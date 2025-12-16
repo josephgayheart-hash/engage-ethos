@@ -100,22 +100,62 @@ IMPORTANT: Respond ONLY with valid JSON:
   }
 }`;
 
-const MAPPER_PROMPT = `Help plan communication strategy across goals, domains, student types, and time.
+const MAPPER_PROMPT = `Create a detailed week-by-week messaging strategy journey. Think like a campaign strategist planning touchpoints across the student lifecycle.
 
-Provide:
-- Recommended message domains by moment
-- Relative emphasis (high / medium / low)
-- Authority vs support balance
-- Risks to avoid (e.g., overuse of urgency or consensus)
+Structure your strategy into THREE PHASES:
+1. SHORT-TERM (weeks 1-4): Initial engagement, relationship building, immediate needs
+2. MID-TERM (weeks 5-8): Deepening connection, proactive support, behavioral reinforcement  
+3. LONG-TERM (weeks 9+): Sustained engagement, milestone celebration, retention focus
 
-Focus on strategy and sequencing. Do not generate message copy.
+For EACH touchpoint, specify:
+- Week number and phase
+- Communication channel (email, sms, portal, social-media, phone-call, direct-mail)
+- Message domain (academic, financial, wellbeing, behavioral, engagement, compliance)
+- Tone (supportive, authoritative, encouraging, directive, celebratory, urgent)
+- Behavioral nudge: The psychological principle being applied (e.g., "loss aversion", "social proof", "commitment consistency")
+- Goal (persist, attend, submit, respond, check-in, register, enroll)
+- Sample subject line (for emails) or message preview
+- Key message theme
 
-IMPORTANT: Respond ONLY with valid JSON:
+Consider:
+- Channel fatigue and variety
+- Building from low-friction to higher-commitment asks
+- Timing around academic calendar events
+- Appropriate authority escalation
+- Student autonomy and choice architecture
+
+IMPORTANT: Respond ONLY with valid JSON matching this structure:
 {
-  "recommendations": [
-    {"domain": "academic|financial|wellbeing|...", "emphasis": "high|medium|low", "authorityBalance": "...", "risks": ["..."]}
-  ],
-  "strategyNotes": "..."
+  "journey": {
+    "overview": "2-3 sentence summary of the strategy approach",
+    "totalWeeks": <number>,
+    "phases": [
+      {
+        "phase": "short-term|mid-term|long-term",
+        "name": "Phase display name",
+        "weekRange": "Weeks X-Y",
+        "focus": "Primary focus for this phase",
+        "keyObjectives": ["objective 1", "objective 2"]
+      }
+    ],
+    "touchpoints": [
+      {
+        "week": <number>,
+        "phase": "short-term|mid-term|long-term",
+        "title": "Touchpoint title",
+        "description": "What this touchpoint accomplishes",
+        "channel": "email|sms|portal|social-media|phone-call|direct-mail",
+        "domain": "academic|financial|wellbeing|behavioral|engagement|compliance",
+        "tone": "supportive|authoritative|encouraging|directive|celebratory|urgent",
+        "behavioralNudge": "The psychological principle being applied",
+        "goal": "persist|attend|submit|respond|check-in|register|enroll",
+        "sampleSubject": "Subject line or message preview",
+        "keyMessage": "Core message theme"
+      }
+    ],
+    "risks": ["Risk 1 to monitor", "Risk 2"],
+    "successMetrics": ["Metric 1 to track", "Metric 2"]
+  }
 }`;
 
 serve(async (req) => {
@@ -124,7 +164,7 @@ serve(async (req) => {
   }
 
   try {
-    const { message, context, mode, institutionalConfig } = await req.json();
+    const { message, context, mode, institutionalConfig, journeyWeeks } = await req.json();
     
     if (!context) {
       return new Response(
@@ -132,6 +172,8 @@ serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+    
+    const totalWeeks = journeyWeeks || 12;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -198,11 +240,13 @@ Provide draft messages and recommendations as JSON.`;
 
       case 'mapper':
         modePrompt = MAPPER_PROMPT;
-        userPrompt = `Please help plan a messaging strategy for this context:
+        userPrompt = `Please create a detailed ${totalWeeks}-week messaging strategy journey for this context:
 ${contextStr}
 ${institutionalStr}
 
-Provide strategic recommendations as JSON.`;
+Create a comprehensive journey with touchpoints distributed across short-term (weeks 1-4), mid-term (weeks 5-8), and long-term (weeks 9+) phases. Include 8-15 touchpoints depending on the journey length, with variety in channels and domains.
+
+Provide the complete journey as JSON.`;
         break;
 
       default:

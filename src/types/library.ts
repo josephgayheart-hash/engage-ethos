@@ -1,16 +1,18 @@
+import type { Channel, AudienceType, MessageDomain, CommunicationMoment, PrimaryGoal, TonePreference, CohortContext } from './persist';
+
 export type LibraryEntryStatus = 'draft' | 'submitted' | 'approved' | 'published';
 
 export interface SavedMessage {
   id: string;
   title: string;
   content: string;
-  channel: 'email' | 'sms' | 'portal' | 'landing-page' | 'social-media';
-  audience: 'prospective' | 'first-year' | 'continuing' | 'at-risk' | 'graduate';
-  cohort?: string[];
-  domain?: string;
-  moment: string;
-  goal?: string;
-  tone?: string;
+  channel: Channel;
+  audience: AudienceType;
+  cohort?: CohortContext[];
+  domain?: MessageDomain;
+  moment: CommunicationMoment;
+  goal?: PrimaryGoal;
+  tone?: TonePreference;
   senderRecommendation?: string;
   createdAt: string;
   updatedAt: string;

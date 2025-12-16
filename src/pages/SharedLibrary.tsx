@@ -56,7 +56,7 @@ const SharedLibrary = () => {
       content: customizedContent || template.content,
       channel: template.requiredFields.channel[0] as any,
       audience: template.requiredFields.audience[0] as any,
-      moment: template.requiredFields.moment[0],
+      moment: template.requiredFields.moment[0] as any,
       approved: false,
       mode: 'generated',
     });
