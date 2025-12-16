@@ -42,9 +42,11 @@ const ratingConfig: Record<Rating, { icon: typeof CheckCircle2; variant: 'strong
 };
 
 export function PillarCard({ evaluation, index }: PillarCardProps) {
-  const Icon = pillarIcons[evaluation.pillarKey];
-  const RatingIcon = ratingConfig[evaluation.rating].icon;
-  const description = pillarDescriptions[evaluation.pillarKey];
+  const Icon = pillarIcons[evaluation.pillarKey] || Shield;
+  const ratingData = ratingConfig[evaluation.rating] || ratingConfig['Moderate'];
+  const RatingIcon = ratingData.icon;
+  const ratingVariant = ratingData.variant;
+  const description = pillarDescriptions[evaluation.pillarKey] || '';
 
   return (
     <Card 
@@ -78,7 +80,7 @@ export function PillarCard({ evaluation, index }: PillarCardProps) {
               </p>
             </div>
           </div>
-          <Badge variant={ratingConfig[evaluation.rating].variant} className="flex items-center gap-1 shrink-0">
+          <Badge variant={ratingVariant} className="flex items-center gap-1 shrink-0">
             <RatingIcon className="w-3 h-3" />
             {evaluation.rating}
           </Badge>
