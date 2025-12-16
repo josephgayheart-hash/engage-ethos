@@ -407,7 +407,12 @@ const StrategyPage = () => {
                 </CardContent>
               </Card>
 
-              <StrategyJourneyDisplay journey={mapperResult.journey} context={context} />
+              <StrategyJourneyDisplay 
+                journey={mapperResult.journey} 
+                context={context} 
+                startDate={startDate?.toISOString()}
+                endDate={endDate?.toISOString()}
+              />
             </div>
           )}
         </div>

@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { type, context, institutionalConfig, touchpoint, channels } = await req.json();
+    const { type, context, institutionalConfig, touchpoint, channels, startDate, endDate } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -33,6 +33,30 @@ Formatting guidelines:
 - Include relevant institutional names and resources when available`;
 
     let userPrompt = "";
+
+    // Format dates for display
+    const formatDate = (dateStr?: string) => {
+      if (!dateStr) return null;
+      try {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      } catch {
+        return dateStr;
+      }
+    };
+
+    // Calculate days until end date (deadline)
+    const daysUntilDeadline = endDate 
+      ? Math.ceil((new Date(endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) 
+      : null;
+
+    // Build timeline context string
+    const timelineStr = (startDate || endDate) ? `
+JOURNEY TIMELINE & DEADLINE:
+${startDate ? `- Journey Start: ${formatDate(startDate)}` : ""}
+${endDate ? `- Target Due Date: ${formatDate(endDate)}` : ""}
+${daysUntilDeadline ? `- Days Until Deadline: ${daysUntilDeadline} days remaining` : ""}
+- IMPORTANT: Incorporate deadline awareness and countdown urgency naturally in the message. Reference the target date explicitly when appropriate.` : "";
 
     if (type === "touchpoint") {
       // Generate message for a specific journey touchpoint
@@ -87,11 +111,13 @@ ${context ? `AUDIENCE CONTEXT:
 ${context.department ? `- Department: ${context.department}` : ""}
 ${context.cohort ? `- Cohort: ${context.cohort}` : ""}` : ""}
 ${instConfigStr}
+${timelineStr}
 
 GENERATE MESSAGES FOR THESE CHANNELS:
 ${channelPrompts}
 
 ${touchpoint.behavioralNudge ? `IMPORTANT: Apply the behavioral nudge "${touchpoint.behavioralNudge}" subtly in each message.` : ""}
+${endDate ? `IMPORTANT: Reference the target deadline (${formatDate(endDate)}) naturally in messages where urgency is appropriate.` : ""}
 
 Respond with valid JSON only:
 {
@@ -115,6 +141,7 @@ TOUCHPOINT DETAILS:
 - Domain: ${touchpoint.domain}
 ${touchpoint.behavioralNudge ? `- Behavioral Nudge to incorporate: ${touchpoint.behavioralNudge}` : ""}
 ${instConfigStr}
+${timelineStr}
 
 FORMAT REQUIREMENTS:
 ${channelGuides[channel] || "Professional message appropriate for the channel."}
@@ -126,6 +153,7 @@ Generate a complete, ready-to-use message that:
 4. Is relevant to ${touchpoint.domain}
 ${touchpoint.behavioralNudge ? `5. Subtly incorporates the behavioral nudge: "${touchpoint.behavioralNudge}"` : ""}
 ${institutionalConfig?.institutionName ? `6. Reflects the voice and branding of ${institutionalConfig.institutionName}` : ""}
+${endDate ? `7. References the target deadline (${formatDate(endDate)}, ${daysUntilDeadline} days away) naturally when appropriate` : ""}
 
 Return ONLY the message content, no explanations or JSON formatting.`;
       }
