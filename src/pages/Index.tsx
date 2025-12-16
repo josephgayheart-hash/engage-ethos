@@ -244,7 +244,7 @@ const Index = () => {
                   </div>
                   <h3 className="font-semibold mb-2">Research-Grounded</h3>
                   <p className="text-sm text-muted-foreground">
-                    Powered by Cialdini, ELM, and Kaptein's persuasion research.
+                    Powered by Cialdini, ELM, Kaptein, and Gayheart's higher ed research.
                   </p>
                 </CardContent>
               </Card>
