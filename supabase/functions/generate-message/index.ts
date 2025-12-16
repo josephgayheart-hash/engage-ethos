@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { type, context, institutionalConfig } = await req.json();
+    const { type, context, institutionalConfig, touchpoint, channels } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -34,7 +34,55 @@ Formatting guidelines:
 
     let userPrompt = "";
 
-    if (type === "template") {
+    if (type === "touchpoint") {
+      // Generate messages for a specific journey touchpoint across multiple channels
+      const channelGuides: Record<string, string> = {
+        email: "Full email with subject line. Professional but warm. 150-250 words. Include greeting, body, CTA, and signature placeholder.",
+        sms: "Short SMS message. 160 characters max. Direct and actionable. Include link placeholder if needed.",
+        "social-media": "Social media post. Engaging and shareable. 100-200 characters. Use emojis sparingly. Include hashtag suggestions.",
+        portal: "Portal notification message. Clear and informative. 50-100 words. Action-oriented.",
+        "direct-mail": "Direct mail letter opening paragraph and key message. Formal tone. 100-150 words.",
+        "phone-call": "Phone call script talking points. Bullet format. Include greeting, key message, and closing."
+      };
+
+      const channelPrompts = channels.map((channel: string) => `
+Channel: ${channel.toUpperCase()}
+Format: ${channelGuides[channel] || "Professional message appropriate for the channel."}
+`).join("\n");
+
+      userPrompt = `Generate messages for a strategy journey touchpoint across multiple channels.
+
+TOUCHPOINT DETAILS:
+- Week: ${touchpoint.week}
+- Phase: ${touchpoint.phase}
+- Title: ${touchpoint.title}
+- Description: ${touchpoint.description}
+- Behavioral Nudge: ${touchpoint.behavioralNudge}
+- Goal: ${touchpoint.goal}
+- Tone: ${touchpoint.tone}
+- Domain: ${touchpoint.domain}
+- Key Message: ${touchpoint.keyMessage || "Not specified"}
+- Sample Subject: ${touchpoint.sampleSubject || "Not specified"}
+
+AUDIENCE CONTEXT:
+- Audience Type: ${context.audience}
+- Communication Moment: ${context.moment}
+${context.department ? `- Department: ${context.department}` : ""}
+${context.cohort ? `- Cohort: ${context.cohort}` : ""}
+
+GENERATE MESSAGES FOR THESE CHANNELS:
+${channelPrompts}
+
+IMPORTANT: Apply the behavioral nudge "${touchpoint.behavioralNudge}" subtly in each message.
+
+Respond with valid JSON only:
+{
+  "messages": [
+    { "channel": "email", "content": "Subject: ...\n\n..." },
+    { "channel": "sms", "content": "..." }
+  ]
+}`;
+    } else if (type === "template") {
       userPrompt = `Generate a professional message template for higher education student communication.
 
 Context:
@@ -123,15 +171,39 @@ Return ONLY the message content.`;
     }
 
     const data = await response.json();
-    const generatedMessage = data.choices?.[0]?.message?.content;
+    const generatedContent = data.choices?.[0]?.message?.content;
 
-    if (!generatedMessage) {
+    if (!generatedContent) {
       throw new Error("No message generated");
     }
 
     console.log("Message generated successfully");
 
-    return new Response(JSON.stringify({ message: generatedMessage }), {
+    // Parse JSON response for touchpoint type
+    if (type === "touchpoint") {
+      let jsonContent = generatedContent;
+      const jsonMatch = generatedContent.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (jsonMatch) {
+        jsonContent = jsonMatch[1].trim();
+      }
+      
+      try {
+        const parsed = JSON.parse(jsonContent);
+        return new Response(JSON.stringify(parsed), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      } catch (parseError) {
+        console.error("Failed to parse touchpoint response:", parseError);
+        // Fallback: return raw content as single message
+        return new Response(JSON.stringify({ 
+          messages: [{ channel: channels[0], content: generatedContent }] 
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    return new Response(JSON.stringify({ message: generatedContent }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {

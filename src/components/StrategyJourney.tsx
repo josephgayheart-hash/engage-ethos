@@ -1,5 +1,11 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { AIIndicator } from "@/components/ui/ai-indicator";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Mail, 
   MessageSquare, 
@@ -12,12 +18,24 @@ import {
   TrendingUp,
   Lightbulb,
   Calendar,
-  ArrowRight
+  ArrowRight,
+  Sparkles,
+  Copy,
+  Check,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
-import type { StrategyJourney, Channel, StrategyPhase } from "@/types/persist";
+import type { StrategyJourney, Channel, StrategyPhase, JourneyTouchpoint, MessageContext } from "@/types/persist";
 
 interface StrategyJourneyProps {
   journey: StrategyJourney;
+  context: MessageContext;
+}
+
+interface GeneratedMessage {
+  touchpointIndex: number;
+  channel: Channel;
+  content: string;
 }
 
 const channelIcons: Record<Channel, React.ReactNode> = {
@@ -42,7 +60,270 @@ const phaseBgColors: Record<StrategyPhase, string> = {
   'long-term': 'border-l-violet-500',
 };
 
-export function StrategyJourneyDisplay({ journey }: StrategyJourneyProps) {
+const allChannels: Channel[] = ['email', 'sms', 'social-media'];
+
+function TouchpointCard({ 
+  touchpoint, 
+  index, 
+  context,
+  generatedMessages,
+  onGenerateMessage,
+  isGenerating
+}: { 
+  touchpoint: JourneyTouchpoint; 
+  index: number;
+  context: MessageContext;
+  generatedMessages: GeneratedMessage[];
+  onGenerateMessage: (index: number, channels: Channel[]) => void;
+  isGenerating: number | null;
+}) {
+  const { toast } = useToast();
+  const [expanded, setExpanded] = useState(false);
+  const [copiedChannel, setCopiedChannel] = useState<string | null>(null);
+  const [selectedChannels, setSelectedChannels] = useState<Channel[]>([touchpoint.channel]);
+
+  const thisMessages = generatedMessages.filter(m => m.touchpointIndex === index);
+
+  const handleCopy = async (content: string, channel: string) => {
+    await navigator.clipboard.writeText(content);
+    setCopiedChannel(channel);
+    toast({ title: "Copied to clipboard" });
+    setTimeout(() => setCopiedChannel(null), 2000);
+  };
+
+  const toggleChannel = (channel: Channel) => {
+    setSelectedChannels(prev => 
+      prev.includes(channel) 
+        ? prev.filter(c => c !== channel)
+        : [...prev, channel]
+    );
+  };
+
+  const selectAllChannels = () => {
+    setSelectedChannels(allChannels);
+  };
+
+  return (
+    <div className="relative pl-12">
+      {/* Timeline dot */}
+      <div className={`absolute left-2 w-5 h-5 rounded-full border-2 border-background flex items-center justify-center text-xs font-bold ${
+        touchpoint.phase === 'short-term' ? 'bg-emerald-500 text-white' :
+        touchpoint.phase === 'mid-term' ? 'bg-amber-500 text-white' :
+        'bg-violet-500 text-white'
+      }`}>
+        {touchpoint.week}
+      </div>
+      
+      <Card className={`border-l-4 ${phaseBgColors[touchpoint.phase]}`}>
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <CardTitle className="text-base font-medium">
+              Week {touchpoint.week}: {touchpoint.title}
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="capitalize flex items-center gap-1">
+                {channelIcons[touchpoint.channel]}
+                {touchpoint.channel.replace('-', ' ')}
+              </Badge>
+              <Badge variant="secondary" className="capitalize">
+                {touchpoint.domain}
+              </Badge>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            {touchpoint.description}
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                Behavioral Nudge
+              </p>
+              <div className="flex items-start gap-2">
+                <Lightbulb className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+                <p className="text-sm">{touchpoint.behavioralNudge}</p>
+              </div>
+            </div>
+            
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                Goal & Tone
+              </p>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="capitalize text-xs">
+                  {touchpoint.goal}
+                </Badge>
+                <Badge variant="outline" className="capitalize text-xs">
+                  {touchpoint.tone}
+                </Badge>
+              </div>
+            </div>
+          </div>
+
+          {touchpoint.sampleSubject && (
+            <div className="p-3 border border-dashed border-border rounded-lg">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                Sample Subject Line
+              </p>
+              <p className="text-sm font-medium">{touchpoint.sampleSubject}</p>
+            </div>
+          )}
+
+          {touchpoint.keyMessage && (
+            <div className="p-3 border border-dashed border-border rounded-lg">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                Key Message
+              </p>
+              <p className="text-sm italic">"{touchpoint.keyMessage}"</p>
+            </div>
+          )}
+
+          {/* Generate Message Section */}
+          <div className="pt-3 border-t border-border space-y-3">
+            <div className="flex items-center justify-between">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setExpanded(!expanded)}
+                className="text-sm"
+              >
+                {expanded ? <ChevronUp className="w-4 h-4 mr-1" /> : <ChevronDown className="w-4 h-4 mr-1" />}
+                {expanded ? 'Hide' : 'Generate'} Message Copy
+              </Button>
+            </div>
+
+            {expanded && (
+              <div className="space-y-3 animate-fade-in">
+                {/* Channel Selection */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Channels:</span>
+                  {allChannels.map(channel => (
+                    <Badge
+                      key={channel}
+                      variant={selectedChannels.includes(channel) ? "default" : "outline"}
+                      className="cursor-pointer capitalize"
+                      onClick={() => toggleChannel(channel)}
+                    >
+                      {channelIcons[channel]}
+                      <span className="ml-1">{channel.replace('-', ' ')}</span>
+                    </Badge>
+                  ))}
+                  <Button variant="ghost" size="sm" onClick={selectAllChannels}>
+                    All
+                  </Button>
+                </div>
+
+                <Button
+                  onClick={() => onGenerateMessage(index, selectedChannels)}
+                  disabled={isGenerating === index || selectedChannels.length === 0}
+                  size="sm"
+                  className="w-full"
+                >
+                  {isGenerating === index ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Generate for {selectedChannels.length} channel{selectedChannels.length > 1 ? 's' : ''}
+                      <AIIndicator className="ml-2" />
+                    </>
+                  )}
+                </Button>
+
+                {/* Generated Messages */}
+                {thisMessages.length > 0 && (
+                  <div className="space-y-3">
+                    {thisMessages.map((msg, i) => (
+                      <div key={i} className="p-3 bg-primary/5 border border-primary/20 rounded-lg space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Badge variant="secondary" className="capitalize flex items-center gap-1">
+                            {channelIcons[msg.channel]}
+                            {msg.channel.replace('-', ' ')}
+                          </Badge>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleCopy(msg.content, msg.channel)}
+                          >
+                            {copiedChannel === msg.channel ? (
+                              <Check className="w-4 h-4 text-green-500" />
+                            ) : (
+                              <Copy className="w-4 h-4" />
+                            )}
+                          </Button>
+                        </div>
+                        <Textarea 
+                          value={msg.content} 
+                          readOnly 
+                          className="min-h-[100px] text-sm bg-background"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+export function StrategyJourneyDisplay({ journey, context }: StrategyJourneyProps) {
+  const { toast } = useToast();
+  const [generatedMessages, setGeneratedMessages] = useState<GeneratedMessage[]>([]);
+  const [isGenerating, setIsGenerating] = useState<number | null>(null);
+
+  const handleGenerateMessage = async (touchpointIndex: number, channels: Channel[]) => {
+    const touchpoint = journey.touchpoints[touchpointIndex];
+    setIsGenerating(touchpointIndex);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-message', {
+        body: {
+          type: 'touchpoint',
+          touchpoint,
+          channels,
+          context,
+        }
+      });
+
+      if (error) throw error;
+      if (data.error) throw new Error(data.error);
+
+      const newMessages: GeneratedMessage[] = data.messages.map((msg: { channel: Channel; content: string }) => ({
+        touchpointIndex,
+        channel: msg.channel,
+        content: msg.content,
+      }));
+
+      setGeneratedMessages(prev => [
+        ...prev.filter(m => m.touchpointIndex !== touchpointIndex || !channels.includes(m.channel)),
+        ...newMessages
+      ]);
+
+      toast({
+        title: "Messages Generated",
+        description: `Generated ${newMessages.length} message${newMessages.length > 1 ? 's' : ''} for this touchpoint.`,
+      });
+    } catch (error) {
+      console.error("Message generation failed:", error);
+      toast({
+        variant: "destructive",
+        title: "Generation Failed",
+        description: error instanceof Error ? error.message : "Please try again.",
+      });
+    } finally {
+      setIsGenerating(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Overview */}
@@ -96,7 +377,7 @@ export function StrategyJourneyDisplay({ journey }: StrategyJourneyProps) {
             Week-by-Week Journey
           </CardTitle>
           <CardDescription>
-            Detailed touchpoints with channel recommendations and behavioral nudges
+            Click "Generate Message Copy" on any touchpoint to create ready-to-use messages
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -106,84 +387,15 @@ export function StrategyJourneyDisplay({ journey }: StrategyJourneyProps) {
             
             <div className="space-y-6">
               {journey.touchpoints.map((touchpoint, index) => (
-                <div key={index} className="relative pl-12">
-                  {/* Timeline dot */}
-                  <div className={`absolute left-2 w-5 h-5 rounded-full border-2 border-background flex items-center justify-center text-xs font-bold ${
-                    touchpoint.phase === 'short-term' ? 'bg-emerald-500 text-white' :
-                    touchpoint.phase === 'mid-term' ? 'bg-amber-500 text-white' :
-                    'bg-violet-500 text-white'
-                  }`}>
-                    {touchpoint.week}
-                  </div>
-                  
-                  <Card className={`border-l-4 ${phaseBgColors[touchpoint.phase]}`}>
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between flex-wrap gap-2">
-                        <CardTitle className="text-base font-medium">
-                          Week {touchpoint.week}: {touchpoint.title}
-                        </CardTitle>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="capitalize flex items-center gap-1">
-                            {channelIcons[touchpoint.channel]}
-                            {touchpoint.channel.replace('-', ' ')}
-                          </Badge>
-                          <Badge variant="secondary" className="capitalize">
-                            {touchpoint.domain}
-                          </Badge>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <p className="text-sm text-muted-foreground">
-                        {touchpoint.description}
-                      </p>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div className="p-3 bg-muted/50 rounded-lg">
-                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                            Behavioral Nudge
-                          </p>
-                          <div className="flex items-start gap-2">
-                            <Lightbulb className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
-                            <p className="text-sm">{touchpoint.behavioralNudge}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="p-3 bg-muted/50 rounded-lg">
-                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                            Goal & Tone
-                          </p>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="capitalize text-xs">
-                              {touchpoint.goal}
-                            </Badge>
-                            <Badge variant="outline" className="capitalize text-xs">
-                              {touchpoint.tone}
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
-
-                      {touchpoint.sampleSubject && (
-                        <div className="p-3 border border-dashed border-border rounded-lg">
-                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                            Sample Subject Line
-                          </p>
-                          <p className="text-sm font-medium">{touchpoint.sampleSubject}</p>
-                        </div>
-                      )}
-
-                      {touchpoint.keyMessage && (
-                        <div className="p-3 border border-dashed border-border rounded-lg">
-                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                            Key Message
-                          </p>
-                          <p className="text-sm italic">"{touchpoint.keyMessage}"</p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
+                <TouchpointCard
+                  key={index}
+                  touchpoint={touchpoint}
+                  index={index}
+                  context={context}
+                  generatedMessages={generatedMessages}
+                  onGenerateMessage={handleGenerateMessage}
+                  isGenerating={isGenerating}
+                />
               ))}
             </div>
           </div>
