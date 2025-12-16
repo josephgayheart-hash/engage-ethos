@@ -4,6 +4,7 @@ import { Header } from "@/components/Header";
 import { ContextSelector } from "@/components/ContextSelector";
 import { MessageInput } from "@/components/MessageInput";
 import { EvaluationResults } from "@/components/EvaluationResults";
+import { LibraryNav } from "@/components/LibraryNav";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -110,6 +111,9 @@ const EvaluatePage = () => {
             </div>
             <AIBadge />
           </div>
+
+          {/* Library Navigation */}
+          <LibraryNav mode="messages" />
 
           {/* Input Card */}
           <Card>

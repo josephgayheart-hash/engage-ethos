@@ -31,11 +31,12 @@ export function AdminApprovalPanel({ templates, onUpdateStatus }: AdminApprovalP
   const { toast } = useToast();
   const [selectedTemplate, setSelectedTemplate] = useState<SharedTemplate | null>(null);
   const [approvalNotes, setApprovalNotes] = useState("");
-  const [actionType, setActionType] = useState<'approve' | 'reject' | null>(null);
+  const [actionType, setActionType] = useState<'approve' | 'reject' | 'review' | null>(null);
 
   const pendingTemplates = templates.filter(t => t.status === 'submitted');
+  const reviewingTemplates = templates.filter(t => t.status === 'draft' && t.approvalNotes);
 
-  const handleAction = (template: SharedTemplate, action: 'approve' | 'reject') => {
+  const handleAction = (template: SharedTemplate, action: 'approve' | 'reject' | 'review') => {
     setSelectedTemplate(template);
     setActionType(action);
     setApprovalNotes("");
@@ -44,15 +45,32 @@ export function AdminApprovalPanel({ templates, onUpdateStatus }: AdminApprovalP
   const confirmAction = () => {
     if (!selectedTemplate || !actionType) return;
 
-    const newStatus: LibraryEntryStatus = actionType === 'approve' ? 'approved' : 'draft';
+    let newStatus: LibraryEntryStatus;
+    let toastTitle: string;
+    let toastDesc: string;
+
+    switch (actionType) {
+      case 'approve':
+        newStatus = 'approved';
+        toastTitle = "Template Approved";
+        toastDesc = "The template has been approved and is ready for publishing.";
+        break;
+      case 'review':
+        newStatus = 'draft';
+        toastTitle = "Under Review";
+        toastDesc = "The template is marked for further review with notes.";
+        break;
+      case 'reject':
+      default:
+        newStatus = 'draft';
+        toastTitle = "Template Returned";
+        toastDesc = "The template has been returned with feedback.";
+        break;
+    }
+
     onUpdateStatus(selectedTemplate.id, newStatus, approvalNotes);
     
-    toast({
-      title: actionType === 'approve' ? "Template Approved" : "Template Returned",
-      description: actionType === 'approve' 
-        ? "The template has been approved and is ready for publishing."
-        : "The template has been returned with feedback.",
-    });
+    toast({ title: toastTitle, description: toastDesc });
 
     setSelectedTemplate(null);
     setActionType(null);
@@ -189,13 +207,22 @@ export function AdminApprovalPanel({ templates, onUpdateStatus }: AdminApprovalP
                   Approve
                 </Button>
                 <Button 
+                  variant="secondary" 
+                  size="sm"
+                  onClick={() => handleAction(template, 'review')}
+                  className="flex items-center gap-1"
+                >
+                  <Eye className="w-4 h-4" />
+                  Mark for Review
+                </Button>
+                <Button 
                   variant="outline" 
                   size="sm"
                   onClick={() => handleAction(template, 'reject')}
                   className="flex items-center gap-1"
                 >
                   <XCircle className="w-4 h-4" />
-                  Return with Feedback
+                  Return
                 </Button>
               </div>
             </CardContent>
@@ -242,11 +269,14 @@ export function AdminApprovalPanel({ templates, onUpdateStatus }: AdminApprovalP
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {actionType === 'approve' ? 'Approve Template' : 'Return Template'}
+              {actionType === 'approve' ? 'Approve Template' : 
+               actionType === 'review' ? 'Mark for Review' : 'Return Template'}
             </DialogTitle>
             <DialogDescription>
               {actionType === 'approve' 
                 ? 'This template will be approved and ready for publishing.'
+                : actionType === 'review'
+                ? 'Mark this template for further review before final decision.'
                 : 'Return this template to the submitter with feedback.'}
             </DialogDescription>
           </DialogHeader>
@@ -259,7 +289,8 @@ export function AdminApprovalPanel({ templates, onUpdateStatus }: AdminApprovalP
 
             <div className="space-y-2">
               <Label htmlFor="notes">
-                {actionType === 'approve' ? 'Approval Notes (optional)' : 'Feedback for Submitter'}
+                {actionType === 'approve' ? 'Approval Notes (optional)' : 
+                 actionType === 'review' ? 'Review Notes' : 'Feedback for Submitter'}
               </Label>
               <Textarea
                 id="notes"
@@ -267,6 +298,8 @@ export function AdminApprovalPanel({ templates, onUpdateStatus }: AdminApprovalP
                 onChange={(e) => setApprovalNotes(e.target.value)}
                 placeholder={actionType === 'approve' 
                   ? 'Any notes about this approval...'
+                  : actionType === 'review'
+                  ? 'What needs to be reviewed or clarified...'
                   : 'Explain what changes are needed...'}
                 rows={4}
               />
@@ -284,7 +317,8 @@ export function AdminApprovalPanel({ templates, onUpdateStatus }: AdminApprovalP
               onClick={confirmAction}
               variant={actionType === 'approve' ? 'default' : 'secondary'}
             >
-              {actionType === 'approve' ? 'Approve' : 'Return with Feedback'}
+              {actionType === 'approve' ? 'Approve' : 
+               actionType === 'review' ? 'Mark for Review' : 'Return with Feedback'}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -35,45 +35,49 @@ Formatting guidelines:
     let userPrompt = "";
 
     if (type === "touchpoint") {
-      // Generate messages for a specific journey touchpoint across multiple channels
+      // Generate message for a specific journey touchpoint
+      const channel = touchpoint.channel || "email";
       const channelGuides: Record<string, string> = {
         email: "Full email with subject line. Professional but warm. 150-250 words. Include greeting, body, CTA, and signature placeholder.",
         sms: "Short SMS message. 160 characters max. Direct and actionable. Include link placeholder if needed.",
         "social-media": "Social media post. Engaging and shareable. 100-200 characters. Use emojis sparingly. Include hashtag suggestions.",
         portal: "Portal notification message. Clear and informative. 50-100 words. Action-oriented.",
+        "landing-page": "Landing page copy. Compelling headline and body. 100-200 words. Clear value proposition and CTA.",
         "direct-mail": "Direct mail letter opening paragraph and key message. Formal tone. 100-150 words.",
         "phone-call": "Phone call script talking points. Bullet format. Include greeting, key message, and closing."
       };
 
-      const channelPrompts = channels.map((channel: string) => `
-Channel: ${channel.toUpperCase()}
-Format: ${channelGuides[channel] || "Professional message appropriate for the channel."}
+      // Handle multi-channel generation if channels array is provided
+      if (channels && Array.isArray(channels) && channels.length > 0) {
+        const channelPrompts = channels.map((ch: string) => `
+Channel: ${ch.toUpperCase()}
+Format: ${channelGuides[ch] || "Professional message appropriate for the channel."}
 `).join("\n");
 
-      userPrompt = `Generate messages for a strategy journey touchpoint across multiple channels.
+        userPrompt = `Generate messages for a strategy journey touchpoint across multiple channels.
 
 TOUCHPOINT DETAILS:
 - Week: ${touchpoint.week}
 - Phase: ${touchpoint.phase}
 - Title: ${touchpoint.title}
 - Description: ${touchpoint.description}
-- Behavioral Nudge: ${touchpoint.behavioralNudge}
+- Behavioral Nudge: ${touchpoint.behavioralNudge || "None specified"}
 - Goal: ${touchpoint.goal}
 - Tone: ${touchpoint.tone}
 - Domain: ${touchpoint.domain}
 - Key Message: ${touchpoint.keyMessage || "Not specified"}
 - Sample Subject: ${touchpoint.sampleSubject || "Not specified"}
 
-AUDIENCE CONTEXT:
-- Audience Type: ${context.audience}
-- Communication Moment: ${context.moment}
+${context ? `AUDIENCE CONTEXT:
+- Audience Type: ${context.audience || "general student"}
+- Communication Moment: ${context.moment || "general"}
 ${context.department ? `- Department: ${context.department}` : ""}
-${context.cohort ? `- Cohort: ${context.cohort}` : ""}
+${context.cohort ? `- Cohort: ${context.cohort}` : ""}` : ""}
 
 GENERATE MESSAGES FOR THESE CHANNELS:
 ${channelPrompts}
 
-IMPORTANT: Apply the behavioral nudge "${touchpoint.behavioralNudge}" subtly in each message.
+${touchpoint.behavioralNudge ? `IMPORTANT: Apply the behavioral nudge "${touchpoint.behavioralNudge}" subtly in each message.` : ""}
 
 Respond with valid JSON only:
 {
@@ -82,6 +86,33 @@ Respond with valid JSON only:
     { "channel": "sms", "content": "..." }
   ]
 }`;
+      } else {
+        // Single channel touchpoint message generation
+        userPrompt = `Generate a message for a strategy journey touchpoint.
+
+TOUCHPOINT DETAILS:
+- Week: ${touchpoint.week}
+- Phase: ${touchpoint.phase}
+- Title: ${touchpoint.title}
+- Description: ${touchpoint.description}
+- Channel: ${channel}
+- Goal: ${touchpoint.goal}
+- Tone: ${touchpoint.tone}
+- Domain: ${touchpoint.domain}
+${touchpoint.behavioralNudge ? `- Behavioral Nudge to incorporate: ${touchpoint.behavioralNudge}` : ""}
+
+FORMAT REQUIREMENTS:
+${channelGuides[channel] || "Professional message appropriate for the channel."}
+
+Generate a complete, ready-to-use message that:
+1. Matches the ${channel} channel format
+2. Achieves the "${touchpoint.goal}" goal
+3. Uses a ${touchpoint.tone} tone
+4. Is relevant to ${touchpoint.domain}
+${touchpoint.behavioralNudge ? `5. Subtly incorporates the behavioral nudge: "${touchpoint.behavioralNudge}"` : ""}
+
+Return ONLY the message content, no explanations or JSON formatting.`;
+      }
     } else if (type === "template") {
       userPrompt = `Generate a professional message template for higher education student communication.
 
@@ -179,8 +210,8 @@ Return ONLY the message content.`;
 
     console.log("Message generated successfully");
 
-    // Parse JSON response for touchpoint type
-    if (type === "touchpoint") {
+    // Parse JSON response for touchpoint type with channels array
+    if (type === "touchpoint" && channels && Array.isArray(channels) && channels.length > 0) {
       let jsonContent = generatedContent;
       const jsonMatch = generatedContent.match(/```(?:json)?\s*([\s\S]*?)```/);
       if (jsonMatch) {

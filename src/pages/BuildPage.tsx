@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { ContextSelector } from "@/components/ContextSelector";
+import { LibraryNav } from "@/components/LibraryNav";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -239,7 +240,9 @@ const BuildPage = () => {
             <AIBadge />
           </div>
 
-          {/* Context Card */}
+          {/* Library Navigation */}
+          <LibraryNav mode="messages" />
+
           <Card>
             <CardHeader>
               <CardTitle className="font-serif text-lg">Message Context</CardTitle>

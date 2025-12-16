@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { ContextSelector } from "@/components/ContextSelector";
 import { StrategyJourneyDisplay } from "@/components/StrategyJourney";
+import { LibraryNav } from "@/components/LibraryNav";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -172,6 +173,9 @@ const StrategyPage = () => {
             </div>
             <AIBadge />
           </div>
+
+          {/* Library Navigation */}
+          <LibraryNav mode="journeys" />
 
           {/* Context Card */}
           <Card>
