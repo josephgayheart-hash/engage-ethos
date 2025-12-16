@@ -173,12 +173,43 @@ export interface EvaluationResult {
   changeExplanation: string;
 }
 
+export interface EmailDraft {
+  subject: string;
+  body: string;
+}
+
+export interface LandingPageDraft {
+  headline: string;
+  subheadline?: string;
+  body: string;
+  cta: string;
+}
+
+export interface CallScriptDraft {
+  opening: string;
+  purpose: string;
+  talkingPoints: string[];
+  objectionHandlers?: string[];
+  closing: string;
+  voicemail?: string;
+}
+
+export interface ChannelDrafts {
+  email?: EmailDraft;
+  sms?: string;
+  'social-media'?: string;
+  portal?: string;
+  'landing-page'?: LandingPageDraft;
+  'direct-mail'?: string;
+  'phone-call'?: CallScriptDraft;
+}
+
 export interface BuilderResult {
-  drafts: string[];
+  channelDrafts: ChannelDrafts;
+  drafts: string[]; // Legacy fallback
   recommendedAuthority: string;
   recommendedSender: string;
   recommendedLength: string;
-  evaluation: EvaluationResult;
 }
 
 export interface MapperResult {

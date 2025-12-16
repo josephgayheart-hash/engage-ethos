@@ -222,19 +222,6 @@ export function BuilderResults({
         </CardContent>
       </Card>
 
-      {/* Evaluation of drafts */}
-      {result.evaluation && (
-        <div className="space-y-4">
-          <h3 className="font-serif text-lg font-medium flex items-center gap-2">
-            Draft Evaluation
-            <span className="text-xs text-secondary flex items-center gap-1">
-              <Sparkles className="w-3 h-3" />
-              AI Analysis
-            </span>
-          </h3>
-          <EvaluationResults result={result.evaluation} />
-        </div>
-      )}
     </div>
   );
 }

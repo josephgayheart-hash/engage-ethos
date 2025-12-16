@@ -5,38 +5,30 @@ import { Header } from "@/components/Header";
 import { ContextSelector } from "@/components/ContextSelector";
 import { LibraryNav } from "@/components/LibraryNav";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
+import { ChannelPreview } from "@/components/ChannelPreview";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { AIBadge } from "@/components/ui/ai-indicator";
-import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { CreateTemplateDialog } from "@/components/library/CreateTemplateDialog";
-import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { 
   ArrowLeft, 
-  ArrowRight, 
   PenTool, 
   Save, 
   RefreshCw, 
   Sparkles,
-  Copy,
-  Check,
   User,
   FileText,
   Ruler,
-  FolderPlus,
-  Library,
-  Trash2,
   Mail,
   CalendarIcon,
   Clock,
@@ -97,13 +89,9 @@ const BuildPage = () => {
   });
   const [selectedChannels, setSelectedChannels] = useState<Channel[]>(['email']);
   const [builderResult, setBuilderResult] = useState<BuilderResult | null>(null);
-  const [drafts, setDrafts] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isGeneratingMore, setIsGeneratingMore] = useState(false);
   const [autoSave, setAutoSave] = useState(true);
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const [savedIndex, setSavedIndex] = useState<number | null>(null);
-  const [activeDraft, setActiveDraft] = useState(0);
+  const [copiedChannel, setCopiedChannel] = useState<string | null>(null);
   const [submitToSharedOpen, setSubmitToSharedOpen] = useState(false);
   const [draftToSubmit, setDraftToSubmit] = useState('');
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -127,44 +115,16 @@ const BuildPage = () => {
     
     setIsProcessing(true);
     setBuilderResult(null);
-    setDrafts([]);
     
     try {
-      // Use selected channels in context
       const contextWithChannels = { ...context, channel: selectedChannels[0], channels: selectedChannels };
       const result = await buildMessage(contextWithChannels, institutionalConfig || undefined);
       setBuilderResult(result);
-      setDrafts(result.drafts);
-      setActiveDraft(0);
       
-      if (autoSave && result.drafts.length > 0) {
-        const title = `Generated: ${context.domain || context.moment} ${context.audience} message`;
-        addMessage({
-          title,
-          content: result.drafts[0],
-          channel: selectedChannels[0],
-          audience: context.audience,
-          cohort: context.cohort ? [context.cohort] : undefined,
-          domain: context.domain,
-          moment: context.moment,
-          goal: context.goal,
-          tone: context.tone,
-          senderRecommendation: result.recommendedSender,
-          approved: false,
-          mode: 'generated',
-          institutionalProfileId: selectedProfileId || undefined,
-          institutionalProfileName: selectedProfileName,
-        });
-        toast({
-          title: "Messages Generated",
-          description: "First draft saved to your library.",
-        });
-      } else {
-        toast({
-          title: "Messages Generated",
-          description: "Draft messages created based on your context.",
-        });
-      }
+      toast({
+        title: "Messages Generated",
+        description: `Content created for ${selectedChannels.length} channel${selectedChannels.length > 1 ? 's' : ''}.`,
+      });
     } catch (error) {
       console.error("Build failed:", error);
       toast({
@@ -177,89 +137,20 @@ const BuildPage = () => {
     }
   };
 
-  // Auto-scroll to results when drafts are generated
+  // Auto-scroll to results when content is generated
   useEffect(() => {
-    if (drafts.length > 0 && resultsRef.current) {
+    if (builderResult?.channelDrafts && resultsRef.current) {
       resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }, [drafts.length]);
+  }, [builderResult]);
 
-  const handleGenerateMore = async () => {
-    setIsGeneratingMore(true);
-    try {
-      const contextWithChannels = { ...context, channel: selectedChannels[0], channels: selectedChannels };
-      const { data, error } = await supabase.functions.invoke('generate-message', {
-        body: { type: 'builder', context: contextWithChannels, institutionalConfig }
-      });
-
-      if (error) throw error;
-      
-      if (data?.message) {
-        const newDrafts = [...drafts, data.message];
-        setDrafts(newDrafts);
-        setActiveDraft(newDrafts.length - 1);
-        toast({ 
-          title: "New draft generated",
-          description: "AI created another message option."
-        });
-      }
-    } catch (error) {
-      console.error("Generation failed:", error);
-      toast({ 
-        variant: "destructive",
-        title: "Generation failed", 
-        description: "Could not generate additional message."
-      });
-    } finally {
-      setIsGeneratingMore(false);
-    }
-  };
-
-  const handleDeleteDraft = (index: number) => {
-    if (drafts.length <= 1) {
-      toast({ variant: "destructive", title: "Cannot delete", description: "You need at least one draft." });
-      return;
-    }
-    const newDrafts = drafts.filter((_, i) => i !== index);
-    setDrafts(newDrafts);
-    if (activeDraft >= newDrafts.length) {
-      setActiveDraft(newDrafts.length - 1);
-    }
-  };
-
-  const copyToClipboard = async (text: string, index: number) => {
+  const handleCopyContent = async (text: string) => {
     await navigator.clipboard.writeText(text);
-    setCopiedIndex(index);
-    setTimeout(() => setCopiedIndex(null), 2000);
-  };
-
-  const handleSaveToLibrary = (draft: string, index: number) => {
-    const title = `Generated: ${context.domain || context.moment} for ${context.audience}`;
-    addMessage({
-      title,
-      content: draft,
-      channel: selectedChannels[0],
-      audience: context.audience,
-      cohort: context.cohort ? [context.cohort] : undefined,
-      domain: context.domain,
-      moment: context.moment,
-      goal: context.goal,
-      tone: context.tone,
-      senderRecommendation: builderResult?.recommendedSender,
-      approved: false,
-      mode: 'generated',
-      institutionalProfileId: selectedProfileId || undefined,
-      institutionalProfileName: selectedProfileName,
-    });
-    setSavedIndex(index);
-    setTimeout(() => setSavedIndex(null), 2000);
-    toast({ title: "Saved to your library" });
+    toast({ title: "Copied to clipboard" });
   };
 
   const handleReset = () => {
     setBuilderResult(null);
-    setDrafts([]);
-    setActiveDraft(0);
   };
 
   return (
@@ -420,7 +311,7 @@ const BuildPage = () => {
                 </Button>
                 
                 <div className="flex gap-2">
-                  {drafts.length > 0 && (
+                  {builderResult && (
                     <Button variant="outline" onClick={handleReset}>
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Start Over
@@ -449,40 +340,25 @@ const BuildPage = () => {
           </Card>
 
           {/* Results */}
-          {drafts.length > 0 && builderResult && (
+          {builderResult?.channelDrafts && (
             <div ref={resultsRef} className="space-y-6 animate-fade-in scroll-mt-6">
-              {/* Recommendations */}
+              {/* Header with metadata */}
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="font-serif text-lg flex items-center gap-2">
-                      Generated Messages
+                      Generated Content
                       <Badge variant="secondary" className="text-xs">
-                        {drafts.length} draft{drafts.length > 1 ? 's' : ''}
+                        {selectedChannels.length} channel{selectedChannels.length > 1 ? 's' : ''}
                       </Badge>
                     </CardTitle>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleGenerateMore}
-                      disabled={isGeneratingMore || drafts.length >= 5}
-                      className="flex items-center gap-2"
-                    >
-                      {isGeneratingMore ? (
-                        <>
-                          <RefreshCw className="w-4 h-4 animate-spin" />
-                          Generating...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-4 h-4" />
-                          Generate Another
-                        </>
-                      )}
+                    <Button variant="outline" size="sm" onClick={handleReset}>
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Start Over
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent>
                   {/* Recipient & Recommendations */}
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-4 p-4 bg-muted/30 rounded-lg">
                     <div className="flex items-start gap-2">
@@ -521,94 +397,24 @@ const BuildPage = () => {
                       </div>
                     </div>
                   </div>
-
-                  {/* Drafts Tabs */}
-                  <Tabs value={`draft-${activeDraft}`} onValueChange={(v) => setActiveDraft(parseInt(v.split('-')[1]))}>
-                    <TabsList className="flex flex-wrap gap-1">
-                      {drafts.map((_, index) => (
-                        <TabsTrigger key={index} value={`draft-${index}`} className="text-sm">
-                          Draft {index + 1}
-                        </TabsTrigger>
-                      ))}
-                    </TabsList>
-                    
-                    {drafts.map((draft, index) => (
-                      <TabsContent key={index} value={`draft-${index}`}>
-                        <div className="relative p-4 bg-card border border-border rounded-lg">
-                          <div className="absolute top-2 right-2 flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => copyToClipboard(draft, index)}
-                              title="Copy to clipboard"
-                            >
-                              {copiedIndex === index ? (
-                                <Check className="w-4 h-4 text-green-600" />
-                              ) : (
-                                <Copy className="w-4 h-4" />
-                              )}
-                            </Button>
-                            {drafts.length > 1 && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDeleteDraft(index)}
-                                title="Delete draft"
-                              >
-                                <Trash2 className="w-4 h-4 text-destructive" />
-                              </Button>
-                            )}
-                          </div>
-                          
-                          {/* Channel badges */}
-                          <div className="flex flex-wrap gap-1 mb-3">
-                            {selectedChannels.map(ch => (
-                              <Badge key={ch} variant="outline" className="text-xs">
-                                {channelOptions.find(c => c.value === ch)?.label || ch}
-                              </Badge>
-                            ))}
-                          </div>
-                          
-                          <p className="text-sm whitespace-pre-wrap">{draft}</p>
-                          {selectedChannels.includes('sms') && (
-                            <SmsCharCounter text={draft} className="mt-2" />
-                          )}
-                        </div>
-                        
-                        {/* Actions */}
-                        <div className="flex flex-wrap gap-2 mt-4">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleSaveToLibrary(draft, index)}
-                            className="flex items-center gap-2"
-                          >
-                            {savedIndex === index ? (
-                              <Check className="w-4 h-4 text-green-600" />
-                            ) : (
-                              <FolderPlus className="w-4 h-4" />
-                            )}
-                            Save to My Library
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setDraftToSubmit(draft);
-                              setSubmitToSharedOpen(true);
-                            }}
-                            className="flex items-center gap-2"
-                          >
-                            <Library className="w-4 h-4" />
-                            Submit to Shared Library
-                          </Button>
-                        </div>
-                      </TabsContent>
-                    ))}
-                  </Tabs>
                 </CardContent>
               </Card>
 
+              {/* Channel-specific previews */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {selectedChannels.map(channel => {
+                  const content = builderResult.channelDrafts[channel];
+                  if (!content) return null;
+                  return (
+                    <ChannelPreview
+                      key={channel}
+                      channel={channel}
+                      content={content}
+                      onCopy={handleCopyContent}
+                    />
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>

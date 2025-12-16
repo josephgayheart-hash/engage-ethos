@@ -88,29 +88,46 @@ IMPORTANT: Respond ONLY with valid JSON:
   "changeExplanation": "..."
 }`;
 
-const BUILDER_PROMPT = `When building a message from scratch, start with CONTEXT, not copy.
+const BUILDER_PROMPT = `When building messages from scratch, generate CHANNEL-SPECIFIC content for each requested channel.
 
 Based on the provided context:
 - Recommend an appropriate authority level
 - Recommend sender role
-- Recommend message length and structure
-- Generate 2 draft messages
+- Generate content tailored to EACH selected channel
 
-Then immediately evaluate the drafts using the FIVE PILLARS and explain tradeoffs.
+CHANNEL-SPECIFIC REQUIREMENTS:
+- EMAIL: Include subject line and full body with proper greeting, content, CTA, and signature placeholder
+- SMS: Keep under 160 characters when possible, direct and actionable, no subject line needed
+- SOCIAL MEDIA: Platform-appropriate tone, engaging, may include hashtag suggestions, under 280 characters
+- PORTAL: Dashboard-style notification, clear and scannable, action-oriented
+- LANDING PAGE: Include compelling headline, subheadline, body copy, and clear CTA button text
+- DIRECT MAIL: Formal letter format with salutation, body paragraphs, and closing
+- PHONE CALL: Include opening statement, purpose statement, 3-5 talking points, objection handlers, closing options, and voicemail script
 
 IMPORTANT: Respond ONLY with valid JSON:
 {
-  "drafts": ["Draft 1...", "Draft 2..."],
+  "channelDrafts": {
+    "email": { "subject": "Subject line here", "body": "Full email body..." },
+    "sms": "Short SMS message here",
+    "social-media": "Social media post content here",
+    "portal": "Portal notification content here",
+    "landing-page": { "headline": "...", "subheadline": "...", "body": "...", "cta": "CTA button text" },
+    "direct-mail": "Full letter content here",
+    "phone-call": { 
+      "opening": "Hello, this is [Name] from [Institution]...",
+      "purpose": "I'm calling today to...",
+      "talkingPoints": ["Point 1", "Point 2", "Point 3"],
+      "objectionHandlers": ["If busy: ...", "If not interested: ..."],
+      "closing": "Thank you for your time...",
+      "voicemail": "Hi, this is [Name] from..."
+    }
+  },
   "recommendedAuthority": "...",
   "recommendedSender": "...",
-  "recommendedLength": "...",
-  "evaluation": {
-    "pillars": [...],
-    "refinedMessage": "...",
-    "reducedLoadMessage": "...",
-    "changeExplanation": "..."
-  }
-}`;
+  "recommendedLength": "varies by channel"
+}
+
+Only include channels that were requested in the context. Do not include channels that were not selected.`;
 
 const MAPPER_PROMPT = `Create a detailed week-by-week messaging strategy journey. Think like a campaign strategist planning touchpoints across the student lifecycle.
 
