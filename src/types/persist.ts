@@ -315,6 +315,23 @@ export interface InstitutionalConfig {
   
   // Deadlines & Dates (placeholders)
   importantDates?: { label: string; placeholder: string }[];
+  
+  // Brand Voice Samples & Analysis
+  brandVoiceSamples?: string[];
+  voiceAnalysis?: VoiceAnalysis;
+}
+
+export interface VoiceAnalysis {
+  overallTone: string;
+  keyCharacteristics: string[];
+  vocabularyPatterns: string[];
+  sentenceStyle: string;
+  formalityLevel: string;
+  emotionalTone: string;
+  commonPhrases: string[];
+  messagingTactics: string[];
+  summary: string;
+  analyzedAt: string;
 }
 
 export interface UserProfile {

@@ -6,6 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   X, 
   Plus, 
@@ -19,9 +23,14 @@ import {
   Monitor,
   MapPin,
   Building,
-  Clock
+  Clock,
+  Mic,
+  Sparkles,
+  Loader2,
+  FileText,
+  Trash2
 } from "lucide-react";
-import type { InstitutionalConfig as InstitutionalConfigType } from "@/types/persist";
+import type { InstitutionalConfig as InstitutionalConfigType, VoiceAnalysis } from "@/types/persist";
 
 interface InstitutionalConfigProps {
   config: InstitutionalConfigType;
@@ -29,6 +38,9 @@ interface InstitutionalConfigProps {
 }
 
 export function InstitutionalConfig({ config, onChange }: InstitutionalConfigProps) {
+  const { toast } = useToast();
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [sampleInput, setSampleInput] = useState('');
   const [inputs, setInputs] = useState({
     buildingName: '',
     programName: '',
@@ -83,6 +95,69 @@ export function InstitutionalConfig({ config, onChange }: InstitutionalConfigPro
   const removeImportantDate = (label: string) => {
     const currentDates = config.importantDates || [];
     onChange({ ...config, importantDates: currentDates.filter(d => d.label !== label) });
+  };
+
+  const addVoiceSample = () => {
+    const value = sampleInput.trim();
+    if (!value) return;
+    
+    const currentSamples = config.brandVoiceSamples || [];
+    onChange({ ...config, brandVoiceSamples: [...currentSamples, value] });
+    setSampleInput('');
+    toast({
+      title: "Sample added",
+      description: "Voice sample has been added. Analyze samples to update your voice profile.",
+    });
+  };
+
+  const removeVoiceSample = (index: number) => {
+    const currentSamples = config.brandVoiceSamples || [];
+    const newSamples = currentSamples.filter((_, i) => i !== index);
+    onChange({ ...config, brandVoiceSamples: newSamples });
+  };
+
+  const analyzeVoiceSamples = async () => {
+    const samples = config.brandVoiceSamples || [];
+    if (samples.length === 0) {
+      toast({
+        title: "No samples",
+        description: "Please add at least one sample communication before analyzing.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-voice', {
+        body: { samples }
+      });
+
+      if (error) throw error;
+
+      onChange({ ...config, voiceAnalysis: data as VoiceAnalysis });
+      toast({
+        title: "Analysis complete",
+        description: "Your brand voice profile has been extracted and will be applied to all message generation.",
+      });
+    } catch (error) {
+      console.error('Voice analysis error:', error);
+      toast({
+        title: "Analysis failed",
+        description: error instanceof Error ? error.message : "Failed to analyze voice samples",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const clearVoiceAnalysis = () => {
+    onChange({ ...config, voiceAnalysis: undefined });
+    toast({
+      title: "Voice profile cleared",
+      description: "Voice analysis has been removed. Add samples and re-analyze to create a new profile.",
+    });
   };
 
   const renderArrayField = (
@@ -152,7 +227,7 @@ export function InstitutionalConfig({ config, onChange }: InstitutionalConfigPro
   return (
     <div className="space-y-6">
       <Tabs defaultValue="identity" className="w-full">
-        <TabsList className="grid grid-cols-4 md:grid-cols-7 w-full mb-6">
+        <TabsList className="grid grid-cols-4 md:grid-cols-8 w-full mb-6">
           <TabsTrigger value="identity" className="text-xs">Identity</TabsTrigger>
           <TabsTrigger value="systems" className="text-xs">Systems</TabsTrigger>
           <TabsTrigger value="locations" className="text-xs">Locations</TabsTrigger>
@@ -160,6 +235,10 @@ export function InstitutionalConfig({ config, onChange }: InstitutionalConfigPro
           <TabsTrigger value="ctas" className="text-xs">CTAs</TabsTrigger>
           <TabsTrigger value="terms" className="text-xs">Terms</TabsTrigger>
           <TabsTrigger value="style" className="text-xs">Style</TabsTrigger>
+          <TabsTrigger value="voice" className="text-xs flex items-center gap-1">
+            <Sparkles className="w-3 h-3" />
+            Voice
+          </TabsTrigger>
         </TabsList>
 
         {/* Identity Tab */}
@@ -536,6 +615,227 @@ export function InstitutionalConfig({ config, onChange }: InstitutionalConfigPro
             'wordToAvoid', 
             'e.g., mandatory, must, failure',
             'Terms that should not appear in messages'
+          )}
+        </TabsContent>
+
+        {/* Voice Tab */}
+        <TabsContent value="voice" className="space-y-6">
+          <div className="p-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg mb-4 border border-primary/20">
+            <h4 className="font-medium text-sm flex items-center gap-2 mb-2">
+              <Sparkles className="w-4 h-4 text-primary" />
+              Brand Voice Learning
+            </h4>
+            <p className="text-xs text-muted-foreground">
+              Upload sample communications and let AI analyze your institution's unique voice, tone, and messaging patterns. 
+              This analysis will be applied to all generated messages.
+            </p>
+          </div>
+
+          {/* Sample Input */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Add Sample Communication</Label>
+              <p className="text-xs text-muted-foreground">
+                Paste emails, SMS messages, or marketing copy that represent your institution's voice. Add 2-5 samples for best results.
+              </p>
+              <Textarea
+                value={sampleInput}
+                onChange={(e) => setSampleInput(e.target.value)}
+                placeholder="Paste a sample email, SMS, or marketing message here..."
+                rows={6}
+                className="resize-none"
+              />
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={addVoiceSample}
+                disabled={!sampleInput.trim()}
+                className="w-full"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Sample
+              </Button>
+            </div>
+
+            {/* Sample List */}
+            {(config.brandVoiceSamples?.length ?? 0) > 0 && (
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">
+                  Added Samples ({config.brandVoiceSamples?.length})
+                </Label>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {config.brandVoiceSamples?.map((sample, index) => (
+                    <Card key={index} className="bg-muted/30">
+                      <CardContent className="p-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-start gap-2 flex-1 min-w-0">
+                            <FileText className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
+                            <p className="text-xs text-muted-foreground line-clamp-3">
+                              {sample.substring(0, 200)}{sample.length > 200 ? '...' : ''}
+                            </p>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="shrink-0 h-6 w-6 hover:text-destructive"
+                            onClick={() => removeVoiceSample(index)}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                <Button 
+                  type="button"
+                  onClick={analyzeVoiceSamples}
+                  disabled={isAnalyzing}
+                  className="w-full"
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Analyzing Voice...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Analyze Voice Samples
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Voice Analysis Results */}
+          {config.voiceAnalysis && (
+            <Card className="border-primary/30 bg-gradient-to-br from-background to-primary/5">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Mic className="w-5 h-5 text-primary" />
+                    <CardTitle className="text-lg">Voice Profile</CardTitle>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearVoiceAnalysis}
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="w-4 h-4 mr-1" />
+                    Clear
+                  </Button>
+                </div>
+                <CardDescription className="text-xs">
+                  Analyzed {new Date(config.voiceAnalysis.analyzedAt).toLocaleDateString()}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Summary */}
+                <div className="p-3 bg-primary/5 rounded-lg border border-primary/10">
+                  <h5 className="font-medium text-sm mb-2 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    AI Summary
+                  </h5>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {config.voiceAnalysis.summary}
+                  </p>
+                </div>
+
+                {/* Key Characteristics */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <h5 className="font-medium text-sm">Overall Tone</h5>
+                    <Badge variant="secondary" className="text-xs">
+                      {config.voiceAnalysis.overallTone}
+                    </Badge>
+                  </div>
+                  <div className="space-y-2">
+                    <h5 className="font-medium text-sm">Formality Level</h5>
+                    <Badge variant="secondary" className="text-xs">
+                      {config.voiceAnalysis.formalityLevel}
+                    </Badge>
+                  </div>
+                  <div className="space-y-2">
+                    <h5 className="font-medium text-sm">Emotional Tone</h5>
+                    <Badge variant="secondary" className="text-xs">
+                      {config.voiceAnalysis.emotionalTone}
+                    </Badge>
+                  </div>
+                  <div className="space-y-2">
+                    <h5 className="font-medium text-sm">Sentence Style</h5>
+                    <Badge variant="secondary" className="text-xs">
+                      {config.voiceAnalysis.sentenceStyle}
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Lists */}
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="characteristics">
+                    <AccordionTrigger className="text-sm py-2">
+                      Key Characteristics ({config.voiceAnalysis.keyCharacteristics?.length || 0})
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="flex flex-wrap gap-1">
+                        {config.voiceAnalysis.keyCharacteristics?.map((item, i) => (
+                          <Badge key={i} variant="outline" className="text-xs">{item}</Badge>
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                  
+                  <AccordionItem value="vocabulary">
+                    <AccordionTrigger className="text-sm py-2">
+                      Vocabulary Patterns ({config.voiceAnalysis.vocabularyPatterns?.length || 0})
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="flex flex-wrap gap-1">
+                        {config.voiceAnalysis.vocabularyPatterns?.map((item, i) => (
+                          <Badge key={i} variant="outline" className="text-xs">{item}</Badge>
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                  
+                  <AccordionItem value="phrases">
+                    <AccordionTrigger className="text-sm py-2">
+                      Common Phrases ({config.voiceAnalysis.commonPhrases?.length || 0})
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="flex flex-wrap gap-1">
+                        {config.voiceAnalysis.commonPhrases?.map((item, i) => (
+                          <Badge key={i} variant="outline" className="text-xs">"{item}"</Badge>
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                  
+                  <AccordionItem value="tactics">
+                    <AccordionTrigger className="text-sm py-2">
+                      Messaging Tactics ({config.voiceAnalysis.messagingTactics?.length || 0})
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="flex flex-wrap gap-1">
+                        {config.voiceAnalysis.messagingTactics?.map((item, i) => (
+                          <Badge key={i} variant="outline" className="text-xs">{item}</Badge>
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+
+                <div className="flex items-center gap-2 text-xs text-primary bg-primary/5 p-2 rounded-lg">
+                  <Check className="w-4 h-4" />
+                  This voice profile will be applied to all AI-generated messages.
+                </div>
+              </CardContent>
+            </Card>
           )}
         </TabsContent>
       </Tabs>

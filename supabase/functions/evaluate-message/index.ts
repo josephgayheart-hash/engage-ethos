@@ -360,7 +360,23 @@ STYLE & VOICE:
 - Words to Avoid: ${institutionalConfig.wordsToAvoid?.join(', ') || 'Not specified'}
 - Preferred Phrases: ${institutionalConfig.preferredPhrases?.join(', ') || 'Not specified'}
 - Important Dates: ${institutionalConfig.importantDates?.join(', ') || 'Not specified'}
+${institutionalConfig.voiceAnalysis ? `
+BRAND VOICE PROFILE (CRITICAL - Match this voice in all generated content):
+The following voice profile was extracted from the institution's actual communications. You MUST match this voice:
 
+- Overall Tone: ${institutionalConfig.voiceAnalysis.overallTone || 'Not specified'}
+- Formality Level: ${institutionalConfig.voiceAnalysis.formalityLevel || 'Not specified'}
+- Emotional Tone: ${institutionalConfig.voiceAnalysis.emotionalTone || 'Not specified'}
+- Sentence Style: ${institutionalConfig.voiceAnalysis.sentenceStyle || 'Not specified'}
+- Key Characteristics: ${institutionalConfig.voiceAnalysis.keyCharacteristics?.join(', ') || 'Not specified'}
+- Vocabulary Patterns: ${institutionalConfig.voiceAnalysis.vocabularyPatterns?.join(', ') || 'Not specified'}
+- Common Phrases to Use: ${institutionalConfig.voiceAnalysis.commonPhrases?.join('; ') || 'Not specified'}
+- Messaging Tactics to Apply: ${institutionalConfig.voiceAnalysis.messagingTactics?.join('; ') || 'Not specified'}
+
+Voice Summary: ${institutionalConfig.voiceAnalysis.summary || 'Not specified'}
+
+IMPORTANT: Emulate this voice profile closely. Use similar sentence structures, vocabulary choices, and emotional undertones as described above. Incorporate the common phrases naturally where appropriate.
+` : ''}
 CRITICAL: Use the EXACT institution name, system names, and terminology provided above. Do NOT use generic placeholders like "University Name", "[Portal Name]", or "[Institution]". Use the actual configured values.` : '';
 
     switch (mode) {
