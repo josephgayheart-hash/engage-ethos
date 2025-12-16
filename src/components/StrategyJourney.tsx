@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { AIIndicator } from "@/components/ui/ai-indicator";
+import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import { useToast } from "@/hooks/use-toast";
 import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
 import { supabase } from "@/integrations/supabase/client";
@@ -271,6 +272,9 @@ function TouchpointCard({
                           readOnly 
                           className="min-h-[100px] text-sm bg-background"
                         />
+                        {msg.channel === 'sms' && (
+                          <SmsCharCounter text={msg.content} />
+                        )}
                       </div>
                     ))}
                   </div>

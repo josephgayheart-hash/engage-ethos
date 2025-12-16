@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { AIBadge } from "@/components/ui/ai-indicator";
+import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
@@ -493,6 +494,9 @@ const BuildPage = () => {
                             )}
                           </div>
                           <p className="text-sm whitespace-pre-wrap pr-20">{draft}</p>
+                          {selectedChannels.includes('sms') && (
+                            <SmsCharCounter text={draft} className="mt-2" />
+                          )}
                         </div>
                         
                         {/* Actions */}
