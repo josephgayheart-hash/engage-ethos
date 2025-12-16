@@ -19,6 +19,7 @@ import {
   ChevronRight,
   Clock,
   Mail,
+  Upload,
   MessageSquare,
   Megaphone,
   ArrowRight,
@@ -79,6 +80,15 @@ const Index = () => {
       color: 'text-pillar-susceptibility',
       bgColor: 'bg-pillar-susceptibility/10',
       href: '/playground'
+    },
+    { 
+      id: 'byoc', 
+      title: 'Import & Evaluate', 
+      description: 'Bring your own comm: upload, evaluate, tag, and share existing content',
+      icon: Upload,
+      color: 'text-secondary',
+      bgColor: 'bg-secondary/10',
+      href: '/byoc'
     },
     { 
       id: 'admin', 
@@ -303,6 +313,7 @@ const Index = () => {
                 <li><Link to="/strategy" className="hover:text-foreground transition-colors">Plan Strategy</Link></li>
                 <li><Link to="/call-script" className="hover:text-foreground transition-colors">Call Scripts</Link></li>
                 <li><Link to="/playground" className="hover:text-foreground transition-colors">Playground</Link></li>
+                <li><Link to="/byoc" className="hover:text-foreground transition-colors">Import & Evaluate</Link></li>
               </ul>
             </div>
             {/* Libraries */}
