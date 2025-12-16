@@ -12,6 +12,7 @@ import EvaluatePage from "./pages/EvaluatePage";
 import BuildPage from "./pages/BuildPage";
 import StrategyPage from "./pages/StrategyPage";
 import CallScriptPage from "./pages/CallScriptPage";
+import PlaygroundPage from "./pages/PlaygroundPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
           <Route path="/build" element={<RequireOnboarding><BuildPage /></RequireOnboarding>} />
           <Route path="/strategy" element={<RequireOnboarding><StrategyPage /></RequireOnboarding>} />
           <Route path="/call-script" element={<RequireOnboarding><CallScriptPage /></RequireOnboarding>} />
+          <Route path="/playground" element={<RequireOnboarding><PlaygroundPage /></RequireOnboarding>} />
           <Route path="/library" element={<RequireOnboarding><PersonalLibrary /></RequireOnboarding>} />
           <Route path="/shared-library" element={<RequireOnboarding><SharedLibrary /></RequireOnboarding>} />
           <Route path="/admin" element={<RequireOnboarding><AdminPanel /></RequireOnboarding>} />
