@@ -12,13 +12,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { 
   ArrowRight, 
   Sparkles, 
   Shield, 
   Brain, 
   Target,
-  AlertCircle
+  AlertCircle,
+  Save
 } from "lucide-react";
 import { evaluateMessage, buildMessage, mapMessages } from "@/lib/evaluateMessage";
 import type { 
@@ -32,6 +34,7 @@ import type {
 
 const Index = () => {
   const { toast } = useToast();
+  const { addMessage } = useMessageLibrary();
   const [mode, setMode] = useState<OperationMode>('evaluator');
   const [messageContent, setMessageContent] = useState("");
   const [context, setContext] = useState<MessageContext>({
@@ -44,6 +47,7 @@ const Index = () => {
   const [builderResult, setBuilderResult] = useState<BuilderResult | null>(null);
   const [mapperResult, setMapperResult] = useState<MapperResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [autoSave, setAutoSave] = useState(true);
 
   const clearResults = () => {
     setEvaluationResult(null);
@@ -56,6 +60,23 @@ const Index = () => {
     clearResults();
   };
 
+  const saveToLibrary = (content: string, title: string, mode: 'evaluated' | 'generated', senderRecommendation?: string) => {
+    addMessage({
+      title,
+      content,
+      channel: context.channel,
+      audience: context.audience,
+      cohort: context.cohort ? [context.cohort] : undefined,
+      domain: context.domain,
+      moment: context.moment,
+      goal: context.goal,
+      tone: context.tone,
+      senderRecommendation,
+      approved: false,
+      mode,
+    });
+  };
+
   const handleProcess = async () => {
     setIsProcessing(true);
     clearResults();
@@ -66,19 +87,39 @@ const Index = () => {
           if (!messageContent.trim()) return;
           const evalResult = await evaluateMessage(messageContent, context, institutionalConfig);
           setEvaluationResult(evalResult);
-          toast({
-            title: "Evaluation Complete",
-            description: "Your message has been analyzed using the five-pillar framework.",
-          });
+          
+          if (autoSave) {
+            const title = `Evaluated: ${messageContent.slice(0, 40)}${messageContent.length > 40 ? '...' : ''}`;
+            saveToLibrary(messageContent, title, 'evaluated');
+            toast({
+              title: "Evaluation Complete",
+              description: "Message analyzed and saved to your library.",
+            });
+          } else {
+            toast({
+              title: "Evaluation Complete",
+              description: "Your message has been analyzed using the five-pillar framework.",
+            });
+          }
           break;
           
         case 'builder':
           const buildResult = await buildMessage(context, institutionalConfig);
           setBuilderResult(buildResult);
-          toast({
-            title: "Messages Generated",
-            description: "Draft messages have been created based on your context.",
-          });
+          
+          if (autoSave && buildResult.drafts.length > 0) {
+            const title = `Generated: ${context.domain || context.moment} ${context.audience} message`;
+            saveToLibrary(buildResult.drafts[0], title, 'generated', buildResult.recommendedSender);
+            toast({
+              title: "Messages Generated",
+              description: "Draft saved to your library.",
+            });
+          } else {
+            toast({
+              title: "Messages Generated",
+              description: "Draft messages have been created based on your context.",
+            });
+          }
           break;
           
         case 'mapper':
@@ -176,12 +217,25 @@ const Index = () => {
           {mode !== 'customization' && (
             <Card className="card-elevated">
               <CardHeader>
-                <CardTitle className="font-serif text-xl flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-secondary" />
-                  {mode === 'evaluator' && 'Message Evaluation'}
-                  {mode === 'builder' && 'Message Builder'}
-                  {mode === 'mapper' && 'Messaging Strategy'}
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="font-serif text-xl flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-secondary" />
+                    {mode === 'evaluator' && 'Message Evaluation'}
+                    {mode === 'builder' && 'Message Builder'}
+                    {mode === 'mapper' && 'Messaging Strategy'}
+                  </CardTitle>
+                  {(mode === 'evaluator' || mode === 'builder') && (
+                    <Button
+                      variant={autoSave ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setAutoSave(!autoSave)}
+                      className="flex items-center gap-2"
+                    >
+                      <Save className="w-4 h-4" />
+                      Auto-save {autoSave ? 'On' : 'Off'}
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
               <CardContent className="space-y-6">
                 <ContextSelector context={context} onChange={setContext} mode={mode} />
