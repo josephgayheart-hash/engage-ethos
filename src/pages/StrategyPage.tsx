@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { format, differenceInWeeks, addWeeks } from "date-fns";
 import { Header } from "@/components/Header";
 import { ContextSelector } from "@/components/ContextSelector";
 import { StrategyJourneyDisplay } from "@/components/StrategyJourney";
@@ -9,11 +10,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { AIBadge } from "@/components/ui/ai-indicator";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
-import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar, Save, Share2, BookMarked } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target } from "lucide-react";
 import { mapMessages } from "@/lib/evaluateMessage";
 import type { MessageContext, MapperResult, Channel } from "@/types/persist";
 
@@ -37,8 +41,37 @@ const StrategyPage = () => {
   });
   const [selectedChannels, setSelectedChannels] = useState<Channel[]>(['email', 'sms']);
   const [journeyWeeks, setJourneyWeeks] = useState(12);
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [mapperResult, setMapperResult] = useState<MapperResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Auto-calculate weeks when dates change
+  const handleStartDateChange = (date: Date | undefined) => {
+    setStartDate(date);
+    if (date && endDate) {
+      const weeks = differenceInWeeks(endDate, date);
+      if (weeks > 0 && weeks <= 52) setJourneyWeeks(weeks);
+    }
+  };
+
+  const handleEndDateChange = (date: Date | undefined) => {
+    setEndDate(date);
+    if (date && startDate) {
+      const weeks = differenceInWeeks(date, startDate);
+      if (weeks > 0 && weeks <= 52) setJourneyWeeks(weeks);
+    } else if (date && !startDate) {
+      // If only end date, calculate start from weeks
+      setStartDate(addWeeks(date, -journeyWeeks));
+    }
+  };
+
+  const handleWeeksChange = (weeks: number) => {
+    setJourneyWeeks(weeks);
+    if (startDate) {
+      setEndDate(addWeeks(startDate, weeks));
+    }
+  };
 
   const canProcess = context.audience && context.moment && selectedChannels.length > 0;
 
@@ -63,7 +96,13 @@ const StrategyPage = () => {
     try {
       // Use the first selected channel for the context
       const contextWithChannels = { ...context, channel: selectedChannels[0], channels: selectedChannels };
-      const result = await mapMessages(contextWithChannels, undefined, journeyWeeks);
+      const result = await mapMessages(
+        contextWithChannels, 
+        undefined, 
+        journeyWeeks,
+        startDate?.toISOString(),
+        endDate?.toISOString()
+      );
       setMapperResult(result);
       toast({
         title: "Strategy Generated",
@@ -215,25 +254,101 @@ const StrategyPage = () => {
                 </div>
               </div>
 
-              {/* Journey Duration */}
-              <div className="flex items-end gap-4 pt-2 border-t border-border">
-                <div className="space-y-2">
-                  <Label htmlFor="journey-weeks" className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-                    Journey Duration (weeks)
-                  </Label>
-                  <Input
-                    id="journey-weeks"
-                    type="number"
-                    min={4}
-                    max={52}
-                    value={journeyWeeks}
-                    onChange={(e) => setJourneyWeeks(Number(e.target.value))}
-                    className="w-24"
-                  />
+              {/* Journey Timeline */}
+              <div className="space-y-4 pt-2 border-t border-border">
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-primary" />
+                  Journey Timeline
+                </Label>
+                
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Start Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !startDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {startDate ? format(startDate, "MMM d, yyyy") : "Start date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={startDate}
+                          onSelect={handleStartDateChange}
+                          initialFocus
+                          className="p-3 pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">End Date (Due)</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !endDate && "text-muted-foreground"
+                          )}
+                        >
+                          <Target className="mr-2 h-4 w-4 text-destructive" />
+                          {endDate ? format(endDate, "MMM d, yyyy") : "Due date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={endDate}
+                          onSelect={handleEndDateChange}
+                          disabled={(date) => startDate ? date < startDate : false}
+                          initialFocus
+                          className="p-3 pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="journey-weeks" className="text-xs text-muted-foreground">Duration (weeks)</Label>
+                    <Input
+                      id="journey-weeks"
+                      type="number"
+                      min={4}
+                      max={52}
+                      value={journeyWeeks}
+                      onChange={(e) => handleWeeksChange(Number(e.target.value))}
+                      className="w-full"
+                    />
+                  </div>
+
+                  {(startDate || endDate) && (
+                    <div className="flex items-end">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => { setStartDate(undefined); setEndDate(undefined); }}
+                        className="text-muted-foreground"
+                      >
+                        Clear dates
+                      </Button>
+                    </div>
+                  )}
                 </div>
-                <p className="text-sm text-muted-foreground pb-2">
-                  Typical journeys: 8-12 weeks (enrollment), 16 weeks (semester), 32+ weeks (year-long)
+
+                <p className="text-xs text-muted-foreground">
+                  {startDate && endDate 
+                    ? `Journey runs from ${format(startDate, "MMM d")} to ${format(endDate, "MMM d, yyyy")} (${journeyWeeks} weeks)`
+                    : "Typical journeys: 8-12 weeks (enrollment), 16 weeks (semester), 32+ weeks (year-long)"
+                  }
                 </p>
               </div>
 
