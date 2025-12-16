@@ -130,7 +130,7 @@ const toneOptions: { value: TonePreference; label: string }[] = [
 
 export function ContextSelector({ context, onChange, mode = 'evaluator' }: ContextSelectorProps) {
   const showExtendedOptions = mode === 'builder' || mode === 'mapper';
-  const hideChannel = mode === 'mapper'; // Strategy page has its own multi-channel selection
+  const hideChannel = mode === 'mapper' || mode === 'builder'; // Builder/Strategy pages have their own multi-channel selection
 
   return (
     <div className="space-y-4">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { Header } from "@/components/Header";
@@ -105,6 +105,7 @@ const BuildPage = () => {
   const [activeDraft, setActiveDraft] = useState(0);
   const [submitToSharedOpen, setSubmitToSharedOpen] = useState(false);
   const [draftToSubmit, setDraftToSubmit] = useState('');
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const canProcess = context.audience && context.moment && selectedChannels.length > 0;
 
@@ -174,6 +175,13 @@ const BuildPage = () => {
       setIsProcessing(false);
     }
   };
+
+  // Auto-scroll to results when drafts are generated
+  useEffect(() => {
+    if (drafts.length > 0 && resultsRef.current) {
+      resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [drafts.length]);
 
   const handleGenerateMore = async () => {
     setIsGeneratingMore(true);
@@ -441,7 +449,7 @@ const BuildPage = () => {
 
           {/* Results */}
           {drafts.length > 0 && builderResult && (
-            <div className="space-y-6 animate-fade-in">
+            <div ref={resultsRef} className="space-y-6 animate-fade-in scroll-mt-6">
               {/* Recommendations */}
               <Card>
                 <CardHeader>
@@ -550,7 +558,17 @@ const BuildPage = () => {
                               </Button>
                             )}
                           </div>
-                          <p className="text-sm whitespace-pre-wrap pr-20">{draft}</p>
+                          
+                          {/* Channel badges */}
+                          <div className="flex flex-wrap gap-1 mb-3">
+                            {selectedChannels.map(ch => (
+                              <Badge key={ch} variant="outline" className="text-xs">
+                                {channelOptions.find(c => c.value === ch)?.label || ch}
+                              </Badge>
+                            ))}
+                          </div>
+                          
+                          <p className="text-sm whitespace-pre-wrap">{draft}</p>
                           {selectedChannels.includes('sms') && (
                             <SmsCharCounter text={draft} className="mt-2" />
                           )}
