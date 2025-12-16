@@ -4,12 +4,35 @@ export type OperationMode =
   | 'mapper' 
   | 'customization';
 
+export type Department = 
+  | 'central-marketing'
+  | 'executive-comms'
+  | 'enrollment-management'
+  | 'registrar'
+  | 'college-communications'
+  | 'student-success'
+  | 'recruitment'
+  | 'health-wellbeing'
+  | 'advancement-alumni';
+
+export interface DepartmentInfo {
+  id: Department;
+  name: string;
+  description: string;
+  primaryTools: OperationMode[];
+  typicalAudiences: AudienceType[];
+  typicalMoments: CommunicationMoment[];
+}
+
 export type AudienceType = 
   | 'prospective' 
   | 'first-year' 
   | 'continuing' 
   | 'at-risk' 
-  | 'graduate';
+  | 'graduate'
+  | 'alumni'
+  | 'parents'
+  | 'donors';
 
 export type CohortContext = 
   | 'first-gen'
@@ -32,14 +55,20 @@ export type CommunicationMoment =
   | 'seasonal'
   | 'recruitment'
   | 'orientation'
-  | 'registration';
+  | 'registration'
+  | 'yield'
+  | 'summer-melt'
+  | 'graduation'
+  | 'giving-campaign';
 
 export type Channel = 
   | 'email' 
   | 'sms' 
   | 'portal' 
   | 'landing-page'
-  | 'social-media';
+  | 'social-media'
+  | 'direct-mail'
+  | 'phone-call';
 
 export type MessageDomain = 
   | 'academic'
@@ -50,20 +79,27 @@ export type MessageDomain =
   | 'seasonal'
   | 'athletics'
   | 'compliance'
-  | 'scholastic';
+  | 'scholastic'
+  | 'giving'
+  | 'alumni-relations';
 
 export type PrimaryGoal = 
   | 'persist'
   | 'attend'
   | 'submit'
   | 'respond'
-  | 'check-in';
+  | 'check-in'
+  | 'donate'
+  | 'register'
+  | 'enroll';
 
 export type TonePreference = 
   | 'supportive'
   | 'authoritative'
   | 'encouraging'
-  | 'directive';
+  | 'directive'
+  | 'celebratory'
+  | 'urgent';
 
 export type Rating = 'Strong' | 'Moderate' | 'Needs Attention';
 
@@ -83,6 +119,39 @@ export interface MessageContext {
   domain?: MessageDomain;
   goal?: PrimaryGoal;
   tone?: TonePreference;
+  department?: Department;
+}
+
+// Strategy Journey Types
+export type StrategyPhase = 'short-term' | 'mid-term' | 'long-term';
+
+export interface JourneyTouchpoint {
+  week: number;
+  phase: StrategyPhase;
+  title: string;
+  description: string;
+  channel: Channel;
+  domain: MessageDomain;
+  tone: TonePreference;
+  behavioralNudge: string;
+  goal: PrimaryGoal;
+  sampleSubject?: string;
+  keyMessage?: string;
+}
+
+export interface StrategyJourney {
+  overview: string;
+  totalWeeks: number;
+  phases: {
+    phase: StrategyPhase;
+    name: string;
+    weekRange: string;
+    focus: string;
+    keyObjectives: string[];
+  }[];
+  touchpoints: JourneyTouchpoint[];
+  risks: string[];
+  successMetrics: string[];
 }
 
 export interface EvaluationResult {
@@ -101,13 +170,7 @@ export interface BuilderResult {
 }
 
 export interface MapperResult {
-  recommendations: {
-    domain: MessageDomain;
-    emphasis: 'high' | 'medium' | 'low';
-    authorityBalance: string;
-    risks: string[];
-  }[];
-  strategyNotes: string;
+  journey: StrategyJourney;
 }
 
 export interface InstitutionalConfig {
@@ -157,6 +220,11 @@ export interface InstitutionalConfig {
   
   // Deadlines & Dates (placeholders)
   importantDates?: { label: string; placeholder: string }[];
+}
+
+export interface UserProfile {
+  department: Department;
+  onboardingComplete: boolean;
 }
 
 export interface MessageInput {

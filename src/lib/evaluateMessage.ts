@@ -67,7 +67,8 @@ export async function buildMessage(
 
 export async function mapMessages(
   context: MessageContext,
-  institutionalConfig?: InstitutionalConfig
+  institutionalConfig?: InstitutionalConfig,
+  journeyWeeks?: number
 ): Promise<MapperResult> {
   console.log("Generating messaging strategy...");
   
@@ -75,7 +76,8 @@ export async function mapMessages(
     body: { 
       context,
       mode: 'mapper',
-      institutionalConfig
+      institutionalConfig,
+      journeyWeeks: journeyWeeks || 12
     }
   });
 

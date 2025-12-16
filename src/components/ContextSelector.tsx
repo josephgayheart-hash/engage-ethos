@@ -31,6 +31,9 @@ const audienceOptions: { value: AudienceType; label: string }[] = [
   { value: 'continuing', label: 'Continuing Student' },
   { value: 'at-risk', label: 'At-Risk Student' },
   { value: 'graduate', label: 'Graduate Student' },
+  { value: 'alumni', label: 'Alumni' },
+  { value: 'parents', label: 'Parents/Family' },
+  { value: 'donors', label: 'Donors' },
 ];
 
 const cohortOptions: { value: CohortContext; label: string }[] = [
@@ -49,12 +52,16 @@ const cohortOptions: { value: CohortContext; label: string }[] = [
 
 const momentOptions: { value: CommunicationMoment; label: string }[] = [
   { value: 'recruitment', label: 'Recruitment' },
+  { value: 'yield', label: 'Yield Campaign' },
+  { value: 'summer-melt', label: 'Summer Melt Prevention' },
   { value: 'orientation', label: 'Orientation' },
   { value: 'registration', label: 'Registration' },
   { value: 'early-term', label: 'Early Term' },
   { value: 'midterm', label: 'Midterm' },
   { value: 'finals', label: 'Finals' },
   { value: 're-engagement', label: 'Re-engagement' },
+  { value: 'graduation', label: 'Graduation' },
+  { value: 'giving-campaign', label: 'Giving Campaign' },
   { value: 'seasonal', label: 'Seasonal' },
 ];
 
@@ -64,6 +71,8 @@ const channelOptions: { value: Channel; label: string }[] = [
   { value: 'portal', label: 'Student Portal' },
   { value: 'landing-page', label: 'Landing Page' },
   { value: 'social-media', label: 'Social Media' },
+  { value: 'direct-mail', label: 'Direct Mail' },
+  { value: 'phone-call', label: 'Phone Call' },
 ];
 
 const domainOptions: { value: MessageDomain; label: string }[] = [
@@ -76,6 +85,8 @@ const domainOptions: { value: MessageDomain; label: string }[] = [
   { value: 'athletics', label: 'Athletics' },
   { value: 'compliance', label: 'Compliance' },
   { value: 'scholastic', label: 'Scholastic' },
+  { value: 'giving', label: 'Giving/Fundraising' },
+  { value: 'alumni-relations', label: 'Alumni Relations' },
 ];
 
 const goalOptions: { value: PrimaryGoal; label: string }[] = [
@@ -84,6 +95,9 @@ const goalOptions: { value: PrimaryGoal; label: string }[] = [
   { value: 'submit', label: 'Submit (form/document)' },
   { value: 'respond', label: 'Respond (reply/contact)' },
   { value: 'check-in', label: 'Check-in (welfare)' },
+  { value: 'donate', label: 'Donate (giving)' },
+  { value: 'register', label: 'Register (enrollment)' },
+  { value: 'enroll', label: 'Enroll (commit)' },
 ];
 
 const toneOptions: { value: TonePreference; label: string }[] = [
@@ -91,6 +105,8 @@ const toneOptions: { value: TonePreference; label: string }[] = [
   { value: 'authoritative', label: 'Authoritative' },
   { value: 'encouraging', label: 'Encouraging' },
   { value: 'directive', label: 'Directive' },
+  { value: 'celebratory', label: 'Celebratory' },
+  { value: 'urgent', label: 'Urgent' },
 ];
 
 export function ContextSelector({ context, onChange, mode = 'evaluator' }: ContextSelectorProps) {
