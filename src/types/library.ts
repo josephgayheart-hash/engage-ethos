@@ -1,4 +1,4 @@
-import type { Channel, AudienceType, MessageDomain, CommunicationMoment, PrimaryGoal, TonePreference, CohortContext } from './persist';
+import type { Channel, AudienceType, MessageDomain, CommunicationMoment, PrimaryGoal, TonePreference, CohortContext, ChannelDrafts } from './persist';
 
 export type LibraryEntryStatus = 'draft' | 'submitted' | 'approved' | 'published';
 
@@ -7,6 +7,8 @@ export interface SavedMessage {
   title: string;
   content: string;
   channel?: Channel;
+  channels?: Channel[];
+  channelDrafts?: ChannelDrafts;
   audience?: AudienceType;
   cohort?: CohortContext[];
   domain?: MessageDomain;
@@ -19,7 +21,7 @@ export interface SavedMessage {
   versions: MessageVersion[];
   notes?: string;
   approved: boolean;
-  mode: 'evaluated' | 'generated';
+  mode: 'evaluated' | 'generated' | 'kit';
   institutionalProfileId?: string;
   institutionalProfileName?: string;
 }

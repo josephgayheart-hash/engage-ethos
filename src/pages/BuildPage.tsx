@@ -33,7 +33,9 @@ import {
   CalendarIcon,
   Clock,
   Users,
-  UserCheck
+  UserCheck,
+  FolderPlus,
+  Library
 } from "lucide-react";
 import { buildMessage } from "@/lib/evaluateMessage";
 
@@ -151,6 +153,66 @@ const BuildPage = () => {
 
   const handleReset = () => {
     setBuilderResult(null);
+  };
+
+  const handleSaveToLibrary = () => {
+    if (!builderResult?.channelDrafts) return;
+    
+    const channelList = selectedChannels.join(', ');
+    const title = `${audienceLabels[context.audience || ''] || 'Message'} Kit - ${channelList}`;
+    
+    // Serialize channel drafts to content for backwards compatibility
+    const contentSummary = selectedChannels.map(ch => {
+      const content = builderResult.channelDrafts[ch];
+      if (typeof content === 'string') return `[${ch.toUpperCase()}]\n${content}`;
+      if (content && typeof content === 'object') {
+        if ('subject' in content) return `[EMAIL]\nSubject: ${content.subject}\n${content.body}`;
+        if ('opening' in content) return `[PHONE CALL]\n${content.opening}`;
+        if ('headline' in content) return `[LANDING PAGE]\n${content.headline}\n${content.body}`;
+      }
+      return '';
+    }).filter(Boolean).join('\n\n---\n\n');
+
+    addMessage({
+      title,
+      content: contentSummary,
+      channels: selectedChannels,
+      channelDrafts: builderResult.channelDrafts,
+      audience: context.audience,
+      domain: context.domain,
+      moment: context.moment,
+      goal: context.goal,
+      tone: context.tone,
+      senderRecommendation: builderResult.recommendedSender,
+      approved: false,
+      mode: 'kit',
+      institutionalProfileId: selectedProfileId || undefined,
+      institutionalProfileName: selectedProfileName,
+    });
+
+    toast({
+      title: "Saved to Personal Library",
+      description: "Your message kit has been saved.",
+    });
+  };
+
+  const handleSubmitToShared = () => {
+    if (!builderResult?.channelDrafts) return;
+    
+    const channelList = selectedChannels.join(', ');
+    const contentSummary = selectedChannels.map(ch => {
+      const content = builderResult.channelDrafts[ch];
+      if (typeof content === 'string') return `[${ch.toUpperCase()}]\n${content}`;
+      if (content && typeof content === 'object') {
+        if ('subject' in content) return `[EMAIL]\nSubject: ${content.subject}\n${content.body}`;
+        if ('opening' in content) return `[PHONE CALL]\n${content.opening}`;
+        if ('headline' in content) return `[LANDING PAGE]\n${content.headline}\n${content.body}`;
+      }
+      return '';
+    }).filter(Boolean).join('\n\n---\n\n');
+
+    setDraftToSubmit(contentSummary);
+    setSubmitToSharedOpen(true);
   };
 
   return (
@@ -396,6 +458,18 @@ const BuildPage = () => {
                         <p className="text-sm font-medium">{builderResult.recommendedLength}</p>
                       </div>
                     </div>
+                  </div>
+
+                  {/* Save Actions */}
+                  <div className="flex gap-2 mt-4 pt-4 border-t border-border">
+                    <Button onClick={handleSaveToLibrary} variant="outline" className="flex-1">
+                      <FolderPlus className="w-4 h-4 mr-2" />
+                      Save to Personal Library
+                    </Button>
+                    <Button onClick={handleSubmitToShared} variant="secondary" className="flex-1">
+                      <Library className="w-4 h-4 mr-2" />
+                      Submit to Shared Library
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
