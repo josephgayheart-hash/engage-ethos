@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { Header } from "@/components/Header";
+import { ModeSelector } from "@/components/ModeSelector";
 import { ContextSelector } from "@/components/ContextSelector";
 import { MessageInput } from "@/components/MessageInput";
 import { EvaluationResults } from "@/components/EvaluationResults";
+import { BuilderResults } from "@/components/BuilderResults";
+import { MapperResults } from "@/components/MapperResults";
+import { InstitutionalConfig } from "@/components/InstitutionalConfig";
 import { ResearchFoundation } from "@/components/ResearchFoundation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,46 +20,102 @@ import {
   Target,
   AlertCircle
 } from "lucide-react";
-import { evaluateMessage } from "@/lib/evaluateMessage";
-import type { MessageContext, EvaluationResult } from "@/types/persist";
+import { evaluateMessage, buildMessage, mapMessages } from "@/lib/evaluateMessage";
+import type { 
+  MessageContext, 
+  EvaluationResult, 
+  BuilderResult, 
+  MapperResult,
+  OperationMode,
+  InstitutionalConfig as InstitutionalConfigType 
+} from "@/types/persist";
 
 const Index = () => {
   const { toast } = useToast();
+  const [mode, setMode] = useState<OperationMode>('evaluator');
   const [messageContent, setMessageContent] = useState("");
   const [context, setContext] = useState<MessageContext>({
     audience: 'first-year',
     moment: 'early-term',
     channel: 'email',
   });
-  const [result, setResult] = useState<EvaluationResult | null>(null);
-  const [isEvaluating, setIsEvaluating] = useState(false);
+  const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfigType>({});
+  const [evaluationResult, setEvaluationResult] = useState<EvaluationResult | null>(null);
+  const [builderResult, setBuilderResult] = useState<BuilderResult | null>(null);
+  const [mapperResult, setMapperResult] = useState<MapperResult | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleEvaluate = async () => {
-    if (!messageContent.trim()) return;
-    
-    setIsEvaluating(true);
-    setResult(null);
+  const clearResults = () => {
+    setEvaluationResult(null);
+    setBuilderResult(null);
+    setMapperResult(null);
+  };
+
+  const handleModeChange = (newMode: OperationMode) => {
+    setMode(newMode);
+    clearResults();
+  };
+
+  const handleProcess = async () => {
+    setIsProcessing(true);
+    clearResults();
     
     try {
-      const evaluation = await evaluateMessage(messageContent, context);
-      setResult(evaluation);
-      toast({
-        title: "Evaluation Complete",
-        description: "Your message has been analyzed using the five-pillar framework.",
-      });
+      switch (mode) {
+        case 'evaluator':
+          if (!messageContent.trim()) return;
+          const evalResult = await evaluateMessage(messageContent, context, institutionalConfig);
+          setEvaluationResult(evalResult);
+          toast({
+            title: "Evaluation Complete",
+            description: "Your message has been analyzed using the five-pillar framework.",
+          });
+          break;
+          
+        case 'builder':
+          const buildResult = await buildMessage(context, institutionalConfig);
+          setBuilderResult(buildResult);
+          toast({
+            title: "Messages Generated",
+            description: "Draft messages have been created based on your context.",
+          });
+          break;
+          
+        case 'mapper':
+          const mapResult = await mapMessages(context, institutionalConfig);
+          setMapperResult(mapResult);
+          toast({
+            title: "Strategy Generated",
+            description: "Your messaging strategy map is ready.",
+          });
+          break;
+      }
     } catch (error) {
-      console.error("Evaluation failed:", error);
+      console.error("Processing failed:", error);
       toast({
         variant: "destructive",
-        title: "Evaluation Failed",
-        description: error instanceof Error ? error.message : "Failed to evaluate message. Please try again.",
+        title: "Processing Failed",
+        description: error instanceof Error ? error.message : "An error occurred. Please try again.",
       });
     } finally {
-      setIsEvaluating(false);
+      setIsProcessing(false);
     }
   };
 
-  const canEvaluate = messageContent.trim().length > 20;
+  const canProcess = mode === 'evaluator' 
+    ? messageContent.trim().length > 20 
+    : context.audience && context.moment && context.channel;
+
+  const getButtonText = () => {
+    if (isProcessing) return 'Processing...';
+    switch (mode) {
+      case 'evaluator': return 'Evaluate Message';
+      case 'builder': return 'Generate Messages';
+      case 'mapper': return 'Create Strategy Map';
+      case 'customization': return 'Save Configuration';
+      default: return 'Process';
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -66,11 +126,11 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-primary-foreground mb-4 animate-fade-in">
-              Evaluate Student Messages with Research-Backed Insights
+              Messaging Intelligence for Higher Education
             </h1>
             <p className="text-lg md:text-xl text-primary-foreground/80 mb-8 animate-fade-in" style={{ animationDelay: '100ms' }}>
-              PERSIST analyzes your student-facing communications using peer-reviewed 
-              persuasion research tested in higher education contexts.
+              PERSIST helps you design, evaluate, and plan student-facing communication 
+              using peer-reviewed research tested in higher education contexts.
             </p>
             <div className="flex flex-wrap justify-center gap-4 animate-fade-in" style={{ animationDelay: '200ms' }}>
               <div className="flex items-center gap-2 text-primary-foreground/70 text-sm">
@@ -94,56 +154,92 @@ const Index = () => {
       <main className="container mx-auto px-4 py-12">
         <div className="max-w-5xl mx-auto space-y-8">
           
-          {/* Input Section */}
+          {/* Mode Selection */}
           <Card className="card-elevated">
             <CardHeader>
-              <CardTitle className="font-serif text-xl flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-secondary" />
-                Message Evaluation
-              </CardTitle>
+              <CardTitle className="font-serif text-xl">Select Mode</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <ContextSelector context={context} onChange={setContext} />
-              
-              <Separator />
-              
-              <MessageInput 
-                value={messageContent} 
-                onChange={setMessageContent} 
-              />
-
-              {!canEvaluate && messageContent.length > 0 && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <AlertCircle className="w-4 h-4" />
-                  <span>Please enter at least 20 characters for evaluation.</span>
-                </div>
-              )}
-
-              <Button 
-                onClick={handleEvaluate}
-                disabled={!canEvaluate || isEvaluating}
-                className="w-full md:w-auto bg-primary hover:bg-primary/90 text-primary-foreground"
-                size="lg"
-              >
-                {isEvaluating ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    Evaluate Message
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </>
-                )}
-              </Button>
+            <CardContent>
+              <ModeSelector mode={mode} onChange={handleModeChange} />
             </CardContent>
           </Card>
 
+          {/* Institutional Config Mode */}
+          {mode === 'customization' && (
+            <InstitutionalConfig 
+              config={institutionalConfig} 
+              onChange={setInstitutionalConfig} 
+            />
+          )}
+
+          {/* Input Section (for non-customization modes) */}
+          {mode !== 'customization' && (
+            <Card className="card-elevated">
+              <CardHeader>
+                <CardTitle className="font-serif text-xl flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-secondary" />
+                  {mode === 'evaluator' && 'Message Evaluation'}
+                  {mode === 'builder' && 'Message Builder'}
+                  {mode === 'mapper' && 'Messaging Strategy'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <ContextSelector context={context} onChange={setContext} mode={mode} />
+                
+                {mode === 'evaluator' && (
+                  <>
+                    <Separator />
+                    <MessageInput 
+                      value={messageContent} 
+                      onChange={setMessageContent} 
+                    />
+                    {!canProcess && messageContent.length > 0 && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <AlertCircle className="w-4 h-4" />
+                        <span>Please enter at least 20 characters for evaluation.</span>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                <Button 
+                  onClick={handleProcess}
+                  disabled={!canProcess || isProcessing}
+                  className="w-full md:w-auto bg-primary hover:bg-primary/90 text-primary-foreground"
+                  size="lg"
+                >
+                  {isProcessing ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      {getButtonText()}
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Results Section */}
-          {result && (
+          {evaluationResult && (
             <div className="animate-fade-in">
-              <EvaluationResults result={result} />
+              <EvaluationResults result={evaluationResult} />
+            </div>
+          )}
+
+          {builderResult && (
+            <div className="animate-fade-in">
+              <BuilderResults result={builderResult} />
+            </div>
+          )}
+
+          {mapperResult && (
+            <div className="animate-fade-in">
+              <MapperResults result={mapperResult} />
             </div>
           )}
 
