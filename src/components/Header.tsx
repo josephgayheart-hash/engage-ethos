@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { BookOpen, GraduationCap, Library, FolderOpen } from "lucide-react";
+import { BookOpen, GraduationCap, Library, FolderOpen, Settings } from "lucide-react";
 
 export function Header() {
   return (
@@ -32,6 +32,13 @@ export function Header() {
           >
             <Library className="w-4 h-4" />
             <span className="hidden sm:inline">Shared Library</span>
+          </Link>
+          <Link 
+            to="/admin" 
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
+          >
+            <Settings className="w-4 h-4" />
+            <span className="hidden md:inline">Admin</span>
           </Link>
           <a 
             href="#about" 

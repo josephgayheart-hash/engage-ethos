@@ -4,7 +4,7 @@ export interface SavedMessage {
   id: string;
   title: string;
   content: string;
-  channel: 'email' | 'sms' | 'portal' | 'landing-page';
+  channel: 'email' | 'sms' | 'portal' | 'landing-page' | 'social-media';
   audience: 'prospective' | 'first-year' | 'continuing' | 'at-risk' | 'graduate';
   cohort?: string[];
   domain?: string;
@@ -46,6 +46,8 @@ export interface SharedTemplate {
   ethicalGuardrails: string[];
   owner: string;
   maintainer: string;
+  collegeName?: string;
+  departmentName?: string;
   status: LibraryEntryStatus;
   version: string;
   createdAt: string;

@@ -63,6 +63,7 @@ const channelOptions: { value: Channel; label: string }[] = [
   { value: 'sms', label: 'SMS/Text' },
   { value: 'portal', label: 'Student Portal' },
   { value: 'landing-page', label: 'Landing Page' },
+  { value: 'social-media', label: 'Social Media' },
 ];
 
 const domainOptions: { value: MessageDomain; label: string }[] = [

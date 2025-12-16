@@ -24,6 +24,8 @@ export function CreateTemplateDialog({ open, onOpenChange, onSubmit, initialCont
   const [content, setContent] = useState(initialContent);
   const [playbook, setPlaybook] = useState('');
   const [owner, setOwner] = useState('');
+  const [collegeName, setCollegeName] = useState('');
+  const [departmentName, setDepartmentName] = useState('');
   const [audiences, setAudiences] = useState<string[]>([]);
   const [channels, setChannels] = useState<string[]>([]);
   const [moments, setMoments] = useState<string[]>([]);
@@ -36,7 +38,7 @@ export function CreateTemplateDialog({ open, onOpenChange, onSubmit, initialCont
   const [newGuardrail, setNewGuardrail] = useState('');
 
   const audienceOptions = ['prospective', 'first-year', 'continuing', 'at-risk', 'graduate'];
-  const channelOptions = ['email', 'sms', 'portal', 'landing-page'];
+  const channelOptions = ['email', 'sms', 'portal', 'landing-page', 'social-media'];
   const momentOptions = ['early-term', 'midterm', 'finals', 're-engagement', 'seasonal', 'recruitment', 'orientation', 'registration'];
 
   const toggleArrayItem = (arr: string[], setArr: (v: string[]) => void, item: string) => {
@@ -84,6 +86,8 @@ export function CreateTemplateDialog({ open, onOpenChange, onSubmit, initialCont
       playbook: playbook || undefined,
       owner: owner || 'Unknown',
       maintainer: owner || 'Unknown',
+      collegeName: collegeName || undefined,
+      departmentName: departmentName || undefined,
       status: 'draft',
       version: '1.0',
       placeholders,
@@ -108,6 +112,8 @@ export function CreateTemplateDialog({ open, onOpenChange, onSubmit, initialCont
     setContent('');
     setPlaybook('');
     setOwner('');
+    setCollegeName('');
+    setDepartmentName('');
     setAudiences([]);
     setChannels([]);
     setMoments([]);
@@ -152,8 +158,18 @@ export function CreateTemplateDialog({ open, onOpenChange, onSubmit, initialCont
                 <Input id="playbook" value={playbook} onChange={(e) => setPlaybook(e.target.value)} placeholder="e.g., Midterm Academic Support" />
               </div>
               <div>
-                <Label htmlFor="owner">Owner / Department</Label>
-                <Input id="owner" value={owner} onChange={(e) => setOwner(e.target.value)} placeholder="e.g., Student Success Office" />
+                <Label htmlFor="owner">Owner / Contact</Label>
+                <Input id="owner" value={owner} onChange={(e) => setOwner(e.target.value)} placeholder="e.g., Jane Smith" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="collegeName">College Name</Label>
+                <Input id="collegeName" value={collegeName} onChange={(e) => setCollegeName(e.target.value)} placeholder="e.g., College of Arts & Sciences" />
+              </div>
+              <div>
+                <Label htmlFor="departmentName">Department Name</Label>
+                <Input id="departmentName" value={departmentName} onChange={(e) => setDepartmentName(e.target.value)} placeholder="e.g., Student Success Office" />
               </div>
             </div>
           </div>
