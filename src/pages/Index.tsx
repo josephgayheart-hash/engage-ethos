@@ -218,6 +218,65 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Marketing Section */}
+      <section className="bg-gradient-to-b from-primary/5 to-background py-12">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-8">
+              <Badge className="mb-4 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
+                <Sparkles className="w-3 h-3 mr-1" />
+                Why PERSIST?
+              </Badge>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-4">
+                Stop Guessing. Start Connecting.
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Most student communications are written on instinct. PERSIST transforms your messaging 
+                with research-backed intelligence that actually moves students to action.
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-3 gap-6">
+              <Card className="border-none shadow-md bg-card/50 backdrop-blur">
+                <CardContent className="p-6 text-center">
+                  <div className="w-12 h-12 rounded-full bg-pillar-authority/10 flex items-center justify-center mx-auto mb-4">
+                    <Brain className="w-6 h-6 text-pillar-authority" />
+                  </div>
+                  <h3 className="font-semibold mb-2">Research-Grounded</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Built on Cialdini's persuasion principles, ELM theory, and higher ed-specific behavioral research.
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card className="border-none shadow-md bg-card/50 backdrop-blur">
+                <CardContent className="p-6 text-center">
+                  <div className="w-12 h-12 rounded-full bg-pillar-cognitive/10 flex items-center justify-center mx-auto mb-4">
+                    <Target className="w-6 h-6 text-pillar-cognitive" />
+                  </div>
+                  <h3 className="font-semibold mb-2">Student-Centered</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Designed for enrollment, retention, and student success teams who need messages that resonate.
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card className="border-none shadow-md bg-card/50 backdrop-blur">
+                <CardContent className="p-6 text-center">
+                  <div className="w-12 h-12 rounded-full bg-pillar-ethics/10 flex items-center justify-center mx-auto mb-4">
+                    <Shield className="w-6 h-6 text-pillar-ethics" />
+                  </div>
+                  <h3 className="font-semibold mb-2">Ethically Informed</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Every evaluation prioritizes student autonomy and transparent, ethical persuasion.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto space-y-10">
           
