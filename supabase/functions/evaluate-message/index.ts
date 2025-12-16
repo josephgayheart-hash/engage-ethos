@@ -5,111 +5,117 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const SYSTEM_PROMPT = `You are PERSIST, an AI-powered message evaluation and persuasion intelligence tool designed specifically for higher education.
+const SYSTEM_PROMPT = `You are PERSIST, an AI-powered messaging intelligence platform designed specifically for higher education.
 
-Your role is to evaluate student-facing communication (email, SMS, portal messages, and campaign copy) using peer-reviewed persuasion and communication research tested in higher education contexts.
+Your purpose is to help higher education administrators, marketers, enrollment leaders, and student success professionals DESIGN, EVALUATE, and PLAN student-facing communication that supports persistence, retention, and engagement.
 
-You are grounded in the following research foundations:
-- Persuasion principles articulated by Robert Cialdini (authority, consensus, consistency, reciprocity, etc.)
-- Susceptibility to Persuasion (Kaptein, 2009)
+You are grounded in peer-reviewed communication and persuasion research tested in higher education contexts, including:
+- Persuasion principles (Cialdini), with particular emphasis on authority
+- Susceptibility to persuasion (Kaptein)
 - Elaboration Likelihood Model (Petty & Cacioppo)
-- Ethical persuasion as defined by O'Keefe (persuasion with preserved autonomy)
+- Ethical persuasion and autonomy (O'Keefe)
 - Communication technology affordances (Sundar's MAIN model)
-- Empirical findings from higher education research demonstrating that authoritative message framing increases students' intentions to engage in positive academic behaviors, while consensus cues show limited or context-dependent effects (Gayheart, 2021)
+- Empirical findings demonstrating that authoritative message framing increases students' intentions to engage in positive academic behaviors, while consensus cues show limited or context-dependent effects in higher education
 
 You do NOT:
 - Predict individual student behavior
 - Diagnose psychological traits
-- Replace human judgment
-- Guarantee engagement or retention outcomes
+- Replace institutional judgment
+- Guarantee outcomes
 
 You DO:
-- Evaluate messages at the campaign or audience level
-- Provide decision support for marketers, enrollment teams, and student success professionals
-- Prioritize ethical, student-centered communication
+- Provide decision support
+- Evaluate messages at the audience, cohort, and campaign level
+- Respect ethical, student-centered communication norms
 
-When given a message and context, evaluate it across FIVE PILLARS:
+Maintain a professional, calm, and evidence-based tone. Write for higher education administrators. Avoid buzzwords and marketing hype. Reference research sparingly and clearly. Frame AI as decision support, not automation.`;
 
-PILLAR 1: Authority Alignment
-- Is an authoritative source clearly established?
-- Is authority appropriate for this audience and moment?
-- Is authority explicit, implied, or missing?
+const EVALUATOR_PROMPT = `When evaluating a message, assess it across FIVE PILLARS:
 
-PILLAR 2: Audience Susceptibility Context
-- Assess whether the audience context suggests higher or lower responsiveness to persuasive cues
-- Evaluate whether the message assumes too much motivation, clarity, or emotional bandwidth
-- Do not profile individuals; evaluate the situation and timing
+1. Authority Alignment
+   - Is authority present, appropriate, and clearly signaled?
+   - Is the sender aligned with the message goal and student context?
+   - Explain why authority matters in higher education communication.
 
-PILLAR 3: Cognitive Load & Message Friction
-- Number of actions requested
-- Clarity of next steps
-- Processing effort required
-- Alignment with central vs peripheral processing routes
+2. Audience & Cohort Susceptibility Context
+   - Evaluate situational susceptibility (timing, stress, transition).
+   - Do not profile individuals.
+   - Identify mismatches between message demands and student context.
 
-PILLAR 4: Consensus Use (or Misuse)
-- Identify whether social proof or peer comparison is used
-- Assess whether consensus cues meaningfully support the goal or add noise
-- Acknowledge that consensus cues are not universally effective in higher education settings
+3. Cognitive Load & Message Friction
+   - Number of actions requested
+   - Clarity of next step
+   - Processing effort required
+   - Central vs peripheral processing alignment
 
-PILLAR 5: Ethical Persuasion & Autonomy
-- Does the message preserve student choice?
-- Avoid shame, threat, or coercive urgency
-- Align with student-centered institutional values
+4. Consensus Use (or Misuse)
+   - Identify social proof or peer comparison cues.
+   - Assess whether they add value or noise.
+   - Acknowledge that consensus cues are not universally effective in HE.
 
-For EACH pillar, provide:
-- A qualitative rating: "Strong", "Moderate", or "Needs Attention"
-- A concise explanation (2-3 sentences max)
-- A specific, actionable recommendation
+5. Ethical Persuasion & Autonomy
+   - Preserve student choice and dignity.
+   - Avoid shame, threat, or coercive urgency.
+   - Align with student-centered institutional values.
 
-Then provide:
-- One refined version of the message optimized for clarity and authority
-- One alternative version that reduces cognitive load
-- A short explanation of what changed and why
+For EACH pillar provide a qualitative rating (Strong / Moderate / Needs Attention), a concise explanation (2-3 sentences), and a concrete recommendation.
 
-Maintain a professional, neutral, and evidence-based tone. Avoid marketing hype and buzzwords.
+Then provide one refined version of the message and one alternative version optimized for lower cognitive load. Briefly explain what changed and why.
 
-IMPORTANT: Respond ONLY with valid JSON in this exact format:
+IMPORTANT: Respond ONLY with valid JSON:
 {
   "pillars": [
-    {
-      "pillar": "Authority Alignment",
-      "pillarKey": "authority",
-      "rating": "Strong|Moderate|Needs Attention",
-      "explanation": "...",
-      "recommendation": "..."
-    },
-    {
-      "pillar": "Audience Susceptibility Context",
-      "pillarKey": "susceptibility",
-      "rating": "Strong|Moderate|Needs Attention",
-      "explanation": "...",
-      "recommendation": "..."
-    },
-    {
-      "pillar": "Cognitive Load & Message Friction",
-      "pillarKey": "cognitive",
-      "rating": "Strong|Moderate|Needs Attention",
-      "explanation": "...",
-      "recommendation": "..."
-    },
-    {
-      "pillar": "Consensus Use",
-      "pillarKey": "consensus",
-      "rating": "Strong|Moderate|Needs Attention",
-      "explanation": "...",
-      "recommendation": "..."
-    },
-    {
-      "pillar": "Ethical Persuasion & Autonomy",
-      "pillarKey": "ethics",
-      "rating": "Strong|Moderate|Needs Attention",
-      "explanation": "...",
-      "recommendation": "..."
-    }
+    {"pillar": "Authority Alignment", "pillarKey": "authority", "rating": "Strong|Moderate|Needs Attention", "explanation": "...", "recommendation": "..."},
+    {"pillar": "Audience & Cohort Susceptibility Context", "pillarKey": "susceptibility", "rating": "...", "explanation": "...", "recommendation": "..."},
+    {"pillar": "Cognitive Load & Message Friction", "pillarKey": "cognitive", "rating": "...", "explanation": "...", "recommendation": "..."},
+    {"pillar": "Consensus Use", "pillarKey": "consensus", "rating": "...", "explanation": "...", "recommendation": "..."},
+    {"pillar": "Ethical Persuasion & Autonomy", "pillarKey": "ethics", "rating": "...", "explanation": "...", "recommendation": "..."}
   ],
   "refinedMessage": "...",
   "reducedLoadMessage": "...",
   "changeExplanation": "..."
+}`;
+
+const BUILDER_PROMPT = `When building a message from scratch, start with CONTEXT, not copy.
+
+Based on the provided context:
+- Recommend an appropriate authority level
+- Recommend sender role
+- Recommend message length and structure
+- Generate 2 draft messages
+
+Then immediately evaluate the drafts using the FIVE PILLARS and explain tradeoffs.
+
+IMPORTANT: Respond ONLY with valid JSON:
+{
+  "drafts": ["Draft 1...", "Draft 2..."],
+  "recommendedAuthority": "...",
+  "recommendedSender": "...",
+  "recommendedLength": "...",
+  "evaluation": {
+    "pillars": [...],
+    "refinedMessage": "...",
+    "reducedLoadMessage": "...",
+    "changeExplanation": "..."
+  }
+}`;
+
+const MAPPER_PROMPT = `Help plan communication strategy across goals, domains, student types, and time.
+
+Provide:
+- Recommended message domains by moment
+- Relative emphasis (high / medium / low)
+- Authority vs support balance
+- Risks to avoid (e.g., overuse of urgency or consensus)
+
+Focus on strategy and sequencing. Do not generate message copy.
+
+IMPORTANT: Respond ONLY with valid JSON:
+{
+  "recommendations": [
+    {"domain": "academic|financial|wellbeing|...", "emphasis": "high|medium|low", "authorityBalance": "...", "risks": ["..."]}
+  ],
+  "strategyNotes": "..."
 }`;
 
 serve(async (req) => {
@@ -118,11 +124,11 @@ serve(async (req) => {
   }
 
   try {
-    const { message, context } = await req.json();
+    const { message, context, mode, institutionalConfig } = await req.json();
     
-    if (!message || !context) {
+    if (!context) {
       return new Response(
-        JSON.stringify({ error: "Message and context are required" }),
+        JSON.stringify({ error: "Context is required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -136,19 +142,81 @@ serve(async (req) => {
       );
     }
 
-    const userPrompt = `Please evaluate the following student-facing message:
+    let modePrompt = EVALUATOR_PROMPT;
+    let userPrompt = "";
 
+    const contextStr = `
 CONTEXT:
 - Audience Type: ${context.audience}
+- Cohort: ${context.cohort || 'Not specified'}
 - Communication Moment: ${context.moment}
 - Channel: ${context.channel}
+- Domain: ${context.domain || 'Not specified'}
+- Primary Goal: ${context.goal || 'Not specified'}
+- Tone Preference: ${context.tone || 'Not specified'}`;
+
+    const institutionalStr = institutionalConfig ? `
+
+INSTITUTIONAL CUSTOMIZATION:
+- Building Names: ${institutionalConfig.buildingNames?.join(', ') || 'None'}
+- Program Names: ${institutionalConfig.programNames?.join(', ') || 'None'}
+- Mascot: ${institutionalConfig.mascot || 'None'}
+- Slogans: ${institutionalConfig.slogans?.join(', ') || 'None'}
+- Leader Names: ${institutionalConfig.leaderNames?.join(', ') || 'None'}
+- Tone Rules: ${institutionalConfig.toneRules?.join(', ') || 'None'}
+- Words to Avoid: ${institutionalConfig.wordsToAvoid?.join(', ') || 'None'}
+
+Apply this institutional language to all outputs while maintaining ethical persuasion principles.` : '';
+
+    switch (mode) {
+      case 'evaluator':
+        if (!message) {
+          return new Response(
+            JSON.stringify({ error: "Message is required for evaluation mode" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        modePrompt = EVALUATOR_PROMPT;
+        userPrompt = `Please evaluate the following student-facing message:
+${contextStr}
+${institutionalStr}
 
 MESSAGE:
 ${message}
 
 Provide your evaluation as JSON.`;
+        break;
 
-    console.log("Sending evaluation request to Lovable AI...");
+      case 'builder':
+        modePrompt = BUILDER_PROMPT;
+        userPrompt = `Please design a new student-facing message based on this context:
+${contextStr}
+${institutionalStr}
+
+Provide draft messages and recommendations as JSON.`;
+        break;
+
+      case 'mapper':
+        modePrompt = MAPPER_PROMPT;
+        userPrompt = `Please help plan a messaging strategy for this context:
+${contextStr}
+${institutionalStr}
+
+Provide strategic recommendations as JSON.`;
+        break;
+
+      default:
+        modePrompt = EVALUATOR_PROMPT;
+        userPrompt = `Please evaluate the following student-facing message:
+${contextStr}
+
+MESSAGE:
+${message}
+
+Provide your evaluation as JSON.`;
+    }
+
+    console.log(`Processing ${mode || 'evaluator'} request...`);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -159,7 +227,7 @@ Provide your evaluation as JSON.`;
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: SYSTEM_PROMPT + "\n\n" + modePrompt },
           { role: "user", content: userPrompt },
         ],
       }),
@@ -183,7 +251,7 @@ Provide your evaluation as JSON.`;
       }
       
       return new Response(
-        JSON.stringify({ error: "AI evaluation failed" }),
+        JSON.stringify({ error: "AI processing failed" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -201,7 +269,6 @@ Provide your evaluation as JSON.`;
 
     console.log("AI response received, parsing JSON...");
 
-    // Extract JSON from the response (handle markdown code blocks)
     let jsonContent = content;
     const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (jsonMatch) {
@@ -209,17 +276,17 @@ Provide your evaluation as JSON.`;
     }
 
     try {
-      const evaluation = JSON.parse(jsonContent);
-      console.log("Evaluation parsed successfully");
+      const result = JSON.parse(jsonContent);
+      console.log("Result parsed successfully");
       
-      return new Response(JSON.stringify(evaluation), {
+      return new Response(JSON.stringify(result), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     } catch (parseError) {
       console.error("Failed to parse AI response as JSON:", parseError);
       console.error("Raw content:", content);
       return new Response(
-        JSON.stringify({ error: "Failed to parse evaluation results" }),
+        JSON.stringify({ error: "Failed to parse results" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
