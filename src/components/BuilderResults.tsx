@@ -2,23 +2,36 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Copy, Check, PenTool, User, FileText, Ruler, FolderPlus, Library, Save } from "lucide-react";
+import { Copy, Check, PenTool, User, FileText, Ruler, FolderPlus, Library, RefreshCw, Sparkles } from "lucide-react";
 import { EvaluationResults } from "./EvaluationResults";
-import type { BuilderResult, MessageContext } from "@/types/persist";
+import { AIBadge } from "@/components/ui/ai-indicator";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import type { BuilderResult, MessageContext, InstitutionalConfig } from "@/types/persist";
 
 interface BuilderResultsProps {
   result: BuilderResult;
   context?: MessageContext;
+  institutionalConfig?: InstitutionalConfig;
   onSaveToLibrary?: (content: string, title: string) => void;
   onSubmitToShared?: (content: string) => void;
+  onRegeneratedDraft?: (draft: string) => void;
 }
 
-export function BuilderResults({ result, context, onSaveToLibrary, onSubmitToShared }: BuilderResultsProps) {
+export function BuilderResults({ 
+  result, 
+  context, 
+  institutionalConfig,
+  onSaveToLibrary, 
+  onSubmitToShared,
+  onRegeneratedDraft 
+}: BuilderResultsProps) {
   const { toast } = useToast();
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [savedIndex, setSavedIndex] = useState<number | null>(null);
   const [activeDraft, setActiveDraft] = useState(0);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [drafts, setDrafts] = useState(result.drafts);
 
   const copyToClipboard = async (text: string, index: number) => {
     await navigator.clipboard.writeText(text);
@@ -46,17 +59,78 @@ export function BuilderResults({ result, context, onSaveToLibrary, onSubmitToSha
     }
   };
 
+  const handleGenerateNew = async () => {
+    if (!context) return;
+    
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-message', {
+        body: { 
+          type: 'builder',
+          context,
+          institutionalConfig 
+        }
+      });
+
+      if (error) throw error;
+      
+      if (data?.message) {
+        const newDrafts = [...drafts, data.message];
+        setDrafts(newDrafts);
+        setActiveDraft(newDrafts.length - 1);
+        onRegeneratedDraft?.(data.message);
+        toast({ 
+          title: "New draft generated",
+          description: "AI created a new message based on your context."
+        });
+      }
+    } catch (error) {
+      console.error("Failed to generate:", error);
+      toast({ 
+        variant: "destructive",
+        title: "Generation failed", 
+        description: "Could not generate a new message. Please try again."
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card className="card-elevated">
         <CardHeader>
-          <CardTitle className="font-serif text-xl flex items-center gap-2">
-            <PenTool className="w-5 h-5 text-secondary" />
-            Generated Messages
-          </CardTitle>
-          <CardDescription>
-            Draft messages based on your context and goals
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="font-serif text-xl flex items-center gap-2">
+                <PenTool className="w-5 h-5 text-secondary" />
+                Generated Messages
+                <AIBadge className="ml-2" />
+              </CardTitle>
+              <CardDescription>
+                Draft messages based on your context and goals
+              </CardDescription>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleGenerateNew}
+              disabled={isGenerating}
+              className="flex items-center gap-2"
+            >
+              {isGenerating ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  Generate New
+                </>
+              )}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Recommendations */}
@@ -85,12 +159,15 @@ export function BuilderResults({ result, context, onSaveToLibrary, onSubmitToSha
           </div>
 
           {/* Drafts */}
-          <Tabs defaultValue="draft-0" onValueChange={(v) => setActiveDraft(parseInt(v.split('-')[1]))}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="draft-0">Draft 1</TabsTrigger>
-              <TabsTrigger value="draft-1">Draft 2</TabsTrigger>
+          <Tabs value={`draft-${activeDraft}`} onValueChange={(v) => setActiveDraft(parseInt(v.split('-')[1]))}>
+            <TabsList className={`grid w-full`} style={{ gridTemplateColumns: `repeat(${Math.min(drafts.length, 4)}, 1fr)` }}>
+              {drafts.slice(0, 4).map((_, index) => (
+                <TabsTrigger key={index} value={`draft-${index}`}>
+                  Draft {index + 1}
+                </TabsTrigger>
+              ))}
             </TabsList>
-            {result.drafts.map((draft, index) => (
+            {drafts.map((draft, index) => (
               <TabsContent key={index} value={`draft-${index}`}>
                 <div className="relative p-4 bg-card border border-border rounded-lg">
                   <div className="absolute top-2 right-2 flex gap-1">
@@ -148,7 +225,13 @@ export function BuilderResults({ result, context, onSaveToLibrary, onSubmitToSha
       {/* Evaluation of drafts */}
       {result.evaluation && (
         <div className="space-y-4">
-          <h3 className="font-serif text-lg font-medium">Draft Evaluation</h3>
+          <h3 className="font-serif text-lg font-medium flex items-center gap-2">
+            Draft Evaluation
+            <span className="text-xs text-secondary flex items-center gap-1">
+              <Sparkles className="w-3 h-3" />
+              AI Analysis
+            </span>
+          </h3>
           <EvaluationResults result={result.evaluation} />
         </div>
       )}

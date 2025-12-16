@@ -6,8 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AIBadge } from "@/components/ui/ai-indicator";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Plus, X, Sparkles, RefreshCw } from "lucide-react";
 import type { SharedTemplate } from "@/types/library";
 
 interface CreateTemplateDialogProps {
@@ -32,6 +34,7 @@ export function CreateTemplateDialog({ open, onOpenChange, onSubmit, initialCont
   const [whenToUse, setWhenToUse] = useState<string[]>([]);
   const [whenNotToUse, setWhenNotToUse] = useState<string[]>([]);
   const [guardrails, setGuardrails] = useState<string[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
   
   const [newUseCase, setNewUseCase] = useState('');
   const [newNotUseCase, setNewNotUseCase] = useState('');
@@ -53,6 +56,56 @@ export function CreateTemplateDialog({ open, onOpenChange, onSubmit, initialCont
     if (value.trim() && !list.includes(value.trim())) {
       setList([...list, value.trim()]);
       clear();
+    }
+  };
+
+  const handleGenerateWithAI = async () => {
+    if (audiences.length === 0 || channels.length === 0) {
+      toast({ 
+        variant: "destructive", 
+        title: "Select context first", 
+        description: "Please select at least one audience and channel for AI generation." 
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-message', {
+        body: {
+          type: 'template',
+          context: {
+            audience: audiences[0],
+            channel: channels[0],
+            moment: moments[0] || 'general',
+            domain: playbook || 'academic support',
+            tone: 'supportive',
+          },
+          institutionalConfig: {
+            institutionName: collegeName || undefined,
+            departmentName: departmentName || undefined,
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.message) {
+        setContent(data.message);
+        toast({ 
+          title: "Message generated",
+          description: "AI created a template based on your selections. Review and customize as needed."
+        });
+      }
+    } catch (error) {
+      console.error("Generation failed:", error);
+      toast({ 
+        variant: "destructive", 
+        title: "Generation failed", 
+        description: "Could not generate message. Please try again." 
+      });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -126,9 +179,12 @@ export function CreateTemplateDialog({ open, onOpenChange, onSubmit, initialCont
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-serif">Create Template</DialogTitle>
+          <DialogTitle className="font-serif flex items-center gap-2">
+            Create Template
+            <AIBadge />
+          </DialogTitle>
           <DialogDescription>
-            Submit a new template for the Shared Library. It will be reviewed before publishing.
+            Submit a new template for the Shared Library. Use AI to generate content or write your own.
           </DialogDescription>
         </DialogHeader>
 
@@ -143,14 +199,9 @@ export function CreateTemplateDialog({ open, onOpenChange, onSubmit, initialCont
               <Label htmlFor="intent">Intent Statement *</Label>
               <Textarea id="intent" value={intentStatement} onChange={(e) => setIntentStatement(e.target.value)} placeholder="Briefly describe the purpose of this template..." rows={2} />
             </div>
-            <div>
-              <Label htmlFor="content">Message Content *</Label>
-              <Textarea id="content" value={content} onChange={(e) => setContent(e.target.value)} placeholder="Use {{placeholder}} syntax for variables..." rows={6} className="font-mono text-sm" />
-              <p className="text-xs text-muted-foreground mt-1">Use {"{{variable_name}}"} for placeholders that users can customize</p>
-            </div>
           </div>
 
-          {/* Classification */}
+          {/* Classification - moved up for AI context */}
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -174,7 +225,7 @@ export function CreateTemplateDialog({ open, onOpenChange, onSubmit, initialCont
             </div>
           </div>
 
-          {/* Required Fields */}
+          {/* Required Fields - needed for AI */}
           <div className="space-y-4">
             <div>
               <Label className="mb-2 block">Target Audiences *</Label>
@@ -221,6 +272,42 @@ export function CreateTemplateDialog({ open, onOpenChange, onSubmit, initialCont
                 ))}
               </div>
             </div>
+          </div>
+
+          {/* Content with AI Generate */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="content">Message Content *</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleGenerateWithAI}
+                disabled={isGenerating}
+                className="flex items-center gap-2"
+              >
+                {isGenerating ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4" />
+                    Generate with AI
+                  </>
+                )}
+              </Button>
+            </div>
+            <Textarea 
+              id="content" 
+              value={content} 
+              onChange={(e) => setContent(e.target.value)} 
+              placeholder="Use {{placeholder}} syntax for variables... or click 'Generate with AI' after selecting audience and channel above." 
+              rows={8} 
+              className="font-mono text-sm" 
+            />
+            <p className="text-xs text-muted-foreground">Use {"{{variable_name}}"} for placeholders that users can customize</p>
           </div>
 
           {/* Use Cases */}
