@@ -28,8 +28,11 @@ import {
   Share2, 
   RefreshCw,
   Plus,
-  Tag
+  Tag,
+  FolderOpen,
+  Sparkles
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { MessageContext, EvaluationResult } from "@/types/persist";
 
 const BYOCPage = () => {
@@ -247,10 +250,10 @@ const BYOCPage = () => {
                 />
               </div>
 
-              {/* File Upload */}
+              {/* File Upload & Google Drive */}
               <div className="space-y-2">
-                <Label>Upload File</Label>
-                <div className="flex items-center gap-3">
+                <Label>Import Source</Label>
+                <div className="flex items-center gap-3 flex-wrap">
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -264,8 +267,29 @@ const BYOCPage = () => {
                     className="flex items-center gap-2"
                   >
                     <Upload className="w-4 h-4" />
-                    Choose File
+                    Upload File
                   </Button>
+                  
+                  {/* Google Drive - Coming Soon */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        disabled
+                        className="flex items-center gap-2 opacity-60"
+                      >
+                        <FolderOpen className="w-4 h-4" />
+                        Google Drive
+                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 ml-1">
+                          Coming Soon
+                        </Badge>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Import from Google Drive - feature in development</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  
                   {fileName && (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <FileText className="w-4 h-4" />
@@ -372,56 +396,77 @@ const BYOCPage = () => {
 
               <Separator />
 
-              {/* Action Buttons */}
-              <div className="flex items-center justify-between flex-wrap gap-3">
-                <div className="flex gap-2">
-                  {evaluationResult && (
-                    <>
-                      <Button
-                        variant="outline"
-                        onClick={handleSaveToLibrary}
-                        className="flex items-center gap-2"
-                      >
-                        <Save className="w-4 h-4" />
-                        Save to My Library
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => setShowShareDialog(true)}
-                        className="flex items-center gap-2"
-                      >
-                        <Share2 className="w-4 h-4" />
-                        Submit to Shared Library
-                      </Button>
-                    </>
-                  )}
-                </div>
+              {/* Action Buttons - Three Clear Options */}
+              <div className="space-y-4">
+                <Label className="text-base font-medium">What would you like to do?</Label>
                 
-                <div className="flex gap-2">
-                  {(messageContent || evaluationResult) && (
-                    <Button variant="ghost" onClick={handleReset}>
-                      <RefreshCw className="w-4 h-4 mr-2" />
-                      Start Over
-                    </Button>
-                  )}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {/* Evaluate */}
                   <Button 
                     onClick={handleEvaluate}
                     disabled={!canProcess || isProcessing}
-                    size="lg"
+                    className="flex items-center justify-center gap-2 h-auto py-4"
+                    variant={evaluationResult ? "outline" : "default"}
                   >
                     {isProcessing ? (
                       <>
-                        <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2" />
+                        <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                         Analyzing...
                       </>
                     ) : (
                       <>
-                        Evaluate Communication
-                        <ArrowRight className="w-4 h-4 ml-2" />
+                        <Sparkles className="w-4 h-4" />
+                        <div className="text-left">
+                          <div className="font-medium">Evaluate</div>
+                          <div className="text-xs opacity-80">AI Analysis</div>
+                        </div>
                       </>
                     )}
                   </Button>
+                  
+                  {/* Save to My Library */}
+                  <Button
+                    variant="outline"
+                    onClick={handleSaveToLibrary}
+                    disabled={!canProcess}
+                    className="flex items-center justify-center gap-2 h-auto py-4"
+                  >
+                    <Save className="w-4 h-4" />
+                    <div className="text-left">
+                      <div className="font-medium">Save to My Library</div>
+                      <div className="text-xs text-muted-foreground">Personal use</div>
+                    </div>
+                  </Button>
+                  
+                  {/* Submit to Shared Library */}
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowShareDialog(true)}
+                    disabled={!canProcess}
+                    className="flex items-center justify-center gap-2 h-auto py-4"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    <div className="text-left">
+                      <div className="font-medium">Submit to Shared</div>
+                      <div className="text-xs text-muted-foreground">For review</div>
+                    </div>
+                  </Button>
                 </div>
+
+                {!canProcess && messageContent.length > 0 && (
+                  <p className="text-sm text-destructive">
+                    Please enter at least 20 characters to continue.
+                  </p>
+                )}
+
+                {(messageContent || evaluationResult) && (
+                  <div className="flex justify-end">
+                    <Button variant="ghost" size="sm" onClick={handleReset}>
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Start Over
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
