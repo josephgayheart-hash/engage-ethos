@@ -14,6 +14,14 @@ import StrategyPage from "./pages/StrategyPage";
 import CallScriptPage from "./pages/CallScriptPage";
 import PlaygroundPage from "./pages/PlaygroundPage";
 import BYOCPage from "./pages/BYOCPage";
+import CampaignDashboard from "./pages/CampaignDashboard";
+import CommunicationCalendar from "./pages/CommunicationCalendar";
+import SubjectLineOptimizer from "./pages/SubjectLineOptimizer";
+import AccessibilityChecker from "./pages/AccessibilityChecker";
+import BrandVoiceScorer from "./pages/BrandVoiceScorer";
+import EmailPreview from "./pages/EmailPreview";
+import PerformanceBenchmarks from "./pages/PerformanceBenchmarks";
+import TranslationTool from "./pages/TranslationTool";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +55,14 @@ const App = () => (
           <Route path="/library" element={<RequireOnboarding><PersonalLibrary /></RequireOnboarding>} />
           <Route path="/shared-library" element={<RequireOnboarding><SharedLibrary /></RequireOnboarding>} />
           <Route path="/admin" element={<RequireOnboarding><AdminPanel /></RequireOnboarding>} />
+          <Route path="/campaign-dashboard" element={<RequireOnboarding><CampaignDashboard /></RequireOnboarding>} />
+          <Route path="/calendar" element={<RequireOnboarding><CommunicationCalendar /></RequireOnboarding>} />
+          <Route path="/subject-optimizer" element={<RequireOnboarding><SubjectLineOptimizer /></RequireOnboarding>} />
+          <Route path="/accessibility" element={<RequireOnboarding><AccessibilityChecker /></RequireOnboarding>} />
+          <Route path="/brand-voice" element={<RequireOnboarding><BrandVoiceScorer /></RequireOnboarding>} />
+          <Route path="/email-preview" element={<RequireOnboarding><EmailPreview /></RequireOnboarding>} />
+          <Route path="/benchmarks" element={<RequireOnboarding><PerformanceBenchmarks /></RequireOnboarding>} />
+          <Route path="/translate" element={<RequireOnboarding><TranslationTool /></RequireOnboarding>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
