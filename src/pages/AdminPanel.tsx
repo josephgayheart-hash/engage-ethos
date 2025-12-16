@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Header } from "@/components/Header";
+import { InstitutionalConfig } from "@/components/InstitutionalConfig";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
+import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Plus, 
@@ -31,6 +33,7 @@ import type { SharedTemplate, LibraryEntryStatus } from "@/types/library";
 const AdminPanel = () => {
   const { toast } = useToast();
   const { templates, addTemplate, updateTemplateStatus, isLoading } = useSharedLibrary();
+  const { config: institutionalConfig, updateConfig: updateInstitutionalConfig } = useInstitutionalConfig();
   const [activeTab, setActiveTab] = useState("overview");
   const [createOpen, setCreateOpen] = useState(false);
   const [distributeOpen, setDistributeOpen] = useState(false);
@@ -235,7 +238,7 @@ const AdminPanel = () => {
 
           {/* Main Content */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList>
+            <TabsList className="flex-wrap">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="pending" className="relative">
                 Pending Review
@@ -247,6 +250,10 @@ const AdminPanel = () => {
               </TabsTrigger>
               <TabsTrigger value="ready">Ready to Distribute</TabsTrigger>
               <TabsTrigger value="published">Published</TabsTrigger>
+              <TabsTrigger value="settings" className="flex items-center gap-1">
+                <Building2 className="w-4 h-4" />
+                Institutional Settings
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-4 mt-4">
@@ -410,6 +417,16 @@ const AdminPanel = () => {
                   </Card>
                 ))
               )}
+            </TabsContent>
+
+            <TabsContent value="settings" className="mt-4">
+              <InstitutionalConfig 
+                config={institutionalConfig} 
+                onChange={updateInstitutionalConfig} 
+              />
+              <p className="text-sm text-muted-foreground mt-4">
+                These settings are applied to all AI-generated messages across the Evaluator, Builder, and Strategy tools.
+              </p>
             </TabsContent>
           </Tabs>
         </div>
