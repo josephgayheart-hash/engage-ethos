@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.generate-message]
 verify_jwt = false
+
+[functions.playground-chat]
+verify_jwt = false

@@ -23,7 +23,8 @@ import {
   Megaphone,
   ArrowRight,
   Sparkles,
-  Phone
+  Phone,
+  MessageCircle
 } from "lucide-react";
 
 const Index = () => {
@@ -69,6 +70,15 @@ const Index = () => {
       color: 'text-pillar-ethics',
       bgColor: 'bg-pillar-ethics/10',
       href: '/call-script'
+    },
+    { 
+      id: 'playground', 
+      title: 'Playground', 
+      description: 'Chat with AI to brainstorm strategies, review ideas, and explore research',
+      icon: MessageCircle,
+      color: 'text-pillar-susceptibility',
+      bgColor: 'bg-pillar-susceptibility/10',
+      href: '/playground'
     },
   ];
 
@@ -124,7 +134,7 @@ const Index = () => {
                 Powered by AI
               </Badge>
             </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
               {modeCards.map((card) => {
                 const Icon = card.icon;
                 return (
