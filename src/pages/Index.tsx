@@ -8,11 +8,13 @@ import { BuilderResults } from "@/components/BuilderResults";
 import { MapperResults } from "@/components/MapperResults";
 import { InstitutionalConfig } from "@/components/InstitutionalConfig";
 import { ResearchFoundation } from "@/components/ResearchFoundation";
+import { CreateTemplateDialog } from "@/components/library/CreateTemplateDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
+import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { 
   ArrowRight, 
   Sparkles, 
@@ -35,6 +37,7 @@ import type {
 const Index = () => {
   const { toast } = useToast();
   const { addMessage } = useMessageLibrary();
+  const { addTemplate } = useSharedLibrary();
   const [mode, setMode] = useState<OperationMode>('evaluator');
   const [messageContent, setMessageContent] = useState("");
   const [context, setContext] = useState<MessageContext>({
@@ -48,6 +51,8 @@ const Index = () => {
   const [mapperResult, setMapperResult] = useState<MapperResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [autoSave, setAutoSave] = useState(true);
+  const [submitToSharedOpen, setSubmitToSharedOpen] = useState(false);
+  const [draftToSubmit, setDraftToSubmit] = useState('');
 
   const clearResults = () => {
     setEvaluationResult(null);
@@ -287,7 +292,17 @@ const Index = () => {
 
           {builderResult && (
             <div className="animate-fade-in">
-              <BuilderResults result={builderResult} />
+              <BuilderResults 
+                result={builderResult} 
+                context={context}
+                onSaveToLibrary={(content, title) => {
+                  saveToLibrary(content, title, 'generated', builderResult.recommendedSender);
+                }}
+                onSubmitToShared={(content) => {
+                  setDraftToSubmit(content);
+                  setSubmitToSharedOpen(true);
+                }}
+              />
             </div>
           )}
 
@@ -315,6 +330,20 @@ const Index = () => {
           </div>
         </div>
       </footer>
+
+      <CreateTemplateDialog
+        open={submitToSharedOpen}
+        onOpenChange={setSubmitToSharedOpen}
+        onSubmit={(template) => {
+          addTemplate(template);
+          toast({
+            title: "Template submitted",
+            description: "Your message has been submitted to the Shared Library for review.",
+          });
+          setDraftToSubmit('');
+        }}
+        initialContent={draftToSubmit}
+      />
     </div>
   );
 };

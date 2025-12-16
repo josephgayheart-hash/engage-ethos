@@ -3,16 +3,17 @@ import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
+import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { MessageDetailDialog } from "@/components/library/MessageDetailDialog";
+import { CreateTemplateDialog } from "@/components/library/CreateTemplateDialog";
 import type { SavedMessage, LibraryFilters, SortOption } from "@/types/library";
 import { 
   Search, 
-  Filter,
   ArrowLeft,
   Copy,
   Trash2,
@@ -22,7 +23,10 @@ import {
   Mail,
   MessageSquare,
   Globe,
-  Layout
+  Layout,
+  Filter,
+  X,
+  Library
 } from "lucide-react";
 
 const channelIcons = {
@@ -35,9 +39,13 @@ const channelIcons = {
 const PersonalLibrary = () => {
   const { toast } = useToast();
   const { messages, deleteMessage, duplicateMessage, exportMessage, filterMessages, updateMessage } = useMessageLibrary();
+  const { addTemplate } = useSharedLibrary();
   const [filters, setFilters] = useState<LibraryFilters>({ search: '' });
   const [sort, setSort] = useState<SortOption>('newest');
   const [selectedMessage, setSelectedMessage] = useState<SavedMessage | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [submitToSharedOpen, setSubmitToSharedOpen] = useState(false);
+  const [messageToSubmit, setMessageToSubmit] = useState<SavedMessage | null>(null);
 
   const filteredMessages = filterMessages(filters, sort);
 
@@ -60,6 +68,26 @@ const PersonalLibrary = () => {
     updateMessage(id, { approved: true });
     toast({ title: "Message approved" });
   };
+
+  const handleSubmitToShared = (message: SavedMessage) => {
+    setMessageToSubmit(message);
+    setSubmitToSharedOpen(true);
+  };
+
+  const handleCreateTemplate = (template: any) => {
+    addTemplate(template);
+    toast({
+      title: "Template submitted",
+      description: "Your message has been submitted to the Shared Library for review.",
+    });
+    setMessageToSubmit(null);
+  };
+
+  const clearFilters = () => {
+    setFilters({ search: '' });
+  };
+
+  const hasActiveFilters = filters.channel || filters.audience || filters.domain || filters.moment;
 
   const ChannelIcon = (channel: string) => {
     const Icon = channelIcons[channel as keyof typeof channelIcons] || FileText;
@@ -92,50 +120,95 @@ const PersonalLibrary = () => {
           {/* Filters */}
           <Card className="mb-6">
             <CardContent className="pt-6">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search messages..."
-                    value={filters.search}
-                    onChange={(e) => setFilters(f => ({ ...f, search: e.target.value }))}
-                    className="pl-10"
-                  />
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search messages..."
+                      value={filters.search}
+                      onChange={(e) => setFilters(f => ({ ...f, search: e.target.value }))}
+                      className="pl-10"
+                    />
+                  </div>
+                  <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
+                    <SelectTrigger className="w-full md:w-[140px]">
+                      <SelectValue placeholder="Sort" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="newest">Newest</SelectItem>
+                      <SelectItem value="oldest">Oldest</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button variant="outline" onClick={() => setShowFilters(!showFilters)} className="flex items-center gap-2">
+                    <Filter className="w-4 h-4" />
+                    Filters
+                    {hasActiveFilters && <Badge variant="secondary" className="ml-1">{[filters.channel, filters.audience, filters.domain, filters.moment].filter(Boolean).length}</Badge>}
+                  </Button>
+                  {hasActiveFilters && (
+                    <Button variant="ghost" size="sm" onClick={clearFilters} className="flex items-center gap-1">
+                      <X className="w-4 h-4" />
+                      Clear
+                    </Button>
+                  )}
                 </div>
-                <Select value={filters.channel || 'all'} onValueChange={(v) => setFilters(f => ({ ...f, channel: v === 'all' ? undefined : v }))}>
-                  <SelectTrigger className="w-full md:w-[150px]">
-                    <SelectValue placeholder="Channel" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Channels</SelectItem>
-                    <SelectItem value="email">Email</SelectItem>
-                    <SelectItem value="sms">SMS</SelectItem>
-                    <SelectItem value="portal">Portal</SelectItem>
-                    <SelectItem value="landing-page">Landing Page</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={filters.audience || 'all'} onValueChange={(v) => setFilters(f => ({ ...f, audience: v === 'all' ? undefined : v }))}>
-                  <SelectTrigger className="w-full md:w-[150px]">
-                    <SelectValue placeholder="Audience" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Audiences</SelectItem>
-                    <SelectItem value="prospective">Prospective</SelectItem>
-                    <SelectItem value="first-year">First-Year</SelectItem>
-                    <SelectItem value="continuing">Continuing</SelectItem>
-                    <SelectItem value="at-risk">At-Risk</SelectItem>
-                    <SelectItem value="graduate">Graduate</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-                  <SelectTrigger className="w-full md:w-[150px]">
-                    <SelectValue placeholder="Sort" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="newest">Newest</SelectItem>
-                    <SelectItem value="oldest">Oldest</SelectItem>
-                  </SelectContent>
-                </Select>
+
+                {showFilters && (
+                  <div className="flex flex-wrap gap-4 pt-4 border-t">
+                    <Select value={filters.channel || 'all'} onValueChange={(v) => setFilters(f => ({ ...f, channel: v === 'all' ? undefined : v }))}>
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue placeholder="Channel" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Channels</SelectItem>
+                        <SelectItem value="email">Email</SelectItem>
+                        <SelectItem value="sms">SMS</SelectItem>
+                        <SelectItem value="portal">Portal</SelectItem>
+                        <SelectItem value="landing-page">Landing Page</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select value={filters.audience || 'all'} onValueChange={(v) => setFilters(f => ({ ...f, audience: v === 'all' ? undefined : v }))}>
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue placeholder="Audience" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Audiences</SelectItem>
+                        <SelectItem value="prospective">Prospective</SelectItem>
+                        <SelectItem value="first-year">First-Year</SelectItem>
+                        <SelectItem value="continuing">Continuing</SelectItem>
+                        <SelectItem value="at-risk">At-Risk</SelectItem>
+                        <SelectItem value="graduate">Graduate</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select value={filters.domain || 'all'} onValueChange={(v) => setFilters(f => ({ ...f, domain: v === 'all' ? undefined : v }))}>
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue placeholder="Domain" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Domains</SelectItem>
+                        <SelectItem value="academic">Academic</SelectItem>
+                        <SelectItem value="financial">Financial</SelectItem>
+                        <SelectItem value="wellbeing">Wellbeing</SelectItem>
+                        <SelectItem value="engagement">Engagement</SelectItem>
+                        <SelectItem value="behavioral">Behavioral</SelectItem>
+                        <SelectItem value="seasonal">Seasonal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select value={filters.moment || 'all'} onValueChange={(v) => setFilters(f => ({ ...f, moment: v === 'all' ? undefined : v }))}>
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue placeholder="Moment" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Moments</SelectItem>
+                        <SelectItem value="early-term">Early Term</SelectItem>
+                        <SelectItem value="midterm">Midterm</SelectItem>
+                        <SelectItem value="finals">Finals</SelectItem>
+                        <SelectItem value="re-engagement">Re-engagement</SelectItem>
+                        <SelectItem value="seasonal">Seasonal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -181,6 +254,9 @@ const PersonalLibrary = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" onClick={() => handleSubmitToShared(message)} title="Submit to Shared Library">
+                          <Library className="w-4 h-4" />
+                        </Button>
                         <Button variant="ghost" size="icon" onClick={() => handleDuplicate(message.id)} title="Duplicate">
                           <Copy className="w-4 h-4" />
                         </Button>
@@ -217,6 +293,13 @@ const PersonalLibrary = () => {
           }}
         />
       )}
+
+      <CreateTemplateDialog
+        open={submitToSharedOpen}
+        onOpenChange={setSubmitToSharedOpen}
+        onSubmit={handleCreateTemplate}
+        initialContent={messageToSubmit?.content || ''}
+      />
     </div>
   );
 };
