@@ -7,6 +7,7 @@ import { ResearchFoundation } from "@/components/ResearchFoundation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
 import { 
   ArrowRight, 
   Sparkles, 
@@ -19,6 +20,7 @@ import { evaluateMessage } from "@/lib/evaluateMessage";
 import type { MessageContext, EvaluationResult } from "@/types/persist";
 
 const Index = () => {
+  const { toast } = useToast();
   const [messageContent, setMessageContent] = useState("");
   const [context, setContext] = useState<MessageContext>({
     audience: 'first-year',
@@ -32,12 +34,25 @@ const Index = () => {
     if (!messageContent.trim()) return;
     
     setIsEvaluating(true);
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    setResult(null);
     
-    const evaluation = evaluateMessage(messageContent, context);
-    setResult(evaluation);
-    setIsEvaluating(false);
+    try {
+      const evaluation = await evaluateMessage(messageContent, context);
+      setResult(evaluation);
+      toast({
+        title: "Evaluation Complete",
+        description: "Your message has been analyzed using the five-pillar framework.",
+      });
+    } catch (error) {
+      console.error("Evaluation failed:", error);
+      toast({
+        variant: "destructive",
+        title: "Evaluation Failed",
+        description: error instanceof Error ? error.message : "Failed to evaluate message. Please try again.",
+      });
+    } finally {
+      setIsEvaluating(false);
+    }
   };
 
   const canEvaluate = messageContent.trim().length > 20;
