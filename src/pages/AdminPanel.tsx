@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useToast } from "@/hooks/use-toast";
 import { 
+  ArrowLeft,
   Plus, 
   Send, 
   FileText, 
@@ -163,6 +164,16 @@ const AdminPanel = () => {
       
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto space-y-6">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Link to="/" className="hover:text-foreground transition-colors flex items-center gap-1">
+              <ArrowLeft className="w-4 h-4" />
+              Home
+            </Link>
+            <span>/</span>
+            <span className="text-foreground">Admin Panel</span>
+          </div>
+
           {/* Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
