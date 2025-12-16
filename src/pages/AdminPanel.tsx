@@ -30,22 +30,16 @@ import {
   Edit,
   Trash2,
   ChevronRight,
-  Lock,
   AlertTriangle,
   RefreshCw,
   Key
 } from "lucide-react";
 import type { SharedTemplate, LibraryEntryStatus } from "@/types/library";
 
-const ADMIN_PASSWORD = "persist2024";
-
 const AdminPanel = () => {
   const { toast } = useToast();
   const { templates, addTemplate, updateTemplateStatus, clearAllTemplates, resetToDefaults, isLoading } = useSharedLibrary();
   const { messages, clearAllMessages } = useMessageLibrary();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [passwordInput, setPasswordInput] = useState("");
-  const [passwordError, setPasswordError] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [createOpen, setCreateOpen] = useState(false);
   const [distributeOpen, setDistributeOpen] = useState(false);
@@ -72,14 +66,6 @@ const AdminPanel = () => {
   const approvedTemplates = templates.filter(t => t.status === 'approved');
   const publishedTemplates = templates.filter(t => t.status === 'published');
 
-  const handlePasswordSubmit = () => {
-    if (passwordInput === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      setPasswordError(false);
-    } else {
-      setPasswordError(true);
-    }
-  };
 
   const handleClearPersonalLibrary = () => {
     clearAllMessages();
@@ -219,61 +205,6 @@ const AdminPanel = () => {
     );
   }
 
-  // Password protection screen
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container mx-auto px-4 py-8">
-          <div className="max-w-md mx-auto space-y-6">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Link to="/" className="hover:text-foreground transition-colors flex items-center gap-1">
-                <ArrowLeft className="w-4 h-4" />
-                Home
-              </Link>
-              <span>/</span>
-              <span className="text-foreground">Admin Panel</span>
-            </div>
-
-            <Card>
-              <CardHeader className="text-center">
-                <div className="mx-auto p-3 rounded-full bg-primary/10 w-fit mb-2">
-                  <Lock className="w-6 h-6 text-primary" />
-                </div>
-                <CardTitle className="font-serif">Admin Access Required</CardTitle>
-                <CardDescription>
-                  Enter the admin password to access this panel
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={passwordInput}
-                    onChange={(e) => {
-                      setPasswordInput(e.target.value);
-                      setPasswordError(false);
-                    }}
-                    onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()}
-                    placeholder="Enter admin password"
-                    className={passwordError ? 'border-destructive' : ''}
-                  />
-                  {passwordError && (
-                    <p className="text-sm text-destructive">Incorrect password. Please try again.</p>
-                  )}
-                </div>
-                <Button onClick={handlePasswordSubmit} className="w-full">
-                  Access Admin Panel
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </main>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">
