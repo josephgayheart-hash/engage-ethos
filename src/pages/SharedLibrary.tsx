@@ -50,10 +50,10 @@ const SharedLibrary = () => {
     playbook: activeTab !== 'all' ? activeTab : undefined,
   });
 
-  const handlePullTemplate = (template: SharedTemplate) => {
+  const handlePullTemplate = (template: SharedTemplate, customizedContent?: string) => {
     addMessage({
       title: `${template.title} (from Shared Library)`,
-      content: template.content,
+      content: customizedContent || template.content,
       channel: template.requiredFields.channel[0] as any,
       audience: template.requiredFields.audience[0] as any,
       moment: template.requiredFields.moment[0],
@@ -62,7 +62,7 @@ const SharedLibrary = () => {
     });
     toast({
       title: "Template added to Personal Library",
-      description: "You can now customize it in your library.",
+      description: "You can now customize it further in your library.",
     });
     setSelectedTemplate(null);
   };
@@ -284,7 +284,7 @@ const SharedLibrary = () => {
           template={selectedTemplate}
           open={!!selectedTemplate}
           onOpenChange={(open) => !open && setSelectedTemplate(null)}
-          onPull={() => handlePullTemplate(selectedTemplate)}
+          onPull={(customizedContent) => handlePullTemplate(selectedTemplate, customizedContent)}
         />
       )}
 
