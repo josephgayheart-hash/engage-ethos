@@ -44,6 +44,7 @@ const audienceOptions: { value: AudienceType; label: string }[] = [
   { value: 'continuing', label: 'Continuing Student' },
   { value: 'at-risk', label: 'At-Risk Student' },
   { value: 'graduate', label: 'Graduate Student' },
+  { value: 'online-learner', label: 'Online Learner' },
   { value: 'alumni', label: 'Alumni' },
   { value: 'parents', label: 'Parents/Family' },
   { value: 'donors', label: 'Donors' },

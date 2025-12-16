@@ -37,6 +37,7 @@ const audienceLabels: Record<string, string> = {
   'continuing': 'Continuing Student',
   'at-risk': 'At-Risk Student',
   'graduate': 'Graduate Student',
+  'online-learner': 'Online Learner',
   'alumni': 'Alumni',
   'parents': 'Parents/Family',
   'donors': 'Donors',
