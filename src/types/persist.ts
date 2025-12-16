@@ -111,13 +111,52 @@ export interface MapperResult {
 }
 
 export interface InstitutionalConfig {
-  buildingNames?: string[];
-  programNames?: string[];
+  // Branding & Identity
+  institutionName?: string;
   mascot?: string;
   slogans?: string[];
+  
+  // Locations & Facilities
+  buildingNames?: string[];
+  programNames?: string[];
+  supportCenters?: string[];
+  
+  // People & Roles
   leaderNames?: string[];
+  advisorTitles?: string[];
+  staffTitles?: string[];
+  
+  // Naming Conventions
+  studentAddressing?: 'first-name' | 'full-name' | 'formal';
+  staffAddressing?: 'first-name' | 'title-last' | 'full-title';
+  pronounPreference?: 'they' | 'he-she' | 'avoid';
+  
+  // Call to Actions
+  primaryCTAs?: string[];
+  secondaryCTAs?: string[];
+  urgentCTAs?: string[];
+  
+  // Contact & Resources
+  primaryContactEmail?: string;
+  primaryContactPhone?: string;
+  websiteLinks?: string[];
+  socialMediaHandles?: string[];
+  
+  // Academic Terms
+  academicTerms?: string[];
+  gradingTerms?: string[];
+  enrollmentTerms?: string[];
+  
+  // Signature Blocks
+  signatureTemplates?: string[];
+  
+  // Tone & Style
   toneRules?: string[];
   wordsToAvoid?: string[];
+  preferredPhrases?: string[];
+  
+  // Deadlines & Dates (placeholders)
+  importantDates?: { label: string; placeholder: string }[];
 }
 
 export interface MessageInput {
