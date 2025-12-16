@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { 
+  ArrowLeft,
   Building2, 
   Plus, 
   Pencil, 
@@ -36,6 +37,7 @@ import {
   FolderOpen,
   Sparkles
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import type { InstitutionalConfig as InstitutionalConfigType } from "@/types/persist";
@@ -112,6 +114,16 @@ const SettingsPage = () => {
       
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+            <Link to="/" className="hover:text-foreground transition-colors flex items-center gap-1">
+              <ArrowLeft className="w-4 h-4" />
+              Home
+            </Link>
+            <span>/</span>
+            <span className="text-foreground">Institutional Profiles</span>
+          </div>
+
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
