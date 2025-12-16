@@ -141,16 +141,16 @@ export function ContextSelector({ context, onChange, mode = 'evaluator' }: Conte
             Audience Type
           </Label>
           <Select
-            value={context.audience || 'all'}
+            value={context.audience ?? ""}
             onValueChange={(value) =>
-              onChange({ ...context, audience: value === 'all' ? undefined : value as AudienceType })
+              onChange({ ...context, audience: value === "none" || value === "" ? undefined : value as AudienceType })
             }
           >
             <SelectTrigger id="audience" className="w-full bg-background">
-              <SelectValue placeholder="All Audiences" />
+              <SelectValue placeholder="Select audience..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Audiences</SelectItem>
+              <SelectItem value="none">— None —</SelectItem>
               {audienceOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
@@ -190,16 +190,16 @@ export function ContextSelector({ context, onChange, mode = 'evaluator' }: Conte
             Communication Moment
           </Label>
           <Select
-            value={context.moment || 'all'}
+            value={context.moment ?? ""}
             onValueChange={(value) =>
-              onChange({ ...context, moment: value === 'all' ? undefined : value as CommunicationMoment })
+              onChange({ ...context, moment: value === "none" || value === "" ? undefined : value as CommunicationMoment })
             }
           >
             <SelectTrigger id="moment" className="w-full bg-background">
-              <SelectValue placeholder="All Moments" />
+              <SelectValue placeholder="Select moment..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Moments</SelectItem>
+              <SelectItem value="none">— None —</SelectItem>
               {momentOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
@@ -216,16 +216,16 @@ export function ContextSelector({ context, onChange, mode = 'evaluator' }: Conte
               Channel
             </Label>
             <Select
-              value={context.channel || 'all'}
+              value={context.channel ?? ""}
               onValueChange={(value) =>
-                onChange({ ...context, channel: value === 'all' ? undefined : value as Channel })
+                onChange({ ...context, channel: value === "none" || value === "" ? undefined : value as Channel })
               }
             >
               <SelectTrigger id="channel" className="w-full bg-background">
-                <SelectValue placeholder="All Channels" />
+                <SelectValue placeholder="Select channel..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Channels</SelectItem>
+                <SelectItem value="none">— None —</SelectItem>
                 {channelOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
@@ -245,16 +245,16 @@ export function ContextSelector({ context, onChange, mode = 'evaluator' }: Conte
               Department
             </Label>
             <Select
-              value={context.department || 'all'}
+              value={context.department ?? ""}
               onValueChange={(value) =>
-                onChange({ ...context, department: value === 'all' ? undefined : value as Department })
+                onChange({ ...context, department: value === "none" || value === "" ? undefined : value as Department })
               }
             >
               <SelectTrigger id="department" className="w-full bg-background">
-                <SelectValue placeholder="All Departments" />
+                <SelectValue placeholder="Select department..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Departments</SelectItem>
+                <SelectItem value="none">— None —</SelectItem>
                 {departmentOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
@@ -270,16 +270,16 @@ export function ContextSelector({ context, onChange, mode = 'evaluator' }: Conte
               Message Domain
             </Label>
             <Select
-              value={context.domain || 'all'}
+              value={context.domain ?? ""}
               onValueChange={(value) =>
-                onChange({ ...context, domain: value === 'all' ? undefined : value as MessageDomain })
+                onChange({ ...context, domain: value === "none" || value === "" ? undefined : value as MessageDomain })
               }
             >
               <SelectTrigger id="domain" className="w-full bg-background">
-                <SelectValue placeholder="All Domains" />
+                <SelectValue placeholder="Select domain..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Domains</SelectItem>
+                <SelectItem value="none">— None —</SelectItem>
                 {domainOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
@@ -295,16 +295,16 @@ export function ContextSelector({ context, onChange, mode = 'evaluator' }: Conte
               Primary Goal
             </Label>
             <Select
-              value={context.goal || 'all'}
+              value={context.goal ?? ""}
               onValueChange={(value) =>
-                onChange({ ...context, goal: value === 'all' ? undefined : value as PrimaryGoal })
+                onChange({ ...context, goal: value === "none" || value === "" ? undefined : value as PrimaryGoal })
               }
             >
               <SelectTrigger id="goal" className="w-full bg-background">
-                <SelectValue placeholder="All Goals" />
+                <SelectValue placeholder="Select goal..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Goals</SelectItem>
+                <SelectItem value="none">— None —</SelectItem>
                 {goalOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
@@ -319,16 +319,16 @@ export function ContextSelector({ context, onChange, mode = 'evaluator' }: Conte
               Tone Preference
             </Label>
             <Select
-              value={context.tone || 'all'}
+              value={context.tone ?? ""}
               onValueChange={(value) =>
-                onChange({ ...context, tone: value === 'all' ? undefined : value as TonePreference })
+                onChange({ ...context, tone: value === "none" || value === "" ? undefined : value as TonePreference })
               }
             >
               <SelectTrigger id="tone" className="w-full bg-background">
-                <SelectValue placeholder="All Tones" />
+                <SelectValue placeholder="Select tone..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Tones</SelectItem>
+                <SelectItem value="none">— None —</SelectItem>
                 {toneOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
