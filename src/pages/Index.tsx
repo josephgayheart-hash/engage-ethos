@@ -100,6 +100,15 @@ const Index = () => {
       href: '/byoc'
     },
     { 
+      id: 'settings', 
+      title: 'Institutional Settings', 
+      description: 'Configure your institution\'s voice, names, branding, and terminology',
+      icon: Settings,
+      color: 'text-primary',
+      bgColor: 'bg-primary/10',
+      href: '/settings'
+    },
+    { 
       id: 'admin', 
       title: 'Admin Panel', 
       description: 'Create, approve, and distribute playbooks across your institution',
