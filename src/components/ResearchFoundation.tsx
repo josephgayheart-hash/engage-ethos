@@ -28,6 +28,11 @@ export function ResearchFoundation() {
       title: "Higher Education Research",
       description: "Authoritative message framing increases students' intentions to engage in positive academic behaviors.",
       citation: "Morrison et al. (2021)"
+    },
+    {
+      title: "Higher Ed Persuasion Framework",
+      description: "Applying persuasion principles specifically to higher education student communication contexts.",
+      citation: "Gayheart (2025)"
     }
   ];
 
