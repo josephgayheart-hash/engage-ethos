@@ -6,6 +6,7 @@ import { ContextSelector } from "@/components/ContextSelector";
 import { MessageInput } from "@/components/MessageInput";
 import { EvaluationResults } from "@/components/EvaluationResults";
 import { LibraryNav } from "@/components/LibraryNav";
+import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -16,16 +17,16 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { AIBadge } from "@/components/ui/ai-indicator";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
-import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, ArrowRight, FileText, AlertCircle, Save, RefreshCw, CalendarIcon, Clock } from "lucide-react";
 import { evaluateMessage } from "@/lib/evaluateMessage";
-import type { MessageContext, EvaluationResult } from "@/types/persist";
+import type { MessageContext, EvaluationResult, InstitutionalConfig } from "@/types/persist";
 
 const EvaluatePage = () => {
   const { toast } = useToast();
   const { addMessage } = useMessageLibrary();
-  const { config: institutionalConfig } = useInstitutionalConfig();
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfig | null>(null);
   const [messageContent, setMessageContent] = useState("");
   const [context, setContext] = useState<MessageContext>({
     audience: 'first-year',
@@ -45,7 +46,7 @@ const EvaluatePage = () => {
     setEvaluationResult(null);
     
     try {
-      const result = await evaluateMessage(messageContent, context, institutionalConfig);
+      const result = await evaluateMessage(messageContent, context, institutionalConfig || undefined);
       setEvaluationResult(result);
       
       if (autoSave) {
@@ -132,6 +133,15 @@ const EvaluatePage = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Institutional Profile Selector */}
+              <InstitutionalProfileSelector
+                selectedProfileId={selectedProfileId}
+                onProfileChange={(id, config) => {
+                  setSelectedProfileId(id);
+                  setInstitutionalConfig(config);
+                }}
+              />
+
               <ContextSelector context={context} onChange={setContext} mode="evaluator" />
               
               <Separator />

@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { Header } from "@/components/Header";
 import { ContextSelector } from "@/components/ContextSelector";
 import { LibraryNav } from "@/components/LibraryNav";
+import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +19,6 @@ import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
-import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
 import { CreateTemplateDialog } from "@/components/library/CreateTemplateDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -59,7 +59,8 @@ const BuildPage = () => {
   const { toast } = useToast();
   const { addMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
-  const { config: institutionalConfig } = useInstitutionalConfig();
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfig | null>(null);
   const [context, setContext] = useState<MessageContext>({
     audience: 'first-year',
     moment: 'early-term',
@@ -101,7 +102,7 @@ const BuildPage = () => {
     try {
       // Use selected channels in context
       const contextWithChannels = { ...context, channel: selectedChannels[0], channels: selectedChannels };
-      const result = await buildMessage(contextWithChannels, institutionalConfig);
+      const result = await buildMessage(contextWithChannels, institutionalConfig || undefined);
       setBuilderResult(result);
       setDrafts(result.drafts);
       setActiveDraft(0);
@@ -261,6 +262,15 @@ const BuildPage = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Institutional Profile Selector */}
+              <InstitutionalProfileSelector
+                selectedProfileId={selectedProfileId}
+                onProfileChange={(id, config) => {
+                  setSelectedProfileId(id);
+                  setInstitutionalConfig(config);
+                }}
+              />
+
               <ContextSelector context={context} onChange={setContext} mode="builder" />
 
               {/* Channel Selection */}

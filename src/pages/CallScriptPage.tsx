@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { Header } from "@/components/Header";
+import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +17,6 @@ import { AIBadge } from "@/components/ui/ai-indicator";
 import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
-import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { 
@@ -37,7 +37,7 @@ import {
   XCircle,
   HelpCircle
 } from "lucide-react";
-import type { AudienceType, CommunicationMoment, MessageDomain, PrimaryGoal, TonePreference } from "@/types/persist";
+import type { AudienceType, CommunicationMoment, MessageDomain, PrimaryGoal, TonePreference, InstitutionalConfig } from "@/types/persist";
 
 interface CallScript {
   opening: string;
@@ -97,7 +97,8 @@ const toneOptions: { value: TonePreference; label: string }[] = [
 const CallScriptPage = () => {
   const { toast } = useToast();
   const { addMessage } = useMessageLibrary();
-  const { config: institutionalConfig } = useInstitutionalConfig();
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfig | null>(null);
   
   const [audience, setAudience] = useState<AudienceType>('first-year');
   const [moment, setMoment] = useState<CommunicationMoment>('early-term');
@@ -247,6 +248,15 @@ ${callScript.followUpNotes}`;
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Institutional Profile Selector */}
+              <InstitutionalProfileSelector
+                selectedProfileId={selectedProfileId}
+                onProfileChange={(id, config) => {
+                  setSelectedProfileId(id);
+                  setInstitutionalConfig(config);
+                }}
+              />
+
               {/* Caller Info */}
               <div className="space-y-2">
                 <Label htmlFor="caller-role">Your Role/Title</Label>

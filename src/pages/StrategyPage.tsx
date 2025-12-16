@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { ContextSelector } from "@/components/ContextSelector";
 import { StrategyJourneyDisplay } from "@/components/StrategyJourney";
 import { LibraryNav } from "@/components/LibraryNav";
+import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,11 +17,10 @@ import { AIBadge } from "@/components/ui/ai-indicator";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
-import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target } from "lucide-react";
 import { mapMessages } from "@/lib/evaluateMessage";
-import type { MessageContext, MapperResult, Channel } from "@/types/persist";
+import type { MessageContext, MapperResult, Channel, InstitutionalConfig } from "@/types/persist";
 
 const channelOptions: { value: Channel; label: string }[] = [
   { value: 'email', label: 'Email' },
@@ -35,7 +35,8 @@ const StrategyPage = () => {
   const { toast } = useToast();
   const { addMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
-  const { config: institutionalConfig } = useInstitutionalConfig();
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfig | null>(null);
   const [context, setContext] = useState<MessageContext>({
     audience: 'first-year',
     moment: 'early-term',
@@ -100,7 +101,7 @@ const StrategyPage = () => {
       const contextWithChannels = { ...context, channel: selectedChannels[0], channels: selectedChannels };
       const result = await mapMessages(
         contextWithChannels, 
-        institutionalConfig, 
+        institutionalConfig || undefined, 
         journeyWeeks,
         startDate?.toISOString(),
         endDate?.toISOString()
@@ -227,6 +228,15 @@ const StrategyPage = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Institutional Profile Selector */}
+              <InstitutionalProfileSelector
+                selectedProfileId={selectedProfileId}
+                onProfileChange={(id, config) => {
+                  setSelectedProfileId(id);
+                  setInstitutionalConfig(config);
+                }}
+              />
+
               <ContextSelector context={context} onChange={setContext} mode="mapper" />
 
               {/* Channel Selection */}
