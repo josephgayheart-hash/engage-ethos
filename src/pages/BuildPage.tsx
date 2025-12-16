@@ -42,7 +42,7 @@ import {
   Clock
 } from "lucide-react";
 import { buildMessage } from "@/lib/evaluateMessage";
-import { EvaluationResults } from "@/components/EvaluationResults";
+
 import type { MessageContext, BuilderResult, InstitutionalConfig, Channel } from "@/types/persist";
 
 const channelOptions: { value: Channel; label: string }[] = [
@@ -549,19 +549,6 @@ const BuildPage = () => {
                 </CardContent>
               </Card>
 
-              {/* Evaluation */}
-              {builderResult.evaluation && (
-                <div className="space-y-4">
-                  <h3 className="font-serif text-lg font-medium flex items-center gap-2">
-                    Draft Evaluation
-                    <span className="text-xs text-secondary flex items-center gap-1">
-                      <Sparkles className="w-3 h-3" />
-                      AI Analysis
-                    </span>
-                  </h3>
-                  <EvaluationResults result={builderResult.evaluation} />
-                </div>
-              )}
             </div>
           )}
         </div>
