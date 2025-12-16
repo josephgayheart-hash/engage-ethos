@@ -407,11 +407,11 @@ const BuildPage = () => {
                 <textarea
                   value={context.additionalContext || ''}
                   onChange={(e) => setContext({ ...context, additionalContext: e.target.value })}
-                  placeholder="Add specific details, situations, or refinement notes to help tailor the message. For example: 'Student missed last week's advising appointment' or 'Focus on financial aid deadline urgency'"
+                  placeholder="Add campaign context or refinement notes. Examples: 'Emphasize career outcomes and ROI for this cohort' or 'Focus on FAFSA deadline urgency' or 'Highlight peer success stories from this program'"
                   className="w-full min-h-[80px] px-3 py-2 text-sm rounded-md border border-input bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-y"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Provide situation-specific details to make your message more relevant and personalized.
+                  Provide campaign-specific details to make your messaging more relevant and targeted.
                 </p>
               </div>
 

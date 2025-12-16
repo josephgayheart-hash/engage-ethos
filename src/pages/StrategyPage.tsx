@@ -401,11 +401,11 @@ const StrategyPage = () => {
                 <textarea
                   value={context.additionalContext || ''}
                   onChange={(e) => setContext({ ...context, additionalContext: e.target.value })}
-                  placeholder="Add specific details to tailor your journey. For example: 'Focus on students who missed orientation' or 'Emphasize career outcomes and ROI'"
+                  placeholder="Add campaign context to tailor your journey. Examples: 'Target late-registering students' or 'Emphasize career outcomes and ROI' or 'Address common objections about program cost'"
                   className="w-full min-h-[80px] px-3 py-2 text-sm rounded-md border border-input bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-y"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Provide situation-specific details to make your journey more relevant and targeted.
+                  Provide campaign-specific details to make your journey more relevant and targeted.
                 </p>
               </div>
 
