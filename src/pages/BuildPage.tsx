@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { format } from "date-fns";
 import { Header } from "@/components/Header";
 import { ContextSelector } from "@/components/ContextSelector";
 import { LibraryNav } from "@/components/LibraryNav";
@@ -9,12 +10,16 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { AIBadge } from "@/components/ui/ai-indicator";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { CreateTemplateDialog } from "@/components/library/CreateTemplateDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 import { 
   ArrowLeft, 
   ArrowRight, 
@@ -30,7 +35,9 @@ import {
   FolderPlus,
   Library,
   Trash2,
-  Mail
+  Mail,
+  CalendarIcon,
+  Clock
 } from "lucide-react";
 import { buildMessage } from "@/lib/evaluateMessage";
 import { EvaluationResults } from "@/components/EvaluationResults";
@@ -281,6 +288,69 @@ const BuildPage = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Urgency & Deadline Section */}
+              <div className="space-y-3 pt-2 border-t border-border">
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-destructive" />
+                  Urgency & Deadline (Optional)
+                </Label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="urgency-label" className="text-xs text-muted-foreground">Deadline Label</Label>
+                    <Input
+                      id="urgency-label"
+                      placeholder="e.g., Registration Deadline"
+                      value={context.urgencyLabel || ''}
+                      onChange={(e) => setContext({ ...context, urgencyLabel: e.target.value })}
+                      className="bg-background"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Due Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !context.dueDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {context.dueDate ? format(new Date(context.dueDate), "PPP") : "Pick due date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={context.dueDate ? new Date(context.dueDate) : undefined}
+                          onSelect={(date) => setContext({ ...context, dueDate: date?.toISOString() })}
+                          initialFocus
+                          className="p-3 pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  {context.dueDate && (
+                    <div className="flex items-end">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setContext({ ...context, dueDate: undefined, urgencyLabel: undefined })}
+                        className="text-muted-foreground"
+                      >
+                        Clear deadline
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                {context.dueDate && (
+                  <p className="text-xs text-muted-foreground">
+                    Messages will include countdown language referencing this deadline.
+                  </p>
+                )}
               </div>
 
               <div className="flex items-center justify-between">

@@ -127,6 +127,10 @@ export interface MessageContext {
   goal?: PrimaryGoal;
   tone?: TonePreference;
   department?: Department;
+  // Urgency & Timing
+  dueDate?: string; // ISO date string for countdown/deadline
+  startDate?: string; // ISO date string for journey start
+  urgencyLabel?: string; // Custom label like "Registration Deadline" or "Application Due"
 }
 
 // Strategy Journey Types

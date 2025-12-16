@@ -164,7 +164,7 @@ serve(async (req) => {
   }
 
   try {
-    const { message, context, mode, institutionalConfig, journeyWeeks } = await req.json();
+    const { message, context, mode, institutionalConfig, journeyWeeks, startDate, endDate } = await req.json();
     
     if (!context) {
       return new Response(
@@ -191,6 +191,19 @@ serve(async (req) => {
       ? context.channels.join(', ') 
       : context.channel || 'Not specified';
 
+    // Format dates for display if provided
+    const formatDate = (dateStr?: string) => {
+      if (!dateStr) return null;
+      try {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      } catch {
+        return dateStr;
+      }
+    };
+
+    const daysUntilDeadline = context.dueDate ? Math.ceil((new Date(context.dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
+
     const contextStr = `
 CONTEXT:
 - Department: ${context.department || 'Not specified'}
@@ -201,6 +214,17 @@ CONTEXT:
 - Domain: ${context.domain || 'Not specified'}
 - Primary Goal: ${context.goal || 'Not specified'}
 - Tone Preference: ${context.tone || 'Not specified'}
+${context.dueDate ? `
+URGENCY & DEADLINE:
+- Deadline Label: ${context.urgencyLabel || 'Deadline'}
+- Due Date: ${formatDate(context.dueDate)}
+- Days Until Deadline: ${daysUntilDeadline} days
+- IMPORTANT: Incorporate countdown urgency language naturally. Reference the deadline explicitly.` : ''}
+${startDate ? `
+JOURNEY TIMELINE:
+- Journey Start Date: ${formatDate(startDate)}
+- Journey End Date: ${formatDate(endDate)}
+- IMPORTANT: Consider timing relative to these dates when planning touchpoints.` : ''}
 
 DEPARTMENT CONTEXT GUIDANCE:
 ${context.department === 'enrollment-management' || context.department === 'recruitment' ? 
