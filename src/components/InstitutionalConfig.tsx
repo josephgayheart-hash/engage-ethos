@@ -162,7 +162,7 @@ export function InstitutionalConfig({ config, onChange }: InstitutionalConfigPro
                 <Input
                   value={config.institutionName || ''}
                   onChange={(e) => onChange({ ...config, institutionName: e.target.value })}
-                  placeholder="e.g., University of Kentucky"
+                  placeholder="e.g., Lakewood University"
                 />
               </div>
               <div className="space-y-2">
@@ -170,12 +170,12 @@ export function InstitutionalConfig({ config, onChange }: InstitutionalConfigPro
                 <Input
                   value={config.mascot || ''}
                   onChange={(e) => onChange({ ...config, mascot: e.target.value })}
-                  placeholder="e.g., Wildcats"
+                  placeholder="e.g., Griffins"
                 />
               </div>
             </div>
             
-            {renderArrayField('Slogans & Spirit Phrases', 'slogans', 'slogan', 'e.g., Go Big Blue!', 'Phrases used in communications to build school spirit')}
+            {renderArrayField('Slogans & Spirit Phrases', 'slogans', 'slogan', 'e.g., Go Griffins!', 'Phrases used in communications to build school spirit')}
             {renderArrayField('Building & Facility Names', 'buildingNames', 'buildingName', 'e.g., Student Success Center', 'Official names for buildings referenced in messages')}
             {renderArrayField('Program Names', 'programNames', 'programName', 'e.g., First-Year Experience Program', 'Academic and support program names')}
             {renderArrayField('Support Centers', 'supportCenters', 'supportCenter', 'e.g., Writing Center, Math Tutoring Lab', 'Student support resources to reference')}

@@ -27,7 +27,7 @@ export function ResearchFoundation() {
     {
       title: "Higher Education Research",
       description: "Authoritative message framing increases students' intentions to engage in positive academic behaviors.",
-      citation: "Gayheart (2021)"
+      citation: "Morrison et al. (2021)"
     }
   ];
 
