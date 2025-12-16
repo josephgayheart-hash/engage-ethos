@@ -279,7 +279,7 @@ const StrategyPage = () => {
                       </Button>
                       <Button variant="default" onClick={handleShareToLibrary}>
                         <Share2 className="w-4 h-4 mr-2" />
-                        Share to Shared Library
+                        Send to Shared Library
                       </Button>
                     </div>
                   </div>

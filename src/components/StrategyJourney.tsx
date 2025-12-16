@@ -62,6 +62,12 @@ const phaseBgColors: Record<StrategyPhase, string> = {
 
 const allChannels: Channel[] = ['email', 'sms', 'social-media'];
 
+// Helper to format channel names with proper capitalization
+const formatChannelName = (channel: string): string => {
+  if (channel === 'sms') return 'SMS';
+  return channel.replace('-', ' ').replace(/\b\w/g, c => c.toUpperCase());
+};
+
 function TouchpointCard({ 
   touchpoint, 
   index, 
@@ -121,9 +127,9 @@ function TouchpointCard({
               Week {touchpoint.week}: {touchpoint.title}
             </CardTitle>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="capitalize flex items-center gap-1">
+              <Badge variant="outline" className="flex items-center gap-1">
                 {channelIcons[touchpoint.channel]}
-                {touchpoint.channel.replace('-', ' ')}
+                {formatChannelName(touchpoint.channel)}
               </Badge>
               <Badge variant="secondary" className="capitalize">
                 {touchpoint.domain}
@@ -203,11 +209,11 @@ function TouchpointCard({
                     <Badge
                       key={channel}
                       variant={selectedChannels.includes(channel) ? "default" : "outline"}
-                      className="cursor-pointer capitalize"
+                      className="cursor-pointer"
                       onClick={() => toggleChannel(channel)}
                     >
                       {channelIcons[channel]}
-                      <span className="ml-1">{channel.replace('-', ' ')}</span>
+                      <span className="ml-1">{formatChannelName(channel)}</span>
                     </Badge>
                   ))}
                   <Button variant="ghost" size="sm" onClick={selectAllChannels}>
@@ -241,9 +247,9 @@ function TouchpointCard({
                     {thisMessages.map((msg, i) => (
                       <div key={i} className="p-3 bg-primary/5 border border-primary/20 rounded-lg space-y-2">
                         <div className="flex items-center justify-between">
-                          <Badge variant="secondary" className="capitalize flex items-center gap-1">
+                          <Badge variant="secondary" className="flex items-center gap-1">
                             {channelIcons[msg.channel]}
-                            {msg.channel.replace('-', ' ')}
+                            {formatChannelName(msg.channel)}
                           </Badge>
                           <Button
                             variant="ghost"
@@ -275,10 +281,17 @@ function TouchpointCard({
   );
 }
 
+
 export function StrategyJourneyDisplay({ journey, context }: StrategyJourneyProps) {
   const { toast } = useToast();
   const [generatedMessages, setGeneratedMessages] = useState<GeneratedMessage[]>([]);
   const [isGenerating, setIsGenerating] = useState<number | null>(null);
+
+  // Calculate analytics from touchpoints
+  const analytics = journey.touchpoints.reduce((acc, tp) => {
+    acc[tp.channel] = (acc[tp.channel] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
 
   const handleGenerateMessage = async (touchpointIndex: number, channels: Channel[]) => {
     const touchpoint = journey.touchpoints[touchpointIndex];
@@ -326,6 +339,41 @@ export function StrategyJourneyDisplay({ journey, context }: StrategyJourneyProp
 
   return (
     <div className="space-y-6">
+      {/* Analytics Overview */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+        {Object.entries(analytics).map(([channel, count]) => (
+          <Card key={channel} className="bg-muted/30">
+            <CardContent className="py-4 px-4 text-center">
+              <div className="flex items-center justify-center gap-2 text-muted-foreground mb-1">
+                {channelIcons[channel as Channel]}
+                <span className="text-xs font-medium uppercase tracking-wide">
+                  {formatChannelName(channel)}
+                </span>
+              </div>
+              <p className="text-2xl font-bold text-foreground">{count}</p>
+            </CardContent>
+          </Card>
+        ))}
+        <Card className="bg-primary/10 border-primary/20">
+          <CardContent className="py-4 px-4 text-center">
+            <div className="flex items-center justify-center gap-2 text-primary mb-1">
+              <Calendar className="w-4 h-4" />
+              <span className="text-xs font-medium uppercase tracking-wide">Weeks</span>
+            </div>
+            <p className="text-2xl font-bold text-primary">{journey.totalWeeks}</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-secondary/10 border-secondary/20">
+          <CardContent className="py-4 px-4 text-center">
+            <div className="flex items-center justify-center gap-2 text-secondary mb-1">
+              <Target className="w-4 h-4" />
+              <span className="text-xs font-medium uppercase tracking-wide">Touchpoints</span>
+            </div>
+            <p className="text-2xl font-bold text-secondary">{journey.touchpoints.length}</p>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Overview */}
       <Card className="card-elevated">
         <CardHeader>
