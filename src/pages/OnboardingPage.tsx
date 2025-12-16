@@ -16,6 +16,7 @@ import {
   ArrowRight,
   CheckCircle2
 } from "lucide-react";
+import persistLogo from "@/assets/persist-logo.png";
 import type { Department, DepartmentInfo } from "@/types/persist";
 
 const departments: DepartmentInfo[] = [
@@ -123,8 +124,9 @@ const OnboardingPage = () => {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto space-y-8">
-          {/* Header */}
+          {/* Logo and Header */}
           <div className="text-center space-y-4">
+            <img src={persistLogo} alt="PERSIST" className="h-16 mx-auto" />
             <h1 className="font-serif text-3xl md:text-4xl font-bold text-foreground">
               Welcome to PERSIST
             </h1>

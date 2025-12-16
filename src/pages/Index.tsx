@@ -80,6 +80,15 @@ const Index = () => {
       bgColor: 'bg-pillar-susceptibility/10',
       href: '/playground'
     },
+    { 
+      id: 'admin', 
+      title: 'Admin Panel', 
+      description: 'Create, approve, and distribute playbooks across your institution',
+      icon: Settings,
+      color: 'text-muted-foreground',
+      bgColor: 'bg-muted',
+      href: '/admin'
+    },
   ];
 
   const getChannelIcon = (channel: string) => {
@@ -134,7 +143,7 @@ const Index = () => {
                 Powered by AI
               </Badge>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {modeCards.map((card) => {
                 const Icon = card.icon;
                 return (
@@ -275,15 +284,6 @@ const Index = () => {
             </Card>
           </section>
 
-          {/* Quick Links */}
-          <section className="flex flex-wrap justify-center gap-4">
-            <Link to="/admin">
-              <Button variant="outline" className="flex items-center gap-2">
-                <Settings className="w-4 h-4" />
-                Admin Panel
-              </Button>
-            </Link>
-          </section>
 
           {/* Research Foundation */}
           <ResearchFoundation />
@@ -291,19 +291,51 @@ const Index = () => {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-card py-6">
+      <footer className="border-t border-border bg-card py-8">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+            {/* Tools */}
+            <div>
+              <h4 className="font-semibold text-sm mb-3">Tools</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link to="/evaluate" className="hover:text-foreground transition-colors">Evaluate Message</Link></li>
+                <li><Link to="/build" className="hover:text-foreground transition-colors">Build Message</Link></li>
+                <li><Link to="/strategy" className="hover:text-foreground transition-colors">Plan Strategy</Link></li>
+                <li><Link to="/call-script" className="hover:text-foreground transition-colors">Call Scripts</Link></li>
+                <li><Link to="/playground" className="hover:text-foreground transition-colors">Playground</Link></li>
+              </ul>
+            </div>
+            {/* Libraries */}
+            <div>
+              <h4 className="font-semibold text-sm mb-3">Libraries</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link to="/library" className="hover:text-foreground transition-colors">My Library</Link></li>
+                <li><Link to="/shared-library" className="hover:text-foreground transition-colors">Shared Library</Link></li>
+              </ul>
+            </div>
+            {/* Admin */}
+            <div>
+              <h4 className="font-semibold text-sm mb-3">Administration</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link to="/admin" className="hover:text-foreground transition-colors">Admin Panel</Link></li>
+              </ul>
+            </div>
+            {/* Research */}
+            <div>
+              <h4 className="font-semibold text-sm mb-3">Research</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><a href="#about" className="hover:text-foreground transition-colors">Research Foundation</a></li>
+                <li><span>Gayheart (2021), University of Kentucky</span></li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-border pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground">
               PERSIST — Persuasion Intelligence for Student Engagement
             </p>
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              <Link to="/admin" className="hover:text-foreground transition-colors">
-                Admin Panel
-              </Link>
-              <span>•</span>
-              <span>Research: Gayheart (2021), University of Kentucky</span>
-            </div>
+            <p className="text-xs text-muted-foreground">
+              Evidence-based messaging for higher education
+            </p>
           </div>
         </div>
       </footer>
