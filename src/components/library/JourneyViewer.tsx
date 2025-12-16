@@ -230,9 +230,9 @@ export function JourneyViewer({ journey, allowGeneration = true }: JourneyViewer
                     </Badge>
                     {allowGeneration && (
                       <Button
-                        variant="default"
+                        variant="secondary"
                         size="sm"
-                        className="h-7 px-3 text-xs bg-gradient-to-r from-secondary to-primary hover:from-secondary/90 hover:to-primary/90 text-primary-foreground shadow-md hover:shadow-lg transition-all"
+                        className="h-7 px-3 text-xs font-medium shadow-sm hover:shadow-md transition-all border border-secondary-foreground/20"
                         onClick={() => handleGenerateMessage(touchpoint, index)}
                         disabled={generatingIndex === index}
                       >
