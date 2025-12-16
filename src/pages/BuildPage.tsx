@@ -39,7 +39,9 @@ import {
   Trash2,
   Mail,
   CalendarIcon,
-  Clock
+  Clock,
+  Users,
+  UserCheck
 } from "lucide-react";
 import { buildMessage } from "@/lib/evaluateMessage";
 
@@ -54,6 +56,31 @@ const channelOptions: { value: Channel; label: string }[] = [
   { value: 'direct-mail', label: 'Direct Mail' },
   { value: 'phone-call', label: 'Phone Call' },
 ];
+
+const audienceLabels: Record<string, string> = {
+  'prospective': 'Prospective Student',
+  'first-year': 'First-Year Student',
+  'continuing': 'Continuing Student',
+  'at-risk': 'At-Risk Student',
+  'graduate': 'Graduate Student',
+  'alumni': 'Alumni',
+  'parents': 'Parents/Family',
+  'donors': 'Donors',
+};
+
+const cohortLabels: Record<string, string> = {
+  'none': 'No specific cohort',
+  'first-gen': 'First-Generation',
+  'probation': 'Academic Probation',
+  'online': 'Online Student',
+  'commuter': 'Commuter',
+  'residential': 'Residential',
+  'transfer': 'Transfer Student',
+  'international': 'International',
+  'veteran': 'Veteran',
+  'parent': 'Student Parent',
+  'working-adult': 'Working Adult',
+};
 
 const BuildPage = () => {
   const { toast } = useToast();
@@ -447,8 +474,22 @@ const BuildPage = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* Recommendations */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg">
+                  {/* Recipient & Recommendations */}
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 p-4 bg-muted/30 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <Users className="w-4 h-4 text-primary mt-0.5" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Audience Type</p>
+                        <p className="text-sm font-medium">{context.audience ? audienceLabels[context.audience] || context.audience : '—'}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <UserCheck className="w-4 h-4 text-primary mt-0.5" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Cohort Context</p>
+                        <p className="text-sm font-medium">{context.cohort && context.cohort !== 'none' ? cohortLabels[context.cohort] || context.cohort : '—'}</p>
+                      </div>
+                    </div>
                     <div className="flex items-start gap-2">
                       <User className="w-4 h-4 text-secondary mt-0.5" />
                       <div>
