@@ -292,6 +292,11 @@ const SharedLibrary = () => {
                           {template.requiredFields.audience.length > 2 && (
                             <Badge variant="outline" className="text-xs">+{template.requiredFields.audience.length - 2}</Badge>
                           )}
+                          {template.institutionalProfileName && (
+                            <Badge variant="default" className="text-xs bg-primary/10 text-primary border-primary/20">
+                              {template.institutionalProfileName}
+                            </Badge>
+                          )}
                         </div>
                         <div className="flex items-center justify-between text-xs text-muted-foreground border-t pt-3">
                           <div className="flex items-center gap-1">

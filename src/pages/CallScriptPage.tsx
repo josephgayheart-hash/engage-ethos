@@ -98,6 +98,7 @@ const CallScriptPage = () => {
   const { toast } = useToast();
   const { addMessage } = useMessageLibrary();
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [selectedProfileName, setSelectedProfileName] = useState<string | undefined>(undefined);
   const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfig | null>(null);
   
   const [audience, setAudience] = useState<AudienceType>('first-year');
@@ -201,6 +202,8 @@ ${callScript.followUpNotes}`;
       tone,
       approved: false,
       mode: 'generated',
+      institutionalProfileId: selectedProfileId || undefined,
+      institutionalProfileName: selectedProfileName,
     });
 
     toast({
@@ -251,9 +254,10 @@ ${callScript.followUpNotes}`;
               {/* Institutional Profile Selector */}
               <InstitutionalProfileSelector
                 selectedProfileId={selectedProfileId}
-                onProfileChange={(id, config) => {
+                onProfileChange={(id, config, name) => {
                   setSelectedProfileId(id);
                   setInstitutionalConfig(config);
+                  setSelectedProfileName(name);
                 }}
               />
 

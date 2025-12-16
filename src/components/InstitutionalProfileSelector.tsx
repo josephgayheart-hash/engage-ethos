@@ -21,7 +21,7 @@ import type { InstitutionalConfig } from "@/types/persist";
 
 interface InstitutionalProfileSelectorProps {
   selectedProfileId: string | null;
-  onProfileChange: (profileId: string | null, config: InstitutionalConfig | null) => void;
+  onProfileChange: (profileId: string | null, config: InstitutionalConfig | null, profileName?: string) => void;
   compact?: boolean;
 }
 
@@ -34,10 +34,10 @@ export function InstitutionalProfileSelector({
   
   const handleChange = (value: string) => {
     if (value === 'none') {
-      onProfileChange(null, null);
+      onProfileChange(null, null, undefined);
     } else {
       const profile = getProfile(value);
-      onProfileChange(value, profile?.config || null);
+      onProfileChange(value, profile?.config || null, profile?.name);
     }
   };
 

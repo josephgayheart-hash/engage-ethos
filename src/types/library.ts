@@ -20,6 +20,8 @@ export interface SavedMessage {
   notes?: string;
   approved: boolean;
   mode: 'evaluated' | 'generated';
+  institutionalProfileId?: string;
+  institutionalProfileName?: string;
 }
 
 export interface MessageVersion {
@@ -57,6 +59,8 @@ export interface SharedTemplate {
   approvalNotes?: string;
   changeHistory: TemplateChange[];
   playbook?: string;
+  institutionalProfileId?: string;
+  institutionalProfileName?: string;
 }
 
 export interface TemplatePlaceholder {
