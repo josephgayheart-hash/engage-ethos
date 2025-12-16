@@ -239,6 +239,10 @@ const AdminPanel = () => {
           {/* Main Content */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="flex-wrap">
+              <TabsTrigger value="settings" className="flex items-center gap-1.5 bg-primary/10 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                <Building2 className="w-4 h-4" />
+                Institutional Settings
+              </TabsTrigger>
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="pending" className="relative">
                 Pending Review
@@ -250,10 +254,6 @@ const AdminPanel = () => {
               </TabsTrigger>
               <TabsTrigger value="ready">Ready to Distribute</TabsTrigger>
               <TabsTrigger value="published">Published</TabsTrigger>
-              <TabsTrigger value="settings" className="flex items-center gap-1">
-                <Building2 className="w-4 h-4" />
-                Institutional Settings
-              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-4 mt-4">

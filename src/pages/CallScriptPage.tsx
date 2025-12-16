@@ -417,10 +417,44 @@ ${callScript.followUpNotes}`;
                   <Phone className="w-5 h-5 text-primary" />
                   Your Call Script
                 </h2>
-                <Button variant="outline" size="sm" onClick={handleSaveToLibrary}>
-                  <Save className="w-4 h-4 mr-2" />
-                  Save to Library
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => {
+                      const fullScript = `CALL SCRIPT: ${domain} - ${audience}
+
+OPENING:
+${callScript.opening}
+
+PURPOSE:
+${callScript.purposeStatement}
+
+KEY TALKING POINTS:
+${callScript.keyTalkingPoints.map((p, i) => `${i + 1}. ${p}`).join('\n')}
+
+OBJECTION HANDLERS:
+${callScript.objectionHandlers.map(o => `Q: ${o.objection}\nA: ${o.response}`).join('\n\n')}
+
+CLOSING OPTIONS:
+${callScript.closingOptions.map(c => `[${c.scenario}]\n${c.script}`).join('\n\n')}
+
+VOICEMAIL SCRIPT:
+${callScript.voicemailScript}
+
+FOLLOW-UP NOTES:
+${callScript.followUpNotes}`;
+                      handleCopy(fullScript, 'all');
+                    }}
+                  >
+                    {copiedSection === 'all' ? <Check className="w-4 h-4 mr-2 text-green-500" /> : <Copy className="w-4 h-4 mr-2" />}
+                    Copy All
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleSaveToLibrary}>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save to Library
+                  </Button>
+                </div>
               </div>
 
               <Tabs defaultValue="opening" className="w-full">
