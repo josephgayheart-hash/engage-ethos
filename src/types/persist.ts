@@ -118,10 +118,11 @@ export interface PillarEvaluation {
 }
 
 export interface MessageContext {
-  audience: AudienceType;
+  audience?: AudienceType;
   cohort?: CohortContext;
-  moment: CommunicationMoment;
-  channel: Channel;
+  moment?: CommunicationMoment;
+  channel?: Channel;
+  channels?: Channel[]; // For multi-channel selection (strategy page)
   domain?: MessageDomain;
   goal?: PrimaryGoal;
   tone?: TonePreference;

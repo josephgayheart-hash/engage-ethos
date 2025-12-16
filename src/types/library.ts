@@ -6,11 +6,11 @@ export interface SavedMessage {
   id: string;
   title: string;
   content: string;
-  channel: Channel;
-  audience: AudienceType;
+  channel?: Channel;
+  audience?: AudienceType;
   cohort?: CohortContext[];
   domain?: MessageDomain;
-  moment: CommunicationMoment;
+  moment?: CommunicationMoment;
   goal?: PrimaryGoal;
   tone?: TonePreference;
   senderRecommendation?: string;
