@@ -137,11 +137,41 @@ export function useMessageLibrary() {
     const message = messages.find(msg => msg.id === id);
     if (!message) return null;
     
-    const blob = new Blob([JSON.stringify(message, null, 2)], { type: 'application/json' });
+    // Format as readable text
+    const textContent = `
+${message.title}
+${'='.repeat(message.title.length)}
+
+MESSAGE CONTENT
+---------------
+${message.content}
+
+METADATA
+--------
+Channel: ${message.channel}
+Audience: ${message.audience}
+${message.domain ? `Domain: ${message.domain}` : ''}
+Moment: ${message.moment}
+${message.goal ? `Goal: ${message.goal}` : ''}
+${message.tone ? `Tone: ${message.tone}` : ''}
+${message.senderRecommendation ? `Sender: ${message.senderRecommendation}` : ''}
+Mode: ${message.mode}
+Approved: ${message.approved ? 'Yes' : 'No'}
+
+DATES
+-----
+Created: ${new Date(message.createdAt).toLocaleString()}
+Updated: ${new Date(message.updatedAt).toLocaleString()}
+
+${message.notes ? `NOTES\n-----\n${message.notes}\n` : ''}
+${message.versions.length > 1 ? `VERSION HISTORY\n---------------\n${message.versions.map((v, i) => `Version ${message.versions.length - i}: ${new Date(v.createdAt).toLocaleString()}${v.changeNotes ? ` - ${v.changeNotes}` : ''}`).join('\n')}` : ''}
+`.trim();
+    
+    const blob = new Blob([textContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${message.title.replace(/[^a-z0-9]/gi, '_')}.json`;
+    a.download = `${message.title.replace(/[^a-z0-9]/gi, '_')}.txt`;
     a.click();
     URL.revokeObjectURL(url);
     return message;
