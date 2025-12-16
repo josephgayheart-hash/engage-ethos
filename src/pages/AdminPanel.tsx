@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
+import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useToast } from "@/hooks/use-toast";
 import { 
   ArrowLeft,
@@ -27,17 +28,28 @@ import {
   Eye,
   Edit,
   Trash2,
-  ChevronRight
+  ChevronRight,
+  Lock,
+  AlertTriangle,
+  RefreshCw
 } from "lucide-react";
 import type { SharedTemplate, LibraryEntryStatus } from "@/types/library";
 
+const ADMIN_PASSWORD = "persist2024";
+
 const AdminPanel = () => {
   const { toast } = useToast();
-  const { templates, addTemplate, updateTemplateStatus, isLoading } = useSharedLibrary();
+  const { templates, addTemplate, updateTemplateStatus, clearAllTemplates, resetToDefaults, isLoading } = useSharedLibrary();
+  const { messages, clearAllMessages } = useMessageLibrary();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [passwordError, setPasswordError] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [createOpen, setCreateOpen] = useState(false);
   const [distributeOpen, setDistributeOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<SharedTemplate | null>(null);
+  const [clearPersonalOpen, setClearPersonalOpen] = useState(false);
+  const [clearSharedOpen, setClearSharedOpen] = useState(false);
   
   // Form state for quick create
   const [quickTitle, setQuickTitle] = useState('');
@@ -55,6 +67,32 @@ const AdminPanel = () => {
   const submittedTemplates = templates.filter(t => t.status === 'submitted');
   const approvedTemplates = templates.filter(t => t.status === 'approved');
   const publishedTemplates = templates.filter(t => t.status === 'published');
+
+  const handlePasswordSubmit = () => {
+    if (passwordInput === ADMIN_PASSWORD) {
+      setIsAuthenticated(true);
+      setPasswordError(false);
+    } else {
+      setPasswordError(true);
+    }
+  };
+
+  const handleClearPersonalLibrary = () => {
+    clearAllMessages();
+    setClearPersonalOpen(false);
+    toast({ title: "Personal Library cleared", description: "All personal messages have been removed." });
+  };
+
+  const handleClearSharedLibrary = () => {
+    clearAllTemplates();
+    setClearSharedOpen(false);
+    toast({ title: "Shared Library cleared", description: "All shared templates have been removed." });
+  };
+
+  const handleResetSharedToDefaults = () => {
+    resetToDefaults();
+    toast({ title: "Shared Library reset", description: "Default templates have been restored." });
+  };
 
   const toggleArrayItem = (arr: string[], setArr: (v: string[]) => void, item: string) => {
     if (arr.includes(item)) {
@@ -154,6 +192,62 @@ const AdminPanel = () => {
       <div className="min-h-screen bg-background">
         <Header />
         <div className="container mx-auto px-4 py-12 text-center">Loading...</div>
+      </div>
+    );
+  }
+
+  // Password protection screen
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container mx-auto px-4 py-8">
+          <div className="max-w-md mx-auto space-y-6">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Link to="/" className="hover:text-foreground transition-colors flex items-center gap-1">
+                <ArrowLeft className="w-4 h-4" />
+                Home
+              </Link>
+              <span>/</span>
+              <span className="text-foreground">Admin Panel</span>
+            </div>
+
+            <Card>
+              <CardHeader className="text-center">
+                <div className="mx-auto p-3 rounded-full bg-primary/10 w-fit mb-2">
+                  <Lock className="w-6 h-6 text-primary" />
+                </div>
+                <CardTitle className="font-serif">Admin Access Required</CardTitle>
+                <CardDescription>
+                  Enter the admin password to access this panel
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={passwordInput}
+                    onChange={(e) => {
+                      setPasswordInput(e.target.value);
+                      setPasswordError(false);
+                    }}
+                    onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()}
+                    placeholder="Enter admin password"
+                    className={passwordError ? 'border-destructive' : ''}
+                  />
+                  {passwordError && (
+                    <p className="text-sm text-destructive">Incorrect password. Please try again.</p>
+                  )}
+                </div>
+                <Button onClick={handlePasswordSubmit} className="w-full">
+                  Access Admin Panel
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
       </div>
     );
   }
@@ -269,6 +363,7 @@ const AdminPanel = () => {
               </TabsTrigger>
               <TabsTrigger value="ready">Ready to Distribute</TabsTrigger>
               <TabsTrigger value="published">Published</TabsTrigger>
+              <TabsTrigger value="library-mgmt">Library Management</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-4 mt-4">
@@ -433,6 +528,87 @@ const AdminPanel = () => {
                 ))
               )}
             </TabsContent>
+
+            {/* Library Management Tab */}
+            <TabsContent value="library-mgmt" className="space-y-4 mt-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="font-serif">Library Management</CardTitle>
+                  <CardDescription>Manage personal and shared library data</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Personal Library Section */}
+                  <div className="p-4 rounded-lg border border-border">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium flex items-center gap-2">
+                          <FileText className="w-4 h-4" />
+                          Personal Message Library
+                        </h4>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {messages.length} message{messages.length !== 1 ? 's' : ''} saved
+                        </p>
+                      </div>
+                      <Button 
+                        variant="destructive" 
+                        size="sm"
+                        onClick={() => setClearPersonalOpen(true)}
+                        disabled={messages.length === 0}
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Clear All
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Shared Library Section */}
+                  <div className="p-4 rounded-lg border border-border">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          Shared Template Library
+                        </h4>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {templates.length} template{templates.length !== 1 ? 's' : ''} in library
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={handleResetSharedToDefaults}
+                        >
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Reset to Defaults
+                        </Button>
+                        <Button 
+                          variant="destructive" 
+                          size="sm"
+                          onClick={() => setClearSharedOpen(true)}
+                          disabled={templates.length === 0}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Clear All
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+                    <div className="flex gap-3">
+                      <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-amber-800 dark:text-amber-200">Warning</p>
+                        <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                          Clearing libraries will permanently remove all saved messages or templates. This action cannot be undone.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
           </Tabs>
         </div>
       </main>
@@ -540,6 +716,50 @@ const AdminPanel = () => {
             <Button onClick={() => selectedTemplate && handleDistribute(selectedTemplate)}>
               <Megaphone className="w-4 h-4 mr-2" />
               Distribute to All Users
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clear Personal Library Confirmation */}
+      <Dialog open={clearPersonalOpen} onOpenChange={setClearPersonalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-serif flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-destructive" />
+              Clear Personal Library
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete all {messages.length} message{messages.length !== 1 ? 's' : ''} from the Personal Library? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setClearPersonalOpen(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleClearPersonalLibrary}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Clear All Messages
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clear Shared Library Confirmation */}
+      <Dialog open={clearSharedOpen} onOpenChange={setClearSharedOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-serif flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-destructive" />
+              Clear Shared Library
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete all {templates.length} template{templates.length !== 1 ? 's' : ''} from the Shared Library? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setClearSharedOpen(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleClearSharedLibrary}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Clear All Templates
             </Button>
           </DialogFooter>
         </DialogContent>
