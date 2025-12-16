@@ -392,6 +392,23 @@ const StrategyPage = () => {
                 </p>
               </div>
 
+              {/* Additional Context */}
+              <div className="space-y-2 pt-2 border-t border-border">
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <BookMarked className="w-4 h-4 text-primary" />
+                  Additional Context (Optional)
+                </Label>
+                <textarea
+                  value={context.additionalContext || ''}
+                  onChange={(e) => setContext({ ...context, additionalContext: e.target.value })}
+                  placeholder="Add specific details to tailor your journey. For example: 'Focus on students who missed orientation' or 'Emphasize career outcomes and ROI'"
+                  className="w-full min-h-[80px] px-3 py-2 text-sm rounded-md border border-input bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-y"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Provide situation-specific details to make your journey more relevant and targeted.
+                </p>
+              </div>
+
               <div className="flex justify-end gap-2">
                 {mapperResult && (
                   <Button variant="outline" onClick={handleReset}>
