@@ -177,6 +177,11 @@ ${message.versions.length > 1 ? `VERSION HISTORY\n---------------\n${message.ver
     return message;
   }, [messages]);
 
+  const clearAllMessages = useCallback(() => {
+    localStorage.removeItem(STORAGE_KEY);
+    setMessages([]);
+  }, []);
+
   return {
     messages,
     isLoading,
@@ -186,5 +191,6 @@ ${message.versions.length > 1 ? `VERSION HISTORY\n---------------\n${message.ver
     duplicateMessage,
     filterMessages,
     exportMessage,
+    clearAllMessages,
   };
 }

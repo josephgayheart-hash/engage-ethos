@@ -270,6 +270,15 @@ export function useSharedLibrary() {
     return newTemplate;
   }, [templates, saveToStorage]);
 
+  const clearAllTemplates = useCallback(() => {
+    localStorage.removeItem(STORAGE_KEY);
+    setTemplates([]);
+  }, []);
+
+  const resetToDefaults = useCallback(() => {
+    saveToStorage(DEFAULT_TEMPLATES);
+  }, [saveToStorage]);
+
   return {
     templates,
     isLoading,
@@ -278,5 +287,7 @@ export function useSharedLibrary() {
     getTemplateById,
     updateTemplateStatus,
     addTemplate,
+    clearAllTemplates,
+    resetToDefaults,
   };
 }
