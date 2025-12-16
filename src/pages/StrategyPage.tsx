@@ -7,24 +7,51 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { AIBadge } from "@/components/ui/ai-indicator";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar } from "lucide-react";
+import { useMessageLibrary } from "@/hooks/useMessageLibrary";
+import { useSharedLibrary } from "@/hooks/useSharedLibrary";
+import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar, Save, Share2, BookMarked } from "lucide-react";
 import { mapMessages } from "@/lib/evaluateMessage";
-import type { MessageContext, MapperResult } from "@/types/persist";
+import type { MessageContext, MapperResult, Channel } from "@/types/persist";
+
+const channelOptions: { value: Channel; label: string }[] = [
+  { value: 'email', label: 'Email' },
+  { value: 'sms', label: 'SMS/Text' },
+  { value: 'social-media', label: 'Social Media' },
+  { value: 'portal', label: 'Portal' },
+  { value: 'direct-mail', label: 'Direct Mail' },
+  { value: 'phone-call', label: 'Phone Call' },
+];
 
 const StrategyPage = () => {
   const { toast } = useToast();
+  const { addMessage } = useMessageLibrary();
+  const { addTemplate } = useSharedLibrary();
   const [context, setContext] = useState<MessageContext>({
     audience: 'first-year',
     moment: 'early-term',
     channel: 'email',
   });
+  const [selectedChannels, setSelectedChannels] = useState<Channel[]>(['email', 'sms']);
   const [journeyWeeks, setJourneyWeeks] = useState(12);
   const [mapperResult, setMapperResult] = useState<MapperResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const canProcess = context.audience && context.moment && context.channel;
+  const canProcess = context.audience && context.moment && selectedChannels.length > 0;
+
+  const toggleChannel = (channel: Channel) => {
+    setSelectedChannels(prev => 
+      prev.includes(channel) 
+        ? prev.filter(c => c !== channel)
+        : [...prev, channel]
+    );
+  };
+
+  const selectAllChannels = () => {
+    setSelectedChannels(channelOptions.map(c => c.value));
+  };
 
   const handleGenerateStrategy = async () => {
     if (!canProcess) return;
@@ -33,7 +60,9 @@ const StrategyPage = () => {
     setMapperResult(null);
     
     try {
-      const result = await mapMessages(context, undefined, journeyWeeks);
+      // Use the first selected channel for the context
+      const contextWithChannels = { ...context, channel: selectedChannels[0], channels: selectedChannels };
+      const result = await mapMessages(contextWithChannels, undefined, journeyWeeks);
       setMapperResult(result);
       toast({
         title: "Strategy Generated",
@@ -53,6 +82,65 @@ const StrategyPage = () => {
 
   const handleReset = () => {
     setMapperResult(null);
+  };
+
+  const handleSaveToLibrary = () => {
+    if (!mapperResult?.journey) return;
+
+    const journeyContent = JSON.stringify(mapperResult.journey, null, 2);
+    const title = `Strategy Journey: ${context.audience} - ${context.moment} (${journeyWeeks} weeks)`;
+    
+    addMessage({
+      title,
+      content: journeyContent,
+      channel: context.channel,
+      audience: context.audience,
+      cohort: context.cohort ? [context.cohort] : undefined,
+      domain: context.domain,
+      moment: context.moment,
+      goal: context.goal,
+      tone: context.tone,
+      approved: false,
+      mode: 'generated',
+    });
+
+    toast({
+      title: "Saved to Personal Library",
+      description: "Your strategy journey has been saved.",
+    });
+  };
+
+  const handleShareToLibrary = () => {
+    if (!mapperResult?.journey) return;
+
+    const journey = mapperResult.journey;
+    
+    addTemplate({
+      title: `Strategy Journey: ${context.audience} - ${context.moment}`,
+      intentStatement: journey.overview,
+      content: JSON.stringify(journey, null, 2),
+      playbook: 'Strategy Journeys',
+      owner: 'Current User',
+      maintainer: 'Current User',
+      status: 'submitted' as const,
+      version: '1.0',
+      requiredFields: {
+        audience: [context.audience],
+        moment: [context.moment],
+        channel: selectedChannels,
+      },
+      useCases: {
+        whenToUse: journey.phases.map(p => p.focus),
+        whenNotToUse: journey.risks,
+      },
+      ethicalGuardrails: ['Review all touchpoints before publishing', 'Ensure messaging aligns with institutional voice'],
+      placeholders: [],
+    });
+
+    toast({
+      title: "Submitted for Review",
+      description: "Your strategy journey has been submitted to the shared library for admin approval.",
+    });
   };
 
   return (
@@ -95,6 +183,33 @@ const StrategyPage = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <ContextSelector context={context} onChange={setContext} mode="mapper" />
+
+              {/* Channel Selection */}
+              <div className="space-y-3 pt-2 border-t border-border">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium">Channel Modalities</Label>
+                  <Button variant="ghost" size="sm" onClick={selectAllChannels}>
+                    Select All
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {channelOptions.map(channel => (
+                    <div key={channel.value} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`channel-${channel.value}`}
+                        checked={selectedChannels.includes(channel.value)}
+                        onCheckedChange={() => toggleChannel(channel.value)}
+                      />
+                      <label
+                        htmlFor={`channel-${channel.value}`}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      >
+                        {channel.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
               {/* Journey Duration */}
               <div className="flex items-end gap-4 pt-2 border-t border-border">
@@ -148,8 +263,30 @@ const StrategyPage = () => {
 
           {/* Results */}
           {mapperResult?.journey && (
-            <div className="animate-fade-in">
-              <StrategyJourneyDisplay journey={mapperResult.journey} />
+            <div className="animate-fade-in space-y-6">
+              {/* Save/Share Actions */}
+              <Card className="bg-primary/5 border-primary/20">
+                <CardContent className="py-4">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <BookMarked className="w-5 h-5 text-primary" />
+                      <span className="font-medium">Save this journey</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" onClick={handleSaveToLibrary}>
+                        <Save className="w-4 h-4 mr-2" />
+                        Save to My Library
+                      </Button>
+                      <Button variant="default" onClick={handleShareToLibrary}>
+                        <Share2 className="w-4 h-4 mr-2" />
+                        Share to Shared Library
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <StrategyJourneyDisplay journey={mapperResult.journey} context={context} />
             </div>
           )}
         </div>
