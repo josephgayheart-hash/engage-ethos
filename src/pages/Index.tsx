@@ -168,26 +168,28 @@ const Index = () => {
                     {recentMessages.map((msg) => {
                       const ChannelIcon = getChannelIcon(msg.channel);
                       return (
-                        <div key={msg.id} className="p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1 min-w-0">
-                              <h4 className="text-sm font-medium truncate">{msg.title}</h4>
-                              <div className="flex items-center gap-2 mt-1">
-                                <Badge variant="outline" className="text-xs px-1.5 py-0">
-                                  <ChannelIcon className="w-3 h-3 mr-1" />
-                                  {msg.channel}
-                                </Badge>
-                                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                  <Clock className="w-3 h-3" />
-                                  {new Date(msg.createdAt).toLocaleDateString()}
-                                </span>
+                        <Link key={msg.id} to="/library" className="block">
+                          <div className="p-3 rounded-lg border bg-card hover:bg-muted/50 hover:border-primary/30 transition-colors cursor-pointer">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-sm font-medium truncate">{msg.title}</h4>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Badge variant="outline" className="text-xs px-1.5 py-0">
+                                    <ChannelIcon className="w-3 h-3 mr-1" />
+                                    {msg.channel}
+                                  </Badge>
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                    <Clock className="w-3 h-3" />
+                                    {new Date(msg.createdAt).toLocaleDateString()}
+                                  </span>
+                                </div>
                               </div>
+                              <Badge variant={msg.mode === 'generated' ? 'default' : 'secondary'} className="text-xs shrink-0">
+                                {msg.mode}
+                              </Badge>
                             </div>
-                            <Badge variant={msg.mode === 'generated' ? 'default' : 'secondary'} className="text-xs shrink-0">
-                              {msg.mode}
-                            </Badge>
                           </div>
-                        </div>
+                        </Link>
                       );
                     })}
                   </div>
@@ -221,29 +223,31 @@ const Index = () => {
                 ) : (
                   <div className="space-y-2">
                     {publishedTemplates.map((template) => (
-                      <div key={template.id} className="p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-sm font-medium truncate">{template.title}</h4>
-                            <div className="flex items-center gap-2 mt-1">
-                              {template.playbook && (
-                                <Badge variant="outline" className="text-xs px-1.5 py-0">
-                                  {template.playbook}
-                                </Badge>
-                              )}
-                              {template.collegeName && (
-                                <span className="text-xs text-muted-foreground truncate">
-                                  {template.collegeName}
-                                </span>
-                              )}
+                      <Link key={template.id} to="/shared-library" className="block">
+                        <div className="p-3 rounded-lg border bg-card hover:bg-muted/50 hover:border-primary/30 transition-colors cursor-pointer">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm font-medium truncate">{template.title}</h4>
+                              <div className="flex items-center gap-2 mt-1">
+                                {template.playbook && (
+                                  <Badge variant="outline" className="text-xs px-1.5 py-0">
+                                    {template.playbook}
+                                  </Badge>
+                                )}
+                                {template.collegeName && (
+                                  <span className="text-xs text-muted-foreground truncate">
+                                    {template.collegeName}
+                                  </span>
+                                )}
+                              </div>
                             </div>
+                            <Badge variant="default" className="text-xs shrink-0 flex items-center gap-1">
+                              <Megaphone className="w-3 h-3" />
+                              published
+                            </Badge>
                           </div>
-                          <Badge variant="default" className="text-xs shrink-0 flex items-center gap-1">
-                            <Megaphone className="w-3 h-3" />
-                            published
-                          </Badge>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 )}
