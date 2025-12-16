@@ -1,6 +1,6 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
-import { InstitutionalConfig } from "@/components/InstitutionalConfig";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
-import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Plus, 
@@ -26,16 +25,15 @@ import {
   Calendar,
   Eye,
   Edit,
-  Trash2
+  Trash2,
+  ChevronRight
 } from "lucide-react";
 import type { SharedTemplate, LibraryEntryStatus } from "@/types/library";
 
 const AdminPanel = () => {
   const { toast } = useToast();
   const { templates, addTemplate, updateTemplateStatus, isLoading } = useSharedLibrary();
-  const { config: institutionalConfig, updateConfig: updateInstitutionalConfig } = useInstitutionalConfig();
   const [activeTab, setActiveTab] = useState("overview");
-  const [showSettings, setShowSettings] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [distributeOpen, setDistributeOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<SharedTemplate | null>(null);
@@ -175,41 +173,20 @@ const AdminPanel = () => {
                 Create, approve, and distribute playbooks across your institution
               </p>
             </div>
-            <Button variant="outline" onClick={() => setShowSettings(!showSettings)} className="flex items-center gap-2">
-              <Building2 className="w-4 h-4" />
-              Institutional Settings
-            </Button>
-            <Button onClick={() => setCreateOpen(true)} className="flex items-center gap-2">
-              <Plus className="w-4 h-4" />
-              Create Playbook
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" asChild>
+                <Link to="/settings" className="flex items-center gap-2">
+                  <Building2 className="w-4 h-4" />
+                  Institutional Profiles
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
+              </Button>
+              <Button onClick={() => setCreateOpen(true)} className="flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                Create Playbook
+              </Button>
+            </div>
           </div>
-
-          {/* Institutional Settings Section */}
-          {showSettings && (
-            <Card className="border-primary/30 bg-primary/5">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="font-serif flex items-center gap-2">
-                    <Building2 className="w-5 h-5 text-primary" />
-                    Institutional Settings
-                  </CardTitle>
-                  <Button variant="ghost" size="sm" onClick={() => setShowSettings(false)}>
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-                <CardDescription>
-                  Configure your institution's voice, terminology, and branding for all AI-generated messages
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <InstitutionalConfig 
-                  config={institutionalConfig} 
-                  onChange={updateInstitutionalConfig} 
-                />
-              </CardContent>
-            </Card>
-          )}
 
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
