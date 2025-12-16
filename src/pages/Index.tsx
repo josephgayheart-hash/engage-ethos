@@ -489,6 +489,7 @@ const Index = () => {
                   <BuilderResults 
                     result={builderResult} 
                     context={context}
+                    institutionalConfig={institutionalConfig}
                     onSaveToLibrary={(content, title) => {
                       saveToLibrary(content, title, 'generated', builderResult.recommendedSender);
                     }}
