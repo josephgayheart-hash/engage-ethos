@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Mail, 
@@ -59,6 +60,7 @@ const phaseBorderColors: Record<StrategyPhase, string> = {
 
 export function JourneyViewer({ journey, allowGeneration = true }: JourneyViewerProps) {
   const { toast } = useToast();
+  const { config: institutionalConfig } = useInstitutionalConfig();
   const [generatingIndex, setGeneratingIndex] = useState<number | null>(null);
   const [generatedMessage, setGeneratedMessage] = useState<string | null>(null);
   const [selectedTouchpoint, setSelectedTouchpoint] = useState<JourneyTouchpoint | null>(null);
@@ -90,7 +92,8 @@ export function JourneyViewer({ journey, allowGeneration = true }: JourneyViewer
             behavioralNudge: touchpoint.behavioralNudge,
             week: touchpoint.week,
             phase: touchpoint.phase,
-          }
+          },
+          institutionalConfig
         }
       });
 

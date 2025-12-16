@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { format } from "date-fns";
 import { Header } from "@/components/Header";
 import { ContextSelector } from "@/components/ContextSelector";
 import { MessageInput } from "@/components/MessageInput";
@@ -8,16 +9,23 @@ import { LibraryNav } from "@/components/LibraryNav";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { AIBadge } from "@/components/ui/ai-indicator";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
-import { ArrowLeft, ArrowRight, FileText, AlertCircle, Save, RefreshCw } from "lucide-react";
+import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
+import { cn } from "@/lib/utils";
+import { ArrowLeft, ArrowRight, FileText, AlertCircle, Save, RefreshCw, CalendarIcon, Clock } from "lucide-react";
 import { evaluateMessage } from "@/lib/evaluateMessage";
-import type { MessageContext, EvaluationResult, InstitutionalConfig } from "@/types/persist";
+import type { MessageContext, EvaluationResult } from "@/types/persist";
 
 const EvaluatePage = () => {
   const { toast } = useToast();
   const { addMessage } = useMessageLibrary();
+  const { config: institutionalConfig } = useInstitutionalConfig();
   const [messageContent, setMessageContent] = useState("");
   const [context, setContext] = useState<MessageContext>({
     audience: 'first-year',
@@ -37,7 +45,7 @@ const EvaluatePage = () => {
     setEvaluationResult(null);
     
     try {
-      const result = await evaluateMessage(messageContent, context);
+      const result = await evaluateMessage(messageContent, context, institutionalConfig);
       setEvaluationResult(result);
       
       if (autoSave) {
@@ -132,6 +140,69 @@ const EvaluatePage = () => {
                 value={messageContent} 
                 onChange={setMessageContent} 
               />
+
+              {/* Urgency & Deadline Section */}
+              <div className="space-y-3 pt-2 border-t border-border">
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-destructive" />
+                  Urgency & Deadline (Optional)
+                </Label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="urgency-label-eval" className="text-xs text-muted-foreground">Deadline Label</Label>
+                    <Input
+                      id="urgency-label-eval"
+                      placeholder="e.g., Registration Deadline"
+                      value={context.urgencyLabel || ''}
+                      onChange={(e) => setContext({ ...context, urgencyLabel: e.target.value })}
+                      className="bg-background"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Due Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !context.dueDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {context.dueDate ? format(new Date(context.dueDate), "PPP") : "Pick due date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={context.dueDate ? new Date(context.dueDate) : undefined}
+                          onSelect={(date) => setContext({ ...context, dueDate: date?.toISOString() })}
+                          initialFocus
+                          className="p-3 pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  {context.dueDate && (
+                    <div className="flex items-end">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setContext({ ...context, dueDate: undefined, urgencyLabel: undefined })}
+                        className="text-muted-foreground"
+                      >
+                        Clear deadline
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                {context.dueDate && (
+                  <p className="text-xs text-muted-foreground">
+                    Evaluation will consider countdown language and urgency relative to this deadline.
+                  </p>
+                )}
+              </div>
               
               {!canProcess && messageContent.length > 0 && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">

@@ -47,6 +47,19 @@ Formatting guidelines:
         "phone-call": "Phone call script talking points. Bullet format. Include greeting, key message, and closing."
       };
 
+      // Build institutional config string for prompts
+      const instConfigStr = institutionalConfig ? `
+INSTITUTIONAL VOICE & BRANDING:
+${institutionalConfig.institutionName ? `- Institution: ${institutionalConfig.institutionName}` : ""}
+${institutionalConfig.mascot ? `- Mascot: ${institutionalConfig.mascot}` : ""}
+${institutionalConfig.slogans?.length ? `- Spirit phrases: ${institutionalConfig.slogans.join(", ")}` : ""}
+${institutionalConfig.supportCenters?.length ? `- Support resources: ${institutionalConfig.supportCenters.join(", ")}` : ""}
+${institutionalConfig.primaryCTAs?.length ? `- Use CTA style like: ${institutionalConfig.primaryCTAs[0]}` : ""}
+${institutionalConfig.preferredPhrases?.length ? `- Preferred phrases: ${institutionalConfig.preferredPhrases.join(", ")}` : ""}
+${institutionalConfig.wordsToAvoid?.length ? `- Words to AVOID: ${institutionalConfig.wordsToAvoid.join(", ")}` : ""}
+${institutionalConfig.toneRules?.length ? `- Tone guidelines: ${institutionalConfig.toneRules.join(", ")}` : ""}
+${institutionalConfig.signatureTemplates?.length ? `- Sign off with: ${institutionalConfig.signatureTemplates[0]}` : ""}` : "";
+
       // Handle multi-channel generation if channels array is provided
       if (channels && Array.isArray(channels) && channels.length > 0) {
         const channelPrompts = channels.map((ch: string) => `
@@ -73,6 +86,7 @@ ${context ? `AUDIENCE CONTEXT:
 - Communication Moment: ${context.moment || "general"}
 ${context.department ? `- Department: ${context.department}` : ""}
 ${context.cohort ? `- Cohort: ${context.cohort}` : ""}` : ""}
+${instConfigStr}
 
 GENERATE MESSAGES FOR THESE CHANNELS:
 ${channelPrompts}
@@ -100,6 +114,7 @@ TOUCHPOINT DETAILS:
 - Tone: ${touchpoint.tone}
 - Domain: ${touchpoint.domain}
 ${touchpoint.behavioralNudge ? `- Behavioral Nudge to incorporate: ${touchpoint.behavioralNudge}` : ""}
+${instConfigStr}
 
 FORMAT REQUIREMENTS:
 ${channelGuides[channel] || "Professional message appropriate for the channel."}
@@ -110,6 +125,7 @@ Generate a complete, ready-to-use message that:
 3. Uses a ${touchpoint.tone} tone
 4. Is relevant to ${touchpoint.domain}
 ${touchpoint.behavioralNudge ? `5. Subtly incorporates the behavioral nudge: "${touchpoint.behavioralNudge}"` : ""}
+${institutionalConfig?.institutionName ? `6. Reflects the voice and branding of ${institutionalConfig.institutionName}` : ""}
 
 Return ONLY the message content, no explanations or JSON formatting.`;
       }
@@ -140,6 +156,11 @@ Generate a complete message that:
 
 Return ONLY the message content, no explanations.`;
     } else if (type === "builder") {
+      // Calculate days until deadline if provided
+      const daysUntilDeadline = context?.dueDate 
+        ? Math.ceil((new Date(context.dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) 
+        : null;
+      
       userPrompt = `Generate a personalized student message based on the following context:
 
 - Channel: ${context.channel}
@@ -149,17 +170,28 @@ ${context.domain ? `- Domain: ${context.domain}` : ""}
 ${context.goal ? `- Goal: ${context.goal}` : ""}
 ${context.tone ? `- Tone: ${context.tone}` : ""}
 ${context.cohort ? `- Cohort: ${context.cohort}` : ""}
+${context.dueDate ? `
+URGENCY & DEADLINE:
+- Deadline Label: ${context.urgencyLabel || "Deadline"}
+- Due Date: ${context.dueDate}
+- Days Until Deadline: ${daysUntilDeadline} days
+- IMPORTANT: Incorporate countdown urgency language naturally. Reference the deadline explicitly.` : ""}
 
 ${institutionalConfig?.institutionName ? `Institution: ${institutionalConfig.institutionName}` : ""}
 ${institutionalConfig?.mascot ? `Mascot: ${institutionalConfig.mascot}` : ""}
 ${institutionalConfig?.supportCenters?.length ? `Support Centers: ${institutionalConfig.supportCenters.join(", ")}` : ""}
 ${institutionalConfig?.primaryCTAs?.length ? `Use CTA style like: ${institutionalConfig.primaryCTAs[0]}` : ""}
+${institutionalConfig?.preferredPhrases?.length ? `Preferred phrases to use: ${institutionalConfig.preferredPhrases.join(", ")}` : ""}
+${institutionalConfig?.wordsToAvoid?.length ? `Words/phrases to avoid: ${institutionalConfig.wordsToAvoid.join(", ")}` : ""}
+${institutionalConfig?.toneRules?.length ? `Tone guidelines: ${institutionalConfig.toneRules.join(", ")}` : ""}
+${institutionalConfig?.signatureTemplates?.length ? `Sign off with: ${institutionalConfig.signatureTemplates[0]}` : ""}
 
 Generate a complete, ready-to-send message that:
 1. Is appropriate for the ${context.channel} channel
 2. Speaks directly to ${context.audience} students
 3. Is relevant for the ${context.moment} timing
 4. Has a clear purpose and call-to-action
+${context.dueDate ? `5. Includes deadline urgency referencing "${context.urgencyLabel || "the deadline"}" on ${context.dueDate} (${daysUntilDeadline} days away)` : ""}
 
 Return ONLY the message content.`;
     }

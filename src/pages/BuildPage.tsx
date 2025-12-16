@@ -17,6 +17,7 @@ import { AIBadge } from "@/components/ui/ai-indicator";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
+import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
 import { CreateTemplateDialog } from "@/components/library/CreateTemplateDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -57,6 +58,7 @@ const BuildPage = () => {
   const { toast } = useToast();
   const { addMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
+  const { config: institutionalConfig } = useInstitutionalConfig();
   const [context, setContext] = useState<MessageContext>({
     audience: 'first-year',
     moment: 'early-term',
@@ -98,7 +100,7 @@ const BuildPage = () => {
     try {
       // Use selected channels in context
       const contextWithChannels = { ...context, channel: selectedChannels[0], channels: selectedChannels };
-      const result = await buildMessage(contextWithChannels);
+      const result = await buildMessage(contextWithChannels, institutionalConfig);
       setBuilderResult(result);
       setDrafts(result.drafts);
       setActiveDraft(0);
@@ -146,7 +148,7 @@ const BuildPage = () => {
     try {
       const contextWithChannels = { ...context, channel: selectedChannels[0], channels: selectedChannels };
       const { data, error } = await supabase.functions.invoke('generate-message', {
-        body: { type: 'builder', context: contextWithChannels }
+        body: { type: 'builder', context: contextWithChannels, institutionalConfig }
       });
 
       if (error) throw error;
