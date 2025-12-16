@@ -256,7 +256,7 @@ const Index = () => {
                   </div>
                   <h3 className="font-semibold mb-2">Student-Centered</h3>
                   <p className="text-sm text-muted-foreground">
-                    Built for enrollment, retention, and student success teams.
+                    Built for university communicators and marketing teams.
                   </p>
                 </CardContent>
               </Card>
