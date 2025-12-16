@@ -9,7 +9,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import type { SharedTemplate } from "@/types/library";
-import { Copy, Download, CheckCircle, AlertTriangle, Users, Lightbulb, ShieldCheck, Edit3 } from "lucide-react";
+import { JourneyViewer, isJourneyContent, parseJourneyContent } from "./JourneyViewer";
+import { Copy, Download, CheckCircle, AlertTriangle, Users, Lightbulb, ShieldCheck, Edit3, Map } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -84,6 +85,8 @@ export function TemplateDetailDialog({ template, open, onOpenChange, onPull }: T
   }, [template.placeholders, placeholderValues]);
 
   const usageHistory = useMemo(() => generateMockUsage(template.id), [template.id]);
+  const isJourney = useMemo(() => isJourneyContent(template.content), [template.content]);
+  const journeyData = useMemo(() => isJourney ? parseJourneyContent(template.content) : null, [template.content, isJourney]);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(customizedContent);
@@ -128,20 +131,30 @@ export function TemplateDetailDialog({ template, open, onOpenChange, onPull }: T
           <TabsContent value="template" className="mt-4">
             <ScrollArea className="h-[400px]">
               <div className="space-y-4">
-                {/* Live Preview */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <Label className="text-sm font-medium">Live Preview</Label>
-                    {!allRequiredFilled && (
-                      <Badge variant="outline" className="text-xs">
-                        Fill placeholders in Customize tab
-                      </Badge>
-                    )}
+                {/* Journey or Message Preview */}
+                {isJourney && journeyData ? (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Map className="w-4 h-4 text-primary" />
+                      <Label className="text-sm font-medium">Strategy Journey</Label>
+                    </div>
+                    <JourneyViewer journey={journeyData} />
                   </div>
-                  <div className="bg-muted rounded-lg p-4 border-2 border-dashed border-border">
-                    <pre className="whitespace-pre-wrap text-sm font-sans">{customizedContent}</pre>
+                ) : (
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <Label className="text-sm font-medium">Live Preview</Label>
+                      {!allRequiredFilled && (
+                        <Badge variant="outline" className="text-xs">
+                          Fill placeholders in Customize tab
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="bg-muted rounded-lg p-4 border-2 border-dashed border-border">
+                      <pre className="whitespace-pre-wrap text-sm font-sans">{customizedContent}</pre>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Use Cases */}
                 <Card>
