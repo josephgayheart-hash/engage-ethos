@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import type { SavedMessage } from "@/types/library";
 import { JourneyViewer, isJourneyContent, parseJourneyContent } from "./JourneyViewer";
 import { CheckCircle, Copy, Trash2, History, Map } from "lucide-react";
@@ -64,6 +65,9 @@ export function MessageDetailDialog({ message, open, onOpenChange, onApprove, on
               ) : (
                 <div className="bg-muted rounded-lg p-4 mb-4">
                   <pre className="whitespace-pre-wrap text-sm font-sans">{message.content}</pre>
+                  {message.channel === 'sms' && (
+                    <SmsCharCounter text={message.content} className="mt-3" />
+                  )}
                 </div>
               )}
             </ScrollArea>
