@@ -16,6 +16,7 @@ import { AIBadge } from "@/components/ui/ai-indicator";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
+import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target } from "lucide-react";
 import { mapMessages } from "@/lib/evaluateMessage";
@@ -34,6 +35,7 @@ const StrategyPage = () => {
   const { toast } = useToast();
   const { addMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
+  const { config: institutionalConfig } = useInstitutionalConfig();
   const [context, setContext] = useState<MessageContext>({
     audience: 'first-year',
     moment: 'early-term',
@@ -98,7 +100,7 @@ const StrategyPage = () => {
       const contextWithChannels = { ...context, channel: selectedChannels[0], channels: selectedChannels };
       const result = await mapMessages(
         contextWithChannels, 
-        undefined, 
+        institutionalConfig, 
         journeyWeeks,
         startDate?.toISOString(),
         endDate?.toISOString()
