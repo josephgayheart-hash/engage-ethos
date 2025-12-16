@@ -6,8 +6,17 @@ import { Label } from '@/components/ui/label';
 import { Lock } from 'lucide-react';
 import persistLogo from '@/assets/persist-logo.png';
 
-const APP_PASSWORD = 'persist2024';
+const DEFAULT_PASSWORD = 'persist2024';
+const PASSWORD_STORAGE_KEY = 'persist_app_password';
 const AUTH_STORAGE_KEY = 'persist_app_authenticated';
+
+export const getAppPassword = (): string => {
+  return localStorage.getItem(PASSWORD_STORAGE_KEY) || DEFAULT_PASSWORD;
+};
+
+export const setAppPassword = (newPassword: string): void => {
+  localStorage.setItem(PASSWORD_STORAGE_KEY, newPassword);
+};
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -43,7 +52,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const handlePasswordSubmit = () => {
-    if (passwordInput === APP_PASSWORD) {
+    if (passwordInput === getAppPassword()) {
       setIsAuthenticated(true);
       setPasswordError(false);
       sessionStorage.setItem(AUTH_STORAGE_KEY, 'true');

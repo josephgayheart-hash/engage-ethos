@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useToast } from "@/hooks/use-toast";
+import { getAppPassword, setAppPassword } from "@/contexts/AuthContext";
 import { 
   ArrowLeft,
   Plus, 
@@ -31,7 +32,8 @@ import {
   ChevronRight,
   Lock,
   AlertTriangle,
-  RefreshCw
+  RefreshCw,
+  Key
 } from "lucide-react";
 import type { SharedTemplate, LibraryEntryStatus } from "@/types/library";
 
@@ -50,6 +52,8 @@ const AdminPanel = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<SharedTemplate | null>(null);
   const [clearPersonalOpen, setClearPersonalOpen] = useState(false);
   const [clearSharedOpen, setClearSharedOpen] = useState(false);
+  const [newAppPassword, setNewAppPassword] = useState('');
+  const [confirmAppPassword, setConfirmAppPassword] = useState('');
   
   // Form state for quick create
   const [quickTitle, setQuickTitle] = useState('');
@@ -92,6 +96,25 @@ const AdminPanel = () => {
   const handleResetSharedToDefaults = () => {
     resetToDefaults();
     toast({ title: "Shared Library reset", description: "Default templates have been restored." });
+  };
+
+  const handleUpdateAppPassword = () => {
+    if (!newAppPassword || !confirmAppPassword) {
+      toast({ variant: "destructive", title: "Missing fields", description: "Please enter and confirm the new password." });
+      return;
+    }
+    if (newAppPassword !== confirmAppPassword) {
+      toast({ variant: "destructive", title: "Passwords don't match", description: "Please make sure both passwords match." });
+      return;
+    }
+    if (newAppPassword.length < 4) {
+      toast({ variant: "destructive", title: "Password too short", description: "Password must be at least 4 characters." });
+      return;
+    }
+    setAppPassword(newAppPassword);
+    setNewAppPassword('');
+    setConfirmAppPassword('');
+    toast({ title: "Password updated", description: "The application password has been changed." });
   };
 
   const toggleArrayItem = (arr: string[], setArr: (v: string[]) => void, item: string) => {
@@ -606,6 +629,48 @@ const AdminPanel = () => {
                       </div>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* Password Management */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="font-serif flex items-center gap-2">
+                    <Key className="w-5 h-5" />
+                    Application Password
+                  </CardTitle>
+                  <CardDescription>Update the password required to access PERSIST</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="new-password">New Password</Label>
+                      <Input
+                        id="new-password"
+                        type="password"
+                        value={newAppPassword}
+                        onChange={(e) => setNewAppPassword(e.target.value)}
+                        placeholder="Enter new password"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirm-password">Confirm Password</Label>
+                      <Input
+                        id="confirm-password"
+                        type="password"
+                        value={confirmAppPassword}
+                        onChange={(e) => setConfirmAppPassword(e.target.value)}
+                        placeholder="Confirm new password"
+                      />
+                    </div>
+                  </div>
+                  <Button onClick={handleUpdateAppPassword} className="w-full md:w-auto">
+                    <Key className="w-4 h-4 mr-2" />
+                    Update Password
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    Note: Changing the password will not log out the current session, but will require the new password on next login.
+                  </p>
                 </CardContent>
               </Card>
             </TabsContent>
