@@ -215,6 +215,17 @@ const BuildPage = () => {
     setSubmitToSharedOpen(true);
   };
 
+  const handleContentChange = (channel: Channel, newContent: ChannelDrafts[keyof ChannelDrafts]) => {
+    if (!builderResult) return;
+    setBuilderResult({
+      ...builderResult,
+      channelDrafts: {
+        ...builderResult.channelDrafts,
+        [channel]: newContent,
+      },
+    });
+  };
+
   const handleSaveIndividualChannel = (channel: Channel, channelContent: ChannelDrafts[keyof ChannelDrafts], contentText: string) => {
     const channelLabel = channelOptions.find(c => c.value === channel)?.label || channel;
     const title = `${audienceLabels[context.audience || ''] || 'Message'} - ${channelLabel}`;
@@ -511,6 +522,7 @@ const BuildPage = () => {
                       channel={channel}
                       content={content}
                       onCopy={handleCopyContent}
+                      onContentChange={handleContentChange}
                       onSaveToLibrary={handleSaveIndividualChannel}
                     />
                   );

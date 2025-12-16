@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,6 +31,7 @@ interface ChannelPreviewProps {
   channel: Channel;
   content: ChannelDrafts[keyof ChannelDrafts];
   onCopy: (text: string) => void;
+  onContentChange?: (channel: Channel, content: ChannelDrafts[keyof ChannelDrafts]) => void;
   onSaveToLibrary?: (channel: Channel, content: ChannelDrafts[keyof ChannelDrafts], contentText: string) => void;
 }
 
@@ -54,10 +55,15 @@ const channelLabels: Record<Channel, string> = {
   'phone-call': 'Phone Script',
 };
 
-export function ChannelPreview({ channel, content, onCopy, onSaveToLibrary }: ChannelPreviewProps) {
+export function ChannelPreview({ channel, content, onCopy, onContentChange, onSaveToLibrary }: ChannelPreviewProps) {
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState<ChannelDrafts[keyof ChannelDrafts]>(content);
+
+  // Sync editedContent with parent content when it changes
+  useEffect(() => {
+    setEditedContent(content);
+  }, [content]);
 
   const handleCopy = (text: string) => {
     onCopy(text);
@@ -92,11 +98,19 @@ export function ChannelPreview({ channel, content, onCopy, onSaveToLibrary }: Ch
     return '';
   };
 
-  const handleSave = () => {
+  // Just commit edits locally, don't save to library
+  const handleCommitEdits = () => {
+    if (onContentChange) {
+      onContentChange(channel, editedContent);
+    }
+    setIsEditing(false);
+  };
+
+  // Separate action to save to library
+  const handleSaveToLibrary = () => {
     if (onSaveToLibrary) {
       onSaveToLibrary(channel, editedContent, getFullContent(editedContent));
     }
-    setIsEditing(false);
   };
 
   // Edit renderers for each channel type
@@ -420,10 +434,11 @@ export function ChannelPreview({ channel, content, onCopy, onSaveToLibrary }: Ch
                 <Button
                   variant="default"
                   size="sm"
-                  onClick={handleSave}
+                  onClick={handleCommitEdits}
+                  title="Save edits"
                 >
-                  <FolderPlus className="w-4 h-4 mr-1" />
-                  Save
+                  <Check className="w-4 h-4 mr-1" />
+                  Done
                 </Button>
               </>
             ) : (
@@ -432,14 +447,24 @@ export function ChannelPreview({ channel, content, onCopy, onSaveToLibrary }: Ch
                   variant="ghost"
                   size="sm"
                   onClick={handleStartEdit}
-                  title="Edit & Save to Library"
+                  title="Edit content"
                 >
                   <Pencil className="w-4 h-4" />
                 </Button>
+                {onSaveToLibrary && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleSaveToLibrary}
+                    title="Save to Personal Library"
+                  >
+                    <FolderPlus className="w-4 h-4" />
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleCopy(getFullContent(content))}
+                  onClick={() => handleCopy(getFullContent(editedContent))}
                 >
                   {copied ? (
                     <Check className="w-4 h-4 text-green-600" />
