@@ -6,7 +6,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Users, Clock, Mail, Briefcase, Target, MessageSquare } from "lucide-react";
+import { Users, Clock, Mail, Briefcase, Target, MessageSquare, Building2 } from "lucide-react";
 import type { 
   MessageContext, 
   AudienceType, 
@@ -16,7 +16,8 @@ import type {
   MessageDomain,
   PrimaryGoal,
   TonePreference,
-  OperationMode
+  OperationMode,
+  Department
 } from "@/types/persist";
 
 interface ContextSelectorProps {
@@ -24,6 +25,18 @@ interface ContextSelectorProps {
   onChange: (context: MessageContext) => void;
   mode?: OperationMode;
 }
+
+const departmentOptions: { value: Department; label: string }[] = [
+  { value: 'central-marketing', label: 'Central Marketing' },
+  { value: 'executive-comms', label: 'Executive Communications' },
+  { value: 'enrollment-management', label: 'Enrollment Management' },
+  { value: 'registrar', label: 'Registrar' },
+  { value: 'college-communications', label: 'College Communications' },
+  { value: 'student-success', label: 'Student Success' },
+  { value: 'recruitment', label: 'Recruitment' },
+  { value: 'health-wellbeing', label: 'Health & Well-being' },
+  { value: 'advancement-alumni', label: 'Advancement & Alumni' },
+];
 
 const audienceOptions: { value: AudienceType; label: string }[] = [
   { value: 'prospective', label: 'Prospective Student' },
@@ -76,6 +89,8 @@ const channelOptions: { value: Channel; label: string }[] = [
 ];
 
 const domainOptions: { value: MessageDomain; label: string }[] = [
+  { value: 'admissions', label: 'Admissions' },
+  { value: 'recruitment', label: 'Recruitment' },
   { value: 'academic', label: 'Academic' },
   { value: 'financial', label: 'Financial Aid' },
   { value: 'wellbeing', label: 'Health & Wellbeing' },
@@ -90,14 +105,18 @@ const domainOptions: { value: MessageDomain; label: string }[] = [
 ];
 
 const goalOptions: { value: PrimaryGoal; label: string }[] = [
+  { value: 'inquiry', label: 'Inquiry (lead generation)' },
+  { value: 'apply', label: 'Apply (application push)' },
+  { value: 'yield', label: 'Yield (deposit/commit)' },
+  { value: 'confirm', label: 'Confirm (enrollment confirmation)' },
+  { value: 'enroll', label: 'Enroll (registration)' },
   { value: 'persist', label: 'Persist (retention)' },
   { value: 'attend', label: 'Attend (event/class)' },
   { value: 'submit', label: 'Submit (form/document)' },
   { value: 'respond', label: 'Respond (reply/contact)' },
   { value: 'check-in', label: 'Check-in (welfare)' },
   { value: 'donate', label: 'Donate (giving)' },
-  { value: 'register', label: 'Register (enrollment)' },
-  { value: 'enroll', label: 'Enroll (commit)' },
+  { value: 'register', label: 'Register (course/event)' },
 ];
 
 const toneOptions: { value: TonePreference; label: string }[] = [
@@ -213,7 +232,31 @@ export function ContextSelector({ context, onChange, mode = 'evaluator' }: Conte
       </div>
 
       {showExtendedOptions && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-2 border-t border-border">
+          <div className="space-y-2">
+            <Label htmlFor="department" className="flex items-center gap-2 text-sm font-medium">
+              <Building2 className="w-4 h-4 text-primary" />
+              Department
+            </Label>
+            <Select
+              value={context.department || ''}
+              onValueChange={(value: Department) =>
+                onChange({ ...context, department: value || undefined })
+              }
+            >
+              <SelectTrigger id="department" className="w-full bg-background">
+                <SelectValue placeholder="Select department" />
+              </SelectTrigger>
+              <SelectContent>
+                {departmentOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="domain" className="flex items-center gap-2 text-sm font-medium">
               <MessageSquare className="w-4 h-4 text-secondary" />

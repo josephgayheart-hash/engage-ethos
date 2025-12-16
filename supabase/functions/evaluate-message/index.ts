@@ -189,13 +189,28 @@ serve(async (req) => {
 
     const contextStr = `
 CONTEXT:
+- Department: ${context.department || 'Not specified'}
 - Audience Type: ${context.audience}
 - Cohort: ${context.cohort || 'Not specified'}
 - Communication Moment: ${context.moment}
 - Channel: ${context.channel}
 - Domain: ${context.domain || 'Not specified'}
 - Primary Goal: ${context.goal || 'Not specified'}
-- Tone Preference: ${context.tone || 'Not specified'}`;
+- Tone Preference: ${context.tone || 'Not specified'}
+
+DEPARTMENT CONTEXT GUIDANCE:
+${context.department === 'enrollment-management' || context.department === 'recruitment' ? 
+  '- Focus on conversion-oriented messaging (inquiry → application → yield → enrollment)' : ''}
+${context.department === 'student-success' ? 
+  '- Focus on retention, persistence, and support-oriented messaging' : ''}
+${context.department === 'advancement-alumni' ? 
+  '- Focus on engagement, stewardship, and giving-oriented messaging' : ''}
+${context.department === 'central-marketing' ? 
+  '- Focus on brand-consistent, multi-channel campaign messaging' : ''}
+${context.department === 'registrar' ? 
+  '- Focus on compliance, deadlines, and procedural clarity' : ''}
+${context.department === 'health-wellbeing' ? 
+  '- Focus on supportive, non-judgmental, resource-oriented messaging' : ''}`;
 
     const institutionalStr = institutionalConfig ? `
 
