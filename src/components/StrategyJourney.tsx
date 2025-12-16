@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { AIIndicator } from "@/components/ui/ai-indicator";
 import { useToast } from "@/hooks/use-toast";
+import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Mail, 
@@ -30,6 +31,8 @@ import type { StrategyJourney, Channel, StrategyPhase, JourneyTouchpoint, Messag
 interface StrategyJourneyProps {
   journey: StrategyJourney;
   context: MessageContext;
+  startDate?: string;
+  endDate?: string;
 }
 
 interface GeneratedMessage {
@@ -282,8 +285,9 @@ function TouchpointCard({
 }
 
 
-export function StrategyJourneyDisplay({ journey, context }: StrategyJourneyProps) {
+export function StrategyJourneyDisplay({ journey, context, startDate, endDate }: StrategyJourneyProps) {
   const { toast } = useToast();
+  const { config: institutionalConfig } = useInstitutionalConfig();
   const [generatedMessages, setGeneratedMessages] = useState<GeneratedMessage[]>([]);
   const [isGenerating, setIsGenerating] = useState<number | null>(null);
 
@@ -304,6 +308,9 @@ export function StrategyJourneyDisplay({ journey, context }: StrategyJourneyProp
           touchpoint,
           channels,
           context,
+          institutionalConfig,
+          startDate,
+          endDate,
         }
       });
 
