@@ -244,7 +244,7 @@ const Index = () => {
                   </div>
                   <h3 className="font-semibold mb-2">Research-Grounded</h3>
                   <p className="text-sm text-muted-foreground">
-                    Built on Cialdini's persuasion principles, ELM theory, Kaptein's susceptibility research, and higher ed-specific behavioral studies.
+                    Powered by Cialdini, ELM, and Kaptein's persuasion research.
                   </p>
                 </CardContent>
               </Card>
@@ -256,7 +256,7 @@ const Index = () => {
                   </div>
                   <h3 className="font-semibold mb-2">Student-Centered</h3>
                   <p className="text-sm text-muted-foreground">
-                    Designed for enrollment, retention, and student success teams who need messages that resonate.
+                    Built for enrollment, retention, and student success teams.
                   </p>
                 </CardContent>
               </Card>
@@ -268,7 +268,7 @@ const Index = () => {
                   </div>
                   <h3 className="font-semibold mb-2">Shared Libraries</h3>
                   <p className="text-sm text-muted-foreground">
-                    Save messages, share templates enterprise-wide, and build institution-approved playbooks for consistent outreach.
+                    Save, share, and reuse institution-approved playbooks.
                   </p>
                 </CardContent>
               </Card>
@@ -278,9 +278,9 @@ const Index = () => {
                   <div className="w-12 h-12 rounded-full bg-pillar-ethics/10 flex items-center justify-center mx-auto mb-4">
                     <Settings className="w-6 h-6 text-pillar-ethics" />
                   </div>
-                  <h3 className="font-semibold mb-2">Your Institution's Voice</h3>
+                  <h3 className="font-semibold mb-2">Your Voice</h3>
                   <p className="text-sm text-muted-foreground">
-                    Customize naming conventions, terminology, links, and tone rules to match your institution's brand.
+                    Customize terminology, naming, and brand tone.
                   </p>
                 </CardContent>
               </Card>
