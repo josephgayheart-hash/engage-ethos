@@ -12,27 +12,89 @@ export interface InstitutionalProfile {
 const STORAGE_KEY = 'persist_institutional_profiles';
 
 const createEmptyConfig = (): InstitutionalConfig => ({
+  // Identity
+  institutionName: '',
+  institutionAbbreviation: '',
+  mascot: '',
+  slogans: [],
+  
+  // Systems
+  portalName: '',
+  lmsName: '',
+  emailDomain: '',
+  advisingSystemName: '',
+  schedulingSystemName: '',
+  degreeAuditSystem: '',
+  financialAidPortal: '',
+  registrationSystem: '',
+  virtualMeetingPlatform: '',
+  
+  // Locations
   buildingNames: [],
   programNames: [],
   supportCenters: [],
-  mascot: '',
-  slogans: [],
+  libraryName: '',
+  tutorCenter: '',
+  writingCenter: '',
+  mathCenter: '',
+  careerCenter: '',
+  counselingCenter: '',
+  healthCenter: '',
+  fitnessCenter: '',
+  diningHall: '',
+  campusTerms: [],
+  defaultMeetingLocation: '',
+  
+  // Offices
+  registrarOffice: '',
+  financialAidOffice: '',
+  admissionsOffice: '',
+  bursarOffice: '',
+  itHelpDesk: '',
+  housingOffice: '',
+  studentAffairsOffice: '',
+  internationalOffice: '',
+  disabilityServices: '',
+  veteransServices: '',
+  
+  // People
   leaderNames: [],
   advisorTitles: [],
   staffTitles: [],
-  toneRules: [],
-  wordsToAvoid: [],
-  preferredPhrases: [],
-  primaryCTAs: [],
-  secondaryCTAs: [],
-  urgentCTAs: [],
-  signatureTemplates: [],
-  importantDates: [],
+  defaultAdvisorName: '',
+  studentIdTerm: '',
+  
+  // Contact
+  primaryContactEmail: '',
+  primaryContactPhone: '',
+  advisingEmail: '',
+  generalHelpEmail: '',
+  emergencyPhone: '',
+  textAlertNumber: '',
+  websiteLinks: [],
+  socialMediaHandles: [],
+  appointmentLink: '',
+  
+  // Terms
   academicTerms: [],
   gradingTerms: [],
   enrollmentTerms: [],
-  websiteLinks: [],
-  socialMediaHandles: [],
+  currentTermName: '',
+  nextTermName: '',
+  officeHoursFormat: '',
+  timeZone: '',
+  
+  // CTAs
+  primaryCTAs: [],
+  secondaryCTAs: [],
+  urgentCTAs: [],
+  
+  // Style
+  signatureTemplates: [],
+  toneRules: [],
+  wordsToAvoid: [],
+  preferredPhrases: [],
+  importantDates: [],
 });
 
 export function useInstitutionalProfiles() {

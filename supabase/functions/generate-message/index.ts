@@ -71,13 +71,50 @@ ${daysUntilDeadline ? `- Days Until Deadline: ${daysUntilDeadline} days remainin
         "phone-call": "Phone call script talking points. Bullet format. Include greeting, key message, and closing."
       };
 
-      // Build institutional config string for prompts
+      // Build comprehensive institutional config string for prompts
       const instConfigStr = institutionalConfig ? `
 INSTITUTIONAL VOICE & BRANDING:
-${institutionalConfig.institutionName ? `- Institution: ${institutionalConfig.institutionName}` : ""}
+${institutionalConfig.institutionName ? `- Institution: ${institutionalConfig.institutionName}${institutionalConfig.institutionAbbreviation ? ` (${institutionalConfig.institutionAbbreviation})` : ''}` : ""}
 ${institutionalConfig.mascot ? `- Mascot: ${institutionalConfig.mascot}` : ""}
 ${institutionalConfig.slogans?.length ? `- Spirit phrases: ${institutionalConfig.slogans.join(", ")}` : ""}
-${institutionalConfig.supportCenters?.length ? `- Support resources: ${institutionalConfig.supportCenters.join(", ")}` : ""}
+
+DIGITAL PLATFORMS (use these exact names):
+${institutionalConfig.portalName ? `- Student Portal: ${institutionalConfig.portalName}` : ""}
+${institutionalConfig.lmsName ? `- LMS/Course System: ${institutionalConfig.lmsName}` : ""}
+${institutionalConfig.advisingSystemName ? `- Advising System: ${institutionalConfig.advisingSystemName}` : ""}
+${institutionalConfig.schedulingSystemName ? `- Scheduling: ${institutionalConfig.schedulingSystemName}` : ""}
+${institutionalConfig.degreeAuditSystem ? `- Degree Audit: ${institutionalConfig.degreeAuditSystem}` : ""}
+${institutionalConfig.financialAidPortal ? `- Financial Aid Portal: ${institutionalConfig.financialAidPortal}` : ""}
+${institutionalConfig.registrationSystem ? `- Registration: ${institutionalConfig.registrationSystem}` : ""}
+${institutionalConfig.virtualMeetingPlatform ? `- Virtual Meetings: ${institutionalConfig.virtualMeetingPlatform}` : ""}
+
+CAMPUS LOCATIONS & OFFICES:
+${institutionalConfig.supportCenters?.length ? `- Support Resources: ${institutionalConfig.supportCenters.join(", ")}` : ""}
+${institutionalConfig.libraryName ? `- Library: ${institutionalConfig.libraryName}` : ""}
+${institutionalConfig.tutorCenter ? `- Tutoring: ${institutionalConfig.tutorCenter}` : ""}
+${institutionalConfig.writingCenter ? `- Writing Help: ${institutionalConfig.writingCenter}` : ""}
+${institutionalConfig.mathCenter ? `- Math Help: ${institutionalConfig.mathCenter}` : ""}
+${institutionalConfig.careerCenter ? `- Career Services: ${institutionalConfig.careerCenter}` : ""}
+${institutionalConfig.counselingCenter ? `- Counseling: ${institutionalConfig.counselingCenter}` : ""}
+${institutionalConfig.healthCenter ? `- Health Services: ${institutionalConfig.healthCenter}` : ""}
+${institutionalConfig.registrarOffice ? `- Registrar: ${institutionalConfig.registrarOffice}` : ""}
+${institutionalConfig.financialAidOffice ? `- Financial Aid Office: ${institutionalConfig.financialAidOffice}` : ""}
+${institutionalConfig.itHelpDesk ? `- IT Support: ${institutionalConfig.itHelpDesk}` : ""}
+${institutionalConfig.defaultMeetingLocation ? `- Default Meeting Location: ${institutionalConfig.defaultMeetingLocation}` : ""}
+
+CONTACT INFORMATION:
+${institutionalConfig.primaryContactEmail ? `- Email: ${institutionalConfig.primaryContactEmail}` : ""}
+${institutionalConfig.primaryContactPhone ? `- Phone: ${institutionalConfig.primaryContactPhone}` : ""}
+${institutionalConfig.advisingEmail ? `- Advising Email: ${institutionalConfig.advisingEmail}` : ""}
+${institutionalConfig.appointmentLink ? `- Booking Link: ${institutionalConfig.appointmentLink}` : ""}
+${institutionalConfig.officeHoursFormat ? `- Office Hours: ${institutionalConfig.officeHoursFormat}` : ""}
+
+TERMINOLOGY:
+${institutionalConfig.studentIdTerm ? `- Student ID called: ${institutionalConfig.studentIdTerm}` : ""}
+${institutionalConfig.currentTermName ? `- Current term: ${institutionalConfig.currentTermName}` : ""}
+${institutionalConfig.nextTermName ? `- Next term: ${institutionalConfig.nextTermName}` : ""}
+
+MESSAGING STYLE:
 ${institutionalConfig.primaryCTAs?.length ? `- Use CTA style like: ${institutionalConfig.primaryCTAs[0]}` : ""}
 ${institutionalConfig.preferredPhrases?.length ? `- Preferred phrases: ${institutionalConfig.preferredPhrases.join(", ")}` : ""}
 ${institutionalConfig.wordsToAvoid?.length ? `- Words to AVOID: ${institutionalConfig.wordsToAvoid.join(", ")}` : ""}
@@ -205,14 +242,20 @@ URGENCY & DEADLINE:
 - Days Until Deadline: ${daysUntilDeadline} days
 - IMPORTANT: Incorporate countdown urgency language naturally. Reference the deadline explicitly.` : ""}
 
-${institutionalConfig?.institutionName ? `Institution: ${institutionalConfig.institutionName}` : ""}
+INSTITUTIONAL CONFIG:
+${institutionalConfig?.institutionName ? `Institution: ${institutionalConfig.institutionName}${institutionalConfig.institutionAbbreviation ? ` (${institutionalConfig.institutionAbbreviation})` : ''}` : ""}
 ${institutionalConfig?.mascot ? `Mascot: ${institutionalConfig.mascot}` : ""}
+${institutionalConfig?.portalName ? `Student Portal: ${institutionalConfig.portalName}` : ""}
+${institutionalConfig?.lmsName ? `LMS: ${institutionalConfig.lmsName}` : ""}
+${institutionalConfig?.advisingSystemName ? `Advising System: ${institutionalConfig.advisingSystemName}` : ""}
 ${institutionalConfig?.supportCenters?.length ? `Support Centers: ${institutionalConfig.supportCenters.join(", ")}` : ""}
 ${institutionalConfig?.primaryCTAs?.length ? `Use CTA style like: ${institutionalConfig.primaryCTAs[0]}` : ""}
 ${institutionalConfig?.preferredPhrases?.length ? `Preferred phrases to use: ${institutionalConfig.preferredPhrases.join(", ")}` : ""}
 ${institutionalConfig?.wordsToAvoid?.length ? `Words/phrases to avoid: ${institutionalConfig.wordsToAvoid.join(", ")}` : ""}
 ${institutionalConfig?.toneRules?.length ? `Tone guidelines: ${institutionalConfig.toneRules.join(", ")}` : ""}
 ${institutionalConfig?.signatureTemplates?.length ? `Sign off with: ${institutionalConfig.signatureTemplates[0]}` : ""}
+${institutionalConfig?.appointmentLink ? `Appointment link: ${institutionalConfig.appointmentLink}` : ""}
+${institutionalConfig?.currentTermName ? `Current term: ${institutionalConfig.currentTermName}` : ""}
 
 Generate a complete, ready-to-send message that:
 1. Is appropriate for the ${context.channel} channel
@@ -228,13 +271,25 @@ Return ONLY the message content.`;
         ? Math.ceil((new Date(context.dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) 
         : null;
 
+      // Build comprehensive institutional config for call scripts
       const instConfigStr = institutionalConfig ? `
 INSTITUTIONAL VOICE:
-${institutionalConfig.institutionName ? `- Institution: ${institutionalConfig.institutionName}` : ""}
+${institutionalConfig.institutionName ? `- Institution: ${institutionalConfig.institutionName}${institutionalConfig.institutionAbbreviation ? ` (${institutionalConfig.institutionAbbreviation})` : ''}` : ""}
 ${institutionalConfig.mascot ? `- Mascot: ${institutionalConfig.mascot}` : ""}
 ${institutionalConfig.supportCenters?.length ? `- Support resources to mention: ${institutionalConfig.supportCenters.join(", ")}` : ""}
 ${institutionalConfig.preferredPhrases?.length ? `- Preferred phrases: ${institutionalConfig.preferredPhrases.join(", ")}` : ""}
-${institutionalConfig.wordsToAvoid?.length ? `- Words to AVOID: ${institutionalConfig.wordsToAvoid.join(", ")}` : ""}` : "";
+${institutionalConfig.wordsToAvoid?.length ? `- Words to AVOID: ${institutionalConfig.wordsToAvoid.join(", ")}` : ""}
+
+SYSTEMS TO REFERENCE:
+${institutionalConfig.portalName ? `- Student Portal: ${institutionalConfig.portalName}` : ""}
+${institutionalConfig.advisingSystemName ? `- Advising System: ${institutionalConfig.advisingSystemName}` : ""}
+${institutionalConfig.schedulingSystemName ? `- Scheduling: ${institutionalConfig.schedulingSystemName}` : ""}
+
+KEY CONTACTS:
+${institutionalConfig.primaryContactPhone ? `- Main Phone: ${institutionalConfig.primaryContactPhone}` : ""}
+${institutionalConfig.advisingEmail ? `- Advising Email: ${institutionalConfig.advisingEmail}` : ""}
+${institutionalConfig.appointmentLink ? `- Booking Link: ${institutionalConfig.appointmentLink}` : ""}
+${institutionalConfig.officeHoursFormat ? `- Office Hours: ${institutionalConfig.officeHoursFormat}` : ""}` : "";
 
       userPrompt = `Generate a comprehensive phone call script template for student outreach. This script will be copied into a CRM or marketing system, so use "[Student]" as a placeholder for student names.
 

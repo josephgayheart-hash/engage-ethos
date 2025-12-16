@@ -187,23 +187,62 @@ export interface MapperResult {
 export interface InstitutionalConfig {
   // Branding & Identity
   institutionName?: string;
+  institutionAbbreviation?: string;
   mascot?: string;
   slogans?: string[];
+  
+  // Digital Platforms & Systems
+  portalName?: string;           // e.g., "MyUniversity Portal"
+  lmsName?: string;              // e.g., "Canvas", "Blackboard"
+  emailDomain?: string;          // e.g., "@university.edu"
+  advisingSystemName?: string;   // e.g., "Navigate", "Starfish"
+  schedulingSystemName?: string; // e.g., "Calendly", "Bookings"
+  degreeAuditSystem?: string;    // e.g., "DegreeWorks"
+  financialAidPortal?: string;   // e.g., "Financial Aid Self-Service"
+  registrationSystem?: string;   // e.g., "Student Registration Portal"
   
   // Locations & Facilities
   buildingNames?: string[];
   programNames?: string[];
   supportCenters?: string[];
+  libraryName?: string;
+  tutorCenter?: string;
+  writingCenter?: string;
+  mathCenter?: string;
+  careerCenter?: string;
+  counselingCenter?: string;
+  healthCenter?: string;
+  fitnessCenter?: string;
+  diningHall?: string;
+  
+  // Campus Geography
+  campusTerms?: string[];        // e.g., "quad", "commons", "student union"
+  defaultMeetingLocation?: string;
+  virtualMeetingPlatform?: string; // e.g., "Zoom", "Teams"
+  
+  // Offices & Departments
+  registrarOffice?: string;
+  financialAidOffice?: string;
+  admissionsOffice?: string;
+  bursarOffice?: string;
+  itHelpDesk?: string;
+  housingOffice?: string;
+  studentAffairsOffice?: string;
+  internationalOffice?: string;
+  disabilityServices?: string;
+  veteransServices?: string;
   
   // People & Roles
   leaderNames?: string[];
   advisorTitles?: string[];
   staffTitles?: string[];
+  defaultAdvisorName?: string;   // Placeholder name for templates
   
   // Naming Conventions
   studentAddressing?: 'first-name' | 'full-name' | 'formal';
   staffAddressing?: 'first-name' | 'title-last' | 'full-title';
   pronounPreference?: 'they' | 'he-she' | 'avoid';
+  studentIdTerm?: string;        // e.g., "Student ID", "University ID", "Banner ID"
   
   // Call to Actions
   primaryCTAs?: string[];
@@ -213,13 +252,24 @@ export interface InstitutionalConfig {
   // Contact & Resources
   primaryContactEmail?: string;
   primaryContactPhone?: string;
+  advisingEmail?: string;
+  generalHelpEmail?: string;
+  emergencyPhone?: string;
+  textAlertNumber?: string;
   websiteLinks?: string[];
   socialMediaHandles?: string[];
+  appointmentLink?: string;      // Direct booking URL
   
   // Academic Terms
   academicTerms?: string[];
   gradingTerms?: string[];
   enrollmentTerms?: string[];
+  currentTermName?: string;      // e.g., "Spring 2025"
+  nextTermName?: string;         // e.g., "Fall 2025"
+  
+  // Time & Scheduling
+  officeHoursFormat?: string;    // e.g., "Monday-Friday 8am-5pm"
+  timeZone?: string;             // e.g., "Eastern Time"
   
   // Signature Blocks
   signatureTemplates?: string[];
