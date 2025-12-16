@@ -230,20 +230,18 @@ export function JourneyViewer({ journey, allowGeneration = true }: JourneyViewer
                     </Badge>
                     {allowGeneration && (
                       <Button
-                        variant="ghost"
+                        variant="default"
                         size="sm"
-                        className="h-6 px-2 text-xs"
+                        className="h-7 px-3 text-xs bg-gradient-to-r from-secondary to-primary hover:from-secondary/90 hover:to-primary/90 text-primary-foreground shadow-md hover:shadow-lg transition-all"
                         onClick={() => handleGenerateMessage(touchpoint, index)}
                         disabled={generatingIndex === index}
                       >
                         {generatingIndex === index ? (
-                          <RefreshCw className="w-3 h-3 animate-spin" />
+                          <RefreshCw className="w-3 h-3 animate-spin mr-1" />
                         ) : (
-                          <>
-                            <Sparkles className="w-3 h-3 mr-1 text-secondary" />
-                            Generate
-                          </>
+                          <Sparkles className="w-3 h-3 mr-1" />
                         )}
+                        {generatingIndex === index ? 'Generating...' : 'Generate Copy'}
                       </Button>
                     )}
                   </div>
