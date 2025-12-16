@@ -642,6 +642,10 @@ const AdminPanel = () => {
                   <CardDescription>Update the password required to access PERSIST</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  <div className="p-3 rounded-lg bg-muted border">
+                    <Label className="text-xs text-muted-foreground">Current Password</Label>
+                    <p className="font-mono text-sm mt-1">{getAppPassword()}</p>
+                  </div>
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="new-password">New Password</Label>

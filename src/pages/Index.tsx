@@ -56,7 +56,7 @@ const Index = () => {
     },
     { 
       id: 'build', 
-      title: 'Build Message', 
+      title: 'Message Builder', 
       description: 'Generate new AI-powered messages based on context and audience',
       icon: PenTool,
       color: 'text-pillar-cognitive',
