@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { AIBadge } from "@/components/ui/ai-indicator";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
@@ -26,11 +28,22 @@ import {
   Ruler,
   FolderPlus,
   Library,
-  Trash2
+  Trash2,
+  Mail
 } from "lucide-react";
 import { buildMessage } from "@/lib/evaluateMessage";
 import { EvaluationResults } from "@/components/EvaluationResults";
-import type { MessageContext, BuilderResult, InstitutionalConfig } from "@/types/persist";
+import type { MessageContext, BuilderResult, InstitutionalConfig, Channel } from "@/types/persist";
+
+const channelOptions: { value: Channel; label: string }[] = [
+  { value: 'email', label: 'Email' },
+  { value: 'sms', label: 'SMS/Text' },
+  { value: 'social-media', label: 'Social Media' },
+  { value: 'portal', label: 'Portal' },
+  { value: 'landing-page', label: 'Landing Page' },
+  { value: 'direct-mail', label: 'Direct Mail' },
+  { value: 'phone-call', label: 'Phone Call' },
+];
 
 const BuildPage = () => {
   const { toast } = useToast();
@@ -41,6 +54,7 @@ const BuildPage = () => {
     moment: 'early-term',
     channel: 'email',
   });
+  const [selectedChannels, setSelectedChannels] = useState<Channel[]>(['email']);
   const [builderResult, setBuilderResult] = useState<BuilderResult | null>(null);
   const [drafts, setDrafts] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -52,7 +66,19 @@ const BuildPage = () => {
   const [submitToSharedOpen, setSubmitToSharedOpen] = useState(false);
   const [draftToSubmit, setDraftToSubmit] = useState('');
 
-  const canProcess = context.audience && context.moment && context.channel;
+  const canProcess = context.audience && context.moment && selectedChannels.length > 0;
+
+  const toggleChannel = (channel: Channel) => {
+    setSelectedChannels(prev => 
+      prev.includes(channel) 
+        ? prev.filter(c => c !== channel)
+        : [...prev, channel]
+    );
+  };
+
+  const selectAllChannels = () => {
+    setSelectedChannels(channelOptions.map(c => c.value));
+  };
 
   const handleBuild = async () => {
     if (!canProcess) return;
@@ -62,7 +88,9 @@ const BuildPage = () => {
     setDrafts([]);
     
     try {
-      const result = await buildMessage(context);
+      // Use selected channels in context
+      const contextWithChannels = { ...context, channel: selectedChannels[0], channels: selectedChannels };
+      const result = await buildMessage(contextWithChannels);
       setBuilderResult(result);
       setDrafts(result.drafts);
       setActiveDraft(0);
@@ -72,7 +100,7 @@ const BuildPage = () => {
         addMessage({
           title,
           content: result.drafts[0],
-          channel: context.channel,
+          channel: selectedChannels[0],
           audience: context.audience,
           cohort: context.cohort ? [context.cohort] : undefined,
           domain: context.domain,
@@ -108,8 +136,9 @@ const BuildPage = () => {
   const handleGenerateMore = async () => {
     setIsGeneratingMore(true);
     try {
+      const contextWithChannels = { ...context, channel: selectedChannels[0], channels: selectedChannels };
       const { data, error } = await supabase.functions.invoke('generate-message', {
-        body: { type: 'builder', context }
+        body: { type: 'builder', context: contextWithChannels }
       });
 
       if (error) throw error;
@@ -158,7 +187,7 @@ const BuildPage = () => {
     addMessage({
       title,
       content: draft,
-      channel: context.channel,
+      channel: selectedChannels[0],
       audience: context.audience,
       cohort: context.cohort ? [context.cohort] : undefined,
       domain: context.domain,
@@ -220,6 +249,36 @@ const BuildPage = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <ContextSelector context={context} onChange={setContext} mode="builder" />
+
+              {/* Channel Selection */}
+              <div className="space-y-3 pt-2 border-t border-border">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium flex items-center gap-2">
+                    <Mail className="w-4 h-4 text-pillar-consensus" />
+                    Channel Modalities
+                  </Label>
+                  <Button variant="ghost" size="sm" onClick={selectAllChannels}>
+                    Select All
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {channelOptions.map(channel => (
+                    <div key={channel.value} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`channel-${channel.value}`}
+                        checked={selectedChannels.includes(channel.value)}
+                        onCheckedChange={() => toggleChannel(channel.value)}
+                      />
+                      <label
+                        htmlFor={`channel-${channel.value}`}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      >
+                        {channel.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
               <div className="flex items-center justify-between">
                 <Button
