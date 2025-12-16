@@ -55,6 +55,7 @@ const audienceOptions: { value: AudienceType; label: string }[] = [
   { value: 'continuing', label: 'Continuing Student' },
   { value: 'at-risk', label: 'At-Risk Student' },
   { value: 'graduate', label: 'Graduate Student' },
+  { value: 'online-learner', label: 'Online Learner' },
 ];
 
 const momentOptions: { value: CommunicationMoment; label: string }[] = [

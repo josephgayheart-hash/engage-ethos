@@ -30,6 +30,7 @@ export type AudienceType =
   | 'continuing' 
   | 'at-risk' 
   | 'graduate'
+  | 'online-learner'
   | 'alumni'
   | 'parents'
   | 'donors';
