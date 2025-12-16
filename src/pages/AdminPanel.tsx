@@ -35,6 +35,7 @@ const AdminPanel = () => {
   const { templates, addTemplate, updateTemplateStatus, isLoading } = useSharedLibrary();
   const { config: institutionalConfig, updateConfig: updateInstitutionalConfig } = useInstitutionalConfig();
   const [activeTab, setActiveTab] = useState("overview");
+  const [showSettings, setShowSettings] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [distributeOpen, setDistributeOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<SharedTemplate | null>(null);
@@ -174,11 +175,41 @@ const AdminPanel = () => {
                 Create, approve, and distribute playbooks across your institution
               </p>
             </div>
+            <Button variant="outline" onClick={() => setShowSettings(!showSettings)} className="flex items-center gap-2">
+              <Building2 className="w-4 h-4" />
+              Institutional Settings
+            </Button>
             <Button onClick={() => setCreateOpen(true)} className="flex items-center gap-2">
               <Plus className="w-4 h-4" />
               Create Playbook
             </Button>
           </div>
+
+          {/* Institutional Settings Section */}
+          {showSettings && (
+            <Card className="border-primary/30 bg-primary/5">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="font-serif flex items-center gap-2">
+                    <Building2 className="w-5 h-5 text-primary" />
+                    Institutional Settings
+                  </CardTitle>
+                  <Button variant="ghost" size="sm" onClick={() => setShowSettings(false)}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+                <CardDescription>
+                  Configure your institution's voice, terminology, and branding for all AI-generated messages
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <InstitutionalConfig 
+                  config={institutionalConfig} 
+                  onChange={updateInstitutionalConfig} 
+                />
+              </CardContent>
+            </Card>
+          )}
 
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -236,13 +267,9 @@ const AdminPanel = () => {
             </Card>
           </div>
 
-          {/* Main Content */}
+          {/* Playbook Management */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="flex-wrap">
-              <TabsTrigger value="settings" className="flex items-center gap-1.5 bg-primary/10 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                <Building2 className="w-4 h-4" />
-                Institutional Settings
-              </TabsTrigger>
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="pending" className="relative">
                 Pending Review
@@ -417,16 +444,6 @@ const AdminPanel = () => {
                   </Card>
                 ))
               )}
-            </TabsContent>
-
-            <TabsContent value="settings" className="mt-4">
-              <InstitutionalConfig 
-                config={institutionalConfig} 
-                onChange={updateInstitutionalConfig} 
-              />
-              <p className="text-sm text-muted-foreground mt-4">
-                These settings are applied to all AI-generated messages across the Evaluator, Builder, and Strategy tools.
-              </p>
             </TabsContent>
           </Tabs>
         </div>
