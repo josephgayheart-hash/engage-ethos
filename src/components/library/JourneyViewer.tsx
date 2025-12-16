@@ -1,5 +1,10 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Mail, 
   MessageSquare, 
@@ -12,12 +17,17 @@ import {
   ArrowRight,
   Lightbulb,
   AlertTriangle,
-  TrendingUp
+  TrendingUp,
+  Sparkles,
+  Copy,
+  Check,
+  RefreshCw
 } from "lucide-react";
-import type { StrategyJourney, Channel, StrategyPhase } from "@/types/persist";
+import type { StrategyJourney, Channel, StrategyPhase, JourneyTouchpoint } from "@/types/persist";
 
 interface JourneyViewerProps {
   journey: StrategyJourney;
+  allowGeneration?: boolean;
 }
 
 const channelIcons: Record<Channel, React.ReactNode> = {
@@ -47,12 +57,79 @@ const phaseBorderColors: Record<StrategyPhase, string> = {
   'long-term': 'border-l-violet-500',
 };
 
-export function JourneyViewer({ journey }: JourneyViewerProps) {
+export function JourneyViewer({ journey, allowGeneration = true }: JourneyViewerProps) {
+  const { toast } = useToast();
+  const [generatingIndex, setGeneratingIndex] = useState<number | null>(null);
+  const [generatedMessage, setGeneratedMessage] = useState<string | null>(null);
+  const [selectedTouchpoint, setSelectedTouchpoint] = useState<JourneyTouchpoint | null>(null);
+  const [copied, setCopied] = useState(false);
+
   // Calculate analytics
   const analytics = journey.touchpoints.reduce((acc, tp) => {
     acc[tp.channel] = (acc[tp.channel] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
+
+  const handleGenerateMessage = async (touchpoint: JourneyTouchpoint, index: number) => {
+    setGeneratingIndex(index);
+    setSelectedTouchpoint(touchpoint);
+    setGeneratedMessage(null);
+    setCopied(false);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-message', {
+        body: {
+          type: 'touchpoint',
+          touchpoint: {
+            title: touchpoint.title,
+            description: touchpoint.description,
+            channel: touchpoint.channel,
+            domain: touchpoint.domain,
+            tone: touchpoint.tone,
+            goal: touchpoint.goal,
+            behavioralNudge: touchpoint.behavioralNudge,
+            week: touchpoint.week,
+            phase: touchpoint.phase,
+          }
+        }
+      });
+
+      if (error) throw error;
+      
+      if (data?.message) {
+        setGeneratedMessage(data.message);
+      }
+    } catch (error) {
+      console.error("Generation failed:", error);
+      toast({
+        variant: "destructive",
+        title: "Generation Failed",
+        description: "Could not generate message for this touchpoint.",
+      });
+      setSelectedTouchpoint(null);
+    } finally {
+      setGeneratingIndex(null);
+    }
+  };
+
+  const handleCopy = async () => {
+    if (generatedMessage) {
+      await navigator.clipboard.writeText(generatedMessage);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleRegenerate = () => {
+    if (selectedTouchpoint) {
+      const index = journey.touchpoints.findIndex(tp => 
+        tp.title === selectedTouchpoint.title && tp.week === selectedTouchpoint.week
+      );
+      if (index !== -1) {
+        handleGenerateMessage(selectedTouchpoint, index);
+      }
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -121,6 +198,11 @@ export function JourneyViewer({ journey }: JourneyViewerProps) {
             <Calendar className="w-4 h-4" />
             Journey Touchpoints ({journey.touchpoints.length})
           </CardTitle>
+          {allowGeneration && (
+            <CardDescription className="text-xs">
+              Click the sparkle icon to generate AI-powered message content for each touchpoint
+            </CardDescription>
+          )}
         </CardHeader>
         <CardContent>
           <div className="relative pl-6 space-y-4">
@@ -143,6 +225,24 @@ export function JourneyViewer({ journey }: JourneyViewerProps) {
                       {channelIcons[touchpoint.channel]}
                       {formatChannelName(touchpoint.channel)}
                     </Badge>
+                    {allowGeneration && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-xs"
+                        onClick={() => handleGenerateMessage(touchpoint, index)}
+                        disabled={generatingIndex === index}
+                      >
+                        {generatingIndex === index ? (
+                          <RefreshCw className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <>
+                            <Sparkles className="w-3 h-3 mr-1 text-secondary" />
+                            Generate
+                          </>
+                        )}
+                      </Button>
+                    )}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">{touchpoint.description}</p>
                   
@@ -205,6 +305,41 @@ export function JourneyViewer({ journey }: JourneyViewerProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Generated Message Dialog */}
+      <Dialog open={!!selectedTouchpoint && !!generatedMessage} onOpenChange={() => {
+        setSelectedTouchpoint(null);
+        setGeneratedMessage(null);
+      }}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-secondary" />
+              Generated Message: {selectedTouchpoint?.title}
+            </DialogTitle>
+            <DialogDescription>
+              Week {selectedTouchpoint?.week} • {selectedTouchpoint?.channel && formatChannelName(selectedTouchpoint.channel)}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="bg-muted rounded-lg p-4">
+              <pre className="whitespace-pre-wrap text-sm font-sans">{generatedMessage}</pre>
+            </div>
+
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={handleCopy}>
+                {copied ? <Check className="w-4 h-4 mr-1" /> : <Copy className="w-4 h-4 mr-1" />}
+                {copied ? 'Copied!' : 'Copy'}
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleRegenerate} disabled={generatingIndex !== null}>
+                <RefreshCw className={`w-4 h-4 mr-1 ${generatingIndex !== null ? 'animate-spin' : ''}`} />
+                Regenerate
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
