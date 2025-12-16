@@ -5,8 +5,9 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { SavedMessage } from "@/types/library";
-import { CheckCircle, Copy, Trash2, History } from "lucide-react";
-import { useState } from "react";
+import { JourneyViewer, isJourneyContent, parseJourneyContent } from "./JourneyViewer";
+import { CheckCircle, Copy, Trash2, History, Map } from "lucide-react";
+import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 interface MessageDetailDialogProps {
@@ -20,6 +21,8 @@ interface MessageDetailDialogProps {
 export function MessageDetailDialog({ message, open, onOpenChange, onApprove, onDelete }: MessageDetailDialogProps) {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
+  const isJourney = useMemo(() => isJourneyContent(message.content), [message.content]);
+  const journeyData = useMemo(() => isJourney ? parseJourneyContent(message.content) : null, [message.content, isJourney]);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(message.content);
@@ -49,10 +52,22 @@ export function MessageDetailDialog({ message, open, onOpenChange, onApprove, on
           </TabsList>
 
           <TabsContent value="content" className="mt-4">
-            <div className="bg-muted rounded-lg p-4 mb-4">
-              <pre className="whitespace-pre-wrap text-sm font-sans">{message.content}</pre>
-            </div>
-            <div className="flex gap-2">
+            <ScrollArea className="h-[350px]">
+              {isJourney && journeyData ? (
+                <div className="pr-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Map className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-medium">Strategy Journey</span>
+                  </div>
+                  <JourneyViewer journey={journeyData} />
+                </div>
+              ) : (
+                <div className="bg-muted rounded-lg p-4 mb-4">
+                  <pre className="whitespace-pre-wrap text-sm font-sans">{message.content}</pre>
+                </div>
+              )}
+            </ScrollArea>
+            <div className="flex gap-2 mt-4">
               <Button onClick={handleCopy} variant="outline" className="flex items-center gap-2">
                 <Copy className="w-4 h-4" />
                 {copied ? "Copied!" : "Copy"}
