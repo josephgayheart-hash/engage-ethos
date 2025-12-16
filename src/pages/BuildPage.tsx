@@ -39,7 +39,7 @@ import {
 } from "lucide-react";
 import { buildMessage } from "@/lib/evaluateMessage";
 
-import type { MessageContext, BuilderResult, InstitutionalConfig, Channel } from "@/types/persist";
+import type { MessageContext, BuilderResult, InstitutionalConfig, Channel, ChannelDrafts } from "@/types/persist";
 
 const channelOptions: { value: Channel; label: string }[] = [
   { value: 'email', label: 'Email' },
@@ -213,6 +213,32 @@ const BuildPage = () => {
 
     setDraftToSubmit(contentSummary);
     setSubmitToSharedOpen(true);
+  };
+
+  const handleSaveIndividualChannel = (channel: Channel, channelContent: ChannelDrafts[keyof ChannelDrafts], contentText: string) => {
+    const channelLabel = channelOptions.find(c => c.value === channel)?.label || channel;
+    const title = `${audienceLabels[context.audience || ''] || 'Message'} - ${channelLabel}`;
+
+    addMessage({
+      title,
+      content: contentText,
+      channel,
+      audience: context.audience,
+      domain: context.domain,
+      moment: context.moment,
+      goal: context.goal,
+      tone: context.tone,
+      senderRecommendation: builderResult?.recommendedSender,
+      approved: false,
+      mode: 'generated',
+      institutionalProfileId: selectedProfileId || undefined,
+      institutionalProfileName: selectedProfileName,
+    });
+
+    toast({
+      title: "Saved to Personal Library",
+      description: `Your ${channelLabel} message has been saved.`,
+    });
   };
 
   return (
@@ -485,6 +511,7 @@ const BuildPage = () => {
                       channel={channel}
                       content={content}
                       onCopy={handleCopyContent}
+                      onSaveToLibrary={handleSaveIndividualChannel}
                     />
                   );
                 })}
