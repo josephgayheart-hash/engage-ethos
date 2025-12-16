@@ -134,25 +134,15 @@ export function InstitutionalConfig({ config, onChange }: InstitutionalConfigPro
   );
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="font-serif text-xl flex items-center gap-2">
-          <Building2 className="w-5 h-5 text-secondary" />
-          Institutional Customization
-        </CardTitle>
-        <CardDescription>
-          Configure your institution's voice, naming conventions, CTAs, and branding. These settings personalize all message outputs.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="identity" className="w-full">
-          <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full mb-6">
-            <TabsTrigger value="identity" className="text-xs">Identity</TabsTrigger>
-            <TabsTrigger value="people" className="text-xs">People</TabsTrigger>
-            <TabsTrigger value="ctas" className="text-xs">CTAs</TabsTrigger>
-            <TabsTrigger value="terms" className="text-xs">Terms</TabsTrigger>
-            <TabsTrigger value="style" className="text-xs">Style</TabsTrigger>
-          </TabsList>
+    <div className="space-y-6">
+      <Tabs defaultValue="identity" className="w-full">
+        <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full mb-6">
+          <TabsTrigger value="identity" className="text-xs">Identity</TabsTrigger>
+          <TabsTrigger value="people" className="text-xs">People</TabsTrigger>
+          <TabsTrigger value="ctas" className="text-xs">CTAs</TabsTrigger>
+          <TabsTrigger value="terms" className="text-xs">Terms</TabsTrigger>
+          <TabsTrigger value="style" className="text-xs">Style</TabsTrigger>
+        </TabsList>
 
           {/* Identity Tab */}
           <TabsContent value="identity" className="space-y-6">
@@ -456,7 +446,6 @@ export function InstitutionalConfig({ config, onChange }: InstitutionalConfigPro
             <span>Institutional settings will personalize all message outputs.</span>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
   );
 }
