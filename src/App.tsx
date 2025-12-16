@@ -7,6 +7,9 @@ import Index from "./pages/Index";
 import PersonalLibrary from "./pages/PersonalLibrary";
 import SharedLibrary from "./pages/SharedLibrary";
 import AdminPanel from "./pages/AdminPanel";
+import EvaluatePage from "./pages/EvaluatePage";
+import BuildPage from "./pages/BuildPage";
+import StrategyPage from "./pages/StrategyPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -19,6 +22,9 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/evaluate" element={<EvaluatePage />} />
+          <Route path="/build" element={<BuildPage />} />
+          <Route path="/strategy" element={<StrategyPage />} />
           <Route path="/library" element={<PersonalLibrary />} />
           <Route path="/shared-library" element={<SharedLibrary />} />
           <Route path="/admin" element={<AdminPanel />} />
