@@ -398,6 +398,23 @@ const BuildPage = () => {
                 )}
               </div>
 
+              {/* Additional Context */}
+              <div className="space-y-2 pt-2 border-t border-border">
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-primary" />
+                  Additional Context (Optional)
+                </Label>
+                <textarea
+                  value={context.additionalContext || ''}
+                  onChange={(e) => setContext({ ...context, additionalContext: e.target.value })}
+                  placeholder="Add specific details, situations, or refinement notes to help tailor the message. For example: 'Student missed last week's advising appointment' or 'Focus on financial aid deadline urgency'"
+                  className="w-full min-h-[80px] px-3 py-2 text-sm rounded-md border border-input bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-y"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Provide situation-specific details to make your message more relevant and personalized.
+                </p>
+              </div>
+
               <div className="flex items-center justify-between">
                 <Button
                   variant={autoSave ? "default" : "outline"}

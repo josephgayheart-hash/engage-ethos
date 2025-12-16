@@ -241,6 +241,10 @@ URGENCY & DEADLINE:
 - Due Date: ${context.dueDate}
 - Days Until Deadline: ${daysUntilDeadline} days
 - IMPORTANT: Incorporate countdown urgency language naturally. Reference the deadline explicitly.` : ""}
+${context.additionalContext ? `
+ADDITIONAL CONTEXT & REFINEMENT NOTES:
+${context.additionalContext}
+- IMPORTANT: Use the above context to tailor the message specifically to this situation. Incorporate relevant details naturally.` : ""}
 
 INSTITUTIONAL CONFIG:
 ${institutionalConfig?.institutionName ? `Institution: ${institutionalConfig.institutionName}${institutionalConfig.institutionAbbreviation ? ` (${institutionalConfig.institutionAbbreviation})` : ''}` : ""}
@@ -263,6 +267,7 @@ Generate a complete, ready-to-send message that:
 3. Is relevant for the ${context.moment} timing
 4. Has a clear purpose and call-to-action
 ${context.dueDate ? `5. Includes deadline urgency referencing "${context.urgencyLabel || "the deadline"}" on ${context.dueDate} (${daysUntilDeadline} days away)` : ""}
+${context.additionalContext ? `6. Incorporates the specific situation details provided in the additional context` : ""}
 
 Return ONLY the message content.`;
     } else if (type === "call-script") {

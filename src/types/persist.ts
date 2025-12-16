@@ -132,6 +132,8 @@ export interface MessageContext {
   dueDate?: string; // ISO date string for countdown/deadline
   startDate?: string; // ISO date string for journey start
   urgencyLabel?: string; // Custom label like "Registration Deadline" or "Application Due"
+  // Additional context for refinement
+  additionalContext?: string; // User-provided context, situation details, or refinement notes
 }
 
 // Strategy Journey Types

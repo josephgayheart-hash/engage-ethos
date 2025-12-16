@@ -254,6 +254,10 @@ JOURNEY TIMELINE:
 - Journey Start Date: ${formatDate(startDate)}
 - Journey End Date: ${formatDate(endDate)}
 - IMPORTANT: Consider timing relative to these dates when planning touchpoints.` : ''}
+${context.additionalContext ? `
+ADDITIONAL CONTEXT & REFINEMENT NOTES:
+${context.additionalContext}
+- IMPORTANT: Use the above context to tailor the message specifically to this situation. Incorporate relevant details naturally.` : ''}
 
 DEPARTMENT CONTEXT GUIDANCE:
 ${context.department === 'enrollment-management' || context.department === 'recruitment' ? 
