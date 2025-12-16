@@ -84,7 +84,7 @@ const SharedLibrary = () => {
     setActiveTab('all');
   };
 
-  const hasActiveFilters = filters.status || filters.audience || filters.channel || filters.domain || activeTab !== 'all';
+  const hasActiveFilters = filters.status || filters.audience || filters.channel || filters.domain || filters.moment || activeTab !== 'all';
 
   const StatusBadge = ({ status }: { status: LibraryEntryStatus }) => {
     const config = statusConfig[status];
@@ -177,6 +177,20 @@ const SharedLibrary = () => {
 
                     {showFilters && (
                       <div className="flex flex-wrap gap-4 pt-4 border-t">
+                        <Select value={filters.channel || 'all'} onValueChange={(v) => setFilters(f => ({ ...f, channel: v === 'all' ? undefined : v }))}>
+                          <SelectTrigger className="w-[140px]">
+                            <SelectValue placeholder="Channel" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Channels</SelectItem>
+                            <SelectItem value="email">Email</SelectItem>
+                            <SelectItem value="sms">SMS</SelectItem>
+                            <SelectItem value="portal">Portal</SelectItem>
+                            <SelectItem value="landing-page">Landing Page</SelectItem>
+                            <SelectItem value="social-media">Social Media</SelectItem>
+                            <SelectItem value="direct-mail">Direct Mail</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <Select value={filters.audience || 'all'} onValueChange={(v) => setFilters(f => ({ ...f, audience: v === 'all' ? undefined : v }))}>
                           <SelectTrigger className="w-[140px]">
                             <SelectValue placeholder="Audience" />
@@ -190,18 +204,6 @@ const SharedLibrary = () => {
                             <SelectItem value="graduate">Graduate</SelectItem>
                           </SelectContent>
                         </Select>
-                        <Select value={filters.channel || 'all'} onValueChange={(v) => setFilters(f => ({ ...f, channel: v === 'all' ? undefined : v }))}>
-                          <SelectTrigger className="w-[140px]">
-                            <SelectValue placeholder="Channel" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">All Channels</SelectItem>
-                            <SelectItem value="email">Email</SelectItem>
-                            <SelectItem value="sms">SMS</SelectItem>
-                            <SelectItem value="portal">Portal</SelectItem>
-                            <SelectItem value="landing-page">Landing Page</SelectItem>
-                          </SelectContent>
-                        </Select>
                         <Select value={filters.domain || 'all'} onValueChange={(v) => setFilters(f => ({ ...f, domain: v === 'all' ? undefined : v }))}>
                           <SelectTrigger className="w-[140px]">
                             <SelectValue placeholder="Domain" />
@@ -213,6 +215,22 @@ const SharedLibrary = () => {
                             <SelectItem value="wellbeing">Wellbeing</SelectItem>
                             <SelectItem value="engagement">Engagement</SelectItem>
                             <SelectItem value="behavioral">Behavioral</SelectItem>
+                            <SelectItem value="seasonal">Seasonal</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Select value={filters.moment || 'all'} onValueChange={(v) => setFilters(f => ({ ...f, moment: v === 'all' ? undefined : v }))}>
+                          <SelectTrigger className="w-[140px]">
+                            <SelectValue placeholder="Moment" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Moments</SelectItem>
+                            <SelectItem value="recruitment">Recruitment</SelectItem>
+                            <SelectItem value="orientation">Orientation</SelectItem>
+                            <SelectItem value="registration">Registration</SelectItem>
+                            <SelectItem value="early-term">Early Term</SelectItem>
+                            <SelectItem value="midterm">Midterm</SelectItem>
+                            <SelectItem value="finals">Finals</SelectItem>
+                            <SelectItem value="re-engagement">Re-engagement</SelectItem>
                             <SelectItem value="seasonal">Seasonal</SelectItem>
                           </SelectContent>
                         </Select>

@@ -165,6 +165,8 @@ const PersonalLibrary = () => {
                         <SelectItem value="sms">SMS</SelectItem>
                         <SelectItem value="portal">Portal</SelectItem>
                         <SelectItem value="landing-page">Landing Page</SelectItem>
+                        <SelectItem value="social-media">Social Media</SelectItem>
+                        <SelectItem value="direct-mail">Direct Mail</SelectItem>
                       </SelectContent>
                     </Select>
                     <Select value={filters.audience || 'all'} onValueChange={(v) => setFilters(f => ({ ...f, audience: v === 'all' ? undefined : v }))}>
@@ -200,6 +202,9 @@ const PersonalLibrary = () => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All Moments</SelectItem>
+                        <SelectItem value="recruitment">Recruitment</SelectItem>
+                        <SelectItem value="orientation">Orientation</SelectItem>
+                        <SelectItem value="registration">Registration</SelectItem>
                         <SelectItem value="early-term">Early Term</SelectItem>
                         <SelectItem value="midterm">Midterm</SelectItem>
                         <SelectItem value="finals">Finals</SelectItem>
