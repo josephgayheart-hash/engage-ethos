@@ -22,7 +22,8 @@ import {
   MessageSquare,
   Megaphone,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Phone
 } from "lucide-react";
 
 const Index = () => {
@@ -59,6 +60,15 @@ const Index = () => {
       color: 'text-pillar-consensus',
       bgColor: 'bg-pillar-consensus/10',
       href: '/strategy'
+    },
+    { 
+      id: 'call-script', 
+      title: 'Call Scripts', 
+      description: 'Generate research-informed phone scripts for student outreach calls',
+      icon: Phone,
+      color: 'text-pillar-ethics',
+      bgColor: 'bg-pillar-ethics/10',
+      href: '/call-script'
     },
   ];
 
@@ -114,7 +124,7 @@ const Index = () => {
                 Powered by AI
               </Badge>
             </div>
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
               {modeCards.map((card) => {
                 const Icon = card.icon;
                 return (
