@@ -81,7 +81,9 @@ export type MessageDomain =
   | 'compliance'
   | 'scholastic'
   | 'giving'
-  | 'alumni-relations';
+  | 'alumni-relations'
+  | 'admissions'
+  | 'recruitment';
 
 export type PrimaryGoal = 
   | 'persist'
@@ -91,7 +93,11 @@ export type PrimaryGoal =
   | 'check-in'
   | 'donate'
   | 'register'
-  | 'enroll';
+  | 'enroll'
+  | 'inquiry'
+  | 'apply'
+  | 'yield'
+  | 'confirm';
 
 export type TonePreference = 
   | 'supportive'
