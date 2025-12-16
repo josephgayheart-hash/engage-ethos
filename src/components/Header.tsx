@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { BookOpen, Library, FolderOpen, Settings } from "lucide-react";
+import { BookOpen, Library, FolderOpen, Settings, Phone } from "lucide-react";
 import persistLogo from "@/assets/persist-logo.png";
 
 export function Header() {
@@ -10,6 +10,13 @@ export function Header() {
           <img src={persistLogo} alt="PERSIST" className="h-10 w-auto" />
         </Link>
         <nav className="flex items-center gap-2 md:gap-4">
+          <Link 
+            to="/call-script" 
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
+          >
+            <Phone className="w-4 h-4" />
+            <span className="hidden sm:inline">Call Scripts</span>
+          </Link>
           <Link 
             to="/library" 
             className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"

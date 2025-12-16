@@ -60,36 +60,38 @@ const audienceOptions: { value: AudienceType; label: string }[] = [
 const momentOptions: { value: CommunicationMoment; label: string }[] = [
   { value: 'recruitment', label: 'Recruitment Outreach' },
   { value: 'early-term', label: 'Early Term Check-in' },
-  { value: 'mid-term', label: 'Mid-Term Follow-up' },
-  { value: 'support', label: 'Support Call' },
+  { value: 'midterm', label: 'Mid-Term Follow-up' },
   { value: 're-engagement', label: 'Re-engagement' },
+  { value: 'registration', label: 'Registration' },
+  { value: 'orientation', label: 'Orientation' },
 ];
 
 const domainOptions: { value: MessageDomain; label: string }[] = [
-  { value: 'academic-performance', label: 'Academic Performance' },
-  { value: 'financial-aid', label: 'Financial Aid' },
-  { value: 'registration', label: 'Registration' },
-  { value: 'student-life', label: 'Student Life' },
-  { value: 'career-services', label: 'Career Services' },
-  { value: 'mental-health', label: 'Mental Health & Wellness' },
-  { value: 'tutoring', label: 'Tutoring & Academic Support' },
+  { value: 'academic', label: 'Academic Performance' },
+  { value: 'financial', label: 'Financial Aid' },
+  { value: 'wellbeing', label: 'Wellbeing & Mental Health' },
+  { value: 'behavioral', label: 'Behavioral Support' },
+  { value: 'engagement', label: 'Student Engagement' },
+  { value: 'admissions', label: 'Admissions' },
+  { value: 'compliance', label: 'Compliance' },
 ];
 
 const goalOptions: { value: PrimaryGoal; label: string }[] = [
-  { value: 'inform', label: 'Inform' },
-  { value: 'motivate', label: 'Motivate' },
-  { value: 'remind', label: 'Remind' },
-  { value: 'support', label: 'Support' },
-  { value: 'celebrate', label: 'Celebrate' },
-  { value: 'warn', label: 'Warn' },
+  { value: 'persist', label: 'Persist / Retain' },
+  { value: 'respond', label: 'Get Response' },
+  { value: 'check-in', label: 'Check-in' },
+  { value: 'attend', label: 'Attend Event' },
+  { value: 'submit', label: 'Submit Documents' },
+  { value: 'register', label: 'Register' },
 ];
 
 const toneOptions: { value: TonePreference; label: string }[] = [
-  { value: 'warm', label: 'Warm & Friendly' },
-  { value: 'professional', label: 'Professional' },
-  { value: 'urgent', label: 'Urgent' },
+  { value: 'supportive', label: 'Supportive & Warm' },
+  { value: 'authoritative', label: 'Authoritative' },
   { value: 'encouraging', label: 'Encouraging' },
-  { value: 'empathetic', label: 'Empathetic' },
+  { value: 'directive', label: 'Directive' },
+  { value: 'urgent', label: 'Urgent' },
+  { value: 'celebratory', label: 'Celebratory' },
 ];
 
 const CallScriptPage = () => {
@@ -98,10 +100,10 @@ const CallScriptPage = () => {
   const { config: institutionalConfig } = useInstitutionalConfig();
   
   const [audience, setAudience] = useState<AudienceType>('first-year');
-  const [moment, setMoment] = useState<CommunicationMoment>('support');
-  const [domain, setDomain] = useState<MessageDomain>('academic-performance');
-  const [goal, setGoal] = useState<PrimaryGoal>('support');
-  const [tone, setTone] = useState<TonePreference>('warm');
+  const [moment, setMoment] = useState<CommunicationMoment>('early-term');
+  const [domain, setDomain] = useState<MessageDomain>('academic');
+  const [goal, setGoal] = useState<PrimaryGoal>('check-in');
+  const [tone, setTone] = useState<TonePreference>('supportive');
   const [callerRole, setCallerRole] = useState('');
   const [studentName, setStudentName] = useState('');
   const [specificContext, setSpecificContext] = useState('');

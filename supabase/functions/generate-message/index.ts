@@ -222,6 +222,74 @@ Generate a complete, ready-to-send message that:
 ${context.dueDate ? `5. Includes deadline urgency referencing "${context.urgencyLabel || "the deadline"}" on ${context.dueDate} (${daysUntilDeadline} days away)` : ""}
 
 Return ONLY the message content.`;
+    } else if (type === "call-script") {
+      // Generate call script for phone outreach
+      const daysUntil = context?.dueDate 
+        ? Math.ceil((new Date(context.dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) 
+        : null;
+
+      const instConfigStr = institutionalConfig ? `
+INSTITUTIONAL VOICE:
+${institutionalConfig.institutionName ? `- Institution: ${institutionalConfig.institutionName}` : ""}
+${institutionalConfig.mascot ? `- Mascot: ${institutionalConfig.mascot}` : ""}
+${institutionalConfig.supportCenters?.length ? `- Support resources to mention: ${institutionalConfig.supportCenters.join(", ")}` : ""}
+${institutionalConfig.preferredPhrases?.length ? `- Preferred phrases: ${institutionalConfig.preferredPhrases.join(", ")}` : ""}
+${institutionalConfig.wordsToAvoid?.length ? `- Words to AVOID: ${institutionalConfig.wordsToAvoid.join(", ")}` : ""}` : "";
+
+      userPrompt = `Generate a comprehensive phone call script for student outreach.
+
+CALL CONTEXT:
+- Student Type: ${context.audience}
+- Call Purpose: ${context.moment}
+- Topic/Domain: ${context.domain}
+- Primary Goal: ${context.goal}
+- Tone: ${context.tone}
+- Caller Role: ${context.callerRole || "Academic Advisor"}
+- Student Name: ${context.studentName || "[Student Name]"}
+${context.specificContext ? `- Specific Situation: ${context.specificContext}` : ""}
+${context.dueDate ? `
+DEADLINE INFO:
+- Deadline: ${context.urgencyLabel || "Deadline"}: ${context.dueDate}
+- Days remaining: ${daysUntil} days` : ""}
+${instConfigStr}
+
+Generate a structured call script with these sections. Return valid JSON only:
+
+{
+  "opening": "The opening greeting and introduction (2-3 sentences, personalized with student name)",
+  "purposeStatement": "Clear statement of why you're calling (1-2 sentences)",
+  "keyTalkingPoints": [
+    "First key point to cover",
+    "Second key point to cover",
+    "Third key point to cover"
+  ],
+  "objectionHandlers": [
+    {
+      "objection": "Common student pushback or concern",
+      "response": "Empathetic and helpful response"
+    },
+    {
+      "objection": "Another common objection",
+      "response": "Response that addresses the concern"
+    }
+  ],
+  "closingOptions": [
+    {
+      "scenario": "Student agrees to action",
+      "script": "Positive closing with next steps"
+    },
+    {
+      "scenario": "Student needs time to think",
+      "script": "Supportive closing with follow-up plan"
+    },
+    {
+      "scenario": "Student declines",
+      "script": "Graceful closing that leaves door open"
+    }
+  ],
+  "voicemailScript": "Complete voicemail message if student doesn't answer (30 seconds max)",
+  "followUpNotes": "Recommended follow-up actions after the call"
+}`;
     }
 
     console.log("Generating message with type:", type);
@@ -285,10 +353,31 @@ Return ONLY the message content.`;
         });
       } catch (parseError) {
         console.error("Failed to parse touchpoint response:", parseError);
-        // Fallback: return raw content as single message
         return new Response(JSON.stringify({ 
           messages: [{ channel: channels[0], content: generatedContent }] 
         }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    // Parse JSON response for call-script type
+    if (type === "call-script") {
+      let jsonContent = generatedContent;
+      const jsonMatch = generatedContent.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (jsonMatch) {
+        jsonContent = jsonMatch[1].trim();
+      }
+      
+      try {
+        const parsed = JSON.parse(jsonContent);
+        return new Response(JSON.stringify({ script: parsed }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      } catch (parseError) {
+        console.error("Failed to parse call-script response:", parseError);
+        return new Response(JSON.stringify({ error: "Failed to parse call script" }), {
+          status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
