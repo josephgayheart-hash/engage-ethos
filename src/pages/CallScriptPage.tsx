@@ -105,7 +105,6 @@ const CallScriptPage = () => {
   const [goal, setGoal] = useState<PrimaryGoal>('check-in');
   const [tone, setTone] = useState<TonePreference>('supportive');
   const [callerRole, setCallerRole] = useState('');
-  const [studentName, setStudentName] = useState('');
   const [specificContext, setSpecificContext] = useState('');
   const [dueDate, setDueDate] = useState<Date | undefined>();
   const [urgencyLabel, setUrgencyLabel] = useState('');
@@ -129,7 +128,6 @@ const CallScriptPage = () => {
             goal,
             tone,
             callerRole,
-            studentName: studentName || '[Student Name]',
             specificContext,
             dueDate: dueDate?.toISOString(),
             urgencyLabel,
@@ -249,26 +247,15 @@ ${callScript.followUpNotes}`;
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Student Info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="student-name">Student Name (Optional)</Label>
-                  <Input
-                    id="student-name"
-                    placeholder="e.g., Jordan Smith"
-                    value={studentName}
-                    onChange={(e) => setStudentName(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="caller-role">Your Role/Title</Label>
-                  <Input
-                    id="caller-role"
-                    placeholder="e.g., Academic Advisor, Success Coach"
-                    value={callerRole}
-                    onChange={(e) => setCallerRole(e.target.value)}
-                  />
-                </div>
+              {/* Caller Info */}
+              <div className="space-y-2">
+                <Label htmlFor="caller-role">Your Role/Title</Label>
+                <Input
+                  id="caller-role"
+                  placeholder="e.g., Academic Advisor, Success Coach"
+                  value={callerRole}
+                  onChange={(e) => setCallerRole(e.target.value)}
+                />
               </div>
 
               {/* Context Selectors */}
