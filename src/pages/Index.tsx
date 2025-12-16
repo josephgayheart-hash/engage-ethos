@@ -236,7 +236,7 @@ const Index = () => {
               </p>
             </div>
             
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card className="border-none shadow-md bg-card/50 backdrop-blur">
                 <CardContent className="p-6 text-center">
                   <div className="w-12 h-12 rounded-full bg-pillar-authority/10 flex items-center justify-center mx-auto mb-4">
@@ -244,7 +244,7 @@ const Index = () => {
                   </div>
                   <h3 className="font-semibold mb-2">Research-Grounded</h3>
                   <p className="text-sm text-muted-foreground">
-                    Built on Cialdini's persuasion principles, ELM theory, and higher ed-specific behavioral research.
+                    Built on Cialdini's persuasion principles, ELM theory, Kaptein's susceptibility research, and higher ed-specific behavioral studies.
                   </p>
                 </CardContent>
               </Card>
@@ -263,12 +263,24 @@ const Index = () => {
               
               <Card className="border-none shadow-md bg-card/50 backdrop-blur">
                 <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 rounded-full bg-pillar-ethics/10 flex items-center justify-center mx-auto mb-4">
-                    <Shield className="w-6 h-6 text-pillar-ethics" />
+                  <div className="w-12 h-12 rounded-full bg-pillar-consensus/10 flex items-center justify-center mx-auto mb-4">
+                    <Library className="w-6 h-6 text-pillar-consensus" />
                   </div>
-                  <h3 className="font-semibold mb-2">Ethically Informed</h3>
+                  <h3 className="font-semibold mb-2">Shared Libraries</h3>
                   <p className="text-sm text-muted-foreground">
-                    Every evaluation prioritizes student autonomy and transparent, ethical persuasion.
+                    Save messages, share templates enterprise-wide, and build institution-approved playbooks for consistent outreach.
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card className="border-none shadow-md bg-card/50 backdrop-blur">
+                <CardContent className="p-6 text-center">
+                  <div className="w-12 h-12 rounded-full bg-pillar-ethics/10 flex items-center justify-center mx-auto mb-4">
+                    <Settings className="w-6 h-6 text-pillar-ethics" />
+                  </div>
+                  <h3 className="font-semibold mb-2">Your Institution's Voice</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Customize naming conventions, terminology, links, and tone rules to match your institution's brand.
                   </p>
                 </CardContent>
               </Card>
