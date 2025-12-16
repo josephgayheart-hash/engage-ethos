@@ -22,6 +22,7 @@ import BrandVoiceScorer from "./pages/BrandVoiceScorer";
 import EmailPreview from "./pages/EmailPreview";
 import PerformanceBenchmarks from "./pages/PerformanceBenchmarks";
 import TranslationTool from "./pages/TranslationTool";
+import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -63,6 +64,7 @@ const App = () => (
           <Route path="/email-preview" element={<RequireOnboarding><EmailPreview /></RequireOnboarding>} />
           <Route path="/benchmarks" element={<RequireOnboarding><PerformanceBenchmarks /></RequireOnboarding>} />
           <Route path="/translate" element={<RequireOnboarding><TranslationTool /></RequireOnboarding>} />
+          <Route path="/settings" element={<RequireOnboarding><SettingsPage /></RequireOnboarding>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
