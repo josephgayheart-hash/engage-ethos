@@ -38,7 +38,8 @@ export type Channel =
   | 'email' 
   | 'sms' 
   | 'portal' 
-  | 'landing-page';
+  | 'landing-page'
+  | 'social-media';
 
 export type MessageDomain = 
   | 'academic'
