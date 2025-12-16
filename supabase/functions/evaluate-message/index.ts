@@ -242,16 +242,93 @@ ${context.department === 'health-wellbeing' ?
 
     const institutionalStr = institutionalConfig ? `
 
-INSTITUTIONAL CUSTOMIZATION:
-- Building Names: ${institutionalConfig.buildingNames?.join(', ') || 'None'}
-- Program Names: ${institutionalConfig.programNames?.join(', ') || 'None'}
-- Mascot: ${institutionalConfig.mascot || 'None'}
-- Slogans: ${institutionalConfig.slogans?.join(', ') || 'None'}
-- Leader Names: ${institutionalConfig.leaderNames?.join(', ') || 'None'}
-- Tone Rules: ${institutionalConfig.toneRules?.join(', ') || 'None'}
-- Words to Avoid: ${institutionalConfig.wordsToAvoid?.join(', ') || 'None'}
+INSTITUTIONAL CUSTOMIZATION (Use these EXACT values when generating content - do NOT use placeholders like "University Name"):
 
-Apply this institutional language to all outputs while maintaining ethical persuasion principles.` : '';
+IDENTITY:
+- Institution Name: ${institutionalConfig.institutionName || 'Not specified'}
+- Abbreviation: ${institutionalConfig.institutionAbbreviation || 'Not specified'}
+- Mascot: ${institutionalConfig.mascot || 'Not specified'}
+- Slogans: ${institutionalConfig.slogans?.join(', ') || 'Not specified'}
+
+DIGITAL SYSTEMS (use these exact names):
+- Student Portal: ${institutionalConfig.portalName || 'student portal'}
+- LMS: ${institutionalConfig.lmsName || 'learning management system'}
+- Email Domain: ${institutionalConfig.emailDomain || 'Not specified'}
+- Advising System: ${institutionalConfig.advisingSystemName || 'advising system'}
+- Scheduling System: ${institutionalConfig.schedulingSystemName || 'scheduling system'}
+- Degree Audit: ${institutionalConfig.degreeAuditSystem || 'degree audit'}
+- Financial Aid Portal: ${institutionalConfig.financialAidPortal || 'financial aid portal'}
+- Registration System: ${institutionalConfig.registrationSystem || 'registration system'}
+- Virtual Meeting Platform: ${institutionalConfig.virtualMeetingPlatform || 'virtual meeting platform'}
+
+CAMPUS LOCATIONS:
+- Building Names: ${institutionalConfig.buildingNames?.join(', ') || 'Not specified'}
+- Program Names: ${institutionalConfig.programNames?.join(', ') || 'Not specified'}
+- Support Centers: ${institutionalConfig.supportCenters?.join(', ') || 'Not specified'}
+- Library: ${institutionalConfig.libraryName || 'library'}
+- Tutoring Center: ${institutionalConfig.tutorCenter || 'tutoring center'}
+- Writing Center: ${institutionalConfig.writingCenter || 'writing center'}
+- Math Center: ${institutionalConfig.mathCenter || 'math center'}
+- Career Center: ${institutionalConfig.careerCenter || 'career center'}
+- Counseling Center: ${institutionalConfig.counselingCenter || 'counseling center'}
+- Health Center: ${institutionalConfig.healthCenter || 'health center'}
+- Fitness Center: ${institutionalConfig.fitnessCenter || 'fitness center'}
+- Dining Hall: ${institutionalConfig.diningHall || 'dining hall'}
+- Campus Terms: ${institutionalConfig.campusTerms?.join(', ') || 'Not specified'}
+- Default Meeting Location: ${institutionalConfig.defaultMeetingLocation || 'Not specified'}
+
+ADMINISTRATIVE OFFICES:
+- Registrar: ${institutionalConfig.registrarOffice || 'Registrar\'s Office'}
+- Financial Aid: ${institutionalConfig.financialAidOffice || 'Financial Aid Office'}
+- Admissions: ${institutionalConfig.admissionsOffice || 'Admissions Office'}
+- Bursar: ${institutionalConfig.bursarOffice || 'Bursar\'s Office'}
+- IT Help Desk: ${institutionalConfig.itHelpDesk || 'IT Help Desk'}
+- Housing: ${institutionalConfig.housingOffice || 'Housing Office'}
+- Student Affairs: ${institutionalConfig.studentAffairsOffice || 'Student Affairs'}
+- International: ${institutionalConfig.internationalOffice || 'International Office'}
+- Disability Services: ${institutionalConfig.disabilityServices || 'Disability Services'}
+- Veterans Services: ${institutionalConfig.veteransServices || 'Veterans Services'}
+
+PEOPLE & TITLES:
+- Leader Names: ${institutionalConfig.leaderNames?.join(', ') || 'Not specified'}
+- Advisor Titles: ${institutionalConfig.advisorTitles?.join(', ') || 'advisor'}
+- Staff Titles: ${institutionalConfig.staffTitles?.join(', ') || 'Not specified'}
+- Default Advisor Name: ${institutionalConfig.defaultAdvisorName || 'your advisor'}
+- Student ID Term: ${institutionalConfig.studentIdTerm || 'student ID'}
+
+CONTACT INFORMATION:
+- Primary Email: ${institutionalConfig.primaryContactEmail || 'Not specified'}
+- Primary Phone: ${institutionalConfig.primaryContactPhone || 'Not specified'}
+- Advising Email: ${institutionalConfig.advisingEmail || 'Not specified'}
+- General Help Email: ${institutionalConfig.generalHelpEmail || 'Not specified'}
+- Emergency Phone: ${institutionalConfig.emergencyPhone || 'Not specified'}
+- Text Alert Number: ${institutionalConfig.textAlertNumber || 'Not specified'}
+- Website Links: ${institutionalConfig.websiteLinks?.join(', ') || 'Not specified'}
+- Social Media: ${institutionalConfig.socialMediaHandles?.join(', ') || 'Not specified'}
+- Appointment Link: ${institutionalConfig.appointmentLink || 'Not specified'}
+
+ACADEMIC TERMS:
+- Academic Terms: ${institutionalConfig.academicTerms?.join(', ') || 'Not specified'}
+- Grading Terms: ${institutionalConfig.gradingTerms?.join(', ') || 'Not specified'}
+- Enrollment Terms: ${institutionalConfig.enrollmentTerms?.join(', ') || 'Not specified'}
+- Current Term: ${institutionalConfig.currentTermName || 'current term'}
+- Next Term: ${institutionalConfig.nextTermName || 'next term'}
+- Office Hours Format: ${institutionalConfig.officeHoursFormat || 'Not specified'}
+- Time Zone: ${institutionalConfig.timeZone || 'Not specified'}
+
+CALLS TO ACTION (use these exact CTAs when appropriate):
+- Primary CTAs: ${institutionalConfig.primaryCTAs?.join(', ') || 'Not specified'}
+- Secondary CTAs: ${institutionalConfig.secondaryCTAs?.join(', ') || 'Not specified'}
+- Urgent CTAs: ${institutionalConfig.urgentCTAs?.join(', ') || 'Not specified'}
+
+STYLE & VOICE:
+- Signature Templates: ${institutionalConfig.signatureTemplates?.join(' | ') || 'Not specified'}
+- Tone Rules: ${institutionalConfig.toneRules?.join(', ') || 'Not specified'}
+- Words to Avoid: ${institutionalConfig.wordsToAvoid?.join(', ') || 'Not specified'}
+- Preferred Phrases: ${institutionalConfig.preferredPhrases?.join(', ') || 'Not specified'}
+- Important Dates: ${institutionalConfig.importantDates?.join(', ') || 'Not specified'}
+
+CRITICAL: Use the EXACT institution name, system names, and terminology provided above. Do NOT use generic placeholders like "University Name", "[Portal Name]", or "[Institution]". Use the actual configured values.` : '';
 
     switch (mode) {
       case 'evaluator':

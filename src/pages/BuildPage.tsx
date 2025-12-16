@@ -60,6 +60,7 @@ const BuildPage = () => {
   const { addMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [selectedProfileName, setSelectedProfileName] = useState<string | undefined>(undefined);
   const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfig | null>(null);
   const [context, setContext] = useState<MessageContext>({
     audience: 'first-year',
@@ -122,6 +123,8 @@ const BuildPage = () => {
           senderRecommendation: result.recommendedSender,
           approved: false,
           mode: 'generated',
+          institutionalProfileId: selectedProfileId || undefined,
+          institutionalProfileName: selectedProfileName,
         });
         toast({
           title: "Messages Generated",
@@ -209,6 +212,8 @@ const BuildPage = () => {
       senderRecommendation: builderResult?.recommendedSender,
       approved: false,
       mode: 'generated',
+      institutionalProfileId: selectedProfileId || undefined,
+      institutionalProfileName: selectedProfileName,
     });
     setSavedIndex(index);
     setTimeout(() => setSavedIndex(null), 2000);
@@ -265,9 +270,10 @@ const BuildPage = () => {
               {/* Institutional Profile Selector */}
               <InstitutionalProfileSelector
                 selectedProfileId={selectedProfileId}
-                onProfileChange={(id, config) => {
+                onProfileChange={(id, config, name) => {
                   setSelectedProfileId(id);
                   setInstitutionalConfig(config);
+                  setSelectedProfileName(name);
                 }}
               />
 

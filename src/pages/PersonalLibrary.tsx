@@ -256,6 +256,11 @@ const PersonalLibrary = () => {
                           <Badge variant="secondary">{message.audience}</Badge>
                           <Badge variant="outline">{message.moment}</Badge>
                           {message.domain && <Badge variant="outline">{message.domain}</Badge>}
+                          {message.institutionalProfileName && (
+                            <Badge variant="default" className="bg-primary/10 text-primary border-primary/20">
+                              {message.institutionalProfileName}
+                            </Badge>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>

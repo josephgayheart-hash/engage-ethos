@@ -36,6 +36,7 @@ const StrategyPage = () => {
   const { addMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [selectedProfileName, setSelectedProfileName] = useState<string | undefined>(undefined);
   const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfig | null>(null);
   const [context, setContext] = useState<MessageContext>({
     audience: 'first-year',
@@ -231,9 +232,10 @@ const StrategyPage = () => {
               {/* Institutional Profile Selector */}
               <InstitutionalProfileSelector
                 selectedProfileId={selectedProfileId}
-                onProfileChange={(id, config) => {
+                onProfileChange={(id, config, name) => {
                   setSelectedProfileId(id);
                   setInstitutionalConfig(config);
+                  setSelectedProfileName(name);
                 }}
               />
 

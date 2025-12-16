@@ -26,6 +26,7 @@ const EvaluatePage = () => {
   const { toast } = useToast();
   const { addMessage } = useMessageLibrary();
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [selectedProfileName, setSelectedProfileName] = useState<string | undefined>(undefined);
   const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfig | null>(null);
   const [messageContent, setMessageContent] = useState("");
   const [context, setContext] = useState<MessageContext>({
@@ -63,6 +64,8 @@ const EvaluatePage = () => {
           tone: context.tone,
           approved: false,
           mode: 'evaluated',
+          institutionalProfileId: selectedProfileId || undefined,
+          institutionalProfileName: selectedProfileName,
         });
         toast({
           title: "Evaluation Complete",
@@ -136,9 +139,10 @@ const EvaluatePage = () => {
               {/* Institutional Profile Selector */}
               <InstitutionalProfileSelector
                 selectedProfileId={selectedProfileId}
-                onProfileChange={(id, config) => {
+                onProfileChange={(id, config, name) => {
                   setSelectedProfileId(id);
                   setInstitutionalConfig(config);
+                  setSelectedProfileName(name);
                 }}
               />
 
