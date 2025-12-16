@@ -18,7 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target } from "lucide-react";
+import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target, Users, UserCheck, Mail } from "lucide-react";
 import { mapMessages } from "@/lib/evaluateMessage";
 import type { MessageContext, MapperResult, Channel, InstitutionalConfig } from "@/types/persist";
 
@@ -30,6 +30,31 @@ const channelOptions: { value: Channel; label: string }[] = [
   { value: 'direct-mail', label: 'Direct Mail' },
   { value: 'phone-call', label: 'Phone Call' },
 ];
+
+const audienceLabels: Record<string, string> = {
+  'prospective': 'Prospective Student',
+  'first-year': 'First-Year Student',
+  'continuing': 'Continuing Student',
+  'at-risk': 'At-Risk Student',
+  'graduate': 'Graduate Student',
+  'alumni': 'Alumni',
+  'parents': 'Parents/Family',
+  'donors': 'Donors',
+};
+
+const cohortLabels: Record<string, string> = {
+  'none': 'No specific cohort',
+  'first-gen': 'First-Generation',
+  'probation': 'Academic Probation',
+  'online': 'Online Student',
+  'commuter': 'Commuter',
+  'residential': 'Residential',
+  'transfer': 'Transfer Student',
+  'international': 'International',
+  'veteran': 'Veteran',
+  'parent': 'Student Parent',
+  'working-adult': 'Working Adult',
+};
 
 const StrategyPage = () => {
   const { toast } = useToast();
@@ -419,6 +444,37 @@ const StrategyPage = () => {
                 </CardContent>
               </Card>
 
+              {/* Designated Recipient */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted/30 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <Users className="w-4 h-4 text-primary mt-0.5" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Audience Type</p>
+                    <p className="text-sm font-medium">{context.audience ? audienceLabels[context.audience] || context.audience : '—'}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <UserCheck className="w-4 h-4 text-primary mt-0.5" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Cohort Context</p>
+                    <p className="text-sm font-medium">{context.cohort && context.cohort !== 'none' ? cohortLabels[context.cohort] || context.cohort : '—'}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Clock className="w-4 h-4 text-secondary mt-0.5" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Journey Duration</p>
+                    <p className="text-sm font-medium">{journeyWeeks} weeks</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Mail className="w-4 h-4 text-secondary mt-0.5" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Channels</p>
+                    <p className="text-sm font-medium">{selectedChannels.length} selected</p>
+                  </div>
+                </div>
+              </div>
               <StrategyJourneyDisplay 
                 journey={mapperResult.journey} 
                 context={context} 
