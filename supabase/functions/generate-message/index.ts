@@ -236,7 +236,7 @@ ${institutionalConfig.supportCenters?.length ? `- Support resources to mention: 
 ${institutionalConfig.preferredPhrases?.length ? `- Preferred phrases: ${institutionalConfig.preferredPhrases.join(", ")}` : ""}
 ${institutionalConfig.wordsToAvoid?.length ? `- Words to AVOID: ${institutionalConfig.wordsToAvoid.join(", ")}` : ""}` : "";
 
-      userPrompt = `Generate a comprehensive phone call script for student outreach.
+      userPrompt = `Generate a comprehensive phone call script template for student outreach. This script will be copied into a CRM or marketing system, so use "[Student]" as a placeholder for student names.
 
 CALL CONTEXT:
 - Student Type: ${context.audience}
@@ -245,7 +245,6 @@ CALL CONTEXT:
 - Primary Goal: ${context.goal}
 - Tone: ${context.tone}
 - Caller Role: ${context.callerRole || "Academic Advisor"}
-- Student Name: ${context.studentName || "[Student Name]"}
 ${context.specificContext ? `- Specific Situation: ${context.specificContext}` : ""}
 ${context.dueDate ? `
 DEADLINE INFO:
@@ -253,10 +252,12 @@ DEADLINE INFO:
 - Days remaining: ${daysUntil} days` : ""}
 ${instConfigStr}
 
+IMPORTANT: Use "[Student]" as the placeholder for the student's name throughout the script. Do NOT use specific names or [Student Name] - always use [Student].
+
 Generate a structured call script with these sections. Return valid JSON only:
 
 {
-  "opening": "The opening greeting and introduction (2-3 sentences, personalized with student name)",
+  "opening": "The opening greeting and introduction using [Student] as placeholder (2-3 sentences)",
   "purposeStatement": "Clear statement of why you're calling (1-2 sentences)",
   "keyTalkingPoints": [
     "First key point to cover",
@@ -287,7 +288,7 @@ Generate a structured call script with these sections. Return valid JSON only:
       "script": "Graceful closing that leaves door open"
     }
   ],
-  "voicemailScript": "Complete voicemail message if student doesn't answer (30 seconds max)",
+  "voicemailScript": "Complete voicemail message using [Student] placeholder if student doesn't answer (30 seconds max)",
   "followUpNotes": "Recommended follow-up actions after the call"
 }`;
     }
