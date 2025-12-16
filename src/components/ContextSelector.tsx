@@ -130,10 +130,11 @@ const toneOptions: { value: TonePreference; label: string }[] = [
 
 export function ContextSelector({ context, onChange, mode = 'evaluator' }: ContextSelectorProps) {
   const showExtendedOptions = mode === 'builder' || mode === 'mapper';
+  const hideChannel = mode === 'mapper'; // Strategy page has its own multi-channel selection
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className={`grid grid-cols-1 md:grid-cols-2 ${hideChannel ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-4`}>
         <div className="space-y-2">
           <Label htmlFor="audience" className="flex items-center gap-2 text-sm font-medium">
             <Users className="w-4 h-4 text-pillar-authority" />
@@ -206,29 +207,31 @@ export function ContextSelector({ context, onChange, mode = 'evaluator' }: Conte
           </Select>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="channel" className="flex items-center gap-2 text-sm font-medium">
-            <Mail className="w-4 h-4 text-pillar-consensus" />
-            Channel
-          </Label>
-          <Select
-            value={context.channel}
-            onValueChange={(value: Channel) =>
-              onChange({ ...context, channel: value })
-            }
-          >
-            <SelectTrigger id="channel" className="w-full bg-background">
-              <SelectValue placeholder="Select channel" />
-            </SelectTrigger>
-            <SelectContent>
-              {channelOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {!hideChannel && (
+          <div className="space-y-2">
+            <Label htmlFor="channel" className="flex items-center gap-2 text-sm font-medium">
+              <Mail className="w-4 h-4 text-pillar-consensus" />
+              Channel
+            </Label>
+            <Select
+              value={context.channel}
+              onValueChange={(value: Channel) =>
+                onChange({ ...context, channel: value })
+              }
+            >
+              <SelectTrigger id="channel" className="w-full bg-background">
+                <SelectValue placeholder="Select channel" />
+              </SelectTrigger>
+              <SelectContent>
+                {channelOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
       {showExtendedOptions && (

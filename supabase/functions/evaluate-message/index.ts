@@ -187,13 +187,17 @@ serve(async (req) => {
     let modePrompt = EVALUATOR_PROMPT;
     let userPrompt = "";
 
+    const channelsStr = context.channels?.length > 0 
+      ? context.channels.join(', ') 
+      : context.channel || 'Not specified';
+
     const contextStr = `
 CONTEXT:
 - Department: ${context.department || 'Not specified'}
 - Audience Type: ${context.audience}
 - Cohort: ${context.cohort || 'Not specified'}
 - Communication Moment: ${context.moment}
-- Channel: ${context.channel}
+- Channels: ${channelsStr}
 - Domain: ${context.domain || 'Not specified'}
 - Primary Goal: ${context.goal || 'Not specified'}
 - Tone Preference: ${context.tone || 'Not specified'}
@@ -255,11 +259,17 @@ Provide draft messages and recommendations as JSON.`;
 
       case 'mapper':
         modePrompt = MAPPER_PROMPT;
+        const channelsList = context.channels?.length > 0 
+          ? context.channels.join(', ') 
+          : 'email, sms, phone-call';
         userPrompt = `Please create a detailed ${totalWeeks}-week messaging strategy journey for this context:
 ${contextStr}
 ${institutionalStr}
 
-Create a comprehensive journey with touchpoints distributed across short-term (weeks 1-4), mid-term (weeks 5-8), and long-term (weeks 9+) phases. Include 8-15 touchpoints depending on the journey length, with variety in channels and domains.
+Create a comprehensive journey with touchpoints distributed across short-term (weeks 1-4), mid-term (weeks 5-8), and long-term (weeks 9+) phases. Include 8-15 touchpoints depending on the journey length.
+
+IMPORTANT: Only use these channels for touchpoints: ${channelsList}
+Distribute touchpoints across the selected channels based on best practices for the audience and moment.
 
 Provide the complete journey as JSON.`;
         break;
