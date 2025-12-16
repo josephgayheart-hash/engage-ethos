@@ -25,7 +25,16 @@ import {
   ArrowRight,
   Sparkles,
   Phone,
-  MessageCircle
+  MessageCircle,
+  BarChart3,
+  Calendar,
+  Type,
+  Eye,
+  Mic,
+  Monitor,
+  TrendingUp,
+  Languages,
+  Wrench
 } from "lucide-react";
 
 const Index = () => {
@@ -101,6 +110,65 @@ const Index = () => {
     },
   ];
 
+  const utilityTools = [
+    {
+      id: 'campaign-dashboard',
+      title: 'Campaign Dashboard',
+      description: 'Track campaign performance with analytics and metrics',
+      icon: BarChart3,
+      href: '/campaign-dashboard'
+    },
+    {
+      id: 'calendar',
+      title: 'Communication Calendar',
+      description: 'Visualize and plan messaging across the academic year',
+      icon: Calendar,
+      href: '/calendar'
+    },
+    {
+      id: 'subject-optimizer',
+      title: 'Subject Line Optimizer',
+      description: 'Test and optimize email subject lines for engagement',
+      icon: Type,
+      href: '/subject-optimizer'
+    },
+    {
+      id: 'accessibility',
+      title: 'Accessibility Checker',
+      description: 'Ensure messages meet accessibility standards',
+      icon: Eye,
+      href: '/accessibility'
+    },
+    {
+      id: 'brand-voice',
+      title: 'Brand Voice Scorer',
+      description: 'Verify messaging aligns with institutional voice',
+      icon: Mic,
+      href: '/brand-voice'
+    },
+    {
+      id: 'email-preview',
+      title: 'Email Preview',
+      description: 'Preview emails across devices and clients',
+      icon: Monitor,
+      href: '/email-preview'
+    },
+    {
+      id: 'benchmarks',
+      title: 'Performance Benchmarks',
+      description: 'Compare metrics against higher ed industry benchmarks',
+      icon: TrendingUp,
+      href: '/benchmarks'
+    },
+    {
+      id: 'translate',
+      title: 'Translation Tool',
+      description: 'Translate messages for multilingual audiences',
+      icon: Languages,
+      href: '/translate'
+    },
+  ];
+
   const getChannelIcon = (channel: string) => {
     switch (channel) {
       case 'email': return Mail;
@@ -169,6 +237,35 @@ const Index = () => {
                           Get Started
                           <ArrowRight className="w-4 h-4 ml-1" />
                         </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* Utility Tools Section */}
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-serif text-xl font-semibold">Utility Tools</h2>
+              <Badge variant="outline" className="flex items-center gap-1">
+                <Wrench className="w-3 h-3" />
+                Optimize & Analyze
+              </Badge>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {utilityTools.map((tool) => {
+                const Icon = tool.icon;
+                return (
+                  <Link key={tool.id} to={tool.href}>
+                    <Card className="h-full cursor-pointer transition-all hover:shadow-md hover:border-primary/50 group">
+                      <CardContent className="p-4">
+                        <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center mb-3 group-hover:bg-primary/10 transition-colors">
+                          <Icon className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </div>
+                        <h3 className="font-medium text-sm mb-1">{tool.title}</h3>
+                        <p className="text-xs text-muted-foreground line-clamp-2">{tool.description}</p>
                       </CardContent>
                     </Card>
                   </Link>
@@ -316,6 +413,20 @@ const Index = () => {
                 <li><Link to="/byoc" className="hover:text-foreground transition-colors">Import & Evaluate</Link></li>
               </ul>
             </div>
+            {/* Utilities */}
+            <div>
+              <h4 className="font-semibold text-sm mb-3">Utilities</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link to="/campaign-dashboard" className="hover:text-foreground transition-colors">Campaign Dashboard</Link></li>
+                <li><Link to="/calendar" className="hover:text-foreground transition-colors">Communication Calendar</Link></li>
+                <li><Link to="/subject-optimizer" className="hover:text-foreground transition-colors">Subject Line Optimizer</Link></li>
+                <li><Link to="/accessibility" className="hover:text-foreground transition-colors">Accessibility Checker</Link></li>
+                <li><Link to="/brand-voice" className="hover:text-foreground transition-colors">Brand Voice Scorer</Link></li>
+                <li><Link to="/email-preview" className="hover:text-foreground transition-colors">Email Preview</Link></li>
+                <li><Link to="/benchmarks" className="hover:text-foreground transition-colors">Benchmarks</Link></li>
+                <li><Link to="/translate" className="hover:text-foreground transition-colors">Translation Tool</Link></li>
+              </ul>
+            </div>
             {/* Libraries */}
             <div>
               <h4 className="font-semibold text-sm mb-3">Libraries</h4>
@@ -324,19 +435,12 @@ const Index = () => {
                 <li><Link to="/shared-library" className="hover:text-foreground transition-colors">Shared Library</Link></li>
               </ul>
             </div>
-            {/* Admin */}
+            {/* Admin & Research */}
             <div>
-              <h4 className="font-semibold text-sm mb-3">Administration</h4>
+              <h4 className="font-semibold text-sm mb-3">Admin & Research</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link to="/admin" className="hover:text-foreground transition-colors">Admin Panel</Link></li>
-              </ul>
-            </div>
-            {/* Research */}
-            <div>
-              <h4 className="font-semibold text-sm mb-3">Research</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><a href="#about" className="hover:text-foreground transition-colors">Research Foundation</a></li>
-                <li><span>Gayheart (2021), University of Kentucky</span></li>
               </ul>
             </div>
           </div>
