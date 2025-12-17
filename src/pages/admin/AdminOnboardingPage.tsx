@@ -73,6 +73,9 @@ export default function AdminOnboardingPage() {
   // Action dialogs
   const [selectedRequest, setSelectedRequest] = useState<OnboardingRequest | null>(null);
   const [selectedTenantId, setSelectedTenantId] = useState<string>('');
+  const [createNewTenant, setCreateNewTenant] = useState(false);
+  const [newTenantName, setNewTenantName] = useState('');
+  const [selectedRole, setSelectedRole] = useState<string>('user');
   const [showApproveDialog, setShowApproveDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [rejectNotes, setRejectNotes] = useState('');
@@ -136,11 +139,20 @@ export default function AdminOnboardingPage() {
   const handleApprove = async () => {
     if (!selectedRequest) return;
     
-    // Super admins must select a tenant
-    if (!selectedTenantId) {
+    // Validate tenant selection
+    if (!createNewTenant && !selectedTenantId) {
       toast({
         title: 'Select Institution',
-        description: 'Please select which institution to assign this user to.',
+        description: 'Please select an existing institution or create a new one.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    if (createNewTenant && !newTenantName.trim()) {
+      toast({
+        title: 'Enter Institution Name',
+        description: 'Please enter a name for the new institution.',
         variant: 'destructive',
       });
       return;
@@ -168,7 +180,10 @@ export default function AdminOnboardingPage() {
           action: 'approve_onboarding',
           requestId: selectedRequest.id,
           password: tempPassword,
-          tenantId: selectedTenantId,
+          tenantId: createNewTenant ? null : selectedTenantId,
+          createNewTenant: createNewTenant,
+          newTenantName: createNewTenant ? newTenantName.trim() : null,
+          role: selectedRole,
         },
       });
 
@@ -190,12 +205,14 @@ export default function AdminOnboardingPage() {
       setCredentials({ email: selectedRequest.email, password: tempPassword });
       setShowCredentialsDialog(true);
       
+      const roleLabel = selectedRole === 'admin' ? 'University Admin' : selectedRole === 'super_admin' ? 'PERSIST Super Admin' : 'University User';
       toast({
         title: 'Request Approved',
-        description: `User account created for ${selectedRequest.email}`,
+        description: `User account created for ${selectedRequest.email} as ${roleLabel}`,
       });
 
       fetchRequests();
+      fetchTenants(); // Refresh tenants list if new one was created
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -206,6 +223,9 @@ export default function AdminOnboardingPage() {
       setIsProcessing(false);
       setSelectedRequest(null);
       setSelectedTenantId('');
+      setCreateNewTenant(false);
+      setNewTenantName('');
+      setSelectedRole('user');
     }
   };
 
@@ -453,18 +473,73 @@ export default function AdminOnboardingPage() {
             
             <div className="space-y-2">
               <label className="text-sm font-medium">Assign to Institution *</label>
+              <div className="space-y-3">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="tenantOption"
+                    checked={!createNewTenant}
+                    onChange={() => setCreateNewTenant(false)}
+                    className="text-[hsl(222,47%,31%)]"
+                  />
+                  <span className="text-sm">Select existing institution</span>
+                </label>
+                {!createNewTenant && (
+                  <select
+                    value={selectedTenantId}
+                    onChange={(e) => setSelectedTenantId(e.target.value)}
+                    className="w-full px-3 py-2 border border-[hsl(220,13%,88%)] rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(222,47%,31%)]"
+                  >
+                    <option value="">Select an institution...</option>
+                    {tenants.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.institution_name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="tenantOption"
+                    checked={createNewTenant}
+                    onChange={() => {
+                      setCreateNewTenant(true);
+                      setNewTenantName(selectedRequest?.institution_name_input || '');
+                    }}
+                    className="text-[hsl(222,47%,31%)]"
+                  />
+                  <span className="text-sm">Create new institution</span>
+                </label>
+                {createNewTenant && (
+                  <input
+                    type="text"
+                    value={newTenantName}
+                    onChange={(e) => setNewTenantName(e.target.value)}
+                    placeholder="Enter institution name..."
+                    className="w-full px-3 py-2 border border-[hsl(220,13%,88%)] rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(222,47%,31%)]"
+                  />
+                )}
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium">User Role *</label>
               <select
-                value={selectedTenantId}
-                onChange={(e) => setSelectedTenantId(e.target.value)}
+                value={selectedRole}
+                onChange={(e) => setSelectedRole(e.target.value)}
                 className="w-full px-3 py-2 border border-[hsl(220,13%,88%)] rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(222,47%,31%)]"
               >
-                <option value="">Select an institution...</option>
-                {tenants.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.institution_name}
-                  </option>
-                ))}
+                <option value="user">University User</option>
+                <option value="admin">University Admin</option>
+                <option value="super_admin">PERSIST Super Admin</option>
               </select>
+              <p className="text-xs text-[hsl(220,14%,46%)]">
+                {selectedRole === 'user' && 'Standard access to tools and features within their institution.'}
+                {selectedRole === 'admin' && 'Can manage users and settings for their institution.'}
+                {selectedRole === 'super_admin' && 'Full access to all institutions and system settings.'}
+              </p>
             </div>
           </div>
           <DialogFooter>
@@ -473,7 +548,7 @@ export default function AdminOnboardingPage() {
             </Button>
             <Button 
               onClick={handleApprove} 
-              disabled={isProcessing || !selectedTenantId}
+              disabled={isProcessing || (!createNewTenant && !selectedTenantId) || (createNewTenant && !newTenantName.trim())}
               className="bg-[hsl(158,64%,42%)] hover:bg-[hsl(158,64%,38%)]"
             >
               {isProcessing ? (
