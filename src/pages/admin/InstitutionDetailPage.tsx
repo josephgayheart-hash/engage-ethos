@@ -89,6 +89,46 @@ interface InstitutionalProfile {
   created_at: string;
 }
 
+// Comprehensive list of all institutional config fields
+const allConfigFields = [
+  // Branding & Identity
+  'institutionName', 'institutionAbbreviation', 'mascot', 'slogans',
+  // Digital Platforms & Systems
+  'portalName', 'lmsName', 'emailDomain', 'advisingSystemName', 'schedulingSystemName',
+  'degreeAuditSystem', 'financialAidPortal', 'registrationSystem',
+  // Locations & Facilities
+  'buildingNames', 'programNames', 'supportCenters', 'libraryName', 'tutorCenter',
+  'writingCenter', 'mathCenter', 'careerCenter', 'counselingCenter', 'healthCenter',
+  'fitnessCenter', 'diningHall',
+  // Campus Geography
+  'campusTerms', 'defaultMeetingLocation', 'virtualMeetingPlatform',
+  // Offices & Departments
+  'registrarOffice', 'financialAidOffice', 'admissionsOffice', 'bursarOffice',
+  'itHelpDesk', 'housingOffice', 'studentAffairsOffice', 'internationalOffice',
+  'disabilityServices', 'veteransServices',
+  // People & Roles
+  'leaderNames', 'advisorTitles', 'staffTitles', 'defaultAdvisorName',
+  // Naming Conventions
+  'studentAddressing', 'staffAddressing', 'pronounPreference', 'studentIdTerm',
+  // Call to Actions
+  'primaryCTAs', 'secondaryCTAs', 'urgentCTAs',
+  // Contact & Resources
+  'primaryContactEmail', 'primaryContactPhone', 'advisingEmail', 'generalHelpEmail',
+  'emergencyPhone', 'textAlertNumber', 'websiteLinks', 'socialMediaHandles', 'appointmentLink',
+  // Academic Terms
+  'academicTerms', 'gradingTerms', 'enrollmentTerms', 'currentTermName', 'nextTermName',
+  // Time & Scheduling
+  'officeHoursFormat', 'timeZone',
+  // Signature Blocks
+  'signatureTemplates',
+  // Tone & Style
+  'toneRules', 'wordsToAvoid', 'preferredPhrases',
+  // Deadlines & Dates
+  'importantDates',
+  // Brand Voice
+  'brandVoiceSamples', 'voiceAnalysis'
+];
+
 export default function InstitutionDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -218,17 +258,13 @@ export default function InstitutionDetailPage() {
 
   const calculateProfileCompletion = (config: Record<string, any> | null): number => {
     if (!config || typeof config !== 'object') return 0;
-    const importantFields = [
-      'institutionName', 'mascot', 'slogans', 'officialWebsite',
-      'portalName', 'lmsName', 'primaryCTA', 'secondaryCTA',
-      'studentTermSingular', 'leaderName', 'leaderTitle'
-    ];
-    const filledCount = importantFields.filter(field => {
+    const filledCount = allConfigFields.filter(field => {
       const value = config[field];
       if (Array.isArray(value)) return value.length > 0;
+      if (typeof value === 'object' && value !== null) return Object.keys(value).length > 0;
       return value && value.toString().trim() !== '';
     }).length;
-    return Math.round((filledCount / importantFields.length) * 100);
+    return Math.round((filledCount / allConfigFields.length) * 100);
   };
 
   if (!isSuperAdmin) {
@@ -605,6 +641,14 @@ export default function InstitutionDetailPage() {
                         {institutionalProfiles.map(profile => {
                           const completionPct = calculateProfileCompletion(profile.config);
                           const config = profile.config || {};
+                          const filledCount = allConfigFields.filter(field => {
+                            const value = config[field];
+                            if (Array.isArray(value)) return value.length > 0;
+                            if (typeof value === 'object' && value !== null) return Object.keys(value).length > 0;
+                            return value && value.toString().trim() !== '';
+                          }).length;
+                          const hasDNA = config.voiceAnalysis || (config.brandVoiceSamples && config.brandVoiceSamples.length > 0);
+                          
                           return (
                             <Card key={profile.id} className="border">
                               <CardContent className="p-4">
@@ -615,14 +659,33 @@ export default function InstitutionDetailPage() {
                                       Created {formatDate(profile.created_at)}
                                     </p>
                                   </div>
-                                  <Badge 
-                                    variant="outline"
-                                    className={`text-xs ${completionPct >= 70 ? 'bg-green-50 text-green-700' : completionPct >= 40 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}
-                                  >
-                                    {completionPct}% complete
-                                  </Badge>
+                                  <div className="flex items-center gap-2">
+                                    {hasDNA && (
+                                      <Badge variant="outline" className="text-[10px] bg-orange-50 text-orange-700">
+                                        <Mic className="w-3 h-3 mr-1" />
+                                        DNA
+                                      </Badge>
+                                    )}
+                                    <Badge 
+                                      variant="outline"
+                                      className={`text-xs ${completionPct >= 70 ? 'bg-green-50 text-green-700' : completionPct >= 40 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}
+                                    >
+                                      {filledCount}/{allConfigFields.length} ({completionPct}%)
+                                    </Badge>
+                                  </div>
                                 </div>
                                 <Progress value={completionPct} className="h-1.5 mb-3" />
+                                <div className="flex flex-wrap gap-1 mb-3">
+                                  {config.institutionName && <Badge variant="secondary" className="text-[10px]">Name</Badge>}
+                                  {config.mascot && <Badge variant="secondary" className="text-[10px]">Mascot</Badge>}
+                                  {config.primaryCTAs?.length > 0 && <Badge variant="secondary" className="text-[10px]">CTAs</Badge>}
+                                  {config.leaderNames?.length > 0 && <Badge variant="secondary" className="text-[10px]">Leaders</Badge>}
+                                  {config.portalName && <Badge variant="secondary" className="text-[10px]">Portal</Badge>}
+                                  {config.lmsName && <Badge variant="secondary" className="text-[10px]">LMS</Badge>}
+                                  {config.toneRules?.length > 0 && <Badge variant="secondary" className="text-[10px]">Tone</Badge>}
+                                  {config.supportCenters?.length > 0 && <Badge variant="secondary" className="text-[10px]">Centers</Badge>}
+                                  {config.primaryContactEmail && <Badge variant="secondary" className="text-[10px]">Contact</Badge>}
+                                </div>
                                 <div className="grid grid-cols-2 gap-2 text-xs">
                                   {config.institutionName && (
                                     <div><span className="text-muted-foreground">Name:</span> {config.institutionName}</div>
@@ -630,8 +693,8 @@ export default function InstitutionDetailPage() {
                                   {config.mascot && (
                                     <div><span className="text-muted-foreground">Mascot:</span> {config.mascot}</div>
                                   )}
-                                  {config.leaderName && (
-                                    <div><span className="text-muted-foreground">Leader:</span> {config.leaderName}</div>
+                                  {config.leaderNames?.length > 0 && (
+                                    <div><span className="text-muted-foreground">Leader:</span> {config.leaderNames[0]}</div>
                                   )}
                                   {config.portalName && (
                                     <div><span className="text-muted-foreground">Portal:</span> {config.portalName}</div>

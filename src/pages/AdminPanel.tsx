@@ -315,6 +315,46 @@ interface BetaFeedback {
   institution_name?: string;
 }
 
+// Comprehensive list of all institutional config fields
+const allConfigFields = [
+  // Branding & Identity
+  'institutionName', 'institutionAbbreviation', 'mascot', 'slogans',
+  // Digital Platforms & Systems
+  'portalName', 'lmsName', 'emailDomain', 'advisingSystemName', 'schedulingSystemName',
+  'degreeAuditSystem', 'financialAidPortal', 'registrationSystem',
+  // Locations & Facilities
+  'buildingNames', 'programNames', 'supportCenters', 'libraryName', 'tutorCenter',
+  'writingCenter', 'mathCenter', 'careerCenter', 'counselingCenter', 'healthCenter',
+  'fitnessCenter', 'diningHall',
+  // Campus Geography
+  'campusTerms', 'defaultMeetingLocation', 'virtualMeetingPlatform',
+  // Offices & Departments
+  'registrarOffice', 'financialAidOffice', 'admissionsOffice', 'bursarOffice',
+  'itHelpDesk', 'housingOffice', 'studentAffairsOffice', 'internationalOffice',
+  'disabilityServices', 'veteransServices',
+  // People & Roles
+  'leaderNames', 'advisorTitles', 'staffTitles', 'defaultAdvisorName',
+  // Naming Conventions
+  'studentAddressing', 'staffAddressing', 'pronounPreference', 'studentIdTerm',
+  // Call to Actions
+  'primaryCTAs', 'secondaryCTAs', 'urgentCTAs',
+  // Contact & Resources
+  'primaryContactEmail', 'primaryContactPhone', 'advisingEmail', 'generalHelpEmail',
+  'emergencyPhone', 'textAlertNumber', 'websiteLinks', 'socialMediaHandles', 'appointmentLink',
+  // Academic Terms
+  'academicTerms', 'gradingTerms', 'enrollmentTerms', 'currentTermName', 'nextTermName',
+  // Time & Scheduling
+  'officeHoursFormat', 'timeZone',
+  // Signature Blocks
+  'signatureTemplates',
+  // Tone & Style
+  'toneRules', 'wordsToAvoid', 'preferredPhrases',
+  // Deadlines & Dates
+  'importantDates',
+  // Brand Voice
+  'brandVoiceSamples', 'voiceAnalysis'
+];
+
 const AdminPanel = () => {
   const { toast } = useToast();
   const { tenant, isSuperAdmin } = useAuth();
@@ -448,17 +488,13 @@ const AdminPanel = () => {
       // Helper function to calculate profile completion percentage
       const calculateProfileCompletion = (config: Record<string, any>): number => {
         if (!config || typeof config !== 'object') return 0;
-        const importantFields = [
-          'institutionName', 'mascot', 'slogans', 'officialWebsite',
-          'portalName', 'lmsName', 'primaryCTA', 'secondaryCTA',
-          'studentTermSingular', 'leaderName', 'leaderTitle'
-        ];
-        const filledCount = importantFields.filter(field => {
+        const filledCount = allConfigFields.filter(field => {
           const value = config[field];
           if (Array.isArray(value)) return value.length > 0;
+          if (typeof value === 'object' && value !== null) return Object.keys(value).length > 0;
           return value && value.toString().trim() !== '';
         }).length;
-        return Math.round((filledCount / importantFields.length) * 100);
+        return Math.round((filledCount / allConfigFields.length) * 100);
       };
 
       // Calculate comprehensive stats per tenant
@@ -1506,13 +1542,19 @@ const AdminPanel = () => {
                         <div className="space-y-2">
                           {institutionalProfiles.map(profile => {
                             const config = profile.config || {};
-                            const importantFields = ['institutionName', 'mascot', 'slogans', 'officialWebsite', 'portalName', 'lmsName', 'primaryCTA', 'secondaryCTA', 'studentTermSingular', 'leaderName', 'leaderTitle'];
-                            const filledCount = importantFields.filter(field => {
+                            const filledCount = allConfigFields.filter(field => {
                               const value = config[field];
                               if (Array.isArray(value)) return value.length > 0;
+                              if (typeof value === 'object' && value !== null) return Object.keys(value).length > 0;
                               return value && value.toString().trim() !== '';
                             }).length;
-                            const completionPct = Math.round((filledCount / importantFields.length) * 100);
+                            const completionPct = Math.round((filledCount / allConfigFields.length) * 100);
+                            const hasDNA = config.voiceAnalysis || (config.brandVoiceSamples && config.brandVoiceSamples.length > 0);
+                            const dnaSampleCount = contentDNASamples.filter(s => {
+                              // Match by tenant
+                              const profileTenant = institutionalProfiles.find(p => p.id === profile.id)?.tenant_id;
+                              return s.tenant_id === profileTenant && s.profile_id === profile.id;
+                            }).length;
                             
                             return (
                               <div key={profile.id} className="p-3 border rounded-lg">
@@ -1521,20 +1563,36 @@ const AdminPanel = () => {
                                     <p className="font-medium text-sm">{profile.name}</p>
                                     <p className="text-[10px] text-muted-foreground">{profile.institution_name}</p>
                                   </div>
-                                  <Badge 
-                                    variant="outline"
-                                    className={`text-xs ${completionPct >= 70 ? 'bg-green-50 text-green-700' : completionPct >= 40 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}
-                                  >
-                                    {completionPct}% complete
-                                  </Badge>
+                                  <div className="flex items-center gap-2">
+                                    {hasDNA && (
+                                      <Badge variant="outline" className="text-[10px] bg-orange-50 text-orange-700">
+                                        <Mic className="w-3 h-3 mr-1" />
+                                        DNA
+                                      </Badge>
+                                    )}
+                                    <Badge 
+                                      variant="outline"
+                                      className={`text-xs ${completionPct >= 70 ? 'bg-green-50 text-green-700' : completionPct >= 40 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}
+                                    >
+                                      {filledCount}/{allConfigFields.length} ({completionPct}%)
+                                    </Badge>
+                                  </div>
                                 </div>
                                 <Progress value={completionPct} className="h-1.5" />
                                 <div className="mt-2 flex flex-wrap gap-1">
                                   {config.institutionName && <Badge variant="secondary" className="text-[10px]">Name</Badge>}
                                   {config.mascot && <Badge variant="secondary" className="text-[10px]">Mascot</Badge>}
-                                  {config.primaryCTA && <Badge variant="secondary" className="text-[10px]">CTA</Badge>}
-                                  {config.leaderName && <Badge variant="secondary" className="text-[10px]">Leader</Badge>}
+                                  {config.primaryCTAs?.length > 0 && <Badge variant="secondary" className="text-[10px]">CTAs</Badge>}
+                                  {config.leaderNames?.length > 0 && <Badge variant="secondary" className="text-[10px]">Leaders</Badge>}
                                   {config.portalName && <Badge variant="secondary" className="text-[10px]">Portal</Badge>}
+                                  {config.lmsName && <Badge variant="secondary" className="text-[10px]">LMS</Badge>}
+                                  {config.toneRules?.length > 0 && <Badge variant="secondary" className="text-[10px]">Tone</Badge>}
+                                  {config.supportCenters?.length > 0 && <Badge variant="secondary" className="text-[10px]">Centers</Badge>}
+                                  {dnaSampleCount > 0 && (
+                                    <Badge variant="secondary" className="text-[10px] bg-orange-100">
+                                      {dnaSampleCount} DNA sample{dnaSampleCount !== 1 ? 's' : ''}
+                                    </Badge>
+                                  )}
                                 </div>
                               </div>
                             );
@@ -1599,49 +1657,92 @@ const AdminPanel = () => {
                     <FileText className="w-4 h-4" />
                     Field Completion Overview
                   </CardTitle>
-                  <CardDescription>How often each key field is filled across all profiles</CardDescription>
+                  <CardDescription>Completion by category across all {institutionalProfiles.length} profiles ({allConfigFields.length} total fields)</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {(() => {
-                    const fieldStats = [
-                      { name: 'Institution Name', field: 'institutionName' },
-                      { name: 'Mascot', field: 'mascot' },
-                      { name: 'Slogans', field: 'slogans' },
-                      { name: 'Official Website', field: 'officialWebsite' },
-                      { name: 'Portal Name', field: 'portalName' },
-                      { name: 'LMS Name', field: 'lmsName' },
-                      { name: 'Primary CTA', field: 'primaryCTA' },
-                      { name: 'Secondary CTA', field: 'secondaryCTA' },
-                      { name: 'Student Term', field: 'studentTermSingular' },
-                      { name: 'Leader Name', field: 'leaderName' },
-                      { name: 'Leader Title', field: 'leaderTitle' },
-                    ].map(item => {
-                      const filledCount = institutionalProfiles.filter(p => {
+                    const fieldCategories = [
+                      { name: 'Branding & Identity', fields: ['institutionName', 'institutionAbbreviation', 'mascot', 'slogans'] },
+                      { name: 'Digital Systems', fields: ['portalName', 'lmsName', 'emailDomain', 'advisingSystemName', 'schedulingSystemName', 'degreeAuditSystem', 'financialAidPortal', 'registrationSystem'] },
+                      { name: 'Facilities', fields: ['buildingNames', 'programNames', 'supportCenters', 'libraryName', 'tutorCenter', 'writingCenter', 'mathCenter', 'careerCenter', 'counselingCenter', 'healthCenter', 'fitnessCenter', 'diningHall'] },
+                      { name: 'Campus', fields: ['campusTerms', 'defaultMeetingLocation', 'virtualMeetingPlatform'] },
+                      { name: 'Offices', fields: ['registrarOffice', 'financialAidOffice', 'admissionsOffice', 'bursarOffice', 'itHelpDesk', 'housingOffice', 'studentAffairsOffice', 'internationalOffice', 'disabilityServices', 'veteransServices'] },
+                      { name: 'People & Roles', fields: ['leaderNames', 'advisorTitles', 'staffTitles', 'defaultAdvisorName'] },
+                      { name: 'Naming', fields: ['studentAddressing', 'staffAddressing', 'pronounPreference', 'studentIdTerm'] },
+                      { name: 'CTAs', fields: ['primaryCTAs', 'secondaryCTAs', 'urgentCTAs'] },
+                      { name: 'Contact Info', fields: ['primaryContactEmail', 'primaryContactPhone', 'advisingEmail', 'generalHelpEmail', 'emergencyPhone', 'textAlertNumber', 'websiteLinks', 'socialMediaHandles', 'appointmentLink'] },
+                      { name: 'Academic Terms', fields: ['academicTerms', 'gradingTerms', 'enrollmentTerms', 'currentTermName', 'nextTermName'] },
+                      { name: 'Scheduling', fields: ['officeHoursFormat', 'timeZone'] },
+                      { name: 'Signatures', fields: ['signatureTemplates'] },
+                      { name: 'Tone & Style', fields: ['toneRules', 'wordsToAvoid', 'preferredPhrases'] },
+                      { name: 'Dates', fields: ['importantDates'] },
+                      { name: 'Content DNA', fields: ['brandVoiceSamples', 'voiceAnalysis'] },
+                    ].map(cat => {
+                      let totalFilled = 0;
+                      let totalFields = cat.fields.length * institutionalProfiles.length;
+                      institutionalProfiles.forEach(p => {
                         const config = p.config || {};
-                        const value = config[item.field];
-                        if (Array.isArray(value)) return value.length > 0;
-                        return value && value.toString().trim() !== '';
-                      }).length;
-                      const pct = institutionalProfiles.length > 0 ? Math.round((filledCount / institutionalProfiles.length) * 100) : 0;
-                      return { ...item, filledCount, pct };
+                        cat.fields.forEach(field => {
+                          const value = config[field];
+                          if (Array.isArray(value) && value.length > 0) totalFilled++;
+                          else if (typeof value === 'object' && value !== null && Object.keys(value).length > 0) totalFilled++;
+                          else if (value && value.toString().trim() !== '') totalFilled++;
+                        });
+                      });
+                      const pct = totalFields > 0 ? Math.round((totalFilled / totalFields) * 100) : 0;
+                      return { ...cat, totalFilled, totalFields, pct };
                     });
 
                     return (
-                      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {fieldStats.map(item => (
-                          <div key={item.field} className="p-2 border rounded-lg">
+                      <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-3">
+                        {fieldCategories.map(cat => (
+                          <div key={cat.name} className="p-2 border rounded-lg">
                             <div className="flex items-center justify-between mb-1">
-                              <span className="text-xs font-medium">{item.name}</span>
-                              <span className={`text-xs font-bold ${item.pct >= 70 ? 'text-green-600' : item.pct >= 40 ? 'text-yellow-600' : 'text-muted-foreground'}`}>
-                                {item.filledCount}/{institutionalProfiles.length}
+                              <span className="text-[10px] font-medium truncate">{cat.name}</span>
+                              <span className={`text-[10px] font-bold ${cat.pct >= 70 ? 'text-green-600' : cat.pct >= 40 ? 'text-yellow-600' : 'text-muted-foreground'}`}>
+                                {cat.pct}%
                               </span>
                             </div>
-                            <Progress value={item.pct} className="h-1" />
+                            <Progress value={cat.pct} className="h-1" />
+                            <p className="text-[9px] text-muted-foreground mt-1">{cat.fields.length} fields</p>
                           </div>
                         ))}
                       </div>
                     );
                   })()}
+                </CardContent>
+              </Card>
+
+              {/* Content DNA Samples */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Mic className="w-4 h-4" />
+                    Content DNA Samples
+                  </CardTitle>
+                  <CardDescription>{contentDNASamples.length} samples uploaded across all institutions</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {contentDNASamples.length === 0 ? (
+                    <div className="text-center py-6 text-muted-foreground">
+                      <Mic className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">No Content DNA samples uploaded yet</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {tenants.filter(t => t.contentDNACount > 0).map(inst => (
+                        <div key={inst.id} className="flex items-center justify-between p-2 border rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <GraduationCap className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm font-medium">{inst.institution_name}</span>
+                          </div>
+                          <Badge variant="outline" className="bg-orange-50 text-orange-700">
+                            {inst.contentDNACount} sample{inst.contentDNACount !== 1 ? 's' : ''}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
