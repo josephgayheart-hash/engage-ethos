@@ -799,126 +799,137 @@ export function InstitutionalConfig({ config, onChange }: InstitutionalConfigPro
 
           {/* Voice Analysis Results */}
           {config.voiceAnalysis && (
-            <Card className="border-primary/30 bg-gradient-to-br from-background to-primary/5">
-              <CardHeader className="pb-3">
+            <Card className="border border-border bg-card shadow-sm">
+              <CardHeader className="pb-4 border-b border-border">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Mic className="w-5 h-5 text-primary" />
-                    <CardTitle className="text-lg">Voice Profile</CardTitle>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <Mic className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base font-semibold">Voice Profile</CardTitle>
+                      <CardDescription className="text-xs mt-0.5">
+                        Analyzed {new Date(config.voiceAnalysis.analyzedAt).toLocaleDateString()}
+                      </CardDescription>
+                    </div>
                   </div>
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
                     onClick={clearVoiceAnalysis}
-                    className="text-muted-foreground hover:text-destructive"
+                    className="text-muted-foreground hover:text-destructive h-8"
                   >
                     <Trash2 className="w-4 h-4 mr-1" />
                     Clear
                   </Button>
                 </div>
-                <CardDescription className="text-xs">
-                  Analyzed {new Date(config.voiceAnalysis.analyzedAt).toLocaleDateString()}
-                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Summary */}
-                <div className="p-3 bg-primary/5 rounded-lg border border-primary/10">
-                  <h5 className="font-medium text-sm mb-2 flex items-center gap-2">
+              <CardContent className="pt-4 space-y-5">
+                {/* AI Summary */}
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
                     <Sparkles className="w-4 h-4 text-primary" />
-                    AI Summary
-                  </h5>
+                    <h5 className="font-medium text-sm">AI Summary</h5>
+                  </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     {config.voiceAnalysis.summary}
                   </p>
                 </div>
 
-                {/* Key Characteristics */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <h5 className="font-medium text-sm">Overall Tone</h5>
-                    <Badge variant="secondary" className="text-xs">
-                      {config.voiceAnalysis.overallTone}
-                    </Badge>
+                {/* Voice Attributes Grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 bg-muted/30 rounded-lg border border-border/50">
+                    <p className="text-xs text-muted-foreground mb-1.5">Overall Tone</p>
+                    <p className="text-sm font-medium">{config.voiceAnalysis.overallTone}</p>
                   </div>
-                  <div className="space-y-2">
-                    <h5 className="font-medium text-sm">Formality Level</h5>
-                    <Badge variant="secondary" className="text-xs">
-                      {config.voiceAnalysis.formalityLevel}
-                    </Badge>
+                  <div className="p-3 bg-muted/30 rounded-lg border border-border/50">
+                    <p className="text-xs text-muted-foreground mb-1.5">Formality</p>
+                    <p className="text-sm font-medium">{config.voiceAnalysis.formalityLevel}</p>
                   </div>
-                  <div className="space-y-2">
-                    <h5 className="font-medium text-sm">Emotional Tone</h5>
-                    <Badge variant="secondary" className="text-xs">
-                      {config.voiceAnalysis.emotionalTone}
-                    </Badge>
+                  <div className="p-3 bg-muted/30 rounded-lg border border-border/50">
+                    <p className="text-xs text-muted-foreground mb-1.5">Emotional Tone</p>
+                    <p className="text-sm font-medium">{config.voiceAnalysis.emotionalTone}</p>
                   </div>
-                  <div className="space-y-2">
-                    <h5 className="font-medium text-sm">Sentence Style</h5>
-                    <Badge variant="secondary" className="text-xs">
-                      {config.voiceAnalysis.sentenceStyle}
-                    </Badge>
+                  <div className="p-3 bg-muted/30 rounded-lg border border-border/50">
+                    <p className="text-xs text-muted-foreground mb-1.5">Sentence Style</p>
+                    <p className="text-sm font-medium">{config.voiceAnalysis.sentenceStyle}</p>
                   </div>
                 </div>
 
-                {/* Lists */}
-                <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="characteristics">
-                    <AccordionTrigger className="text-sm py-2">
-                      Key Characteristics ({config.voiceAnalysis.keyCharacteristics?.length || 0})
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="flex flex-wrap gap-1">
-                        {config.voiceAnalysis.keyCharacteristics?.map((item, i) => (
-                          <Badge key={i} variant="outline" className="text-xs">{item}</Badge>
+                {/* Expandable Sections */}
+                <div className="space-y-3">
+                  {/* Key Characteristics */}
+                  {config.voiceAnalysis.keyCharacteristics && config.voiceAnalysis.keyCharacteristics.length > 0 && (
+                    <div className="p-3 border border-border/50 rounded-lg">
+                      <h5 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                        Key Characteristics
+                      </h5>
+                      <div className="flex flex-wrap gap-1.5">
+                        {config.voiceAnalysis.keyCharacteristics.map((item, i) => (
+                          <Badge key={i} variant="secondary" className="text-xs font-normal">
+                            {item}
+                          </Badge>
                         ))}
                       </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                  
-                  <AccordionItem value="vocabulary">
-                    <AccordionTrigger className="text-sm py-2">
-                      Vocabulary Patterns ({config.voiceAnalysis.vocabularyPatterns?.length || 0})
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="flex flex-wrap gap-1">
-                        {config.voiceAnalysis.vocabularyPatterns?.map((item, i) => (
-                          <Badge key={i} variant="outline" className="text-xs">{item}</Badge>
-                        ))}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                  
-                  <AccordionItem value="phrases">
-                    <AccordionTrigger className="text-sm py-2">
-                      Common Phrases ({config.voiceAnalysis.commonPhrases?.length || 0})
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="flex flex-wrap gap-1">
-                        {config.voiceAnalysis.commonPhrases?.map((item, i) => (
-                          <Badge key={i} variant="outline" className="text-xs">"{item}"</Badge>
-                        ))}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                  
-                  <AccordionItem value="tactics">
-                    <AccordionTrigger className="text-sm py-2">
-                      Messaging Tactics ({config.voiceAnalysis.messagingTactics?.length || 0})
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="flex flex-wrap gap-1">
-                        {config.voiceAnalysis.messagingTactics?.map((item, i) => (
-                          <Badge key={i} variant="outline" className="text-xs">{item}</Badge>
-                        ))}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
+                    </div>
+                  )}
 
-                <div className="flex items-center gap-2 text-xs text-primary bg-primary/5 p-2 rounded-lg">
-                  <Check className="w-4 h-4" />
-                  This voice profile will be applied to all AI-generated messages.
+                  {/* Vocabulary Patterns */}
+                  {config.voiceAnalysis.vocabularyPatterns && config.voiceAnalysis.vocabularyPatterns.length > 0 && (
+                    <div className="p-3 border border-border/50 rounded-lg">
+                      <h5 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                        Vocabulary Patterns
+                      </h5>
+                      <div className="flex flex-wrap gap-1.5">
+                        {config.voiceAnalysis.vocabularyPatterns.map((item, i) => (
+                          <Badge key={i} variant="outline" className="text-xs font-normal">
+                            {item}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Common Phrases */}
+                  {config.voiceAnalysis.commonPhrases && config.voiceAnalysis.commonPhrases.length > 0 && (
+                    <div className="p-3 border border-border/50 rounded-lg">
+                      <h5 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                        Common Phrases
+                      </h5>
+                      <div className="flex flex-wrap gap-1.5">
+                        {config.voiceAnalysis.commonPhrases.map((item, i) => (
+                          <Badge key={i} variant="outline" className="text-xs font-normal bg-primary/5">
+                            "{item}"
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Messaging Tactics */}
+                  {config.voiceAnalysis.messagingTactics && config.voiceAnalysis.messagingTactics.length > 0 && (
+                    <div className="p-3 border border-border/50 rounded-lg">
+                      <h5 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                        Messaging Tactics
+                      </h5>
+                      <div className="flex flex-wrap gap-1.5">
+                        {config.voiceAnalysis.messagingTactics.map((item, i) => (
+                          <Badge key={i} variant="outline" className="text-xs font-normal">
+                            {item}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Status Banner */}
+                <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                  <Check className="w-4 h-4 text-green-600 shrink-0" />
+                  <p className="text-xs text-green-700 dark:text-green-400">
+                    Voice profile active — applied to all AI-generated messages
+                  </p>
                 </div>
               </CardContent>
             </Card>
