@@ -57,15 +57,22 @@ interface OnboardingRequest {
   notes: string | null;
 }
 
+interface Tenant {
+  id: string;
+  institution_name: string;
+}
+
 export default function AdminOnboardingPage() {
   const { tenant } = useAuth();
   const { toast } = useToast();
   const [requests, setRequests] = useState<OnboardingRequest[]>([]);
+  const [tenants, setTenants] = useState<Tenant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('pending');
   
   // Action dialogs
   const [selectedRequest, setSelectedRequest] = useState<OnboardingRequest | null>(null);
+  const [selectedTenantId, setSelectedTenantId] = useState<string>('');
   const [showApproveDialog, setShowApproveDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [rejectNotes, setRejectNotes] = useState('');
@@ -97,8 +104,24 @@ export default function AdminOnboardingPage() {
     }
   };
 
+  const fetchTenants = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('tenants')
+        .select('id, institution_name')
+        .neq('institution_name', 'PERSIST System')
+        .order('institution_name');
+
+      if (error) throw error;
+      setTenants(data || []);
+    } catch (error) {
+      console.error('Error fetching tenants:', error);
+    }
+  };
+
   useEffect(() => {
     fetchRequests();
+    fetchTenants();
   }, []);
 
   const generatePassword = () => {
@@ -112,6 +135,16 @@ export default function AdminOnboardingPage() {
 
   const handleApprove = async () => {
     if (!selectedRequest) return;
+    
+    // Super admins must select a tenant
+    if (!selectedTenantId) {
+      toast({
+        title: 'Select Institution',
+        description: 'Please select which institution to assign this user to.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     setIsProcessing(true);
     const tempPassword = generatePassword();
@@ -135,6 +168,7 @@ export default function AdminOnboardingPage() {
           action: 'approve_onboarding',
           requestId: selectedRequest.id,
           password: tempPassword,
+          tenantId: selectedTenantId,
         },
       });
 
@@ -171,6 +205,7 @@ export default function AdminOnboardingPage() {
     } finally {
       setIsProcessing(false);
       setSelectedRequest(null);
+      setSelectedTenantId('');
     }
   };
 
@@ -395,20 +430,41 @@ export default function AdminOnboardingPage() {
       </div>
 
       {/* Approve Dialog */}
-      <Dialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
+      <Dialog open={showApproveDialog} onOpenChange={(open) => {
+        setShowApproveDialog(open);
+        if (!open) setSelectedTenantId('');
+      }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="font-serif">Approve Request</DialogTitle>
             <DialogDescription>
-              Create a user account for {selectedRequest?.first_name} {selectedRequest?.last_name}. 
-              They will be added to {tenant?.institution_name}.
+              Create a user account for {selectedRequest?.first_name} {selectedRequest?.last_name}.
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4">
+          <div className="py-4 space-y-4">
             <div className="space-y-2 text-sm">
               <p><strong>Email:</strong> {selectedRequest?.email}</p>
               <p><strong>Department:</strong> {selectedRequest?.department || 'Not specified'}</p>
               <p><strong>Title:</strong> {selectedRequest?.title || 'Not specified'}</p>
+              {selectedRequest?.institution_name_input && (
+                <p><strong>Requested Institution:</strong> {selectedRequest.institution_name_input}</p>
+              )}
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Assign to Institution *</label>
+              <select
+                value={selectedTenantId}
+                onChange={(e) => setSelectedTenantId(e.target.value)}
+                className="w-full px-3 py-2 border border-[hsl(220,13%,88%)] rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(222,47%,31%)]"
+              >
+                <option value="">Select an institution...</option>
+                {tenants.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.institution_name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <DialogFooter>
@@ -417,7 +473,7 @@ export default function AdminOnboardingPage() {
             </Button>
             <Button 
               onClick={handleApprove} 
-              disabled={isProcessing}
+              disabled={isProcessing || !selectedTenantId}
               className="bg-[hsl(158,64%,42%)] hover:bg-[hsl(158,64%,38%)]"
             >
               {isProcessing ? (
