@@ -222,6 +222,13 @@ const AdminPanel = () => {
             </div>
             <div className="flex gap-2">
               <Button variant="outline" asChild>
+                <Link to="/admin/users" className="flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  User Management
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
+              </Button>
+              <Button variant="outline" asChild>
                 <Link to="/settings" className="flex items-center gap-2">
                   <Building2 className="w-4 h-4" />
                   Institutional Profiles

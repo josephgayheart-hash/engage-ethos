@@ -32,6 +32,7 @@ import ProfilePage from "./pages/ProfilePage";
 import AdminConsolePage from "./pages/admin/AdminConsolePage";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import AdminOnboardingPage from "./pages/admin/AdminOnboardingPage";
+import ApprovalsPage from "./pages/ApprovalsPage";
 
 const queryClient = new QueryClient();
 
@@ -77,6 +78,25 @@ function RequireAdmin({ children }: { children: React.ReactNode }) {
   }
   
   if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+  
+  return <>{children}</>;
+}
+
+// Approver route wrapper - requires approver or admin role
+function RequireApprover({ children }: { children: React.ReactNode }) {
+  const { isApprover, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-pulse">Loading...</div>
+      </div>
+    );
+  }
+  
+  if (!isApprover) {
     return <Navigate to="/" replace />;
   }
   
@@ -130,6 +150,9 @@ const AppRoutes = () => (
     <Route path="/translate" element={<RequireAuth><TranslationTool /></RequireAuth>} />
     <Route path="/settings" element={<RequireAuth><SettingsPage /></RequireAuth>} />
     <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
+    
+    {/* Approver routes */}
+    <Route path="/approvals" element={<RequireAuth><RequireApprover><ApprovalsPage /></RequireApprover></RequireAuth>} />
     
     {/* Admin routes */}
     <Route path="/admin" element={<RequireAuth><RequireAdmin><AdminPanel /></RequireAdmin></RequireAuth>} />
