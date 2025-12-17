@@ -55,30 +55,32 @@ const SettingsPage = () => {
   const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
   const [profileToDuplicate, setProfileToDuplicate] = useState<InstitutionalProfile | null>(null);
 
-  const handleCreateProfile = () => {
+  const handleCreateProfile = async () => {
     if (!newProfileName.trim()) return;
-    const profile = createProfile(newProfileName.trim());
+    const profile = await createProfile(newProfileName.trim());
     setNewProfileName("");
     setCreateDialogOpen(false);
-    setEditingProfile(profile);
-    toast({ title: "Profile created", description: `"${profile.name}" is ready to configure.` });
+    if (profile) {
+      setEditingProfile(profile);
+      toast({ title: "Profile created", description: `"${profile.name}" is ready to configure.` });
+    }
   };
 
-  const handleUpdateConfig = (config: InstitutionalConfigType) => {
+  const handleUpdateConfig = async (config: InstitutionalConfigType) => {
     if (!editingProfile) return;
-    updateProfile(editingProfile.id, { config });
+    await updateProfile(editingProfile.id, { config });
     setEditingProfile({ ...editingProfile, config });
   };
 
-  const handleRenameProfile = (newName: string) => {
+  const handleRenameProfile = async (newName: string) => {
     if (!editingProfile || !newName.trim()) return;
-    updateProfile(editingProfile.id, { name: newName.trim() });
+    await updateProfile(editingProfile.id, { name: newName.trim() });
     setEditingProfile({ ...editingProfile, name: newName.trim() });
   };
 
-  const handleDeleteProfile = () => {
+  const handleDeleteProfile = async () => {
     if (!profileToDelete) return;
-    deleteProfile(profileToDelete.id);
+    await deleteProfile(profileToDelete.id);
     if (editingProfile?.id === profileToDelete.id) {
       setEditingProfile(null);
     }
@@ -87,9 +89,9 @@ const SettingsPage = () => {
     toast({ title: "Profile deleted" });
   };
 
-  const handleDuplicateProfile = () => {
+  const handleDuplicateProfile = async () => {
     if (!profileToDuplicate || !duplicateName.trim()) return;
-    const newProfile = duplicateProfile(profileToDuplicate.id, duplicateName.trim());
+    const newProfile = await duplicateProfile(profileToDuplicate.id, duplicateName.trim());
     setDuplicateDialogOpen(false);
     setProfileToDuplicate(null);
     setDuplicateName("");
