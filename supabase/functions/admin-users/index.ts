@@ -43,22 +43,23 @@ serve(async (req) => {
       );
     }
 
-    // Verify requesting user is an admin
+    // Verify requesting user is an admin or super_admin
     const { data: roles } = await adminClient
       .from("user_roles")
       .select("role, tenant_id")
       .eq("user_id", requestingUser.id)
-      .eq("role", "admin")
-      .single();
+      .in("role", ["admin", "super_admin"]);
 
-    if (!roles) {
+    if (!roles || roles.length === 0) {
       return new Response(
         JSON.stringify({ error: "Admin access required" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const adminTenantId = roles.tenant_id;
+    // Get the first role (prefer super_admin if present)
+    const isSuperAdmin = roles.some(r => r.role === "super_admin");
+    const adminTenantId = isSuperAdmin ? null : roles[0].tenant_id;
     const body = await req.json();
     const { action } = body;
 
@@ -66,7 +67,17 @@ serve(async (req) => {
 
     switch (action) {
       case "create_user": {
-        const { email, password, firstName, lastName, phone, department, title, role, roles: rolesList } = body;
+        const { email, password, firstName, lastName, phone, department, title, role, roles: rolesList, tenantId: targetTenantId } = body;
+        
+        // Super admins must specify a tenant, regular admins use their own tenant
+        const effectiveTenantId = isSuperAdmin ? targetTenantId : adminTenantId;
+        
+        if (!effectiveTenantId) {
+          return new Response(
+            JSON.stringify({ error: "Tenant ID required for super admin operations" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
         
         // Create auth user
         const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
@@ -88,7 +99,7 @@ serve(async (req) => {
           .from("profiles")
           .insert({
             id: authData.user.id,
-            tenant_id: adminTenantId,
+            tenant_id: effectiveTenantId,
             email,
             first_name: firstName,
             last_name: lastName,
@@ -130,7 +141,7 @@ serve(async (req) => {
             .from("user_roles")
             .insert({
               user_id: authData.user.id,
-              tenant_id: adminTenantId,
+              tenant_id: effectiveTenantId,
               role: r,
             });
 
@@ -141,7 +152,7 @@ serve(async (req) => {
 
         // Create audit log
         await adminClient.from("audit_log").insert({
-          tenant_id: adminTenantId,
+          tenant_id: effectiveTenantId,
           actor_user_id: requestingUser.id,
           action: "create_user",
           target_type: "user",
@@ -162,26 +173,28 @@ serve(async (req) => {
       case "update_user_roles": {
         const { userId, roles: newRoles } = body;
 
-        // Verify user belongs to admin's tenant
+        // Verify user belongs to admin's tenant (super admins can manage any user)
         const { data: targetProfile } = await adminClient
           .from("profiles")
           .select("tenant_id")
           .eq("id", userId)
           .single();
 
-        if (!targetProfile || targetProfile.tenant_id !== adminTenantId) {
+        if (!targetProfile || (!isSuperAdmin && targetProfile.tenant_id !== adminTenantId)) {
           return new Response(
             JSON.stringify({ error: "User not found in your organization" }),
             { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
+        
+        const targetTenantId = targetProfile.tenant_id;
 
         // Delete existing roles for this user
         await adminClient
           .from("user_roles")
           .delete()
           .eq("user_id", userId)
-          .eq("tenant_id", adminTenantId);
+          .eq("tenant_id", targetTenantId);
 
         // Insert new roles
         for (const r of newRoles) {
@@ -189,14 +202,14 @@ serve(async (req) => {
             .from("user_roles")
             .insert({
               user_id: userId,
-              tenant_id: adminTenantId,
+              tenant_id: targetTenantId,
               role: r,
             });
         }
 
         // Audit log
         await adminClient.from("audit_log").insert({
-          tenant_id: adminTenantId,
+          tenant_id: targetTenantId,
           actor_user_id: requestingUser.id,
           action: "update_user_roles",
           target_type: "user",
@@ -213,14 +226,14 @@ serve(async (req) => {
       case "reset_password": {
         const { userId, newPassword } = body;
 
-        // Verify user belongs to admin's tenant
+        // Verify user belongs to admin's tenant (super admins can manage any user)
         const { data: targetProfile } = await adminClient
           .from("profiles")
           .select("tenant_id")
           .eq("id", userId)
           .single();
 
-        if (!targetProfile || targetProfile.tenant_id !== adminTenantId) {
+        if (!targetProfile || (!isSuperAdmin && targetProfile.tenant_id !== adminTenantId)) {
           return new Response(
             JSON.stringify({ error: "User not found in your organization" }),
             { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -250,7 +263,7 @@ serve(async (req) => {
 
         // Audit log
         await adminClient.from("audit_log").insert({
-          tenant_id: adminTenantId,
+          tenant_id: targetProfile.tenant_id,
           actor_user_id: requestingUser.id,
           action: "reset_password",
           target_type: "user",
@@ -272,7 +285,7 @@ serve(async (req) => {
           .eq("id", userId)
           .single();
 
-        if (!targetProfile || targetProfile.tenant_id !== adminTenantId) {
+        if (!targetProfile || (!isSuperAdmin && targetProfile.tenant_id !== adminTenantId)) {
           return new Response(
             JSON.stringify({ error: "User not found in your organization" }),
             { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -293,7 +306,7 @@ serve(async (req) => {
 
         // Audit log
         await adminClient.from("audit_log").insert({
-          tenant_id: adminTenantId,
+          tenant_id: targetProfile.tenant_id,
           actor_user_id: requestingUser.id,
           action: `update_user_status_${status}`,
           target_type: "user",
@@ -308,7 +321,17 @@ serve(async (req) => {
       }
 
       case "approve_onboarding": {
-        const { requestId, password } = body;
+        const { requestId, password, tenantId: targetTenantId } = body;
+
+        // Super admins must specify a tenant for approved users
+        const effectiveApprovalTenantId = isSuperAdmin ? targetTenantId : adminTenantId;
+        
+        if (!effectiveApprovalTenantId) {
+          return new Response(
+            JSON.stringify({ error: "Tenant ID required for onboarding approval" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
 
         const { data: request, error: requestError } = await adminClient
           .from("onboarding_requests")
@@ -342,7 +365,7 @@ serve(async (req) => {
           .from("profiles")
           .insert({
             id: authData.user.id,
-            tenant_id: adminTenantId,
+            tenant_id: effectiveApprovalTenantId,
             email: request.email,
             first_name: request.first_name,
             last_name: request.last_name,
@@ -364,7 +387,7 @@ serve(async (req) => {
         // Create role
         await adminClient.from("user_roles").insert({
           user_id: authData.user.id,
-          tenant_id: adminTenantId,
+          tenant_id: effectiveApprovalTenantId,
           role: "user",
         });
 
@@ -373,7 +396,7 @@ serve(async (req) => {
           .from("onboarding_requests")
           .update({
             request_status: "approved",
-            tenant_id: adminTenantId,
+            tenant_id: effectiveApprovalTenantId,
             reviewed_by_admin_user_id: requestingUser.id,
             reviewed_at: new Date().toISOString(),
           })
@@ -381,7 +404,7 @@ serve(async (req) => {
 
         // Audit log
         await adminClient.from("audit_log").insert({
-          tenant_id: adminTenantId,
+          tenant_id: effectiveApprovalTenantId,
           actor_user_id: requestingUser.id,
           action: "approve_onboarding",
           target_type: "onboarding_request",
@@ -402,6 +425,13 @@ serve(async (req) => {
       case "reject_onboarding": {
         const { requestId, notes } = body;
 
+        // Get the request to determine the tenant for audit log
+        const { data: request } = await adminClient
+          .from("onboarding_requests")
+          .select("tenant_id")
+          .eq("id", requestId)
+          .single();
+
         await adminClient
           .from("onboarding_requests")
           .update({
@@ -412,8 +442,11 @@ serve(async (req) => {
           })
           .eq("id", requestId);
 
+        // Use request's tenant_id for audit, or PERSIST System tenant for super admin
+        const auditTenantId = request?.tenant_id || (isSuperAdmin ? '00000000-0000-0000-0000-000000000000' : adminTenantId);
+
         await adminClient.from("audit_log").insert({
-          tenant_id: adminTenantId,
+          tenant_id: auditTenantId,
           actor_user_id: requestingUser.id,
           action: "reject_onboarding",
           target_type: "onboarding_request",
