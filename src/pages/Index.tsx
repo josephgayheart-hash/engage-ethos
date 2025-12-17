@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
+import { useAuth } from "@/contexts/AuthContext";
 import { ResearchFoundation } from "@/components/ResearchFoundation";
 import { 
   Shield, 
@@ -40,6 +41,7 @@ import {
 const Index = () => {
   const { messages } = useMessageLibrary();
   const { templates } = useSharedLibrary();
+  const { isAdmin } = useAuth();
 
   const recentMessages = messages.slice(0, 3);
   const publishedTemplates = templates.filter(t => t.status === 'published').slice(0, 3);
@@ -302,7 +304,9 @@ const Index = () => {
               </Badge>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {modeCards.map((card) => {
+              {modeCards
+                .filter(card => card.id !== 'admin' || isAdmin)
+                .map((card) => {
                 const Icon = card.icon;
                 return (
                   <Link key={card.id} to={card.href}>
