@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,9 +12,12 @@ import persistLogo from '@/assets/persist-logo.png';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { toast } = useToast();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -83,6 +87,36 @@ export default function LoginPage() {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError('Enter your email, then click “Forgot password?”.');
+      return;
+    }
+
+    setIsResetting(true);
+    setError(null);
+
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/change-password`,
+      });
+
+      if (resetError) {
+        setError(resetError.message);
+        return;
+      }
+
+      toast({
+        title: 'Password reset email sent',
+        description: 'Check your inbox for the reset link.',
+      });
+    } catch (err) {
+      setError('Unable to send reset email. Please try again.');
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[hsl(210,20%,98%)] flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
@@ -141,6 +175,18 @@ export default function LoginPage() {
                     className="pl-10 border-[hsl(220,13%,88%)]"
                     required
                   />
+                </div>
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    variant="link"
+                    size="sm"
+                    onClick={handleForgotPassword}
+                    disabled={isLoading || isResetting}
+                    className="px-0"
+                  >
+                    {isResetting ? 'Sending reset link…' : 'Forgot password?'}
+                  </Button>
                 </div>
               </div>
 
