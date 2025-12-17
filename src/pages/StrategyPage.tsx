@@ -4,6 +4,7 @@ import { format, differenceInWeeks, addWeeks } from "date-fns";
 import { Header } from "@/components/Header";
 import { ContextSelector } from "@/components/ContextSelector";
 import { StrategyJourneyDisplay } from "@/components/StrategyJourney";
+import { JourneyFlowDiagram } from "@/components/JourneyFlowDiagram";
 import { LibraryNav } from "@/components/LibraryNav";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -493,6 +494,23 @@ const StrategyPage = () => {
                   </div>
                 </div>
               </div>
+              
+              {/* Interactive Journey Flow Diagram */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="font-serif text-lg flex items-center gap-2">
+                    <Map className="w-5 h-5 text-pillar-consensus" />
+                    Journey Flow Diagram
+                  </CardTitle>
+                  <CardDescription>
+                    Drag nodes to rearrange • Scroll to zoom • Click and drag background to pan
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <JourneyFlowDiagram journey={mapperResult.journey} />
+                </CardContent>
+              </Card>
+
               <StrategyJourneyDisplay 
                 journey={mapperResult.journey} 
                 context={context} 
