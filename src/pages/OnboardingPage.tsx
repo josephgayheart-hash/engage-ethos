@@ -13,6 +13,7 @@ import {
   UserPlus, 
   HeartHandshake, 
   GraduationCap,
+  Briefcase,
   ArrowRight,
   CheckCircle2
 } from "lucide-react";
@@ -92,6 +93,14 @@ const departments: DepartmentInfo[] = [
     typicalAudiences: ['alumni', 'donors', 'parents'],
     typicalMoments: ['giving-campaign', 'seasonal', 'graduation'],
   },
+  {
+    id: 'human-resources',
+    name: 'Human Resources (HR)',
+    description: 'Benefits, policy updates, onboarding, and employee engagement communications',
+    primaryTools: ['builder', 'evaluator'],
+    typicalAudiences: ['employee'],
+    typicalMoments: ['open-enrollment', 'onboarding', 'policy-update', 'campus-event'],
+  },
 ];
 
 const departmentIcons: Record<Department, React.ReactNode> = {
@@ -104,6 +113,7 @@ const departmentIcons: Record<Department, React.ReactNode> = {
   'recruitment': <UserPlus className="w-6 h-6" />,
   'health-wellbeing': <Heart className="w-6 h-6" />,
   'advancement-alumni': <HeartHandshake className="w-6 h-6" />,
+  'human-resources': <Briefcase className="w-6 h-6" />,
 };
 
 const OnboardingPage = () => {
