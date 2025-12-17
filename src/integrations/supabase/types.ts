@@ -55,6 +55,62 @@ export type Database = {
           },
         ]
       }
+      beta_feedback: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          feature_area: string
+          feedback_text: string
+          feedback_type: string
+          id: string
+          page_path: string | null
+          rating: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          tenant_id: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          feature_area: string
+          feedback_text: string
+          feedback_type?: string
+          id?: string
+          page_path?: string | null
+          rating?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          tenant_id: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          feature_area?: string
+          feedback_text?: string
+          feedback_type?: string
+          id?: string
+          page_path?: string | null
+          rating?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          tenant_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beta_feedback_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       byoc_uploads: {
         Row: {
           content_text: string | null
