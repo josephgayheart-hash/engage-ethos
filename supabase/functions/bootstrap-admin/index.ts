@@ -1,0 +1,145 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+// This function creates the initial admin user for a tenant
+// Should only be used once during initial setup
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    const adminClient = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+
+    const body = await req.json();
+    const { email, password, firstName, lastName, tenantId, setupKey } = body;
+
+    // Simple security check - require a setup key
+    if (setupKey !== "PERSIST_SETUP_2024") {
+      return new Response(
+        JSON.stringify({ error: "Invalid setup key" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Verify tenant exists
+    const { data: tenant, error: tenantError } = await adminClient
+      .from("tenants")
+      .select("id, institution_name")
+      .eq("id", tenantId)
+      .single();
+
+    if (tenantError || !tenant) {
+      return new Response(
+        JSON.stringify({ error: "Tenant not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Check if admin already exists for this tenant
+    const { data: existingAdmin } = await adminClient
+      .from("user_roles")
+      .select("user_id")
+      .eq("tenant_id", tenantId)
+      .eq("role", "admin")
+      .limit(1);
+
+    if (existingAdmin && existingAdmin.length > 0) {
+      return new Response(
+        JSON.stringify({ error: "Admin already exists for this tenant" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Create auth user
+    const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
+
+    if (authError) {
+      console.error("Auth creation error:", authError);
+      return new Response(
+        JSON.stringify({ error: authError.message }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Create profile
+    const { error: profileError } = await adminClient
+      .from("profiles")
+      .insert({
+        id: authData.user.id,
+        tenant_id: tenantId,
+        email,
+        first_name: firstName,
+        last_name: lastName,
+        status: "active",
+        password_reset_required: false,
+      });
+
+    if (profileError) {
+      console.error("Profile creation error:", profileError);
+      await adminClient.auth.admin.deleteUser(authData.user.id);
+      return new Response(
+        JSON.stringify({ error: profileError.message }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Create admin role
+    const { error: roleError } = await adminClient
+      .from("user_roles")
+      .insert({
+        user_id: authData.user.id,
+        tenant_id: tenantId,
+        role: "admin",
+      });
+
+    if (roleError) {
+      console.error("Role creation error:", roleError);
+    }
+
+    // Create audit log
+    await adminClient.from("audit_log").insert({
+      tenant_id: tenantId,
+      actor_user_id: authData.user.id,
+      action: "bootstrap_admin",
+      target_type: "user",
+      target_id: authData.user.id,
+      metadata: { email, institution: tenant.institution_name },
+    });
+
+    console.log(`Bootstrap admin created: ${email} for ${tenant.institution_name}`);
+
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        userId: authData.user.id,
+        email,
+        institution: tenant.institution_name,
+        message: "Admin account created successfully. You can now log in."
+      }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+
+  } catch (error: unknown) {
+    console.error("Bootstrap admin error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    return new Response(
+      JSON.stringify({ error: errorMessage }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
