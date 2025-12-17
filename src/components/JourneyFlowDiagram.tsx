@@ -22,6 +22,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { StrategyJourney, JourneyTouchpoint, MessageContext } from '@/types/persist';
+import {
+  applyDagreLayout,
+  getNodesBounds,
+  getNodeSize,
+  parseWeekRange,
+  resolveNonOverlappingX,
+  shiftNodes,
+} from '@/lib/journeyDiagramLayout';
 
 interface JourneyFlowDiagramProps {
   journey: StrategyJourney;
@@ -235,26 +243,135 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
   }, []);
 
   // Convert journey phases and touchpoints to React Flow nodes
-  const { initialNodes, initialEdges } = useMemo(() => {
-    const nodes: Node[] = [];
+  const { initialNodes, initialEdges, diagramHeight } = useMemo(() => {
     const edges: Edge[] = [];
-    
-    const touchpointCount = journey.touchpoints.length;
-    
-    // Reasonable spacing for nodes (kept compact, but prevents header/phase overlap)
-    const xSpacing = 300;
-    const ySpacing = 220;
-    const nodesPerRow = touchpointCount > 10 ? 4 : touchpointCount > 6 ? 3 : Math.min(touchpointCount, 4);
-    const yBase = 240;
-    
-    // Calculate total width for centering
-    const totalWidth = nodesPerRow * xSpacing;
-    
-    // Add journey info header node
-    nodes.push({
+
+    // --- Touchpoints (laid out via dagre so nodes never overlap) ---
+    const touchpointNodes: Node[] = journey.touchpoints.map((touchpoint, index) => {
+      const weekDate = calculateWeekDate(startDate, touchpoint.week);
+
+      return {
+        id: `tp-${index}`,
+        type: 'touchpoint',
+        position: { x: 0, y: 0 },
+        data: { touchpoint, index, weekDate },
+        draggable: true,
+      };
+    });
+
+    // Main journey edges (visible)
+    for (let i = 1; i < touchpointNodes.length; i++) {
+      edges.push({
+        id: `e-${i - 1}-${i}`,
+        source: `tp-${i - 1}`,
+        target: `tp-${i}`,
+        type: 'smoothstep',
+        animated: true,
+        style: { stroke: 'hsl(var(--primary))', strokeWidth: 2 },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          color: 'hsl(var(--primary))',
+        },
+      });
+    }
+
+    const laidOutTouchpoints = applyDagreLayout(touchpointNodes, edges, {
+      direction: 'LR',
+      nodeSep: 90,
+      rankSep: 140,
+    });
+
+    // Shift the dagre graph into a predictable canvas region
+    const tpBoundsRaw = getNodesBounds(laidOutTouchpoints);
+    const touchpointsTopY = 420;
+    const leftMarginX = 40;
+
+    const shiftedTouchpoints = shiftNodes(
+      laidOutTouchpoints,
+      leftMarginX - tpBoundsRaw.minX,
+      touchpointsTopY - tpBoundsRaw.minY
+    );
+
+    const nodeById = new Map(shiftedTouchpoints.map((n) => [n.id, n] as const));
+
+    // --- Phases (positioned above the touchpoints, centered over their week ranges) ---
+    const phaseSize = getNodeSize({
+      id: 'phase-size',
+      type: 'phase',
+      position: { x: 0, y: 0 },
+      data: {},
+    } as Node);
+
+    const phaseY = 260;
+
+    const phaseDraft = journey.phases.map((phase, phaseIndex) => {
+      const range = parseWeekRange(phase.weekRange);
+
+      const relevant = journey.touchpoints
+        .map((tp, index) => ({ tp, node: nodeById.get(`tp-${index}`) }))
+        .filter(({ tp, node }) => {
+          if (!node) return false;
+          if (!range) return true;
+          return tp.week >= range.startWeek && tp.week <= range.endWeek;
+        })
+        .map(({ node }) => node as Node);
+
+      // Fallback if range parsing fails or no nodes match (space phases evenly over the touchpoint bounds)
+      const tpBounds = getNodesBounds(shiftedTouchpoints);
+      const fallbackCenterX =
+        tpBounds.minX +
+        ((phaseIndex + 0.5) / Math.max(1, journey.phases.length)) * (tpBounds.maxX - tpBounds.minX);
+
+      const centerX = (() => {
+        if (!relevant.length) return fallbackCenterX;
+        let minX = Number.POSITIVE_INFINITY;
+        let maxX = Number.NEGATIVE_INFINITY;
+        for (const n of relevant) {
+          const size = getNodeSize(n);
+          minX = Math.min(minX, n.position.x);
+          maxX = Math.max(maxX, n.position.x + size.width);
+        }
+        return (minX + maxX) / 2;
+      })();
+
+      return {
+        id: `phase-${phaseIndex}`,
+        type: 'phase',
+        position: { x: centerX - phaseSize.width / 2, y: phaseY },
+        data: {
+          name: phase.name,
+          weekRange: phase.weekRange,
+          focus: phase.focus,
+        },
+        draggable: true,
+      } satisfies Node;
+    });
+
+    const nonOverlappingPhaseX = resolveNonOverlappingX(
+      phaseDraft.map((p) => ({ id: p.id, x: p.position.x, width: phaseSize.width })),
+      28
+    );
+
+    const phaseNodes: Node[] = phaseDraft.map((p) => ({
+      ...p,
+      position: { ...p.position, x: nonOverlappingPhaseX[p.id] ?? p.position.x },
+    }));
+
+    // --- Journey info header (placed above phases) ---
+    const infoSize = getNodeSize({
+      id: 'info-size',
+      type: 'journeyInfo',
+      position: { x: 0, y: 0 },
+      data: {},
+    } as Node);
+
+    const allTopNodes = [...phaseNodes, ...shiftedTouchpoints];
+    const allTopBounds = getNodesBounds(allTopNodes);
+
+    const journeyInfoNode: Node = {
       id: 'journey-info',
       type: 'journeyInfo',
-      position: { x: 20, y: -240 },
+      position: { x: allTopBounds.minX, y: 20 },
       data: {
         overview: journey.overview,
         audience: context?.audience,
@@ -267,76 +384,26 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
         touchpointCount: journey.touchpoints.length,
       },
       draggable: true,
-    });
-    
-    // Add phase header nodes
-    const phaseWidth = totalWidth / journey.phases.length;
-    journey.phases.forEach((phase, phaseIndex) => {
-      nodes.push({
-        id: `phase-${phaseIndex}`,
-        type: 'phase',
-        position: { x: phaseIndex * phaseWidth + (phaseWidth / 2) - 75, y: 40 },
-        data: { 
-          name: phase.name,
-          weekRange: phase.weekRange,
-          focus: phase.focus,
-        },
-        draggable: true,
-      });
-    });
-    
-    // Add touchpoint nodes in a clean grid layout (no serpentine, no stagger for cleaner alignment)
-    journey.touchpoints.forEach((touchpoint, index) => {
-      const row = Math.floor(index / nodesPerRow);
-      const col = index % nodesPerRow;
-      
-      // Calculate horizontal offset to center the row
-      const itemsInThisRow = Math.min(nodesPerRow, touchpointCount - row * nodesPerRow);
-      const rowWidth = itemsInThisRow * xSpacing;
-      const totalWidth = nodesPerRow * xSpacing;
-      const xOffset = (totalWidth - rowWidth) / 2;
-      
-      const weekDate = calculateWeekDate(startDate, touchpoint.week);
-      
-      nodes.push({
-        id: `tp-${index}`,
-        type: 'touchpoint',
-        position: { 
-          x: col * xSpacing + xOffset + 40, 
-          y: yBase + (row * ySpacing)
-        },
-        data: { touchpoint, index, weekDate },
-        draggable: true,
-      });
-      
-      // Connect to previous node
-      if (index > 0) {
-        edges.push({
-          id: `e-${index - 1}-${index}`,
-          source: `tp-${index - 1}`,
-          target: `tp-${index}`,
-          type: 'smoothstep',
-          animated: true,
-          style: { stroke: 'hsl(var(--primary))', strokeWidth: 2 },
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-            color: 'hsl(var(--primary))',
-          },
-        });
-      }
-    });
-    
-    return { initialNodes: nodes, initialEdges: edges };
+    };
+
+    const nodes: Node[] = [journeyInfoNode, ...phaseNodes, ...shiftedTouchpoints];
+
+    // Ensure the header never starts off-canvas even when it is wider than the touchpoints.
+    const allBounds = getNodesBounds(nodes);
+    const finalShiftX = Math.max(0, 24 - allBounds.minX);
+    const shiftedAllNodes = finalShiftX ? shiftNodes(nodes, finalShiftX, 0) : nodes;
+
+    const finalBounds = getNodesBounds(shiftedAllNodes);
+    const diagramHeight = Math.max(560, finalBounds.maxY + 60);
+
+    // Also keep the canvas wide enough for large header exports by shifting, rather than scaling.
+    void infoSize;
+
+    return { initialNodes: shiftedAllNodes, initialEdges: edges, diagramHeight };
   }, [journey, context, startDate, endDate]);
 
   const [nodes, , onNodesChange] = useNodesState(initialNodes);
   const [edges, , onEdgesChange] = useEdgesState(initialEdges);
-
-  // Calculate dynamic height
-  const touchpointCount = journey.touchpoints.length;
-  const nodesPerRow = touchpointCount > 10 ? 4 : touchpointCount > 6 ? 3 : Math.min(touchpointCount, 4);
-  const rowCount = Math.ceil(touchpointCount / nodesPerRow);
-  const dynamicHeight = Math.max(520, 280 + rowCount * 240);
 
   return (
     <div ref={flowRef} className="w-full border rounded-lg bg-muted/20 relative">
@@ -437,7 +504,7 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
       </div>
 
       {/* React Flow Diagram */}
-      <div style={{ height: `${dynamicHeight}px` }}>
+      <div style={{ height: `${diagramHeight}px` }}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
