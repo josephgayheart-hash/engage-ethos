@@ -60,7 +60,7 @@ interface UserWithRole extends UserProfile {
 }
 
 export default function AdminUsersPage() {
-  const { tenant } = useAuth();
+  const { tenant, isSuperAdmin } = useAuth();
   const { toast } = useToast();
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -313,6 +313,9 @@ export default function AdminUsersPage() {
                 <span className="text-[hsl(222,47%,11%)]">Users</span>
               </div>
               <h1 className="font-serif text-2xl font-bold text-[hsl(222,47%,11%)]">User Management</h1>
+              <p className="text-sm text-[hsl(220,14%,46%)]">
+                {isSuperAdmin ? 'Create and manage user accounts' : 'View users in your institution (read-only)'}
+              </p>
             </div>
           </div>
         </div>
@@ -330,13 +333,15 @@ export default function AdminUsersPage() {
                 </Badge>
               )}
             </CardTitle>
-            <Button 
-              onClick={() => setShowCreateDialog(true)}
-              className="bg-[hsl(222,47%,14%)] hover:bg-[hsl(222,47%,20%)]"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add User
-            </Button>
+            {isSuperAdmin && (
+              <Button 
+                onClick={() => setShowCreateDialog(true)}
+                className="bg-[hsl(222,47%,14%)] hover:bg-[hsl(222,47%,20%)]"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add User
+              </Button>
+            )}
           </CardHeader>
           <CardContent>
             {/* Filters */}
@@ -380,7 +385,7 @@ export default function AdminUsersPage() {
                     <TableHead>Role</TableHead>
                     <TableHead>Last Login</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead className="w-12"></TableHead>
+                    {isSuperAdmin && <TableHead className="w-12"></TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -414,50 +419,52 @@ export default function AdminUsersPage() {
                           : 'Never'}
                       </TableCell>
                       <TableCell>{getStatusBadge(user.status)}</TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreVertical className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => {
-                              setResetUserId(user.id);
-                              setShowResetDialog(true);
-                            }}>
-                              <KeyRound className="w-4 h-4 mr-2" />
-                              Reset Password
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            {user.status !== 'locked' ? (
-                              <DropdownMenuItem onClick={() => handleUpdateStatus(user.id, 'locked')}>
-                                <Lock className="w-4 h-4 mr-2" />
-                                Lock Account
+                      {isSuperAdmin && (
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => {
+                                setResetUserId(user.id);
+                                setShowResetDialog(true);
+                              }}>
+                                <KeyRound className="w-4 h-4 mr-2" />
+                                Reset Password
                               </DropdownMenuItem>
-                            ) : (
-                              <DropdownMenuItem onClick={() => handleUpdateStatus(user.id, 'active')}>
-                                <Unlock className="w-4 h-4 mr-2" />
-                                Unlock Account
-                              </DropdownMenuItem>
-                            )}
-                            {user.status !== 'disabled' && (
-                              <DropdownMenuItem 
-                                onClick={() => handleUpdateStatus(user.id, 'disabled')}
-                                className="text-red-600"
-                              >
-                                <UserX className="w-4 h-4 mr-2" />
-                                Disable Account
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
+                              <DropdownMenuSeparator />
+                              {user.status !== 'locked' ? (
+                                <DropdownMenuItem onClick={() => handleUpdateStatus(user.id, 'locked')}>
+                                  <Lock className="w-4 h-4 mr-2" />
+                                  Lock Account
+                                </DropdownMenuItem>
+                              ) : (
+                                <DropdownMenuItem onClick={() => handleUpdateStatus(user.id, 'active')}>
+                                  <Unlock className="w-4 h-4 mr-2" />
+                                  Unlock Account
+                                </DropdownMenuItem>
+                              )}
+                              {user.status !== 'disabled' && (
+                                <DropdownMenuItem 
+                                  onClick={() => handleUpdateStatus(user.id, 'disabled')}
+                                  className="text-red-600"
+                                >
+                                  <UserX className="w-4 h-4 mr-2" />
+                                  Disable Account
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                   {filteredUsers.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-[hsl(220,14%,46%)]">
+                      <TableCell colSpan={isSuperAdmin ? 7 : 6} className="text-center py-8 text-[hsl(220,14%,46%)]">
                         No users found
                       </TableCell>
                     </TableRow>
