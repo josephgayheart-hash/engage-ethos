@@ -121,7 +121,7 @@ export default function ProfilePage() {
                 <div className="flex items-center gap-2 mt-2">
                   <Badge variant="outline" className="flex items-center gap-1">
                     <Building2 className="w-3 h-3" />
-                    {tenant?.institution_name}
+                    {tenant?.institution_name || 'Loading...'}
                   </Badge>
                   <Badge className={role === 'admin' ? 'bg-[hsl(222,47%,14%)]' : 'bg-[hsl(173,58%,39%)]'}>
                     {role === 'admin' ? 'Admin' : 'User'}
