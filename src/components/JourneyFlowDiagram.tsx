@@ -9,12 +9,10 @@ import ReactFlow, {
   MarkerType,
   Position,
   Handle,
-  getRectOfNodes,
-  getTransformForBounds,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { toPng, toSvg } from 'html-to-image';
-import { Mail, MessageSquare, Globe, Phone, Share2, FileText, Download, Image, FileCode } from 'lucide-react';
+import { Mail, MessageSquare, Globe, Phone, Share2, FileText, Download, Image, FileCode, Users, Target, Calendar, Megaphone } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,11 +21,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import type { StrategyJourney, JourneyTouchpoint } from '@/types/persist';
+import type { StrategyJourney, JourneyTouchpoint, MessageContext } from '@/types/persist';
 
 interface JourneyFlowDiagramProps {
   journey: StrategyJourney;
+  context?: MessageContext;
   startDate?: string;
+  endDate?: string;
 }
 
 // Helper to calculate date for a specific week
@@ -37,9 +37,20 @@ const calculateWeekDate = (startDate: string | undefined, weekNumber: number): s
     const start = new Date(startDate);
     const weekDate = new Date(start);
     weekDate.setDate(start.getDate() + (weekNumber - 1) * 7);
-    return weekDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return weekDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   } catch {
     return null;
+  }
+};
+
+// Helper to format date for display
+const formatDisplayDate = (dateStr: string | undefined): string => {
+  if (!dateStr) return '';
+  try {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  } catch {
+    return '';
   }
 };
 
@@ -47,6 +58,12 @@ const calculateWeekDate = (startDate: string | undefined, weekNumber: number): s
 const formatChannelName = (channel: string): string => {
   if (channel?.toLowerCase() === 'sms') return 'SMS';
   return channel?.replace('-', ' ').replace(/\b\w/g, c => c.toUpperCase()) || '';
+};
+
+// Helper to format filter values
+const formatFilterValue = (value: string | undefined): string => {
+  if (!value) return 'Not specified';
+  return value.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 };
 
 // Custom node component for touchpoints
@@ -76,24 +93,23 @@ const TouchpointNode = ({ data }: { data: { touchpoint: JourneyTouchpoint; index
   };
 
   return (
-    <div className="bg-card border-2 border-border rounded-lg shadow-lg p-3 min-w-[180px] max-w-[220px] cursor-move">
+    <div className="bg-card border-2 border-border rounded-lg shadow-lg p-3 min-w-[200px] max-w-[240px] cursor-move">
       <Handle type="target" position={Position.Left} className="!bg-primary !w-2 !h-2" />
       
-      <div className="flex items-center gap-2 mb-2">
-        <div className={`p-1.5 rounded ${getChannelColor(touchpoint.channel)} text-white`}>
-          {getChannelIcon(touchpoint.channel)}
+      {/* Week & Date Header */}
+      <div className="bg-muted/50 -mx-3 -mt-3 px-3 py-2 rounded-t-md mb-2 border-b border-border">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-foreground">Week {touchpoint.week}</span>
+          <div className={`p-1 rounded ${getChannelColor(touchpoint.channel)} text-white`}>
+            {getChannelIcon(touchpoint.channel)}
+          </div>
         </div>
-        <div>
-          <p className="text-xs font-bold text-foreground">
-            Week {touchpoint.week}
-          </p>
-          {weekDate && (
-            <p className="text-[10px] font-medium text-primary">{weekDate}</p>
-          )}
-          <p className="text-xs text-muted-foreground">{formatChannelName(touchpoint.channel)}</p>
-        </div>
+        {weekDate && (
+          <p className="text-xs font-semibold text-primary mt-0.5">{weekDate}</p>
+        )}
       </div>
       
+      <p className="text-xs text-muted-foreground mb-1">{formatChannelName(touchpoint.channel)}</p>
       <p className="text-xs font-medium mb-1 line-clamp-1">{touchpoint.title}</p>
       <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
         {touchpoint.description}
@@ -127,7 +143,7 @@ const nodeTypes = {
   phase: PhaseNode,
 };
 
-export const JourneyFlowDiagram = ({ journey, startDate }: JourneyFlowDiagramProps) => {
+export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: JourneyFlowDiagramProps) => {
   const flowRef = useRef<HTMLDivElement>(null);
 
   // Export functions
@@ -159,8 +175,8 @@ export const JourneyFlowDiagram = ({ journey, startDate }: JourneyFlowDiagramPro
     const touchpointCount = journey.touchpoints.length;
     
     // Dynamic spacing based on journey length
-    const xSpacing = touchpointCount > 12 ? 320 : touchpointCount > 8 ? 300 : 280;
-    const ySpacing = touchpointCount > 12 ? 220 : touchpointCount > 8 ? 200 : 180;
+    const xSpacing = touchpointCount > 12 ? 340 : touchpointCount > 8 ? 320 : 300;
+    const ySpacing = touchpointCount > 12 ? 240 : touchpointCount > 8 ? 220 : 200;
     const nodesPerRow = touchpointCount > 15 ? 5 : touchpointCount > 10 ? 4 : touchpointCount > 6 ? 3 : Math.min(touchpointCount, 4);
     const yBase = 120;
     
@@ -234,46 +250,124 @@ export const JourneyFlowDiagram = ({ journey, startDate }: JourneyFlowDiagramPro
   const touchpointCount = journey.touchpoints.length;
   const nodesPerRow = touchpointCount > 15 ? 5 : touchpointCount > 10 ? 4 : touchpointCount > 6 ? 3 : Math.min(touchpointCount, 4);
   const rowCount = Math.ceil(touchpointCount / nodesPerRow);
-  const dynamicHeight = Math.max(450, 180 + rowCount * 220);
+  const dynamicHeight = Math.max(500, 200 + rowCount * 240);
 
   return (
-    <div ref={flowRef} className="w-full border rounded-lg bg-muted/20 relative" style={{ height: `${dynamicHeight}px` }}>
-      {/* Export Button */}
-      <div className="absolute top-2 right-2 z-10">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="bg-card shadow-md">
-              <Download className="w-4 h-4 mr-2" />
-              Export
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => exportToImage('png')}>
-              <Image className="w-4 h-4 mr-2" />
-              Export as PNG
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => exportToImage('svg')}>
-              <FileCode className="w-4 h-4 mr-2" />
-              Export as SVG
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+    <div ref={flowRef} className="w-full border rounded-lg bg-muted/20 relative">
+      {/* Journey Context Header */}
+      <div className="bg-card border-b border-border p-4 rounded-t-lg">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          {/* Left: Journey Overview */}
+          <div className="flex-1 min-w-[200px]">
+            <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
+              <Target className="w-4 h-4 text-primary" />
+              Journey Overview
+            </h3>
+            <p className="text-xs text-muted-foreground line-clamp-2">{journey.overview}</p>
+          </div>
+
+          {/* Center: Filters/Context */}
+          {context && (
+            <div className="flex-1 min-w-[200px]">
+              <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
+                <Users className="w-4 h-4 text-secondary" />
+                Target Audience
+              </h3>
+              <div className="flex flex-wrap gap-1.5">
+                <Badge variant="outline" className="text-[10px]">
+                  {formatFilterValue(context.audience)}
+                </Badge>
+                {context.cohort && (
+                  <Badge variant="outline" className="text-[10px]">
+                    {formatFilterValue(context.cohort)}
+                  </Badge>
+                )}
+                {context.moment && (
+                  <Badge variant="secondary" className="text-[10px]">
+                    {formatFilterValue(context.moment)}
+                  </Badge>
+                )}
+                {context.goal && (
+                  <Badge variant="secondary" className="text-[10px]">
+                    Goal: {formatFilterValue(context.goal)}
+                  </Badge>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Right: Timeline */}
+          <div className="min-w-[180px]">
+            <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-primary" />
+              Timeline
+            </h3>
+            <div className="space-y-1">
+              {startDate && (
+                <p className="text-xs">
+                  <span className="text-muted-foreground">Start:</span>{' '}
+                  <span className="font-medium">{formatDisplayDate(startDate)}</span>
+                </p>
+              )}
+              {endDate && (
+                <p className="text-xs">
+                  <span className="text-muted-foreground">End:</span>{' '}
+                  <span className="font-medium">{formatDisplayDate(endDate)}</span>
+                </p>
+              )}
+              <p className="text-xs">
+                <span className="text-muted-foreground">Duration:</span>{' '}
+                <span className="font-medium">{journey.totalWeeks} weeks</span>
+              </p>
+              <p className="text-xs">
+                <span className="text-muted-foreground">Touchpoints:</span>{' '}
+                <span className="font-medium">{journey.touchpoints.length}</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Export Button */}
+          <div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="bg-card shadow-md">
+                  <Download className="w-4 h-4 mr-2" />
+                  Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-card">
+                <DropdownMenuItem onClick={() => exportToImage('png')}>
+                  <Image className="w-4 h-4 mr-2" />
+                  Export as PNG
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => exportToImage('svg')}>
+                  <FileCode className="w-4 h-4 mr-2" />
+                  Export as SVG
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
       </div>
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        nodeTypes={nodeTypes}
-        fitView
-        fitViewOptions={{ padding: 0.3 }}
-        minZoom={0.2}
-        maxZoom={1.5}
-        className="bg-background"
-      >
-        <Background color="hsl(var(--border))" gap={20} />
-        <Controls className="!bg-card !border-border !rounded-lg !shadow-md" />
-      </ReactFlow>
+
+      {/* React Flow Diagram */}
+      <div style={{ height: `${dynamicHeight}px` }}>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          nodeTypes={nodeTypes}
+          fitView
+          fitViewOptions={{ padding: 0.3 }}
+          minZoom={0.2}
+          maxZoom={1.5}
+          className="bg-background"
+        >
+          <Background color="hsl(var(--border))" gap={20} />
+          <Controls className="!bg-card !border-border !rounded-lg !shadow-md" />
+        </ReactFlow>
+      </div>
     </div>
   );
 };
