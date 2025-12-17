@@ -157,7 +157,7 @@ export default function AdminConsolePage() {
   const adminLinks = [
     {
       title: 'User Management',
-      description: 'Create, edit, and manage user accounts',
+      description: isSuperAdmin ? 'Create, edit, and manage user accounts' : 'View users in your institution',
       icon: Users,
       href: '/admin/users',
       color: 'bg-[hsl(222,47%,14%)]',
@@ -200,11 +200,11 @@ export default function AdminConsolePage() {
               <Home className="w-4 h-4" />
             </Link>
             <span>/</span>
-            <span className="text-[hsl(222,47%,11%)]">Admin Console</span>
+            <span className="text-[hsl(222,47%,11%)]">Institution Admin</span>
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="font-serif text-2xl font-bold text-[hsl(222,47%,11%)]">Admin Console</h1>
+              <h1 className="font-serif text-2xl font-bold text-[hsl(222,47%,11%)]">Institution Admin</h1>
               <p className="text-[hsl(220,14%,46%)]">Manage your institution's PERSIST settings</p>
             </div>
             <div className="flex items-center gap-2">

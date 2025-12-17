@@ -42,6 +42,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { 
   ArrowLeft,
   Users, 
+  UserPlus,
   Building2,
   ChevronRight,
   Trash2,
@@ -388,20 +389,26 @@ const AdminPanel = () => {
               Home
             </Link>
             <span>/</span>
-            <span className="text-foreground">Admin Panel</span>
+            <span className="text-foreground">Super Admin</span>
           </div>
 
           {/* Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
               <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground">
-                Admin Panel
+                PERSIST Super Admin
               </h1>
               <p className="text-muted-foreground mt-1">
-                Cross-institution analytics and administration
+                Cross-institution analytics and system administration
               </p>
             </div>
             <div className="flex gap-2">
+              <Button variant="outline" asChild>
+                <Link to="/admin/onboarding">
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Onboarding Requests
+                </Link>
+              </Button>
               <Button variant="outline" asChild>
                 <Link to="/admin/users">
                   <Users className="w-4 h-4 mr-2" />

@@ -226,7 +226,7 @@ export default function AdminOnboardingPage() {
       <div className="border-b border-[hsl(220,13%,88%)] bg-white">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
-            <Link to="/admin" className="text-[hsl(220,14%,46%)] hover:text-[hsl(222,47%,11%)]">
+            <Link to="/admin/panel" className="text-[hsl(220,14%,46%)] hover:text-[hsl(222,47%,11%)]">
               <ChevronLeft className="w-5 h-5" />
             </Link>
             <div>
@@ -235,7 +235,7 @@ export default function AdminOnboardingPage() {
                   <Home className="w-4 h-4" />
                 </Link>
                 <span>/</span>
-                <Link to="/admin" className="hover:text-[hsl(222,47%,11%)]">Admin</Link>
+                <Link to="/admin/panel" className="hover:text-[hsl(222,47%,11%)]">Super Admin</Link>
                 <span>/</span>
                 <span className="text-[hsl(222,47%,11%)]">Onboarding Requests</span>
               </div>
