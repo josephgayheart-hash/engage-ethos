@@ -64,6 +64,7 @@ const studentCohortOptions: { value: CohortContext; label: string }[] = [
   { value: 'veteran', label: 'Veteran' },
   { value: 'parent', label: 'Student Parent' },
   { value: 'working-adult', label: 'Working Adult' },
+  { value: 'pre-college', label: 'Pre-College Program' },
 ];
 
 const employeeCohortOptions: { value: CohortContext; label: string }[] = [
