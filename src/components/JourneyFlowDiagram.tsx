@@ -9,6 +9,7 @@ import ReactFlow, {
   MarkerType,
   Position,
   Handle,
+  SelectionMode,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { toPng, toSvg } from 'html-to-image';
@@ -513,6 +514,10 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
           minZoom={0.2}
           maxZoom={1.5}
           className="bg-background"
+          selectionOnDrag
+          selectionMode={SelectionMode.Partial}
+          panOnDrag={[1, 2]}
+          selectNodesOnDrag={false}
         >
           <Background color="hsl(var(--border))" gap={20} />
           <Controls className="!bg-card !border-border !rounded-lg !shadow-md" />
