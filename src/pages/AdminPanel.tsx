@@ -245,6 +245,8 @@ interface TenantWithStats {
   toolUsageCount: number;
   contentDNACount: number;
   byocCount: number;
+  personalMessagesCount: number;
+  sharedTemplatesCount: number;
   recentActivity: string | null;
   users: RealUser[];
 }
@@ -365,6 +367,18 @@ const AdminPanel = () => {
       
       setBYOCUploads(byocData || []);
 
+      // Fetch personal messages
+      const { data: personalMessagesData } = await supabase
+        .from('personal_messages')
+        .select('id, tenant_id, user_id, channel, created_at')
+        .order('created_at', { ascending: false });
+
+      // Fetch shared templates
+      const { data: sharedTemplatesData } = await supabase
+        .from('shared_templates')
+        .select('id, tenant_id, status, playbook, created_at')
+        .order('created_at', { ascending: false });
+
       // Fetch beta feedback
       const { data: feedbackData } = await supabase
         .from('beta_feedback')
@@ -406,7 +420,8 @@ const AdminPanel = () => {
         const tenantToolUsage = (toolUsageData || []).filter(tu => tu.tenant_id === t.id);
         const tenantContentDNA = (contentDNAData || []).filter(cd => cd.tenant_id === t.id);
         const tenantBYOC = (byocData || []).filter(b => b.tenant_id === t.id);
-        const tenantAudit = (auditData || []).filter(a => a.tenant_id === t.id);
+        const tenantPersonalMessages = (personalMessagesData || []).filter(pm => pm.tenant_id === t.id);
+        const tenantSharedTemplates = (sharedTemplatesData || []).filter(st => st.tenant_id === t.id);
         
         // Get most recent activity
         const recentActivityDate = tenantUsers
@@ -421,6 +436,8 @@ const AdminPanel = () => {
           toolUsageCount: tenantToolUsage.length,
           contentDNACount: tenantContentDNA.length,
           byocCount: tenantBYOC.length,
+          personalMessagesCount: tenantPersonalMessages.length,
+          sharedTemplatesCount: tenantSharedTemplates.length,
           recentActivity: recentActivityDate,
           users: tenantUsers.map(u => ({
             ...u,
@@ -578,7 +595,7 @@ const AdminPanel = () => {
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-7 gap-3">
             <Card>
               <CardContent className="p-3">
                 <div className="flex items-center gap-2">
@@ -621,12 +638,25 @@ const AdminPanel = () => {
             <Card>
               <CardContent className="p-3">
                 <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded bg-blue-500/10">
+                    <FileText className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-xl font-bold">{isLoadingUsers ? '...' : tenants.reduce((sum, t) => sum + t.personalMessagesCount, 0)}</p>
+                    <p className="text-[10px] text-muted-foreground">Personal Msgs</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-3">
+                <div className="flex items-center gap-2">
                   <div className="p-1.5 rounded bg-purple-500/10">
                     <Library className="w-4 h-4 text-purple-600" />
                   </div>
                   <div>
-                    <p className="text-xl font-bold">{templates.length}</p>
-                    <p className="text-[10px] text-muted-foreground">Shared Items</p>
+                    <p className="text-xl font-bold">{isLoadingUsers ? '...' : tenants.reduce((sum, t) => sum + t.sharedTemplatesCount, 0)}</p>
+                    <p className="text-[10px] text-muted-foreground">Shared Templates</p>
                   </div>
                 </div>
               </CardContent>
@@ -787,7 +817,7 @@ const AdminPanel = () => {
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-4">
-                                  <div className="flex gap-2">
+                                  <div className="flex gap-2 flex-wrap">
                                     <Badge variant="secondary" className="text-xs">
                                       <Users className="w-3 h-3 mr-1" />
                                       {inst.userCount}
@@ -795,6 +825,14 @@ const AdminPanel = () => {
                                     <Badge variant="outline" className="text-xs">
                                       <Activity className="w-3 h-3 mr-1" />
                                       {inst.toolUsageCount}
+                                    </Badge>
+                                    <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
+                                      <FileText className="w-3 h-3 mr-1" />
+                                      {inst.personalMessagesCount}
+                                    </Badge>
+                                    <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700">
+                                      <Library className="w-3 h-3 mr-1" />
+                                      {inst.sharedTemplatesCount}
                                     </Badge>
                                     <Badge variant="outline" className="text-xs">
                                       <Mic className="w-3 h-3 mr-1" />
