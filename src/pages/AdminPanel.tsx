@@ -240,6 +240,44 @@ interface TenantWithStats {
   institution_name: string;
   status: string;
   userCount: number;
+  toolUsageCount: number;
+  contentDNACount: number;
+  byocCount: number;
+  recentActivity: string | null;
+  users: RealUser[];
+}
+
+interface ToolUsageEvent {
+  id: string;
+  tenant_id: string;
+  user_id: string;
+  tool_name: string;
+  action: string;
+  created_at: string;
+}
+
+interface ContentDNASample {
+  id: string;
+  tenant_id: string;
+  user_id: string;
+  profile_id: string | null;
+  file_name: string;
+  file_type: string | null;
+  file_size: number | null;
+  content_text: string | null;
+  source_type: string;
+  created_at: string;
+}
+
+interface BYOCUpload {
+  id: string;
+  tenant_id: string;
+  file_name: string;
+  file_type: string | null;
+  file_size: number | null;
+  tags: string[];
+  created_at: string;
+  user_id: string;
 }
 
 const AdminPanel = () => {
@@ -252,11 +290,15 @@ const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [users, setUsers] = useState<RealUser[]>([]);
   const [tenants, setTenants] = useState<TenantWithStats[]>([]);
+  const [toolUsage, setToolUsage] = useState<ToolUsageEvent[]>([]);
+  const [contentDNASamples, setContentDNASamples] = useState<ContentDNASample[]>([]);
+  const [byocUploads, setBYOCUploads] = useState<BYOCUpload[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+  const [expandedTenant, setExpandedTenant] = useState<string | null>(null);
   const [clearPersonalOpen, setClearPersonalOpen] = useState(false);
   const [clearSharedOpen, setClearSharedOpen] = useState(false);
 
-  // Fetch real users and tenants
+  // Fetch real users, tenants, and activity data
   useEffect(() => {
     const fetchData = async () => {
       setIsLoadingUsers(true);
@@ -279,6 +321,36 @@ const AdminPanel = () => {
 
         if (profilesError) throw profilesError;
 
+        // Fetch tool usage events
+        const { data: toolUsageData } = await supabase
+          .from('tool_usage_events')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        setToolUsage(toolUsageData || []);
+
+        // Fetch Content DNA samples
+        const { data: contentDNAData } = await supabase
+          .from('content_dna_samples')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        setContentDNASamples(contentDNAData || []);
+
+        // Fetch BYOC uploads
+        const { data: byocData } = await supabase
+          .from('byoc_uploads')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        setBYOCUploads(byocData || []);
+
+        // Fetch audit log for recent activity
+        const { data: auditData } = await supabase
+          .from('audit_log')
+          .select('*')
+          .order('created_at', { ascending: false });
+
         // Map users with institution names
         const usersWithInstitution = (profilesData || []).map(profile => {
           const userTenant = tenantsData?.find(t => t.id === profile.tenant_id);
@@ -290,11 +362,34 @@ const AdminPanel = () => {
 
         setUsers(usersWithInstitution);
 
-        // Calculate user counts per tenant
-        const tenantsWithStats = (tenantsData || []).map(t => ({
-          ...t,
-          userCount: (profilesData || []).filter(p => p.tenant_id === t.id).length
-        }));
+        // Calculate comprehensive stats per tenant
+        const tenantsWithStats: TenantWithStats[] = (tenantsData || []).map(t => {
+          const tenantUsers = (profilesData || []).filter(p => p.tenant_id === t.id);
+          const tenantToolUsage = (toolUsageData || []).filter(tu => tu.tenant_id === t.id);
+          const tenantContentDNA = (contentDNAData || []).filter(cd => cd.tenant_id === t.id);
+          const tenantBYOC = (byocData || []).filter(b => b.tenant_id === t.id);
+          const tenantAudit = (auditData || []).filter(a => a.tenant_id === t.id);
+          
+          // Get most recent activity
+          const recentActivityDate = tenantUsers
+            .filter(u => u.last_login_at)
+            .sort((a, b) => new Date(b.last_login_at!).getTime() - new Date(a.last_login_at!).getTime())[0]?.last_login_at || null;
+
+          return {
+            id: t.id,
+            institution_name: t.institution_name,
+            status: t.status,
+            userCount: tenantUsers.length,
+            toolUsageCount: tenantToolUsage.length,
+            contentDNACount: tenantContentDNA.length,
+            byocCount: tenantBYOC.length,
+            recentActivity: recentActivityDate,
+            users: tenantUsers.map(u => ({
+              ...u,
+              institution_name: t.institution_name
+            }))
+          };
+        });
 
         setTenants(tenantsWithStats);
       } catch (error) {
@@ -466,7 +561,7 @@ const AdminPanel = () => {
                     <Library className="w-4 h-4 text-purple-600" />
                   </div>
                   <div>
-                    <p className="text-xl font-bold">263</p>
+                    <p className="text-xl font-bold">{templates.length}</p>
                     <p className="text-[10px] text-muted-foreground">Shared Items</p>
                   </div>
                 </div>
@@ -479,7 +574,7 @@ const AdminPanel = () => {
                     <Mic className="w-4 h-4 text-orange-600" />
                   </div>
                   <div>
-                    <p className="text-xl font-bold">16</p>
+                    <p className="text-xl font-bold">{isLoadingUsers ? '...' : contentDNASamples.length}</p>
                     <p className="text-[10px] text-muted-foreground">Content DNA</p>
                   </div>
                 </div>
@@ -492,8 +587,8 @@ const AdminPanel = () => {
                     <Cpu className="w-4 h-4 text-cyan-600" />
                   </div>
                   <div>
-                    <p className="text-xl font-bold">1,136</p>
-                    <p className="text-[10px] text-muted-foreground">AI Calls (30d)</p>
+                    <p className="text-xl font-bold">{isLoadingUsers ? '...' : toolUsage.length}</p>
+                    <p className="text-[10px] text-muted-foreground">Tool Events</p>
                   </div>
                 </div>
               </CardContent>
@@ -579,11 +674,11 @@ const AdminPanel = () => {
             </TabsContent>
 
             {/* Institutions Tab */}
-            <TabsContent value="institutions" className="mt-4">
+            <TabsContent value="institutions" className="mt-4 space-y-4">
               <Card>
                 <CardHeader>
                   <CardTitle className="font-serif">Institution Breakdown</CardTitle>
-                  <CardDescription>All institutions and their users</CardDescription>
+                  <CardDescription>Detailed analytics per institution including users, activity, and file uploads</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {isLoadingUsers ? (
@@ -596,47 +691,182 @@ const AdminPanel = () => {
                       <p className="text-sm">No institutions found</p>
                     </div>
                   ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Institution</TableHead>
-                          <TableHead className="text-center">Users</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {tenants.map(inst => (
-                          <TableRow key={inst.id}>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <div className="p-1.5 rounded bg-primary/10">
-                                  <GraduationCap className="w-4 h-4 text-primary" />
+                    <div className="space-y-3">
+                      {tenants.map(inst => {
+                        const isExpanded = expandedTenant === inst.id;
+                        const tenantToolUsage = toolUsage.filter(tu => tu.tenant_id === inst.id);
+                        const tenantContentDNA = contentDNASamples.filter(cd => cd.tenant_id === inst.id);
+                        const tenantBYOC = byocUploads.filter(b => b.tenant_id === inst.id);
+                        
+                        // Aggregate tool usage by tool name
+                        const toolUsageByName = tenantToolUsage.reduce((acc, tu) => {
+                          acc[tu.tool_name] = (acc[tu.tool_name] || 0) + 1;
+                          return acc;
+                        }, {} as Record<string, number>);
+                        
+                        return (
+                          <Card key={inst.id} className={`border ${isExpanded ? 'border-primary/50' : ''}`}>
+                            <div 
+                              className="p-4 cursor-pointer hover:bg-muted/30 transition-colors"
+                              onClick={() => setExpandedTenant(isExpanded ? null : inst.id)}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2 rounded-lg bg-primary/10">
+                                    <GraduationCap className="w-5 h-5 text-primary" />
+                                  </div>
+                                  <div>
+                                    <h3 className="font-semibold">{inst.institution_name}</h3>
+                                    <p className="text-xs text-muted-foreground">
+                                      {inst.recentActivity ? `Last active ${formatLastLogin(inst.recentActivity)}` : 'No recent activity'}
+                                    </p>
+                                  </div>
                                 </div>
-                                <span className="font-medium text-sm">{inst.institution_name}</span>
+                                <div className="flex items-center gap-4">
+                                  <div className="flex gap-2">
+                                    <Badge variant="secondary" className="text-xs">
+                                      <Users className="w-3 h-3 mr-1" />
+                                      {inst.userCount}
+                                    </Badge>
+                                    <Badge variant="outline" className="text-xs">
+                                      <Activity className="w-3 h-3 mr-1" />
+                                      {inst.toolUsageCount}
+                                    </Badge>
+                                    <Badge variant="outline" className="text-xs">
+                                      <Mic className="w-3 h-3 mr-1" />
+                                      {inst.contentDNACount}
+                                    </Badge>
+                                    <Badge variant="outline" className="text-xs">
+                                      <Upload className="w-3 h-3 mr-1" />
+                                      {inst.byocCount}
+                                    </Badge>
+                                  </div>
+                                  <ChevronRight className={`w-5 h-5 text-muted-foreground transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                                </div>
                               </div>
-                            </TableCell>
-                            <TableCell className="text-center">
-                              <Badge variant="secondary">{inst.userCount}</Badge>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant={inst.status === 'active' ? 'default' : 'secondary'} 
-                                className={inst.status === 'active' ? 'bg-green-500' : ''}>
-                                {inst.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <Button variant="ghost" size="sm" asChild>
-                                <Link to={`/admin/users?tenant=${inst.id}`}>
-                                  View Users
-                                  <ChevronRight className="w-4 h-4 ml-1" />
-                                </Link>
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                            </div>
+                            
+                            {isExpanded && (
+                              <div className="px-4 pb-4 border-t">
+                                <div className="pt-4 grid md:grid-cols-3 gap-4">
+                                  {/* Users Section */}
+                                  <div className="space-y-3">
+                                    <h4 className="font-medium text-sm flex items-center gap-2">
+                                      <Users className="w-4 h-4" />
+                                      Users ({inst.users.length})
+                                    </h4>
+                                    <ScrollArea className="h-48">
+                                      <div className="space-y-2">
+                                        {inst.users.length === 0 ? (
+                                          <p className="text-xs text-muted-foreground">No users</p>
+                                        ) : inst.users.map(user => (
+                                          <div key={user.id} className="flex items-center justify-between p-2 rounded bg-muted/30">
+                                            <div>
+                                              <p className="text-sm font-medium">{user.first_name} {user.last_name}</p>
+                                              <p className="text-xs text-muted-foreground">{user.email}</p>
+                                            </div>
+                                            <div className="text-right">
+                                              <Badge variant={user.status === 'active' ? 'default' : 'secondary'} className="text-[10px]">
+                                                {user.status}
+                                              </Badge>
+                                              <p className="text-[10px] text-muted-foreground mt-1">
+                                                {formatLastLogin(user.last_login_at)}
+                                              </p>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </ScrollArea>
+                                  </div>
+                                  
+                                  {/* Tool Activity Section */}
+                                  <div className="space-y-3">
+                                    <h4 className="font-medium text-sm flex items-center gap-2">
+                                      <Activity className="w-4 h-4" />
+                                      Tool Activity
+                                    </h4>
+                                    {Object.keys(toolUsageByName).length === 0 ? (
+                                      <div className="h-48 flex items-center justify-center">
+                                        <p className="text-xs text-muted-foreground">No tool usage recorded yet</p>
+                                      </div>
+                                    ) : (
+                                      <ScrollArea className="h-48">
+                                        <div className="space-y-2">
+                                          {Object.entries(toolUsageByName)
+                                            .sort(([,a], [,b]) => b - a)
+                                            .map(([tool, count]) => (
+                                              <div key={tool} className="flex items-center justify-between p-2 rounded bg-muted/30">
+                                                <span className="text-sm">{tool}</span>
+                                                <Badge variant="secondary">{count}</Badge>
+                                              </div>
+                                            ))}
+                                        </div>
+                                      </ScrollArea>
+                                    )}
+                                  </div>
+                                  
+                                  {/* Files Section */}
+                                  <div className="space-y-3">
+                                    <h4 className="font-medium text-sm flex items-center gap-2">
+                                      <FolderOpen className="w-4 h-4" />
+                                      Uploaded Files
+                                    </h4>
+                                    <ScrollArea className="h-48">
+                                      <div className="space-y-2">
+                                        {tenantContentDNA.length === 0 && tenantBYOC.length === 0 ? (
+                                          <p className="text-xs text-muted-foreground">No files uploaded</p>
+                                        ) : (
+                                          <>
+                                            {tenantContentDNA.map(file => (
+                                              <div key={file.id} className="flex items-center justify-between p-2 rounded bg-orange-500/10">
+                                                <div className="flex items-center gap-2">
+                                                  <Mic className="w-3 h-3 text-orange-600" />
+                                                  <div>
+                                                    <p className="text-xs font-medium truncate max-w-[120px]">{file.file_name}</p>
+                                                    <p className="text-[10px] text-muted-foreground">Content DNA</p>
+                                                  </div>
+                                                </div>
+                                                <span className="text-[10px] text-muted-foreground">
+                                                  {new Date(file.created_at).toLocaleDateString()}
+                                                </span>
+                                              </div>
+                                            ))}
+                                            {tenantBYOC.map(file => (
+                                              <div key={file.id} className="flex items-center justify-between p-2 rounded bg-blue-500/10">
+                                                <div className="flex items-center gap-2">
+                                                  <Upload className="w-3 h-3 text-blue-600" />
+                                                  <div>
+                                                    <p className="text-xs font-medium truncate max-w-[120px]">{file.file_name}</p>
+                                                    <p className="text-[10px] text-muted-foreground">BYOC</p>
+                                                  </div>
+                                                </div>
+                                                <span className="text-[10px] text-muted-foreground">
+                                                  {new Date(file.created_at).toLocaleDateString()}
+                                                </span>
+                                              </div>
+                                            ))}
+                                          </>
+                                        )}
+                                      </div>
+                                    </ScrollArea>
+                                  </div>
+                                </div>
+                                
+                                {/* Action Buttons */}
+                                <div className="flex gap-2 mt-4 pt-4 border-t">
+                                  <Button variant="outline" size="sm" asChild>
+                                    <Link to={`/admin/users?tenant=${inst.id}`}>
+                                      <Users className="w-4 h-4 mr-2" />
+                                      Manage Users
+                                    </Link>
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+                          </Card>
+                        );
+                      })}
+                    </div>
                   )}
                 </CardContent>
               </Card>

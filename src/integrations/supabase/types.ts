@@ -55,6 +55,107 @@ export type Database = {
           },
         ]
       }
+      byoc_uploads: {
+        Row: {
+          content_text: string | null
+          created_at: string
+          evaluation_result: Json | null
+          file_name: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          tags: string[] | null
+          tenant_id: string
+          user_id: string
+        }
+        Insert: {
+          content_text?: string | null
+          created_at?: string
+          evaluation_result?: Json | null
+          file_name: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          tags?: string[] | null
+          tenant_id: string
+          user_id: string
+        }
+        Update: {
+          content_text?: string | null
+          created_at?: string
+          evaluation_result?: Json | null
+          file_name?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          tags?: string[] | null
+          tenant_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "byoc_uploads_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_dna_samples: {
+        Row: {
+          content_text: string | null
+          created_at: string
+          file_name: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          profile_id: string | null
+          source_type: string | null
+          tenant_id: string
+          user_id: string
+        }
+        Insert: {
+          content_text?: string | null
+          created_at?: string
+          file_name: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          profile_id?: string | null
+          source_type?: string | null
+          tenant_id: string
+          user_id: string
+        }
+        Update: {
+          content_text?: string | null
+          created_at?: string
+          file_name?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          profile_id?: string | null
+          source_type?: string | null
+          tenant_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_dna_samples_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "institutional_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_dna_samples_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       institutional_config: {
         Row: {
           config: Json
@@ -319,6 +420,44 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      tool_usage_events: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          tenant_id: string
+          tool_name: string
+          user_id: string
+        }
+        Insert: {
+          action?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          tenant_id: string
+          tool_name: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          tenant_id?: string
+          tool_name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tool_usage_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
