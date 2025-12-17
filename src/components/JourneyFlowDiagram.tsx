@@ -27,11 +27,31 @@ import type { StrategyJourney, JourneyTouchpoint } from '@/types/persist';
 
 interface JourneyFlowDiagramProps {
   journey: StrategyJourney;
+  startDate?: string;
 }
 
+// Helper to calculate date for a specific week
+const calculateWeekDate = (startDate: string | undefined, weekNumber: number): string | null => {
+  if (!startDate) return null;
+  try {
+    const start = new Date(startDate);
+    const weekDate = new Date(start);
+    weekDate.setDate(start.getDate() + (weekNumber - 1) * 7);
+    return weekDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  } catch {
+    return null;
+  }
+};
+
+// Helper to format channel names with proper capitalization
+const formatChannelName = (channel: string): string => {
+  if (channel?.toLowerCase() === 'sms') return 'SMS';
+  return channel?.replace('-', ' ').replace(/\b\w/g, c => c.toUpperCase()) || '';
+};
+
 // Custom node component for touchpoints
-const TouchpointNode = ({ data }: { data: { touchpoint: JourneyTouchpoint; index: number } }) => {
-  const { touchpoint, index } = data;
+const TouchpointNode = ({ data }: { data: { touchpoint: JourneyTouchpoint; index: number; weekDate: string | null } }) => {
+  const { touchpoint, index, weekDate } = data;
   
   const getChannelIcon = (channel: string) => {
     switch (channel?.toLowerCase()) {
@@ -64,8 +84,10 @@ const TouchpointNode = ({ data }: { data: { touchpoint: JourneyTouchpoint; index
           {getChannelIcon(touchpoint.channel)}
         </div>
         <div>
-          <p className="text-xs font-bold text-muted-foreground">Step {index + 1}</p>
-          <p className="text-sm font-semibold capitalize">{touchpoint.channel}</p>
+          <p className="text-xs font-bold text-muted-foreground">
+            Wk {touchpoint.week}{weekDate ? ` · ${weekDate}` : ''}
+          </p>
+          <p className="text-sm font-semibold">{formatChannelName(touchpoint.channel)}</p>
         </div>
       </div>
       
@@ -102,7 +124,7 @@ const nodeTypes = {
   phase: PhaseNode,
 };
 
-export const JourneyFlowDiagram = ({ journey }: JourneyFlowDiagramProps) => {
+export const JourneyFlowDiagram = ({ journey, startDate }: JourneyFlowDiagramProps) => {
   const flowRef = useRef<HTMLDivElement>(null);
 
   // Export functions
@@ -169,6 +191,8 @@ export const JourneyFlowDiagram = ({ journey }: JourneyFlowDiagramProps) => {
       // Stagger Y position slightly within each row for visual interest
       const yStagger = (colInRow % 2) * 40;
       
+      const weekDate = calculateWeekDate(startDate, touchpoint.week);
+      
       nodes.push({
         id: `tp-${index}`,
         type: 'touchpoint',
@@ -176,7 +200,7 @@ export const JourneyFlowDiagram = ({ journey }: JourneyFlowDiagramProps) => {
           x: col * xSpacing + 20, 
           y: yBase + (row * ySpacing) + yStagger 
         },
-        data: { touchpoint, index },
+        data: { touchpoint, index, weekDate },
         draggable: true,
       });
       
@@ -198,7 +222,7 @@ export const JourneyFlowDiagram = ({ journey }: JourneyFlowDiagramProps) => {
     });
     
     return { initialNodes: nodes, initialEdges: edges };
-  }, [journey]);
+  }, [journey, startDate]);
 
   const [nodes, , onNodesChange] = useNodesState(initialNodes);
   const [edges, , onEdgesChange] = useEdgesState(initialEdges);

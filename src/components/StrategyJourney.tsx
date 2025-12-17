@@ -72,13 +72,27 @@ const formatChannelName = (channel: string): string => {
   return channel.replace('-', ' ').replace(/\b\w/g, c => c.toUpperCase());
 };
 
+// Helper to calculate date for a specific week
+const calculateWeekDate = (startDate: string | undefined, weekNumber: number): string | null => {
+  if (!startDate) return null;
+  try {
+    const start = new Date(startDate);
+    const weekDate = new Date(start);
+    weekDate.setDate(start.getDate() + (weekNumber - 1) * 7);
+    return weekDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  } catch {
+    return null;
+  }
+};
+
 function TouchpointCard({ 
   touchpoint, 
   index, 
   context,
   generatedMessages,
   onGenerateMessage,
-  isGenerating
+  isGenerating,
+  startDate
 }: { 
   touchpoint: JourneyTouchpoint; 
   index: number;
@@ -86,6 +100,7 @@ function TouchpointCard({
   generatedMessages: GeneratedMessage[];
   onGenerateMessage: (index: number, channels: Channel[]) => void;
   isGenerating: number | null;
+  startDate?: string;
 }) {
   const { toast } = useToast();
   const [expanded, setExpanded] = useState(false);
@@ -113,6 +128,8 @@ function TouchpointCard({
     setSelectedChannels(allChannels);
   };
 
+  const weekDate = calculateWeekDate(startDate, touchpoint.week);
+
   return (
     <div className="relative pl-12">
       {/* Timeline dot */}
@@ -128,7 +145,7 @@ function TouchpointCard({
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <CardTitle className="text-base font-medium">
-              Week {touchpoint.week}: {touchpoint.title}
+              Week {touchpoint.week}{weekDate ? ` (${weekDate})` : ''}: {touchpoint.title}
             </CardTitle>
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="flex items-center gap-1">
@@ -454,6 +471,7 @@ export function StrategyJourneyDisplay({ journey, context, startDate, endDate }:
                   generatedMessages={generatedMessages}
                   onGenerateMessage={handleGenerateMessage}
                   isGenerating={isGenerating}
+                  startDate={startDate}
                 />
               ))}
             </div>
