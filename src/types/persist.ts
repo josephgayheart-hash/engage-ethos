@@ -13,7 +13,8 @@ export type Department =
   | 'student-success'
   | 'recruitment'
   | 'health-wellbeing'
-  | 'advancement-alumni';
+  | 'advancement-alumni'
+  | 'human-resources';
 
 export interface DepartmentInfo {
   id: Department;

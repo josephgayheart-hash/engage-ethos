@@ -36,6 +36,7 @@ const departmentOptions: { value: Department; label: string }[] = [
   { value: 'recruitment', label: 'Recruitment' },
   { value: 'health-wellbeing', label: 'Health & Well-being' },
   { value: 'advancement-alumni', label: 'Advancement & Alumni' },
+  { value: 'human-resources', label: 'Human Resources (HR)' },
 ];
 
 const audienceOptions: { value: AudienceType; label: string }[] = [
