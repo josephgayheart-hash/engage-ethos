@@ -76,6 +76,7 @@ const StrategyPage = () => {
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [mapperResult, setMapperResult] = useState<MapperResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [buildDiagram, setBuildDiagram] = useState(true);
 
   // Auto-calculate weeks when dates change
   const handleStartDateChange = (date: Date | undefined) => {
@@ -393,6 +394,25 @@ const StrategyPage = () => {
                 </p>
               </div>
 
+              {/* Build Diagram Toggle */}
+              <div className="flex items-center space-x-3 pt-2 border-t border-border">
+                <Checkbox
+                  id="build-diagram"
+                  checked={buildDiagram}
+                  onCheckedChange={(checked) => setBuildDiagram(checked as boolean)}
+                />
+                <label
+                  htmlFor="build-diagram"
+                  className="text-sm font-medium leading-none cursor-pointer flex items-center gap-2"
+                >
+                  <Map className="w-4 h-4 text-pillar-consensus" />
+                  Build Interactive Diagram
+                </label>
+                <span className="text-xs text-muted-foreground">
+                  Generate a visual flow diagram of the journey
+                </span>
+              </div>
+
               {/* Additional Context */}
               <div className="space-y-2 pt-2 border-t border-border">
                 <Label className="text-sm font-medium flex items-center gap-2">
@@ -496,20 +516,22 @@ const StrategyPage = () => {
               </div>
               
               {/* Interactive Journey Flow Diagram */}
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="font-serif text-lg flex items-center gap-2">
-                    <Map className="w-5 h-5 text-pillar-consensus" />
-                    Journey Flow Diagram
-                  </CardTitle>
-                  <CardDescription>
-                    Drag nodes to rearrange • Scroll to zoom • Click and drag background to pan
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <JourneyFlowDiagram journey={mapperResult.journey} />
-                </CardContent>
-              </Card>
+              {buildDiagram && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="font-serif text-lg flex items-center gap-2">
+                      <Map className="w-5 h-5 text-pillar-consensus" />
+                      Journey Flow Diagram
+                    </CardTitle>
+                    <CardDescription>
+                      Drag nodes to rearrange • Scroll to zoom • Click and drag background to pan
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <JourneyFlowDiagram journey={mapperResult.journey} />
+                  </CardContent>
+                </Card>
+              )}
 
               <StrategyJourneyDisplay 
                 journey={mapperResult.journey} 
