@@ -154,12 +154,11 @@ const AppRoutes = () => (
     {/* Approver routes */}
     <Route path="/approvals" element={<RequireAuth><RequireApprover><ApprovalsPage /></RequireApprover></RequireAuth>} />
     
-    {/* Admin routes */}
-    <Route path="/admin" element={<RequireAuth><RequireAdmin><AdminPanel /></RequireAdmin></RequireAuth>} />
+    {/* Admin routes - tenant-scoped for university admins */}
+    <Route path="/admin" element={<Navigate to="/admin/console" replace />} />
     <Route path="/admin/console" element={<RequireAuth><RequireAdmin><AdminConsolePage /></RequireAdmin></RequireAuth>} />
     <Route path="/admin/users" element={<RequireAuth><RequireAdmin><AdminUsersPage /></RequireAdmin></RequireAuth>} />
     <Route path="/admin/onboarding" element={<RequireAuth><RequireAdmin><AdminOnboardingPage /></RequireAdmin></RequireAuth>} />
-    <Route path="/admin/library" element={<RequireAuth><RequireAdmin><AdminPanel /></RequireAdmin></RequireAuth>} />
     
     {/* Catch-all */}
     <Route path="*" element={<NotFound />} />
