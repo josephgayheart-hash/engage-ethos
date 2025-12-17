@@ -230,7 +230,11 @@ function TouchpointCard({
                     <Badge
                       key={channel}
                       variant={selectedChannels.includes(channel) ? "default" : "outline"}
-                      className="cursor-pointer"
+                      className={`cursor-pointer transition-colors ${
+                        selectedChannels.includes(channel) 
+                          ? 'hover:bg-primary/80' 
+                          : 'hover:bg-primary/20 hover:border-primary/50 hover:text-primary'
+                      }`}
                       onClick={() => toggleChannel(channel)}
                     >
                       {channelIcons[channel]}
