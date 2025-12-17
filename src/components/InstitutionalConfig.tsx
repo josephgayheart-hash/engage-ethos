@@ -238,7 +238,7 @@ export function InstitutionalConfig({ config, onChange }: InstitutionalConfigPro
           <TabsTrigger value="style" className="text-xs">Style</TabsTrigger>
           <TabsTrigger value="voice" className="text-xs flex items-center gap-1">
             <Sparkles className="w-3 h-3" />
-            Voice
+            Content DNA
           </TabsTrigger>
         </TabsList>
 
@@ -619,15 +619,15 @@ export function InstitutionalConfig({ config, onChange }: InstitutionalConfigPro
           )}
         </TabsContent>
 
-        {/* Voice Tab */}
+        {/* Content DNA Tab */}
         <TabsContent value="voice" className="space-y-6">
           <div className="p-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg mb-4 border border-primary/20">
             <h4 className="font-medium text-sm flex items-center gap-2 mb-2">
               <Sparkles className="w-4 h-4 text-primary" />
-              Brand Voice Learning
+              Content DNA Learning
             </h4>
             <p className="text-xs text-muted-foreground">
-              Upload sample communications and let AI analyze your institution's unique voice, tone, and messaging patterns. 
+              Upload sample communications and let AI analyze your institution's unique Content DNA—tone, style, and messaging patterns. 
               This analysis will be applied to all generated messages.
             </p>
           </div>
@@ -688,7 +688,7 @@ export function InstitutionalConfig({ config, onChange }: InstitutionalConfigPro
                           onChange({ ...config, brandVoiceSamples: [...currentSamples, text] });
                           toast({
                             title: "File loaded",
-                            description: `"${file.name}" has been added to voice samples.`,
+                            description: `"${file.name}" has been added to Content DNA samples.`,
                           });
                         } else {
                           toast({

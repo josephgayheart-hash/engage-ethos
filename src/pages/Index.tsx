@@ -102,7 +102,7 @@ const Index = () => {
     { 
       id: 'settings', 
       title: 'Institutional Settings', 
-      description: 'Configure your institution\'s voice, names, branding, and terminology',
+      description: 'Configure your institution\'s Content DNA, names, branding, and terminology',
       icon: Settings,
       color: 'text-primary',
       bgColor: 'bg-primary/10',
@@ -150,8 +150,8 @@ const Index = () => {
     },
     {
       id: 'brand-voice',
-      title: 'Brand Voice Scorer',
-      description: 'Verify messaging aligns with institutional voice',
+      title: 'Content DNA Scorer',
+      description: 'Verify messaging aligns with institutional Content DNA',
       icon: Mic,
       href: '/brand-voice'
     },
@@ -278,7 +278,7 @@ const Index = () => {
                   <div className="w-12 h-12 rounded-full bg-pillar-ethics/10 flex items-center justify-center mx-auto mb-4">
                     <Settings className="w-6 h-6 text-pillar-ethics" />
                   </div>
-                  <h3 className="font-semibold mb-2">Your Voice</h3>
+                  <h3 className="font-semibold mb-2">Your Content DNA</h3>
                   <p className="text-sm text-muted-foreground">
                     Customize terminology, naming, and brand tone.
                   </p>

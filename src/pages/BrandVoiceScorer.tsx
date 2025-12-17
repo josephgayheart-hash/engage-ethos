@@ -215,10 +215,10 @@ const BrandVoiceScorer = () => {
               <div>
                 <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
                   <Palette className="w-7 h-7 text-primary" />
-                  Brand Voice Scorer
+                  Content DNA Scorer
                 </h1>
                 <p className="text-muted-foreground mt-1">
-                  Check if your message aligns with institutional brand guidelines
+                  Check if your message aligns with institutional Content DNA guidelines
                 </p>
               </div>
             </div>
@@ -259,7 +259,7 @@ const BrandVoiceScorer = () => {
                 <CardHeader>
                   <CardTitle className="font-serif text-lg">Your Message</CardTitle>
                   <CardDescription>
-                    Paste your content to analyze brand voice alignment
+                    Paste your content to analyze Content DNA alignment
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -280,7 +280,7 @@ const BrandVoiceScorer = () => {
                       ) : (
                         <Palette className="w-4 h-4 mr-2" />
                       )}
-                      Analyze Brand Voice
+                      Analyze Content DNA
                     </Button>
                     <Button 
                       variant="outline"
@@ -329,7 +329,7 @@ const BrandVoiceScorer = () => {
                         <div className={`text-5xl font-bold ${getScoreColor(analysis.overallScore)}`}>
                           {analysis.overallScore}
                         </div>
-                        <div className="text-muted-foreground mt-1">Brand Voice Score</div>
+                        <div className="text-muted-foreground mt-1">Content DNA Score</div>
                         <Badge 
                           variant="outline" 
                           className={`mt-2 ${getScoreColor(analysis.overallScore)}`}
@@ -433,7 +433,7 @@ const BrandVoiceScorer = () => {
                     <Palette className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                     <h3 className="font-serif text-lg font-semibold mb-2">Ready to Score</h3>
                     <p className="text-muted-foreground">
-                      Enter your message and click "Analyze Brand Voice" to see how well it matches your institutional guidelines.
+                      Enter your message and click "Analyze Content DNA" to see how well it matches your institutional guidelines.
                     </p>
                   </CardContent>
                 </Card>

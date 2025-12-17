@@ -97,7 +97,7 @@ const mockInstitutionData = [
     sharedTemplates: 45,
     personalMessages: 234,
     journeys: 12,
-    voiceProfiles: 3,
+    contentDNAProfiles: 3,
     filesUploaded: 28,
     topTools: ['Message Builder', 'Strategy Mapper', 'Evaluator'],
     recentActivity: '15 min ago'
@@ -108,7 +108,7 @@ const mockInstitutionData = [
     sharedTemplates: 38,
     personalMessages: 189,
     journeys: 8,
-    voiceProfiles: 2,
+    contentDNAProfiles: 2,
     filesUploaded: 15,
     topTools: ['Evaluator', 'Message Builder', 'Call Script'],
     recentActivity: '45 min ago'
@@ -119,7 +119,7 @@ const mockInstitutionData = [
     sharedTemplates: 52,
     personalMessages: 312,
     journeys: 15,
-    voiceProfiles: 4,
+    contentDNAProfiles: 4,
     filesUploaded: 42,
     topTools: ['Strategy Mapper', 'Message Builder', 'BYOC'],
     recentActivity: '2 hours ago'
@@ -130,7 +130,7 @@ const mockInstitutionData = [
     sharedTemplates: 29,
     personalMessages: 156,
     journeys: 6,
-    voiceProfiles: 2,
+    contentDNAProfiles: 2,
     filesUploaded: 19,
     topTools: ['Message Builder', 'Evaluator', 'Playground'],
     recentActivity: '30 min ago'
@@ -141,7 +141,7 @@ const mockInstitutionData = [
     sharedTemplates: 33,
     personalMessages: 98,
     journeys: 4,
-    voiceProfiles: 1,
+    contentDNAProfiles: 1,
     filesUploaded: 11,
     topTools: ['Evaluator', 'Call Script', 'Message Builder'],
     recentActivity: '8 hours ago'
@@ -152,7 +152,7 @@ const mockInstitutionData = [
     sharedTemplates: 21,
     personalMessages: 67,
     journeys: 3,
-    voiceProfiles: 1,
+    contentDNAProfiles: 1,
     filesUploaded: 8,
     topTools: ['Message Builder', 'Strategy Mapper'],
     recentActivity: '1 day ago'
@@ -163,7 +163,7 @@ const mockInstitutionData = [
     sharedTemplates: 18,
     personalMessages: 45,
     journeys: 2,
-    voiceProfiles: 1,
+    contentDNAProfiles: 1,
     filesUploaded: 5,
     topTools: ['Evaluator', 'Message Builder'],
     recentActivity: '2 days ago'
@@ -174,7 +174,7 @@ const mockInstitutionData = [
     sharedTemplates: 27,
     personalMessages: 112,
     journeys: 5,
-    voiceProfiles: 2,
+    contentDNAProfiles: 2,
     filesUploaded: 14,
     topTools: ['Strategy Mapper', 'BYOC', 'Evaluator'],
     recentActivity: '3 days ago'
@@ -288,13 +288,13 @@ const AdminPanel = () => {
 
   // AI function stats - showing the data flow
   const aiFunctionStats = [
-    { name: 'evaluate-message', description: 'Message evaluation & refinement', calls: 423, success: 418, errors: 5, avgTime: '1.2s', voiceUsed: 312 },
-    { name: 'generate-message', description: 'Multi-channel message generation', calls: 512, success: 506, errors: 6, avgTime: '2.1s', voiceUsed: 489 },
-    { name: 'playground-chat', description: 'Interactive strategy chat', calls: 156, success: 154, errors: 2, avgTime: '1.8s', voiceUsed: 78 },
-    { name: 'analyze-voice', description: 'Brand voice extraction', calls: 45, success: 43, errors: 2, avgTime: '3.2s', voiceUsed: 0 },
+    { name: 'evaluate-message', description: 'Message evaluation & refinement', calls: 423, success: 418, errors: 5, avgTime: '1.2s', contentDNAUsed: 312 },
+    { name: 'generate-message', description: 'Multi-channel message generation', calls: 512, success: 506, errors: 6, avgTime: '2.1s', contentDNAUsed: 489 },
+    { name: 'playground-chat', description: 'Interactive strategy chat', calls: 156, success: 154, errors: 2, avgTime: '1.8s', contentDNAUsed: 78 },
+    { name: 'analyze-voice', description: 'Content DNA extraction', calls: 45, success: 43, errors: 2, avgTime: '3.2s', contentDNAUsed: 0 },
   ];
 
-  const totalVoiceInjections = aiFunctionStats.reduce((sum, fn) => sum + fn.voiceUsed, 0);
+  const totalContentDNAInjections = aiFunctionStats.reduce((sum, fn) => sum + fn.contentDNAUsed, 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -394,7 +394,7 @@ const AdminPanel = () => {
                   </div>
                   <div>
                     <p className="text-xl font-bold">16</p>
-                    <p className="text-[10px] text-muted-foreground">Voice Profiles</p>
+                    <p className="text-[10px] text-muted-foreground">Content DNA</p>
                   </div>
                 </div>
               </CardContent>
@@ -420,7 +420,7 @@ const AdminPanel = () => {
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="institutions">Institutions</TabsTrigger>
               <TabsTrigger value="libraries">Libraries</TabsTrigger>
-              <TabsTrigger value="ai">AI & Voice</TabsTrigger>
+              <TabsTrigger value="ai">AI & Content DNA</TabsTrigger>
               <TabsTrigger value="users">Users</TabsTrigger>
               <TabsTrigger value="admin">Admin</TabsTrigger>
             </TabsList>
@@ -508,7 +508,7 @@ const AdminPanel = () => {
                         <TableHead className="text-center">Shared Library</TableHead>
                         <TableHead className="text-center">Personal Messages</TableHead>
                         <TableHead className="text-center">Journeys</TableHead>
-                        <TableHead className="text-center">Voice Profiles</TableHead>
+                        <TableHead className="text-center">Content DNA</TableHead>
                         <TableHead className="text-center">Files</TableHead>
                         <TableHead>Top Tools</TableHead>
                         <TableHead>Last Active</TableHead>
@@ -534,10 +534,10 @@ const AdminPanel = () => {
                           </TableCell>
                           <TableCell className="text-center">{inst.journeys}</TableCell>
                           <TableCell className="text-center">
-                            {inst.voiceProfiles > 0 ? (
+                            {inst.contentDNAProfiles > 0 ? (
                               <Badge className="bg-orange-500/20 text-orange-700 border-orange-500/30">
                                 <Mic className="w-3 h-3 mr-1" />
-                                {inst.voiceProfiles}
+                                {inst.contentDNAProfiles}
                               </Badge>
                             ) : '-'}
                           </TableCell>
@@ -667,14 +667,14 @@ const AdminPanel = () => {
               </div>
             </TabsContent>
 
-            {/* AI & Voice Tab */}
+            {/* AI & Content DNA Tab */}
             <TabsContent value="ai" className="mt-4 space-y-4">
-              {/* Voice → AI Flow Explanation */}
+              {/* Content DNA → AI Flow Explanation */}
               <Card className="border-primary/30 bg-gradient-to-r from-primary/5 to-transparent">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
                     <Zap className="w-4 h-4 text-primary" />
-                    How Voice Profiles Flow Into Message Generation
+                    How Content DNA Flows Into Message Generation
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -688,13 +688,13 @@ const AdminPanel = () => {
                     <div className="flex-shrink-0 p-3 bg-background rounded-lg border text-center min-w-[120px]">
                       <Sparkles className="w-5 h-5 mx-auto mb-1 text-orange-500" />
                       <p className="text-xs font-medium">analyze-voice</p>
-                      <p className="text-[10px] text-muted-foreground">Extracts Voice Profile</p>
+                      <p className="text-[10px] text-muted-foreground">Extracts Content DNA</p>
                     </div>
                     <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                     <div className="flex-shrink-0 p-3 bg-background rounded-lg border text-center min-w-[120px]">
                       <Database className="w-5 h-5 mx-auto mb-1 text-blue-500" />
                       <p className="text-xs font-medium">Stored in Profile</p>
-                      <p className="text-[10px] text-muted-foreground">voiceAnalysis object</p>
+                      <p className="text-[10px] text-muted-foreground">contentDNA object</p>
                     </div>
                     <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                     <div className="flex-shrink-0 p-3 bg-background rounded-lg border text-center min-w-[120px]">
@@ -705,12 +705,12 @@ const AdminPanel = () => {
                     <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                     <div className="flex-shrink-0 p-3 bg-primary/10 rounded-lg border border-primary/30 text-center min-w-[120px]">
                       <CheckCircle2 className="w-5 h-5 mx-auto mb-1 text-primary" />
-                      <p className="text-xs font-medium">Voice-Matched</p>
+                      <p className="text-xs font-medium">DNA-Matched</p>
                       <p className="text-[10px] text-muted-foreground">Output Messages</p>
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground mt-3">
-                    <strong>{totalVoiceInjections} messages</strong> have been generated with voice profile injection in the last 30 days.
+                    <strong>{totalContentDNAInjections} messages</strong> have been generated with Content DNA injection in the last 30 days.
                   </p>
                 </CardContent>
               </Card>
@@ -732,7 +732,7 @@ const AdminPanel = () => {
                           <TableHead>Function</TableHead>
                           <TableHead className="text-right">Calls</TableHead>
                           <TableHead className="text-right">Success</TableHead>
-                          <TableHead className="text-right">Voice Used</TableHead>
+                          <TableHead className="text-right">DNA Used</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -749,9 +749,9 @@ const AdminPanel = () => {
                               <span className="text-green-600">{Math.round((fn.success / fn.calls) * 100)}%</span>
                             </TableCell>
                             <TableCell className="text-right">
-                              {fn.voiceUsed > 0 ? (
+                              {fn.contentDNAUsed > 0 ? (
                                 <Badge className="bg-orange-500/20 text-orange-700 text-[10px]">
-                                  {fn.voiceUsed}
+                                  {fn.contentDNAUsed}
                                 </Badge>
                               ) : '-'}
                             </TableCell>
@@ -767,13 +767,13 @@ const AdminPanel = () => {
                   <CardHeader>
                     <CardTitle className="text-base flex items-center gap-2">
                       <Mic className="w-4 h-4" />
-                      Voice Profiles by Institution
+                      Content DNA Profiles by Institution
                     </CardTitle>
-                    <CardDescription>16 active voice profiles</CardDescription>
+                    <CardDescription>16 active Content DNA profiles</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {mockInstitutionData.filter(i => i.voiceProfiles > 0).map(inst => (
+                      {mockInstitutionData.filter(i => i.contentDNAProfiles > 0).map(inst => (
                         <div key={inst.name} className="flex items-center justify-between p-2 border rounded-lg">
                           <div className="flex items-center gap-2">
                             <GraduationCap className="w-4 h-4 text-muted-foreground" />
@@ -781,7 +781,7 @@ const AdminPanel = () => {
                           </div>
                           <div className="flex items-center gap-2">
                             <Badge variant="outline" className="text-xs">
-                              {inst.voiceProfiles} profile{inst.voiceProfiles > 1 ? 's' : ''}
+                              {inst.contentDNAProfiles} profile{inst.contentDNAProfiles > 1 ? 's' : ''}
                             </Badge>
                             <Badge variant="secondary" className="text-xs">
                               {inst.filesUploaded} files
@@ -794,7 +794,7 @@ const AdminPanel = () => {
                       <div className="flex items-center gap-2">
                         <CheckCircle2 className="w-4 h-4 text-green-600" />
                         <p className="text-xs text-green-700 dark:text-green-400">
-                          All voice profiles are being injected into AI prompts for institution-specific message generation.
+                          All Content DNA profiles are being injected into AI prompts for institution-specific message generation.
                         </p>
                       </div>
                     </div>
