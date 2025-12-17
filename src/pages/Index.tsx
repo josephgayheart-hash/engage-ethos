@@ -68,8 +68,8 @@ const Index = () => {
     },
     { 
       id: 'strategy', 
-      title: 'Plan Strategy', 
-      description: 'Map messaging strategy across goals, domains, and timing',
+      title: 'Journey Designer', 
+      description: 'Design multi-channel communication journeys across goals, domains, and timing',
       icon: Map,
       color: 'text-pillar-consensus',
       bgColor: 'bg-pillar-consensus/10',

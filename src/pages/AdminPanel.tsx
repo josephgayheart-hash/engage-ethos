@@ -103,7 +103,7 @@ const mockInstitutionData = [
     journeys: 12,
     contentDNAProfiles: 3,
     filesUploaded: 28,
-    topTools: ['Message Builder', 'Strategy Mapper', 'Evaluator'],
+    topTools: ['Message Builder', 'Journey Designer', 'Evaluator'],
     recentActivity: '15 min ago'
   },
   { 
@@ -125,7 +125,7 @@ const mockInstitutionData = [
     journeys: 15,
     contentDNAProfiles: 4,
     filesUploaded: 42,
-    topTools: ['Strategy Mapper', 'Message Builder', 'BYOC'],
+    topTools: ['Journey Designer', 'Message Builder', 'BYOC'],
     recentActivity: '2 hours ago'
   },
   { 
@@ -158,7 +158,7 @@ const mockInstitutionData = [
     journeys: 3,
     contentDNAProfiles: 1,
     filesUploaded: 8,
-    topTools: ['Message Builder', 'Strategy Mapper'],
+    topTools: ['Message Builder', 'Journey Designer'],
     recentActivity: '1 day ago'
   },
   { 
@@ -180,7 +180,7 @@ const mockInstitutionData = [
     journeys: 5,
     contentDNAProfiles: 2,
     filesUploaded: 14,
-    topTools: ['Strategy Mapper', 'BYOC', 'Evaluator'],
+    topTools: ['Journey Designer', 'BYOC', 'Evaluator'],
     recentActivity: '3 days ago'
   },
 ];
@@ -606,7 +606,7 @@ const AdminPanel = () => {
   const toolUsageStats = [
     { name: 'Message Builder', icon: MessageSquare, usage: 456, trend: '+12%' },
     { name: 'Message Evaluator', icon: FileText, usage: 389, trend: '+8%' },
-    { name: 'Strategy Mapper', icon: Compass, usage: 234, trend: '+23%' },
+    { name: 'Journey Designer', icon: Compass, usage: 234, trend: '+23%' },
     { name: 'Call Script Generator', icon: Phone, usage: 156, trend: '+5%' },
     { name: 'AI Playground', icon: Sparkles, usage: 98, trend: '+34%' },
     { name: 'BYOC', icon: Upload, usage: 67, trend: '+18%' },

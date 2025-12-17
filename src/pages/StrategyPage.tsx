@@ -226,7 +226,7 @@ const StrategyPage = () => {
               Home
             </Link>
             <span>/</span>
-            <span className="text-foreground">Message Strategy</span>
+            <span className="text-foreground">Journey Designer</span>
           </div>
 
           {/* Header */}
@@ -234,10 +234,10 @@ const StrategyPage = () => {
             <div>
               <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
                 <Map className="w-7 h-7 text-pillar-consensus" />
-                Message Strategy Journey
+                Journey Designer
               </h1>
               <p className="text-muted-foreground mt-1">
-                Generate a detailed week-by-week communication plan with behavioral nudges and channel recommendations
+                Design detailed week-by-week communication journeys with behavioral nudges and channel recommendations
               </p>
             </div>
             <AIBadge />
