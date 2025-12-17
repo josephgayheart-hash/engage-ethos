@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import persistLogo from "@/assets/persist-logo.png";
 
 export function Header() {
-  const { user, profile, tenant, isAdmin, isApprover, logout } = useAuth();
+  const { user, profile, tenant, isAdmin, isSuperAdmin, isApprover, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -73,11 +73,11 @@ export function Header() {
           )}
           {isAdmin && (
             <Link 
-              to="/admin/console" 
+              to={isSuperAdmin ? "/admin/panel" : "/admin/console"}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
             >
               <Settings className="w-4 h-4" />
-              <span className="hidden md:inline">Admin</span>
+              <span className="hidden md:inline">{isSuperAdmin ? "Super Admin" : "Admin"}</span>
             </Link>
           )}
           <a 
