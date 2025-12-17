@@ -317,135 +317,140 @@ const AdminPanel = () => {
   const [expandedTenant, setExpandedTenant] = useState<string | null>(null);
   const [clearPersonalOpen, setClearPersonalOpen] = useState(false);
   const [clearSharedOpen, setClearSharedOpen] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
   // Fetch real users, tenants, and activity data
+  const fetchData = async () => {
+    setIsLoadingUsers(true);
+    try {
+      // Fetch all tenants
+      const { data: tenantsData, error: tenantsError } = await supabase
+        .from('tenants')
+        .select('*')
+        .neq('id', '00000000-0000-0000-0000-000000000000') // Exclude PERSIST System tenant
+        .order('institution_name');
+
+      if (tenantsError) throw tenantsError;
+
+      // Fetch all users with their roles
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('*')
+        .neq('tenant_id', '00000000-0000-0000-0000-000000000000') // Exclude PERSIST system users
+        .order('last_login_at', { ascending: false, nullsFirst: false });
+
+      if (profilesError) throw profilesError;
+
+      // Fetch tool usage events
+      const { data: toolUsageData } = await supabase
+        .from('tool_usage_events')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      setToolUsage(toolUsageData || []);
+
+      // Fetch Content DNA samples
+      const { data: contentDNAData } = await supabase
+        .from('content_dna_samples')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      setContentDNASamples(contentDNAData || []);
+
+      // Fetch BYOC uploads
+      const { data: byocData } = await supabase
+        .from('byoc_uploads')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      setBYOCUploads(byocData || []);
+
+      // Fetch beta feedback
+      const { data: feedbackData } = await supabase
+        .from('beta_feedback')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      // Enrich feedback with user and institution names
+      const enrichedFeedback = (feedbackData || []).map(fb => {
+        const user = profilesData?.find(p => p.id === fb.user_id);
+        const feedbackTenant = tenantsData?.find(t => t.id === fb.tenant_id);
+        return {
+          ...fb,
+          user_name: user ? `${user.first_name} ${user.last_name}` : 'Unknown User',
+          institution_name: feedbackTenant?.institution_name || 'Unknown Institution'
+        };
+      });
+      setBetaFeedback(enrichedFeedback);
+
+      // Fetch audit log for recent activity
+      const { data: auditData } = await supabase
+        .from('audit_log')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      // Map users with institution names
+      const usersWithInstitution = (profilesData || []).map(profile => {
+        const userTenant = tenantsData?.find(t => t.id === profile.tenant_id);
+        return {
+          ...profile,
+          institution_name: userTenant?.institution_name || 'Unknown'
+        };
+      });
+
+      setUsers(usersWithInstitution);
+
+      // Calculate comprehensive stats per tenant
+      const tenantsWithStats: TenantWithStats[] = (tenantsData || []).map(t => {
+        const tenantUsers = (profilesData || []).filter(p => p.tenant_id === t.id);
+        const tenantToolUsage = (toolUsageData || []).filter(tu => tu.tenant_id === t.id);
+        const tenantContentDNA = (contentDNAData || []).filter(cd => cd.tenant_id === t.id);
+        const tenantBYOC = (byocData || []).filter(b => b.tenant_id === t.id);
+        const tenantAudit = (auditData || []).filter(a => a.tenant_id === t.id);
+        
+        // Get most recent activity
+        const recentActivityDate = tenantUsers
+          .filter(u => u.last_login_at)
+          .sort((a, b) => new Date(b.last_login_at!).getTime() - new Date(a.last_login_at!).getTime())[0]?.last_login_at || null;
+
+        return {
+          id: t.id,
+          institution_name: t.institution_name,
+          status: t.status,
+          userCount: tenantUsers.length,
+          toolUsageCount: tenantToolUsage.length,
+          contentDNACount: tenantContentDNA.length,
+          byocCount: tenantBYOC.length,
+          recentActivity: recentActivityDate,
+          users: tenantUsers.map(u => ({
+            ...u,
+            institution_name: t.institution_name
+          }))
+        };
+      });
+
+      setTenants(tenantsWithStats);
+      setLastRefresh(new Date());
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load users and institutions',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
+
+  // Initial fetch and auto-refresh every 30 seconds
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoadingUsers(true);
-      try {
-        // Fetch all tenants
-        const { data: tenantsData, error: tenantsError } = await supabase
-          .from('tenants')
-          .select('*')
-          .neq('id', '00000000-0000-0000-0000-000000000000') // Exclude PERSIST System tenant
-          .order('institution_name');
-
-        if (tenantsError) throw tenantsError;
-
-        // Fetch all users with their roles
-        const { data: profilesData, error: profilesError } = await supabase
-          .from('profiles')
-          .select('*')
-          .neq('tenant_id', '00000000-0000-0000-0000-000000000000') // Exclude PERSIST system users
-          .order('last_login_at', { ascending: false, nullsFirst: false });
-
-        if (profilesError) throw profilesError;
-
-        // Fetch tool usage events
-        const { data: toolUsageData } = await supabase
-          .from('tool_usage_events')
-          .select('*')
-          .order('created_at', { ascending: false });
-        
-        setToolUsage(toolUsageData || []);
-
-        // Fetch Content DNA samples
-        const { data: contentDNAData } = await supabase
-          .from('content_dna_samples')
-          .select('*')
-          .order('created_at', { ascending: false });
-        
-        setContentDNASamples(contentDNAData || []);
-
-        // Fetch BYOC uploads
-        const { data: byocData } = await supabase
-          .from('byoc_uploads')
-          .select('*')
-          .order('created_at', { ascending: false });
-        
-        setBYOCUploads(byocData || []);
-
-        // Fetch beta feedback
-        const { data: feedbackData } = await supabase
-          .from('beta_feedback')
-          .select('*')
-          .order('created_at', { ascending: false });
-        
-        // Enrich feedback with user and institution names
-        const enrichedFeedback = (feedbackData || []).map(fb => {
-          const user = profilesData?.find(p => p.id === fb.user_id);
-          const feedbackTenant = tenantsData?.find(t => t.id === fb.tenant_id);
-          return {
-            ...fb,
-            user_name: user ? `${user.first_name} ${user.last_name}` : 'Unknown User',
-            institution_name: feedbackTenant?.institution_name || 'Unknown Institution'
-          };
-        });
-        setBetaFeedback(enrichedFeedback);
-
-        // Fetch audit log for recent activity
-        const { data: auditData } = await supabase
-          .from('audit_log')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        // Map users with institution names
-        const usersWithInstitution = (profilesData || []).map(profile => {
-          const userTenant = tenantsData?.find(t => t.id === profile.tenant_id);
-          return {
-            ...profile,
-            institution_name: userTenant?.institution_name || 'Unknown'
-          };
-        });
-
-        setUsers(usersWithInstitution);
-
-        // Calculate comprehensive stats per tenant
-        const tenantsWithStats: TenantWithStats[] = (tenantsData || []).map(t => {
-          const tenantUsers = (profilesData || []).filter(p => p.tenant_id === t.id);
-          const tenantToolUsage = (toolUsageData || []).filter(tu => tu.tenant_id === t.id);
-          const tenantContentDNA = (contentDNAData || []).filter(cd => cd.tenant_id === t.id);
-          const tenantBYOC = (byocData || []).filter(b => b.tenant_id === t.id);
-          const tenantAudit = (auditData || []).filter(a => a.tenant_id === t.id);
-          
-          // Get most recent activity
-          const recentActivityDate = tenantUsers
-            .filter(u => u.last_login_at)
-            .sort((a, b) => new Date(b.last_login_at!).getTime() - new Date(a.last_login_at!).getTime())[0]?.last_login_at || null;
-
-          return {
-            id: t.id,
-            institution_name: t.institution_name,
-            status: t.status,
-            userCount: tenantUsers.length,
-            toolUsageCount: tenantToolUsage.length,
-            contentDNACount: tenantContentDNA.length,
-            byocCount: tenantBYOC.length,
-            recentActivity: recentActivityDate,
-            users: tenantUsers.map(u => ({
-              ...u,
-              institution_name: t.institution_name
-            }))
-          };
-        });
-
-        setTenants(tenantsWithStats);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to load users and institutions',
-          variant: 'destructive',
-        });
-      } finally {
-        setIsLoadingUsers(false);
-      }
-    };
-
     if (isSuperAdmin) {
       fetchData();
+      const interval = setInterval(fetchData, 30000);
+      return () => clearInterval(interval);
     }
-  }, [isSuperAdmin, toast]);
+  }, [isSuperAdmin]);
 
   const handleClearPersonalLibrary = () => {
     clearAllMessages();
@@ -536,6 +541,15 @@ const AdminPanel = () => {
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
+              <Button 
+                variant="outline" 
+                onClick={fetchData}
+                disabled={isLoadingUsers}
+                className="gap-2"
+              >
+                <RefreshCw className={`w-4 h-4 ${isLoadingUsers ? 'animate-spin' : ''}`} />
+                {lastRefresh ? `Updated ${formatLastLogin(lastRefresh.toISOString())}` : 'Refresh'}
+              </Button>
               <Button variant="outline" asChild>
                 <Link to="/admin/qa">
                   <Shield className="w-4 h-4 mr-2" />
