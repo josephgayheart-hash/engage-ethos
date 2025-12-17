@@ -378,6 +378,7 @@ export default function AdminUsersPage() {
                     <TableHead>Email</TableHead>
                     <TableHead>Department</TableHead>
                     <TableHead>Role</TableHead>
+                    <TableHead>Last Login</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="w-12"></TableHead>
                   </TableRow>
@@ -406,6 +407,11 @@ export default function AdminUsersPage() {
                             <Badge variant="outline" className="capitalize">User</Badge>
                           )}
                         </div>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {user.last_login_at 
+                          ? new Date(user.last_login_at).toLocaleDateString() + ' ' + new Date(user.last_login_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                          : 'Never'}
                       </TableCell>
                       <TableCell>{getStatusBadge(user.status)}</TableCell>
                       <TableCell>
