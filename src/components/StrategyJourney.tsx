@@ -211,13 +211,14 @@ function TouchpointCard({
           <div className="pt-3 border-t border-border space-y-3">
             <div className="flex items-center justify-between">
               <Button
-                variant="ghost"
+                variant={expanded ? "ghost" : "outline"}
                 size="sm"
                 onClick={() => setExpanded(!expanded)}
-                className="text-sm"
+                className={`text-sm transition-all ${!expanded ? 'bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-primary/30 hover:border-primary/50 hover:bg-primary/15 animate-pulse hover:animate-none' : ''}`}
               >
-                {expanded ? <ChevronUp className="w-4 h-4 mr-1" /> : <ChevronDown className="w-4 h-4 mr-1" />}
+                <Sparkles className={`w-4 h-4 mr-2 ${!expanded ? 'text-primary' : ''}`} />
                 {expanded ? 'Hide' : 'Generate'} Message Copy
+                {!expanded && <AIIndicator className="ml-2" />}
               </Button>
             </div>
 
