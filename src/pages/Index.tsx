@@ -7,6 +7,7 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useAuth } from "@/contexts/AuthContext";
 import { ResearchFoundation } from "@/components/ResearchFoundation";
+import { BetaBanner } from "@/components/BetaBanner";
 import { 
   Shield, 
   Brain, 
@@ -198,6 +199,12 @@ const Index = () => {
       <section className="gradient-hero py-12 md:py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
+            {/* Beta indicator */}
+            <div className="mb-4 animate-fade-in">
+              <Badge className="bg-amber-100/20 text-amber-100 border-amber-200/30 hover:bg-amber-100/30">
+                Beta Release — We welcome your feedback
+              </Badge>
+            </div>
             <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl font-bold text-primary-foreground mb-3 animate-fade-in">
               Messaging Intelligence for Higher Education
             </h1>

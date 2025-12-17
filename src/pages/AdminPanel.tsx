@@ -497,17 +497,29 @@ const AdminPanel = () => {
                 Cross-institution analytics and system administration
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" asChild>
+                <Link to="/admin/qa">
+                  <Shield className="w-4 h-4 mr-2" />
+                  QA Diagnostics
+                </Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link to="/admin/seed">
+                  <Database className="w-4 h-4 mr-2" />
+                  Seed Data
+                </Link>
+              </Button>
               <Button variant="outline" asChild>
                 <Link to="/admin/onboarding">
                   <UserPlus className="w-4 h-4 mr-2" />
-                  Onboarding Requests
+                  Onboarding
                 </Link>
               </Button>
               <Button variant="outline" asChild>
                 <Link to="/admin/users">
                   <Users className="w-4 h-4 mr-2" />
-                  User Management
+                  Users
                 </Link>
               </Button>
             </div>

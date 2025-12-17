@@ -32,6 +32,8 @@ import ProfilePage from "./pages/ProfilePage";
 import AdminConsolePage from "./pages/admin/AdminConsolePage";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import AdminOnboardingPage from "./pages/admin/AdminOnboardingPage";
+import QADiagnosticsPage from "./pages/admin/QADiagnosticsPage";
+import SeedDataPage from "./pages/admin/SeedDataPage";
 import ApprovalsPage from "./pages/ApprovalsPage";
 
 const queryClient = new QueryClient();
@@ -176,6 +178,8 @@ const AppRoutes = () => (
     {/* Super Admin routes */}
     <Route path="/admin/panel" element={<RequireAuth><RequireSuperAdmin><AdminPanel /></RequireSuperAdmin></RequireAuth>} />
     <Route path="/admin/onboarding" element={<RequireAuth><RequireSuperAdmin><AdminOnboardingPage /></RequireSuperAdmin></RequireAuth>} />
+    <Route path="/admin/qa" element={<RequireAuth><RequireSuperAdmin><QADiagnosticsPage /></RequireSuperAdmin></RequireAuth>} />
+    <Route path="/admin/seed" element={<RequireAuth><RequireSuperAdmin><SeedDataPage /></RequireSuperAdmin></RequireAuth>} />
     
     {/* Admin routes - tenant-scoped for university admins */}
     <Route path="/admin" element={<Navigate to="/admin/console" replace />} />

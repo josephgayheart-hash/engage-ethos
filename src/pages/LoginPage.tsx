@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Lock, Mail, AlertCircle, Loader2 } from 'lucide-react';
+import { BetaBanner } from '@/components/BetaBanner';
 import persistLogo from '@/assets/persist-logo.png';
 
 export default function LoginPage() {
@@ -118,7 +119,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[hsl(210,20%,98%)] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[hsl(210,20%,98%)] flex flex-col">
+      {/* Beta Banner at top */}
+      <BetaBanner variant="compact" />
+      
+      <div className="flex-1 flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
           <img src={persistLogo} alt="PERSIST" className="h-16 w-auto mx-auto mb-4" />
@@ -220,6 +225,7 @@ export default function LoginPage() {
         <p className="text-center text-xs text-[hsl(220,14%,46%)]">
           © 2024 PERSIST. Research-grounded messaging intelligence.
         </p>
+      </div>
       </div>
     </div>
   );
