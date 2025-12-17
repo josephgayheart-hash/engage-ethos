@@ -251,7 +251,7 @@ const SettingsPage = () => {
                           <Sparkles className="w-4 h-4 text-secondary" />
                         </div>
                         <CardDescription className="mt-1">
-                          Configure voice, terminology, and branding for this profile
+                          Configure Content DNA, terminology, and branding for this profile
                         </CardDescription>
                       </div>
                       <div className="flex items-center gap-1">

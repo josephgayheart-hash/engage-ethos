@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const ANALYSIS_PROMPT = `You are a brand voice analyst for higher education communications. Analyze the provided sample communications to extract the institution's unique voice, tone, and messaging patterns.
+const ANALYSIS_PROMPT = `You are a Content DNA analyst for higher education communications. Analyze the provided sample communications to extract the institution's unique Content DNA—voice, tone, and messaging patterns.
 
 Examine the samples for:
 1. Overall tone (warm, formal, casual, authoritative, etc.)
@@ -17,7 +17,7 @@ Examine the samples for:
 7. Common phrases or expressions that recur
 8. Messaging tactics used (appeals to authority, social proof, urgency, personalization, etc.)
 
-Provide a comprehensive summary of the brand voice that can be used to generate new messages matching this style.
+Provide a comprehensive summary of the Content DNA that can be used to generate new messages matching this style.
 
 IMPORTANT: Respond ONLY with valid JSON:
 {
@@ -29,7 +29,7 @@ IMPORTANT: Respond ONLY with valid JSON:
   "emotionalTone": "Description of emotional undertone",
   "commonPhrases": ["phrase 1", "phrase 2", "phrase 3"],
   "messagingTactics": ["tactic 1", "tactic 2", "tactic 3"],
-  "summary": "2-3 paragraph summary of the brand voice that can guide future message generation"
+  "summary": "2-3 paragraph summary of the Content DNA that can guide future message generation"
 }`;
 
 serve(async (req) => {
@@ -60,13 +60,13 @@ serve(async (req) => {
       `--- SAMPLE ${index + 1} ---\n${sample}\n`
     ).join('\n');
 
-    const userPrompt = `Please analyze the following sample communications to extract the brand voice and messaging patterns:
+    const userPrompt = `Please analyze the following sample communications to extract the Content DNA and messaging patterns:
 
 ${samplesText}
 
-Analyze these samples and extract the voice profile as JSON.`;
+Analyze these samples and extract the Content DNA profile as JSON.`;
 
-    console.log(`Analyzing ${samples.length} voice samples...`);
+    console.log(`Analyzing ${samples.length} Content DNA samples...`);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -128,7 +128,7 @@ Analyze these samples and extract the voice profile as JSON.`;
     try {
       const result = JSON.parse(jsonContent);
       result.analyzedAt = new Date().toISOString();
-      console.log("Voice analysis completed successfully");
+      console.log("Content DNA analysis completed successfully");
       
       return new Response(JSON.stringify(result), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
