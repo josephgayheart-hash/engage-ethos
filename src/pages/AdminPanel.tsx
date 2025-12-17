@@ -71,7 +71,9 @@ import {
   Database,
   Mic,
   ArrowRight,
-  GraduationCap
+  GraduationCap,
+  MessageSquarePlus,
+  Star
 } from "lucide-react";
 
 // Mock Ivy League user data
@@ -280,6 +282,23 @@ interface BYOCUpload {
   user_id: string;
 }
 
+interface BetaFeedback {
+  id: string;
+  tenant_id: string;
+  user_id: string;
+  feature_area: string;
+  page_path: string | null;
+  feedback_type: string;
+  feedback_text: string;
+  rating: number | null;
+  status: string;
+  admin_notes: string | null;
+  created_at: string;
+  reviewed_at: string | null;
+  user_name?: string;
+  institution_name?: string;
+}
+
 const AdminPanel = () => {
   const { toast } = useToast();
   const { tenant, isSuperAdmin } = useAuth();
@@ -293,6 +312,7 @@ const AdminPanel = () => {
   const [toolUsage, setToolUsage] = useState<ToolUsageEvent[]>([]);
   const [contentDNASamples, setContentDNASamples] = useState<ContentDNASample[]>([]);
   const [byocUploads, setBYOCUploads] = useState<BYOCUpload[]>([]);
+  const [betaFeedback, setBetaFeedback] = useState<BetaFeedback[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [expandedTenant, setExpandedTenant] = useState<string | null>(null);
   const [clearPersonalOpen, setClearPersonalOpen] = useState(false);
@@ -344,6 +364,24 @@ const AdminPanel = () => {
           .order('created_at', { ascending: false });
         
         setBYOCUploads(byocData || []);
+
+        // Fetch beta feedback
+        const { data: feedbackData } = await supabase
+          .from('beta_feedback')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        // Enrich feedback with user and institution names
+        const enrichedFeedback = (feedbackData || []).map(fb => {
+          const user = profilesData?.find(p => p.id === fb.user_id);
+          const feedbackTenant = tenantsData?.find(t => t.id === fb.tenant_id);
+          return {
+            ...fb,
+            user_name: user ? `${user.first_name} ${user.last_name}` : 'Unknown User',
+            institution_name: feedbackTenant?.institution_name || 'Unknown Institution'
+          };
+        });
+        setBetaFeedback(enrichedFeedback);
 
         // Fetch audit log for recent activity
         const { data: auditData } = await supabase
@@ -609,11 +647,19 @@ const AdminPanel = () => {
 
           {/* Main Content Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid grid-cols-6 w-full">
+            <TabsList className="grid grid-cols-7 w-full">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="institutions">Institutions</TabsTrigger>
+              <TabsTrigger value="feedback" className="flex items-center gap-1">
+                Feedback
+                {betaFeedback.filter(f => f.status === 'new').length > 0 && (
+                  <Badge className="ml-1 h-4 w-4 p-0 text-[10px] flex items-center justify-center bg-amber-500">
+                    {betaFeedback.filter(f => f.status === 'new').length}
+                  </Badge>
+                )}
+              </TabsTrigger>
               <TabsTrigger value="libraries">Libraries</TabsTrigger>
-              <TabsTrigger value="ai">AI & Content DNA</TabsTrigger>
+              <TabsTrigger value="ai">AI</TabsTrigger>
               <TabsTrigger value="users">Users</TabsTrigger>
               <TabsTrigger value="admin">Admin</TabsTrigger>
             </TabsList>
@@ -1283,6 +1329,109 @@ const AdminPanel = () => {
                   </CardContent>
                 </Card>
               </div>
+            </TabsContent>
+
+            {/* Feedback Tab */}
+            <TabsContent value="feedback" className="mt-4 space-y-4">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="font-serif flex items-center gap-2">
+                        <MessageSquarePlus className="w-5 h-5 text-amber-600" />
+                        Beta Feedback
+                      </CardTitle>
+                      <CardDescription>
+                        Feedback submitted by beta testers across all institutions
+                      </CardDescription>
+                    </div>
+                    <div className="flex gap-2">
+                      <Badge variant="outline" className="bg-green-50 text-green-700">
+                        {betaFeedback.filter(f => f.status === 'new').length} New
+                      </Badge>
+                      <Badge variant="outline">
+                        {betaFeedback.length} Total
+                      </Badge>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {isLoadingUsers ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : betaFeedback.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <MessageSquarePlus className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">No feedback submitted yet</p>
+                      <p className="text-xs mt-1">Feedback from beta testers will appear here</p>
+                    </div>
+                  ) : (
+                    <ScrollArea className="h-[500px]">
+                      <div className="space-y-3">
+                        {betaFeedback.map(feedback => (
+                          <div 
+                            key={feedback.id} 
+                            className={`p-4 border rounded-lg ${feedback.status === 'new' ? 'border-amber-200 bg-amber-50/50' : ''}`}
+                          >
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Badge variant="outline" className="text-xs">
+                                    {feedback.feature_area.replace(/_/g, ' ')}
+                                  </Badge>
+                                  <Badge 
+                                    variant="outline" 
+                                    className={`text-xs ${
+                                      feedback.feedback_type === 'bug' ? 'bg-red-50 text-red-700' :
+                                      feedback.feedback_type === 'feature' ? 'bg-blue-50 text-blue-700' :
+                                      feedback.feedback_type === 'praise' ? 'bg-green-50 text-green-700' :
+                                      ''
+                                    }`}
+                                  >
+                                    {feedback.feedback_type}
+                                  </Badge>
+                                  {feedback.status === 'new' && (
+                                    <Badge className="bg-amber-500 text-xs">New</Badge>
+                                  )}
+                                </div>
+                                <p className="text-sm mb-2">{feedback.feedback_text}</p>
+                                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                  <span>{feedback.user_name}</span>
+                                  <span>•</span>
+                                  <span>{feedback.institution_name}</span>
+                                  <span>•</span>
+                                  <span>{new Date(feedback.created_at).toLocaleDateString()}</span>
+                                  {feedback.page_path && (
+                                    <>
+                                      <span>•</span>
+                                      <code className="text-xs bg-muted px-1 rounded">{feedback.page_path}</code>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                              {feedback.rating && (
+                                <div className="flex items-center gap-0.5">
+                                  {[1, 2, 3, 4, 5].map(star => (
+                                    <Star 
+                                      key={star}
+                                      className={`w-4 h-4 ${
+                                        star <= feedback.rating! 
+                                          ? 'fill-amber-400 text-amber-400' 
+                                          : 'text-muted-foreground/30'
+                                      }`} 
+                                    />
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  )}
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>

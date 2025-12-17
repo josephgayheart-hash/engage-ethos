@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { FeedbackButton } from "@/components/FeedbackButton";
 import Index from "./pages/Index";
 import OnboardingPage from "./pages/OnboardingPage";
 import PersonalLibrary from "./pages/PersonalLibrary";
@@ -199,6 +200,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <AppRoutes />
+          <FeedbackButton />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
