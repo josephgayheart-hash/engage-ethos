@@ -12,6 +12,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import persistLogo from "@/assets/persist-logo.png";
 
+const MAX_LOGO_HEIGHT = 32;
+const MAX_LOGO_WIDTH = 120;
+
 export function Header() {
   const { user, profile, tenant, isAdmin, isSuperAdmin, isApprover, logout } = useAuth();
   const navigate = useNavigate();
@@ -20,6 +23,9 @@ export function Header() {
     await logout();
     navigate('/login');
   };
+
+  // Get accent color from tenant or use default
+  const accentColor = tenant?.accent_color || '#2C7A7B';
 
   return (
     <header className="border-b border-border bg-card">
@@ -32,7 +38,17 @@ export function Header() {
             <>
               <div className="h-8 w-px bg-border hidden sm:block" />
               <div className="hidden sm:flex items-center gap-2">
-                {/* Future: tenant.logo_url && <img src={tenant.logo_url} alt={tenant.institution_name} className="h-8 w-auto" /> */}
+                {tenant.logo_url && (
+                  <img 
+                    src={tenant.logo_url} 
+                    alt={tenant.institution_name} 
+                    className="object-contain"
+                    style={{ 
+                      maxHeight: `${MAX_LOGO_HEIGHT}px`, 
+                      maxWidth: `${MAX_LOGO_WIDTH}px` 
+                    }}
+                  />
+                )}
                 <span className="text-lg font-semibold text-foreground">
                   {tenant.institution_name}
                 </span>
@@ -128,6 +144,13 @@ export function Header() {
           )}
         </nav>
       </div>
+      {/* Accent color bar */}
+      {tenant?.accent_color && (
+        <div 
+          className="h-1 w-full" 
+          style={{ backgroundColor: accentColor }}
+        />
+      )}
     </header>
   );
 }

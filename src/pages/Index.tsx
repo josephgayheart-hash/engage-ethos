@@ -41,7 +41,7 @@ import {
 const Index = () => {
   const { messages } = useMessageLibrary();
   const { templates } = useSharedLibrary();
-  const { isAdmin } = useAuth();
+  const { isAdmin, isSuperAdmin } = useAuth();
 
   const recentMessages = messages.slice(0, 3);
   const publishedTemplates = templates.filter(t => t.status === 'published').slice(0, 3);
@@ -112,12 +112,14 @@ const Index = () => {
     },
     { 
       id: 'admin', 
-      title: 'Admin Console', 
-      description: 'Manage users, review requests, and configure your institution',
+      title: isSuperAdmin ? 'PERSIST System Admin' : 'Admin Console', 
+      description: isSuperAdmin 
+        ? 'Manage all institutions, users, and system-wide configuration' 
+        : 'Manage users, review requests, and configure your institution',
       icon: Settings,
       color: 'text-muted-foreground',
       bgColor: 'bg-muted',
-      href: '/admin/console'
+      href: isSuperAdmin ? '/admin/panel' : '/admin/console'
     },
   ];
 
