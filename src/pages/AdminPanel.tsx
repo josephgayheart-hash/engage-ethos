@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useToast } from "@/hooks/use-toast";
-import { getAppPassword, setAppPassword } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   ArrowLeft,
   Plus, 
@@ -85,22 +85,10 @@ const AdminPanel = () => {
   };
 
   const handleUpdateAppPassword = () => {
-    if (!newAppPassword || !confirmAppPassword) {
-      toast({ variant: "destructive", title: "Missing fields", description: "Please enter and confirm the new password." });
-      return;
-    }
-    if (newAppPassword !== confirmAppPassword) {
-      toast({ variant: "destructive", title: "Passwords don't match", description: "Please make sure both passwords match." });
-      return;
-    }
-    if (newAppPassword.length < 4) {
-      toast({ variant: "destructive", title: "Password too short", description: "Password must be at least 4 characters." });
-      return;
-    }
-    setAppPassword(newAppPassword);
-    setNewAppPassword('');
-    setConfirmAppPassword('');
-    toast({ title: "Password updated", description: "The application password has been changed." });
+    toast({ 
+      title: "Password management moved", 
+      description: "User passwords are now managed through the Admin Console → User Management page." 
+    });
   };
 
   const toggleArrayItem = (arr: string[], setArr: (v: string[]) => void, item: string) => {
@@ -568,44 +556,20 @@ const AdminPanel = () => {
                 <CardHeader>
                   <CardTitle className="font-serif flex items-center gap-2">
                     <Key className="w-5 h-5" />
-                    Application Password
+                    User Management
                   </CardTitle>
-                  <CardDescription>Update the password required to access PERSIST</CardDescription>
+                  <CardDescription>Manage user accounts, passwords, and access</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="p-3 rounded-lg bg-muted border">
-                    <Label className="text-xs text-muted-foreground">Current Password</Label>
-                    <p className="font-mono text-sm mt-1">{getAppPassword()}</p>
-                  </div>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="new-password">New Password</Label>
-                      <Input
-                        id="new-password"
-                        type="password"
-                        value={newAppPassword}
-                        onChange={(e) => setNewAppPassword(e.target.value)}
-                        placeholder="Enter new password"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="confirm-password">Confirm Password</Label>
-                      <Input
-                        id="confirm-password"
-                        type="password"
-                        value={confirmAppPassword}
-                        onChange={(e) => setConfirmAppPassword(e.target.value)}
-                        placeholder="Confirm new password"
-                      />
-                    </div>
-                  </div>
-                  <Button onClick={handleUpdateAppPassword} className="w-full md:w-auto">
-                    <Key className="w-4 h-4 mr-2" />
-                    Update Password
-                  </Button>
-                  <p className="text-xs text-muted-foreground">
-                    Note: Changing the password will not log out the current session, but will require the new password on next login.
+                  <p className="text-sm text-muted-foreground">
+                    User authentication is now managed through the new Admin Console. You can create users, reset passwords, approve access requests, and manage user status.
                   </p>
+                  <Link to="/admin/users">
+                    <Button className="w-full md:w-auto">
+                      <Users className="w-4 h-4 mr-2" />
+                      Go to User Management
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
             </TabsContent>
