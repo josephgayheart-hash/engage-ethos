@@ -1,3 +1,4 @@
+// Strategy Page - Journey Designer with PDF Export
 import { useState, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { format, differenceInWeeks, addWeeks } from "date-fns";
