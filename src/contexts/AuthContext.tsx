@@ -1,9 +1,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
 
-export type UserRole = 'admin' | 'user';
+export type UserRole = 'admin' | 'user' | 'approver';
 export type UserStatus = 'invited' | 'pending' | 'active' | 'locked' | 'disabled';
 
 export interface UserProfile {
@@ -36,8 +35,10 @@ interface AuthContextType {
   profile: UserProfile | null;
   tenant: Tenant | null;
   role: UserRole | null;
+  roles: UserRole[];
   isLoading: boolean;
   isAdmin: boolean;
+  isApprover: boolean;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -61,7 +62,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [tenant, setTenant] = useState<Tenant | null>(null);
-  const [role, setRole] = useState<UserRole | null>(null);
+  const [roles, setRoles] = useState<UserRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchUserData = async (userId: string) => {
@@ -91,15 +92,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setTenant(tenantData as Tenant);
       }
 
-      // Fetch role
-      const { data: roleData } = await supabase
+      // Fetch all roles for this user
+      const { data: rolesData } = await supabase
         .from('user_roles')
         .select('role')
-        .eq('user_id', userId)
-        .single();
+        .eq('user_id', userId);
 
-      if (roleData) {
-        setRole(roleData.role as UserRole);
+      if (rolesData && rolesData.length > 0) {
+        const userRoles = rolesData.map(r => r.role as UserRole);
+        setRoles(userRoles);
+      } else {
+        setRoles([]);
       }
 
       // Update last login
@@ -128,7 +131,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         } else {
           setProfile(null);
           setTenant(null);
-          setRole(null);
+          setRoles([]);
         }
       }
     );
@@ -156,7 +159,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setSession(null);
     setProfile(null);
     setTenant(null);
-    setRole(null);
+    setRoles([]);
   };
 
   const refreshProfile = async () => {
@@ -165,7 +168,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  const isAdmin = role === 'admin';
+  const isAdmin = roles.includes('admin');
+  const isApprover = roles.includes('approver') || roles.includes('admin');
+  const role = roles.length > 0 ? roles[0] : null;
 
   return (
     <AuthContext.Provider value={{ 
@@ -173,9 +178,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       session, 
       profile, 
       tenant, 
-      role, 
+      role,
+      roles,
       isLoading, 
       isAdmin,
+      isApprover,
       logout,
       refreshProfile
     }}>
