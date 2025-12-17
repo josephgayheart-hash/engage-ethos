@@ -221,18 +221,97 @@ const mockPersonalLibraryStats = {
   ]
 };
 
+interface RealUser {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  status: string;
+  last_login_at: string | null;
+  created_at: string;
+  department: string | null;
+  tenant_id: string;
+  institution_name?: string;
+}
+
+interface TenantWithStats {
+  id: string;
+  institution_name: string;
+  status: string;
+  userCount: number;
+}
+
 const AdminPanel = () => {
   const { toast } = useToast();
-  const { tenant } = useAuth();
+  const { tenant, isSuperAdmin } = useAuth();
   const { templates, clearAllTemplates, resetToDefaults } = useSharedLibrary();
   const { messages, clearAllMessages } = useMessageLibrary();
   const { profiles } = useInstitutionalProfiles();
   
   const [activeTab, setActiveTab] = useState("overview");
-  const [users] = useState(mockIvyLeagueUsers);
-  const [isLoadingUsers] = useState(false);
+  const [users, setUsers] = useState<RealUser[]>([]);
+  const [tenants, setTenants] = useState<TenantWithStats[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [clearPersonalOpen, setClearPersonalOpen] = useState(false);
   const [clearSharedOpen, setClearSharedOpen] = useState(false);
+
+  // Fetch real users and tenants
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoadingUsers(true);
+      try {
+        // Fetch all tenants
+        const { data: tenantsData, error: tenantsError } = await supabase
+          .from('tenants')
+          .select('*')
+          .neq('id', '00000000-0000-0000-0000-000000000000') // Exclude PERSIST System tenant
+          .order('institution_name');
+
+        if (tenantsError) throw tenantsError;
+
+        // Fetch all users with their roles
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('*')
+          .neq('tenant_id', '00000000-0000-0000-0000-000000000000') // Exclude PERSIST system users
+          .order('last_login_at', { ascending: false, nullsFirst: false });
+
+        if (profilesError) throw profilesError;
+
+        // Map users with institution names
+        const usersWithInstitution = (profilesData || []).map(profile => {
+          const userTenant = tenantsData?.find(t => t.id === profile.tenant_id);
+          return {
+            ...profile,
+            institution_name: userTenant?.institution_name || 'Unknown'
+          };
+        });
+
+        setUsers(usersWithInstitution);
+
+        // Calculate user counts per tenant
+        const tenantsWithStats = (tenantsData || []).map(t => ({
+          ...t,
+          userCount: (profilesData || []).filter(p => p.tenant_id === t.id).length
+        }));
+
+        setTenants(tenantsWithStats);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load users and institutions',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsLoadingUsers(false);
+      }
+    };
+
+    if (isSuperAdmin) {
+      fetchData();
+    }
+  }, [isSuperAdmin, toast]);
 
   const handleClearPersonalLibrary = () => {
     clearAllMessages();
@@ -341,7 +420,7 @@ const AdminPanel = () => {
                     <GraduationCap className="w-4 h-4 text-primary" />
                   </div>
                   <div>
-                    <p className="text-xl font-bold">8</p>
+                    <p className="text-xl font-bold">{isLoadingUsers ? '...' : tenants.length}</p>
                     <p className="text-[10px] text-muted-foreground">Institutions</p>
                   </div>
                 </div>
@@ -446,7 +525,7 @@ const AdminPanel = () => {
                             </div>
                             <div>
                               <p className="text-sm font-medium">{user.first_name} {user.last_name}</p>
-                              <p className="text-[10px] text-muted-foreground">{user.institution}</p>
+                              <p className="text-[10px] text-muted-foreground">{user.institution_name}</p>
                             </div>
                           </div>
                           <span className="text-xs text-muted-foreground">{formatLastLogin(user.last_login_at)}</span>
@@ -497,63 +576,61 @@ const AdminPanel = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="font-serif">Institution Breakdown</CardTitle>
-                  <CardDescription>Activity and library usage per institution</CardDescription>
+                  <CardDescription>All institutions and their users</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Institution</TableHead>
-                        <TableHead className="text-center">Users</TableHead>
-                        <TableHead className="text-center">Shared Library</TableHead>
-                        <TableHead className="text-center">Personal Messages</TableHead>
-                        <TableHead className="text-center">Journeys</TableHead>
-                        <TableHead className="text-center">Content DNA</TableHead>
-                        <TableHead className="text-center">Files</TableHead>
-                        <TableHead>Top Tools</TableHead>
-                        <TableHead>Last Active</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {mockInstitutionData.map(inst => (
-                        <TableRow key={inst.name}>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <div className="p-1.5 rounded bg-primary/10">
-                                <GraduationCap className="w-4 h-4 text-primary" />
-                              </div>
-                              <span className="font-medium text-sm">{inst.name}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-center">{inst.users}</TableCell>
-                          <TableCell className="text-center">
-                            <Badge variant="secondary">{inst.sharedTemplates}</Badge>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Badge variant="outline">{inst.personalMessages}</Badge>
-                          </TableCell>
-                          <TableCell className="text-center">{inst.journeys}</TableCell>
-                          <TableCell className="text-center">
-                            {inst.contentDNAProfiles > 0 ? (
-                              <Badge className="bg-orange-500/20 text-orange-700 border-orange-500/30">
-                                <Mic className="w-3 h-3 mr-1" />
-                                {inst.contentDNAProfiles}
-                              </Badge>
-                            ) : '-'}
-                          </TableCell>
-                          <TableCell className="text-center">{inst.filesUploaded}</TableCell>
-                          <TableCell>
-                            <div className="flex gap-1">
-                              {inst.topTools.slice(0, 2).map(tool => (
-                                <Badge key={tool} variant="outline" className="text-[10px]">{tool}</Badge>
-                              ))}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-muted-foreground text-sm">{inst.recentActivity}</TableCell>
+                  {isLoadingUsers ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : tenants.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Building2 className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">No institutions found</p>
+                    </div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Institution</TableHead>
+                          <TableHead className="text-center">Users</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Actions</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {tenants.map(inst => (
+                          <TableRow key={inst.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <div className="p-1.5 rounded bg-primary/10">
+                                  <GraduationCap className="w-4 h-4 text-primary" />
+                                </div>
+                                <span className="font-medium text-sm">{inst.institution_name}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Badge variant="secondary">{inst.userCount}</Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={inst.status === 'active' ? 'default' : 'secondary'} 
+                                className={inst.status === 'active' ? 'bg-green-500' : ''}>
+                                {inst.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Button variant="ghost" size="sm" asChild>
+                                <Link to={`/admin/users?tenant=${inst.id}`}>
+                                  View Users
+                                  <ChevronRight className="w-4 h-4 ml-1" />
+                                </Link>
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -809,7 +886,7 @@ const AdminPanel = () => {
                 <CardHeader className="flex flex-row items-center justify-between">
                   <div>
                     <CardTitle className="font-serif">All Users</CardTitle>
-                    <CardDescription>{users.length} users across 8 Ivy League institutions</CardDescription>
+                    <CardDescription>{users.length} users across {tenants.length} institutions</CardDescription>
                   </div>
                   <Button asChild>
                     <Link to="/admin/users">
@@ -819,49 +896,60 @@ const AdminPanel = () => {
                   </Button>
                 </CardHeader>
                 <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>User</TableHead>
-                        <TableHead>Institution</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Last Login</TableHead>
-                        <TableHead>Member Since</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {users.map(user => (
-                        <TableRow key={user.id}>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">
-                                {user.first_name[0]}{user.last_name[0]}
-                              </div>
-                              <div>
-                                <p className="font-medium text-sm">{user.first_name} {user.last_name}</p>
-                                <p className="text-[10px] text-muted-foreground">{user.email}</p>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-sm">{user.institution}</TableCell>
-                          <TableCell>
-                            <Badge 
-                              variant={user.status === 'active' ? 'default' : 'secondary'}
-                              className={user.status === 'active' ? 'bg-green-500' : user.status === 'locked' ? 'bg-red-500' : ''}
-                            >
-                              {user.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
-                            {formatLastLogin(user.last_login_at)}
-                          </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
-                            {new Date(user.created_at).toLocaleDateString()}
-                          </TableCell>
+                  {isLoadingUsers ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : users.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Users className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">No users found</p>
+                    </div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>User</TableHead>
+                          <TableHead>Institution</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Last Login</TableHead>
+                          <TableHead>Member Since</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {users.map(user => (
+                          <TableRow key={user.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">
+                                  {user.first_name[0]}{user.last_name[0]}
+                                </div>
+                                <div>
+                                  <p className="font-medium text-sm">{user.first_name} {user.last_name}</p>
+                                  <p className="text-[10px] text-muted-foreground">{user.email}</p>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-sm">{user.institution_name}</TableCell>
+                            <TableCell>
+                              <Badge 
+                                variant={user.status === 'active' ? 'default' : 'secondary'}
+                                className={user.status === 'active' ? 'bg-green-500' : user.status === 'locked' ? 'bg-red-500' : ''}
+                              >
+                                {user.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {formatLastLogin(user.last_login_at)}
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {new Date(user.created_at).toLocaleDateString()}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
