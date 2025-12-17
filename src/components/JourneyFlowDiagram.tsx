@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useRef } from 'react';
+import { useMemo, useCallback, useRef, useState } from 'react';
 import ReactFlow, {
   Node,
   Edge,
@@ -20,16 +20,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+  DropdownMenuCheckboxItem,
 } from '@/components/ui/dropdown-menu';
 import type { StrategyJourney, JourneyTouchpoint, MessageContext } from '@/types/persist';
-import {
-  applyDagreLayout,
-  getNodesBounds,
-  getNodeSize,
-  parseWeekRange,
-  resolveNonOverlappingX,
-  shiftNodes,
-} from '@/lib/journeyDiagramLayout';
 
 interface JourneyFlowDiagramProps {
   journey: StrategyJourney;
@@ -220,158 +215,58 @@ const nodeTypes = {
 
 export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: JourneyFlowDiagramProps) => {
   const flowRef = useRef<HTMLDivElement>(null);
+  const [exportBg, setExportBg] = useState<'themed' | 'white' | 'transparent'>('themed');
+  const [exportQuality, setExportQuality] = useState<'standard' | 'high'>('high');
 
-  // Export functions
+  // Export functions with options
   const exportToImage = useCallback((format: 'png' | 'svg') => {
     const flowElement = flowRef.current?.querySelector('.react-flow') as HTMLElement;
     if (!flowElement) return;
 
     const downloadImage = (dataUrl: string) => {
       const a = document.createElement('a');
-      a.setAttribute('download', `journey-diagram.${format}`);
+      const timestamp = new Date().toISOString().split('T')[0];
+      a.setAttribute('download', `journey-diagram-${timestamp}.${format}`);
       a.setAttribute('href', dataUrl);
       a.click();
+    };
+
+    const getBgColor = () => {
+      if (exportBg === 'transparent') return undefined;
+      if (exportBg === 'white') return '#ffffff';
+      return 'hsl(var(--background))';
     };
 
     const exportFn = format === 'png' ? toPng : toSvg;
     
     exportFn(flowElement, {
-      backgroundColor: 'hsl(var(--background))',
+      backgroundColor: getBgColor(),
       quality: 1,
-      pixelRatio: 2,
+      pixelRatio: exportQuality === 'high' ? 3 : 2,
     }).then(downloadImage).catch(console.error);
-  }, []);
+  }, [exportBg, exportQuality]);
 
-  // Convert journey phases and touchpoints to React Flow nodes
-  const { initialNodes, initialEdges, diagramHeight } = useMemo(() => {
+  // Convert journey phases and touchpoints to React Flow nodes - ZIG-ZAG GRID LAYOUT
+  const { initialNodes, initialEdges, dynamicHeight } = useMemo(() => {
+    const nodes: Node[] = [];
     const edges: Edge[] = [];
-
-    // --- Touchpoints (laid out via dagre so nodes never overlap) ---
-    const touchpointNodes: Node[] = journey.touchpoints.map((touchpoint, index) => {
-      const weekDate = calculateWeekDate(startDate, touchpoint.week);
-
-      return {
-        id: `tp-${index}`,
-        type: 'touchpoint',
-        position: { x: 0, y: 0 },
-        data: { touchpoint, index, weekDate },
-        draggable: true,
-      };
-    });
-
-    // Main journey edges (visible)
-    for (let i = 1; i < touchpointNodes.length; i++) {
-      edges.push({
-        id: `e-${i - 1}-${i}`,
-        source: `tp-${i - 1}`,
-        target: `tp-${i}`,
-        type: 'smoothstep',
-        animated: true,
-        style: { stroke: 'hsl(var(--primary))', strokeWidth: 2 },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          color: 'hsl(var(--primary))',
-        },
-      });
-    }
-
-    const laidOutTouchpoints = applyDagreLayout(touchpointNodes, edges, {
-      direction: 'LR',
-      nodeSep: 90,
-      rankSep: 140,
-    });
-
-    // Shift the dagre graph into a predictable canvas region
-    const tpBoundsRaw = getNodesBounds(laidOutTouchpoints);
-    const touchpointsTopY = 420;
-    const leftMarginX = 40;
-
-    const shiftedTouchpoints = shiftNodes(
-      laidOutTouchpoints,
-      leftMarginX - tpBoundsRaw.minX,
-      touchpointsTopY - tpBoundsRaw.minY
-    );
-
-    const nodeById = new Map(shiftedTouchpoints.map((n) => [n.id, n] as const));
-
-    // --- Phases (positioned above the touchpoints, centered over their week ranges) ---
-    const phaseSize = getNodeSize({
-      id: 'phase-size',
-      type: 'phase',
-      position: { x: 0, y: 0 },
-      data: {},
-    } as Node);
-
-    const phaseY = 260;
-
-    const phaseDraft = journey.phases.map((phase, phaseIndex) => {
-      const range = parseWeekRange(phase.weekRange);
-
-      const relevant = journey.touchpoints
-        .map((tp, index) => ({ tp, node: nodeById.get(`tp-${index}`) }))
-        .filter(({ tp, node }) => {
-          if (!node) return false;
-          if (!range) return true;
-          return tp.week >= range.startWeek && tp.week <= range.endWeek;
-        })
-        .map(({ node }) => node as Node);
-
-      // Fallback if range parsing fails or no nodes match (space phases evenly over the touchpoint bounds)
-      const tpBounds = getNodesBounds(shiftedTouchpoints);
-      const fallbackCenterX =
-        tpBounds.minX +
-        ((phaseIndex + 0.5) / Math.max(1, journey.phases.length)) * (tpBounds.maxX - tpBounds.minX);
-
-      const centerX = (() => {
-        if (!relevant.length) return fallbackCenterX;
-        let minX = Number.POSITIVE_INFINITY;
-        let maxX = Number.NEGATIVE_INFINITY;
-        for (const n of relevant) {
-          const size = getNodeSize(n);
-          minX = Math.min(minX, n.position.x);
-          maxX = Math.max(maxX, n.position.x + size.width);
-        }
-        return (minX + maxX) / 2;
-      })();
-
-      return {
-        id: `phase-${phaseIndex}`,
-        type: 'phase',
-        position: { x: centerX - phaseSize.width / 2, y: phaseY },
-        data: {
-          name: phase.name,
-          weekRange: phase.weekRange,
-          focus: phase.focus,
-        },
-        draggable: true,
-      } satisfies Node;
-    });
-
-    const nonOverlappingPhaseX = resolveNonOverlappingX(
-      phaseDraft.map((p) => ({ id: p.id, x: p.position.x, width: phaseSize.width })),
-      28
-    );
-
-    const phaseNodes: Node[] = phaseDraft.map((p) => ({
-      ...p,
-      position: { ...p.position, x: nonOverlappingPhaseX[p.id] ?? p.position.x },
-    }));
-
-    // --- Journey info header (placed above phases) ---
-    const infoSize = getNodeSize({
-      id: 'info-size',
-      type: 'journeyInfo',
-      position: { x: 0, y: 0 },
-      data: {},
-    } as Node);
-
-    const allTopNodes = [...phaseNodes, ...shiftedTouchpoints];
-    const allTopBounds = getNodesBounds(allTopNodes);
-
-    const journeyInfoNode: Node = {
+    
+    const touchpointCount = journey.touchpoints.length;
+    
+    // Grid layout settings for zig-zag pattern
+    const xSpacing = 300;
+    const ySpacing = 200;
+    const nodesPerRow = touchpointCount > 10 ? 4 : touchpointCount > 6 ? 3 : Math.min(touchpointCount, 4);
+    const yBase = 220;
+    
+    // Calculate total width for centering
+    const totalWidth = nodesPerRow * xSpacing;
+    
+    // Add journey info header node
+    nodes.push({
       id: 'journey-info',
       type: 'journeyInfo',
-      position: { x: allTopBounds.minX, y: 20 },
+      position: { x: 20, y: -200 },
       data: {
         overview: journey.overview,
         audience: context?.audience,
@@ -384,22 +279,76 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
         touchpointCount: journey.touchpoints.length,
       },
       draggable: true,
-    };
-
-    const nodes: Node[] = [journeyInfoNode, ...phaseNodes, ...shiftedTouchpoints];
-
-    // Ensure the header never starts off-canvas even when it is wider than the touchpoints.
-    const allBounds = getNodesBounds(nodes);
-    const finalShiftX = Math.max(0, 24 - allBounds.minX);
-    const shiftedAllNodes = finalShiftX ? shiftNodes(nodes, finalShiftX, 0) : nodes;
-
-    const finalBounds = getNodesBounds(shiftedAllNodes);
-    const diagramHeight = Math.max(560, finalBounds.maxY + 60);
-
-    // Also keep the canvas wide enough for large header exports by shifting, rather than scaling.
-    void infoSize;
-
-    return { initialNodes: shiftedAllNodes, initialEdges: edges, diagramHeight };
+    });
+    
+    // Add phase header nodes
+    const phaseWidth = totalWidth / journey.phases.length;
+    journey.phases.forEach((phase, phaseIndex) => {
+      nodes.push({
+        id: `phase-${phaseIndex}`,
+        type: 'phase',
+        position: { x: phaseIndex * phaseWidth + (phaseWidth / 2) - 75, y: 40 },
+        data: { 
+          name: phase.name,
+          weekRange: phase.weekRange,
+          focus: phase.focus,
+        },
+        draggable: true,
+      });
+    });
+    
+    // Add touchpoint nodes in a ZIG-ZAG / SERPENTINE pattern
+    journey.touchpoints.forEach((touchpoint, index) => {
+      const row = Math.floor(index / nodesPerRow);
+      const colInRow = index % nodesPerRow;
+      
+      // Serpentine: odd rows go right-to-left
+      const isOddRow = row % 2 === 1;
+      const col = isOddRow ? (nodesPerRow - 1 - colInRow) : colInRow;
+      
+      // Calculate horizontal offset to center the row
+      const itemsInThisRow = Math.min(nodesPerRow, touchpointCount - row * nodesPerRow);
+      const rowWidth = itemsInThisRow * xSpacing;
+      const xOffset = (totalWidth - rowWidth) / 2;
+      
+      const weekDate = calculateWeekDate(startDate, touchpoint.week);
+      
+      // Add slight vertical stagger for visual interest
+      const staggerY = (col % 2) * 20;
+      
+      nodes.push({
+        id: `tp-${index}`,
+        type: 'touchpoint',
+        position: { 
+          x: col * xSpacing + xOffset + 40, 
+          y: yBase + (row * ySpacing) + staggerY
+        },
+        data: { touchpoint, index, weekDate },
+        draggable: true,
+      });
+      
+      // Connect to previous node with smooth step edges
+      if (index > 0) {
+        edges.push({
+          id: `e-${index - 1}-${index}`,
+          source: `tp-${index - 1}`,
+          target: `tp-${index}`,
+          type: 'smoothstep',
+          animated: true,
+          style: { stroke: 'hsl(var(--primary))', strokeWidth: 2 },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: 'hsl(var(--primary))',
+          },
+        });
+      }
+    });
+    
+    // Calculate dynamic height based on rows
+    const rowCount = Math.ceil(touchpointCount / nodesPerRow);
+    const dynamicHeight = Math.max(500, 240 + rowCount * 220);
+    
+    return { initialNodes: nodes, initialEdges: edges, dynamicHeight };
   }, [journey, context, startDate, endDate]);
 
   const [nodes, , onNodesChange] = useNodesState(initialNodes);
@@ -479,7 +428,7 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
             </div>
           </div>
 
-          {/* Export Button */}
+          {/* Export Button with Options */}
           <div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -488,7 +437,43 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
                   Export
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-card">
+              <DropdownMenuContent align="end" className="bg-card w-52">
+                <DropdownMenuLabel className="text-xs text-muted-foreground">Background</DropdownMenuLabel>
+                <DropdownMenuCheckboxItem 
+                  checked={exportBg === 'themed'} 
+                  onCheckedChange={() => setExportBg('themed')}
+                >
+                  Theme Background
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem 
+                  checked={exportBg === 'white'} 
+                  onCheckedChange={() => setExportBg('white')}
+                >
+                  White Background
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem 
+                  checked={exportBg === 'transparent'} 
+                  onCheckedChange={() => setExportBg('transparent')}
+                >
+                  Transparent (PNG only)
+                </DropdownMenuCheckboxItem>
+                
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-xs text-muted-foreground">Quality</DropdownMenuLabel>
+                <DropdownMenuCheckboxItem 
+                  checked={exportQuality === 'standard'} 
+                  onCheckedChange={() => setExportQuality('standard')}
+                >
+                  Standard (2x)
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem 
+                  checked={exportQuality === 'high'} 
+                  onCheckedChange={() => setExportQuality('high')}
+                >
+                  High Resolution (3x)
+                </DropdownMenuCheckboxItem>
+                
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => exportToImage('png')}>
                   <Image className="w-4 h-4 mr-2" />
                   Export as PNG
@@ -504,7 +489,7 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
       </div>
 
       {/* React Flow Diagram */}
-      <div style={{ height: `${diagramHeight}px` }}>
+      <div style={{ height: `${dynamicHeight}px` }}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
