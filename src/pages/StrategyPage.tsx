@@ -259,7 +259,7 @@ const StrategyPage = () => {
   // PDF Export function
   const handleExportPdf = useCallback(async () => {
     if (!resultsRef.current || !mapperResult?.journey) return;
-    
+
     setIsExportingPdf(true);
     toast({
       title: "Generating PDF",
@@ -267,74 +267,154 @@ const StrategyPage = () => {
     });
 
     try {
-      const element = resultsRef.current;
-      
-      // Capture the entire results section with onclone to fix badge alignment
-      const canvas = await html2canvas(element, {
+      // Ensure fonts are loaded before capture (prevents text overlap/layout shifts)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (document as any).fonts?.ready;
+
+      const root = resultsRef.current;
+      const sections = Array.from(root.querySelectorAll<HTMLElement>("[data-pdf-section]"));
+      const exportTargets = sections.length ? sections : [root];
+
+      const commonCanvasOpts = {
         scale: 2,
         useCORS: true,
         logging: false,
-        backgroundColor: '#ffffff',
-        windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight,
-        onclone: (clonedDoc) => {
-          // Fix badge alignment issues for PDF export
+        backgroundColor: "#ffffff",
+        scrollX: 0,
+        scrollY: -window.scrollY,
+        onclone: (clonedDoc: Document) => {
+          // PDF capture stabilizers: fix badge alignment + remove layout-shifting effects
+          const style = clonedDoc.createElement("style");
+          style.innerHTML = `
+            * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+            body { line-height: 1.4; }
+            p { line-height: 1.4; }
+            .shadow, [class*="shadow"], [class*="backdrop"], [style*="filter"], [style*="backdrop-filter"] {
+              filter: none !important;
+              backdrop-filter: none !important;
+            }
+          `;
+          clonedDoc.head.appendChild(style);
+
           const badges = clonedDoc.querySelectorAll('[class*="badge"], [class*="Badge"]');
           badges.forEach((badge) => {
             const el = badge as HTMLElement;
-            el.style.display = 'inline-flex';
-            el.style.alignItems = 'center';
-            el.style.verticalAlign = 'middle';
-            el.style.lineHeight = '1';
-            el.style.gap = '4px';
+            el.style.display = "inline-flex";
+            el.style.alignItems = "center";
+            el.style.verticalAlign = "middle";
+            el.style.lineHeight = "1";
+            el.style.gap = "4px";
+            el.style.whiteSpace = "nowrap";
           });
-          
-          // Fix flex containers with gap
+
           const flexContainers = clonedDoc.querySelectorAll('[class*="flex"][class*="gap"]');
           flexContainers.forEach((container) => {
             const el = container as HTMLElement;
-            el.style.display = 'flex';
-            el.style.alignItems = 'center';
+            el.style.display = "flex";
+            el.style.alignItems = "center";
+            el.style.flexWrap = "wrap";
           });
-          
-          // Fix icons inside badges
-          const icons = clonedDoc.querySelectorAll('svg');
+
+          const icons = clonedDoc.querySelectorAll("svg");
           icons.forEach((icon) => {
-            const el = icon as SVGElement;
-            el.style.display = 'inline-block';
-            el.style.verticalAlign = 'middle';
-            el.style.flexShrink = '0';
+            const el = icon as unknown as HTMLElement;
+            el.style.display = "inline-block";
+            el.style.verticalAlign = "middle";
+            el.style.flexShrink = "0";
           });
         },
-      });
+      } as const;
 
-      const imgData = canvas.toDataURL('image/png');
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
+      const canvases: HTMLCanvasElement[] = [];
+      for (const target of exportTargets) {
+        const canvas = await html2canvas(target, {
+          ...commonCanvasOpts,
+          windowWidth: target.scrollWidth,
+          windowHeight: target.scrollHeight,
+        });
+        canvases.push(canvas);
+      }
 
-      // Calculate PDF dimensions (A4 width in points = 595.28)
-      const pdfWidth = 595.28;
-      const pdfHeight = (imgHeight * pdfWidth) / imgWidth;
-      
-      // Create PDF with dynamic height
-      const pdf = new jsPDF({
-        orientation: pdfHeight > pdfWidth ? 'portrait' : 'landscape',
-        unit: 'pt',
-        format: [pdfWidth, Math.max(pdfHeight, 841.89)], // Minimum A4 height
-      });
+      // Standard A4 multi-page export with section-aware page breaks
+      const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
 
-      // Add header
-      pdf.setFontSize(10);
-      pdf.setTextColor(128, 128, 128);
-      pdf.text(`Strategy Journey Export • ${format(new Date(), 'MMM d, yyyy')}`, 40, 30);
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
 
-      // Add the captured image
-      pdf.addImage(imgData, 'PNG', 0, 50, pdfWidth, pdfHeight);
+      const marginX = 40;
+      const headerH = 44;
+      const marginBottom = 40;
+      const sectionGap = 18;
 
-      // Generate filename
-      const timestamp = format(new Date(), 'yyyy-MM-dd');
-      const audienceLabel = context.audience ? audienceLabels[context.audience] || context.audience : 'journey';
-      const filename = `strategy-journey-${audienceLabel.toLowerCase().replace(/\s+/g, '-')}-${timestamp}.pdf`;
+      const availableWidth = pageWidth - marginX * 2;
+      const availableHeight = pageHeight - headerH - marginBottom;
+
+      let pageNum = 1;
+      let cursorY = headerH;
+
+      const addHeader = () => {
+        pdf.setFontSize(10);
+        pdf.setTextColor(128, 128, 128);
+        pdf.text(
+          `Strategy Journey Export • ${format(new Date(), "MMM d, yyyy")} • Page ${pageNum}`,
+          marginX,
+          28
+        );
+      };
+
+      const newPage = () => {
+        pdf.addPage();
+        pageNum += 1;
+        addHeader();
+        cursorY = headerH;
+      };
+
+      const coverFooter = () => {
+        pdf.setFillColor(255, 255, 255);
+        pdf.rect(0, pageHeight - marginBottom, pageWidth, marginBottom, "F");
+      };
+
+      addHeader();
+
+      for (const canvas of canvases) {
+        const imgData = canvas.toDataURL("image/png");
+        const imgHeight = (canvas.height * availableWidth) / canvas.width;
+
+        const remaining = pageHeight - marginBottom - cursorY;
+
+        // If this section won't fit, start it on a fresh page
+        if (imgHeight > remaining) {
+          if (cursorY !== headerH) newPage();
+        }
+
+        if (imgHeight <= availableHeight) {
+          pdf.addImage(imgData, "PNG", marginX, cursorY, availableWidth, imgHeight, undefined, "FAST");
+          coverFooter();
+          cursorY += imgHeight + sectionGap;
+
+          // If we ended too close to the bottom, move to a clean new page
+          if (cursorY > pageHeight - marginBottom - 24) newPage();
+          continue;
+        }
+
+        // Multi-page slice for very tall sections
+        const pagesForCanvas = Math.max(1, Math.ceil(imgHeight / availableHeight));
+        for (let i = 0; i < pagesForCanvas; i++) {
+          if (i > 0) newPage();
+
+          const y = headerH - i * availableHeight;
+          pdf.addImage(imgData, "PNG", marginX, y, availableWidth, imgHeight, undefined, "FAST");
+          coverFooter();
+        }
+
+        const remainder = imgHeight - (pagesForCanvas - 1) * availableHeight;
+        cursorY = headerH + remainder + sectionGap;
+        if (cursorY > pageHeight - marginBottom - 24) newPage();
+      }
+
+      const timestamp = format(new Date(), "yyyy-MM-dd");
+      const audienceLabel = context.audience ? audienceLabels[context.audience] || context.audience : "journey";
+      const filename = `strategy-journey-${audienceLabel.toLowerCase().replace(/\s+/g, "-")}-${timestamp}.pdf`;
 
       pdf.save(filename);
 
@@ -343,7 +423,7 @@ const StrategyPage = () => {
         description: "Your strategy journey has been downloaded.",
       });
     } catch (error) {
-      console.error('PDF export failed:', error);
+      console.error("PDF export failed:", error);
       toast({
         variant: "destructive",
         title: "Export Failed",
@@ -640,9 +720,12 @@ const StrategyPage = () => {
               </Card>
 
               {/* PDF Export Target Area */}
-              <div ref={resultsRef} className="space-y-6 bg-background">
+              <div ref={resultsRef} className="space-y-6 bg-background pb-10">
                 {/* Designated Recipient */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted/30 rounded-lg">
+                <div
+                  data-pdf-section="recipient"
+                  className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted/30 rounded-lg"
+                >
                   <div className="flex items-start gap-2">
                     <Users className="w-4 h-4 text-primary mt-0.5" />
                     <div>
@@ -675,7 +758,7 @@ const StrategyPage = () => {
                 
                 {/* Interactive Journey Flow Diagram */}
                 {buildDiagram && (
-                  <Card>
+                  <Card data-pdf-section="diagram">
                     <CardHeader className="pb-2">
                       <CardTitle className="font-serif text-lg flex items-center gap-2">
                         <Map className="w-5 h-5 text-pillar-consensus" />
@@ -696,12 +779,14 @@ const StrategyPage = () => {
                   </Card>
                 )}
 
-                <StrategyJourneyDisplay 
-                  journey={mapperResult.journey} 
-                  context={context} 
-                  startDate={startDate?.toISOString()}
-                  endDate={endDate?.toISOString()}
-                />
+                <div data-pdf-section="timeline">
+                  <StrategyJourneyDisplay 
+                    journey={mapperResult.journey} 
+                    context={context} 
+                    startDate={startDate?.toISOString()}
+                    endDate={endDate?.toISOString()}
+                  />
+                </div>
               </div>
             </div>
           )}
