@@ -73,7 +73,8 @@ import {
   ArrowRight,
   GraduationCap,
   MessageSquarePlus,
-  Star
+  Star,
+  Eye
 } from "lucide-react";
 
 // Mock Ivy League user data
@@ -923,7 +924,21 @@ const AdminPanel = () => {
                                       </Badge>
                                     )}
                                   </div>
-                                  <ChevronRight className={`w-5 h-5 text-muted-foreground transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                                  <div className="flex items-center gap-2">
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm" 
+                                      className="gap-1"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        window.location.href = `/admin/institution/${inst.id}`;
+                                      }}
+                                    >
+                                      <Eye className="w-3 h-3" />
+                                      View
+                                    </Button>
+                                    <ChevronRight className={`w-5 h-5 text-muted-foreground transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -942,20 +957,27 @@ const AdminPanel = () => {
                                         {inst.users.length === 0 ? (
                                           <p className="text-xs text-muted-foreground">No users</p>
                                         ) : inst.users.map(user => (
-                                          <div key={user.id} className="flex items-center justify-between p-2 rounded bg-muted/30">
+                                          <Link 
+                                            key={user.id} 
+                                            to={`/admin/user/${user.id}`}
+                                            className="flex items-center justify-between p-2 rounded bg-muted/30 hover:bg-muted/50 transition-colors"
+                                          >
                                             <div>
                                               <p className="text-sm font-medium">{user.first_name} {user.last_name}</p>
                                               <p className="text-xs text-muted-foreground">{user.email}</p>
                                             </div>
-                                            <div className="text-right">
-                                              <Badge variant={user.status === 'active' ? 'default' : 'secondary'} className="text-[10px]">
-                                                {user.status}
-                                              </Badge>
-                                              <p className="text-[10px] text-muted-foreground mt-1">
-                                                {formatLastLogin(user.last_login_at)}
-                                              </p>
+                                            <div className="flex items-center gap-2">
+                                              <div className="text-right">
+                                                <Badge variant={user.status === 'active' ? 'default' : 'secondary'} className="text-[10px]">
+                                                  {user.status}
+                                                </Badge>
+                                                <p className="text-[10px] text-muted-foreground mt-1">
+                                                  {formatLastLogin(user.last_login_at)}
+                                                </p>
+                                              </div>
+                                              <Eye className="w-3 h-3 text-muted-foreground" />
                                             </div>
-                                          </div>
+                                          </Link>
                                         ))}
                                       </div>
                                     </ScrollArea>

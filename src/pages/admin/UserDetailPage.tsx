@@ -1,0 +1,552 @@
+import { useState, useEffect } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Header } from '@/components/Header';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import {
+  ArrowLeft,
+  User,
+  Building2,
+  FileText,
+  Activity,
+  Loader2,
+  RefreshCw,
+  Mail,
+  MessageSquare,
+  Phone,
+  Globe,
+  Calendar,
+  Clock,
+  Briefcase,
+  GraduationCap,
+} from 'lucide-react';
+
+interface UserProfile {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  status: string;
+  last_login_at: string | null;
+  created_at: string;
+  department: string | null;
+  title: string | null;
+  phone: string | null;
+  tenant_id: string;
+}
+
+interface TenantInfo {
+  id: string;
+  institution_name: string;
+}
+
+interface PersonalMessage {
+  id: string;
+  title: string;
+  content: string;
+  channel: string;
+  audience: string | null;
+  domain: string | null;
+  moment: string | null;
+  tone: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface ToolUsageEvent {
+  id: string;
+  tool_name: string;
+  action: string;
+  created_at: string;
+}
+
+export default function UserDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { isSuperAdmin } = useAuth();
+  const { toast } = useToast();
+  
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [tenant, setTenant] = useState<TenantInfo | null>(null);
+  const [messages, setMessages] = useState<PersonalMessage[]>([]);
+  const [toolUsage, setToolUsage] = useState<ToolUsageEvent[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('overview');
+
+  const fetchData = async () => {
+    if (!id) return;
+    
+    setIsLoading(true);
+    try {
+      // Fetch user profile
+      const { data: userData, error: userError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+      
+      if (userError) throw userError;
+      if (!userData) {
+        toast({ title: 'User not found', variant: 'destructive' });
+        navigate('/admin/panel');
+        return;
+      }
+      setUser(userData);
+
+      // Fetch tenant info
+      const { data: tenantData } = await supabase
+        .from('tenants')
+        .select('id, institution_name')
+        .eq('id', userData.tenant_id)
+        .maybeSingle();
+      setTenant(tenantData);
+
+      // Fetch personal messages
+      const { data: messagesData } = await supabase
+        .from('personal_messages')
+        .select('*')
+        .eq('user_id', id)
+        .order('created_at', { ascending: false });
+      setMessages(messagesData || []);
+
+      // Fetch tool usage
+      const { data: toolUsageData } = await supabase
+        .from('tool_usage_events')
+        .select('*')
+        .eq('user_id', id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      setToolUsage(toolUsageData || []);
+
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      toast({ title: 'Error loading user data', variant: 'destructive' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isSuperAdmin && id) {
+      fetchData();
+    }
+  }, [isSuperAdmin, id]);
+
+  const formatDate = (date: string | null) => {
+    if (!date) return 'Never';
+    const d = new Date(date);
+    const now = new Date();
+    const diffMs = now.getTime() - d.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return d.toLocaleDateString();
+  };
+
+  const getChannelIcon = (channel: string) => {
+    switch (channel?.toLowerCase()) {
+      case 'email': return <Mail className="w-3 h-3" />;
+      case 'sms': return <MessageSquare className="w-3 h-3" />;
+      case 'phone': return <Phone className="w-3 h-3" />;
+      default: return <Globe className="w-3 h-3" />;
+    }
+  };
+
+  const getToolDisplayName = (tool: string) => {
+    const names: Record<string, string> = {
+      'message_evaluator': 'Message Evaluator',
+      'message_builder': 'Message Builder',
+      'strategy_mapper': 'Strategy Mapper',
+      'call_script': 'Call Script Generator',
+      'playground': 'AI Playground',
+      'byoc': 'BYOC',
+    };
+    return names[tool] || tool;
+  };
+
+  // Group messages by channel
+  const messagesByChannel = messages.reduce((acc, msg) => {
+    const channel = msg.channel || 'Other';
+    acc[channel] = (acc[channel] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  // Group tool usage by tool
+  const toolUsageByTool = toolUsage.reduce((acc, event) => {
+    acc[event.tool_name] = (acc[event.tool_name] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  if (!isSuperAdmin) {
+    return null;
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Link to="/admin/panel" className="hover:text-foreground transition-colors flex items-center gap-1">
+              <ArrowLeft className="w-4 h-4" />
+              Super Admin Panel
+            </Link>
+            {tenant && (
+              <>
+                <span>/</span>
+                <Link to={`/admin/institution/${tenant.id}`} className="hover:text-foreground transition-colors">
+                  {tenant.institution_name}
+                </Link>
+              </>
+            )}
+            <span>/</span>
+            <span className="text-foreground">{user?.first_name} {user?.last_name}</span>
+          </div>
+
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : user ? (
+            <>
+              {/* Header */}
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-xl font-bold text-primary">
+                    {user.first_name[0]}{user.last_name[0]}
+                  </div>
+                  <div>
+                    <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground">
+                      {user.first_name} {user.last_name}
+                    </h1>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge variant={user.status === 'active' ? 'default' : 'secondary'}
+                        className={user.status === 'active' ? 'bg-green-500' : user.status === 'locked' ? 'bg-red-500' : ''}>
+                        {user.status}
+                      </Badge>
+                      {tenant && (
+                        <Link to={`/admin/institution/${tenant.id}`} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
+                          <GraduationCap className="w-3 h-3" />
+                          {tenant.institution_name}
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <Button variant="outline" onClick={fetchData} className="gap-2">
+                  <RefreshCw className="w-4 h-4" />
+                  Refresh
+                </Button>
+              </div>
+
+              {/* Quick Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <Card>
+                  <CardContent className="p-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 rounded bg-blue-500/10">
+                        <FileText className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-xl font-bold">{messages.length}</p>
+                        <p className="text-[10px] text-muted-foreground">Messages</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 rounded bg-purple-500/10">
+                        <Activity className="w-4 h-4 text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="text-xl font-bold">{toolUsage.length}</p>
+                        <p className="text-[10px] text-muted-foreground">Tool Events</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 rounded bg-green-500/10">
+                        <Clock className="w-4 h-4 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold">{formatDate(user.last_login_at)}</p>
+                        <p className="text-[10px] text-muted-foreground">Last Login</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 rounded bg-orange-500/10">
+                        <Calendar className="w-4 h-4 text-orange-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold">{new Date(user.created_at).toLocaleDateString()}</p>
+                        <p className="text-[10px] text-muted-foreground">Member Since</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Tabs */}
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="grid grid-cols-4 w-full">
+                  <TabsTrigger value="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="messages">Messages</TabsTrigger>
+                  <TabsTrigger value="activity">Activity</TabsTrigger>
+                  <TabsTrigger value="profile">Profile</TabsTrigger>
+                </TabsList>
+
+                {/* Overview Tab */}
+                <TabsContent value="overview" className="mt-4 space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {/* Messages by Channel */}
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <FileText className="w-4 h-4" />
+                          Messages by Channel
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {Object.entries(messagesByChannel).map(([channel, count]) => (
+                            <div key={channel} className="flex items-center justify-between p-2 rounded bg-muted/30">
+                              <div className="flex items-center gap-2">
+                                {getChannelIcon(channel)}
+                                <span className="text-sm">{channel}</span>
+                              </div>
+                              <Badge variant="secondary">{count}</Badge>
+                            </div>
+                          ))}
+                          {Object.keys(messagesByChannel).length === 0 && (
+                            <p className="text-sm text-muted-foreground text-center py-4">No messages yet</p>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Tool Usage */}
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Activity className="w-4 h-4" />
+                          Tool Usage
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {Object.entries(toolUsageByTool).map(([tool, count]) => (
+                            <div key={tool} className="flex items-center justify-between p-2 rounded bg-muted/30">
+                              <span className="text-sm">{getToolDisplayName(tool)}</span>
+                              <Badge variant="secondary">{count}</Badge>
+                            </div>
+                          ))}
+                          {Object.keys(toolUsageByTool).length === 0 && (
+                            <p className="text-sm text-muted-foreground text-center py-4">No tool usage recorded</p>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </TabsContent>
+
+                {/* Messages Tab */}
+                <TabsContent value="messages" className="mt-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="font-serif">Personal Messages</CardTitle>
+                      <CardDescription>{messages.length} messages in personal library</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ScrollArea className="h-[500px]">
+                        <div className="space-y-3">
+                          {messages.map(message => (
+                            <Card key={message.id} className="border">
+                              <CardContent className="p-4">
+                                <div className="flex items-start justify-between mb-2">
+                                  <div>
+                                    <h4 className="font-medium">{message.title}</h4>
+                                    <p className="text-xs text-muted-foreground">
+                                      {formatDate(message.created_at)}
+                                    </p>
+                                  </div>
+                                  <div className="flex gap-2 flex-wrap justify-end">
+                                    <Badge variant="outline" className="text-xs flex items-center gap-1">
+                                      {getChannelIcon(message.channel)}
+                                      {message.channel}
+                                    </Badge>
+                                    {message.audience && (
+                                      <Badge variant="secondary" className="text-xs">{message.audience}</Badge>
+                                    )}
+                                    {message.tone && (
+                                      <Badge variant="outline" className="text-xs">{message.tone}</Badge>
+                                    )}
+                                  </div>
+                                </div>
+                                <p className="text-sm text-muted-foreground line-clamp-3">{message.content}</p>
+                                {(message.domain || message.moment) && (
+                                  <div className="mt-2 flex gap-2">
+                                    {message.domain && (
+                                      <Badge variant="outline" className="text-[10px]">{message.domain}</Badge>
+                                    )}
+                                    {message.moment && (
+                                      <Badge variant="outline" className="text-[10px]">{message.moment}</Badge>
+                                    )}
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          ))}
+                          {messages.length === 0 && (
+                            <div className="text-center py-8 text-muted-foreground">
+                              <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                              <p className="text-sm">No personal messages</p>
+                            </div>
+                          )}
+                        </div>
+                      </ScrollArea>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* Activity Tab */}
+                <TabsContent value="activity" className="mt-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="font-serif">Recent Activity</CardTitle>
+                      <CardDescription>Last {toolUsage.length} tool usage events</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ScrollArea className="h-[500px]">
+                        <div className="space-y-2">
+                          {toolUsage.map(event => (
+                            <div key={event.id} className="flex items-center justify-between p-3 rounded-lg border">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 rounded bg-muted">
+                                  <Activity className="w-4 h-4 text-muted-foreground" />
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium">{getToolDisplayName(event.tool_name)}</p>
+                                  <p className="text-[10px] text-muted-foreground">{event.action}</p>
+                                </div>
+                              </div>
+                              <span className="text-xs text-muted-foreground">{formatDate(event.created_at)}</span>
+                            </div>
+                          ))}
+                          {toolUsage.length === 0 && (
+                            <div className="text-center py-8 text-muted-foreground">
+                              <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                              <p className="text-sm">No activity recorded</p>
+                            </div>
+                          )}
+                        </div>
+                      </ScrollArea>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* Profile Tab */}
+                <TabsContent value="profile" className="mt-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="font-serif">User Profile</CardTitle>
+                      <CardDescription>Account details and information</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                          <div>
+                            <label className="text-xs text-muted-foreground uppercase">Email</label>
+                            <p className="text-sm font-medium flex items-center gap-2">
+                              <Mail className="w-4 h-4 text-muted-foreground" />
+                              {user.email}
+                            </p>
+                          </div>
+                          {user.phone && (
+                            <div>
+                              <label className="text-xs text-muted-foreground uppercase">Phone</label>
+                              <p className="text-sm font-medium flex items-center gap-2">
+                                <Phone className="w-4 h-4 text-muted-foreground" />
+                                {user.phone}
+                              </p>
+                            </div>
+                          )}
+                          {user.department && (
+                            <div>
+                              <label className="text-xs text-muted-foreground uppercase">Department</label>
+                              <p className="text-sm font-medium flex items-center gap-2">
+                                <Building2 className="w-4 h-4 text-muted-foreground" />
+                                {user.department}
+                              </p>
+                            </div>
+                          )}
+                          {user.title && (
+                            <div>
+                              <label className="text-xs text-muted-foreground uppercase">Title</label>
+                              <p className="text-sm font-medium flex items-center gap-2">
+                                <Briefcase className="w-4 h-4 text-muted-foreground" />
+                                {user.title}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                        <div className="space-y-4">
+                          <div>
+                            <label className="text-xs text-muted-foreground uppercase">Status</label>
+                            <p className="text-sm">
+                              <Badge 
+                                variant={user.status === 'active' ? 'default' : 'secondary'}
+                                className={user.status === 'active' ? 'bg-green-500' : user.status === 'locked' ? 'bg-red-500' : ''}
+                              >
+                                {user.status}
+                              </Badge>
+                            </p>
+                          </div>
+                          <div>
+                            <label className="text-xs text-muted-foreground uppercase">Last Login</label>
+                            <p className="text-sm font-medium flex items-center gap-2">
+                              <Clock className="w-4 h-4 text-muted-foreground" />
+                              {user.last_login_at ? new Date(user.last_login_at).toLocaleString() : 'Never'}
+                            </p>
+                          </div>
+                          <div>
+                            <label className="text-xs text-muted-foreground uppercase">Member Since</label>
+                            <p className="text-sm font-medium flex items-center gap-2">
+                              <Calendar className="w-4 h-4 text-muted-foreground" />
+                              {new Date(user.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </>
+          ) : null}
+        </div>
+      </main>
+    </div>
+  );
+}
