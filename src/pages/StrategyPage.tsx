@@ -269,7 +269,7 @@ const StrategyPage = () => {
     try {
       const element = resultsRef.current;
       
-      // Capture the entire results section
+      // Capture the entire results section with onclone to fix badge alignment
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
@@ -277,6 +277,35 @@ const StrategyPage = () => {
         backgroundColor: '#ffffff',
         windowWidth: element.scrollWidth,
         windowHeight: element.scrollHeight,
+        onclone: (clonedDoc) => {
+          // Fix badge alignment issues for PDF export
+          const badges = clonedDoc.querySelectorAll('[class*="badge"], [class*="Badge"]');
+          badges.forEach((badge) => {
+            const el = badge as HTMLElement;
+            el.style.display = 'inline-flex';
+            el.style.alignItems = 'center';
+            el.style.verticalAlign = 'middle';
+            el.style.lineHeight = '1';
+            el.style.gap = '4px';
+          });
+          
+          // Fix flex containers with gap
+          const flexContainers = clonedDoc.querySelectorAll('[class*="flex"][class*="gap"]');
+          flexContainers.forEach((container) => {
+            const el = container as HTMLElement;
+            el.style.display = 'flex';
+            el.style.alignItems = 'center';
+          });
+          
+          // Fix icons inside badges
+          const icons = clonedDoc.querySelectorAll('svg');
+          icons.forEach((icon) => {
+            const el = icon as SVGElement;
+            el.style.display = 'inline-block';
+            el.style.verticalAlign = 'middle';
+            el.style.flexShrink = '0';
+          });
+        },
       });
 
       const imgData = canvas.toDataURL('image/png');
