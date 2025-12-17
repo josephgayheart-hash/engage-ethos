@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { format, differenceInWeeks, addWeeks } from "date-fns";
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 import { Header } from "@/components/Header";
 import { ContextSelector } from "@/components/ContextSelector";
 import { StrategyJourneyDisplay } from "@/components/StrategyJourney";
@@ -19,7 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target, Users, UserCheck, Mail } from "lucide-react";
+import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target, Users, UserCheck, Mail, FileDown } from "lucide-react";
 import { mapMessages } from "@/lib/evaluateMessage";
 import type { MessageContext, MapperResult, Channel, InstitutionalConfig } from "@/types/persist";
 
@@ -62,6 +64,8 @@ const StrategyPage = () => {
   const { toast } = useToast();
   const { addMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [selectedProfileName, setSelectedProfileName] = useState<string | undefined>(undefined);
   const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfig | null>(null);
@@ -250,6 +254,75 @@ const StrategyPage = () => {
       description: "Your strategy journey has been submitted to the shared library for admin approval.",
     });
   };
+
+  // PDF Export function
+  const handleExportPdf = useCallback(async () => {
+    if (!resultsRef.current || !mapperResult?.journey) return;
+    
+    setIsExportingPdf(true);
+    toast({
+      title: "Generating PDF",
+      description: "Please wait while we capture your journey...",
+    });
+
+    try {
+      const element = resultsRef.current;
+      
+      // Capture the entire results section
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+
+      // Calculate PDF dimensions (A4 width in points = 595.28)
+      const pdfWidth = 595.28;
+      const pdfHeight = (imgHeight * pdfWidth) / imgWidth;
+      
+      // Create PDF with dynamic height
+      const pdf = new jsPDF({
+        orientation: pdfHeight > pdfWidth ? 'portrait' : 'landscape',
+        unit: 'pt',
+        format: [pdfWidth, Math.max(pdfHeight, 841.89)], // Minimum A4 height
+      });
+
+      // Add header
+      pdf.setFontSize(10);
+      pdf.setTextColor(128, 128, 128);
+      pdf.text(`Strategy Journey Export • ${format(new Date(), 'MMM d, yyyy')}`, 40, 30);
+
+      // Add the captured image
+      pdf.addImage(imgData, 'PNG', 0, 50, pdfWidth, pdfHeight);
+
+      // Generate filename
+      const timestamp = format(new Date(), 'yyyy-MM-dd');
+      const audienceLabel = context.audience ? audienceLabels[context.audience] || context.audience : 'journey';
+      const filename = `strategy-journey-${audienceLabel.toLowerCase().replace(/\s+/g, '-')}-${timestamp}.pdf`;
+
+      pdf.save(filename);
+
+      toast({
+        title: "PDF Exported",
+        description: "Your strategy journey has been downloaded.",
+      });
+    } catch (error) {
+      console.error('PDF export failed:', error);
+      toast({
+        variant: "destructive",
+        title: "Export Failed",
+        description: "Could not generate PDF. Please try again.",
+      });
+    } finally {
+      setIsExportingPdf(false);
+    }
+  }, [mapperResult, context.audience, toast]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -497,7 +570,7 @@ const StrategyPage = () => {
           {/* Results */}
           {mapperResult?.journey && (
             <div className="animate-fade-in space-y-6">
-              {/* Save/Share Actions */}
+              {/* Save/Share/Export Actions */}
               <Card className="bg-primary/5 border-primary/20">
                 <CardContent className="py-4">
                   <div className="flex flex-wrap items-center justify-between gap-4">
@@ -506,6 +579,23 @@ const StrategyPage = () => {
                       <span className="font-medium">Save this journey</span>
                     </div>
                     <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        onClick={handleExportPdf}
+                        disabled={isExportingPdf}
+                      >
+                        {isExportingPdf ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-muted-foreground/30 border-t-muted-foreground rounded-full animate-spin mr-2" />
+                            Exporting...
+                          </>
+                        ) : (
+                          <>
+                            <FileDown className="w-4 h-4 mr-2" />
+                            Export PDF
+                          </>
+                        )}
+                      </Button>
                       <Button variant="outline" onClick={handleSaveToLibrary}>
                         <Save className="w-4 h-4 mr-2" />
                         Save to My Library
@@ -519,67 +609,70 @@ const StrategyPage = () => {
                 </CardContent>
               </Card>
 
-              {/* Designated Recipient */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted/30 rounded-lg">
-                <div className="flex items-start gap-2">
-                  <Users className="w-4 h-4 text-primary mt-0.5" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Audience Type</p>
-                    <p className="text-sm font-medium">{context.audience ? audienceLabels[context.audience] || context.audience : '—'}</p>
+              {/* PDF Export Target Area */}
+              <div ref={resultsRef} className="space-y-6 bg-background">
+                {/* Designated Recipient */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted/30 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <Users className="w-4 h-4 text-primary mt-0.5" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Audience Type</p>
+                      <p className="text-sm font-medium">{context.audience ? audienceLabels[context.audience] || context.audience : '—'}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <UserCheck className="w-4 h-4 text-primary mt-0.5" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Cohort Context</p>
+                      <p className="text-sm font-medium">{context.cohort && context.cohort !== 'none' ? cohortLabels[context.cohort] || context.cohort : '—'}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Clock className="w-4 h-4 text-secondary mt-0.5" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Journey Duration</p>
+                      <p className="text-sm font-medium">{journeyWeeks} weeks</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Mail className="w-4 h-4 text-secondary mt-0.5" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Channels</p>
+                      <p className="text-sm font-medium">{selectedChannels.length} selected</p>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-start gap-2">
-                  <UserCheck className="w-4 h-4 text-primary mt-0.5" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Cohort Context</p>
-                    <p className="text-sm font-medium">{context.cohort && context.cohort !== 'none' ? cohortLabels[context.cohort] || context.cohort : '—'}</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Clock className="w-4 h-4 text-secondary mt-0.5" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Journey Duration</p>
-                    <p className="text-sm font-medium">{journeyWeeks} weeks</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Mail className="w-4 h-4 text-secondary mt-0.5" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Channels</p>
-                    <p className="text-sm font-medium">{selectedChannels.length} selected</p>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Interactive Journey Flow Diagram */}
-              {buildDiagram && (
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="font-serif text-lg flex items-center gap-2">
-                      <Map className="w-5 h-5 text-pillar-consensus" />
-                      Journey Flow Diagram
-                    </CardTitle>
-                    <CardDescription>
-                      Drag nodes to rearrange • Scroll to zoom • Click and drag background to pan
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <JourneyFlowDiagram 
-                      journey={mapperResult.journey} 
-                      context={context}
-                      startDate={startDate?.toISOString()} 
-                      endDate={endDate?.toISOString()}
-                    />
-                  </CardContent>
-                </Card>
-              )}
+                
+                {/* Interactive Journey Flow Diagram */}
+                {buildDiagram && (
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="font-serif text-lg flex items-center gap-2">
+                        <Map className="w-5 h-5 text-pillar-consensus" />
+                        Journey Flow Diagram
+                      </CardTitle>
+                      <CardDescription>
+                        Drag nodes to rearrange • Scroll to zoom • Click and drag background to pan
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <JourneyFlowDiagram 
+                        journey={mapperResult.journey} 
+                        context={context}
+                        startDate={startDate?.toISOString()} 
+                        endDate={endDate?.toISOString()}
+                      />
+                    </CardContent>
+                  </Card>
+                )}
 
-              <StrategyJourneyDisplay 
-                journey={mapperResult.journey} 
-                context={context} 
-                startDate={startDate?.toISOString()}
-                endDate={endDate?.toISOString()}
-              />
+                <StrategyJourneyDisplay 
+                  journey={mapperResult.journey} 
+                  context={context} 
+                  startDate={startDate?.toISOString()}
+                  endDate={endDate?.toISOString()}
+                />
+              </div>
             </div>
           )}
         </div>
