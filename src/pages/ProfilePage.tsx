@@ -170,6 +170,15 @@ export default function ProfilePage() {
             </div>
 
             <div className="space-y-2">
+              <Label className="text-[hsl(220,14%,46%)]">Institution / University</Label>
+              <div className="flex items-center gap-2 px-3 py-2 bg-[hsl(210,20%,94%)] rounded-md">
+                <Building2 className="w-4 h-4 text-[hsl(220,14%,46%)]" />
+                <span className="text-[hsl(222,47%,11%)] font-medium">{tenant?.institution_name || 'Loading...'}</span>
+              </div>
+              <p className="text-xs text-[hsl(220,14%,46%)]">Contact your administrator to change your institution</p>
+            </div>
+
+            <div className="space-y-2">
               <Label className="text-[hsl(220,14%,46%)]">Email</Label>
               <div className="flex items-center gap-2 px-3 py-2 bg-[hsl(210,20%,94%)] rounded-md">
                 <Mail className="w-4 h-4 text-[hsl(220,14%,46%)]" />
