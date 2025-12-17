@@ -26,7 +26,7 @@ import { MessageSquarePlus, Star, Loader2 } from 'lucide-react';
 const featureAreas = [
   { value: 'message_evaluator', label: 'Message Evaluator' },
   { value: 'message_builder', label: 'Message Builder' },
-  { value: 'strategy_mapper', label: 'Strategy Mapper' },
+  { value: 'strategy_mapper', label: 'Journey Designer' },
   { value: 'call_script', label: 'Call Script Generator' },
   { value: 'playground', label: 'AI Playground' },
   { value: 'byoc', label: 'Import & Evaluate (BYOC)' },

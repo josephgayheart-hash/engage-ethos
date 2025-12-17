@@ -167,7 +167,7 @@ export default function UserDetailPage() {
     const names: Record<string, string> = {
       'message_evaluator': 'Message Evaluator',
       'message_builder': 'Message Builder',
-      'strategy_mapper': 'Strategy Mapper',
+      'strategy_mapper': 'Journey Designer',
       'call_script': 'Call Script Generator',
       'playground': 'AI Playground',
       'byoc': 'BYOC',
