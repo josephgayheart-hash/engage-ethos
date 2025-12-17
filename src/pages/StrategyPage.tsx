@@ -528,7 +528,7 @@ const StrategyPage = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <JourneyFlowDiagram journey={mapperResult.journey} />
+                    <JourneyFlowDiagram journey={mapperResult.journey} startDate={startDate?.toISOString()} />
                   </CardContent>
                 </Card>
               )}
