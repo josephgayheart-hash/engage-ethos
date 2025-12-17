@@ -66,7 +66,7 @@ serve(async (req) => {
 
     switch (action) {
       case "create_user": {
-        const { email, password, firstName, lastName, phone, department, title, role } = body;
+        const { email, password, firstName, lastName, phone, department, title, role, roles: rolesList } = body;
         
         // Create auth user
         const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
@@ -109,17 +109,34 @@ serve(async (req) => {
           );
         }
 
-        // Create role
-        const { error: roleError } = await adminClient
-          .from("user_roles")
-          .insert({
-            user_id: authData.user.id,
-            tenant_id: adminTenantId,
-            role: role || "user",
-          });
+        // Determine roles to create - support both legacy 'role' and new 'roles' array
+        let rolesToCreate: string[] = [];
+        if (rolesList && Array.isArray(rolesList)) {
+          rolesToCreate = rolesList;
+        } else if (role) {
+          // Legacy support: map old role values
+          if (role === 'user_approver') {
+            rolesToCreate = ['user', 'approver'];
+          } else {
+            rolesToCreate = [role];
+          }
+        } else {
+          rolesToCreate = ['user'];
+        }
 
-        if (roleError) {
-          console.error("Role creation error:", roleError);
+        // Create roles
+        for (const r of rolesToCreate) {
+          const { error: roleError } = await adminClient
+            .from("user_roles")
+            .insert({
+              user_id: authData.user.id,
+              tenant_id: adminTenantId,
+              role: r,
+            });
+
+          if (roleError) {
+            console.error(`Role creation error for ${r}:`, roleError);
+          }
         }
 
         // Create audit log
@@ -129,7 +146,7 @@ serve(async (req) => {
           action: "create_user",
           target_type: "user",
           target_id: authData.user.id,
-          metadata: { email, role: role || "user" },
+          metadata: { email, roles: rolesToCreate },
         });
 
         return new Response(
@@ -138,6 +155,57 @@ serve(async (req) => {
             userId: authData.user.id,
             tempPassword: password 
           }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      case "update_user_roles": {
+        const { userId, roles: newRoles } = body;
+
+        // Verify user belongs to admin's tenant
+        const { data: targetProfile } = await adminClient
+          .from("profiles")
+          .select("tenant_id")
+          .eq("id", userId)
+          .single();
+
+        if (!targetProfile || targetProfile.tenant_id !== adminTenantId) {
+          return new Response(
+            JSON.stringify({ error: "User not found in your organization" }),
+            { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Delete existing roles for this user
+        await adminClient
+          .from("user_roles")
+          .delete()
+          .eq("user_id", userId)
+          .eq("tenant_id", adminTenantId);
+
+        // Insert new roles
+        for (const r of newRoles) {
+          await adminClient
+            .from("user_roles")
+            .insert({
+              user_id: userId,
+              tenant_id: adminTenantId,
+              role: r,
+            });
+        }
+
+        // Audit log
+        await adminClient.from("audit_log").insert({
+          tenant_id: adminTenantId,
+          actor_user_id: requestingUser.id,
+          action: "update_user_roles",
+          target_type: "user",
+          target_id: userId,
+          metadata: { roles: newRoles },
+        });
+
+        return new Response(
+          JSON.stringify({ success: true }),
           { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
