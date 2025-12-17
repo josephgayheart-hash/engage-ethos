@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
-export type UserRole = 'admin' | 'user' | 'approver';
+export type UserRole = 'admin' | 'user' | 'approver' | 'super_admin';
 export type UserStatus = 'invited' | 'pending' | 'active' | 'locked' | 'disabled';
 
 export interface UserProfile {
@@ -38,6 +38,7 @@ interface AuthContextType {
   roles: UserRole[];
   isLoading: boolean;
   isAdmin: boolean;
+  isSuperAdmin: boolean;
   isApprover: boolean;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -168,8 +169,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  const isAdmin = roles.includes('admin');
-  const isApprover = roles.includes('approver') || roles.includes('admin');
+  const isSuperAdmin = roles.includes('super_admin');
+  const isAdmin = roles.includes('admin') || isSuperAdmin;
+  const isApprover = roles.includes('approver') || roles.includes('admin') || isSuperAdmin;
   const role = roles.length > 0 ? roles[0] : null;
 
   return (
@@ -182,6 +184,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       roles,
       isLoading, 
       isAdmin,
+      isSuperAdmin,
       isApprover,
       logout,
       refreshProfile

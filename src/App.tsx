@@ -84,6 +84,25 @@ function RequireAdmin({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Super Admin route wrapper - requires super_admin role
+function RequireSuperAdmin({ children }: { children: React.ReactNode }) {
+  const { isSuperAdmin, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-pulse">Loading...</div>
+      </div>
+    );
+  }
+  
+  if (!isSuperAdmin) {
+    return <Navigate to="/" replace />;
+  }
+  
+  return <>{children}</>;
+}
+
 // Approver route wrapper - requires approver or admin role
 function RequireApprover({ children }: { children: React.ReactNode }) {
   const { isApprover, isLoading } = useAuth();
@@ -158,7 +177,7 @@ const AppRoutes = () => (
     <Route path="/admin" element={<Navigate to="/admin/console" replace />} />
     <Route path="/admin/console" element={<RequireAuth><RequireAdmin><AdminConsolePage /></RequireAdmin></RequireAuth>} />
     <Route path="/admin/users" element={<RequireAuth><RequireAdmin><AdminUsersPage /></RequireAdmin></RequireAuth>} />
-    <Route path="/admin/onboarding" element={<RequireAuth><RequireAdmin><AdminOnboardingPage /></RequireAdmin></RequireAuth>} />
+    <Route path="/admin/onboarding" element={<RequireAuth><RequireSuperAdmin><AdminOnboardingPage /></RequireSuperAdmin></RequireAuth>} />
     
     {/* Catch-all */}
     <Route path="*" element={<NotFound />} />

@@ -41,7 +41,7 @@ interface OnboardingStats {
 }
 
 export default function AdminConsolePage() {
-  const { tenant, profile, refreshProfile } = useAuth();
+  const { tenant, profile, isSuperAdmin, refreshProfile } = useAuth();
   const { toast } = useToast();
   const [userStats, setUserStats] = useState<UserStats>({ total: 0, active: 0, pending: 0, recentLogins: 0 });
   const [onboardingStats, setOnboardingStats] = useState<OnboardingStats>({ pending: 0, approved: 0, rejected: 0 });
@@ -114,18 +114,19 @@ export default function AdminConsolePage() {
           setRecentUsers(users.slice(0, 5));
         }
 
-        // Fetch onboarding requests
-        const { data: requests } = await supabase
-          .from('onboarding_requests')
-          .select('request_status')
-          .or(`tenant_id.eq.${tenant.id},tenant_id.is.null`);
+        // Fetch onboarding requests (only for super admins)
+        if (isSuperAdmin) {
+          const { data: requests } = await supabase
+            .from('onboarding_requests')
+            .select('request_status');
 
-        if (requests) {
-          setOnboardingStats({
-            pending: requests.filter(r => r.request_status === 'submitted').length,
-            approved: requests.filter(r => r.request_status === 'approved').length,
-            rejected: requests.filter(r => r.request_status === 'rejected').length
-          });
+          if (requests) {
+            setOnboardingStats({
+              pending: requests.filter(r => r.request_status === 'submitted').length,
+              approved: requests.filter(r => r.request_status === 'approved').length,
+              rejected: requests.filter(r => r.request_status === 'rejected').length
+            });
+          }
         }
       } catch (error) {
         console.error('Error fetching admin stats:', error);
@@ -135,7 +136,7 @@ export default function AdminConsolePage() {
     };
 
     fetchStats();
-  }, [tenant?.id]);
+  }, [tenant?.id, isSuperAdmin]);
 
   const formatLastLogin = (date: string | null) => {
     if (!date) return 'Never';
@@ -162,14 +163,15 @@ export default function AdminConsolePage() {
       color: 'bg-[hsl(222,47%,14%)]',
       stat: `${userStats.total} users`
     },
-    {
+    // Only show onboarding requests to super admins
+    ...(isSuperAdmin ? [{
       title: 'Onboarding Requests',
       description: 'Review and approve access requests',
       icon: UserPlus,
       href: '/admin/onboarding',
       color: 'bg-[hsl(173,58%,39%)]',
       stat: onboardingStats.pending > 0 ? `${onboardingStats.pending} pending` : 'No pending'
-    },
+    }] : []),
     {
       title: 'Library Approvals',
       description: 'Review submitted templates and playbooks',
@@ -312,7 +314,7 @@ export default function AdminConsolePage() {
         </Card>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className={`grid grid-cols-2 ${isSuperAdmin ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4 mb-6`}>
           <Card className="border-[hsl(220,13%,88%)]">
             <CardContent className="pt-4 pb-4">
               <div className="flex items-center gap-3">
@@ -347,23 +349,25 @@ export default function AdminConsolePage() {
               </div>
             </CardContent>
           </Card>
-          <Card className="border-[hsl(220,13%,88%)]">
-            <CardContent className="pt-4 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-[hsl(173,58%,39%)]/10">
-                  <UserPlus className="w-5 h-5 text-[hsl(173,58%,39%)]" />
+          {isSuperAdmin && (
+            <Card className="border-[hsl(220,13%,88%)]">
+              <CardContent className="pt-4 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-[hsl(173,58%,39%)]/10">
+                    <UserPlus className="w-5 h-5 text-[hsl(173,58%,39%)]" />
+                  </div>
+                  <div>
+                    {isLoading ? (
+                      <Loader2 className="w-5 h-5 animate-spin text-[hsl(220,14%,46%)]" />
+                    ) : (
+                      <p className="text-2xl font-bold text-[hsl(222,47%,11%)]">{onboardingStats.pending}</p>
+                    )}
+                    <p className="text-xs text-[hsl(220,14%,46%)]">Pending Requests</p>
+                  </div>
                 </div>
-                <div>
-                  {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin text-[hsl(220,14%,46%)]" />
-                  ) : (
-                    <p className="text-2xl font-bold text-[hsl(222,47%,11%)]">{onboardingStats.pending}</p>
-                  )}
-                  <p className="text-xs text-[hsl(220,14%,46%)]">Pending Requests</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
           <Card className="border-[hsl(220,13%,88%)]">
             <CardContent className="pt-4 pb-4">
               <div className="flex items-center gap-3">
