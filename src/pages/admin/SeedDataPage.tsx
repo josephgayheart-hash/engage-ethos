@@ -77,6 +77,22 @@ export default function SeedDataPage() {
       const tenantIds = tenants.map(t => t.id);
       updateResult('find-tenants', 'success', `Found ${tenants.length} seed tenant(s)`);
 
+      // Delete personal messages
+      updateResult('delete-personal-messages', 'running', 'Deleting personal messages...');
+      const { count: personalMessagesCount } = await supabase
+        .from('personal_messages')
+        .delete({ count: 'exact' })
+        .in('tenant_id', tenantIds);
+      updateResult('delete-personal-messages', 'success', `Deleted ${personalMessagesCount || 0} personal messages`);
+
+      // Delete shared templates
+      updateResult('delete-shared-templates', 'running', 'Deleting shared templates...');
+      const { count: sharedTemplatesCount } = await supabase
+        .from('shared_templates')
+        .delete({ count: 'exact' })
+        .in('tenant_id', tenantIds);
+      updateResult('delete-shared-templates', 'success', `Deleted ${sharedTemplatesCount || 0} shared templates`);
+
       // Delete tool usage events
       updateResult('delete-tool-usage', 'running', 'Deleting tool usage events...');
       const { count: toolUsageCount } = await supabase
