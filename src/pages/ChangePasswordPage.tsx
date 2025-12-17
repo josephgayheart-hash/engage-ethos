@@ -46,26 +46,37 @@ export default function ChangePasswordPage() {
     setError(null);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setError('Your session has expired. Please request a new password reset link from the sign-in page.');
+        return;
+      }
+
       const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword,
       });
 
       if (updateError) {
-        setError(updateError.message);
+        if (updateError.message.toLowerCase().includes('session') || updateError.message.toLowerCase().includes('jwt')) {
+          setError('Your session has expired. Please request a new password reset link from the sign-in page.');
+        } else {
+          setError(updateError.message);
+        }
         return;
       }
 
       // Update profile to mark password as changed
-      if (user) {
-        await supabase
-          .from('profiles')
-          .update({ 
-            password_reset_required: false,
-            status: 'active',
-            last_password_reset_at: new Date().toISOString()
-          })
-          .eq('id', user.id);
+      const userId = user?.id ?? session.user.id;
+      await supabase
+        .from('profiles')
+        .update({ 
+          password_reset_required: false,
+          status: 'active',
+          last_password_reset_at: new Date().toISOString()
+        })
+        .eq('id', userId);
 
+      if (user) {
         await refreshProfile();
       }
 
