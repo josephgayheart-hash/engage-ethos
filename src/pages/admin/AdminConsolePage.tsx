@@ -4,13 +4,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Users, 
   UserPlus, 
   Settings, 
-  FileText, 
   Shield,
   Home,
   ChevronRight,
@@ -18,9 +20,11 @@ import {
   Activity,
   Clock,
   Library,
-  FolderOpen,
   TrendingUp,
-  Loader2
+  Loader2,
+  Save,
+  Pencil,
+  X
 } from 'lucide-react';
 
 interface UserStats {
@@ -37,11 +41,53 @@ interface OnboardingStats {
 }
 
 export default function AdminConsolePage() {
-  const { tenant, profile } = useAuth();
+  const { tenant, profile, refreshProfile } = useAuth();
+  const { toast } = useToast();
   const [userStats, setUserStats] = useState<UserStats>({ total: 0, active: 0, pending: 0, recentLogins: 0 });
   const [onboardingStats, setOnboardingStats] = useState<OnboardingStats>({ pending: 0, approved: 0, rejected: 0 });
   const [recentUsers, setRecentUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Institution editing state
+  const [isEditingInstitution, setIsEditingInstitution] = useState(false);
+  const [institutionName, setInstitutionName] = useState('');
+  const [isSavingInstitution, setIsSavingInstitution] = useState(false);
+
+  useEffect(() => {
+    if (tenant?.institution_name) {
+      setInstitutionName(tenant.institution_name);
+    }
+  }, [tenant?.institution_name]);
+
+  const handleSaveInstitution = async () => {
+    if (!tenant?.id || !institutionName.trim()) return;
+    
+    setIsSavingInstitution(true);
+    try {
+      const { error } = await supabase
+        .from('tenants')
+        .update({ institution_name: institutionName.trim() })
+        .eq('id', tenant.id);
+
+      if (error) throw error;
+
+      await refreshProfile();
+      setIsEditingInstitution(false);
+      
+      toast({
+        title: 'Institution Updated',
+        description: 'Your institution name has been saved successfully.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to update institution name',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSavingInstitution(false);
+    }
+  };
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -184,6 +230,84 @@ export default function AdminConsolePage() {
               As an administrator for {tenant?.institution_name || 'your institution'}, you can manage users, 
               review access requests, and configure institutional settings.
             </p>
+          </CardContent>
+        </Card>
+
+        {/* Institution Branding */}
+        <Card className="mb-6 border-[hsl(220,13%,88%)]">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2 text-[hsl(222,47%,11%)]">
+                  <Building2 className="w-5 h-5" />
+                  Institution Branding
+                </CardTitle>
+                <CardDescription>Manage your institution's name and identity</CardDescription>
+              </div>
+              {!isEditingInstitution && (
+                <Button variant="outline" size="sm" onClick={() => setIsEditingInstitution(true)}>
+                  <Pencil className="w-4 h-4 mr-2" />
+                  Edit
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            {isEditingInstitution ? (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="institutionName">Institution Name</Label>
+                  <Input
+                    id="institutionName"
+                    value={institutionName}
+                    onChange={(e) => setInstitutionName(e.target.value)}
+                    placeholder="Enter institution name"
+                    className="max-w-md"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handleSaveInstitution} 
+                    disabled={isSavingInstitution || !institutionName.trim()}
+                    className="bg-[hsl(222,47%,14%)] hover:bg-[hsl(222,47%,20%)]"
+                  >
+                    {isSavingInstitution ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4 mr-2" />
+                        Save Changes
+                      </>
+                    )}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setIsEditingInstitution(false);
+                      setInstitutionName(tenant?.institution_name || '');
+                    }}
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-lg bg-[hsl(222,47%,14%)]/10 flex items-center justify-center">
+                  <Building2 className="w-6 h-6 text-[hsl(222,47%,14%)]" />
+                </div>
+                <div>
+                  <p className="text-lg font-semibold text-[hsl(222,47%,11%)]">
+                    {tenant?.institution_name || 'Loading...'}
+                  </p>
+                  <p className="text-sm text-[hsl(220,14%,46%)]">Your institution's display name</p>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
