@@ -99,14 +99,13 @@ const TouchpointNode = ({ data }: { data: { touchpoint: JourneyTouchpoint; index
       {/* Week & Date Header */}
       <div className="bg-muted/50 -mx-3 -mt-3 px-3 py-2 rounded-t-md mb-2 border-b border-border">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-foreground">Week {touchpoint.week}</span>
+          <span className="text-xs font-bold text-foreground">
+            Week {touchpoint.week}{weekDate && <span className="text-primary ml-1">• {weekDate}</span>}
+          </span>
           <div className={`p-1 rounded ${getChannelColor(touchpoint.channel)} text-white`}>
             {getChannelIcon(touchpoint.channel)}
           </div>
         </div>
-        {weekDate && (
-          <p className="text-xs font-semibold text-primary mt-0.5">{weekDate}</p>
-        )}
       </div>
       
       <p className="text-xs text-muted-foreground mb-1">{formatChannelName(touchpoint.channel)}</p>
