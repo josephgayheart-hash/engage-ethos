@@ -131,15 +131,23 @@ export const JourneyFlowDiagram = ({ journey }: JourneyFlowDiagramProps) => {
     const nodes: Node[] = [];
     const edges: Edge[] = [];
     
-    const xSpacing = 260;
-    const yBase = 100;
+    const touchpointCount = journey.touchpoints.length;
+    
+    // Dynamic spacing based on journey length
+    const xSpacing = touchpointCount > 12 ? 320 : touchpointCount > 8 ? 300 : 280;
+    const ySpacing = touchpointCount > 12 ? 220 : touchpointCount > 8 ? 200 : 180;
+    const nodesPerRow = touchpointCount > 15 ? 5 : touchpointCount > 10 ? 4 : touchpointCount > 6 ? 3 : Math.min(touchpointCount, 4);
+    const yBase = 120;
+    
+    // Calculate phase positions based on touchpoint distribution
+    const phaseWidth = nodesPerRow * xSpacing;
     
     // Add phase header nodes across the top
     journey.phases.forEach((phase, phaseIndex) => {
       const phaseNode: Node = {
         id: `phase-${phaseIndex}`,
         type: 'phase',
-        position: { x: phaseIndex * (xSpacing * 1.5), y: -60 },
+        position: { x: phaseIndex * (phaseWidth / journey.phases.length) + (phaseWidth / journey.phases.length / 2) - 75, y: -80 },
         data: { 
           name: phase.name,
           weekRange: phase.weekRange,
@@ -150,16 +158,24 @@ export const JourneyFlowDiagram = ({ journey }: JourneyFlowDiagramProps) => {
       nodes.push(phaseNode);
     });
     
-    // Add touchpoint nodes
+    // Add touchpoint nodes with serpentine (snake) layout for better flow
     journey.touchpoints.forEach((touchpoint, index) => {
-      const row = Math.floor(index / 4);
-      const col = index % 4;
-      const yOffset = row % 2 === 0 ? 0 : 80;
+      const row = Math.floor(index / nodesPerRow);
+      const colInRow = index % nodesPerRow;
+      
+      // Serpentine layout: alternate direction each row
+      const col = row % 2 === 0 ? colInRow : (nodesPerRow - 1 - colInRow);
+      
+      // Stagger Y position slightly within each row for visual interest
+      const yStagger = (colInRow % 2) * 40;
       
       nodes.push({
         id: `tp-${index}`,
         type: 'touchpoint',
-        position: { x: col * xSpacing, y: yBase + (row * 180) + yOffset },
+        position: { 
+          x: col * xSpacing + 20, 
+          y: yBase + (row * ySpacing) + yStagger 
+        },
         data: { touchpoint, index },
         draggable: true,
       });
@@ -187,8 +203,14 @@ export const JourneyFlowDiagram = ({ journey }: JourneyFlowDiagramProps) => {
   const [nodes, , onNodesChange] = useNodesState(initialNodes);
   const [edges, , onEdgesChange] = useEdgesState(initialEdges);
 
+  // Calculate dynamic height based on touchpoint count
+  const touchpointCount = journey.touchpoints.length;
+  const nodesPerRow = touchpointCount > 15 ? 5 : touchpointCount > 10 ? 4 : touchpointCount > 6 ? 3 : Math.min(touchpointCount, 4);
+  const rowCount = Math.ceil(touchpointCount / nodesPerRow);
+  const dynamicHeight = Math.max(450, 180 + rowCount * 220);
+
   return (
-    <div ref={flowRef} className="w-full h-[450px] border rounded-lg bg-muted/20 relative">
+    <div ref={flowRef} className="w-full border rounded-lg bg-muted/20 relative" style={{ height: `${dynamicHeight}px` }}>
       {/* Export Button */}
       <div className="absolute top-2 right-2 z-10">
         <DropdownMenu>
