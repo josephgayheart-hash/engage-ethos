@@ -137,10 +137,78 @@ const PhaseNode = ({ data }: { data: { name: string; weekRange: string; focus: s
   );
 };
 
+// Journey info header node (for export)
+interface JourneyInfoData {
+  overview: string;
+  audience?: string;
+  cohort?: string;
+  moment?: string;
+  goal?: string;
+  startDate?: string;
+  endDate?: string;
+  totalWeeks: number;
+  touchpointCount: number;
+}
+
+const JourneyInfoNode = ({ data }: { data: JourneyInfoData }) => {
+  return (
+    <div className="bg-card border-2 border-primary/30 rounded-lg shadow-lg p-4 min-w-[600px] max-w-[900px]">
+      {/* Title */}
+      <div className="border-b border-border pb-3 mb-3">
+        <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+          <Target className="w-5 h-5 text-primary" />
+          Communication Journey Strategy
+        </h2>
+        <p className="text-sm text-muted-foreground mt-1">{data.overview}</p>
+      </div>
+      
+      {/* Metadata Grid */}
+      <div className="grid grid-cols-3 gap-4 text-xs">
+        {/* Target Audience */}
+        <div>
+          <p className="font-semibold text-foreground mb-1 flex items-center gap-1">
+            <Users className="w-3 h-3" /> Target Audience
+          </p>
+          <div className="space-y-0.5">
+            {data.audience && <p><span className="text-muted-foreground">Audience:</span> {formatFilterValue(data.audience)}</p>}
+            {data.cohort && <p><span className="text-muted-foreground">Cohort:</span> {formatFilterValue(data.cohort)}</p>}
+            {data.moment && <p><span className="text-muted-foreground">Moment:</span> {formatFilterValue(data.moment)}</p>}
+            {data.goal && <p><span className="text-muted-foreground">Goal:</span> {formatFilterValue(data.goal)}</p>}
+          </div>
+        </div>
+        
+        {/* Timeline */}
+        <div>
+          <p className="font-semibold text-foreground mb-1 flex items-center gap-1">
+            <Calendar className="w-3 h-3" /> Timeline
+          </p>
+          <div className="space-y-0.5">
+            {data.startDate && <p><span className="text-muted-foreground">Start:</span> {formatDisplayDate(data.startDate)}</p>}
+            {data.endDate && <p><span className="text-muted-foreground">End:</span> {formatDisplayDate(data.endDate)}</p>}
+            <p><span className="text-muted-foreground">Duration:</span> {data.totalWeeks} weeks</p>
+          </div>
+        </div>
+        
+        {/* Summary */}
+        <div>
+          <p className="font-semibold text-foreground mb-1 flex items-center gap-1">
+            <Megaphone className="w-3 h-3" /> Summary
+          </p>
+          <div className="space-y-0.5">
+            <p><span className="text-muted-foreground">Touchpoints:</span> {data.touchpointCount}</p>
+            <p><span className="text-muted-foreground">Phases:</span> 3 (Short/Mid/Long)</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Node type mapping
 const nodeTypes = {
   touchpoint: TouchpointNode,
   phase: PhaseNode,
+  journeyInfo: JourneyInfoNode,
 };
 
 export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: JourneyFlowDiagramProps) => {
@@ -178,17 +246,36 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
     const xSpacing = touchpointCount > 12 ? 340 : touchpointCount > 8 ? 320 : 300;
     const ySpacing = touchpointCount > 12 ? 240 : touchpointCount > 8 ? 220 : 200;
     const nodesPerRow = touchpointCount > 15 ? 5 : touchpointCount > 10 ? 4 : touchpointCount > 6 ? 3 : Math.min(touchpointCount, 4);
-    const yBase = 120;
+    const yBase = 220; // Increased to make room for info node
     
     // Calculate phase positions based on touchpoint distribution
     const phaseWidth = nodesPerRow * xSpacing;
+    
+    // Add journey info header node at the very top
+    nodes.push({
+      id: 'journey-info',
+      type: 'journeyInfo',
+      position: { x: 20, y: -180 },
+      data: {
+        overview: journey.overview,
+        audience: context?.audience,
+        cohort: context?.cohort,
+        moment: context?.moment,
+        goal: context?.goal,
+        startDate,
+        endDate,
+        totalWeeks: journey.totalWeeks,
+        touchpointCount: journey.touchpoints.length,
+      },
+      draggable: true,
+    });
     
     // Add phase header nodes across the top
     journey.phases.forEach((phase, phaseIndex) => {
       const phaseNode: Node = {
         id: `phase-${phaseIndex}`,
         type: 'phase',
-        position: { x: phaseIndex * (phaseWidth / journey.phases.length) + (phaseWidth / journey.phases.length / 2) - 75, y: -80 },
+        position: { x: phaseIndex * (phaseWidth / journey.phases.length) + (phaseWidth / journey.phases.length / 2) - 75, y: 20 },
         data: { 
           name: phase.name,
           weekRange: phase.weekRange,
@@ -241,16 +328,16 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
     });
     
     return { initialNodes: nodes, initialEdges: edges };
-  }, [journey, startDate]);
+  }, [journey, context, startDate, endDate]);
 
   const [nodes, , onNodesChange] = useNodesState(initialNodes);
   const [edges, , onEdgesChange] = useEdgesState(initialEdges);
 
-  // Calculate dynamic height based on touchpoint count
+  // Calculate dynamic height based on touchpoint count (increased for info node)
   const touchpointCount = journey.touchpoints.length;
   const nodesPerRow = touchpointCount > 15 ? 5 : touchpointCount > 10 ? 4 : touchpointCount > 6 ? 3 : Math.min(touchpointCount, 4);
   const rowCount = Math.ceil(touchpointCount / nodesPerRow);
-  const dynamicHeight = Math.max(500, 200 + rowCount * 240);
+  const dynamicHeight = Math.max(600, 300 + rowCount * 240);
 
   return (
     <div ref={flowRef} className="w-full border rounded-lg bg-muted/20 relative">
