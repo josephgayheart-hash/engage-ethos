@@ -237,6 +237,17 @@ interface RealUser {
   institution_name?: string;
 }
 
+interface InstitutionalProfile {
+  id: string;
+  tenant_id: string;
+  name: string;
+  config: Record<string, any> | null;
+  created_at: string;
+  updated_at: string;
+  created_by_user_id: string | null;
+  institution_name?: string;
+}
+
 interface TenantWithStats {
   id: string;
   institution_name: string;
@@ -247,6 +258,8 @@ interface TenantWithStats {
   byocCount: number;
   personalMessagesCount: number;
   sharedTemplatesCount: number;
+  institutionalProfilesCount: number;
+  profileCompletionPct: number;
   recentActivity: string | null;
   users: RealUser[];
 }
@@ -315,6 +328,7 @@ const AdminPanel = () => {
   const [contentDNASamples, setContentDNASamples] = useState<ContentDNASample[]>([]);
   const [byocUploads, setBYOCUploads] = useState<BYOCUpload[]>([]);
   const [betaFeedback, setBetaFeedback] = useState<BetaFeedback[]>([]);
+  const [institutionalProfiles, setInstitutionalProfiles] = useState<InstitutionalProfile[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [expandedTenant, setExpandedTenant] = useState<string | null>(null);
   const [clearPersonalOpen, setClearPersonalOpen] = useState(false);
@@ -384,6 +398,22 @@ const AdminPanel = () => {
         .from('beta_feedback')
         .select('*')
         .order('created_at', { ascending: false });
+
+      // Fetch institutional profiles
+      const { data: institutionalProfilesData } = await supabase
+        .from('institutional_profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      const profilesWithInstitution: InstitutionalProfile[] = (institutionalProfilesData || []).map(ip => {
+        const ipTenant = tenantsData?.find(t => t.id === ip.tenant_id);
+        return {
+          ...ip,
+          config: ip.config as Record<string, any> | null,
+          institution_name: ipTenant?.institution_name || 'Unknown'
+        };
+      });
+      setInstitutionalProfiles(profilesWithInstitution);
       
       // Enrich feedback with user and institution names
       const enrichedFeedback = (feedbackData || []).map(fb => {
@@ -414,6 +444,22 @@ const AdminPanel = () => {
 
       setUsers(usersWithInstitution);
 
+      // Helper function to calculate profile completion percentage
+      const calculateProfileCompletion = (config: Record<string, any>): number => {
+        if (!config || typeof config !== 'object') return 0;
+        const importantFields = [
+          'institutionName', 'mascot', 'slogans', 'officialWebsite',
+          'portalName', 'lmsName', 'primaryCTA', 'secondaryCTA',
+          'studentTermSingular', 'leaderName', 'leaderTitle'
+        ];
+        const filledCount = importantFields.filter(field => {
+          const value = config[field];
+          if (Array.isArray(value)) return value.length > 0;
+          return value && value.toString().trim() !== '';
+        }).length;
+        return Math.round((filledCount / importantFields.length) * 100);
+      };
+
       // Calculate comprehensive stats per tenant
       const tenantsWithStats: TenantWithStats[] = (tenantsData || []).map(t => {
         const tenantUsers = (profilesData || []).filter(p => p.tenant_id === t.id);
@@ -422,7 +468,13 @@ const AdminPanel = () => {
         const tenantBYOC = (byocData || []).filter(b => b.tenant_id === t.id);
         const tenantPersonalMessages = (personalMessagesData || []).filter(pm => pm.tenant_id === t.id);
         const tenantSharedTemplates = (sharedTemplatesData || []).filter(st => st.tenant_id === t.id);
+        const tenantInstitutionalProfiles = (institutionalProfilesData || []).filter(ip => ip.tenant_id === t.id);
         
+        // Calculate avg profile completion
+        const avgCompletion = tenantInstitutionalProfiles.length > 0
+          ? Math.round(tenantInstitutionalProfiles.reduce((sum, ip) => sum + calculateProfileCompletion(ip.config as Record<string, any>), 0) / tenantInstitutionalProfiles.length)
+          : 0;
+
         // Get most recent activity
         const recentActivityDate = tenantUsers
           .filter(u => u.last_login_at)
@@ -438,6 +490,8 @@ const AdminPanel = () => {
           byocCount: tenantBYOC.length,
           personalMessagesCount: tenantPersonalMessages.length,
           sharedTemplatesCount: tenantSharedTemplates.length,
+          institutionalProfilesCount: tenantInstitutionalProfiles.length,
+          profileCompletionPct: avgCompletion,
           recentActivity: recentActivityDate,
           users: tenantUsers.map(u => ({
             ...u,
@@ -595,7 +649,7 @@ const AdminPanel = () => {
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-7 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
             <Card>
               <CardContent className="p-3">
                 <div className="flex items-center gap-2">
@@ -687,13 +741,27 @@ const AdminPanel = () => {
                 </div>
               </CardContent>
             </Card>
+            <Card>
+              <CardContent className="p-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded bg-indigo-500/10">
+                    <Settings className="w-4 h-4 text-indigo-600" />
+                  </div>
+                  <div>
+                    <p className="text-xl font-bold">{isLoadingUsers ? '...' : institutionalProfiles.length}</p>
+                    <p className="text-[10px] text-muted-foreground">Profiles</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Main Content Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid grid-cols-6 w-full">
+            <TabsList className="grid grid-cols-7 w-full">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="institutions">Institutions</TabsTrigger>
+              <TabsTrigger value="profiles">Profiles</TabsTrigger>
               <TabsTrigger value="libraries">Libraries</TabsTrigger>
               <TabsTrigger value="ai">AI</TabsTrigger>
               <TabsTrigger value="users">Users</TabsTrigger>
@@ -842,6 +910,18 @@ const AdminPanel = () => {
                                       <Upload className="w-3 h-3 mr-1" />
                                       {inst.byocCount}
                                     </Badge>
+                                    <Badge variant="outline" className="text-xs">
+                                      <Settings className="w-3 h-3 mr-1" />
+                                      {inst.institutionalProfilesCount}
+                                    </Badge>
+                                    {inst.institutionalProfilesCount > 0 && (
+                                      <Badge 
+                                        variant="outline" 
+                                        className={`text-xs ${inst.profileCompletionPct >= 70 ? 'bg-green-50 text-green-700' : inst.profileCompletionPct >= 40 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}
+                                      >
+                                        {inst.profileCompletionPct}%
+                                      </Badge>
+                                    )}
                                   </div>
                                   <ChevronRight className={`w-5 h-5 text-muted-foreground transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
                                 </div>
@@ -1373,6 +1453,175 @@ const AdminPanel = () => {
                   </CardContent>
                 </Card>
               </div>
+            </TabsContent>
+
+            {/* Profiles Tab */}
+            <TabsContent value="profiles" className="mt-4 space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Profiles Overview */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-serif flex items-center gap-2">
+                      <Settings className="w-5 h-5" />
+                      Institutional Profiles
+                    </CardTitle>
+                    <CardDescription>
+                      {institutionalProfiles.length} profiles across {new Set(institutionalProfiles.map(p => p.tenant_id)).size} institutions
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoadingUsers ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : institutionalProfiles.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <Settings className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">No institutional profiles found</p>
+                      </div>
+                    ) : (
+                      <ScrollArea className="h-[400px]">
+                        <div className="space-y-2">
+                          {institutionalProfiles.map(profile => {
+                            const config = profile.config || {};
+                            const importantFields = ['institutionName', 'mascot', 'slogans', 'officialWebsite', 'portalName', 'lmsName', 'primaryCTA', 'secondaryCTA', 'studentTermSingular', 'leaderName', 'leaderTitle'];
+                            const filledCount = importantFields.filter(field => {
+                              const value = config[field];
+                              if (Array.isArray(value)) return value.length > 0;
+                              return value && value.toString().trim() !== '';
+                            }).length;
+                            const completionPct = Math.round((filledCount / importantFields.length) * 100);
+                            
+                            return (
+                              <div key={profile.id} className="p-3 border rounded-lg">
+                                <div className="flex items-center justify-between mb-2">
+                                  <div>
+                                    <p className="font-medium text-sm">{profile.name}</p>
+                                    <p className="text-[10px] text-muted-foreground">{profile.institution_name}</p>
+                                  </div>
+                                  <Badge 
+                                    variant="outline"
+                                    className={`text-xs ${completionPct >= 70 ? 'bg-green-50 text-green-700' : completionPct >= 40 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}
+                                  >
+                                    {completionPct}% complete
+                                  </Badge>
+                                </div>
+                                <Progress value={completionPct} className="h-1.5" />
+                                <div className="mt-2 flex flex-wrap gap-1">
+                                  {config.institutionName && <Badge variant="secondary" className="text-[10px]">Name</Badge>}
+                                  {config.mascot && <Badge variant="secondary" className="text-[10px]">Mascot</Badge>}
+                                  {config.primaryCTA && <Badge variant="secondary" className="text-[10px]">CTA</Badge>}
+                                  {config.leaderName && <Badge variant="secondary" className="text-[10px]">Leader</Badge>}
+                                  {config.portalName && <Badge variant="secondary" className="text-[10px]">Portal</Badge>}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </ScrollArea>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Profile Completion by Institution */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <BarChart3 className="w-4 h-4" />
+                      Completion by Institution
+                    </CardTitle>
+                    <CardDescription>Average profile completion percentage</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoadingUsers ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {tenants.filter(t => t.institutionalProfilesCount > 0).map(inst => (
+                          <div key={inst.id} className="space-y-1">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <GraduationCap className="w-4 h-4 text-muted-foreground" />
+                                <span className="text-sm font-medium">{inst.institution_name}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="text-xs">
+                                  {inst.institutionalProfilesCount} profile{inst.institutionalProfilesCount !== 1 ? 's' : ''}
+                                </Badge>
+                                <span className={`text-sm font-bold ${inst.profileCompletionPct >= 70 ? 'text-green-600' : inst.profileCompletionPct >= 40 ? 'text-yellow-600' : 'text-red-600'}`}>
+                                  {inst.profileCompletionPct}%
+                                </span>
+                              </div>
+                            </div>
+                            <Progress value={inst.profileCompletionPct} className="h-2" />
+                          </div>
+                        ))}
+                        {tenants.filter(t => t.institutionalProfilesCount > 0).length === 0 && (
+                          <div className="text-center py-8 text-muted-foreground">
+                            <Settings className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                            <p className="text-sm">No profiles created yet</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Field Completion Stats */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Field Completion Overview
+                  </CardTitle>
+                  <CardDescription>How often each key field is filled across all profiles</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {(() => {
+                    const fieldStats = [
+                      { name: 'Institution Name', field: 'institutionName' },
+                      { name: 'Mascot', field: 'mascot' },
+                      { name: 'Slogans', field: 'slogans' },
+                      { name: 'Official Website', field: 'officialWebsite' },
+                      { name: 'Portal Name', field: 'portalName' },
+                      { name: 'LMS Name', field: 'lmsName' },
+                      { name: 'Primary CTA', field: 'primaryCTA' },
+                      { name: 'Secondary CTA', field: 'secondaryCTA' },
+                      { name: 'Student Term', field: 'studentTermSingular' },
+                      { name: 'Leader Name', field: 'leaderName' },
+                      { name: 'Leader Title', field: 'leaderTitle' },
+                    ].map(item => {
+                      const filledCount = institutionalProfiles.filter(p => {
+                        const config = p.config || {};
+                        const value = config[item.field];
+                        if (Array.isArray(value)) return value.length > 0;
+                        return value && value.toString().trim() !== '';
+                      }).length;
+                      const pct = institutionalProfiles.length > 0 ? Math.round((filledCount / institutionalProfiles.length) * 100) : 0;
+                      return { ...item, filledCount, pct };
+                    });
+
+                    return (
+                      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {fieldStats.map(item => (
+                          <div key={item.field} className="p-2 border rounded-lg">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs font-medium">{item.name}</span>
+                              <span className={`text-xs font-bold ${item.pct >= 70 ? 'text-green-600' : item.pct >= 40 ? 'text-yellow-600' : 'text-muted-foreground'}`}>
+                                {item.filledCount}/{institutionalProfiles.length}
+                              </span>
+                            </div>
+                            <Progress value={item.pct} className="h-1" />
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
             </TabsContent>
 
           </Tabs>
