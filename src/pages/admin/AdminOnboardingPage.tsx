@@ -117,6 +117,19 @@ export default function AdminOnboardingPage() {
     const tempPassword = generatePassword();
 
     try {
+      // Verify session is still valid before calling
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: 'Session Expired',
+          description: 'Your session has expired. Please log in again.',
+          variant: 'destructive',
+        });
+        setShowApproveDialog(false);
+        setIsProcessing(false);
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('admin-users', {
         body: {
           action: 'approve_onboarding',
@@ -125,8 +138,19 @@ export default function AdminOnboardingPage() {
         },
       });
 
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (error) {
+        // Check for auth errors specifically
+        if (error.message?.includes('Unauthorized') || error.message?.includes('401')) {
+          throw new Error('Session expired. Please log out and log back in.');
+        }
+        throw error;
+      }
+      if (data?.error) {
+        if (data.error === 'Unauthorized') {
+          throw new Error('Session expired. Please log out and log back in.');
+        }
+        throw new Error(data.error);
+      }
 
       setShowApproveDialog(false);
       setCredentials({ email: selectedRequest.email, password: tempPassword });
