@@ -64,7 +64,7 @@ const phaseBgColors: Record<StrategyPhase, string> = {
   'long-term': 'border-l-violet-500',
 };
 
-const allChannels: Channel[] = ['email', 'sms', 'social-media'];
+const allChannels: Channel[] = ['email', 'sms', 'portal', 'social-media', 'landing-page', 'direct-mail', 'phone-call'];
 
 // Helper to format channel names with proper capitalization
 const formatChannelName = (channel: string): string => {
@@ -214,7 +214,7 @@ function TouchpointCard({
                 variant={expanded ? "ghost" : "outline"}
                 size="sm"
                 onClick={() => setExpanded(!expanded)}
-                className={`text-sm transition-all ${!expanded ? 'bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-primary/30 hover:border-primary/50 hover:bg-primary/15 animate-pulse hover:animate-none' : ''}`}
+                className={`text-sm transition-all ${!expanded ? 'border-primary/40 hover:border-primary hover:bg-primary/10' : ''}`}
               >
                 <Sparkles className={`w-4 h-4 mr-2 ${!expanded ? 'text-primary' : ''}`} />
                 {expanded ? 'Hide' : 'Generate'} Message Copy
