@@ -53,8 +53,10 @@ import {
   Home
 } from 'lucide-react';
 
+type RoleType = 'admin' | 'user' | 'approver';
+
 interface UserWithRole extends UserProfile {
-  role?: 'admin' | 'user';
+  roles: RoleType[];
 }
 
 export default function AdminUsersPage() {
@@ -75,7 +77,7 @@ export default function AdminUsersPage() {
     phone: '',
     department: '',
     title: '',
-    role: 'user' as 'admin' | 'user',
+    role: 'user' as 'admin' | 'user' | 'user_approver',
   });
 
   // Credentials dialog
@@ -96,17 +98,26 @@ export default function AdminUsersPage() {
 
       if (profileError) throw profileError;
 
-      // Fetch roles for each user
+      // Fetch all roles for users
       const { data: roles } = await supabase
         .from('user_roles')
         .select('user_id, role');
 
-      const usersWithRoles = (profiles || []).map(profile => ({
+      // Group roles by user_id
+      const rolesByUser: Record<string, RoleType[]> = {};
+      roles?.forEach(r => {
+        if (!rolesByUser[r.user_id]) {
+          rolesByUser[r.user_id] = [];
+        }
+        rolesByUser[r.user_id].push(r.role as RoleType);
+      });
+
+      const usersWithRoles: UserWithRole[] = (profiles || []).map(profile => ({
         ...profile,
-        role: roles?.find(r => r.user_id === profile.id)?.role as 'admin' | 'user' | undefined,
+        roles: rolesByUser[profile.id] || ['user'],
       }));
 
-      setUsers(usersWithRoles as UserWithRole[]);
+      setUsers(usersWithRoles);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
@@ -383,9 +394,18 @@ export default function AdminUsersPage() {
                       <TableCell>{user.email}</TableCell>
                       <TableCell>{user.department || '—'}</TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="capitalize">
-                          {user.role || 'user'}
-                        </Badge>
+                        <div className="flex gap-1 flex-wrap">
+                          {user.roles.includes('admin') ? (
+                            <Badge className="bg-[hsl(222,47%,14%)] text-white">Admin</Badge>
+                          ) : user.roles.includes('approver') ? (
+                            <>
+                              <Badge variant="outline" className="capitalize">User</Badge>
+                              <Badge className="bg-[hsl(173,58%,39%)] text-white">Approver</Badge>
+                            </>
+                          ) : (
+                            <Badge variant="outline" className="capitalize">User</Badge>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>{getStatusBadge(user.status)}</TableCell>
                       <TableCell>
@@ -510,16 +530,20 @@ export default function AdminUsersPage() {
               <Label htmlFor="role">Role</Label>
               <Select 
                 value={newUser.role} 
-                onValueChange={(value: 'admin' | 'user') => setNewUser(prev => ({ ...prev, role: value }))}
+                onValueChange={(value: 'admin' | 'user' | 'user_approver') => setNewUser(prev => ({ ...prev, role: value }))}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="user">User</SelectItem>
+                  <SelectItem value="user_approver">User + Approver</SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">
+                Approvers can review and approve library submissions
+              </p>
             </div>
           </div>
           <DialogFooter>
