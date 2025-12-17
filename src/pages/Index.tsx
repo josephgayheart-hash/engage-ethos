@@ -110,12 +110,12 @@ const Index = () => {
     },
     { 
       id: 'admin', 
-      title: 'Admin Panel', 
-      description: 'Create, approve, and distribute playbooks across your institution',
+      title: 'Admin Console', 
+      description: 'Manage users, review requests, and configure your institution',
       icon: Settings,
       color: 'text-muted-foreground',
       bgColor: 'bg-muted',
-      href: '/admin'
+      href: '/admin/console'
     },
   ];
 
