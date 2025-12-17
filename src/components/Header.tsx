@@ -24,9 +24,22 @@ export function Header() {
   return (
     <header className="border-b border-border bg-card">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
-          <img src={persistLogo} alt="PERSIST" className="h-10 w-auto" />
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+            <img src={persistLogo} alt="PERSIST" className="h-10 w-auto" />
+          </Link>
+          {tenant && (
+            <>
+              <div className="h-8 w-px bg-border hidden sm:block" />
+              <div className="hidden sm:flex items-center gap-2">
+                {/* Future: tenant.logo_url && <img src={tenant.logo_url} alt={tenant.institution_name} className="h-8 w-auto" /> */}
+                <span className="text-lg font-semibold text-foreground">
+                  {tenant.institution_name}
+                </span>
+              </div>
+            </>
+          )}
+        </div>
         <nav className="flex items-center gap-2 md:gap-4">
           <Link
             to="/" 
