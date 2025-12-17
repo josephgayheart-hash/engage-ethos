@@ -105,7 +105,7 @@ export function TemplateDetailDialog({ template, open, onOpenChange, onPull }: T
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh]">
+      <DialogContent className={isJourney ? "max-w-5xl max-h-[90vh]" : "max-w-3xl max-h-[90vh]"}>
         <DialogHeader>
           <DialogTitle className="font-serif">{template.title}</DialogTitle>
           <DialogDescription>
@@ -129,7 +129,7 @@ export function TemplateDetailDialog({ template, open, onOpenChange, onPull }: T
           </TabsList>
 
           <TabsContent value="template" className="mt-4">
-            <ScrollArea className="h-[400px]">
+            <ScrollArea className={isJourney ? "h-[550px]" : "h-[400px]"}>
               <div className="space-y-4">
                 {/* Journey or Message Preview */}
                 {isJourney && journeyData ? (

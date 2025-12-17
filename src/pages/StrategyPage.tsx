@@ -159,7 +159,25 @@ const StrategyPage = () => {
   const handleSaveToLibrary = () => {
     if (!mapperResult?.journey) return;
 
-    const journeyContent = JSON.stringify(mapperResult.journey, null, 2);
+    // Include journey data with metadata for diagram rendering
+    const journeyWithMetadata = {
+      ...mapperResult.journey,
+      _metadata: {
+        context: {
+          audience: context.audience,
+          cohort: context.cohort,
+          moment: context.moment,
+          goal: context.goal,
+          domain: context.domain,
+          tone: context.tone,
+        },
+        startDate: startDate?.toISOString(),
+        endDate: endDate?.toISOString(),
+        channels: selectedChannels,
+      }
+    };
+    
+    const journeyContent = JSON.stringify(journeyWithMetadata, null, 2);
     const title = `Strategy Journey: ${context.audience} - ${context.moment} (${journeyWeeks} weeks)`;
     
     addMessage({
@@ -187,10 +205,28 @@ const StrategyPage = () => {
 
     const journey = mapperResult.journey;
     
+    // Include journey data with metadata for diagram rendering
+    const journeyWithMetadata = {
+      ...journey,
+      _metadata: {
+        context: {
+          audience: context.audience,
+          cohort: context.cohort,
+          moment: context.moment,
+          goal: context.goal,
+          domain: context.domain,
+          tone: context.tone,
+        },
+        startDate: startDate?.toISOString(),
+        endDate: endDate?.toISOString(),
+        channels: selectedChannels,
+      }
+    };
+    
     addTemplate({
       title: `Strategy Journey: ${context.audience} - ${context.moment}`,
       intentStatement: journey.overview,
-      content: JSON.stringify(journey, null, 2),
+      content: JSON.stringify(journeyWithMetadata, null, 2),
       playbook: 'Strategy Journeys',
       owner: 'Current User',
       maintainer: 'Current User',

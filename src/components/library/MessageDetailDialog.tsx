@@ -34,7 +34,7 @@ export function MessageDetailDialog({ message, open, onOpenChange, onApprove, on
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh]">
+      <DialogContent className={isJourney ? "max-w-5xl max-h-[90vh]" : "max-w-2xl max-h-[90vh]"}>
         <DialogHeader>
           <DialogTitle className="font-serif">{message.title}</DialogTitle>
           <DialogDescription>
@@ -53,7 +53,7 @@ export function MessageDetailDialog({ message, open, onOpenChange, onApprove, on
           </TabsList>
 
           <TabsContent value="content" className="mt-4">
-            <ScrollArea className="h-[350px]">
+            <ScrollArea className={isJourney ? "h-[550px]" : "h-[350px]"}>
               {isJourney && journeyData ? (
                 <div className="pr-4">
                   <div className="flex items-center gap-2 mb-3">
