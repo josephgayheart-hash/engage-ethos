@@ -28,7 +28,8 @@ import {
   Sparkles,
   Loader2,
   FileText,
-  Trash2
+  Trash2,
+  Upload
 } from "lucide-react";
 import type { InstitutionalConfig as InstitutionalConfigType, VoiceAnalysis } from "@/types/persist";
 
@@ -631,12 +632,97 @@ export function InstitutionalConfig({ config, onChange }: InstitutionalConfigPro
             </p>
           </div>
 
-          {/* Sample Input */}
+          {/* File Upload */}
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Add Sample Communication</Label>
+              <Label className="text-sm font-medium">Upload Sample Files</Label>
               <p className="text-xs text-muted-foreground">
-                Paste emails, SMS messages, or marketing copy that represent your institution's voice. Add 2-5 samples for best results.
+                Upload .txt or .docx files containing emails, newsletters, or marketing materials. The content will be extracted and analyzed.
+              </p>
+              <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
+                <input
+                  type="file"
+                  id="voice-file-upload"
+                  accept=".txt,.doc,.docx,.pdf"
+                  multiple
+                  className="hidden"
+                  onChange={async (e) => {
+                    const files = e.target.files;
+                    if (!files || files.length === 0) return;
+                    
+                    for (const file of Array.from(files)) {
+                      try {
+                        let text = '';
+                        
+                        if (file.name.endsWith('.txt')) {
+                          text = await file.text();
+                        } else if (file.name.endsWith('.docx') || file.name.endsWith('.doc')) {
+                          // Read as text for basic extraction
+                          const arrayBuffer = await file.arrayBuffer();
+                          const decoder = new TextDecoder('utf-8');
+                          const rawText = decoder.decode(arrayBuffer);
+                          // Extract readable text from XML content
+                          const textMatches = rawText.match(/<w:t[^>]*>([^<]+)<\/w:t>/g);
+                          if (textMatches) {
+                            text = textMatches
+                              .map(match => match.replace(/<[^>]+>/g, ''))
+                              .join(' ')
+                              .replace(/\s+/g, ' ')
+                              .trim();
+                          } else {
+                            // Fallback to plain text extraction
+                            text = rawText.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+                          }
+                        } else if (file.name.endsWith('.pdf')) {
+                          text = `[PDF file: ${file.name}] - PDF parsing requires server-side processing. Please paste the text content directly or use .txt format.`;
+                          toast({
+                            title: "PDF not fully supported",
+                            description: "Please copy/paste the PDF content or convert to .txt format for best results.",
+                            variant: "destructive",
+                          });
+                          continue;
+                        }
+
+                        if (text && text.length > 50) {
+                          const currentSamples = config.brandVoiceSamples || [];
+                          onChange({ ...config, brandVoiceSamples: [...currentSamples, text] });
+                          toast({
+                            title: "File loaded",
+                            description: `"${file.name}" has been added to voice samples.`,
+                          });
+                        } else {
+                          toast({
+                            title: "File too short",
+                            description: `"${file.name}" doesn't contain enough text to analyze.`,
+                            variant: "destructive",
+                          });
+                        }
+                      } catch (error) {
+                        console.error('Error reading file:', error);
+                        toast({
+                          title: "Error reading file",
+                          description: `Could not read "${file.name}". Try a different format.`,
+                          variant: "destructive",
+                        });
+                      }
+                    }
+                    // Reset input
+                    e.target.value = '';
+                  }}
+                />
+                <label htmlFor="voice-file-upload" className="cursor-pointer">
+                  <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+                  <p className="text-sm font-medium">Click to upload files</p>
+                  <p className="text-xs text-muted-foreground">.txt, .docx supported</p>
+                </label>
+              </div>
+            </div>
+
+            {/* Manual Input */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Or Paste Sample Text</Label>
+              <p className="text-xs text-muted-foreground">
+                Paste emails, SMS messages, or marketing copy directly. Add 2-5 samples for best results.
               </p>
               <Textarea
                 value={sampleInput}

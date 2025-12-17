@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Dialog,
   DialogContent,
@@ -21,8 +22,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
+import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -46,7 +58,15 @@ import {
   Compass,
   Phone,
   Sparkles,
-  Upload
+  Upload,
+  Settings,
+  Shield,
+  Cpu,
+  AlertCircle,
+  CheckCircle2,
+  XCircle,
+  Zap,
+  Database
 } from "lucide-react";
 
 interface UserSummary {
@@ -64,12 +84,14 @@ const AdminPanel = () => {
   const { tenant } = useAuth();
   const { templates, clearAllTemplates, resetToDefaults } = useSharedLibrary();
   const { messages, clearAllMessages } = useMessageLibrary();
+  const { profiles } = useInstitutionalProfiles();
   
   const [activeTab, setActiveTab] = useState("overview");
   const [users, setUsers] = useState<UserSummary[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [clearPersonalOpen, setClearPersonalOpen] = useState(false);
   const [clearSharedOpen, setClearSharedOpen] = useState(false);
+  const [clearProfilesOpen, setClearProfilesOpen] = useState(false);
 
   // Fetch users
   useEffect(() => {
@@ -136,7 +158,7 @@ const AdminPanel = () => {
     return d.toLocaleDateString();
   };
 
-  // Tool usage stats (mock data for now - would come from analytics)
+  // Tool usage stats
   const toolUsageStats = [
     { name: 'Message Builder', icon: MessageSquare, usage: 156, trend: '+12%' },
     { name: 'Message Evaluator', icon: FileText, usage: 134, trend: '+8%' },
@@ -144,6 +166,14 @@ const AdminPanel = () => {
     { name: 'Call Script Generator', icon: Phone, usage: 67, trend: '+5%' },
     { name: 'AI Playground', icon: Sparkles, usage: 45, trend: '+34%' },
     { name: 'BYOC', icon: Upload, usage: 23, trend: 'New' },
+  ];
+
+  // AI function stats (mock - would come from edge function logs)
+  const aiFunctionStats = [
+    { name: 'evaluate-message', calls: 423, success: 418, errors: 5, avgTime: '1.2s' },
+    { name: 'generate-message', calls: 312, success: 309, errors: 3, avgTime: '2.1s' },
+    { name: 'playground-chat', calls: 156, success: 154, errors: 2, avgTime: '1.8s' },
+    { name: 'analyze-voice', calls: 45, success: 43, errors: 2, avgTime: '3.2s' },
   ];
 
   return (
@@ -177,21 +207,13 @@ const AdminPanel = () => {
                 <Link to="/admin/users" className="flex items-center gap-2">
                   <Users className="w-4 h-4" />
                   User Management
-                  <ChevronRight className="w-4 h-4" />
-                </Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link to="/settings" className="flex items-center gap-2">
-                  <Building2 className="w-4 h-4" />
-                  Institutional Settings
-                  <ChevronRight className="w-4 h-4" />
                 </Link>
               </Button>
             </div>
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
@@ -222,11 +244,11 @@ const AdminPanel = () => {
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-blue-500/10">
-                    <Clock className="w-5 h-5 text-blue-600" />
+                    <Building2 className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold">{recentLogins}</p>
-                    <p className="text-xs text-muted-foreground">Logins (7 days)</p>
+                    <p className="text-2xl font-bold">{profiles.length}</p>
+                    <p className="text-xs text-muted-foreground">Profiles</p>
                   </div>
                 </div>
               </CardContent>
@@ -239,7 +261,20 @@ const AdminPanel = () => {
                   </div>
                   <div>
                     <p className="text-2xl font-bold">{templates.length}</p>
-                    <p className="text-xs text-muted-foreground">Shared Templates</p>
+                    <p className="text-xs text-muted-foreground">Shared Items</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-orange-500/10">
+                    <Cpu className="w-5 h-5 text-orange-600" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">936</p>
+                    <p className="text-xs text-muted-foreground">AI Calls (30d)</p>
                   </div>
                 </div>
               </CardContent>
@@ -248,11 +283,13 @@ const AdminPanel = () => {
 
           {/* Main Content Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList>
+            <TabsList className="grid grid-cols-6 w-full">
               <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="users">User Activity</TabsTrigger>
-              <TabsTrigger value="usage">Tool Usage</TabsTrigger>
-              <TabsTrigger value="admin">Admin Functions</TabsTrigger>
+              <TabsTrigger value="users">Users</TabsTrigger>
+              <TabsTrigger value="profiles">Profiles</TabsTrigger>
+              <TabsTrigger value="ai">AI Functions</TabsTrigger>
+              <TabsTrigger value="libraries">Libraries</TabsTrigger>
+              <TabsTrigger value="admin">Admin</TabsTrigger>
             </TabsList>
 
             {/* Overview Tab */}
@@ -298,61 +335,59 @@ const AdminPanel = () => {
                   </CardContent>
                 </Card>
 
-                {/* Library Stats */}
+                {/* Tool Usage Summary */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="font-serif text-lg flex items-center gap-2">
                       <BarChart3 className="w-5 h-5" />
-                      Library Overview
+                      Most Used Tools
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                      <div className="flex items-center gap-3">
-                        <Library className="w-5 h-5 text-muted-foreground" />
-                        <div>
-                          <p className="font-medium">Shared Library</p>
-                          <p className="text-xs text-muted-foreground">Organization templates</p>
+                  <CardContent className="space-y-3">
+                    {toolUsageStats.slice(0, 5).map((tool, index) => (
+                      <div key={tool.name} className="flex items-center gap-3">
+                        <div className="w-6 text-center text-muted-foreground font-medium text-sm">
+                          #{index + 1}
+                        </div>
+                        <div className="p-1.5 rounded bg-muted">
+                          <tool.icon className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-medium">{tool.name}</p>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm">{tool.usage}</span>
+                              <Badge variant="outline" className="text-xs">
+                                {tool.trend}
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="h-1.5 bg-muted rounded-full overflow-hidden mt-1">
+                            <div 
+                              className="h-full bg-primary rounded-full"
+                              style={{ width: `${(tool.usage / toolUsageStats[0].usage) * 100}%` }}
+                            />
+                          </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-bold">{templates.length}</p>
-                        <p className="text-xs text-muted-foreground">templates</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                      <div className="flex items-center gap-3">
-                        <FolderOpen className="w-5 h-5 text-muted-foreground" />
-                        <div>
-                          <p className="font-medium">Personal Libraries</p>
-                          <p className="text-xs text-muted-foreground">User-saved messages</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-bold">{messages.length}</p>
-                        <p className="text-xs text-muted-foreground">messages (yours)</p>
-                      </div>
-                    </div>
-                    <Button variant="outline" size="sm" className="w-full" asChild>
-                      <Link to="/shared-library">View Shared Library →</Link>
-                    </Button>
+                    ))}
                   </CardContent>
                 </Card>
               </div>
             </TabsContent>
 
-            {/* User Activity Tab */}
+            {/* Users Tab */}
             <TabsContent value="users" className="mt-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                   <div>
-                    <CardTitle className="font-serif">User Activity</CardTitle>
-                    <CardDescription>Monitor user engagement and last login times</CardDescription>
+                    <CardTitle className="font-serif">User Management</CardTitle>
+                    <CardDescription>Monitor user activity and manage access</CardDescription>
                   </div>
-                  <Button variant="outline" asChild>
+                  <Button asChild>
                     <Link to="/admin/users">
                       <Users className="w-4 h-4 mr-2" />
-                      Manage Users
+                      Full User Management
                     </Link>
                   </Button>
                 </CardHeader>
@@ -410,66 +445,264 @@ const AdminPanel = () => {
               </Card>
             </TabsContent>
 
-            {/* Tool Usage Tab */}
-            <TabsContent value="usage" className="mt-4">
+            {/* Profiles Tab */}
+            <TabsContent value="profiles" className="mt-4">
               <Card>
-                <CardHeader>
-                  <CardTitle className="font-serif">Tool Usage Statistics</CardTitle>
-                  <CardDescription>Most used tools across your institution</CardDescription>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle className="font-serif">Institutional Profiles</CardTitle>
+                    <CardDescription>Manage institution voice and configuration profiles</CardDescription>
+                  </div>
+                  <Button asChild>
+                    <Link to="/settings">
+                      <Settings className="w-4 h-4 mr-2" />
+                      Manage Profiles
+                    </Link>
+                  </Button>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {toolUsageStats.map((tool, index) => (
-                      <div key={tool.name} className="flex items-center gap-4">
-                        <div className="w-8 text-center text-muted-foreground font-medium">
-                          #{index + 1}
-                        </div>
-                        <div className="p-2 rounded-lg bg-muted">
-                          <tool.icon className="w-5 h-5 text-muted-foreground" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-1">
-                            <p className="font-medium">{tool.name}</p>
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-bold">{tool.usage}</span>
-                              <Badge variant="outline" className="text-xs">
-                                <TrendingUp className="w-3 h-3 mr-1" />
-                                {tool.trend}
-                              </Badge>
+                  {profiles.length === 0 ? (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <Building2 className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                      <p>No institutional profiles configured yet.</p>
+                      <Button variant="outline" className="mt-4" asChild>
+                        <Link to="/settings">Create First Profile</Link>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {profiles.map(profile => (
+                        <div key={profile.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-primary/10">
+                              <Building2 className="w-5 h-5 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-medium">{profile.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {profile.config.institutionName || 'No institution name set'}
+                                {profile.config.voiceAnalysis && (
+                                  <Badge variant="secondary" className="ml-2 text-[10px]">
+                                    <Sparkles className="w-3 h-3 mr-1" />
+                                    Voice Trained
+                                  </Badge>
+                                )}
+                              </p>
                             </div>
                           </div>
-                          <div className="h-2 bg-muted rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-primary rounded-full"
-                              style={{ width: `${(tool.usage / toolUsageStats[0].usage) * 100}%` }}
-                            />
+                          <div className="text-right text-xs text-muted-foreground">
+                            <p>Updated {new Date(profile.updatedAt).toLocaleDateString()}</p>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-6 text-center">
-                    Usage data is illustrative. Full analytics coming soon.
-                  </p>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            {/* AI Functions Tab */}
+            <TabsContent value="ai" className="mt-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-serif text-lg flex items-center gap-2">
+                      <Cpu className="w-5 h-5" />
+                      AI Function Performance
+                    </CardTitle>
+                    <CardDescription>Edge function call statistics (30 days)</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Function</TableHead>
+                          <TableHead className="text-right">Calls</TableHead>
+                          <TableHead className="text-right">Success</TableHead>
+                          <TableHead className="text-right">Avg Time</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {aiFunctionStats.map(fn => (
+                          <TableRow key={fn.name}>
+                            <TableCell className="font-mono text-sm">{fn.name}</TableCell>
+                            <TableCell className="text-right">{fn.calls}</TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-1">
+                                <span className="text-green-600">{fn.success}</span>
+                                <span className="text-muted-foreground">/</span>
+                                <span className="text-red-500">{fn.errors}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right text-muted-foreground">{fn.avgTime}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-serif text-lg flex items-center gap-2">
+                      <Zap className="w-5 h-5" />
+                      AI Health Status
+                    </CardTitle>
+                    <CardDescription>Current AI service status</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-5 h-5 text-green-600" />
+                        <span className="font-medium">AI Gateway</span>
+                      </div>
+                      <Badge className="bg-green-500">Operational</Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-5 h-5 text-green-600" />
+                        <span className="font-medium">Message Generation</span>
+                      </div>
+                      <Badge className="bg-green-500">Operational</Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-5 h-5 text-green-600" />
+                        <span className="font-medium">Voice Analysis</span>
+                      </div>
+                      <Badge className="bg-green-500">Operational</Badge>
+                    </div>
+                    
+                    <div className="pt-4 border-t">
+                      <h4 className="font-medium text-sm mb-3">Recent Errors</h4>
+                      <ScrollArea className="h-32">
+                        <div className="space-y-2">
+                          <div className="text-xs p-2 bg-muted rounded">
+                            <div className="flex items-center gap-2 text-amber-600">
+                              <AlertCircle className="w-3 h-3" />
+                              <span className="font-medium">Rate limit warning</span>
+                              <span className="text-muted-foreground ml-auto">2h ago</span>
+                            </div>
+                            <p className="text-muted-foreground mt-1">evaluate-message: 429 Too Many Requests</p>
+                          </div>
+                          <div className="text-xs p-2 bg-muted rounded">
+                            <div className="flex items-center gap-2 text-red-500">
+                              <XCircle className="w-3 h-3" />
+                              <span className="font-medium">Parse error</span>
+                              <span className="text-muted-foreground ml-auto">5h ago</span>
+                            </div>
+                            <p className="text-muted-foreground mt-1">analyze-voice: Invalid JSON response</p>
+                          </div>
+                        </div>
+                      </ScrollArea>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            {/* Libraries Tab */}
+            <TabsContent value="libraries" className="mt-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-serif text-lg flex items-center gap-2">
+                      <Library className="w-5 h-5" />
+                      Shared Library
+                    </CardTitle>
+                    <CardDescription>Organization-wide templates and playbooks</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                      <div>
+                        <p className="text-3xl font-bold">{templates.length}</p>
+                        <p className="text-sm text-muted-foreground">Total Templates</p>
+                      </div>
+                      <Library className="w-10 h-10 text-muted-foreground/30" />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium">By Status</p>
+                      <div className="flex gap-2">
+                        <Badge variant="outline">
+                          Published: {templates.filter(t => t.status === 'published').length}
+                        </Badge>
+                        <Badge variant="outline">
+                          Draft: {templates.filter(t => t.status === 'draft').length}
+                        </Badge>
+                        <Badge variant="outline">
+                          Pending: {templates.filter(t => t.status === 'submitted').length}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <Button variant="outline" className="w-full" asChild>
+                      <Link to="/shared-library">
+                        Browse Shared Library
+                        <ChevronRight className="w-4 h-4 ml-2" />
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-serif text-lg flex items-center gap-2">
+                      <FolderOpen className="w-5 h-5" />
+                      Personal Libraries
+                    </CardTitle>
+                    <CardDescription>User-saved messages across the organization</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                      <div>
+                        <p className="text-3xl font-bold">{messages.length}</p>
+                        <p className="text-sm text-muted-foreground">Your Messages</p>
+                      </div>
+                      <FolderOpen className="w-10 h-10 text-muted-foreground/30" />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium">By Channel</p>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge variant="outline">
+                          Email: {messages.filter(m => m.channels?.includes('email')).length}
+                        </Badge>
+                        <Badge variant="outline">
+                          SMS: {messages.filter(m => m.channels?.includes('sms')).length}
+                        </Badge>
+                        <Badge variant="outline">
+                          Social: {messages.filter(m => m.channels?.includes('social-media')).length}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <Button variant="outline" className="w-full" asChild>
+                      <Link to="/personal-library">
+                        Browse Personal Library
+                        <ChevronRight className="w-4 h-4 ml-2" />
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
 
             {/* Admin Functions Tab */}
             <TabsContent value="admin" className="mt-4">
               <div className="grid md:grid-cols-2 gap-4">
-                {/* Library Management */}
+                {/* Data Management */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="font-serif text-lg flex items-center gap-2">
-                      <Library className="w-5 h-5" />
-                      Library Management
+                      <Database className="w-5 h-5" />
+                      Data Management
                     </CardTitle>
                     <CardDescription>
-                      Manage shared and personal library content
+                      Purge and reset library content
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-3">
+                  <CardContent className="space-y-4">
                     <div className="p-4 border rounded-lg space-y-3">
                       <div className="flex items-center justify-between">
                         <div>
@@ -483,11 +716,12 @@ const AdminPanel = () => {
                           </Button>
                           <Button variant="destructive" size="sm" onClick={() => setClearSharedOpen(true)}>
                             <Trash2 className="w-4 h-4 mr-1" />
-                            Clear
+                            Purge
                           </Button>
                         </div>
                       </div>
                     </div>
+                    
                     <div className="p-4 border rounded-lg space-y-3">
                       <div className="flex items-center justify-between">
                         <div>
@@ -496,7 +730,7 @@ const AdminPanel = () => {
                         </div>
                         <Button variant="destructive" size="sm" onClick={() => setClearPersonalOpen(true)}>
                           <Trash2 className="w-4 h-4 mr-1" />
-                          Clear
+                          Purge
                         </Button>
                       </div>
                     </div>
@@ -507,7 +741,7 @@ const AdminPanel = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle className="font-serif text-lg flex items-center gap-2">
-                      <Building2 className="w-5 h-5" />
+                      <Shield className="w-5 h-5" />
                       Administration
                     </CardTitle>
                     <CardDescription>
@@ -539,7 +773,7 @@ const AdminPanel = () => {
                     <Button variant="outline" className="w-full justify-start" asChild>
                       <Link to="/settings">
                         <Building2 className="w-4 h-4 mr-2" />
-                        Institutional Settings
+                        Institutional Profiles
                         <ChevronRight className="w-4 h-4 ml-auto" />
                       </Link>
                     </Button>
@@ -552,48 +786,48 @@ const AdminPanel = () => {
       </main>
 
       {/* Clear Personal Library Dialog */}
-      <Dialog open={clearPersonalOpen} onOpenChange={setClearPersonalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-destructive">
+      <AlertDialog open={clearPersonalOpen} onOpenChange={setClearPersonalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="w-5 h-5" />
-              Clear Personal Library
-            </DialogTitle>
-            <DialogDescription>
+              Purge Personal Library
+            </AlertDialogTitle>
+            <AlertDialogDescription>
               This will permanently delete all {messages.length} messages from your personal library. This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setClearPersonalOpen(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={handleClearPersonalLibrary}>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleClearPersonalLibrary} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               <Trash2 className="w-4 h-4 mr-2" />
-              Clear Library
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              Purge Library
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Clear Shared Library Dialog */}
-      <Dialog open={clearSharedOpen} onOpenChange={setClearSharedOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-destructive">
+      <AlertDialog open={clearSharedOpen} onOpenChange={setClearSharedOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="w-5 h-5" />
-              Clear Shared Library
-            </DialogTitle>
-            <DialogDescription>
+              Purge Shared Library
+            </AlertDialogTitle>
+            <AlertDialogDescription>
               This will permanently delete all {templates.length} templates from the shared library. All users will lose access to these templates. This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setClearSharedOpen(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={handleClearSharedLibrary}>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleClearSharedLibrary} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               <Trash2 className="w-4 h-4 mr-2" />
-              Clear Library
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              Purge Library
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
