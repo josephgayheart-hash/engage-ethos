@@ -73,7 +73,7 @@ export function Header() {
           )}
           {isAdmin && (
             <Link 
-              to="/admin" 
+              to="/admin/console" 
               className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
             >
               <Settings className="w-4 h-4" />
