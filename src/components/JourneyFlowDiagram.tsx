@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback, useRef } from 'react';
 import ReactFlow, {
   Node,
   Edge,
@@ -9,10 +9,20 @@ import ReactFlow, {
   MarkerType,
   Position,
   Handle,
+  getRectOfNodes,
+  getTransformForBounds,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { Mail, MessageSquare, Globe, Phone, Share2, FileText } from 'lucide-react';
+import { toPng, toSvg } from 'html-to-image';
+import { Mail, MessageSquare, Globe, Phone, Share2, FileText, Download, Image, FileCode } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import type { StrategyJourney, JourneyTouchpoint } from '@/types/persist';
 
 interface JourneyFlowDiagramProps {
@@ -93,6 +103,29 @@ const nodeTypes = {
 };
 
 export const JourneyFlowDiagram = ({ journey }: JourneyFlowDiagramProps) => {
+  const flowRef = useRef<HTMLDivElement>(null);
+
+  // Export functions
+  const exportToImage = useCallback((format: 'png' | 'svg') => {
+    const flowElement = flowRef.current?.querySelector('.react-flow') as HTMLElement;
+    if (!flowElement) return;
+
+    const downloadImage = (dataUrl: string) => {
+      const a = document.createElement('a');
+      a.setAttribute('download', `journey-diagram.${format}`);
+      a.setAttribute('href', dataUrl);
+      a.click();
+    };
+
+    const exportFn = format === 'png' ? toPng : toSvg;
+    
+    exportFn(flowElement, {
+      backgroundColor: 'hsl(var(--background))',
+      quality: 1,
+      pixelRatio: 2,
+    }).then(downloadImage).catch(console.error);
+  }, []);
+
   // Convert journey phases and touchpoints to React Flow nodes
   const { initialNodes, initialEdges } = useMemo(() => {
     const nodes: Node[] = [];
@@ -155,7 +188,28 @@ export const JourneyFlowDiagram = ({ journey }: JourneyFlowDiagramProps) => {
   const [edges, , onEdgesChange] = useEdgesState(initialEdges);
 
   return (
-    <div className="w-full h-[450px] border rounded-lg bg-muted/20">
+    <div ref={flowRef} className="w-full h-[450px] border rounded-lg bg-muted/20 relative">
+      {/* Export Button */}
+      <div className="absolute top-2 right-2 z-10">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="bg-card shadow-md">
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => exportToImage('png')}>
+              <Image className="w-4 h-4 mr-2" />
+              Export as PNG
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportToImage('svg')}>
+              <FileCode className="w-4 h-4 mr-2" />
+              Export as SVG
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
       <ReactFlow
         nodes={nodes}
         edges={edges}
