@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import OnboardingPage from "./pages/OnboardingPage";
 import PersonalLibrary from "./pages/PersonalLibrary";
@@ -25,53 +25,134 @@ import PerformanceBenchmarks from "./pages/PerformanceBenchmarks";
 import TranslationTool from "./pages/TranslationTool";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
+import LoginPage from "./pages/LoginPage";
+import RequestAccessPage from "./pages/RequestAccessPage";
+import ChangePasswordPage from "./pages/ChangePasswordPage";
+import ProfilePage from "./pages/ProfilePage";
+import AdminConsolePage from "./pages/admin/AdminConsolePage";
+import AdminUsersPage from "./pages/admin/AdminUsersPage";
+import AdminOnboardingPage from "./pages/admin/AdminOnboardingPage";
 
 const queryClient = new QueryClient();
 
-// Check if onboarding is complete
-function RequireOnboarding({ children }: { children: React.ReactNode }) {
-  const onboardingComplete = localStorage.getItem('persist_onboarding_complete') === 'true';
+// Protected route wrapper - requires authentication
+function RequireAuth({ children }: { children: React.ReactNode }) {
+  const { user, isLoading, profile } = useAuth();
   
-  if (!onboardingComplete) {
-    return <Navigate to="/onboarding" replace />;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-pulse">Loading...</div>
+      </div>
+    );
+  }
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Check if password reset is required
+  if (profile?.password_reset_required) {
+    return <Navigate to="/change-password" replace />;
+  }
+
+  // Check if user is active
+  if (profile?.status !== 'active' && profile?.status !== 'invited') {
+    return <Navigate to="/login" replace />;
   }
   
   return <>{children}</>;
 }
 
+// Admin route wrapper - requires admin role
+function RequireAdmin({ children }: { children: React.ReactNode }) {
+  const { isAdmin, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-pulse">Loading...</div>
+      </div>
+    );
+  }
+  
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+  
+  return <>{children}</>;
+}
+
+// Public route wrapper - redirects authenticated users to home
+function PublicRoute({ children }: { children: React.ReactNode }) {
+  const { user, isLoading, profile } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-pulse">Loading...</div>
+      </div>
+    );
+  }
+  
+  if (user && profile?.status === 'active' && !profile?.password_reset_required) {
+    return <Navigate to="/" replace />;
+  }
+  
+  return <>{children}</>;
+}
+
+const AppRoutes = () => (
+  <Routes>
+    {/* Public routes */}
+    <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+    <Route path="/request-access" element={<RequestAccessPage />} />
+    <Route path="/change-password" element={<ChangePasswordPage />} />
+    
+    {/* Protected routes */}
+    <Route path="/" element={<RequireAuth><Index /></RequireAuth>} />
+    <Route path="/onboarding" element={<RequireAuth><OnboardingPage /></RequireAuth>} />
+    <Route path="/evaluate" element={<RequireAuth><EvaluatePage /></RequireAuth>} />
+    <Route path="/build" element={<RequireAuth><BuildPage /></RequireAuth>} />
+    <Route path="/strategy" element={<RequireAuth><StrategyPage /></RequireAuth>} />
+    <Route path="/call-script" element={<RequireAuth><CallScriptPage /></RequireAuth>} />
+    <Route path="/playground" element={<RequireAuth><PlaygroundPage /></RequireAuth>} />
+    <Route path="/byoc" element={<RequireAuth><BYOCPage /></RequireAuth>} />
+    <Route path="/library" element={<RequireAuth><PersonalLibrary /></RequireAuth>} />
+    <Route path="/shared-library" element={<RequireAuth><SharedLibrary /></RequireAuth>} />
+    <Route path="/campaign-dashboard" element={<RequireAuth><CampaignDashboard /></RequireAuth>} />
+    <Route path="/calendar" element={<RequireAuth><CommunicationCalendar /></RequireAuth>} />
+    <Route path="/subject-optimizer" element={<RequireAuth><SubjectLineOptimizer /></RequireAuth>} />
+    <Route path="/accessibility" element={<RequireAuth><AccessibilityChecker /></RequireAuth>} />
+    <Route path="/brand-voice" element={<RequireAuth><BrandVoiceScorer /></RequireAuth>} />
+    <Route path="/email-preview" element={<RequireAuth><EmailPreview /></RequireAuth>} />
+    <Route path="/benchmarks" element={<RequireAuth><PerformanceBenchmarks /></RequireAuth>} />
+    <Route path="/translate" element={<RequireAuth><TranslationTool /></RequireAuth>} />
+    <Route path="/settings" element={<RequireAuth><SettingsPage /></RequireAuth>} />
+    <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
+    
+    {/* Admin routes */}
+    <Route path="/admin" element={<RequireAuth><RequireAdmin><AdminPanel /></RequireAdmin></RequireAuth>} />
+    <Route path="/admin/console" element={<RequireAuth><RequireAdmin><AdminConsolePage /></RequireAdmin></RequireAuth>} />
+    <Route path="/admin/users" element={<RequireAuth><RequireAdmin><AdminUsersPage /></RequireAdmin></RequireAuth>} />
+    <Route path="/admin/onboarding" element={<RequireAuth><RequireAdmin><AdminOnboardingPage /></RequireAdmin></RequireAuth>} />
+    <Route path="/admin/library" element={<RequireAuth><RequireAdmin><AdminPanel /></RequireAdmin></RequireAuth>} />
+    
+    {/* Catch-all */}
+    <Route path="*" element={<NotFound />} />
+  </Routes>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/onboarding" element={<OnboardingPage />} />
-            <Route path="/" element={<RequireOnboarding><Index /></RequireOnboarding>} />
-            <Route path="/evaluate" element={<RequireOnboarding><EvaluatePage /></RequireOnboarding>} />
-            <Route path="/build" element={<RequireOnboarding><BuildPage /></RequireOnboarding>} />
-            <Route path="/strategy" element={<RequireOnboarding><StrategyPage /></RequireOnboarding>} />
-            <Route path="/call-script" element={<RequireOnboarding><CallScriptPage /></RequireOnboarding>} />
-            <Route path="/playground" element={<RequireOnboarding><PlaygroundPage /></RequireOnboarding>} />
-            <Route path="/byoc" element={<RequireOnboarding><BYOCPage /></RequireOnboarding>} />
-            <Route path="/library" element={<RequireOnboarding><PersonalLibrary /></RequireOnboarding>} />
-            <Route path="/shared-library" element={<RequireOnboarding><SharedLibrary /></RequireOnboarding>} />
-            <Route path="/admin" element={<RequireOnboarding><AdminPanel /></RequireOnboarding>} />
-            <Route path="/campaign-dashboard" element={<RequireOnboarding><CampaignDashboard /></RequireOnboarding>} />
-            <Route path="/calendar" element={<RequireOnboarding><CommunicationCalendar /></RequireOnboarding>} />
-            <Route path="/subject-optimizer" element={<RequireOnboarding><SubjectLineOptimizer /></RequireOnboarding>} />
-            <Route path="/accessibility" element={<RequireOnboarding><AccessibilityChecker /></RequireOnboarding>} />
-            <Route path="/brand-voice" element={<RequireOnboarding><BrandVoiceScorer /></RequireOnboarding>} />
-            <Route path="/email-preview" element={<RequireOnboarding><EmailPreview /></RequireOnboarding>} />
-            <Route path="/benchmarks" element={<RequireOnboarding><PerformanceBenchmarks /></RequireOnboarding>} />
-            <Route path="/translate" element={<RequireOnboarding><TranslationTool /></RequireOnboarding>} />
-            <Route path="/settings" element={<RequireOnboarding><SettingsPage /></RequireOnboarding>} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <Toaster />
+          <Sonner />
+          <AppRoutes />
+        </AuthProvider>
+      </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );
