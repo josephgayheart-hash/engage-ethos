@@ -45,12 +45,13 @@ const audienceOptions: { value: AudienceType; label: string }[] = [
   { value: 'at-risk', label: 'At-Risk Student' },
   { value: 'graduate', label: 'Graduate Student' },
   { value: 'online-learner', label: 'Online Learner' },
+  { value: 'employee', label: 'University Employee' },
   { value: 'alumni', label: 'Alumni' },
   { value: 'parents', label: 'Parents/Family' },
   { value: 'donors', label: 'Donors' },
 ];
 
-const cohortOptions: { value: CohortContext; label: string }[] = [
+const studentCohortOptions: { value: CohortContext; label: string }[] = [
   { value: 'none', label: 'No specific cohort' },
   { value: 'first-gen', label: 'First-Generation' },
   { value: 'probation', label: 'Academic Probation' },
@@ -64,7 +65,19 @@ const cohortOptions: { value: CohortContext; label: string }[] = [
   { value: 'working-adult', label: 'Working Adult' },
 ];
 
-const momentOptions: { value: CommunicationMoment; label: string }[] = [
+const employeeCohortOptions: { value: CohortContext; label: string }[] = [
+  { value: 'none', label: 'No specific cohort' },
+  { value: 'faculty', label: 'Faculty' },
+  { value: 'staff', label: 'Staff' },
+  { value: 'adjunct', label: 'Adjunct Faculty' },
+  { value: 'administrator', label: 'Administrator' },
+  { value: 'hourly', label: 'Hourly Employee' },
+  { value: 'new-hire', label: 'New Hire' },
+  { value: 'supervisor', label: 'Supervisor/Manager' },
+  { value: 'remote-employee', label: 'Remote Employee' },
+];
+
+const studentMomentOptions: { value: CommunicationMoment; label: string }[] = [
   { value: 'recruitment', label: 'Recruitment' },
   { value: 'yield', label: 'Yield Campaign' },
   { value: 'summer-melt', label: 'Summer Melt Prevention' },
@@ -76,6 +89,20 @@ const momentOptions: { value: CommunicationMoment; label: string }[] = [
   { value: 're-engagement', label: 'Re-engagement' },
   { value: 'graduation', label: 'Graduation' },
   { value: 'giving-campaign', label: 'Giving Campaign' },
+  { value: 'seasonal', label: 'Seasonal' },
+];
+
+const employeeMomentOptions: { value: CommunicationMoment; label: string }[] = [
+  { value: 'open-enrollment', label: 'Benefits Open Enrollment' },
+  { value: 'performance-review', label: 'Performance Review Cycle' },
+  { value: 'professional-development', label: 'Professional Development' },
+  { value: 'onboarding', label: 'Employee Onboarding' },
+  { value: 'policy-update', label: 'Policy Update' },
+  { value: 'campus-event', label: 'Campus Event' },
+  { value: 'wellness-initiative', label: 'Wellness Initiative' },
+  { value: 'recognition', label: 'Recognition/Appreciation' },
+  { value: 'budget-cycle', label: 'Budget Cycle' },
+  { value: 'strategic-planning', label: 'Strategic Planning' },
   { value: 'seasonal', label: 'Seasonal' },
 ];
 
@@ -103,6 +130,12 @@ const domainOptions: { value: MessageDomain; label: string }[] = [
   { value: 'scholastic', label: 'Scholastic' },
   { value: 'giving', label: 'Giving/Fundraising' },
   { value: 'alumni-relations', label: 'Alumni Relations' },
+  // Employee domains
+  { value: 'hr-benefits', label: 'HR & Benefits' },
+  { value: 'professional-growth', label: 'Professional Growth' },
+  { value: 'workplace-culture', label: 'Workplace Culture' },
+  { value: 'operations', label: 'Operations' },
+  { value: 'safety-security', label: 'Safety & Security' },
 ];
 
 const goalOptions: { value: PrimaryGoal; label: string }[] = [
@@ -118,6 +151,12 @@ const goalOptions: { value: PrimaryGoal; label: string }[] = [
   { value: 'check-in', label: 'Check-in (welfare)' },
   { value: 'donate', label: 'Donate (giving)' },
   { value: 'register', label: 'Register (course/event)' },
+  // Employee goals
+  { value: 'enroll-benefits', label: 'Enroll in Benefits' },
+  { value: 'complete-training', label: 'Complete Training' },
+  { value: 'acknowledge', label: 'Acknowledge (policy/info)' },
+  { value: 'participate', label: 'Participate (event/initiative)' },
+  { value: 'review-update', label: 'Review & Update (info/profile)' },
 ];
 
 const toneOptions: { value: TonePreference; label: string }[] = [
@@ -132,6 +171,11 @@ const toneOptions: { value: TonePreference; label: string }[] = [
 export function ContextSelector({ context, onChange, mode = 'evaluator' }: ContextSelectorProps) {
   const showExtendedOptions = mode === 'builder' || mode === 'mapper';
   const hideChannel = mode === 'mapper' || mode === 'builder'; // Builder/Strategy pages have their own multi-channel selection
+  
+  // Dynamic options based on audience type
+  const isEmployee = context.audience === 'employee';
+  const cohortOptions = isEmployee ? employeeCohortOptions : studentCohortOptions;
+  const momentOptions = isEmployee ? employeeMomentOptions : studentMomentOptions;
 
   return (
     <div className="space-y-4">
