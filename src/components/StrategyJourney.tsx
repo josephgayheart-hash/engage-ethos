@@ -64,6 +64,37 @@ const phaseBgColors: Record<StrategyPhase, string> = {
   'long-term': 'border-l-violet-500',
 };
 
+// Channel colors - matches diagram node colors
+const channelColors: Record<Channel, string> = {
+  'email': 'bg-blue-500 text-white',
+  'sms': 'bg-green-500 text-white',
+  'portal': 'bg-orange-500 text-white',
+  'landing-page': 'bg-gray-500 text-white',
+  'social-media': 'bg-pink-500 text-white',
+  'direct-mail': 'bg-gray-500 text-white',
+  'phone-call': 'bg-purple-500 text-white',
+};
+
+const channelBorderColors: Record<Channel, string> = {
+  'email': 'border-l-blue-500',
+  'sms': 'border-l-green-500',
+  'portal': 'border-l-orange-500',
+  'landing-page': 'border-l-gray-500',
+  'social-media': 'border-l-pink-500',
+  'direct-mail': 'border-l-gray-500',
+  'phone-call': 'border-l-purple-500',
+};
+
+const channelDotColors: Record<Channel, string> = {
+  'email': 'bg-blue-500',
+  'sms': 'bg-green-500',
+  'portal': 'bg-orange-500',
+  'landing-page': 'bg-gray-500',
+  'social-media': 'bg-pink-500',
+  'direct-mail': 'bg-gray-500',
+  'phone-call': 'bg-purple-500',
+};
+
 const allChannels: Channel[] = ['email', 'sms', 'portal', 'social-media', 'landing-page', 'direct-mail', 'phone-call'];
 
 // Helper to format channel names with proper capitalization
@@ -132,23 +163,19 @@ function TouchpointCard({
 
   return (
     <div className="relative pl-12">
-      {/* Timeline dot */}
-      <div className={`absolute left-2 w-5 h-5 rounded-full border-2 border-background flex items-center justify-center text-xs font-bold ${
-        touchpoint.phase === 'short-term' ? 'bg-emerald-500 text-white' :
-        touchpoint.phase === 'mid-term' ? 'bg-amber-500 text-white' :
-        'bg-violet-500 text-white'
-      }`}>
+      {/* Timeline dot - colored by channel to match diagram */}
+      <div className={`absolute left-2 w-5 h-5 rounded-full border-2 border-background flex items-center justify-center text-xs font-bold text-white ${channelDotColors[touchpoint.channel]}`}>
         {touchpoint.week}
       </div>
       
-      <Card className={`border-l-4 ${phaseBgColors[touchpoint.phase]}`}>
+      <Card className={`border-l-4 ${channelBorderColors[touchpoint.channel]}`}>
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <CardTitle className="text-base font-medium">
               Week {touchpoint.week}{weekDate ? ` (${weekDate})` : ''}: {touchpoint.title}
             </CardTitle>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="flex items-center gap-1">
+              <Badge className={`flex items-center gap-1 ${channelColors[touchpoint.channel]}`}>
                 {channelIcons[touchpoint.channel]}
                 {formatChannelName(touchpoint.channel)}
               </Badge>

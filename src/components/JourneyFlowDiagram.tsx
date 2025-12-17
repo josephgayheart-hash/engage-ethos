@@ -241,11 +241,18 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
     
     const touchpointCount = journey.touchpoints.length;
     
-    // Dynamic spacing based on journey length
-    const xSpacing = touchpointCount > 12 ? 340 : touchpointCount > 8 ? 320 : 300;
-    const ySpacing = touchpointCount > 12 ? 240 : touchpointCount > 8 ? 220 : 200;
-    const nodesPerRow = touchpointCount > 15 ? 5 : touchpointCount > 10 ? 4 : touchpointCount > 6 ? 3 : Math.min(touchpointCount, 4);
-    const yBase = 220; // Increased to make room for info node
+    // Improved spacing to prevent overlap - wider gaps between nodes
+    const nodeWidth = 260; // Approximate node width including padding
+    const nodeHeight = 180; // Approximate node height including padding
+    const horizontalGap = 80; // Gap between nodes horizontally
+    const verticalGap = 60; // Gap between rows vertically
+    
+    const xSpacing = nodeWidth + horizontalGap;
+    const ySpacing = nodeHeight + verticalGap;
+    
+    // Calculate optimal nodes per row based on count
+    const nodesPerRow = touchpointCount > 12 ? 4 : touchpointCount > 8 ? 4 : touchpointCount > 5 ? 3 : Math.min(touchpointCount, 3);
+    const yBase = 240; // Space for info node and phase headers
     
     // Calculate phase positions based on touchpoint distribution
     const phaseWidth = nodesPerRow * xSpacing;
@@ -285,16 +292,16 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
       nodes.push(phaseNode);
     });
     
-    // Add touchpoint nodes with serpentine (snake) layout for better flow
+    // Add touchpoint nodes in a clean grid layout (no serpentine, no stagger for cleaner alignment)
     journey.touchpoints.forEach((touchpoint, index) => {
       const row = Math.floor(index / nodesPerRow);
-      const colInRow = index % nodesPerRow;
+      const col = index % nodesPerRow;
       
-      // Serpentine layout: alternate direction each row
-      const col = row % 2 === 0 ? colInRow : (nodesPerRow - 1 - colInRow);
-      
-      // Stagger Y position slightly within each row for visual interest
-      const yStagger = (colInRow % 2) * 40;
+      // Calculate horizontal offset to center the row
+      const itemsInThisRow = Math.min(nodesPerRow, touchpointCount - row * nodesPerRow);
+      const rowWidth = itemsInThisRow * xSpacing;
+      const totalWidth = nodesPerRow * xSpacing;
+      const xOffset = (totalWidth - rowWidth) / 2;
       
       const weekDate = calculateWeekDate(startDate, touchpoint.week);
       
@@ -302,8 +309,8 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
         id: `tp-${index}`,
         type: 'touchpoint',
         position: { 
-          x: col * xSpacing + 20, 
-          y: yBase + (row * ySpacing) + yStagger 
+          x: col * xSpacing + xOffset + 40, 
+          y: yBase + (row * ySpacing)
         },
         data: { touchpoint, index, weekDate },
         draggable: true,
@@ -334,9 +341,9 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
 
   // Calculate dynamic height based on touchpoint count (increased for info node)
   const touchpointCount = journey.touchpoints.length;
-  const nodesPerRow = touchpointCount > 15 ? 5 : touchpointCount > 10 ? 4 : touchpointCount > 6 ? 3 : Math.min(touchpointCount, 4);
+  const nodesPerRow = touchpointCount > 12 ? 4 : touchpointCount > 8 ? 4 : touchpointCount > 5 ? 3 : Math.min(touchpointCount, 3);
   const rowCount = Math.ceil(touchpointCount / nodesPerRow);
-  const dynamicHeight = Math.max(600, 300 + rowCount * 240);
+  const dynamicHeight = Math.max(650, 350 + rowCount * 260);
 
   return (
     <div ref={flowRef} className="w-full border rounded-lg bg-muted/20 relative">
