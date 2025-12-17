@@ -31,11 +31,13 @@ export type AudienceType =
   | 'at-risk' 
   | 'graduate'
   | 'online-learner'
+  | 'employee'
   | 'alumni'
   | 'parents'
   | 'donors';
 
 export type CohortContext = 
+  // Student cohorts
   | 'first-gen'
   | 'probation'
   | 'online'
@@ -46,9 +48,19 @@ export type CohortContext =
   | 'veteran'
   | 'parent'
   | 'working-adult'
+  // Employee cohorts
+  | 'faculty'
+  | 'staff'
+  | 'adjunct'
+  | 'administrator'
+  | 'hourly'
+  | 'new-hire'
+  | 'supervisor'
+  | 'remote-employee'
   | 'none';
 
 export type CommunicationMoment = 
+  // Student moments
   | 'early-term' 
   | 'midterm' 
   | 'finals'
@@ -60,7 +72,18 @@ export type CommunicationMoment =
   | 'yield'
   | 'summer-melt'
   | 'graduation'
-  | 'giving-campaign';
+  | 'giving-campaign'
+  // Employee moments
+  | 'open-enrollment'
+  | 'performance-review'
+  | 'professional-development'
+  | 'onboarding'
+  | 'policy-update'
+  | 'campus-event'
+  | 'wellness-initiative'
+  | 'recognition'
+  | 'budget-cycle'
+  | 'strategic-planning';
 
 export type Channel = 
   | 'email' 
@@ -84,7 +107,13 @@ export type MessageDomain =
   | 'giving'
   | 'alumni-relations'
   | 'admissions'
-  | 'recruitment';
+  | 'recruitment'
+  // Employee domains
+  | 'hr-benefits'
+  | 'professional-growth'
+  | 'workplace-culture'
+  | 'operations'
+  | 'safety-security';
 
 export type PrimaryGoal = 
   | 'persist'
@@ -98,7 +127,13 @@ export type PrimaryGoal =
   | 'inquiry'
   | 'apply'
   | 'yield'
-  | 'confirm';
+  | 'confirm'
+  // Employee goals
+  | 'enroll-benefits'
+  | 'complete-training'
+  | 'acknowledge'
+  | 'participate'
+  | 'review-update';
 
 export type TonePreference = 
   | 'supportive'
