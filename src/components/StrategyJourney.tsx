@@ -216,7 +216,6 @@ function TouchpointCard({
                 onClick={() => setExpanded(!expanded)}
                 className={`text-sm transition-all ${!expanded ? 'border-primary/40 hover:border-primary hover:bg-primary/10' : ''}`}
               >
-                <Sparkles className={`w-4 h-4 mr-2 ${!expanded ? 'text-primary' : ''}`} />
                 {expanded ? 'Hide' : 'Generate'} Message Copy
                 {!expanded && <AIIndicator className="ml-2" />}
               </Button>
