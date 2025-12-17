@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,7 +24,11 @@ import {
   Loader2,
   Save,
   Pencil,
-  X
+  X,
+  Upload,
+  Image,
+  Palette,
+  Trash2
 } from 'lucide-react';
 
 interface UserStats {
@@ -40,9 +44,13 @@ interface OnboardingStats {
   rejected: number;
 }
 
+const MAX_LOGO_SIZE = 2 * 1024 * 1024; // 2MB
+const MAX_LOGO_DIMENSION = 400; // Max width/height in pixels
+
 export default function AdminConsolePage() {
   const { tenant, profile, isSuperAdmin, refreshProfile } = useAuth();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [userStats, setUserStats] = useState<UserStats>({ total: 0, active: 0, pending: 0, recentLogins: 0 });
   const [onboardingStats, setOnboardingStats] = useState<OnboardingStats>({ pending: 0, approved: 0, rejected: 0 });
   const [recentUsers, setRecentUsers] = useState<any[]>([]);
@@ -52,12 +60,34 @@ export default function AdminConsolePage() {
   const [isEditingInstitution, setIsEditingInstitution] = useState(false);
   const [institutionName, setInstitutionName] = useState('');
   const [isSavingInstitution, setIsSavingInstitution] = useState(false);
+  
+  // Logo state
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  
+  // Color picker state
+  const [primaryColor, setPrimaryColor] = useState('#1F2A44');
+  const [accentColor, setAccentColor] = useState('#2C7A7B');
+  const [primaryColorInput, setPrimaryColorInput] = useState('#1F2A44');
+  const [accentColorInput, setAccentColorInput] = useState('#2C7A7B');
+  const [isSavingColors, setIsSavingColors] = useState(false);
 
   useEffect(() => {
     if (tenant?.institution_name) {
       setInstitutionName(tenant.institution_name);
     }
-  }, [tenant?.institution_name]);
+    if (tenant?.logo_url) {
+      setLogoUrl(tenant.logo_url);
+    }
+    if (tenant?.primary_color) {
+      setPrimaryColor(tenant.primary_color);
+      setPrimaryColorInput(tenant.primary_color);
+    }
+    if (tenant?.accent_color) {
+      setAccentColor(tenant.accent_color);
+      setAccentColorInput(tenant.accent_color);
+    }
+  }, [tenant]);
 
   const handleSaveInstitution = async () => {
     if (!tenant?.id || !institutionName.trim()) return;
@@ -86,6 +116,211 @@ export default function AdminConsolePage() {
       });
     } finally {
       setIsSavingInstitution(false);
+    }
+  };
+
+  const resizeImage = (file: File): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const img = document.createElement('img');
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      img.onload = () => {
+        let { width, height } = img;
+        
+        // Scale down if needed
+        if (width > MAX_LOGO_DIMENSION || height > MAX_LOGO_DIMENSION) {
+          if (width > height) {
+            height = (height / width) * MAX_LOGO_DIMENSION;
+            width = MAX_LOGO_DIMENSION;
+          } else {
+            width = (width / height) * MAX_LOGO_DIMENSION;
+            height = MAX_LOGO_DIMENSION;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        canvas.toBlob(
+          (blob) => {
+            if (blob) resolve(blob);
+            else reject(new Error('Failed to resize image'));
+          },
+          'image/png',
+          0.9
+        );
+      };
+      
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !tenant?.id) return;
+
+    if (file.size > MAX_LOGO_SIZE) {
+      toast({
+        title: 'File too large',
+        description: 'Logo must be less than 2MB',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: 'Invalid file type',
+        description: 'Please upload an image file',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsUploadingLogo(true);
+    try {
+      // Resize the image
+      const resizedBlob = await resizeImage(file);
+      const fileName = `${tenant.id}/logo-${Date.now()}.png`;
+
+      // Delete old logo if exists
+      if (tenant.logo_url) {
+        const oldPath = tenant.logo_url.split('/').pop();
+        if (oldPath) {
+          await supabase.storage
+            .from('institution-logos')
+            .remove([`${tenant.id}/${oldPath}`]);
+        }
+      }
+
+      // Upload new logo
+      const { error: uploadError } = await supabase.storage
+        .from('institution-logos')
+        .upload(fileName, resizedBlob, { 
+          contentType: 'image/png',
+          upsert: true 
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('institution-logos')
+        .getPublicUrl(fileName);
+
+      // Update tenant with logo URL
+      const { error: updateError } = await supabase
+        .from('tenants')
+        .update({ logo_url: publicUrl })
+        .eq('id', tenant.id);
+
+      if (updateError) throw updateError;
+
+      setLogoUrl(publicUrl);
+      await refreshProfile();
+
+      toast({
+        title: 'Logo Uploaded',
+        description: 'Your institution logo has been updated.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Upload Failed',
+        description: error.message || 'Failed to upload logo',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUploadingLogo(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemoveLogo = async () => {
+    if (!tenant?.id || !tenant.logo_url) return;
+
+    setIsUploadingLogo(true);
+    try {
+      // Extract filename from URL and delete
+      const urlParts = tenant.logo_url.split('/');
+      const fileName = urlParts[urlParts.length - 1];
+      
+      await supabase.storage
+        .from('institution-logos')
+        .remove([`${tenant.id}/${fileName}`]);
+
+      // Update tenant to remove logo URL
+      const { error } = await supabase
+        .from('tenants')
+        .update({ logo_url: null })
+        .eq('id', tenant.id);
+
+      if (error) throw error;
+
+      setLogoUrl(null);
+      await refreshProfile();
+
+      toast({
+        title: 'Logo Removed',
+        description: 'Your institution logo has been removed.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to remove logo',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  };
+
+  const handleSaveColors = async () => {
+    if (!tenant?.id) return;
+
+    setIsSavingColors(true);
+    try {
+      const { error } = await supabase
+        .from('tenants')
+        .update({ 
+          primary_color: primaryColorInput,
+          accent_color: accentColorInput 
+        })
+        .eq('id', tenant.id);
+
+      if (error) throw error;
+
+      setPrimaryColor(primaryColorInput);
+      setAccentColor(accentColorInput);
+      await refreshProfile();
+
+      toast({
+        title: 'Colors Saved',
+        description: 'Your institution colors have been updated.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to save colors',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSavingColors(false);
+    }
+  };
+
+  const handleColorInputChange = (value: string, setter: (v: string) => void) => {
+    // Allow typing partial hex codes
+    if (value === '' || /^#?[0-9A-Fa-f]{0,6}$/.test(value)) {
+      // Add # prefix if not present
+      if (value && !value.startsWith('#')) {
+        value = '#' + value;
+      }
+      setter(value);
     }
   };
 
@@ -219,19 +454,38 @@ export default function AdminConsolePage() {
             </div>
           </div>
         </div>
+        {/* Accent color bar */}
+        {tenant?.accent_color && (
+          <div 
+            className="h-1 w-full" 
+            style={{ backgroundColor: tenant.accent_color }}
+          />
+        )}
       </div>
 
       <div className="container mx-auto px-4 py-8">
         {/* Welcome Card */}
         <Card className="mb-6 border-[hsl(220,13%,88%)] bg-gradient-to-r from-[hsl(222,47%,14%)] to-[hsl(222,47%,20%)] text-white">
           <CardContent className="py-6">
-            <h2 className="font-serif text-xl font-bold mb-2">
-              Welcome, {profile?.first_name}
-            </h2>
-            <p className="text-white/80">
-              As an administrator for {tenant?.institution_name || 'your institution'}, you can manage users, 
-              review access requests, and configure institutional settings.
-            </p>
+            <div className="flex items-center gap-4">
+              {logoUrl && (
+                <img 
+                  src={logoUrl} 
+                  alt={tenant?.institution_name || 'Institution'} 
+                  className="h-16 w-auto object-contain bg-white/10 rounded-lg p-2"
+                  style={{ maxWidth: '150px' }}
+                />
+              )}
+              <div>
+                <h2 className="font-serif text-xl font-bold mb-2">
+                  Welcome, {profile?.first_name}
+                </h2>
+                <p className="text-white/80">
+                  As an administrator for {tenant?.institution_name || 'your institution'}, you can manage users, 
+                  review access requests, and configure institutional settings.
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -244,7 +498,7 @@ export default function AdminConsolePage() {
                   <Building2 className="w-5 h-5" />
                   Institution Branding
                 </CardTitle>
-                <CardDescription>Manage your institution's name and identity</CardDescription>
+                <CardDescription>Manage your institution's name, logo, and colors</CardDescription>
               </div>
               {!isEditingInstitution && (
                 <Button variant="outline" size="sm" onClick={() => setIsEditingInstitution(true)}>
@@ -256,7 +510,8 @@ export default function AdminConsolePage() {
           </CardHeader>
           <CardContent>
             {isEditingInstitution ? (
-              <div className="space-y-4">
+              <div className="space-y-6">
+                {/* Institution Name */}
                 <div className="space-y-2">
                   <Label htmlFor="institutionName">Institution Name</Label>
                   <Input
@@ -267,13 +522,131 @@ export default function AdminConsolePage() {
                     className="max-w-md"
                   />
                 </div>
-                <div className="flex gap-2">
+
+                {/* Logo Upload */}
+                <div className="space-y-3">
+                  <Label>Institution Logo</Label>
+                  <div className="flex items-center gap-4">
+                    {logoUrl ? (
+                      <div className="relative">
+                        <img 
+                          src={logoUrl} 
+                          alt="Institution logo" 
+                          className="h-20 w-auto object-contain border rounded-lg p-2 bg-muted/30"
+                          style={{ maxWidth: '200px' }}
+                        />
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          className="absolute -top-2 -right-2 h-6 w-6"
+                          onClick={handleRemoveLogo}
+                          disabled={isUploadingLogo}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="h-20 w-32 border-2 border-dashed rounded-lg flex items-center justify-center bg-muted/30">
+                        <Image className="w-8 h-8 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        className="hidden"
+                        id="logo-upload"
+                      />
+                      <Button
+                        variant="outline"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploadingLogo}
+                      >
+                        {isUploadingLogo ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-4 h-4 mr-2" />
+                            {logoUrl ? 'Change Logo' : 'Upload Logo'}
+                          </>
+                        )}
+                      </Button>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        PNG, JPG up to 2MB. Will be resized if larger than 400px.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Color Pickers */}
+                <div className="space-y-4">
+                  <Label className="flex items-center gap-2">
+                    <Palette className="w-4 h-4" />
+                    Brand Colors
+                  </Label>
+                  <div className="grid sm:grid-cols-2 gap-4 max-w-md">
+                    <div className="space-y-2">
+                      <Label htmlFor="primaryColor" className="text-xs text-muted-foreground">Primary Color</Label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          id="primaryColor"
+                          value={primaryColorInput}
+                          onChange={(e) => setPrimaryColorInput(e.target.value)}
+                          className="h-10 w-14 rounded border cursor-pointer"
+                        />
+                        <Input
+                          value={primaryColorInput}
+                          onChange={(e) => handleColorInputChange(e.target.value, setPrimaryColorInput)}
+                          placeholder="#1F2A44"
+                          className="flex-1 font-mono text-sm"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="accentColor" className="text-xs text-muted-foreground">Accent Color (Header Bar)</Label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          id="accentColor"
+                          value={accentColorInput}
+                          onChange={(e) => setAccentColorInput(e.target.value)}
+                          className="h-10 w-14 rounded border cursor-pointer"
+                        />
+                        <Input
+                          value={accentColorInput}
+                          onChange={(e) => handleColorInputChange(e.target.value, setAccentColorInput)}
+                          placeholder="#2C7A7B"
+                          className="flex-1 font-mono text-sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-muted-foreground">Preview:</span>
+                    <div 
+                      className="h-4 w-24 rounded" 
+                      style={{ backgroundColor: accentColorInput }}
+                    />
+                  </div>
+                </div>
+
+                {/* Save Buttons */}
+                <div className="flex gap-2 pt-4 border-t">
                   <Button 
-                    onClick={handleSaveInstitution} 
-                    disabled={isSavingInstitution || !institutionName.trim()}
+                    onClick={async () => {
+                      await handleSaveInstitution();
+                      await handleSaveColors();
+                    }} 
+                    disabled={isSavingInstitution || isSavingColors || !institutionName.trim()}
                     className="bg-[hsl(222,47%,14%)] hover:bg-[hsl(222,47%,20%)]"
                   >
-                    {isSavingInstitution ? (
+                    {(isSavingInstitution || isSavingColors) ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                         Saving...
@@ -281,7 +654,7 @@ export default function AdminConsolePage() {
                     ) : (
                       <>
                         <Save className="w-4 h-4 mr-2" />
-                        Save Changes
+                        Save All Changes
                       </>
                     )}
                   </Button>
@@ -290,6 +663,8 @@ export default function AdminConsolePage() {
                     onClick={() => {
                       setIsEditingInstitution(false);
                       setInstitutionName(tenant?.institution_name || '');
+                      setPrimaryColorInput(tenant?.primary_color || '#1F2A44');
+                      setAccentColorInput(tenant?.accent_color || '#2C7A7B');
                     }}
                   >
                     <X className="w-4 h-4 mr-2" />
@@ -298,16 +673,37 @@ export default function AdminConsolePage() {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-lg bg-[hsl(222,47%,14%)]/10 flex items-center justify-center">
-                  <Building2 className="w-6 h-6 text-[hsl(222,47%,14%)]" />
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  {logoUrl ? (
+                    <img 
+                      src={logoUrl} 
+                      alt={tenant?.institution_name || 'Institution'} 
+                      className="h-16 w-auto object-contain border rounded-lg p-2 bg-muted/30"
+                      style={{ maxWidth: '150px' }}
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-lg bg-[hsl(222,47%,14%)]/10 flex items-center justify-center">
+                      <Building2 className="w-6 h-6 text-[hsl(222,47%,14%)]" />
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-lg font-semibold text-[hsl(222,47%,11%)]">
+                      {tenant?.institution_name || 'Loading...'}
+                    </p>
+                    <p className="text-sm text-[hsl(220,14%,46%)]">Your institution's display name</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-lg font-semibold text-[hsl(222,47%,11%)]">
-                    {tenant?.institution_name || 'Loading...'}
-                  </p>
-                  <p className="text-sm text-[hsl(220,14%,46%)]">Your institution's display name</p>
-                </div>
+                {tenant?.accent_color && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-muted-foreground">Header accent:</span>
+                    <div 
+                      className="h-4 w-24 rounded" 
+                      style={{ backgroundColor: tenant.accent_color }}
+                    />
+                    <span className="text-xs text-muted-foreground font-mono">{tenant.accent_color}</span>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
