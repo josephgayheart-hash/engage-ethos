@@ -321,10 +321,34 @@ serve(async (req) => {
       }
 
       case "approve_onboarding": {
-        const { requestId, password, tenantId: targetTenantId } = body;
+        const { requestId, password, tenantId: targetTenantId, createNewTenant: shouldCreateTenant, newTenantName, role: assignedRole } = body;
 
-        // Super admins must specify a tenant for approved users
-        const effectiveApprovalTenantId = isSuperAdmin ? targetTenantId : adminTenantId;
+        let effectiveApprovalTenantId = isSuperAdmin ? targetTenantId : adminTenantId;
+        
+        // Handle creating a new tenant if requested
+        if (shouldCreateTenant && newTenantName) {
+          const { data: newTenant, error: tenantError } = await adminClient
+            .from("tenants")
+            .insert({ institution_name: newTenantName })
+            .select()
+            .single();
+
+          if (tenantError) {
+            console.error("Failed to create tenant:", tenantError);
+            return new Response(
+              JSON.stringify({ error: `Failed to create institution: ${tenantError.message}` }),
+              { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+
+          // Create institutional config for the new tenant
+          await adminClient
+            .from("institutional_config")
+            .insert({ tenant_id: newTenant.id });
+
+          effectiveApprovalTenantId = newTenant.id;
+          console.log(`Created new tenant: ${newTenantName} with ID ${newTenant.id}`);
+        }
         
         if (!effectiveApprovalTenantId) {
           return new Response(
@@ -360,12 +384,17 @@ serve(async (req) => {
           );
         }
 
+        // Determine tenant for super_admin role - they go to PERSIST System tenant
+        const profileTenantId = assignedRole === 'super_admin' 
+          ? '00000000-0000-0000-0000-000000000000' // PERSIST System tenant
+          : effectiveApprovalTenantId;
+
         // Create profile
         const { error: profileError } = await adminClient
           .from("profiles")
           .insert({
             id: authData.user.id,
-            tenant_id: effectiveApprovalTenantId,
+            tenant_id: profileTenantId,
             email: request.email,
             first_name: request.first_name,
             last_name: request.last_name,
@@ -384,11 +413,12 @@ serve(async (req) => {
           );
         }
 
-        // Create role
+        // Create role - use the assigned role (default to 'user')
+        const userRole = assignedRole || "user";
         await adminClient.from("user_roles").insert({
           user_id: authData.user.id,
-          tenant_id: effectiveApprovalTenantId,
-          role: "user",
+          tenant_id: profileTenantId,
+          role: userRole,
         });
 
         // Update request status
@@ -404,12 +434,12 @@ serve(async (req) => {
 
         // Audit log
         await adminClient.from("audit_log").insert({
-          tenant_id: effectiveApprovalTenantId,
+          tenant_id: profileTenantId,
           actor_user_id: requestingUser.id,
           action: "approve_onboarding",
           target_type: "onboarding_request",
           target_id: requestId,
-          metadata: { email: request.email },
+          metadata: { email: request.email, role: userRole, newTenantCreated: shouldCreateTenant || false },
         });
 
         return new Response(
