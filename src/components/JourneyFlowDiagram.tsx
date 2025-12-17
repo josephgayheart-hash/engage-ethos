@@ -298,30 +298,42 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
     });
     
     // Add touchpoint nodes in a ZIG-ZAG / SERPENTINE pattern
+    const totalRows = Math.ceil(touchpointCount / nodesPerRow);
+    
     journey.touchpoints.forEach((touchpoint, index) => {
       const row = Math.floor(index / nodesPerRow);
       const colInRow = index % nodesPerRow;
+      const isLastRow = row === totalRows - 1;
+      const itemsInLastRow = touchpointCount % nodesPerRow || nodesPerRow;
       
       // Serpentine: odd rows go right-to-left
       const isOddRow = row % 2 === 1;
-      const col = isOddRow ? (nodesPerRow - 1 - colInRow) : colInRow;
       
-      // Calculate horizontal offset to center the row
-      const itemsInThisRow = Math.min(nodesPerRow, touchpointCount - row * nodesPerRow);
-      const rowWidth = itemsInThisRow * xSpacing;
-      const xOffset = (totalWidth - rowWidth) / 2;
+      // For partial last rows, keep items aligned to the flow direction
+      let col: number;
+      if (isLastRow && itemsInLastRow < nodesPerRow) {
+        // Last row with fewer items - align to continue the flow
+        if (isOddRow) {
+          // Odd row flows right-to-left, so align items to the right side
+          col = nodesPerRow - 1 - colInRow;
+        } else {
+          // Even row flows left-to-right, items naturally align left
+          col = colInRow;
+        }
+      } else {
+        // Full rows use standard serpentine
+        col = isOddRow ? (nodesPerRow - 1 - colInRow) : colInRow;
+      }
       
       const weekDate = calculateWeekDate(startDate, touchpoint.week);
       
-      // Add slight vertical stagger for visual interest
-      const staggerY = (col % 2) * 20;
-      
+      // No vertical stagger for clean alignment
       nodes.push({
         id: `tp-${index}`,
         type: 'touchpoint',
         position: { 
-          x: col * xSpacing + xOffset + 40, 
-          y: yBase + (row * ySpacing) + staggerY
+          x: col * xSpacing + 40, 
+          y: yBase + (row * ySpacing)
         },
         data: { touchpoint, index, weekDate },
         draggable: true,
