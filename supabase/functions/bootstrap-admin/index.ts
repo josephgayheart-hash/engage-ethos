@@ -6,8 +6,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// This function creates the initial admin user for a tenant
-// Should only be used once during initial setup
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -22,7 +20,7 @@ serve(async (req) => {
     });
 
     const body = await req.json();
-    const { email, password, firstName, lastName, tenantId, setupKey } = body;
+    const { action, email, password, firstName, lastName, tenantId, setupKey, userId, newEmail } = body;
 
     // Simple security check - require a setup key
     if (setupKey !== "PERSIST_SETUP_2024") {
@@ -32,6 +30,128 @@ serve(async (req) => {
       );
     }
 
+    // Action: add_admin - Add admin without checking for existing admins
+    if (action === "add_admin") {
+      // Verify tenant exists
+      const { data: tenant, error: tenantError } = await adminClient
+        .from("tenants")
+        .select("id, institution_name")
+        .eq("id", tenantId)
+        .single();
+
+      if (tenantError || !tenant) {
+        return new Response(
+          JSON.stringify({ error: "Tenant not found" }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Create auth user
+      const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+      });
+
+      if (authError) {
+        console.error("Auth creation error:", authError);
+        return new Response(
+          JSON.stringify({ error: authError.message }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Create profile
+      const { error: profileError } = await adminClient
+        .from("profiles")
+        .insert({
+          id: authData.user.id,
+          tenant_id: tenantId,
+          email,
+          first_name: firstName || "Admin",
+          last_name: lastName || "User",
+          status: "active",
+          password_reset_required: true,
+        });
+
+      if (profileError) {
+        console.error("Profile creation error:", profileError);
+        await adminClient.auth.admin.deleteUser(authData.user.id);
+        return new Response(
+          JSON.stringify({ error: profileError.message }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Create admin role
+      const { error: roleError } = await adminClient
+        .from("user_roles")
+        .insert({
+          user_id: authData.user.id,
+          tenant_id: tenantId,
+          role: "admin",
+        });
+
+      if (roleError) {
+        console.error("Role creation error:", roleError);
+      }
+
+      console.log(`Admin added: ${email} for ${tenant.institution_name}`);
+
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          userId: authData.user.id,
+          email,
+          institution: tenant.institution_name,
+          message: "Admin account created successfully."
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Action: update_email - Update an existing user's email
+    if (action === "update_email") {
+      if (!userId || !newEmail) {
+        return new Response(
+          JSON.stringify({ error: "userId and newEmail are required" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Update auth user email
+      const { error: authError } = await adminClient.auth.admin.updateUserById(userId, {
+        email: newEmail,
+        email_confirm: true
+      });
+
+      if (authError) {
+        console.error("Auth update error:", authError);
+        return new Response(
+          JSON.stringify({ error: authError.message }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Update profile email
+      const { error: profileError } = await adminClient
+        .from("profiles")
+        .update({ email: newEmail })
+        .eq("id", userId);
+
+      if (profileError) {
+        console.error("Profile update error:", profileError);
+      }
+
+      console.log(`Email updated for user ${userId} to ${newEmail}`);
+
+      return new Response(
+        JSON.stringify({ success: true, message: "Email updated successfully" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Default action: create first admin (original behavior)
     // Verify tenant exists
     const { data: tenant, error: tenantError } = await adminClient
       .from("tenants")
