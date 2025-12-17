@@ -241,27 +241,28 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
     
     const touchpointCount = journey.touchpoints.length;
     
-    // Improved spacing to prevent overlap - wider gaps between nodes
-    const nodeWidth = 260; // Approximate node width including padding
-    const nodeHeight = 180; // Approximate node height including padding
-    const horizontalGap = 80; // Gap between nodes horizontally
-    const verticalGap = 60; // Gap between rows vertically
+    // Generous spacing to prevent any overlap
+    const nodeWidth = 280; // Node width with extra buffer
+    const nodeHeight = 200; // Node height with extra buffer for content
+    const horizontalGap = 100; // Comfortable gap between nodes
+    const verticalGap = 80; // Comfortable gap between rows
     
     const xSpacing = nodeWidth + horizontalGap;
     const ySpacing = nodeHeight + verticalGap;
     
-    // Calculate optimal nodes per row based on count
-    const nodesPerRow = touchpointCount > 12 ? 4 : touchpointCount > 8 ? 4 : touchpointCount > 5 ? 3 : Math.min(touchpointCount, 3);
-    const yBase = 240; // Space for info node and phase headers
+    // Fewer nodes per row for cleaner layout
+    const nodesPerRow = touchpointCount > 9 ? 3 : touchpointCount > 4 ? 3 : Math.min(touchpointCount, 3);
+    const yBase = 280; // Extra space for info node and phase headers
     
-    // Calculate phase positions based on touchpoint distribution
-    const phaseWidth = nodesPerRow * xSpacing;
+    // Calculate total width for phase headers
+    const totalWidth = nodesPerRow * xSpacing;
     
-    // Add journey info header node at the very top
+    // Add journey info header node at the very top - centered
+    const infoNodeWidth = 700;
     nodes.push({
       id: 'journey-info',
       type: 'journeyInfo',
-      position: { x: 20, y: -180 },
+      position: { x: (totalWidth - infoNodeWidth) / 2 + 40, y: -200 },
       data: {
         overview: journey.overview,
         audience: context?.audience,
@@ -276,12 +277,16 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
       draggable: true,
     });
     
-    // Add phase header nodes across the top
+    // Add phase header nodes - evenly spaced across total width
+    const phaseWidth = totalWidth / journey.phases.length;
     journey.phases.forEach((phase, phaseIndex) => {
       const phaseNode: Node = {
         id: `phase-${phaseIndex}`,
         type: 'phase',
-        position: { x: phaseIndex * (phaseWidth / journey.phases.length) + (phaseWidth / journey.phases.length / 2) - 75, y: 20 },
+        position: { 
+          x: phaseIndex * phaseWidth + (phaseWidth / 2) - 75 + 40, 
+          y: 60 
+        },
         data: { 
           name: phase.name,
           weekRange: phase.weekRange,
@@ -339,11 +344,11 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
   const [nodes, , onNodesChange] = useNodesState(initialNodes);
   const [edges, , onEdgesChange] = useEdgesState(initialEdges);
 
-  // Calculate dynamic height based on touchpoint count (increased for info node)
+  // Calculate dynamic height based on touchpoint count
   const touchpointCount = journey.touchpoints.length;
-  const nodesPerRow = touchpointCount > 12 ? 4 : touchpointCount > 8 ? 4 : touchpointCount > 5 ? 3 : Math.min(touchpointCount, 3);
+  const nodesPerRow = touchpointCount > 9 ? 3 : touchpointCount > 4 ? 3 : Math.min(touchpointCount, 3);
   const rowCount = Math.ceil(touchpointCount / nodesPerRow);
-  const dynamicHeight = Math.max(650, 350 + rowCount * 260);
+  const dynamicHeight = Math.max(700, 400 + rowCount * 300);
 
   return (
     <div ref={flowRef} className="w-full border rounded-lg bg-muted/20 relative">
