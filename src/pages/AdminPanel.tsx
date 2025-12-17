@@ -647,17 +647,9 @@ const AdminPanel = () => {
 
           {/* Main Content Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid grid-cols-7 w-full">
+            <TabsList className="grid grid-cols-6 w-full">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="institutions">Institutions</TabsTrigger>
-              <TabsTrigger value="feedback" className="flex items-center gap-1">
-                Feedback
-                {betaFeedback.filter(f => f.status === 'new').length > 0 && (
-                  <Badge className="ml-1 h-4 w-4 p-0 text-[10px] flex items-center justify-center bg-amber-500">
-                    {betaFeedback.filter(f => f.status === 'new').length}
-                  </Badge>
-                )}
-              </TabsTrigger>
               <TabsTrigger value="libraries">Libraries</TabsTrigger>
               <TabsTrigger value="ai">AI</TabsTrigger>
               <TabsTrigger value="users">Users</TabsTrigger>
@@ -1331,108 +1323,6 @@ const AdminPanel = () => {
               </div>
             </TabsContent>
 
-            {/* Feedback Tab */}
-            <TabsContent value="feedback" className="mt-4 space-y-4">
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="font-serif flex items-center gap-2">
-                        <MessageSquarePlus className="w-5 h-5 text-amber-600" />
-                        Beta Feedback
-                      </CardTitle>
-                      <CardDescription>
-                        Feedback submitted by beta testers across all institutions
-                      </CardDescription>
-                    </div>
-                    <div className="flex gap-2">
-                      <Badge variant="outline" className="bg-green-50 text-green-700">
-                        {betaFeedback.filter(f => f.status === 'new').length} New
-                      </Badge>
-                      <Badge variant="outline">
-                        {betaFeedback.length} Total
-                      </Badge>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {isLoadingUsers ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-                    </div>
-                  ) : betaFeedback.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <MessageSquarePlus className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                      <p className="text-sm">No feedback submitted yet</p>
-                      <p className="text-xs mt-1">Feedback from beta testers will appear here</p>
-                    </div>
-                  ) : (
-                    <ScrollArea className="h-[500px]">
-                      <div className="space-y-3">
-                        {betaFeedback.map(feedback => (
-                          <div 
-                            key={feedback.id} 
-                            className={`p-4 border rounded-lg ${feedback.status === 'new' ? 'border-amber-200 bg-amber-50/50' : ''}`}
-                          >
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <Badge variant="outline" className="text-xs">
-                                    {feedback.feature_area.replace(/_/g, ' ')}
-                                  </Badge>
-                                  <Badge 
-                                    variant="outline" 
-                                    className={`text-xs ${
-                                      feedback.feedback_type === 'bug' ? 'bg-red-50 text-red-700' :
-                                      feedback.feedback_type === 'feature' ? 'bg-blue-50 text-blue-700' :
-                                      feedback.feedback_type === 'praise' ? 'bg-green-50 text-green-700' :
-                                      ''
-                                    }`}
-                                  >
-                                    {feedback.feedback_type}
-                                  </Badge>
-                                  {feedback.status === 'new' && (
-                                    <Badge className="bg-amber-500 text-xs">New</Badge>
-                                  )}
-                                </div>
-                                <p className="text-sm mb-2">{feedback.feedback_text}</p>
-                                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                  <span>{feedback.user_name}</span>
-                                  <span>•</span>
-                                  <span>{feedback.institution_name}</span>
-                                  <span>•</span>
-                                  <span>{new Date(feedback.created_at).toLocaleDateString()}</span>
-                                  {feedback.page_path && (
-                                    <>
-                                      <span>•</span>
-                                      <code className="text-xs bg-muted px-1 rounded">{feedback.page_path}</code>
-                                    </>
-                                  )}
-                                </div>
-                              </div>
-                              {feedback.rating && (
-                                <div className="flex items-center gap-0.5">
-                                  {[1, 2, 3, 4, 5].map(star => (
-                                    <Star 
-                                      key={star}
-                                      className={`w-4 h-4 ${
-                                        star <= feedback.rating! 
-                                          ? 'fill-amber-400 text-amber-400' 
-                                          : 'text-muted-foreground/30'
-                                      }`} 
-                                    />
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
           </Tabs>
         </div>
       </main>

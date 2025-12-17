@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   ChevronLeft, 
   CheckCircle2, 
@@ -21,9 +22,29 @@ import {
   Lock,
   FileText,
   Clock,
-  Server
+  Server,
+  MessageSquarePlus,
+  Star,
+  Loader2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+
+interface BetaFeedback {
+  id: string;
+  tenant_id: string;
+  user_id: string;
+  feature_area: string;
+  page_path: string | null;
+  feedback_type: string;
+  feedback_text: string;
+  rating: number | null;
+  status: string;
+  admin_notes: string | null;
+  created_at: string;
+  reviewed_at: string | null;
+  user_name?: string;
+  institution_name?: string;
+}
 
 interface TestResult {
   id: string;
@@ -47,6 +68,9 @@ export default function QADiagnosticsPage() {
   const [lastRun, setLastRun] = useState<string | null>(null);
   const [testResults, setTestResults] = useState<TestSuite[]>([]);
   const [stats, setStats] = useState({ total: 0, passed: 0, failed: 0, warnings: 0 });
+  const [betaFeedback, setBetaFeedback] = useState<BetaFeedback[]>([]);
+  const [isLoadingFeedback, setIsLoadingFeedback] = useState(true);
+  const [activeTab, setActiveTab] = useState('tests');
 
   const appVersion = '1.0.0-beta';
   const environment = 'Production';
@@ -54,7 +78,35 @@ export default function QADiagnosticsPage() {
   useEffect(() => {
     // Initialize with pending tests
     initializeTests();
+    fetchFeedback();
   }, []);
+
+  const fetchFeedback = async () => {
+    setIsLoadingFeedback(true);
+    try {
+      // Fetch tenants and profiles for enrichment
+      const [tenantsResult, profilesResult, feedbackResult] = await Promise.all([
+        supabase.from('tenants').select('id, institution_name'),
+        supabase.from('profiles').select('id, first_name, last_name, tenant_id'),
+        supabase.from('beta_feedback').select('*').order('created_at', { ascending: false })
+      ]);
+
+      const enrichedFeedback = (feedbackResult.data || []).map(fb => {
+        const user = profilesResult.data?.find(p => p.id === fb.user_id);
+        const tenant = tenantsResult.data?.find(t => t.id === fb.tenant_id);
+        return {
+          ...fb,
+          user_name: user ? `${user.first_name} ${user.last_name}` : 'Unknown User',
+          institution_name: tenant?.institution_name || 'Unknown Institution'
+        };
+      });
+      setBetaFeedback(enrichedFeedback);
+    } catch (error) {
+      console.error('Error fetching feedback:', error);
+    } finally {
+      setIsLoadingFeedback(false);
+    }
+  };
 
   const initializeTests = () => {
     const initialSuites: TestSuite[] = [
@@ -460,57 +512,178 @@ export default function QADiagnosticsPage() {
             </Card>
           </div>
 
-          {/* Test Suites */}
-          <Tabs defaultValue={testResults[0]?.name || ''} className="space-y-4">
-            <TabsList className="flex-wrap h-auto gap-2 p-2">
-              {testResults.map(suite => (
-                <TabsTrigger 
-                  key={suite.name} 
-                  value={suite.name}
-                  className="flex items-center gap-2"
-                >
-                  {suite.icon}
-                  <span className="hidden sm:inline">{suite.name}</span>
-                </TabsTrigger>
-              ))}
+          {/* Main Tabs - Tests and Feedback */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="tests">Test Suites</TabsTrigger>
+              <TabsTrigger value="feedback" className="flex items-center gap-1">
+                <MessageSquarePlus className="w-4 h-4" />
+                Feedback
+                {betaFeedback.filter(f => f.status === 'new').length > 0 && (
+                  <Badge className="ml-1 h-4 w-4 p-0 text-[10px] flex items-center justify-center bg-amber-500">
+                    {betaFeedback.filter(f => f.status === 'new').length}
+                  </Badge>
+                )}
+              </TabsTrigger>
             </TabsList>
 
-            {testResults.map(suite => (
-              <TabsContent key={suite.name} value={suite.name}>
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-center gap-2">
+            {/* Test Suites Tab */}
+            <TabsContent value="tests">
+              <Tabs defaultValue={testResults[0]?.name || ''} className="space-y-4">
+                <TabsList className="flex-wrap h-auto gap-2 p-2">
+                  {testResults.map(suite => (
+                    <TabsTrigger 
+                      key={suite.name} 
+                      value={suite.name}
+                      className="flex items-center gap-2"
+                    >
                       {suite.icon}
-                      <CardTitle>{suite.name}</CardTitle>
+                      <span className="hidden sm:inline">{suite.name}</span>
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+
+                {testResults.map(suite => (
+                  <TabsContent key={suite.name} value={suite.name}>
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-2">
+                          {suite.icon}
+                          <CardTitle>{suite.name}</CardTitle>
+                        </div>
+                        <CardDescription>
+                          {suite.tests.filter(t => t.status === 'pass').length} / {suite.tests.length} tests passing
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {suite.tests.map(test => (
+                            <div 
+                              key={test.id} 
+                              className="flex items-center justify-between p-3 border rounded-lg"
+                            >
+                              <div className="flex items-center gap-3">
+                                {getStatusIcon(test.status)}
+                                <div>
+                                  <div className="font-medium text-sm">{test.name}</div>
+                                  {test.message && (
+                                    <div className="text-xs text-muted-foreground">{test.message}</div>
+                                  )}
+                                </div>
+                              </div>
+                              {getStatusBadge(test.status)}
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                ))}
+              </Tabs>
+            </TabsContent>
+
+            {/* Feedback Tab */}
+            <TabsContent value="feedback">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="font-serif flex items-center gap-2">
+                        <MessageSquarePlus className="w-5 h-5 text-amber-600" />
+                        Beta Feedback
+                      </CardTitle>
+                      <CardDescription>
+                        Feedback submitted by beta testers across all institutions
+                      </CardDescription>
                     </div>
-                    <CardDescription>
-                      {suite.tests.filter(t => t.status === 'pass').length} / {suite.tests.length} tests passing
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {suite.tests.map(test => (
-                        <div 
-                          key={test.id} 
-                          className="flex items-center justify-between p-3 border rounded-lg"
-                        >
-                          <div className="flex items-center gap-3">
-                            {getStatusIcon(test.status)}
-                            <div>
-                              <div className="font-medium text-sm">{test.name}</div>
-                              {test.message && (
-                                <div className="text-xs text-muted-foreground">{test.message}</div>
+                    <div className="flex gap-2">
+                      <Badge variant="outline" className="bg-green-50 text-green-700">
+                        {betaFeedback.filter(f => f.status === 'new').length} New
+                      </Badge>
+                      <Badge variant="outline">
+                        {betaFeedback.length} Total
+                      </Badge>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {isLoadingFeedback ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : betaFeedback.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <MessageSquarePlus className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">No feedback submitted yet</p>
+                      <p className="text-xs mt-1">Feedback from beta testers will appear here</p>
+                    </div>
+                  ) : (
+                    <ScrollArea className="h-[500px]">
+                      <div className="space-y-3">
+                        {betaFeedback.map(feedback => (
+                          <div 
+                            key={feedback.id} 
+                            className={`p-4 border rounded-lg ${feedback.status === 'new' ? 'border-amber-200 bg-amber-50/50' : ''}`}
+                          >
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Badge variant="outline" className="text-xs">
+                                    {feedback.feature_area.replace(/_/g, ' ')}
+                                  </Badge>
+                                  <Badge 
+                                    variant="outline" 
+                                    className={`text-xs ${
+                                      feedback.feedback_type === 'bug' ? 'bg-red-50 text-red-700' :
+                                      feedback.feedback_type === 'feature' ? 'bg-blue-50 text-blue-700' :
+                                      feedback.feedback_type === 'praise' ? 'bg-green-50 text-green-700' :
+                                      ''
+                                    }`}
+                                  >
+                                    {feedback.feedback_type}
+                                  </Badge>
+                                  {feedback.status === 'new' && (
+                                    <Badge className="bg-amber-500 text-xs">New</Badge>
+                                  )}
+                                </div>
+                                <p className="text-sm mb-2">{feedback.feedback_text}</p>
+                                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                  <span>{feedback.user_name}</span>
+                                  <span>•</span>
+                                  <span>{feedback.institution_name}</span>
+                                  <span>•</span>
+                                  <span>{new Date(feedback.created_at).toLocaleDateString()}</span>
+                                  {feedback.page_path && (
+                                    <>
+                                      <span>•</span>
+                                      <code className="text-xs bg-muted px-1 rounded">{feedback.page_path}</code>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                              {feedback.rating && (
+                                <div className="flex items-center gap-0.5">
+                                  {[1, 2, 3, 4, 5].map(star => (
+                                    <Star 
+                                      key={star}
+                                      className={`w-4 h-4 ${
+                                        star <= feedback.rating! 
+                                          ? 'fill-amber-400 text-amber-400' 
+                                          : 'text-muted-foreground/30'
+                                      }`} 
+                                    />
+                                  ))}
+                                </div>
                               )}
                             </div>
                           </div>
-                          {getStatusBadge(test.status)}
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            ))}
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
           </Tabs>
         </div>
       </main>
