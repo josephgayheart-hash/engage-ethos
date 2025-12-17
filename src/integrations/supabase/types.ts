@@ -385,6 +385,87 @@ export type Database = {
           },
         ]
       }
+      personal_messages: {
+        Row: {
+          approved: boolean | null
+          audience: string | null
+          channel: string
+          content: string
+          created_at: string
+          domain: string | null
+          goal: string | null
+          id: string
+          institutional_profile_id: string | null
+          metadata: Json | null
+          mode: string | null
+          moment: string | null
+          notes: string | null
+          sender_recommendation: string | null
+          tenant_id: string
+          title: string
+          tone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approved?: boolean | null
+          audience?: string | null
+          channel: string
+          content: string
+          created_at?: string
+          domain?: string | null
+          goal?: string | null
+          id?: string
+          institutional_profile_id?: string | null
+          metadata?: Json | null
+          mode?: string | null
+          moment?: string | null
+          notes?: string | null
+          sender_recommendation?: string | null
+          tenant_id: string
+          title: string
+          tone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approved?: boolean | null
+          audience?: string | null
+          channel?: string
+          content?: string
+          created_at?: string
+          domain?: string | null
+          goal?: string | null
+          id?: string
+          institutional_profile_id?: string | null
+          metadata?: Json | null
+          mode?: string | null
+          moment?: string | null
+          notes?: string | null
+          sender_recommendation?: string | null
+          tenant_id?: string
+          title?: string
+          tone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personal_messages_institutional_profile_id_fkey"
+            columns: ["institutional_profile_id"]
+            isOneToOne: false
+            referencedRelation: "institutional_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "personal_messages_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -437,6 +518,83 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shared_templates: {
+        Row: {
+          approval_notes: string | null
+          content: string
+          created_at: string
+          created_by_user_id: string | null
+          ethical_guardrails: string[] | null
+          id: string
+          intent_statement: string | null
+          maintainer: string | null
+          metadata: Json | null
+          owner: string | null
+          placeholders: Json | null
+          playbook: string | null
+          required_fields: Json | null
+          status: string
+          tenant_id: string
+          title: string
+          updated_at: string
+          use_cases: Json | null
+          variants: Json | null
+          version: string | null
+        }
+        Insert: {
+          approval_notes?: string | null
+          content: string
+          created_at?: string
+          created_by_user_id?: string | null
+          ethical_guardrails?: string[] | null
+          id?: string
+          intent_statement?: string | null
+          maintainer?: string | null
+          metadata?: Json | null
+          owner?: string | null
+          placeholders?: Json | null
+          playbook?: string | null
+          required_fields?: Json | null
+          status?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+          use_cases?: Json | null
+          variants?: Json | null
+          version?: string | null
+        }
+        Update: {
+          approval_notes?: string | null
+          content?: string
+          created_at?: string
+          created_by_user_id?: string | null
+          ethical_guardrails?: string[] | null
+          id?: string
+          intent_statement?: string | null
+          maintainer?: string | null
+          metadata?: Json | null
+          owner?: string | null
+          placeholders?: Json | null
+          playbook?: string | null
+          required_fields?: Json | null
+          status?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+          use_cases?: Json | null
+          variants?: Json | null
+          version?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_templates_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
