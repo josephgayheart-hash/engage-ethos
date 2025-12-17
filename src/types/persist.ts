@@ -49,6 +49,7 @@ export type CohortContext =
   | 'veteran'
   | 'parent'
   | 'working-adult'
+  | 'pre-college'
   // Employee cohorts
   | 'faculty'
   | 'staff'
