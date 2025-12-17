@@ -1,71 +1,97 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   ArrowLeft,
-  Plus, 
-  Send, 
-  FileText, 
   Users, 
-  CheckCircle, 
-  Clock, 
-  X,
-  Megaphone,
   Building2,
-  Calendar,
-  Eye,
-  Edit,
-  Trash2,
   ChevronRight,
-  AlertTriangle,
+  Trash2,
   RefreshCw,
-  Key
+  Activity,
+  BarChart3,
+  Library,
+  FolderOpen,
+  Clock,
+  TrendingUp,
+  AlertTriangle,
+  Loader2,
+  FileText,
+  MessageSquare,
+  Compass,
+  Phone,
+  Sparkles,
+  Upload
 } from "lucide-react";
-import type { SharedTemplate, LibraryEntryStatus } from "@/types/library";
+
+interface UserSummary {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  status: string;
+  last_login_at: string | null;
+  created_at: string;
+}
 
 const AdminPanel = () => {
   const { toast } = useToast();
-  const { templates, addTemplate, updateTemplateStatus, clearAllTemplates, resetToDefaults, isLoading } = useSharedLibrary();
+  const { tenant } = useAuth();
+  const { templates, clearAllTemplates, resetToDefaults } = useSharedLibrary();
   const { messages, clearAllMessages } = useMessageLibrary();
+  
   const [activeTab, setActiveTab] = useState("overview");
-  const [createOpen, setCreateOpen] = useState(false);
-  const [distributeOpen, setDistributeOpen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<SharedTemplate | null>(null);
+  const [users, setUsers] = useState<UserSummary[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [clearPersonalOpen, setClearPersonalOpen] = useState(false);
   const [clearSharedOpen, setClearSharedOpen] = useState(false);
-  const [newAppPassword, setNewAppPassword] = useState('');
-  const [confirmAppPassword, setConfirmAppPassword] = useState('');
-  
-  // Form state for quick create
-  const [quickTitle, setQuickTitle] = useState('');
-  const [quickContent, setQuickContent] = useState('');
-  const [quickPlaybook, setQuickPlaybook] = useState('');
-  const [quickCollegeName, setQuickCollegeName] = useState('');
-  const [quickDepartmentName, setQuickDepartmentName] = useState('');
-  const [quickChannels, setQuickChannels] = useState<string[]>([]);
-  const [quickAudiences, setQuickAudiences] = useState<string[]>([]);
 
-  const channelOptions = ['email', 'sms', 'portal', 'landing-page', 'social-media'];
-  const audienceOptions = ['prospective', 'first-year', 'continuing', 'at-risk', 'graduate'];
+  // Fetch users
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setIsLoadingUsers(true);
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name, email, status, last_login_at, created_at')
+          .order('last_login_at', { ascending: false, nullsFirst: false });
 
-  const draftTemplates = templates.filter(t => t.status === 'draft');
-  const submittedTemplates = templates.filter(t => t.status === 'submitted');
-  const approvedTemplates = templates.filter(t => t.status === 'approved');
-  const publishedTemplates = templates.filter(t => t.status === 'published');
+        if (error) throw error;
+        setUsers(data || []);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      } finally {
+        setIsLoadingUsers(false);
+      }
+    };
 
+    fetchUsers();
+  }, []);
 
   const handleClearPersonalLibrary = () => {
     clearAllMessages();
@@ -84,115 +110,41 @@ const AdminPanel = () => {
     toast({ title: "Shared Library reset", description: "Default templates have been restored." });
   };
 
-  const handleUpdateAppPassword = () => {
-    toast({ 
-      title: "Password management moved", 
-      description: "User passwords are now managed through the Admin Console → User Management page." 
-    });
+  // Calculate stats
+  const activeUsers = users.filter(u => u.status === 'active').length;
+  const recentLogins = users.filter(u => {
+    if (!u.last_login_at) return false;
+    const lastLogin = new Date(u.last_login_at);
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    return lastLogin > weekAgo;
+  }).length;
+
+  const formatLastLogin = (date: string | null) => {
+    if (!date) return 'Never';
+    const d = new Date(date);
+    const now = new Date();
+    const diffMs = now.getTime() - d.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return d.toLocaleDateString();
   };
 
-  const toggleArrayItem = (arr: string[], setArr: (v: string[]) => void, item: string) => {
-    if (arr.includes(item)) {
-      setArr(arr.filter(i => i !== item));
-    } else {
-      setArr([...arr, item]);
-    }
-  };
-
-  const handleQuickCreate = () => {
-    if (!quickTitle || !quickContent) {
-      toast({ variant: "destructive", title: "Missing fields", description: "Title and content are required." });
-      return;
-    }
-
-    const placeholderMatches = quickContent.match(/\{\{([^}]+)\}\}/g) || [];
-    const placeholders = placeholderMatches.map(match => {
-      const key = match.replace(/\{\{|\}\}/g, '');
-      return {
-        key,
-        label: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-        description: `Value for ${key}`,
-        required: true,
-      };
-    });
-
-    addTemplate({
-      title: quickTitle,
-      intentStatement: `Quick-created playbook: ${quickTitle}`,
-      content: quickContent,
-      playbook: quickPlaybook || 'General',
-      collegeName: quickCollegeName || undefined,
-      departmentName: quickDepartmentName || undefined,
-      owner: 'Admin',
-      maintainer: 'Admin',
-      status: 'draft',
-      version: '1.0',
-      placeholders,
-      requiredFields: {
-        audience: quickAudiences.length > 0 ? quickAudiences : ['first-year'],
-        channel: quickChannels.length > 0 ? quickChannels : ['email'],
-        moment: ['seasonal'],
-      },
-      useCases: { whenToUse: [], whenNotToUse: [] },
-      ethicalGuardrails: ['Review before distribution'],
-    });
-
-    toast({ title: "Playbook created", description: "New playbook saved as draft." });
-    setQuickTitle('');
-    setQuickContent('');
-    setQuickPlaybook('');
-    setQuickCollegeName('');
-    setQuickDepartmentName('');
-    setQuickChannels([]);
-    setQuickAudiences([]);
-    setCreateOpen(false);
-  };
-
-  const handleDistribute = (template: SharedTemplate) => {
-    updateTemplateStatus(template.id, 'published', 'Distributed by admin');
-    toast({ 
-      title: "Playbook distributed", 
-      description: `"${template.title}" is now available to all users.` 
-    });
-    setDistributeOpen(false);
-    setSelectedTemplate(null);
-  };
-
-  const handleApprove = (template: SharedTemplate) => {
-    updateTemplateStatus(template.id, 'approved', 'Approved by admin');
-    toast({ title: "Template approved", description: `"${template.title}" has been approved.` });
-  };
-
-  const handleReject = (template: SharedTemplate) => {
-    updateTemplateStatus(template.id, 'draft', 'Returned for revision');
-    toast({ title: "Template returned", description: `"${template.title}" has been returned for revision.` });
-  };
-
-  const getStatusBadge = (status: LibraryEntryStatus) => {
-    const variants: Record<LibraryEntryStatus, { variant: "default" | "secondary" | "outline"; icon: React.ReactNode }> = {
-      draft: { variant: "outline", icon: <FileText className="w-3 h-3" /> },
-      submitted: { variant: "secondary", icon: <Clock className="w-3 h-3" /> },
-      approved: { variant: "default", icon: <CheckCircle className="w-3 h-3" /> },
-      published: { variant: "default", icon: <Megaphone className="w-3 h-3" /> },
-    };
-    const { variant, icon } = variants[status];
-    return (
-      <Badge variant={variant} className="flex items-center gap-1">
-        {icon}
-        {status}
-      </Badge>
-    );
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-12 text-center">Loading...</div>
-      </div>
-    );
-  }
-
+  // Tool usage stats (mock data for now - would come from analytics)
+  const toolUsageStats = [
+    { name: 'Message Builder', icon: MessageSquare, usage: 156, trend: '+12%' },
+    { name: 'Message Evaluator', icon: FileText, usage: 134, trend: '+8%' },
+    { name: 'Strategy Mapper', icon: Compass, usage: 89, trend: '+23%' },
+    { name: 'Call Script Generator', icon: Phone, usage: 67, trend: '+5%' },
+    { name: 'AI Playground', icon: Sparkles, usage: 45, trend: '+34%' },
+    { name: 'BYOC', icon: Upload, usage: 23, trend: 'New' },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -217,7 +169,7 @@ const AdminPanel = () => {
                 Admin Panel
               </h1>
               <p className="text-muted-foreground mt-1">
-                Create, approve, and distribute playbooks across your institution
+                Manage users, monitor usage, and administer {tenant?.institution_name || 'your institution'}
               </p>
             </div>
             <div className="flex gap-2">
@@ -231,28 +183,24 @@ const AdminPanel = () => {
               <Button variant="outline" asChild>
                 <Link to="/settings" className="flex items-center gap-2">
                   <Building2 className="w-4 h-4" />
-                  Institutional Profiles
+                  Institutional Settings
                   <ChevronRight className="w-4 h-4" />
                 </Link>
-              </Button>
-              <Button onClick={() => setCreateOpen(true)} className="flex items-center gap-2">
-                <Plus className="w-4 h-4" />
-                Create Playbook
               </Button>
             </div>
           </div>
 
-          {/* Stats */}
+          {/* Quick Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-muted">
-                    <FileText className="w-5 h-5 text-muted-foreground" />
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Users className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold">{draftTemplates.length}</p>
-                    <p className="text-xs text-muted-foreground">Drafts</p>
+                    <p className="text-2xl font-bold">{users.length}</p>
+                    <p className="text-xs text-muted-foreground">Total Users</p>
                   </div>
                 </div>
               </CardContent>
@@ -260,12 +208,12 @@ const AdminPanel = () => {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-secondary/20">
-                    <Clock className="w-5 h-5 text-secondary" />
+                  <div className="p-2 rounded-lg bg-green-500/10">
+                    <Activity className="w-5 h-5 text-green-600" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold">{submittedTemplates.length}</p>
-                    <p className="text-xs text-muted-foreground">Pending Review</p>
+                    <p className="text-2xl font-bold">{activeUsers}</p>
+                    <p className="text-xs text-muted-foreground">Active Users</p>
                   </div>
                 </div>
               </CardContent>
@@ -273,12 +221,12 @@ const AdminPanel = () => {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/20">
-                    <CheckCircle className="w-5 h-5 text-primary" />
+                  <div className="p-2 rounded-lg bg-blue-500/10">
+                    <Clock className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold">{approvedTemplates.length}</p>
-                    <p className="text-xs text-muted-foreground">Approved</p>
+                    <p className="text-2xl font-bold">{recentLogins}</p>
+                    <p className="text-xs text-muted-foreground">Logins (7 days)</p>
                   </div>
                 </div>
               </CardContent>
@@ -286,451 +234,362 @@ const AdminPanel = () => {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-green-500/20">
-                    <Megaphone className="w-5 h-5 text-green-600" />
+                  <div className="p-2 rounded-lg bg-purple-500/10">
+                    <Library className="w-5 h-5 text-purple-600" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold">{publishedTemplates.length}</p>
-                    <p className="text-xs text-muted-foreground">Published</p>
+                    <p className="text-2xl font-bold">{templates.length}</p>
+                    <p className="text-xs text-muted-foreground">Shared Templates</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Playbook Management */}
+          {/* Main Content Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="flex-wrap">
+            <TabsList>
               <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="pending" className="relative">
-                Pending Review
-                {submittedTemplates.length > 0 && (
-                  <span className="ml-1.5 px-1.5 py-0.5 text-xs bg-secondary text-secondary-foreground rounded-full">
-                    {submittedTemplates.length}
-                  </span>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="ready">Ready to Distribute</TabsTrigger>
-              <TabsTrigger value="published">Published</TabsTrigger>
-              <TabsTrigger value="library-mgmt">Library Management</TabsTrigger>
+              <TabsTrigger value="users">User Activity</TabsTrigger>
+              <TabsTrigger value="usage">Tool Usage</TabsTrigger>
+              <TabsTrigger value="admin">Admin Functions</TabsTrigger>
             </TabsList>
 
+            {/* Overview Tab */}
             <TabsContent value="overview" className="space-y-4 mt-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Recent User Activity */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-serif text-lg flex items-center gap-2">
+                      <Activity className="w-5 h-5" />
+                      Recent User Activity
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoadingUsers ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {users.slice(0, 5).map(user => (
+                          <div key={user.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium text-primary">
+                                {user.first_name?.[0]}{user.last_name?.[0]}
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium">{user.first_name} {user.last_name}</p>
+                                <p className="text-xs text-muted-foreground">{user.email}</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-xs text-muted-foreground">Last login</p>
+                              <p className="text-sm">{formatLastLogin(user.last_login_at)}</p>
+                            </div>
+                          </div>
+                        ))}
+                        <Button variant="ghost" size="sm" className="w-full mt-2" asChild>
+                          <Link to="/admin/users">View all users →</Link>
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Library Stats */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-serif text-lg flex items-center gap-2">
+                      <BarChart3 className="w-5 h-5" />
+                      Library Overview
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                      <div className="flex items-center gap-3">
+                        <Library className="w-5 h-5 text-muted-foreground" />
+                        <div>
+                          <p className="font-medium">Shared Library</p>
+                          <p className="text-xs text-muted-foreground">Organization templates</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold">{templates.length}</p>
+                        <p className="text-xs text-muted-foreground">templates</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                      <div className="flex items-center gap-3">
+                        <FolderOpen className="w-5 h-5 text-muted-foreground" />
+                        <div>
+                          <p className="font-medium">Personal Libraries</p>
+                          <p className="text-xs text-muted-foreground">User-saved messages</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold">{messages.length}</p>
+                        <p className="text-xs text-muted-foreground">messages (yours)</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm" className="w-full" asChild>
+                      <Link to="/shared-library">View Shared Library →</Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            {/* User Activity Tab */}
+            <TabsContent value="users" className="mt-4">
               <Card>
-                <CardHeader>
-                  <CardTitle className="font-serif">Recent Activity</CardTitle>
-                  <CardDescription>Latest playbook updates and submissions</CardDescription>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle className="font-serif">User Activity</CardTitle>
+                    <CardDescription>Monitor user engagement and last login times</CardDescription>
+                  </div>
+                  <Button variant="outline" asChild>
+                    <Link to="/admin/users">
+                      <Users className="w-4 h-4 mr-2" />
+                      Manage Users
+                    </Link>
+                  </Button>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    {templates.slice(0, 5).map(template => (
-                      <div key={template.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-medium truncate">{template.title}</h4>
-                            {getStatusBadge(template.status)}
-                          </div>
-                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                            {template.collegeName && (
-                              <span className="flex items-center gap-1">
-                                <Building2 className="w-3 h-3" />
-                                {template.collegeName}
+                  {isLoadingUsers ? (
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>User</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Last Login</TableHead>
+                          <TableHead>Member Since</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {users.map(user => (
+                          <TableRow key={user.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium text-primary">
+                                  {user.first_name?.[0]}{user.last_name?.[0]}
+                                </div>
+                                <div>
+                                  <p className="font-medium">{user.first_name} {user.last_name}</p>
+                                  <p className="text-xs text-muted-foreground">{user.email}</p>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge 
+                                variant={user.status === 'active' ? 'default' : 'secondary'}
+                                className={user.status === 'active' ? 'bg-green-500' : ''}
+                              >
+                                {user.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <span className={!user.last_login_at ? 'text-muted-foreground' : ''}>
+                                {formatLastLogin(user.last_login_at)}
                               </span>
-                            )}
-                            {template.departmentName && (
-                              <span>{template.departmentName}</span>
-                            )}
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              {new Date(template.updatedAt).toLocaleDateString()}
-                            </span>
-                          </div>
+                            </TableCell>
+                            <TableCell className="text-muted-foreground">
+                              {new Date(user.created_at).toLocaleDateString()}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Tool Usage Tab */}
+            <TabsContent value="usage" className="mt-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="font-serif">Tool Usage Statistics</CardTitle>
+                  <CardDescription>Most used tools across your institution</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {toolUsageStats.map((tool, index) => (
+                      <div key={tool.name} className="flex items-center gap-4">
+                        <div className="w-8 text-center text-muted-foreground font-medium">
+                          #{index + 1}
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm">
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          {template.status === 'approved' && (
-                            <Button 
-                              size="sm" 
-                              onClick={() => { setSelectedTemplate(template); setDistributeOpen(true); }}
-                            >
-                              <Send className="w-4 h-4 mr-1" />
-                              Distribute
-                            </Button>
-                          )}
+                        <div className="p-2 rounded-lg bg-muted">
+                          <tool.icon className="w-5 h-5 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="font-medium">{tool.name}</p>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-bold">{tool.usage}</span>
+                              <Badge variant="outline" className="text-xs">
+                                <TrendingUp className="w-3 h-3 mr-1" />
+                                {tool.trend}
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="h-2 bg-muted rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-primary rounded-full"
+                              style={{ width: `${(tool.usage / toolUsageStats[0].usage) * 100}%` }}
+                            />
+                          </div>
                         </div>
                       </div>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="pending" className="space-y-4 mt-4">
-              {submittedTemplates.length === 0 ? (
-                <Card>
-                  <CardContent className="p-8 text-center text-muted-foreground">
-                    <Clock className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No templates pending review</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                submittedTemplates.map(template => (
-                  <Card key={template.id}>
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-serif font-semibold">{template.title}</h3>
-                            {getStatusBadge(template.status)}
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-3">{template.intentStatement}</p>
-                          <div className="flex flex-wrap gap-2 mb-3">
-                            {template.collegeName && <Badge variant="outline"><Building2 className="w-3 h-3 mr-1" />{template.collegeName}</Badge>}
-                            {template.departmentName && <Badge variant="outline">{template.departmentName}</Badge>}
-                            {template.requiredFields.channel.map(c => <Badge key={c} variant="secondary">{c}</Badge>)}
-                          </div>
-                          <div className="bg-muted/50 p-3 rounded-lg text-sm font-mono">
-                            {template.content.slice(0, 200)}...
-                          </div>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <Button onClick={() => handleApprove(template)} className="flex items-center gap-1">
-                            <CheckCircle className="w-4 h-4" />
-                            Approve
-                          </Button>
-                          <Button variant="outline" onClick={() => handleReject(template)} className="flex items-center gap-1">
-                            <X className="w-4 h-4" />
-                            Return
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </TabsContent>
-
-            <TabsContent value="ready" className="space-y-4 mt-4">
-              {approvedTemplates.length === 0 ? (
-                <Card>
-                  <CardContent className="p-8 text-center text-muted-foreground">
-                    <CheckCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No templates ready for distribution</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                approvedTemplates.map(template => (
-                  <Card key={template.id}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-serif font-semibold">{template.title}</h3>
-                          <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-                            {template.collegeName && <span>{template.collegeName}</span>}
-                            {template.departmentName && <span>• {template.departmentName}</span>}
-                          </div>
-                        </div>
-                        <Button onClick={() => { setSelectedTemplate(template); setDistributeOpen(true); }}>
-                          <Send className="w-4 h-4 mr-2" />
-                          Distribute Now
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </TabsContent>
-
-            <TabsContent value="published" className="space-y-4 mt-4">
-              {publishedTemplates.length === 0 ? (
-                <Card>
-                  <CardContent className="p-8 text-center text-muted-foreground">
-                    <Megaphone className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No published playbooks yet</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                publishedTemplates.map(template => (
-                  <Card key={template.id}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-serif font-semibold">{template.title}</h3>
-                            {getStatusBadge(template.status)}
-                          </div>
-                          <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-                            {template.collegeName && <span>{template.collegeName}</span>}
-                            {template.departmentName && <span>• {template.departmentName}</span>}
-                            <span>• Published {new Date(template.updatedAt).toLocaleDateString()}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm"><Eye className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="sm"><Edit className="w-4 h-4" /></Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </TabsContent>
-
-            {/* Library Management Tab */}
-            <TabsContent value="library-mgmt" className="space-y-4 mt-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="font-serif">Library Management</CardTitle>
-                  <CardDescription>Manage personal and shared library data</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* Personal Library Section */}
-                  <div className="p-4 rounded-lg border border-border">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium flex items-center gap-2">
-                          <FileText className="w-4 h-4" />
-                          Personal Message Library
-                        </h4>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {messages.length} message{messages.length !== 1 ? 's' : ''} saved
-                        </p>
-                      </div>
-                      <Button 
-                        variant="destructive" 
-                        size="sm"
-                        onClick={() => setClearPersonalOpen(true)}
-                        disabled={messages.length === 0}
-                      >
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Clear All
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Shared Library Section */}
-                  <div className="p-4 rounded-lg border border-border">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium flex items-center gap-2">
-                          <Users className="w-4 h-4" />
-                          Shared Template Library
-                        </h4>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {templates.length} template{templates.length !== 1 ? 's' : ''} in library
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={handleResetSharedToDefaults}
-                        >
-                          <RefreshCw className="w-4 h-4 mr-2" />
-                          Reset to Defaults
-                        </Button>
-                        <Button 
-                          variant="destructive" 
-                          size="sm"
-                          onClick={() => setClearSharedOpen(true)}
-                          disabled={templates.length === 0}
-                        >
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Clear All
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
-                    <div className="flex gap-3">
-                      <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium text-amber-800 dark:text-amber-200">Warning</p>
-                        <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                          Clearing libraries will permanently remove all saved messages or templates. This action cannot be undone.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Password Management */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="font-serif flex items-center gap-2">
-                    <Key className="w-5 h-5" />
-                    User Management
-                  </CardTitle>
-                  <CardDescription>Manage user accounts, passwords, and access</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    User authentication is now managed through the new Admin Console. You can create users, reset passwords, approve access requests, and manage user status.
+                  <p className="text-xs text-muted-foreground mt-6 text-center">
+                    Usage data is illustrative. Full analytics coming soon.
                   </p>
-                  <Link to="/admin/users">
-                    <Button className="w-full md:w-auto">
-                      <Users className="w-4 h-4 mr-2" />
-                      Go to User Management
-                    </Button>
-                  </Link>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            {/* Admin Functions Tab */}
+            <TabsContent value="admin" className="mt-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Library Management */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-serif text-lg flex items-center gap-2">
+                      <Library className="w-5 h-5" />
+                      Library Management
+                    </CardTitle>
+                    <CardDescription>
+                      Manage shared and personal library content
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="p-4 border rounded-lg space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">Shared Library</p>
+                          <p className="text-xs text-muted-foreground">{templates.length} templates</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" onClick={handleResetSharedToDefaults}>
+                            <RefreshCw className="w-4 h-4 mr-1" />
+                            Reset
+                          </Button>
+                          <Button variant="destructive" size="sm" onClick={() => setClearSharedOpen(true)}>
+                            <Trash2 className="w-4 h-4 mr-1" />
+                            Clear
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-4 border rounded-lg space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">Your Personal Library</p>
+                          <p className="text-xs text-muted-foreground">{messages.length} messages</p>
+                        </div>
+                        <Button variant="destructive" size="sm" onClick={() => setClearPersonalOpen(true)}>
+                          <Trash2 className="w-4 h-4 mr-1" />
+                          Clear
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Quick Links */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-serif text-lg flex items-center gap-2">
+                      <Building2 className="w-5 h-5" />
+                      Administration
+                    </CardTitle>
+                    <CardDescription>
+                      Quick access to admin functions
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <Button variant="outline" className="w-full justify-start" asChild>
+                      <Link to="/admin/users">
+                        <Users className="w-4 h-4 mr-2" />
+                        User Management
+                        <ChevronRight className="w-4 h-4 ml-auto" />
+                      </Link>
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start" asChild>
+                      <Link to="/admin/onboarding">
+                        <Activity className="w-4 h-4 mr-2" />
+                        Access Requests
+                        <ChevronRight className="w-4 h-4 ml-auto" />
+                      </Link>
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start" asChild>
+                      <Link to="/approvals">
+                        <FileText className="w-4 h-4 mr-2" />
+                        Library Approvals
+                        <ChevronRight className="w-4 h-4 ml-auto" />
+                      </Link>
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start" asChild>
+                      <Link to="/settings">
+                        <Building2 className="w-4 h-4 mr-2" />
+                        Institutional Settings
+                        <ChevronRight className="w-4 h-4 ml-auto" />
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
           </Tabs>
         </div>
       </main>
 
-      {/* Quick Create Dialog */}
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="max-w-xl">
-          <DialogHeader>
-            <DialogTitle className="font-serif">Create New Playbook</DialogTitle>
-            <DialogDescription>
-              Quickly create a new messaging playbook to distribute to your team
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div>
-              <Label htmlFor="quick-title">Title *</Label>
-              <Input id="quick-title" value={quickTitle} onChange={(e) => setQuickTitle(e.target.value)} placeholder="e.g., Fall Registration Reminder" />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="quick-college">College Name</Label>
-                <Input id="quick-college" value={quickCollegeName} onChange={(e) => setQuickCollegeName(e.target.value)} placeholder="e.g., College of Education" />
-              </div>
-              <div>
-                <Label htmlFor="quick-department">Department Name</Label>
-                <Input id="quick-department" value={quickDepartmentName} onChange={(e) => setQuickDepartmentName(e.target.value)} placeholder="e.g., Registrar's Office" />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="quick-playbook">Playbook Category</Label>
-              <Input id="quick-playbook" value={quickPlaybook} onChange={(e) => setQuickPlaybook(e.target.value)} placeholder="e.g., Registration Support" />
-            </div>
-            <div>
-              <Label>Channels</Label>
-              <div className="flex flex-wrap gap-2 mt-1">
-                {channelOptions.map(c => (
-                  <Badge 
-                    key={c} 
-                    variant={quickChannels.includes(c) ? "default" : "outline"} 
-                    className="cursor-pointer"
-                    onClick={() => toggleArrayItem(quickChannels, setQuickChannels, c)}
-                  >
-                    {c}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-            <div>
-              <Label>Target Audiences</Label>
-              <div className="flex flex-wrap gap-2 mt-1">
-                {audienceOptions.map(a => (
-                  <Badge 
-                    key={a} 
-                    variant={quickAudiences.includes(a) ? "default" : "outline"} 
-                    className="cursor-pointer"
-                    onClick={() => toggleArrayItem(quickAudiences, setQuickAudiences, a)}
-                  >
-                    {a}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="quick-content">Message Content *</Label>
-              <Textarea 
-                id="quick-content" 
-                value={quickContent} 
-                onChange={(e) => setQuickContent(e.target.value)} 
-                placeholder="Use {{placeholder}} for variables like {{student_name}}, {{deadline_date}}..."
-                rows={6}
-                className="font-mono text-sm"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
-            <Button onClick={handleQuickCreate}>Create Playbook</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Distribute Confirmation Dialog */}
-      <Dialog open={distributeOpen} onOpenChange={setDistributeOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="font-serif">Distribute Playbook</DialogTitle>
-            <DialogDescription>
-              This will make the playbook available to all users in the Shared Library.
-            </DialogDescription>
-          </DialogHeader>
-          {selectedTemplate && (
-            <div className="py-4">
-              <div className="p-4 rounded-lg bg-muted">
-                <h4 className="font-semibold mb-1">{selectedTemplate.title}</h4>
-                <p className="text-sm text-muted-foreground">{selectedTemplate.intentStatement}</p>
-                <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                  {selectedTemplate.collegeName && <span>{selectedTemplate.collegeName}</span>}
-                  {selectedTemplate.departmentName && <span>• {selectedTemplate.departmentName}</span>}
-                </div>
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDistributeOpen(false)}>Cancel</Button>
-            <Button onClick={() => selectedTemplate && handleDistribute(selectedTemplate)}>
-              <Megaphone className="w-4 h-4 mr-2" />
-              Distribute to All Users
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Clear Personal Library Confirmation */}
+      {/* Clear Personal Library Dialog */}
       <Dialog open={clearPersonalOpen} onOpenChange={setClearPersonalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="font-serif flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-destructive" />
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="w-5 h-5" />
               Clear Personal Library
             </DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete all {messages.length} message{messages.length !== 1 ? 's' : ''} from the Personal Library? This action cannot be undone.
+              This will permanently delete all {messages.length} messages from your personal library. This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setClearPersonalOpen(false)}>Cancel</Button>
             <Button variant="destructive" onClick={handleClearPersonalLibrary}>
               <Trash2 className="w-4 h-4 mr-2" />
-              Clear All Messages
+              Clear Library
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Clear Shared Library Confirmation */}
+      {/* Clear Shared Library Dialog */}
       <Dialog open={clearSharedOpen} onOpenChange={setClearSharedOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="font-serif flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-destructive" />
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="w-5 h-5" />
               Clear Shared Library
             </DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete all {templates.length} template{templates.length !== 1 ? 's' : ''} from the Shared Library? This action cannot be undone.
+              This will permanently delete all {templates.length} templates from the shared library. All users will lose access to these templates. This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setClearSharedOpen(false)}>Cancel</Button>
             <Button variant="destructive" onClick={handleClearSharedLibrary}>
               <Trash2 className="w-4 h-4 mr-2" />
-              Clear All Templates
+              Clear Library
             </Button>
           </DialogFooter>
         </DialogContent>
