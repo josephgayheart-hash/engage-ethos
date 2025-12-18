@@ -48,10 +48,17 @@ const handler = async (req: Request): Promise<Response> => {
           <tr>
             <td align="center">
               <table width="100%" max-width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden;">
-                <!-- Header -->
+                <!-- Logo Header -->
                 <tr>
-                  <td style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); padding: 32px 40px; text-align: center;">
-                    <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">UPlaybook.AI</h1>
+                  <td style="background-color: #ffffff; padding: 32px 40px 16px 40px; text-align: center;">
+                    <img src="https://uplaybook.ai/lovable-uploads/5f0b000f-c8ef-48e9-91f9-10c3a51e4f39.png" alt="UPlaybook.AI" style="height: 60px; width: auto;" />
+                  </td>
+                </tr>
+                
+                <!-- Header Banner -->
+                <tr>
+                  <td style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); padding: 24px 40px; text-align: center;">
+                    <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">Welcome to UPlaybook.AI</h1>
                     <p style="margin: 8px 0 0 0; color: #94a3b8; font-size: 14px;">AI-Powered Communication Platform</p>
                   </td>
                 </tr>

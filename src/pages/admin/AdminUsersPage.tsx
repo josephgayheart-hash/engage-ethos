@@ -91,6 +91,15 @@ export default function AdminUsersPage() {
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [resetUserId, setResetUserId] = useState<string | null>(null);
 
+  // Resend invite dialog
+  const [showResendDialog, setShowResendDialog] = useState(false);
+  const [resendUser, setResendUser] = useState<UserWithRole | null>(null);
+  const [isResending, setIsResending] = useState(false);
+
+  // Invite sent confirmation dialog
+  const [showInviteSentDialog, setShowInviteSentDialog] = useState(false);
+  const [inviteSentEmail, setInviteSentEmail] = useState('');
+
   const fetchUsers = async () => {
     setIsLoading(true);
     try {
@@ -242,17 +251,61 @@ export default function AdminUsersPage() {
       
       setCredentials({ email: user?.email || '', password: newPassword });
       setShowCredentialsDialog(true);
-
-      toast({
-        title: 'Password Reset',
-        description: 'New temporary password generated',
-      });
     } catch (error: any) {
       toast({
         title: 'Error',
         description: error.message || 'Failed to reset password',
         variant: 'destructive',
       });
+    }
+  };
+
+  const handleResendInvite = async () => {
+    if (!resendUser) return;
+
+    setIsResending(true);
+    const newPassword = generatePassword();
+
+    try {
+      // First reset the password
+      const { data, error } = await supabase.functions.invoke('admin-users', {
+        body: {
+          action: 'reset_password',
+          userId: resendUser.id,
+          newPassword,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      // Then send the invite email
+      const { error: emailError } = await supabase.functions.invoke('send-invite-email', {
+        body: {
+          email: resendUser.email,
+          firstName: resendUser.first_name,
+          lastName: resendUser.last_name,
+          temporaryPassword: newPassword,
+          institutionName: tenant?.institution_name || 'Your Institution',
+          role: resendUser.roles[0] || 'user',
+        },
+      });
+
+      if (emailError) throw emailError;
+
+      setShowResendDialog(false);
+      setResendUser(null);
+      setInviteSentEmail(resendUser.email);
+      setShowInviteSentDialog(true);
+
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to resend invite',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -454,6 +507,19 @@ export default function AdminUsersPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
+                              {/* Show Resend Invite for users who haven't logged in */}
+                              {!user.last_login_at && (
+                                <>
+                                  <DropdownMenuItem onClick={() => {
+                                    setResendUser(user);
+                                    setShowResendDialog(true);
+                                  }}>
+                                    <Mail className="w-4 h-4 mr-2" />
+                                    Resend Invite
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                </>
+                              )}
                               <DropdownMenuItem onClick={() => {
                                 setResetUserId(user.id);
                                 setShowResetDialog(true);
@@ -681,6 +747,60 @@ export default function AdminUsersPage() {
             </Button>
             <Button onClick={handleResetPassword} className="bg-[hsl(222,47%,14%)] hover:bg-[hsl(222,47%,20%)]">
               Generate New Password
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Resend Invite Dialog */}
+      <Dialog open={showResendDialog} onOpenChange={setShowResendDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-serif">Resend Invitation</DialogTitle>
+            <DialogDescription>
+              This will generate a new temporary password and send a fresh invitation email to <strong>{resendUser?.email}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowResendDialog(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleResendInvite} 
+              disabled={isResending}
+              className="bg-[hsl(222,47%,14%)] hover:bg-[hsl(222,47%,20%)]"
+            >
+              {isResending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Mail className="w-4 h-4 mr-2" />
+                  Resend Invite
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Invite Sent Confirmation Dialog */}
+      <Dialog open={showInviteSentDialog} onOpenChange={setShowInviteSentDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="mx-auto w-12 h-12 bg-[hsl(158,64%,42%)]/10 rounded-full flex items-center justify-center mb-4">
+              <Mail className="w-6 h-6 text-[hsl(158,64%,42%)]" />
+            </div>
+            <DialogTitle className="font-serif text-center">Invitation Sent!</DialogTitle>
+            <DialogDescription className="text-center">
+              A new invitation email with login credentials has been sent to <strong>{inviteSentEmail}</strong>. The user's password has been reset.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-center">
+            <Button onClick={() => setShowInviteSentDialog(false)} className="bg-[hsl(222,47%,14%)] hover:bg-[hsl(222,47%,20%)]">
+              Done
             </Button>
           </DialogFooter>
         </DialogContent>
