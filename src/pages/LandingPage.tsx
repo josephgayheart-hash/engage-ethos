@@ -66,11 +66,13 @@ export default function LandingPage() {
 
             {/* Logo */}
             <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
-              <img 
-                src={uplaybookLogo} 
-                alt="UPlaybook.AI" 
-                className="h-20 sm:h-24 w-auto mx-auto drop-shadow-lg"
-              />
+              <div className="inline-block bg-white/95 backdrop-blur-sm rounded-2xl px-8 py-5 shadow-xl">
+                <img 
+                  src={uplaybookLogo} 
+                  alt="UPlaybook.AI" 
+                  className="h-16 sm:h-20 w-auto"
+                />
+              </div>
             </div>
 
             {/* Primary Slogan */}
