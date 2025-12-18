@@ -83,14 +83,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setProfile(profileData as UserProfile);
 
       // Fetch tenant
-      const { data: tenantData } = await supabase
-        .from('tenants')
-        .select('*')
-        .eq('id', profileData.tenant_id)
-        .single();
+      if (profileData.tenant_id) {
+        const { data: tenantData, error: tenantError } = await supabase
+          .from('tenants')
+          .select('*')
+          .eq('id', profileData.tenant_id)
+          .single();
 
-      if (tenantData) {
-        setTenant(tenantData as Tenant);
+        if (tenantError) {
+          console.error('Tenant fetch error:', tenantError);
+        } else if (tenantData) {
+          setTenant(tenantData as Tenant);
+        }
       }
 
       // Fetch all roles for this user
