@@ -187,20 +187,26 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Secondary CTA Section */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-muted/50">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-4">
+      {/* Secondary CTA Section - Navy Blue */}
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[#1e3a5f] relative overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
+        </div>
+        
+        <div className="max-w-3xl mx-auto text-center relative z-10">
+          <h2 className="font-serif text-2xl sm:text-3xl text-white mb-4">
             Ready to transform your student communications?
           </h2>
-          <p className="text-muted-foreground mb-8 text-lg">
+          <p className="text-white/70 mb-8 text-lg">
             Join institutions already using UPlaybook to craft messages that resonate.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               asChild
               size="lg"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 px-8"
+              className="bg-white text-[#1e3a5f] hover:bg-white/90 px-8 font-semibold"
             >
               <Link to="/request-access">
                 Request Beta Access
@@ -210,7 +216,7 @@ export default function LandingPage() {
               asChild
               variant="ghost"
               size="lg"
-              className="text-muted-foreground hover:text-foreground"
+              className="text-white/80 hover:text-white hover:bg-white/10"
             >
               <Link to="/login">
                 Already have an account? Sign in
