@@ -43,11 +43,11 @@ interface CadenceSelectorProps {
 }
 
 const cadenceOptions: { value: CadenceFrequency; label: string; perWeek: number; description: string }[] = [
-  { value: 'daily', label: 'Daily', perWeek: 7, description: 'High intensity - 7 touchpoints per week' },
-  { value: 'every-other-day', label: 'Every Other Day', perWeek: 3.5, description: 'Moderate-high - ~3-4 touchpoints per week' },
-  { value: '2-3x-week', label: '2-3x Per Week', perWeek: 2.5, description: 'Balanced - 2-3 touchpoints per week' },
-  { value: 'weekly', label: 'Weekly', perWeek: 1, description: 'Standard - 1 touchpoint per week' },
   { value: 'biweekly', label: 'Biweekly', perWeek: 0.5, description: 'Light touch - 1 touchpoint every 2 weeks' },
+  { value: 'weekly', label: 'Weekly', perWeek: 1, description: 'Standard - 1 touchpoint per week' },
+  { value: '2-3x-week', label: '2-3x Per Week', perWeek: 2.5, description: 'Balanced - 2-3 touchpoints per week' },
+  { value: 'every-other-day', label: 'Every Other Day', perWeek: 3.5, description: 'Moderate-high - ~3-4 touchpoints per week' },
+  { value: 'daily', label: 'Daily', perWeek: 7, description: 'High intensity - 7 touchpoints per week' },
 ];
 
 const escalationOptions: { value: EscalationPattern; label: string; description: string; icon: React.ReactNode }[] = [
