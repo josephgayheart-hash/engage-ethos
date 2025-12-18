@@ -59,7 +59,11 @@ serve(async (req) => {
 
     // Get the first role (prefer super_admin if present)
     const isSuperAdmin = roles.some(r => r.role === "super_admin");
-    const adminTenantId = isSuperAdmin ? null : roles[0].tenant_id;
+
+    // Default tenant (even super_admins have a tenant_id on their role)
+    const defaultTenantId = roles[0]?.tenant_id ?? null;
+    const adminTenantId = isSuperAdmin ? null : defaultTenantId;
+
     const body = await req.json();
     const { action } = body;
 
@@ -69,12 +73,13 @@ serve(async (req) => {
       case "create_user": {
         const { email, password, firstName, lastName, phone, department, title, role, roles: rolesList, tenantId: targetTenantId, sendInvite } = body;
         
-        // Super admins must specify a tenant, regular admins use their own tenant
-        const effectiveTenantId = isSuperAdmin ? targetTenantId : adminTenantId;
+        // Super admins may optionally target a tenant; if omitted, fall back to their default tenant.
+        // This keeps single-tenant setups working without requiring a tenant picker in the UI.
+        const effectiveTenantId = isSuperAdmin ? (targetTenantId ?? defaultTenantId) : adminTenantId;
         
         if (!effectiveTenantId) {
           return new Response(
-            JSON.stringify({ error: "Tenant ID required for super admin operations" }),
+            JSON.stringify({ error: "Tenant not found for this operation" }),
             { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
