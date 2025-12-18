@@ -77,7 +77,7 @@ export default function LoginPage() {
         if (profile.password_reset_required) {
           navigate('/change-password');
         } else {
-          navigate('/');
+          navigate('/dashboard');
         }
       }
     } catch (err: any) {
@@ -223,7 +223,7 @@ export default function LoginPage() {
         </Card>
 
         <p className="text-center text-xs text-[hsl(220,14%,46%)]">
-          © 2024 UPlaybook.AI. Research-grounded messaging intelligence.
+          © 2025 UPlaybook.AI. Research-grounded messaging intelligence.
         </p>
       </div>
       </div>

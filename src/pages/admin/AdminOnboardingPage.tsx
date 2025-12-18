@@ -286,7 +286,7 @@ export default function AdminOnboardingPage() {
             </Link>
             <div>
               <div className="flex items-center gap-2 text-sm text-[hsl(220,14%,46%)]">
-                <Link to="/" className="hover:text-[hsl(222,47%,11%)]">
+                <Link to="/dashboard" className="hover:text-[hsl(222,47%,11%)]">
                   <Home className="w-4 h-4" />
                 </Link>
                 <span>/</span>

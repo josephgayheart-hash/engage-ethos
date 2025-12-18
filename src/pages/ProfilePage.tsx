@@ -88,12 +88,12 @@ export default function ProfilePage() {
       <div className="border-b border-[hsl(220,13%,88%)] bg-white">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
-            <Link to="/" className="text-[hsl(220,14%,46%)] hover:text-[hsl(222,47%,11%)]">
+            <Link to="/dashboard" className="text-[hsl(220,14%,46%)] hover:text-[hsl(222,47%,11%)]">
               <ChevronLeft className="w-5 h-5" />
             </Link>
             <div>
               <div className="flex items-center gap-2 text-sm text-[hsl(220,14%,46%)]">
-                <Link to="/" className="hover:text-[hsl(222,47%,11%)]">
+                <Link to="/dashboard" className="hover:text-[hsl(222,47%,11%)]">
                   <Home className="w-4 h-4" />
                 </Link>
                 <span>/</span>

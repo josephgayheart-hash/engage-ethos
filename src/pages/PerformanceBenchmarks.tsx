@@ -174,7 +174,7 @@ const PerformanceBenchmarks = () => {
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="flex items-center gap-4 mb-8">
-            <Link to="/">
+            <Link to="/dashboard">
               <Button variant="ghost" size="icon">
                 <ArrowLeft className="w-5 h-5" />
               </Button>
