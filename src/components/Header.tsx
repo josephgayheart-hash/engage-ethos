@@ -33,7 +33,7 @@ export function Header() {
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
-            <img src={uplaybookLogo} alt="UPlaybook.AI" className="h-10 w-auto" />
+            <img src={uplaybookLogo} alt="UPlaybook.AI" className="h-8 sm:h-10 w-auto object-contain" />
             <BetaBanner variant="badge" />
           </Link>
           {tenant && (
