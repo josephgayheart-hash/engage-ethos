@@ -9,7 +9,11 @@ import {
   ArrowRight,
   Sparkles,
   Users,
-  Target
+  Target,
+  Brain,
+  Zap,
+  CheckCircle2,
+  GraduationCap
 } from 'lucide-react';
 import uplaybookLogo from '@/assets/uplaybook-logo.png';
 
@@ -17,29 +21,44 @@ const features = [
   {
     icon: MessageSquare,
     title: 'Build Messages',
-    description: 'Generate research-backed communications tailored to your audience and goals.',
+    description: 'Generate research-backed communications tailored to your audience, moment, and goal.',
   },
   {
     icon: BarChart3,
     title: 'Evaluate Content',
-    description: 'Score existing messages against persuasion science frameworks.',
-  },
-  {
-    icon: BookOpen,
-    title: 'Message Library',
-    description: 'Save, organize, and share approved templates across your institution.',
+    description: 'Score existing messages against Cialdini\'s persuasion framework and cognitive load principles.',
   },
   {
     icon: Target,
-    title: 'Strategy Builder',
-    description: 'Design multi-touchpoint communication journeys with AI assistance.',
+    title: 'Design Journeys',
+    description: 'Map multi-channel communication strategies across the student lifecycle.',
+  },
+  {
+    icon: BookOpen,
+    title: 'Share & Approve',
+    description: 'Build an institution-wide library of approved templates your whole team can use.',
+  },
+];
+
+const valueProps = [
+  {
+    title: 'Stop guessing what works',
+    description: 'Every message recommendation is grounded in peer-reviewed persuasion research—not hunches.',
+  },
+  {
+    title: 'Speak with one voice',
+    description: 'Define your Content DNA once, and every AI-generated message reflects your brand.',
+  },
+  {
+    title: 'Move students to action',
+    description: 'Apply behavioral science principles that actually influence student decisions.',
   },
 ];
 
 const trustIndicators = [
   { icon: Shield, label: 'Research-Grounded' },
-  { icon: Sparkles, label: 'AI-Powered' },
-  { icon: Users, label: 'Built for Higher Ed' },
+  { icon: Brain, label: 'Behavioral Science' },
+  { icon: GraduationCap, label: 'Built for Higher Ed' },
 ];
 
 export default function LandingPage() {
@@ -47,12 +66,12 @@ export default function LandingPage() {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Hero Section */}
       <header className="relative overflow-hidden">
-        {/* Gradient Background - Light warm gradient */}
+        {/* Gradient Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-stone-100 to-slate-100" />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
         
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-32">
-          <div className="text-center space-y-8">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-28">
+          <div className="text-center space-y-6">
             {/* Beta Badge */}
             <div className="animate-fade-in">
               <Badge 
@@ -75,11 +94,11 @@ export default function LandingPage() {
 
             {/* Primary Slogan */}
             <h1 
-              className="font-serif text-3xl sm:text-4xl lg:text-5xl xl:text-6xl text-foreground tracking-tight animate-fade-in max-w-4xl mx-auto"
+              className="font-serif text-3xl sm:text-4xl lg:text-5xl text-foreground tracking-tight animate-fade-in max-w-4xl mx-auto leading-tight"
               style={{ animationDelay: '0.2s' }}
             >
-              Strategic Messaging Intelligence
-              <span className="block mt-2 text-primary">for Higher Education</span>
+              Your Playbook for
+              <span className="block text-primary">Student Success</span>
             </h1>
 
             {/* Secondary Tagline */}
@@ -87,8 +106,7 @@ export default function LandingPage() {
               className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed animate-fade-in"
               style={{ animationDelay: '0.3s' }}
             >
-              Design, evaluate, and distribute student-facing communication 
-              using peer-reviewed persuasion science.
+              AI-powered messaging intelligence that turns behavioral science into student action.
             </p>
 
             {/* CTA Buttons */}
@@ -120,7 +138,7 @@ export default function LandingPage() {
 
             {/* Trust Indicators */}
             <div 
-              className="flex flex-wrap justify-center gap-6 pt-8 animate-fade-in"
+              className="flex flex-wrap justify-center gap-6 pt-6 animate-fade-in"
               style={{ animationDelay: '0.5s' }}
             >
               {trustIndicators.map((indicator) => (
@@ -153,29 +171,59 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* Features Section */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-foreground mb-4">
-              Powered by Persuasion Science
+      {/* Value Proposition Section */}
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-background">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-3">
+              Stop Guessing. Start Connecting.
             </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Every message is grounded in research on how students actually make decisions.
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Most student communications are written on instinct. UPlaybook gives you 
+              the research-backed playbook to craft messages that actually work.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+          <div className="grid md:grid-cols-3 gap-8">
+            {valueProps.map((prop, index) => (
+              <div key={prop.title} className="text-center">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle2 className="w-5 h-5 text-primary" />
+                </div>
+                <h3 className="font-semibold text-foreground mb-2">{prop.title}</h3>
+                <p className="text-sm text-muted-foreground">{prop.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
+              <Zap className="w-3 h-3 mr-1" />
+              Core Capabilities
+            </Badge>
+            <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-3">
+              Powered by Persuasion Science
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Every feature is designed around how students actually make decisions.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, index) => (
               <div 
                 key={feature.title}
-                className="group card-elevated p-6 hover:border-accent/50 transition-all duration-300 animate-slide-up"
-                style={{ animationDelay: `${0.1 * index}s` }}
+                className="group bg-card border rounded-xl p-6 hover:border-primary/50 hover:shadow-lg transition-all duration-300"
               >
-                <div className="p-3 rounded-lg bg-primary/10 w-fit mb-4 group-hover:bg-accent/10 transition-colors">
-                  <feature.icon className="w-6 h-6 text-primary group-hover:text-accent transition-colors" />
+                <div className="p-3 rounded-lg bg-primary/10 w-fit mb-4 group-hover:bg-primary/20 transition-colors">
+                  <feature.icon className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="font-serif text-lg text-foreground mb-2">
+                <h3 className="font-semibold text-foreground mb-2">
                   {feature.title}
                 </h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">
@@ -200,7 +248,7 @@ export default function LandingPage() {
             Ready to transform your student communications?
           </h2>
           <p className="text-white/70 mb-8 text-lg">
-            Join institutions already using UPlaybook to craft messages that resonate.
+            Join forward-thinking institutions using UPlaybook to connect with students.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
