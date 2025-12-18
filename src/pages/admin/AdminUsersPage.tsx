@@ -50,8 +50,10 @@ import {
   Loader2,
   Copy,
   ChevronLeft,
-  Home
+  Home,
+  Mail
 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 type RoleType = 'admin' | 'user' | 'approver' | 'super_admin';
 
@@ -70,6 +72,7 @@ export default function AdminUsersPage() {
   // Create user dialog
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [sendInviteEmail, setSendInviteEmail] = useState(true);
   const [newUser, setNewUser] = useState({
     firstName: '',
     lastName: '',
@@ -168,6 +171,7 @@ export default function AdminUsersPage() {
           department: newUser.department || null,
           title: newUser.title || null,
           role: newUser.role,
+          sendInvite: sendInviteEmail,
         },
       });
 
@@ -178,6 +182,20 @@ export default function AdminUsersPage() {
       setCredentials({ email: newUser.email, password: tempPassword });
       setShowCredentialsDialog(true);
       
+      // Show appropriate toast message
+      if (data?.emailSent) {
+        toast({
+          title: 'User Created',
+          description: `Invitation email sent to ${newUser.email}`,
+        });
+      } else if (sendInviteEmail) {
+        toast({
+          title: 'User Created',
+          description: 'User created but email could not be sent. Please share credentials manually.',
+          variant: 'default',
+        });
+      }
+      
       setNewUser({
         firstName: '',
         lastName: '',
@@ -187,6 +205,7 @@ export default function AdminUsersPage() {
         title: '',
         role: 'user',
       });
+      setSendInviteEmail(true);
 
       fetchUsers();
     } catch (error: any) {
@@ -568,6 +587,21 @@ export default function AdminUsersPage() {
                   ? 'Full access to all institutions and system settings.'
                   : 'University Users can create and evaluate messages. Approvers can also review library submissions.'}
               </p>
+            </div>
+            
+            {/* Send Email Invite Checkbox */}
+            <div className="flex items-center space-x-3 pt-2 border-t border-[hsl(220,13%,88%)]">
+              <Checkbox
+                id="sendInvite"
+                checked={sendInviteEmail}
+                onCheckedChange={(checked) => setSendInviteEmail(checked as boolean)}
+              />
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-[hsl(220,14%,46%)]" />
+                <Label htmlFor="sendInvite" className="font-normal cursor-pointer">
+                  Send email invitation with login credentials
+                </Label>
+              </div>
             </div>
           </div>
           <DialogFooter>

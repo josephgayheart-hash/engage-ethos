@@ -67,7 +67,7 @@ serve(async (req) => {
 
     switch (action) {
       case "create_user": {
-        const { email, password, firstName, lastName, phone, department, title, role, roles: rolesList, tenantId: targetTenantId } = body;
+        const { email, password, firstName, lastName, phone, department, title, role, roles: rolesList, tenantId: targetTenantId, sendInvite } = body;
         
         // Super admins must specify a tenant, regular admins use their own tenant
         const effectiveTenantId = isSuperAdmin ? targetTenantId : adminTenantId;
@@ -171,11 +171,55 @@ serve(async (req) => {
           metadata: { email, roles: rolesToCreate },
         });
 
+        // Send invite email if requested
+        let emailSent = false;
+        if (sendInvite) {
+          try {
+            // Get tenant name for the email
+            const { data: tenantData } = await adminClient
+              .from("tenants")
+              .select("institution_name")
+              .eq("id", effectiveTenantId)
+              .single();
+
+            const institutionName = tenantData?.institution_name || "Your Institution";
+
+            // Call the send-invite-email function
+            const emailResponse = await fetch(`${supabaseUrl}/functions/v1/send-invite-email`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${supabaseServiceKey}`,
+              },
+              body: JSON.stringify({
+                email,
+                firstName,
+                lastName,
+                temporaryPassword: password,
+                institutionName,
+                role: rolesToCreate[0] || "user",
+              }),
+            });
+
+            if (emailResponse.ok) {
+              emailSent = true;
+              console.log(`Invite email sent successfully to ${email}`);
+            } else {
+              const errorData = await emailResponse.json();
+              console.error(`Failed to send invite email: ${errorData.error}`);
+            }
+          } catch (emailError) {
+            console.error("Error sending invite email:", emailError);
+            // Don't fail the user creation if email fails
+          }
+        }
+
         return new Response(
           JSON.stringify({ 
             success: true, 
             userId: authData.user.id,
-            tempPassword: password 
+            tempPassword: password,
+            emailSent
           }),
           { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
