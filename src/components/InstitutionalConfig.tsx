@@ -204,21 +204,47 @@ export function InstitutionalConfig({ config, onChange }: InstitutionalConfigPro
     </div>
   );
 
+  // Component for text fields with local state to prevent glitchy typing
+  const TextField = ({ 
+    label, 
+    field, 
+    placeholder, 
+    hint 
+  }: { 
+    label: string; 
+    field: keyof InstitutionalConfigType; 
+    placeholder: string; 
+    hint?: string;
+  }) => {
+    const [localValue, setLocalValue] = useState((config[field] as string) || '');
+    
+    const handleBlur = () => {
+      if (localValue !== (config[field] as string || '')) {
+        onChange({ ...config, [field]: localValue });
+      }
+    };
+
+    return (
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">{label}</Label>
+        {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+        <Input
+          value={localValue}
+          onChange={(e) => setLocalValue(e.target.value)}
+          onBlur={handleBlur}
+          placeholder={placeholder}
+        />
+      </div>
+    );
+  };
+
   const renderTextField = (
     label: string,
     field: keyof InstitutionalConfigType,
     placeholder: string,
     hint?: string
   ) => (
-    <div className="space-y-2">
-      <Label className="text-sm font-medium">{label}</Label>
-      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
-      <Input
-        value={(config[field] as string) || ''}
-        onChange={(e) => onChange({ ...config, [field]: e.target.value })}
-        placeholder={placeholder}
-      />
-    </div>
+    <TextField label={label} field={field} placeholder={placeholder} hint={hint} />
   );
 
   const hasConfig = Object.values(config).some(v => 
