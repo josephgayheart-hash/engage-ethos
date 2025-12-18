@@ -1,16 +1,15 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
-import { TemplateDetailDialog } from "@/components/library/TemplateDetailDialog";
 import { CreateTemplateDialog } from "@/components/library/CreateTemplateDialog";
 import { AdminApprovalPanel } from "@/components/library/AdminApprovalPanel";
 import type { SharedTemplate, LibraryFilters, LibraryEntryStatus } from "@/types/library";
@@ -26,7 +25,9 @@ import {
   Plus,
   Filter,
   X,
-  ShieldCheck
+  ShieldCheck,
+  ChevronRight,
+  Calendar
 } from "lucide-react";
 
 const statusConfig: Record<LibraryEntryStatus, { label: string; icon: typeof CheckCircle; variant: 'default' | 'secondary' | 'outline' }> = {
@@ -38,10 +39,10 @@ const statusConfig: Record<LibraryEntryStatus, { label: string; icon: typeof Che
 
 const SharedLibrary = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { templates, filterTemplates, getPlaybooks, addTemplate, updateTemplateStatus } = useSharedLibrary();
   const { addMessage } = useMessageLibrary();
   const [filters, setFilters] = useState<LibraryFilters>({ search: '' });
-  const [selectedTemplate, setSelectedTemplate] = useState<SharedTemplate | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
@@ -52,23 +53,10 @@ const SharedLibrary = () => {
   const filteredTemplates = filterTemplates({
     ...filters,
     playbook: activeTab !== 'all' ? activeTab : undefined,
-  }).filter(t => t.status === 'published' || t.status === 'approved'); // Only show published/approved in browse
+  }).filter(t => t.status === 'published' || t.status === 'approved');
 
-  const handlePullTemplate = (template: SharedTemplate, customizedContent?: string) => {
-    addMessage({
-      title: `${template.title} (from Shared Library)`,
-      content: customizedContent || template.content,
-      channel: template.requiredFields.channel[0] as any,
-      audience: template.requiredFields.audience[0] as any,
-      moment: template.requiredFields.moment[0] as any,
-      approved: false,
-      mode: 'generated',
-    });
-    toast({
-      title: "Template added to Personal Library",
-      description: "You can now customize it further in your library.",
-    });
-    setSelectedTemplate(null);
+  const handleCardClick = (id: string) => {
+    navigate(`/shared-library/${id}`);
   };
 
   const handleCreateTemplate = (template: Omit<SharedTemplate, 'id' | 'createdAt' | 'updatedAt' | 'changeHistory'>) => {
@@ -113,7 +101,7 @@ const SharedLibrary = () => {
               </Link>
               <div>
                 <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground">
-                  Shared Message Library
+                  University Library
                 </h1>
                 <p className="text-muted-foreground mt-1">
                   Organization-approved templates and playbooks
@@ -268,19 +256,22 @@ const SharedLibrary = () => {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 gap-4">
                   {filteredTemplates.map((template) => (
                     <Card 
                       key={template.id} 
-                      className="card-elevated cursor-pointer hover:border-primary/50 transition-colors"
-                      onClick={() => setSelectedTemplate(template)}
+                      className="card-elevated cursor-pointer hover:border-primary/50 transition-all hover:shadow-md group"
+                      onClick={() => handleCardClick(template.id)}
                     >
                       <CardContent className="pt-6">
                         <div className="flex items-start justify-between gap-4 mb-3">
                           <h3 className="font-serif font-semibold text-foreground">
                             {template.title}
                           </h3>
-                          <StatusBadge status={template.status} />
+                          <div className="flex items-center gap-2">
+                            <StatusBadge status={template.status} />
+                            <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </div>
                         </div>
                         <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                           {template.intentStatement}
@@ -303,9 +294,15 @@ const SharedLibrary = () => {
                             <Users className="w-3 h-3" />
                             {template.owner}
                           </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            v{template.version}
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {new Date(template.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              v{template.version}
+                            </div>
                           </div>
                         </div>
                       </CardContent>
@@ -317,15 +314,6 @@ const SharedLibrary = () => {
           )}
         </div>
       </main>
-
-      {selectedTemplate && (
-        <TemplateDetailDialog
-          template={selectedTemplate}
-          open={!!selectedTemplate}
-          onOpenChange={(open) => !open && setSelectedTemplate(null)}
-          onPull={(customizedContent) => handlePullTemplate(selectedTemplate, customizedContent)}
-        />
-      )}
 
       <CreateTemplateDialog
         open={createOpen}
