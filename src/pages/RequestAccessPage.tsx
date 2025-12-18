@@ -6,8 +6,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UserPlus, CheckCircle2, Loader2, ArrowLeft } from 'lucide-react';
 import uplaybookLogo from '@/assets/uplaybook-logo.png';
+
+const REFERRAL_OPTIONS = [
+  { value: 'colleague', label: 'Colleague or peer recommendation' },
+  { value: 'conference', label: 'Conference or event' },
+  { value: 'webinar', label: 'Webinar or presentation' },
+  { value: 'linkedin', label: 'LinkedIn' },
+  { value: 'google', label: 'Google search' },
+  { value: 'industry_publication', label: 'Industry publication or article' },
+  { value: 'email', label: 'Email newsletter' },
+  { value: 'vendor', label: 'Vendor or partner referral' },
+  { value: 'other', label: 'Other' },
+];
 
 export default function RequestAccessPage() {
   const [formData, setFormData] = useState({
@@ -18,6 +31,7 @@ export default function RequestAccessPage() {
     institutionName: '',
     department: '',
     title: '',
+    referralSource: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -46,6 +60,7 @@ export default function RequestAccessPage() {
           institution_name_input: formData.institutionName,
           department: formData.department || null,
           title: formData.title || null,
+          referral_source: formData.referralSource || null,
           request_status: 'submitted',
         });
 
@@ -230,6 +245,25 @@ export default function RequestAccessPage() {
                     className="border-[hsl(220,13%,88%)]"
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="referralSource" className="text-[hsl(222,47%,11%)]">How did you hear about us?</Label>
+                <Select
+                  value={formData.referralSource}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, referralSource: value }))}
+                >
+                  <SelectTrigger className="border-[hsl(220,13%,88%)]">
+                    <SelectValue placeholder="Select an option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {REFERRAL_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <Button 

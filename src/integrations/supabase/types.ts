@@ -336,6 +336,7 @@ export type Database = {
           last_name: string
           notes: string | null
           phone: string | null
+          referral_source: string | null
           request_status: Database["public"]["Enums"]["onboarding_status"]
           reviewed_at: string | null
           reviewed_by_admin_user_id: string | null
@@ -352,6 +353,7 @@ export type Database = {
           last_name: string
           notes?: string | null
           phone?: string | null
+          referral_source?: string | null
           request_status?: Database["public"]["Enums"]["onboarding_status"]
           reviewed_at?: string | null
           reviewed_by_admin_user_id?: string | null
@@ -368,6 +370,7 @@ export type Database = {
           last_name?: string
           notes?: string | null
           phone?: string | null
+          referral_source?: string | null
           request_status?: Database["public"]["Enums"]["onboarding_status"]
           reviewed_at?: string | null
           reviewed_by_admin_user_id?: string | null
