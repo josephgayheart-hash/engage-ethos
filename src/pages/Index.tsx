@@ -372,13 +372,13 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            {/* Shared Library */}
+            {/* University Library */}
             <Card>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Library className="w-5 h-5 text-primary" />
-                    <CardTitle className="font-serif text-lg">Shared Library</CardTitle>
+                    <CardTitle className="font-serif text-lg">University Library</CardTitle>
                   </div>
                   <Link to="/shared-library">
                     <Button variant="ghost" size="sm" className="text-xs">
@@ -398,7 +398,7 @@ const Index = () => {
                 ) : (
                   <div className="space-y-2">
                     {publishedTemplates.map((template) => (
-                      <Link key={template.id} to="/shared-library" className="block">
+                      <Link key={template.id} to={`/shared-library/${template.id}`} className="block">
                         <div className="p-3 rounded-lg border bg-card hover:bg-muted/50 hover:border-primary/30 transition-colors cursor-pointer">
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex-1 min-w-0">

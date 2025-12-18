@@ -20,7 +20,7 @@ export function LibraryNav({ mode }: LibraryNavProps) {
       <Link to="/shared-library">
         <Button variant="ghost" size="sm" className="h-7 text-xs">
           <Library className="w-3 h-3 mr-1" />
-          {mode === 'journeys' ? 'Journey Playbooks' : mode === 'messages' ? 'Message Templates' : 'Shared Library'}
+          {mode === 'journeys' ? 'Journey Playbooks' : mode === 'messages' ? 'Message Templates' : 'University Library'}
           <ChevronRight className="w-3 h-3 ml-1" />
         </Button>
       </Link>

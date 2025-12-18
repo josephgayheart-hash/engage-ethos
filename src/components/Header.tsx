@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { BookOpen, Library, FolderOpen, Settings, Home, LogOut, User, CheckCircle } from "lucide-react";
+import { Library, FolderOpen, Settings, Home, LogOut, User, CheckCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
@@ -78,7 +78,7 @@ export function Header() {
             className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
           >
             <Library className="w-4 h-4" />
-            <span className="hidden sm:inline">Shared Library</span>
+            <span className="hidden sm:inline">University Library</span>
           </Link>
           {isApprover && (
             <Link 
@@ -98,13 +98,6 @@ export function Header() {
               <span className="hidden md:inline">{isSuperAdmin ? "Super Admin" : "Admin"}</span>
             </Link>
           )}
-          <a 
-            href="#about" 
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
-          >
-            <BookOpen className="w-4 h-4" />
-            <span className="hidden md:inline">Research</span>
-          </a>
 
           {/* User Menu */}
           {user && profile && (
