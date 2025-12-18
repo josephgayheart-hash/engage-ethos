@@ -31,7 +31,7 @@ const features = [
   {
     icon: Target,
     title: 'Design Journeys',
-    description: 'Map multi-channel communication strategies across the student lifecycle.',
+    description: 'Map multi-channel communication strategies for any initiative, campaign, or audience.',
   },
   {
     icon: BookOpen,
@@ -42,16 +42,16 @@ const features = [
 
 const valueProps = [
   {
-    title: 'Stop guessing what works',
-    description: 'Every message recommendation is grounded in peer-reviewed persuasion research—not hunches.',
+    title: 'From meeting to message in minutes',
+    description: 'Turn leadership directives into structured communication plans instantly—not days.',
   },
   {
-    title: 'Speak with one voice',
+    title: 'Speak with one institutional voice',
     description: 'Define your Content DNA once, and every AI-generated message reflects your brand.',
   },
   {
-    title: 'Move students to action',
-    description: 'Apply behavioral science principles that actually influence student decisions.',
+    title: 'Strategy first, execution second',
+    description: 'The organized pre-work that makes your CRM and marketing tools actually effective.',
   },
 ];
 
@@ -97,8 +97,8 @@ export default function LandingPage() {
               className="font-serif text-3xl sm:text-4xl lg:text-5xl text-foreground tracking-tight animate-fade-in max-w-4xl mx-auto leading-tight"
               style={{ animationDelay: '0.2s' }}
             >
-              Your Playbook for
-              <span className="block text-primary">Student Success</span>
+              Plan. Strategize. Execute.
+              <span className="block text-primary text-2xl sm:text-3xl lg:text-4xl mt-2">Your Playbook for Higher Ed Communications</span>
             </h1>
 
             {/* Secondary Tagline */}
@@ -106,7 +106,7 @@ export default function LandingPage() {
               className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed animate-fade-in"
               style={{ animationDelay: '0.3s' }}
             >
-              AI-powered messaging intelligence that turns behavioral science into student action.
+              The strategy and planning layer for university communications. From boardroom to inbox—organize your thinking before you hit send.
             </p>
 
             {/* CTA Buttons */}
@@ -176,11 +176,11 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-3">
-              Stop Guessing. Start Connecting.
+              Stop Reacting. Start Planning.
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Most student communications are written on instinct. UPlaybook gives you 
-              the research-backed playbook to craft messages that actually work.
+              Most institutional communications are written on instinct. UPlaybook gives you 
+              the research-backed playbook to plan, organize, and execute with confidence.
             </p>
           </div>
 
@@ -210,7 +210,7 @@ export default function LandingPage() {
               Powered by Persuasion Science
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Every feature is designed around how students actually make decisions.
+              Every feature is designed around how people actually make decisions.
             </p>
           </div>
 
@@ -245,10 +245,10 @@ export default function LandingPage() {
         
         <div className="max-w-3xl mx-auto text-center relative z-10">
           <h2 className="font-serif text-2xl sm:text-3xl text-white mb-4">
-            Ready to transform your student communications?
+            Ready to transform how your institution plans communications?
           </h2>
           <p className="text-white/70 mb-8 text-lg">
-            Join forward-thinking institutions using UPlaybook to connect with students.
+            Join forward-thinking institutions using UPlaybook to organize and execute strategic messaging.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 

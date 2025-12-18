@@ -132,10 +132,10 @@ const Index = () => {
               </Badge>
             </div>
             <h1 className="font-serif text-2xl md:text-3xl font-bold text-primary-foreground mb-2 animate-fade-in">
-              Your Playbook for Student Success
+              Plan. Strategize. Execute.
             </h1>
             <p className="text-base text-primary-foreground/80 animate-fade-in" style={{ animationDelay: '100ms' }}>
-              AI-powered messaging intelligence that turns behavioral science into student action.
+              The strategy layer for higher ed communications—organize your thinking before you hit send.
             </p>
           </div>
         </div>
@@ -242,7 +242,7 @@ const Index = () => {
                     </div>
                     <h3 className="font-serif font-semibold text-lg mb-2">Design Journeys</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Map multi-channel communication strategies across the student lifecycle.
+                      Map multi-channel communication strategies for any initiative or campaign.
                     </p>
                     <div className="flex items-center text-sm text-pillar-consensus font-medium group-hover:gap-2 transition-all">
                       Plan Strategy
