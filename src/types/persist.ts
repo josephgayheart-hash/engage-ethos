@@ -169,6 +169,10 @@ export interface MessageContext {
   dueDate?: string; // ISO date string for countdown/deadline
   startDate?: string; // ISO date string for journey start
   urgencyLabel?: string; // Custom label like "Registration Deadline" or "Application Due"
+  // Cadence & Escalation (for journey designer)
+  cadence?: 'daily' | 'every-other-day' | '2-3x-week' | 'weekly' | 'biweekly';
+  escalation?: 'none' | 'gradual-increase' | 'gradual-decrease' | 'peak-middle' | 'bookend';
+  estimatedTouchpoints?: number;
   // Additional context for refinement
   additionalContext?: string; // User-provided context, situation details, or refinement notes
 }

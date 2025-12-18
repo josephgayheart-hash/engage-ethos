@@ -10,6 +10,7 @@ import { StrategyJourneyDisplay } from "@/components/StrategyJourney";
 import { JourneyFlowDiagram } from "@/components/JourneyFlowDiagram";
 import { LibraryNav } from "@/components/LibraryNav";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
+import { CadenceSelector, CadenceFrequency, EscalationPattern } from "@/components/CadenceSelector";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,6 +83,9 @@ const StrategyPage = () => {
   const [mapperResult, setMapperResult] = useState<MapperResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [buildDiagram, setBuildDiagram] = useState(true);
+  const [cadence, setCadence] = useState<CadenceFrequency>('weekly');
+  const [escalation, setEscalation] = useState<EscalationPattern>('none');
+  const [estimatedTouchpoints, setEstimatedTouchpoints] = useState<number>(12);
 
   // Auto-calculate weeks when dates change
   const handleStartDateChange = (date: Date | undefined) => {
@@ -132,7 +136,14 @@ const StrategyPage = () => {
     
     try {
       // Use the first selected channel for the context
-      const contextWithChannels = { ...context, channel: selectedChannels[0], channels: selectedChannels };
+      const contextWithChannels = { 
+        ...context, 
+        channel: selectedChannels[0], 
+        channels: selectedChannels,
+        cadence,
+        escalation,
+        estimatedTouchpoints,
+      };
       const result = await mapMessages(
         contextWithChannels, 
         institutionalConfig || undefined, 
@@ -612,6 +623,16 @@ const StrategyPage = () => {
                   }
                 </p>
               </div>
+
+              {/* Cadence & Escalation */}
+              <CadenceSelector
+                journeyWeeks={journeyWeeks}
+                onCadenceChange={setCadence}
+                onEscalationChange={setEscalation}
+                onEstimatedTouchpointsChange={setEstimatedTouchpoints}
+                initialCadence={cadence}
+                initialEscalation={escalation}
+              />
 
               {/* Build Diagram Toggle */}
               <div className="flex items-center space-x-3 pt-2 border-t border-border">
