@@ -23,7 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target, Users, UserCheck, Mail, FileDown } from "lucide-react";
+import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target, Users, UserCheck, Mail, FileDown, MessageSquare, Globe, Phone, FileText } from "lucide-react";
 import { mapMessages } from "@/lib/evaluateMessage";
 import type { MessageContext, MapperResult, Channel, InstitutionalConfig } from "@/types/persist";
 
@@ -742,6 +742,53 @@ const StrategyPage = () => {
 
               {/* PDF Export Target Area */}
               <div ref={resultsRef} className="space-y-6 bg-background pb-10">
+                {/* Channel Analytics - Floated to top */}
+                <div data-pdf-section="analytics" className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                  {(() => {
+                    const channelCounts: Record<string, number> = {};
+                    mapperResult.journey.touchpoints.forEach(tp => {
+                      channelCounts[tp.channel] = (channelCounts[tp.channel] || 0) + 1;
+                    });
+                    return Object.entries(channelCounts).map(([channel, count]) => (
+                      <Card key={channel} className="bg-muted/30">
+                        <CardContent className="py-3 px-3 text-center">
+                          <div className="flex items-center justify-center gap-2 text-muted-foreground mb-1">
+                            {channel === 'email' && <Mail className="w-4 h-4" />}
+                            {channel === 'sms' && <MessageSquare className="w-4 h-4" />}
+                            {channel === 'social-media' && <Share2 className="w-4 h-4" />}
+                            {channel === 'portal' && <Globe className="w-4 h-4" />}
+                            {channel === 'phone-call' && <Phone className="w-4 h-4" />}
+                            {channel === 'direct-mail' && <FileText className="w-4 h-4" />}
+                            {channel === 'landing-page' && <FileText className="w-4 h-4" />}
+                            <span className="text-xs font-medium uppercase tracking-wide">
+                              {channel === 'sms' ? 'SMS' : channel.replace(/-/g, ' ')}
+                            </span>
+                          </div>
+                          <p className="text-2xl font-bold text-foreground">{count}</p>
+                        </CardContent>
+                      </Card>
+                    ));
+                  })()}
+                  <Card className="bg-primary/10 border-primary/20">
+                    <CardContent className="py-3 px-3 text-center">
+                      <div className="flex items-center justify-center gap-2 text-primary mb-1">
+                        <Clock className="w-4 h-4" />
+                        <span className="text-xs font-medium uppercase tracking-wide">Weeks</span>
+                      </div>
+                      <p className="text-2xl font-bold text-primary">{mapperResult.journey.totalWeeks}</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-secondary/10 border-secondary/20">
+                    <CardContent className="py-3 px-3 text-center">
+                      <div className="flex items-center justify-center gap-2 text-secondary mb-1">
+                        <Target className="w-4 h-4" />
+                        <span className="text-xs font-medium uppercase tracking-wide">Touchpoints</span>
+                      </div>
+                      <p className="text-2xl font-bold text-secondary">{mapperResult.journey.touchpoints.length}</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
                 {/* Designated Recipient */}
                 <div
                   data-pdf-section="recipient"
