@@ -215,8 +215,8 @@ serve(async (req) => {
               emailSent = true;
               console.log(`Invite email sent successfully to ${email}`);
             } else {
-              const errorData = await emailResponse.json();
-              console.error(`Failed to send invite email: ${errorData.error}`);
+              const errorText = await emailResponse.text();
+              console.error(`Failed to send invite email (status ${emailResponse.status}): ${errorText}`);
             }
           } catch (emailError) {
             console.error("Error sending invite email:", emailError);
