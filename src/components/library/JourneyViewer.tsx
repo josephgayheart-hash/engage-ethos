@@ -26,7 +26,8 @@ import {
   Check,
   RefreshCw,
   Map,
-  List
+  List,
+  Megaphone
 } from "lucide-react";
 import type { StrategyJourney, Channel, StrategyPhase, JourneyTouchpoint, MessageContext } from "@/types/persist";
 
@@ -51,6 +52,8 @@ const channelIcons: Record<Channel, React.ReactNode> = {
   'social-media': <Share2 className="w-4 h-4" />,
   'direct-mail': <FileText className="w-4 h-4" />,
   'phone-call': <Phone className="w-4 h-4" />,
+  'digital-ad-search': <Target className="w-4 h-4" />,
+  'digital-ad-social': <Megaphone className="w-4 h-4" />,
 };
 
 const formatChannelName = (channel: string): string => {
