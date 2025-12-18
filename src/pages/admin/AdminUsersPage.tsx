@@ -51,7 +51,9 @@ import {
   Copy,
   ChevronLeft,
   Home,
-  Mail
+  Mail,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -99,6 +101,11 @@ export default function AdminUsersPage() {
   // Invite sent confirmation dialog
   const [showInviteSentDialog, setShowInviteSentDialog] = useState(false);
   const [inviteSentEmail, setInviteSentEmail] = useState('');
+
+  // Delete user dialog
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteUser, setDeleteUser] = useState<UserWithRole | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchUsers = async () => {
     setIsLoading(true);
@@ -342,6 +349,40 @@ export default function AdminUsersPage() {
     }
   };
 
+  const handleDeleteUser = async () => {
+    if (!deleteUser) return;
+
+    setIsDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-users', {
+        body: {
+          action: 'delete_user',
+          userId: deleteUser.id,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast({
+        title: 'User Deleted',
+        description: `${deleteUser.first_name} ${deleteUser.last_name} has been permanently deleted`,
+      });
+
+      setShowDeleteDialog(false);
+      setDeleteUser(null);
+      fetchUsers();
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to delete user',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({ title: 'Copied to clipboard' });
@@ -544,15 +585,33 @@ export default function AdminUsersPage() {
                                   Unlock Account
                                 </DropdownMenuItem>
                               )}
-                              {user.status !== 'disabled' && (
+                              {user.status !== 'disabled' ? (
                                 <DropdownMenuItem 
                                   onClick={() => handleUpdateStatus(user.id, 'disabled')}
-                                  className="text-red-600"
+                                  className="text-amber-600"
                                 >
                                   <UserX className="w-4 h-4 mr-2" />
                                   Disable Account
                                 </DropdownMenuItem>
+                              ) : (
+                                <DropdownMenuItem 
+                                  onClick={() => handleUpdateStatus(user.id, 'active')}
+                                >
+                                  <Unlock className="w-4 h-4 mr-2" />
+                                  Re-enable Account
+                                </DropdownMenuItem>
                               )}
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem 
+                                onClick={() => {
+                                  setDeleteUser(user);
+                                  setShowDeleteDialog(true);
+                                }}
+                                className="text-red-600"
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete User
+                              </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
@@ -806,6 +865,55 @@ export default function AdminUsersPage() {
           <DialogFooter className="sm:justify-center">
             <Button onClick={() => setShowInviteSentDialog(false)} className="bg-[hsl(222,47%,14%)] hover:bg-[hsl(222,47%,20%)]">
               Done
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete User Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="mx-auto bg-red-100 rounded-full p-3 mb-2">
+              <AlertTriangle className="w-6 h-6 text-red-600" />
+            </div>
+            <DialogTitle className="font-serif text-center">Delete User</DialogTitle>
+            <DialogDescription className="text-center">
+              Are you sure you want to permanently delete <strong>{deleteUser?.first_name} {deleteUser?.last_name}</strong> ({deleteUser?.email})?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 my-4">
+            <p className="text-sm text-red-800">
+              <strong>Warning:</strong> This action cannot be undone. All user data, including their messages, settings, and history will be permanently removed.
+            </p>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowDeleteDialog(false);
+                setDeleteUser(null);
+              }}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteUser}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete User
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

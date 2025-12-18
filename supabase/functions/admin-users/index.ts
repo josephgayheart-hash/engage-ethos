@@ -394,6 +394,77 @@ serve(async (req) => {
         );
       }
 
+      case "delete_user": {
+        const { userId } = body;
+
+        // Verify user exists and get their tenant
+        const { data: targetProfile } = await adminClient
+          .from("profiles")
+          .select("tenant_id, email, first_name, last_name")
+          .eq("id", userId)
+          .single();
+
+        if (!targetProfile || (!isSuperAdmin && targetProfile.tenant_id !== adminTenantId)) {
+          return new Response(
+            JSON.stringify({ error: "User not found in your organization" }),
+            { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Prevent self-deletion
+        if (userId === requestingUser.id) {
+          return new Response(
+            JSON.stringify({ error: "You cannot delete your own account" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        console.log(`Deleting user: ${targetProfile.email} (${userId})`);
+
+        // Delete user roles first
+        await adminClient
+          .from("user_roles")
+          .delete()
+          .eq("user_id", userId);
+
+        // Delete profile (this should cascade, but be explicit)
+        await adminClient
+          .from("profiles")
+          .delete()
+          .eq("id", userId);
+
+        // Delete from auth.users - this is the actual user deletion
+        const { error: deleteError } = await adminClient.auth.admin.deleteUser(userId);
+
+        if (deleteError) {
+          console.error("Error deleting auth user:", deleteError);
+          return new Response(
+            JSON.stringify({ error: deleteError.message }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Audit log
+        await adminClient.from("audit_log").insert({
+          tenant_id: targetProfile.tenant_id,
+          actor_user_id: requestingUser.id,
+          action: "delete_user",
+          target_type: "user",
+          target_id: userId,
+          metadata: { 
+            deleted_email: targetProfile.email,
+            deleted_name: `${targetProfile.first_name} ${targetProfile.last_name}`
+          },
+        });
+
+        console.log(`User ${targetProfile.email} deleted successfully`);
+
+        return new Response(
+          JSON.stringify({ success: true }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
       case "approve_onboarding": {
         const { requestId, password, tenantId: targetTenantId, createNewTenant: shouldCreateTenant, newTenantName, role: assignedRole } = body;
 
