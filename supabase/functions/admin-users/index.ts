@@ -128,11 +128,22 @@ serve(async (req) => {
           // Legacy support: map old role values
           if (role === 'user_approver') {
             rolesToCreate = ['user', 'approver'];
+          } else if (role === 'super_admin') {
+            rolesToCreate = ['super_admin', 'admin'];
           } else {
             rolesToCreate = [role];
           }
         } else {
           rolesToCreate = ['user'];
+        }
+
+        // CRITICAL SECURITY CHECK: Only super_admins can create super_admin accounts
+        if (rolesToCreate.includes('super_admin') && !isSuperAdmin) {
+          console.error(`Security violation: Non-super admin ${requestingUser.id} attempted to create super_admin account`);
+          return new Response(
+            JSON.stringify({ error: "Only Persist Super Admins can create other Super Admin accounts" }),
+            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
         }
 
         // Create roles
@@ -188,6 +199,15 @@ serve(async (req) => {
         }
         
         const targetTenantId = targetProfile.tenant_id;
+
+        // CRITICAL SECURITY CHECK: Only super_admins can assign super_admin role
+        if (newRoles.includes('super_admin') && !isSuperAdmin) {
+          console.error(`Security violation: Non-super admin ${requestingUser.id} attempted to assign super_admin role`);
+          return new Response(
+            JSON.stringify({ error: "Only Persist Super Admins can assign Super Admin roles" }),
+            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
 
         // Delete existing roles for this user
         await adminClient
@@ -415,6 +435,17 @@ serve(async (req) => {
 
         // Create role - use the assigned role (default to 'user')
         const userRole = assignedRole || "user";
+        
+        // CRITICAL SECURITY CHECK: Only super_admins can create super_admin accounts
+        if (userRole === 'super_admin' && !isSuperAdmin) {
+          console.error(`Security violation: Non-super admin ${requestingUser.id} attempted to create super_admin via onboarding`);
+          await adminClient.auth.admin.deleteUser(authData.user.id);
+          return new Response(
+            JSON.stringify({ error: "Only Persist Super Admins can create other Super Admin accounts" }),
+            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        
         await adminClient.from("user_roles").insert({
           user_id: authData.user.id,
           tenant_id: profileTenantId,
