@@ -41,6 +41,8 @@ import InstitutionDetailPage from "./pages/admin/InstitutionDetailPage";
 import UserDetailPage from "./pages/admin/UserDetailPage";
 import ApprovalsPage from "./pages/ApprovalsPage";
 import InitialSetupPage from "./pages/InitialSetupPage";
+import MessageDetailPage from "./pages/MessageDetailPage";
+import TemplateDetailPage from "./pages/TemplateDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -168,7 +170,9 @@ const AppRoutes = () => (
     <Route path="/playground" element={<RequireAuth><PlaygroundPage /></RequireAuth>} />
     <Route path="/byoc" element={<RequireAuth><BYOCPage /></RequireAuth>} />
     <Route path="/library" element={<RequireAuth><PersonalLibrary /></RequireAuth>} />
+    <Route path="/library/:id" element={<RequireAuth><MessageDetailPage /></RequireAuth>} />
     <Route path="/shared-library" element={<RequireAuth><SharedLibrary /></RequireAuth>} />
+    <Route path="/shared-library/:id" element={<RequireAuth><TemplateDetailPage /></RequireAuth>} />
     <Route path="/campaign-dashboard" element={<RequireAuth><CampaignDashboard /></RequireAuth>} />
     <Route path="/calendar" element={<RequireAuth><CommunicationCalendar /></RequireAuth>} />
     <Route path="/subject-optimizer" element={<RequireAuth><SubjectLineOptimizer /></RequireAuth>} />

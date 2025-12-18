@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
-import { MessageDetailDialog } from "@/components/library/MessageDetailDialog";
 import { CreateTemplateDialog } from "@/components/library/CreateTemplateDialog";
 import type { SavedMessage, LibraryFilters, SortOption } from "@/types/library";
 import { 
@@ -26,7 +25,10 @@ import {
   Layout,
   Filter,
   X,
-  Library
+  Library,
+  Calendar,
+  User,
+  ChevronRight
 } from "lucide-react";
 
 const channelIcons = {
@@ -38,38 +40,37 @@ const channelIcons = {
 
 const PersonalLibrary = () => {
   const { toast } = useToast();
-  const { messages, deleteMessage, duplicateMessage, exportMessage, filterMessages, updateMessage } = useMessageLibrary();
+  const navigate = useNavigate();
+  const { messages, deleteMessage, duplicateMessage, exportMessage, filterMessages } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
   const [filters, setFilters] = useState<LibraryFilters>({ search: '' });
   const [sort, setSort] = useState<SortOption>('newest');
-  const [selectedMessage, setSelectedMessage] = useState<SavedMessage | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [submitToSharedOpen, setSubmitToSharedOpen] = useState(false);
   const [messageToSubmit, setMessageToSubmit] = useState<SavedMessage | null>(null);
 
   const filteredMessages = filterMessages(filters, sort);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     deleteMessage(id);
     toast({ title: "Message deleted" });
   };
 
-  const handleDuplicate = (id: string) => {
+  const handleDuplicate = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     duplicateMessage(id);
     toast({ title: "Message duplicated" });
   };
 
-  const handleExport = (id: string) => {
+  const handleExport = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     exportMessage(id);
     toast({ title: "Message exported" });
   };
 
-  const handleApprove = (id: string) => {
-    updateMessage(id, { approved: true });
-    toast({ title: "Message approved" });
-  };
-
-  const handleSubmitToShared = (message: SavedMessage) => {
+  const handleSubmitToShared = (message: SavedMessage, e: React.MouseEvent) => {
+    e.stopPropagation();
     setMessageToSubmit(message);
     setSubmitToSharedOpen(true);
   };
@@ -78,9 +79,13 @@ const PersonalLibrary = () => {
     addTemplate(template);
     toast({
       title: "Template submitted",
-      description: "Your message has been submitted to the Shared Library for review.",
+      description: "Your message has been submitted to the University Library for review.",
     });
     setMessageToSubmit(null);
+  };
+
+  const handleCardClick = (id: string) => {
+    navigate(`/library/${id}`);
   };
 
   const clearFilters = () => {
@@ -235,7 +240,11 @@ const PersonalLibrary = () => {
           ) : (
             <div className="space-y-4">
               {filteredMessages.map((message) => (
-                <Card key={message.id} className="card-elevated cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setSelectedMessage(message)}>
+                <Card 
+                  key={message.id} 
+                  className="card-elevated cursor-pointer hover:border-primary/50 transition-all hover:shadow-md group" 
+                  onClick={() => handleCardClick(message.id)}
+                >
                   <CardContent className="pt-6">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
@@ -243,7 +252,7 @@ const PersonalLibrary = () => {
                           {ChannelIcon(message.channel)}
                           <h3 className="font-semibold text-foreground truncate">{message.title}</h3>
                           {message.approved && (
-                            <Badge variant="outline" className="shrink-0">
+                            <Badge variant="default" className="shrink-0 bg-green-600">
                               <CheckCircle className="w-3 h-3 mr-1" />
                               Approved
                             </Badge>
@@ -263,24 +272,34 @@ const PersonalLibrary = () => {
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
-                        <Button variant="ghost" size="icon" onClick={() => handleSubmitToShared(message)} title="Submit to Shared Library">
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Button variant="ghost" size="icon" onClick={(e) => handleSubmitToShared(message, e)} title="Submit to University Library">
                           <Library className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDuplicate(message.id)} title="Duplicate">
+                        <Button variant="ghost" size="icon" onClick={(e) => handleDuplicate(message.id, e)} title="Duplicate">
                           <Copy className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleExport(message.id)} title="Export">
+                        <Button variant="ghost" size="icon" onClick={(e) => handleExport(message.id, e)} title="Export">
                           <Download className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDelete(message.id)} title="Delete">
+                        <Button variant="ghost" size="icon" onClick={(e) => handleDelete(message.id, e)} title="Delete">
                           <Trash2 className="w-4 h-4 text-destructive" />
                         </Button>
+                        <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
                     </div>
                     <div className="flex items-center gap-4 mt-4 pt-4 border-t text-xs text-muted-foreground">
-                      <span>Created: {new Date(message.createdAt).toLocaleDateString()}</span>
-                      <span>Versions: {message.versions.length}</span>
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {new Date(message.createdAt).toLocaleDateString('en-US', { 
+                          month: 'short', 
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </div>
+                      <span>•</span>
+                      <span>{message.versions.length} version{message.versions.length !== 1 ? 's' : ''}</span>
+                      <span>•</span>
                       <span className="capitalize">{message.mode}</span>
                     </div>
                   </CardContent>
@@ -290,19 +309,6 @@ const PersonalLibrary = () => {
           )}
         </div>
       </main>
-
-      {selectedMessage && (
-        <MessageDetailDialog
-          message={selectedMessage}
-          open={!!selectedMessage}
-          onOpenChange={(open) => !open && setSelectedMessage(null)}
-          onApprove={() => handleApprove(selectedMessage.id)}
-          onDelete={() => {
-            handleDelete(selectedMessage.id);
-            setSelectedMessage(null);
-          }}
-        />
-      )}
 
       <CreateTemplateDialog
         open={submitToSharedOpen}
