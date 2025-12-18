@@ -205,7 +205,7 @@ export default function AdminOnboardingPage() {
       setCredentials({ email: selectedRequest.email, password: tempPassword });
       setShowCredentialsDialog(true);
       
-      const roleLabel = selectedRole === 'admin' ? 'University Admin' : selectedRole === 'super_admin' ? 'PERSIST Super Admin' : 'University User';
+      const roleLabel = selectedRole === 'user_approver' ? 'University User + Approver' : selectedRole === 'super_admin' ? 'Persist Super Admin' : 'University User';
       toast({
         title: 'Request Approved',
         description: `User account created for ${selectedRequest.email} as ${roleLabel}`,
@@ -532,12 +532,12 @@ export default function AdminOnboardingPage() {
                 className="w-full px-3 py-2 border border-[hsl(220,13%,88%)] rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(222,47%,31%)]"
               >
                 <option value="user">University User</option>
-                <option value="admin">University Admin</option>
-                <option value="super_admin">PERSIST Super Admin</option>
+                <option value="user_approver">University User + Approver</option>
+                <option value="super_admin">Persist Super Admin</option>
               </select>
               <p className="text-xs text-[hsl(220,14%,46%)]">
                 {selectedRole === 'user' && 'Standard access to tools and features within their institution.'}
-                {selectedRole === 'admin' && 'Can manage users and settings for their institution.'}
+                {selectedRole === 'user_approver' && 'Can create messages and also review library submissions.'}
                 {selectedRole === 'super_admin' && 'Full access to all institutions and system settings.'}
               </p>
             </div>
