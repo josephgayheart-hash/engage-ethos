@@ -25,6 +25,7 @@ import {
   Clock,
   Briefcase,
   GraduationCap,
+  Eye,
 } from 'lucide-react';
 
 interface UserProfile {
@@ -69,8 +70,9 @@ interface ToolUsageEvent {
 export default function UserDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isSuperAdmin } = useAuth();
+  const { isSuperAdmin, startImpersonation, user: currentUser } = useAuth();
   const { toast } = useToast();
+  const [isImpersonating, setIsImpersonating] = useState(false);
   
   const [user, setUser] = useState<UserProfile | null>(null);
   const [tenant, setTenant] = useState<TenantInfo | null>(null);
@@ -246,10 +248,37 @@ export default function UserDetailPage() {
                     </div>
                   </div>
                 </div>
-                <Button variant="outline" onClick={fetchData} className="gap-2">
-                  <RefreshCw className="w-4 h-4" />
-                  Refresh
-                </Button>
+                <div className="flex gap-2">
+                  {currentUser?.id !== id && (
+                    <Button 
+                      variant="default" 
+                      onClick={async () => {
+                        if (!id) return;
+                        setIsImpersonating(true);
+                        try {
+                          await startImpersonation(id);
+                        } catch (error) {
+                          toast({ title: 'Impersonation failed', variant: 'destructive' });
+                        } finally {
+                          setIsImpersonating(false);
+                        }
+                      }}
+                      disabled={isImpersonating}
+                      className="gap-2"
+                    >
+                      {isImpersonating ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                      View as User
+                    </Button>
+                  )}
+                  <Button variant="outline" onClick={fetchData} className="gap-2">
+                    <RefreshCw className="w-4 h-4" />
+                    Refresh
+                  </Button>
+                </div>
               </div>
 
               {/* Quick Stats */}

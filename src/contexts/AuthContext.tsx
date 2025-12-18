@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export type UserRole = 'admin' | 'user' | 'approver' | 'super_admin';
 export type UserStatus = 'invited' | 'pending' | 'active' | 'locked' | 'disabled';
@@ -29,6 +30,13 @@ export interface Tenant {
   accent_color: string;
 }
 
+interface ImpersonationState {
+  isImpersonating: boolean;
+  originalAccessToken: string | null;
+  originalRefreshToken: string | null;
+  impersonatedUserEmail: string | null;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -42,9 +50,16 @@ interface AuthContextType {
   isApprover: boolean;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  // Impersonation
+  isImpersonating: boolean;
+  impersonatedUserEmail: string | null;
+  startImpersonation: (targetUserId: string) => Promise<void>;
+  exitImpersonation: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const IMPERSONATION_STORAGE_KEY = 'uplaybook_impersonation';
 
 export function useAuth() {
   const context = useContext(AuthContext);
@@ -65,6 +80,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [tenant, setTenant] = useState<Tenant | null>(null);
   const [roles, setRoles] = useState<UserRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [impersonation, setImpersonation] = useState<ImpersonationState>({
+    isImpersonating: false,
+    originalAccessToken: null,
+    originalRefreshToken: null,
+    impersonatedUserEmail: null,
+  });
 
   const fetchUserData = async (userId: string) => {
     try {
@@ -110,11 +131,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setRoles([]);
       }
 
-      // Update last login
-      await supabase
-        .from('profiles')
-        .update({ last_login_at: new Date().toISOString() })
-        .eq('id', userId);
+      // Update last login (skip if impersonating)
+      const storedImpersonation = localStorage.getItem(IMPERSONATION_STORAGE_KEY);
+      if (!storedImpersonation) {
+        await supabase
+          .from('profiles')
+          .update({ last_login_at: new Date().toISOString() })
+          .eq('id', userId);
+      }
 
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -122,6 +146,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   useEffect(() => {
+    // Check for stored impersonation state on mount
+    const storedImpersonation = localStorage.getItem(IMPERSONATION_STORAGE_KEY);
+    if (storedImpersonation) {
+      try {
+        const parsed = JSON.parse(storedImpersonation);
+        setImpersonation({
+          isImpersonating: true,
+          originalAccessToken: parsed.originalAccessToken,
+          originalRefreshToken: parsed.originalRefreshToken,
+          impersonatedUserEmail: parsed.impersonatedUserEmail,
+        });
+      } catch (e) {
+        localStorage.removeItem(IMPERSONATION_STORAGE_KEY);
+      }
+    }
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
@@ -159,6 +199,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const logout = async () => {
+    // Clear impersonation state if exists
+    localStorage.removeItem(IMPERSONATION_STORAGE_KEY);
+    setImpersonation({
+      isImpersonating: false,
+      originalAccessToken: null,
+      originalRefreshToken: null,
+      impersonatedUserEmail: null,
+    });
+    
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
@@ -170,6 +219,111 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const refreshProfile = async () => {
     if (user) {
       await fetchUserData(user.id);
+    }
+  };
+
+  const startImpersonation = async (targetUserId: string) => {
+    if (!session) {
+      toast.error('No active session');
+      return;
+    }
+
+    try {
+      // Store current session before impersonating
+      const currentAccessToken = session.access_token;
+      const currentRefreshToken = session.refresh_token;
+
+      // Call edge function to get impersonation token
+      const { data, error } = await supabase.functions.invoke('impersonate-user', {
+        body: { targetUserId }
+      });
+
+      if (error) {
+        console.error('Impersonation error:', error);
+        toast.error('Failed to start impersonation');
+        return;
+      }
+
+      // Store original session in localStorage
+      const impersonationData = {
+        originalAccessToken: currentAccessToken,
+        originalRefreshToken: currentRefreshToken,
+        impersonatedUserEmail: data.targetUser.email,
+      };
+      localStorage.setItem(IMPERSONATION_STORAGE_KEY, JSON.stringify(impersonationData));
+
+      // Verify the OTP token to get a session
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        token_hash: data.token,
+        type: 'magiclink',
+      });
+
+      if (verifyError) {
+        console.error('Token verification error:', verifyError);
+        localStorage.removeItem(IMPERSONATION_STORAGE_KEY);
+        toast.error('Failed to verify impersonation token');
+        return;
+      }
+
+      setImpersonation({
+        isImpersonating: true,
+        originalAccessToken: currentAccessToken,
+        originalRefreshToken: currentRefreshToken,
+        impersonatedUserEmail: data.targetUser.email,
+      });
+
+      toast.success(`Now viewing as ${data.targetUser.email}`);
+      
+      // Reload to ensure fresh state
+      window.location.href = '/dashboard';
+
+    } catch (error) {
+      console.error('Impersonation error:', error);
+      toast.error('Failed to start impersonation');
+    }
+  };
+
+  const exitImpersonation = async () => {
+    const storedImpersonation = localStorage.getItem(IMPERSONATION_STORAGE_KEY);
+    if (!storedImpersonation) {
+      toast.error('No impersonation session found');
+      return;
+    }
+
+    try {
+      const { originalAccessToken, originalRefreshToken } = JSON.parse(storedImpersonation);
+
+      // Clear impersonation state first
+      localStorage.removeItem(IMPERSONATION_STORAGE_KEY);
+      setImpersonation({
+        isImpersonating: false,
+        originalAccessToken: null,
+        originalRefreshToken: null,
+        impersonatedUserEmail: null,
+      });
+
+      // Restore original session
+      const { error } = await supabase.auth.setSession({
+        access_token: originalAccessToken,
+        refresh_token: originalRefreshToken,
+      });
+
+      if (error) {
+        console.error('Session restore error:', error);
+        toast.error('Failed to restore session. Please log in again.');
+        await supabase.auth.signOut();
+        window.location.href = '/login';
+        return;
+      }
+
+      toast.success('Exited impersonation mode');
+      window.location.href = '/admin/panel';
+
+    } catch (error) {
+      console.error('Exit impersonation error:', error);
+      toast.error('Failed to exit impersonation');
+      await supabase.auth.signOut();
+      window.location.href = '/login';
     }
   };
 
@@ -191,7 +345,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isSuperAdmin,
       isApprover,
       logout,
-      refreshProfile
+      refreshProfile,
+      isImpersonating: impersonation.isImpersonating,
+      impersonatedUserEmail: impersonation.impersonatedUserEmail,
+      startImpersonation,
+      exitImpersonation,
     }}>
       {children}
     </AuthContext.Provider>

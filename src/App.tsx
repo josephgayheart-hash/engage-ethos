@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { FeedbackButton } from "@/components/FeedbackButton";
+import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 import Index from "./pages/Index";
 import LandingPage from "./pages/LandingPage";
 import OnboardingPage from "./pages/OnboardingPage";
@@ -200,11 +201,25 @@ const AppRoutes = () => (
   </Routes>
 );
 
+function ImpersonationWrapper() {
+  const { isImpersonating, impersonatedUserEmail, exitImpersonation } = useAuth();
+  
+  if (!isImpersonating || !impersonatedUserEmail) return null;
+  
+  return (
+    <ImpersonationBanner 
+      targetUserEmail={impersonatedUserEmail} 
+      onExit={exitImpersonation} 
+    />
+  );
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <BrowserRouter>
         <AuthProvider>
+          <ImpersonationWrapper />
           <Toaster />
           <Sonner />
           <AppRoutes />
