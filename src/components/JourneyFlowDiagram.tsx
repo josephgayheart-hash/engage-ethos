@@ -254,11 +254,11 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
     
     const touchpointCount = journey.touchpoints.length;
     
-    // Grid layout settings for zig-zag pattern
-    const xSpacing = 300;
-    const ySpacing = 200;
+    // Grid layout settings for zig-zag pattern - tighter spacing
+    const xSpacing = 280;
+    const ySpacing = 170;
     const nodesPerRow = touchpointCount > 10 ? 4 : touchpointCount > 6 ? 3 : Math.min(touchpointCount, 4);
-    const yBase = 220;
+    const yBase = 200;
     
     // Calculate total width for centering
     const totalWidth = nodesPerRow * xSpacing;
@@ -357,9 +357,10 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
       }
     });
     
-    // Calculate dynamic height based on rows
+    // Calculate dynamic height based on rows - proportionate to actual content
     const rowCount = Math.ceil(touchpointCount / nodesPerRow);
-    const dynamicHeight = Math.max(500, 240 + rowCount * 220);
+    // Base: header info node + phase nodes (~180px), then ~180px per row of touchpoints
+    const dynamicHeight = Math.max(350, 200 + rowCount * 180);
     
     return { initialNodes: nodes, initialEdges: edges, dynamicHeight };
   }, [journey, context, startDate, endDate]);
@@ -510,7 +511,7 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
           onEdgesChange={onEdgesChange}
           nodeTypes={nodeTypes}
           fitView
-          fitViewOptions={{ padding: 0.3 }}
+          fitViewOptions={{ padding: 0.15, maxZoom: 1.2 }}
           minZoom={0.2}
           maxZoom={1.5}
           className="bg-background"
