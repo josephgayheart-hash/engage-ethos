@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { SavedMessage, LibraryFilters, SortOption } from '@/types/library';
 
-const STORAGE_KEY = 'persist_message_library';
+const STORAGE_KEY = 'uplaybook_message_library';
 
 export function useMessageLibrary() {
   const [messages, setMessages] = useState<SavedMessage[]>([]);

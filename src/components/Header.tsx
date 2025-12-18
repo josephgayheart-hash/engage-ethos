@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { BetaBanner } from "@/components/BetaBanner";
-import uplaybookLogo from "@/assets/persist-logo.png";
+import uplaybookLogo from "@/assets/uplaybook-logo.png";
 
 const MAX_LOGO_HEIGHT = 32;
 const MAX_LOGO_WIDTH = 120;

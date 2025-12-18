@@ -384,7 +384,7 @@ const AdminPanel = () => {
       const { data: tenantsData, error: tenantsError } = await supabase
         .from('tenants')
         .select('*')
-        .neq('id', '00000000-0000-0000-0000-000000000000') // Exclude PERSIST System tenant
+        .neq('id', '00000000-0000-0000-0000-000000000000') // Exclude UPlaybook System tenant
         .order('institution_name');
 
       if (tenantsError) throw tenantsError;
@@ -393,7 +393,7 @@ const AdminPanel = () => {
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
-        .neq('tenant_id', '00000000-0000-0000-0000-000000000000') // Exclude PERSIST system users
+        .neq('tenant_id', '00000000-0000-0000-0000-000000000000') // Exclude UPlaybook system users
         .order('last_login_at', { ascending: false, nullsFirst: false });
 
       if (profilesError) throw profilesError;
@@ -642,7 +642,7 @@ const AdminPanel = () => {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
               <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground">
-                PERSIST Super Admin
+                UPlaybook Super Admin
               </h1>
               <p className="text-muted-foreground mt-1">
                 Cross-institution analytics and system administration

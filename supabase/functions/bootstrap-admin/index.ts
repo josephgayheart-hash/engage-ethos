@@ -23,7 +23,7 @@ serve(async (req) => {
     const { action, email, password, firstName, lastName, tenantId, setupKey, userId, newEmail, institutionName, role } = body;
 
     // Simple security check - require a setup key
-    if (setupKey !== "PERSIST_SETUP_2024") {
+    if (setupKey !== "UPLAYBOOK_SETUP_2024") {
       return new Response(
         JSON.stringify({ error: "Invalid setup key" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }

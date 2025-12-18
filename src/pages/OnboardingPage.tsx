@@ -17,7 +17,7 @@ import {
   ArrowRight,
   CheckCircle2
 } from "lucide-react";
-import uplaybookLogo from "@/assets/persist-logo.png";
+import uplaybookLogo from "@/assets/uplaybook-logo.png";
 import type { Department, DepartmentInfo } from "@/types/uplaybook";
 
 const departments: DepartmentInfo[] = [

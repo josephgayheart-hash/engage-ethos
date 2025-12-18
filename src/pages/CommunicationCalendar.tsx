@@ -46,7 +46,7 @@ const CommunicationCalendar = () => {
 
   // Get campaigns from localStorage
   const campaigns = useMemo(() => {
-    const saved = localStorage.getItem('persist_campaigns');
+    const saved = localStorage.getItem('uplaybook_campaigns');
     return saved ? JSON.parse(saved) : [];
   }, []);
 

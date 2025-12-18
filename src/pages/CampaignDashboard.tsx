@@ -47,7 +47,7 @@ const CampaignDashboard = () => {
   const { toast } = useToast();
   const { messages } = useMessageLibrary();
   const [campaigns, setCampaigns] = useState<Campaign[]>(() => {
-    const saved = localStorage.getItem('persist_campaigns');
+    const saved = localStorage.getItem('uplaybook_campaigns');
     return saved ? JSON.parse(saved) : [];
   });
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -64,7 +64,7 @@ const CampaignDashboard = () => {
 
   const saveCampaigns = (updated: Campaign[]) => {
     setCampaigns(updated);
-    localStorage.setItem('persist_campaigns', JSON.stringify(updated));
+    localStorage.setItem('uplaybook_campaigns', JSON.stringify(updated));
   };
 
   const handleCreateCampaign = () => {

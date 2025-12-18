@@ -440,7 +440,7 @@ export default function AdminConsolePage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="font-serif text-2xl font-bold text-[hsl(222,47%,11%)]">Institution Admin</h1>
-              <p className="text-[hsl(220,14%,46%)]">Manage your institution's PERSIST settings</p>
+              <p className="text-[hsl(220,14%,46%)]">Manage your institution's UPlaybook settings</p>
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="flex items-center gap-1">
