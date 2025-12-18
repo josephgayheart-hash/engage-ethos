@@ -35,7 +35,7 @@ const features = [
   },
   {
     icon: BookOpen,
-    title: 'Library & Governance',
+    title: 'University Library',
     description: 'Personal and shared libraries with approval workflows—build your institution\'s playbook of vetted messages.',
   },
 ];
