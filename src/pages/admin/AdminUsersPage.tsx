@@ -53,7 +53,8 @@ import {
   Home,
   Mail,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  Eye
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -64,7 +65,7 @@ interface UserWithRole extends UserProfile {
 }
 
 export default function AdminUsersPage() {
-  const { tenant, isSuperAdmin } = useAuth();
+  const { tenant, isSuperAdmin, startImpersonation, user: currentUser } = useAuth();
   const { toast } = useToast();
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -106,6 +107,7 @@ export default function AdminUsersPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteUser, setDeleteUser] = useState<UserWithRole | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isImpersonatingUser, setIsImpersonatingUser] = useState<string | null>(null);
 
   const fetchUsers = async () => {
     setIsLoading(true);
@@ -562,6 +564,32 @@ export default function AdminUsersPage() {
                                   }}>
                                     <Mail className="w-4 h-4 mr-2" />
                                     Resend Invite
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                </>
+                              )}
+                              {/* View as User option */}
+                              {currentUser?.id !== user.id && user.status === 'active' && (
+                                <>
+                                  <DropdownMenuItem 
+                                    onClick={async () => {
+                                      setIsImpersonatingUser(user.id);
+                                      try {
+                                        await startImpersonation(user.id);
+                                      } catch (error) {
+                                        toast({ title: 'Impersonation failed', variant: 'destructive' });
+                                      } finally {
+                                        setIsImpersonatingUser(null);
+                                      }
+                                    }}
+                                    disabled={isImpersonatingUser === user.id}
+                                  >
+                                    {isImpersonatingUser === user.id ? (
+                                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    ) : (
+                                      <Eye className="w-4 h-4 mr-2" />
+                                    )}
+                                    View as User
                                   </DropdownMenuItem>
                                   <DropdownMenuSeparator />
                                 </>
