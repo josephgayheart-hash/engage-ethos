@@ -141,7 +141,7 @@ serve(async (req) => {
         if (rolesToCreate.includes('super_admin') && !isSuperAdmin) {
           console.error(`Security violation: Non-super admin ${requestingUser.id} attempted to create super_admin account`);
           return new Response(
-            JSON.stringify({ error: "Only Persist Super Admins can create other Super Admin accounts" }),
+            JSON.stringify({ error: "Only UPlaybook Super Admins can create other Super Admin accounts" }),
             { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
@@ -204,7 +204,7 @@ serve(async (req) => {
         if (newRoles.includes('super_admin') && !isSuperAdmin) {
           console.error(`Security violation: Non-super admin ${requestingUser.id} attempted to assign super_admin role`);
           return new Response(
-            JSON.stringify({ error: "Only Persist Super Admins can assign Super Admin roles" }),
+            JSON.stringify({ error: "Only UPlaybook Super Admins can assign Super Admin roles" }),
             { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
@@ -441,7 +441,7 @@ serve(async (req) => {
           console.error(`Security violation: Non-super admin ${requestingUser.id} attempted to create super_admin via onboarding`);
           await adminClient.auth.admin.deleteUser(authData.user.id);
           return new Response(
-            JSON.stringify({ error: "Only Persist Super Admins can create other Super Admin accounts" }),
+            JSON.stringify({ error: "Only UPlaybook Super Admins can create other Super Admin accounts" }),
             { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }

@@ -28,7 +28,7 @@ import {
   ChevronUp,
   Megaphone
 } from "lucide-react";
-import type { StrategyJourney, Channel, StrategyPhase, JourneyTouchpoint, MessageContext } from "@/types/persist";
+import type { StrategyJourney, Channel, StrategyPhase, JourneyTouchpoint, MessageContext } from "@/types/uplaybook";
 
 interface StrategyJourneyProps {
   journey: StrategyJourney;

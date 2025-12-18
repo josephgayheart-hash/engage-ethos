@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import type { InstitutionalConfig } from '@/types/persist';
+import type { InstitutionalConfig } from '@/types/uplaybook';
 
-const STORAGE_KEY = 'persist_institutional_config';
+const STORAGE_KEY = 'uplaybook_institutional_config';
 
 const defaultConfig: InstitutionalConfig = {
   // Identity

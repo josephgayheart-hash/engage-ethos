@@ -20,7 +20,7 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, ArrowRight, FileText, AlertCircle, Save, RefreshCw, CalendarIcon, Clock } from "lucide-react";
 import { evaluateMessage } from "@/lib/evaluateMessage";
-import type { MessageContext, EvaluationResult, InstitutionalConfig } from "@/types/persist";
+import type { MessageContext, EvaluationResult, InstitutionalConfig } from "@/types/uplaybook";
 
 const EvaluatePage = () => {
   const { toast } = useToast();

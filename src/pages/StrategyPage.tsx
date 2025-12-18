@@ -25,7 +25,7 @@ import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target, Users, UserCheck, Mail, FileDown, MessageSquare, Globe, Phone, FileText, Search, Megaphone } from "lucide-react";
 import { mapMessages } from "@/lib/evaluateMessage";
-import type { MessageContext, MapperResult, Channel, InstitutionalConfig } from "@/types/persist";
+import type { MessageContext, MapperResult, Channel, InstitutionalConfig } from "@/types/uplaybook";
 
 const channelOptions: { value: Channel; label: string }[] = [
   { value: 'email', label: 'Email' },

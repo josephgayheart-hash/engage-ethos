@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { UserPlus, CheckCircle2, Loader2, ArrowLeft } from 'lucide-react';
-import persistLogo from '@/assets/persist-logo.png';
+import uplaybookLogo from '@/assets/persist-logo.png';
 
 export default function RequestAccessPage() {
   const [formData, setFormData] = useState({
@@ -72,7 +72,7 @@ export default function RequestAccessPage() {
       <div className="min-h-screen bg-[hsl(210,20%,98%)] flex items-center justify-center p-4">
         <div className="w-full max-w-md space-y-6">
           <div className="text-center">
-            <img src={persistLogo} alt="PERSIST" className="h-16 w-auto mx-auto mb-4" />
+            <img src={uplaybookLogo} alt="UPlaybook.AI" className="h-16 w-auto mx-auto mb-4" />
           </div>
 
           <Card className="border-[hsl(220,13%,88%)]">
@@ -106,9 +106,9 @@ export default function RequestAccessPage() {
     <div className="min-h-screen bg-[hsl(210,20%,98%)] flex items-center justify-center p-4">
       <div className="w-full max-w-lg space-y-6">
         <div className="text-center">
-          <img src={persistLogo} alt="PERSIST" className="h-16 w-auto mx-auto mb-4" />
+          <img src={uplaybookLogo} alt="UPlaybook.AI" className="h-16 w-auto mx-auto mb-4" />
           <p className="text-[hsl(220,14%,46%)]">
-            AI-Powered Message Intelligence for Higher Education
+            Strategic Messaging Intelligence for Higher Education
           </p>
         </div>
 

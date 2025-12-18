@@ -65,9 +65,9 @@ const PlaygroundPage = () => {
     {
       id: 'welcome',
       role: 'assistant',
-      content: `Welcome to the PERSIST Playground! 👋
+      content: `Welcome to the UPlaybook Playground! 👋
 
-I'm your AI assistant grounded in peer-reviewed persuasion research and the PERSIST methodology. I can help you:
+I'm your AI assistant grounded in peer-reviewed persuasion research and the UPlaybook methodology. I can help you:
 
 • **Brainstorm** messaging strategies for specific student populations
 • **Review** draft messages and provide research-backed feedback
@@ -174,10 +174,10 @@ What would you like to explore today?`,
             <div>
               <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
                 <MessageCircle className="w-7 h-7 text-pillar-susceptibility" />
-                PERSIST Playground
+                UPlaybook Playground
               </h1>
               <p className="text-muted-foreground mt-1">
-                Chat with AI grounded in persuasion research and PERSIST methodology
+                Chat with AI grounded in persuasion research and UPlaybook methodology
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -314,7 +314,7 @@ What would you like to explore today?`,
               </Button>
             </div>
             <p className="text-xs text-muted-foreground mt-2 text-center">
-              Responses are grounded in PERSIST's five-pillar framework and peer-reviewed research.
+              Responses are grounded in UPlaybook's five-pillar framework and peer-reviewed research.
             </p>
           </CardContent>
         </Card>

@@ -29,7 +29,7 @@ import {
   List,
   Megaphone
 } from "lucide-react";
-import type { StrategyJourney, Channel, StrategyPhase, JourneyTouchpoint, MessageContext } from "@/types/persist";
+import type { StrategyJourney, Channel, StrategyPhase, JourneyTouchpoint, MessageContext } from "@/types/uplaybook";
 
 // Metadata stored with saved journeys
 interface JourneyMetadata {

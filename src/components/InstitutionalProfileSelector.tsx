@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useInstitutionalProfiles, type InstitutionalProfile } from "@/hooks/useInstitutionalProfiles";
-import type { InstitutionalConfig } from "@/types/persist";
+import type { InstitutionalConfig } from "@/types/uplaybook";
 
 interface InstitutionalProfileSelectorProps {
   selectedProfileId: string | null;

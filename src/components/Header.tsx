@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { BetaBanner } from "@/components/BetaBanner";
-import persistLogo from "@/assets/persist-logo.png";
+import uplaybookLogo from "@/assets/persist-logo.png";
 
 const MAX_LOGO_HEIGHT = 32;
 const MAX_LOGO_WIDTH = 120;
@@ -33,7 +33,7 @@ export function Header() {
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
-            <img src={persistLogo} alt="PERSIST" className="h-10 w-auto" />
+            <img src={uplaybookLogo} alt="UPlaybook.AI" className="h-10 w-auto" />
             <BetaBanner variant="badge" />
           </Link>
           {tenant && (

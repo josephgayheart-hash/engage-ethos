@@ -7,7 +7,7 @@ import { EvaluationResults } from "./EvaluationResults";
 import { AIBadge } from "@/components/ui/ai-indicator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import type { BuilderResult, MessageContext, InstitutionalConfig } from "@/types/persist";
+import type { BuilderResult, MessageContext, InstitutionalConfig } from "@/types/uplaybook";
 
 interface BuilderResultsProps {
   result: BuilderResult;

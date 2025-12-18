@@ -33,7 +33,7 @@ import {
   Sparkles
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import type { MessageContext, EvaluationResult } from "@/types/persist";
+import type { MessageContext, EvaluationResult } from "@/types/uplaybook";
 
 const BYOCPage = () => {
   const { toast } = useToast();

@@ -18,7 +18,7 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    let systemPrompt = `You are PERSIST, an AI assistant specialized in creating effective, ethical communications for higher education institutions - both student-facing and employee-facing.
+    let systemPrompt = `You are UPlaybook, an AI assistant specialized in creating effective, ethical communications for higher education institutions - both student-facing and employee-facing.
 
 Your messages should:
 - Be evidence-based and grounded in persuasion research

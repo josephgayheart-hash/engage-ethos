@@ -37,7 +37,7 @@ import {
   XCircle,
   HelpCircle
 } from "lucide-react";
-import type { AudienceType, CommunicationMoment, MessageDomain, PrimaryGoal, TonePreference, InstitutionalConfig } from "@/types/persist";
+import type { AudienceType, CommunicationMoment, MessageDomain, PrimaryGoal, TonePreference, InstitutionalConfig } from "@/types/uplaybook";
 
 interface CallScript {
   opening: string;

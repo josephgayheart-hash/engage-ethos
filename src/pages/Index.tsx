@@ -113,7 +113,7 @@ const Index = () => {
     },
     { 
       id: 'admin', 
-      title: isSuperAdmin ? 'PERSIST System Admin' : 'Admin Console', 
+      title: isSuperAdmin ? 'UPlaybook System Admin' : 'Admin Console', 
       description: isSuperAdmin 
         ? 'Manage all institutions, users, and system-wide configuration' 
         : 'Manage users, review requests, and configure your institution',
@@ -236,13 +236,13 @@ const Index = () => {
             <div className="text-center mb-8">
               <Badge className="mb-4 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
                 <Sparkles className="w-3 h-3 mr-1" />
-                Why PERSIST?
+                Why UPlaybook?
               </Badge>
               <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-4">
                 Stop Guessing. Start Connecting.
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                Most student communications are written on instinct. PERSIST transforms your messaging 
+                Most student communications are written on instinct. UPlaybook transforms your messaging 
                 with research-backed intelligence that actually moves students to action.
               </p>
             </div>
@@ -539,7 +539,7 @@ const Index = () => {
           </div>
           <div className="border-t border-border pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground">
-              PERSIST — Persuasion Intelligence for Student Engagement
+              UPlaybook — Strategic Messaging Intelligence for Higher Education
             </p>
             <p className="text-xs text-muted-foreground">
               Evidence-based messaging for higher education

@@ -29,7 +29,7 @@ import type {
   SearchAdDraft,
   SocialAdDraft,
   Channel 
-} from "@/types/persist";
+} from "@/types/uplaybook";
 
 interface ChannelPreviewProps {
   channel: Channel;

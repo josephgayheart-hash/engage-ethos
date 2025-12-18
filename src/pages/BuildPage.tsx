@@ -39,7 +39,7 @@ import {
 } from "lucide-react";
 import { buildMessage } from "@/lib/evaluateMessage";
 
-import type { MessageContext, BuilderResult, InstitutionalConfig, Channel, ChannelDrafts } from "@/types/persist";
+import type { MessageContext, BuilderResult, InstitutionalConfig, Channel, ChannelDrafts } from "@/types/uplaybook";
 
 const channelOptions: { value: Channel; label: string }[] = [
   { value: 'email', label: 'Email' },
