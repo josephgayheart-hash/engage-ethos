@@ -69,7 +69,7 @@ export default function LandingPage() {
               <img 
                 src={uplaybookLogo} 
                 alt="UPlaybook.AI" 
-                className="h-20 sm:h-24 w-auto mx-auto drop-shadow-lg"
+                className="h-14 sm:h-16 lg:h-20 w-auto max-w-[320px] sm:max-w-[400px] lg:max-w-[480px] mx-auto drop-shadow-lg"
               />
             </div>
 
@@ -229,11 +229,11 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="py-8 px-4 sm:px-6 lg:px-8 border-t border-border">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <img 
               src={uplaybookLogo} 
               alt="UPlaybook.AI" 
-              className="h-8 w-auto opacity-70"
+              className="h-6 w-auto max-w-[140px] opacity-70"
             />
             <span className="text-sm text-muted-foreground">
               © 2025 UPlaybook.AI
