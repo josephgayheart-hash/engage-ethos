@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { FeedbackButton } from "@/components/FeedbackButton";
 import Index from "./pages/Index";
+import LandingPage from "./pages/LandingPage";
 import OnboardingPage from "./pages/OnboardingPage";
 import PersonalLibrary from "./pages/PersonalLibrary";
 import SharedLibrary from "./pages/SharedLibrary";
@@ -84,7 +85,7 @@ function RequireAdmin({ children }: { children: React.ReactNode }) {
   }
   
   if (!isAdmin) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
   
   return <>{children}</>;
@@ -103,7 +104,7 @@ function RequireSuperAdmin({ children }: { children: React.ReactNode }) {
   }
   
   if (!isSuperAdmin) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
   
   return <>{children}</>;
@@ -122,13 +123,13 @@ function RequireApprover({ children }: { children: React.ReactNode }) {
   }
   
   if (!isApprover) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
   
   return <>{children}</>;
 }
 
-// Public route wrapper - redirects authenticated users to home
+// Public route wrapper - redirects authenticated users to dashboard
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading, profile } = useAuth();
   
@@ -141,7 +142,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   }
   
   if (user && profile?.status === 'active' && !profile?.password_reset_required) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
   
   return <>{children}</>;
@@ -150,13 +151,14 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 const AppRoutes = () => (
   <Routes>
     {/* Public routes */}
+    <Route path="/" element={<LandingPage />} />
     <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
     <Route path="/request-access" element={<RequestAccessPage />} />
     <Route path="/change-password" element={<ChangePasswordPage />} />
     <Route path="/setup" element={<InitialSetupPage />} />
     
     {/* Protected routes */}
-    <Route path="/" element={<RequireAuth><Index /></RequireAuth>} />
+    <Route path="/dashboard" element={<RequireAuth><Index /></RequireAuth>} />
     <Route path="/onboarding" element={<RequireAuth><OnboardingPage /></RequireAuth>} />
     <Route path="/evaluate" element={<RequireAuth><EvaluatePage /></RequireAuth>} />
     <Route path="/build" element={<RequireAuth><BuildPage /></RequireAuth>} />

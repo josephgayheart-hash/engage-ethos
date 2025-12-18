@@ -32,7 +32,7 @@ export function Header() {
     <header className="border-b border-border bg-card">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+          <Link to="/dashboard" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
             <img src={uplaybookLogo} alt="UPlaybook.AI" className="h-8 sm:h-10 w-auto object-contain" />
             <BetaBanner variant="badge" />
           </Link>
@@ -60,7 +60,7 @@ export function Header() {
         </div>
         <nav className="flex items-center gap-2 md:gap-4">
           <Link
-            to="/" 
+            to="/dashboard" 
             className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
           >
             <Home className="w-4 h-4" />

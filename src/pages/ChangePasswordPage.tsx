@@ -80,7 +80,7 @@ export default function ChangePasswordPage() {
         await refreshProfile();
       }
 
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
       console.error('Password change error:', err);
