@@ -58,6 +58,18 @@ export default function RequestAccessPage() {
         return;
       }
 
+      // Send confirmation email (fire-and-forget - don't block on success)
+      supabase.functions.invoke('send-request-confirmation', {
+        body: {
+          email: formData.email,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          institutionName: formData.institutionName,
+        },
+      }).catch((emailErr) => {
+        console.error('Failed to send confirmation email:', emailErr);
+      });
+
       setIsSubmitted(true);
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');

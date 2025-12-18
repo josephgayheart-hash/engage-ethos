@@ -598,6 +598,48 @@ serve(async (req) => {
           metadata: { email: request.email, role: userRole, newTenantCreated: shouldCreateTenant || false },
         });
 
+        // Get institution name for the welcome email
+        let institutionName = newTenantName || "UPlaybook.AI";
+        if (!shouldCreateTenant && effectiveApprovalTenantId) {
+          const { data: tenantData } = await adminClient
+            .from("tenants")
+            .select("institution_name")
+            .eq("id", effectiveApprovalTenantId)
+            .single();
+          if (tenantData) {
+            institutionName = tenantData.institution_name;
+          }
+        }
+
+        // Send welcome/invite email
+        try {
+          const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+          const emailResponse = await fetch(`${SUPABASE_URL}/functions/v1/send-invite-email`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: request.email,
+              firstName: request.first_name,
+              lastName: request.last_name,
+              temporaryPassword: password,
+              institutionName: institutionName,
+              role: userRole,
+            }),
+          });
+
+          if (!emailResponse.ok) {
+            const emailError = await emailResponse.text();
+            console.error("Failed to send welcome email:", emailError);
+          } else {
+            console.log(`Welcome email sent successfully to ${request.email}`);
+          }
+        } catch (emailErr) {
+          console.error("Error sending welcome email:", emailErr);
+          // Don't fail the approval if email fails
+        }
+
         return new Response(
           JSON.stringify({ 
             success: true, 
