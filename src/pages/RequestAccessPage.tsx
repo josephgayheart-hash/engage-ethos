@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { UserPlus, CheckCircle2, Loader2, ArrowLeft } from 'lucide-react';
-import uplaybookLogo from '@/assets/persist-logo.png';
+import uplaybookLogo from '@/assets/uplaybook-logo.png';
 
 export default function RequestAccessPage() {
   const [formData, setFormData] = useState({
@@ -84,7 +84,7 @@ export default function RequestAccessPage() {
                 Request Submitted
               </h2>
               <p className="text-[hsl(220,14%,46%)]">
-                Thank you for your interest in PERSIST. An administrator will review your request and activate your account.
+                Thank you for your interest in UPlaybook. An administrator will review your request and activate your account.
               </p>
               <p className="text-sm text-[hsl(220,14%,46%)]">
                 You will receive your login credentials once approved.
@@ -119,7 +119,7 @@ export default function RequestAccessPage() {
             </div>
             <CardTitle className="font-serif text-[hsl(222,47%,11%)]">Request Access</CardTitle>
             <CardDescription className="text-[hsl(220,14%,46%)]">
-              Fill out the form below to request access to PERSIST
+              Fill out the form below to request access to UPlaybook
             </CardDescription>
           </CardHeader>
           <CardContent>

@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { KeyRound, Loader2, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
-import uplaybookLogo from '@/assets/persist-logo.png';
+import uplaybookLogo from '@/assets/uplaybook-logo.png';
 
 export default function ChangePasswordPage() {
   const navigate = useNavigate();

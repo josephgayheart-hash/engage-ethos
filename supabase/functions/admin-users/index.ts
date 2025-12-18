@@ -404,9 +404,9 @@ serve(async (req) => {
           );
         }
 
-        // Determine tenant for super_admin role - they go to PERSIST System tenant
+        // Determine tenant for super_admin role - they go to UPlaybook System tenant
         const profileTenantId = assignedRole === 'super_admin' 
-          ? '00000000-0000-0000-0000-000000000000' // PERSIST System tenant
+          ? '00000000-0000-0000-0000-000000000000' // UPlaybook System tenant
           : effectiveApprovalTenantId;
 
         // Create profile
@@ -503,7 +503,7 @@ serve(async (req) => {
           })
           .eq("id", requestId);
 
-        // Use request's tenant_id for audit, or PERSIST System tenant for super admin
+        // Use request's tenant_id for audit, or UPlaybook System tenant for super admin
         const auditTenantId = request?.tenant_id || (isSuperAdmin ? '00000000-0000-0000-0000-000000000000' : adminTenantId);
 
         await adminClient.from("audit_log").insert({

@@ -112,7 +112,7 @@ export default function AdminOnboardingPage() {
       const { data, error } = await supabase
         .from('tenants')
         .select('id, institution_name')
-        .neq('institution_name', 'PERSIST System')
+        .neq('institution_name', 'UPlaybook System')
         .order('institution_name');
 
       if (error) throw error;

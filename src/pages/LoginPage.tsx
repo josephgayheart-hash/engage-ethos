@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Lock, Mail, AlertCircle, Loader2 } from 'lucide-react';
 import { BetaBanner } from '@/components/BetaBanner';
-import uplaybookLogo from '@/assets/persist-logo.png';
+import uplaybookLogo from '@/assets/uplaybook-logo.png';
 
 export default function LoginPage() {
   const navigate = useNavigate();
