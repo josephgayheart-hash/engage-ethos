@@ -25,7 +25,8 @@ import {
   Copy,
   Check,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Megaphone
 } from "lucide-react";
 import type { StrategyJourney, Channel, StrategyPhase, JourneyTouchpoint, MessageContext } from "@/types/persist";
 
@@ -50,6 +51,8 @@ const channelIcons: Record<Channel, React.ReactNode> = {
   'social-media': <Share2 className="w-4 h-4" />,
   'direct-mail': <FileText className="w-4 h-4" />,
   'phone-call': <Phone className="w-4 h-4" />,
+  'digital-ad-search': <Target className="w-4 h-4" />,
+  'digital-ad-social': <Megaphone className="w-4 h-4" />,
 };
 
 const phaseColors: Record<StrategyPhase, string> = {
@@ -73,6 +76,8 @@ const channelColors: Record<Channel, string> = {
   'social-media': 'bg-pink-500 text-white',
   'direct-mail': 'bg-gray-500 text-white',
   'phone-call': 'bg-purple-500 text-white',
+  'digital-ad-search': 'bg-yellow-500 text-black',
+  'digital-ad-social': 'bg-indigo-500 text-white',
 };
 
 const channelBorderColors: Record<Channel, string> = {
@@ -83,6 +88,8 @@ const channelBorderColors: Record<Channel, string> = {
   'social-media': 'border-l-pink-500',
   'direct-mail': 'border-l-gray-500',
   'phone-call': 'border-l-purple-500',
+  'digital-ad-search': 'border-l-yellow-500',
+  'digital-ad-social': 'border-l-indigo-500',
 };
 
 const channelDotColors: Record<Channel, string> = {
@@ -93,9 +100,11 @@ const channelDotColors: Record<Channel, string> = {
   'social-media': 'bg-pink-500',
   'direct-mail': 'bg-gray-500',
   'phone-call': 'bg-purple-500',
+  'digital-ad-search': 'bg-yellow-500',
+  'digital-ad-social': 'bg-indigo-500',
 };
 
-const allChannels: Channel[] = ['email', 'sms', 'portal', 'social-media', 'landing-page', 'direct-mail', 'phone-call'];
+const allChannels: Channel[] = ['email', 'sms', 'portal', 'social-media', 'landing-page', 'direct-mail', 'phone-call', 'digital-ad-search', 'digital-ad-social'];
 
 // Helper to format channel names with proper capitalization
 const formatChannelName = (channel: string): string => {

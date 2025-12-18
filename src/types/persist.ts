@@ -94,7 +94,9 @@ export type Channel =
   | 'landing-page'
   | 'social-media'
   | 'direct-mail'
-  | 'phone-call';
+  | 'phone-call'
+  | 'digital-ad-search'
+  | 'digital-ad-social';
 
 export type MessageDomain = 
   | 'academic'
@@ -237,6 +239,21 @@ export interface CallScriptDraft {
   voicemail?: string;
 }
 
+export interface SearchAdDraft {
+  headlines: string[]; // Up to 3 headlines (30 chars each)
+  descriptions: string[]; // Up to 2 descriptions (90 chars each)
+  displayUrl?: string;
+  finalUrl?: string;
+}
+
+export interface SocialAdDraft {
+  primaryText: string; // Main ad copy
+  headline: string; // Bold headline
+  description?: string; // Link description
+  ctaButton: string; // CTA button text
+  platform: 'meta' | 'linkedin' | 'other';
+}
+
 export interface ChannelDrafts {
   email?: EmailDraft;
   sms?: string;
@@ -245,6 +262,8 @@ export interface ChannelDrafts {
   'landing-page'?: LandingPageDraft;
   'direct-mail'?: string;
   'phone-call'?: CallScriptDraft;
+  'digital-ad-search'?: SearchAdDraft;
+  'digital-ad-social'?: SocialAdDraft;
 }
 
 export interface BuilderResult {

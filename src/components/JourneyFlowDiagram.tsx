@@ -13,7 +13,7 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { toPng, toSvg } from 'html-to-image';
-import { Mail, MessageSquare, Globe, Phone, Share2, FileText, Download, Image, FileCode, Users, Target, Calendar, Megaphone } from 'lucide-react';
+import { Mail, MessageSquare, Globe, Phone, Share2, FileText, Download, Image, FileCode, Users, Target, Calendar, Megaphone, Search } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -81,6 +81,8 @@ const TouchpointNode = ({ data }: { data: { touchpoint: JourneyTouchpoint; index
       case 'phone': case 'phone-call': return <Phone className="w-4 h-4" />;
       case 'social-media': return <Share2 className="w-4 h-4" />;
       case 'portal': return <Globe className="w-4 h-4" />;
+      case 'digital-ad-search': return <Search className="w-4 h-4" />;
+      case 'digital-ad-social': return <Megaphone className="w-4 h-4" />;
       default: return <FileText className="w-4 h-4" />;
     }
   };
@@ -92,6 +94,8 @@ const TouchpointNode = ({ data }: { data: { touchpoint: JourneyTouchpoint; index
       case 'phone': case 'phone-call': return 'bg-purple-500';
       case 'social-media': return 'bg-pink-500';
       case 'portal': return 'bg-orange-500';
+      case 'digital-ad-search': return 'bg-yellow-500';
+      case 'digital-ad-social': return 'bg-indigo-500';
       default: return 'bg-gray-500';
     }
   };

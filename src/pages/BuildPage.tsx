@@ -168,7 +168,9 @@ const BuildPage = () => {
       if (content && typeof content === 'object') {
         if ('subject' in content) return `[EMAIL]\nSubject: ${content.subject}\n${content.body}`;
         if ('opening' in content) return `[PHONE CALL]\n${content.opening}`;
-        if ('headline' in content) return `[LANDING PAGE]\n${content.headline}\n${content.body}`;
+        if ('body' in content && 'cta' in content) return `[LANDING PAGE]\n${content.headline}\n${content.body}`;
+        if ('headlines' in content) return `[SEARCH AD]\n${content.headlines.join(' | ')}`;
+        if ('primaryText' in content) return `[SOCIAL AD]\n${content.headline}\n${content.primaryText}`;
       }
       return '';
     }).filter(Boolean).join('\n\n---\n\n');
@@ -206,7 +208,9 @@ const BuildPage = () => {
       if (content && typeof content === 'object') {
         if ('subject' in content) return `[EMAIL]\nSubject: ${content.subject}\n${content.body}`;
         if ('opening' in content) return `[PHONE CALL]\n${content.opening}`;
-        if ('headline' in content) return `[LANDING PAGE]\n${content.headline}\n${content.body}`;
+        if ('body' in content && 'cta' in content) return `[LANDING PAGE]\n${content.headline}\n${content.body}`;
+        if ('headlines' in content) return `[SEARCH AD]\n${content.headlines.join(' | ')}`;
+        if ('primaryText' in content) return `[SOCIAL AD]\n${content.headline}\n${content.primaryText}`;
       }
       return '';
     }).filter(Boolean).join('\n\n---\n\n');

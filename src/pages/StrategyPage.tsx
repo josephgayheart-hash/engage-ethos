@@ -23,7 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target, Users, UserCheck, Mail, FileDown, MessageSquare, Globe, Phone, FileText } from "lucide-react";
+import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target, Users, UserCheck, Mail, FileDown, MessageSquare, Globe, Phone, FileText, Search, Megaphone } from "lucide-react";
 import { mapMessages } from "@/lib/evaluateMessage";
 import type { MessageContext, MapperResult, Channel, InstitutionalConfig } from "@/types/persist";
 
@@ -32,8 +32,11 @@ const channelOptions: { value: Channel; label: string }[] = [
   { value: 'sms', label: 'SMS/Text' },
   { value: 'social-media', label: 'Social Media' },
   { value: 'portal', label: 'Portal' },
+  { value: 'landing-page', label: 'Landing Page' },
   { value: 'direct-mail', label: 'Direct Mail' },
   { value: 'phone-call', label: 'Phone Call' },
+  { value: 'digital-ad-search', label: 'Search Ads (Google/Bing)' },
+  { value: 'digital-ad-social', label: 'Social Ads (Meta/LinkedIn)' },
 ];
 
 const audienceLabels: Record<string, string> = {
@@ -760,8 +763,10 @@ const StrategyPage = () => {
                             {channel === 'phone-call' && <Phone className="w-4 h-4" />}
                             {channel === 'direct-mail' && <FileText className="w-4 h-4" />}
                             {channel === 'landing-page' && <FileText className="w-4 h-4" />}
+                            {channel === 'digital-ad-search' && <Search className="w-4 h-4" />}
+                            {channel === 'digital-ad-social' && <Megaphone className="w-4 h-4" />}
                             <span className="text-xs font-medium uppercase tracking-wide">
-                              {channel === 'sms' ? 'SMS' : channel.replace(/-/g, ' ')}
+                              {channel === 'sms' ? 'SMS' : channel === 'digital-ad-search' ? 'Search Ads' : channel === 'digital-ad-social' ? 'Social Ads' : channel.replace(/-/g, ' ')}
                             </span>
                           </div>
                           <p className="text-2xl font-bold text-foreground">{count}</p>

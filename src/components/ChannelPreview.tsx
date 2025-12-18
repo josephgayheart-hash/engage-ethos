@@ -17,13 +17,17 @@ import {
   Globe,
   Pencil,
   X,
-  FolderPlus
+  FolderPlus,
+  Search,
+  Megaphone
 } from "lucide-react";
 import type { 
   ChannelDrafts, 
   EmailDraft, 
   LandingPageDraft, 
   CallScriptDraft,
+  SearchAdDraft,
+  SocialAdDraft,
   Channel 
 } from "@/types/persist";
 
@@ -43,6 +47,8 @@ const channelIcons: Record<Channel, React.ReactNode> = {
   'landing-page': <Globe className="w-4 h-4" />,
   'direct-mail': <FileText className="w-4 h-4" />,
   'phone-call': <Phone className="w-4 h-4" />,
+  'digital-ad-search': <Search className="w-4 h-4" />,
+  'digital-ad-social': <Megaphone className="w-4 h-4" />,
 };
 
 const channelLabels: Record<Channel, string> = {
@@ -53,6 +59,8 @@ const channelLabels: Record<Channel, string> = {
   'landing-page': 'Landing Page',
   'direct-mail': 'Direct Mail',
   'phone-call': 'Phone Script',
+  'digital-ad-search': 'Search Ad (Google/Bing)',
+  'digital-ad-social': 'Social Ad (Meta/LinkedIn)',
 };
 
 export function ChannelPreview({ channel, content, onCopy, onContentChange, onSaveToLibrary }: ChannelPreviewProps) {
@@ -94,6 +102,14 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     if (channel === 'phone-call') {
       const script = c as CallScriptDraft;
       return `OPENING:\n${script.opening}\n\nPURPOSE:\n${script.purpose}\n\nTALKING POINTS:\n${script.talkingPoints.map((p, i) => `${i + 1}. ${p}`).join('\n')}\n\n${script.objectionHandlers?.length ? `OBJECTION HANDLERS:\n${script.objectionHandlers.join('\n')}\n\n` : ''}CLOSING:\n${script.closing}\n\n${script.voicemail ? `VOICEMAIL:\n${script.voicemail}` : ''}`;
+    }
+    if (channel === 'digital-ad-search') {
+      const ad = c as SearchAdDraft;
+      return `HEADLINES:\n${(ad.headlines || []).join('\n')}\n\nDESCRIPTIONS:\n${(ad.descriptions || []).join('\n')}${ad.displayUrl ? `\n\nDISPLAY URL: ${ad.displayUrl}` : ''}`;
+    }
+    if (channel === 'digital-ad-social') {
+      const ad = c as SocialAdDraft;
+      return `PRIMARY TEXT:\n${ad.primaryText}\n\nHEADLINE: ${ad.headline}${ad.description ? `\nDESCRIPTION: ${ad.description}` : ''}\n\nCTA: ${ad.ctaButton}`;
     }
     return '';
   };
@@ -251,6 +267,82 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     );
   };
 
+  const renderSearchAdEdit = () => {
+    const ad = editedContent as SearchAdDraft;
+    return (
+      <div className="space-y-3">
+        <div>
+          <Label className="text-xs text-muted-foreground">Headlines (max 30 chars each, one per line)</Label>
+          <Textarea
+            value={(ad.headlines || []).join('\n')}
+            onChange={(e) => setEditedContent({ ...ad, headlines: e.target.value.split('\n').slice(0, 3) })}
+            className="mt-1 min-h-[80px]"
+            placeholder="Headline 1&#10;Headline 2&#10;Headline 3"
+          />
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">Descriptions (max 90 chars each, one per line)</Label>
+          <Textarea
+            value={(ad.descriptions || []).join('\n')}
+            onChange={(e) => setEditedContent({ ...ad, descriptions: e.target.value.split('\n').slice(0, 2) })}
+            className="mt-1 min-h-[60px]"
+            placeholder="Description 1&#10;Description 2"
+          />
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">Display URL (optional)</Label>
+          <Input
+            value={ad.displayUrl || ''}
+            onChange={(e) => setEditedContent({ ...ad, displayUrl: e.target.value })}
+            className="mt-1"
+            placeholder="university.edu/admissions"
+          />
+        </div>
+      </div>
+    );
+  };
+
+  const renderSocialAdEdit = () => {
+    const ad = editedContent as SocialAdDraft;
+    return (
+      <div className="space-y-3">
+        <div>
+          <Label className="text-xs text-muted-foreground">Primary Text (Ad Copy)</Label>
+          <Textarea
+            value={ad.primaryText || ''}
+            onChange={(e) => setEditedContent({ ...ad, primaryText: e.target.value })}
+            className="mt-1 min-h-[100px]"
+          />
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">Headline</Label>
+          <Input
+            value={ad.headline || ''}
+            onChange={(e) => setEditedContent({ ...ad, headline: e.target.value })}
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">Description</Label>
+          <Input
+            value={ad.description || ''}
+            onChange={(e) => setEditedContent({ ...ad, description: e.target.value })}
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">CTA Button</Label>
+          <Input
+            value={ad.ctaButton || ''}
+            onChange={(e) => setEditedContent({ ...ad, ctaButton: e.target.value })}
+            className="mt-1"
+            placeholder="Learn More"
+          />
+        </div>
+      </div>
+    );
+  };
+
   const renderEditContent = () => {
     switch (channel) {
       case 'email':
@@ -264,6 +356,10 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
         return renderLandingPageEdit();
       case 'phone-call':
         return renderCallScriptEdit();
+      case 'digital-ad-search':
+        return renderSearchAdEdit();
+      case 'digital-ad-social':
+        return renderSocialAdEdit();
       default:
         return renderSimpleTextEdit();
     }
@@ -388,6 +484,87 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     </div>
   );
 
+  const renderSearchAdPreview = (ad: SearchAdDraft) => (
+    <div className="space-y-3">
+      {/* Google/Bing Search Ad Preview */}
+      <div className="bg-card rounded-lg border border-border p-4 max-w-[600px]">
+        <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
+          <span className="px-1 py-0.5 bg-muted rounded text-[10px] font-medium">Ad</span>
+          <span>{ad.displayUrl || 'university.edu'}</span>
+        </div>
+        <div className="space-y-1">
+          {(ad.headlines || []).map((headline, i) => (
+            <span key={i} className="text-blue-600 dark:text-blue-400 text-lg font-medium hover:underline cursor-pointer">
+              {headline}{i < (ad.headlines?.length || 0) - 1 ? ' | ' : ''}
+            </span>
+          ))}
+        </div>
+        <div className="mt-2 space-y-1">
+          {(ad.descriptions || []).map((desc, i) => (
+            <p key={i} className="text-sm text-muted-foreground">{desc}</p>
+          ))}
+        </div>
+        <div className="mt-3 pt-3 border-t border-border">
+          <p className="text-xs text-muted-foreground">
+            <span className="font-medium">Headlines:</span> {(ad.headlines || []).map((h, i) => `${h.length}/30`).join(', ')} chars
+          </p>
+          <p className="text-xs text-muted-foreground">
+            <span className="font-medium">Descriptions:</span> {(ad.descriptions || []).map((d, i) => `${d.length}/90`).join(', ')} chars
+          </p>
+        </div>
+      </div>
+      <p className="text-xs text-muted-foreground italic">
+        Note: Upload your images directly in Google/Bing Ads Manager
+      </p>
+    </div>
+  );
+
+  const renderSocialAdPreview = (ad: SocialAdDraft) => (
+    <div className="space-y-3">
+      {/* Meta/LinkedIn Ad Preview */}
+      <div className="bg-card rounded-lg border border-border overflow-hidden max-w-[400px]">
+        {/* Ad header */}
+        <div className="p-3 flex items-center gap-2 border-b border-border">
+          <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
+            <Megaphone className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <p className="text-sm font-medium">Your Institution</p>
+            <p className="text-xs text-muted-foreground">Sponsored</p>
+          </div>
+        </div>
+        
+        {/* Primary text */}
+        <div className="p-3">
+          <p className="text-sm whitespace-pre-wrap">{ad.primaryText}</p>
+        </div>
+        
+        {/* Image placeholder */}
+        <div className="bg-muted/50 h-48 flex items-center justify-center border-y border-border">
+          <div className="text-center text-muted-foreground">
+            <Megaphone className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <p className="text-xs">Image uploaded separately</p>
+          </div>
+        </div>
+        
+        {/* Link preview */}
+        <div className="p-3 bg-muted/30">
+          <p className="text-xs text-muted-foreground uppercase">university.edu</p>
+          <p className="text-sm font-semibold">{ad.headline}</p>
+          {ad.description && <p className="text-xs text-muted-foreground">{ad.description}</p>}
+        </div>
+        
+        {/* CTA */}
+        <div className="p-3 border-t border-border">
+          <Button size="sm" className="w-full">{ad.ctaButton || 'Learn More'}</Button>
+        </div>
+      </div>
+      <p className="text-xs text-muted-foreground italic">
+        Note: Upload your creative assets directly in Meta/LinkedIn Ads Manager
+      </p>
+    </div>
+  );
+
   const renderContent = () => {
     const displayContent = isEditing ? editedContent : content;
     if (!displayContent) return <p className="text-muted-foreground text-sm">No content generated</p>;
@@ -407,6 +584,10 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
         return renderDirectMailPreview(displayContent as string);
       case 'phone-call':
         return renderCallScriptPreview(displayContent as CallScriptDraft);
+      case 'digital-ad-search':
+        return renderSearchAdPreview(displayContent as SearchAdDraft);
+      case 'digital-ad-social':
+        return renderSocialAdPreview(displayContent as SocialAdDraft);
       default:
         return <p className="text-sm whitespace-pre-wrap">{String(displayContent)}</p>;
     }
