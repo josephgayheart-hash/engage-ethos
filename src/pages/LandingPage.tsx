@@ -69,7 +69,7 @@ export default function LandingPage() {
               <img 
                 src={uplaybookLogo} 
                 alt="UPlaybook.AI" 
-                className="h-14 sm:h-16 lg:h-20 w-auto max-w-[320px] sm:max-w-[400px] lg:max-w-[480px] mx-auto drop-shadow-lg"
+                className="h-10 sm:h-12 w-auto max-w-[200px] sm:max-w-[260px] mx-auto"
               />
             </div>
 
