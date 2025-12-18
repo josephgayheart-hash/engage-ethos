@@ -77,7 +77,7 @@ export default function AdminUsersPage() {
     phone: '',
     department: '',
     title: '',
-    role: 'user' as 'user' | 'user_approver',
+    role: 'user' as 'user' | 'user_approver' | 'super_admin',
   });
 
   // Credentials dialog
@@ -550,7 +550,7 @@ export default function AdminUsersPage() {
               <Label htmlFor="role">Role</Label>
               <Select 
                 value={newUser.role} 
-                onValueChange={(value: 'user' | 'user_approver') => setNewUser(prev => ({ ...prev, role: value }))}
+                onValueChange={(value: 'user' | 'user_approver' | 'super_admin') => setNewUser(prev => ({ ...prev, role: value }))}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -558,10 +558,15 @@ export default function AdminUsersPage() {
                 <SelectContent>
                   <SelectItem value="user">University User</SelectItem>
                   <SelectItem value="user_approver">University User + Approver</SelectItem>
+                  {isSuperAdmin && (
+                    <SelectItem value="super_admin">Persist Super Admin</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
-                University Users can create and evaluate messages. Approvers can also review library submissions.
+                {newUser.role === 'super_admin' 
+                  ? 'Full access to all institutions and system settings.'
+                  : 'University Users can create and evaluate messages. Approvers can also review library submissions.'}
               </p>
             </div>
           </div>
