@@ -38,6 +38,7 @@ import SeedDataPage from "./pages/admin/SeedDataPage";
 import InstitutionDetailPage from "./pages/admin/InstitutionDetailPage";
 import UserDetailPage from "./pages/admin/UserDetailPage";
 import ApprovalsPage from "./pages/ApprovalsPage";
+import InitialSetupPage from "./pages/InitialSetupPage";
 
 const queryClient = new QueryClient();
 
@@ -152,6 +153,7 @@ const AppRoutes = () => (
     <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
     <Route path="/request-access" element={<RequestAccessPage />} />
     <Route path="/change-password" element={<ChangePasswordPage />} />
+    <Route path="/setup" element={<InitialSetupPage />} />
     
     {/* Protected routes */}
     <Route path="/" element={<RequireAuth><Index /></RequireAuth>} />
