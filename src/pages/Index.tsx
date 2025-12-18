@@ -179,40 +179,46 @@ const Index = () => {
               </Link>
 
               {/* Step 2: Create */}
-              <div className="space-y-4">
-                <Link to="/build">
-                  <Card className="cursor-pointer transition-all hover:shadow-lg hover:border-pillar-cognitive/50 group relative overflow-hidden">
+              <div className="grid grid-rows-2 gap-4 h-full">
+                <Link to="/build" className="block">
+                  <Card className="h-full cursor-pointer transition-all hover:shadow-lg hover:border-pillar-cognitive/50 group relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-1 bg-pillar-cognitive/20 group-hover:bg-pillar-cognitive/40 transition-colors" />
-                    <CardContent className="p-5">
+                    <CardContent className="p-5 h-full flex flex-col justify-center">
                       <div className="flex items-center gap-3 mb-3">
                         <div className="w-8 h-8 rounded-full bg-pillar-cognitive/10 flex items-center justify-center text-sm font-bold text-pillar-cognitive">
-                          2
+                          2a
                         </div>
                         <Badge variant="outline" className="text-xs bg-pillar-cognitive/5">Create</Badge>
                       </div>
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 rounded-lg bg-pillar-cognitive/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                          <PenTool className="w-5 h-5 text-pillar-cognitive" />
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-pillar-cognitive/10 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
+                          <PenTool className="w-6 h-6 text-pillar-cognitive" />
                         </div>
                         <div>
-                          <h3 className="font-semibold">Message Builder</h3>
-                          <p className="text-xs text-muted-foreground">Generate AI-powered messages</p>
+                          <h3 className="font-serif font-semibold text-base mb-1">Message Builder</h3>
+                          <p className="text-sm text-muted-foreground">Generate AI-powered messages tailored to your audience</p>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
                 </Link>
-                <Link to="/evaluate">
-                  <Card className="cursor-pointer transition-all hover:shadow-lg hover:border-pillar-authority/50 group relative overflow-hidden">
+                <Link to="/evaluate" className="block">
+                  <Card className="h-full cursor-pointer transition-all hover:shadow-lg hover:border-pillar-authority/50 group relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-1 bg-pillar-authority/20 group-hover:bg-pillar-authority/40 transition-colors" />
-                    <CardContent className="p-5">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 rounded-lg bg-pillar-authority/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                          <FileText className="w-5 h-5 text-pillar-authority" />
+                    <CardContent className="p-5 h-full flex flex-col justify-center">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-8 h-8 rounded-full bg-pillar-authority/10 flex items-center justify-center text-sm font-bold text-pillar-authority">
+                          2b
+                        </div>
+                        <Badge variant="outline" className="text-xs bg-pillar-authority/5">Evaluate</Badge>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-pillar-authority/10 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
+                          <FileText className="w-6 h-6 text-pillar-authority" />
                         </div>
                         <div>
-                          <h3 className="font-semibold">Evaluate Message</h3>
-                          <p className="text-xs text-muted-foreground">Score against persuasion framework</p>
+                          <h3 className="font-serif font-semibold text-base mb-1">Evaluate Message</h3>
+                          <p className="text-sm text-muted-foreground">Score existing content against persuasion framework</p>
                         </div>
                       </div>
                     </CardContent>
