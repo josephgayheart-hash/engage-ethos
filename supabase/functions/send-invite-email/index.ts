@@ -54,7 +54,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <!-- Logo Header -->
                 <tr>
                   <td style="background-color: #ffffff; padding: 32px 40px 16px 40px; text-align: center;">
-                    <img src="https://uplaybook.ai/lovable-uploads/5f0b000f-c8ef-48e9-91f9-10c3a51e4f39.png" alt="UPlaybook.AI" style="height: 60px; width: auto;" />
+                    <img src="https://uplaybook.ai/uplaybook-logo.png" alt="UPlaybook.AI" style="height: 60px; width: auto;" />
                   </td>
                 </tr>
                 
