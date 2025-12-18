@@ -53,7 +53,7 @@ import {
   Home
 } from 'lucide-react';
 
-type RoleType = 'admin' | 'user' | 'approver';
+type RoleType = 'admin' | 'user' | 'approver' | 'super_admin';
 
 interface UserWithRole extends UserProfile {
   roles: RoleType[];
@@ -77,7 +77,7 @@ export default function AdminUsersPage() {
     phone: '',
     department: '',
     title: '',
-    role: 'user' as 'admin' | 'user' | 'user_approver',
+    role: 'user' as 'user' | 'user_approver',
   });
 
   // Credentials dialog
@@ -409,15 +409,14 @@ export default function AdminUsersPage() {
                       <TableCell>{user.department || '—'}</TableCell>
                       <TableCell>
                         <div className="flex gap-1 flex-wrap">
-                          {user.roles.includes('admin') ? (
-                            <Badge className="bg-[hsl(222,47%,14%)] text-white">Admin</Badge>
+                          {user.roles.includes('super_admin') ? (
+                            <Badge className="bg-[hsl(280,60%,45%)] text-white">Persist Super Admin</Badge>
+                          ) : user.roles.includes('admin') ? (
+                            <Badge className="bg-[hsl(222,47%,14%)] text-white">University Admin</Badge>
                           ) : user.roles.includes('approver') ? (
-                            <>
-                              <Badge variant="outline" className="capitalize">User</Badge>
-                              <Badge className="bg-[hsl(173,58%,39%)] text-white">Approver</Badge>
-                            </>
+                            <Badge className="bg-[hsl(173,58%,39%)] text-white">University User + Approver</Badge>
                           ) : (
-                            <Badge variant="outline" className="capitalize">User</Badge>
+                            <Badge variant="outline">University User</Badge>
                           )}
                         </div>
                       </TableCell>
@@ -551,19 +550,18 @@ export default function AdminUsersPage() {
               <Label htmlFor="role">Role</Label>
               <Select 
                 value={newUser.role} 
-                onValueChange={(value: 'admin' | 'user' | 'user_approver') => setNewUser(prev => ({ ...prev, role: value }))}
+                onValueChange={(value: 'user' | 'user_approver') => setNewUser(prev => ({ ...prev, role: value }))}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="user">User</SelectItem>
-                  <SelectItem value="user_approver">User + Approver</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="user">University User</SelectItem>
+                  <SelectItem value="user_approver">University User + Approver</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
-                Approvers can review and approve library submissions
+                University Users can create and evaluate messages. Approvers can also review library submissions.
               </p>
             </div>
           </div>
