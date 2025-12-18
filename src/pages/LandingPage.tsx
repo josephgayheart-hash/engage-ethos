@@ -35,8 +35,8 @@ const features = [
   },
   {
     icon: BookOpen,
-    title: 'Share & Approve',
-    description: 'Build an institution-wide library of approved templates your whole team can use.',
+    title: 'Library & Governance',
+    description: 'Personal and shared libraries with approval workflows—build your institution\'s playbook of vetted messages.',
   },
 ];
 
@@ -51,7 +51,11 @@ const valueProps = [
   },
   {
     title: 'Strategy first, execution second',
-    description: 'The organized pre-work that makes your CRM and marketing tools actually effective.',
+    description: 'Not a CRM—the organized pre-work that makes your marketing tools actually effective.',
+  },
+  {
+    title: 'Institutional message governance',
+    description: 'Personal libraries for drafts, shared libraries for approved plays—your whole institution on the same page.',
   },
 ];
 
@@ -184,7 +188,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {valueProps.map((prop, index) => (
               <div key={prop.title} className="text-center">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
