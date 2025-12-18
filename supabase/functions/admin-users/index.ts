@@ -87,9 +87,14 @@ serve(async (req) => {
         });
 
         if (authError) {
-          console.error("Auth creation error:", authError);
+          console.error("Auth creation error:", authError.message, authError);
+          // Provide user-friendly error messages
+          let errorMessage = authError.message;
+          if (authError.message.includes("already been registered") || authError.message.includes("already exists")) {
+            errorMessage = "A user with this email address already exists";
+          }
           return new Response(
-            JSON.stringify({ error: authError.message }),
+            JSON.stringify({ error: errorMessage }),
             { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }

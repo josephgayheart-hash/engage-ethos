@@ -184,7 +184,12 @@ export default function AdminUsersPage() {
         },
       });
 
-      if (error) throw error;
+      // Check for edge function errors - the error might be in data.error even when error is null
+      if (error) {
+        // Try to extract error message from the error object
+        const errorMessage = error.message || 'Failed to create user';
+        throw new Error(errorMessage);
+      }
       if (data?.error) throw new Error(data.error);
 
       setShowCreateDialog(false);
