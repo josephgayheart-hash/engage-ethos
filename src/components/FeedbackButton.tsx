@@ -95,7 +95,7 @@ export function FeedbackButton() {
 
       toast({
         title: 'Feedback submitted',
-        description: 'Thank you for helping us improve PERSIST!',
+        description: 'Thank you for helping us improve UPlaybook!',
       });
 
       // Reset form
@@ -138,7 +138,7 @@ export function FeedbackButton() {
               Beta Feedback
             </DialogTitle>
             <DialogDescription>
-              Help us improve PERSIST. Your feedback goes directly to our team.
+              Help us improve UPlaybook. Your feedback goes directly to our team.
             </DialogDescription>
           </DialogHeader>
 

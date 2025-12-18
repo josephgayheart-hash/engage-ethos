@@ -17,8 +17,8 @@ import {
   ArrowRight,
   CheckCircle2
 } from "lucide-react";
-import persistLogo from "@/assets/persist-logo.png";
-import type { Department, DepartmentInfo } from "@/types/persist";
+import uplaybookLogo from "@/assets/persist-logo.png";
+import type { Department, DepartmentInfo } from "@/types/uplaybook";
 
 const departments: DepartmentInfo[] = [
   {
@@ -122,8 +122,8 @@ const OnboardingPage = () => {
 
   const handleContinue = () => {
     if (selectedDepartment) {
-      localStorage.setItem('persist_department', selectedDepartment);
-      localStorage.setItem('persist_onboarding_complete', 'true');
+      localStorage.setItem('uplaybook_department', selectedDepartment);
+      localStorage.setItem('uplaybook_onboarding_complete', 'true');
       navigate('/');
     }
   };
@@ -136,9 +136,9 @@ const OnboardingPage = () => {
         <div className="max-w-4xl mx-auto space-y-8">
           {/* Logo and Header */}
           <div className="text-center space-y-4">
-            <img src={persistLogo} alt="PERSIST" className="h-16 mx-auto" />
+            <img src={uplaybookLogo} alt="UPlaybook.AI" className="h-16 mx-auto" />
             <h1 className="font-serif text-3xl md:text-4xl font-bold text-foreground">
-              Welcome to PERSIST
+              Welcome to UPlaybook
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Let's personalize your experience. Select your department to get tools and recommendations tailored to your communication needs.

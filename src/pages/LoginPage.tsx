@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Lock, Mail, AlertCircle, Loader2 } from 'lucide-react';
 import { BetaBanner } from '@/components/BetaBanner';
-import persistLogo from '@/assets/persist-logo.png';
+import uplaybookLogo from '@/assets/persist-logo.png';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -126,9 +126,9 @@ export default function LoginPage() {
       <div className="flex-1 flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
-          <img src={persistLogo} alt="PERSIST" className="h-16 w-auto mx-auto mb-4" />
+          <img src={uplaybookLogo} alt="UPlaybook.AI" className="h-16 w-auto mx-auto mb-4" />
           <p className="text-[hsl(220,14%,46%)]">
-            AI-Powered Message Intelligence for Higher Education
+            Strategic Messaging Intelligence for Higher Education
           </p>
         </div>
 
@@ -139,7 +139,7 @@ export default function LoginPage() {
             </div>
             <CardTitle className="font-serif text-[hsl(222,47%,11%)]">Sign In</CardTitle>
             <CardDescription className="text-[hsl(220,14%,46%)]">
-              Enter your credentials to access PERSIST
+              Enter your credentials to access UPlaybook
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -223,7 +223,7 @@ export default function LoginPage() {
         </Card>
 
         <p className="text-center text-xs text-[hsl(220,14%,46%)]">
-          © 2024 PERSIST. Research-grounded messaging intelligence.
+          © 2024 UPlaybook.AI. Research-grounded messaging intelligence.
         </p>
       </div>
       </div>

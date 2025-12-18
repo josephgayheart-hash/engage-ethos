@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import type { InstitutionalConfig } from '@/types/persist';
+import type { InstitutionalConfig } from '@/types/uplaybook';
 import type { Json } from '@/integrations/supabase/types';
 
 export interface InstitutionalProfile {

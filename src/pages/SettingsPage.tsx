@@ -40,7 +40,7 @@ import {
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
-import type { InstitutionalConfig as InstitutionalConfigType } from "@/types/persist";
+import type { InstitutionalConfig as InstitutionalConfigType } from "@/types/uplaybook";
 
 const SettingsPage = () => {
   const { profiles, createProfile, updateProfile, deleteProfile, duplicateProfile } = useInstitutionalProfiles();

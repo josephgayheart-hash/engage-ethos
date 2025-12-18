@@ -5,7 +5,7 @@ import type {
   BuilderResult, 
   MapperResult,
   InstitutionalConfig
-} from "@/types/persist";
+} from "@/types/uplaybook";
 
 export async function evaluateMessage(
   content: string, 

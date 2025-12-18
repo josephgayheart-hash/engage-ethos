@@ -1,4 +1,4 @@
-import type { Channel, AudienceType, MessageDomain, CommunicationMoment, PrimaryGoal, TonePreference, CohortContext, ChannelDrafts } from './persist';
+import type { Channel, AudienceType, MessageDomain, CommunicationMoment, PrimaryGoal, TonePreference, CohortContext, ChannelDrafts } from './uplaybook';
 
 export type LibraryEntryStatus = 'draft' | 'submitted' | 'approved' | 'published';
 

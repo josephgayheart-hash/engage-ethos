@@ -11,7 +11,7 @@ import {
   AlertTriangle,
   Lightbulb
 } from "lucide-react";
-import type { PillarEvaluation, Rating } from "@/types/persist";
+import type { PillarEvaluation, Rating } from "@/types/uplaybook";
 import { cn } from "@/lib/utils";
 
 interface PillarCardProps {

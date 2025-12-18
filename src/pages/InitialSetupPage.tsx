@@ -17,7 +17,7 @@ export default function InitialSetupPage() {
   const [error, setError] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
-    institutionName: 'Persist Communications',
+    institutionName: 'UPlaybook Communications',
     firstName: '',
     lastName: '',
     email: '',
@@ -114,7 +114,7 @@ export default function InitialSetupPage() {
           </div>
           <CardTitle className="text-2xl">Initial Instance Setup</CardTitle>
           <CardDescription>
-            Configure your Persist instance with a super admin account
+            Configure your UPlaybook instance with a super admin account
           </CardDescription>
         </CardHeader>
         <CardContent>

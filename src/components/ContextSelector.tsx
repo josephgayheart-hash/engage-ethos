@@ -18,7 +18,7 @@ import type {
   TonePreference,
   OperationMode,
   Department
-} from "@/types/persist";
+} from "@/types/uplaybook";
 
 interface ContextSelectorProps {
   context: MessageContext;

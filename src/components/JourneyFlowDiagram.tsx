@@ -25,7 +25,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuCheckboxItem,
 } from '@/components/ui/dropdown-menu';
-import type { StrategyJourney, JourneyTouchpoint, MessageContext } from '@/types/persist';
+import type { StrategyJourney, JourneyTouchpoint, MessageContext } from '@/types/uplaybook';
 
 interface JourneyFlowDiagramProps {
   journey: StrategyJourney;

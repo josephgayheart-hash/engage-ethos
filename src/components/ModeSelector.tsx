@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Search, PenTool, Map, Building2 } from "lucide-react";
-import type { OperationMode } from "@/types/persist";
+import type { OperationMode } from "@/types/uplaybook";
 
 interface ModeSelectorProps {
   mode: OperationMode;

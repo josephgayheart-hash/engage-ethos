@@ -31,7 +31,7 @@ import {
   Trash2,
   Upload
 } from "lucide-react";
-import type { InstitutionalConfig as InstitutionalConfigType, VoiceAnalysis } from "@/types/persist";
+import type { InstitutionalConfig as InstitutionalConfigType, VoiceAnalysis } from "@/types/uplaybook";
 
 interface InstitutionalConfigProps {
   config: InstitutionalConfigType;
