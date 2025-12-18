@@ -47,9 +47,9 @@ export default function LandingPage() {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Hero Section */}
       <header className="relative overflow-hidden">
-        {/* Gradient Background */}
-        <div className="absolute inset-0 gradient-hero opacity-95" />
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
+        {/* Gradient Background - Light warm gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-stone-100 to-slate-100" />
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
         
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-32">
           <div className="text-center space-y-8">
@@ -57,7 +57,7 @@ export default function LandingPage() {
             <div className="animate-fade-in">
               <Badge 
                 variant="secondary" 
-                className="bg-secondary/20 text-secondary border-secondary/30 px-4 py-1.5 text-sm font-medium"
+                className="bg-primary/10 text-primary border-primary/20 px-4 py-1.5 text-sm font-medium"
               >
                 <Sparkles className="w-3.5 h-3.5 mr-1.5" />
                 Beta Access
@@ -66,27 +66,25 @@ export default function LandingPage() {
 
             {/* Logo */}
             <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
-              <div className="inline-block bg-white/95 backdrop-blur-sm rounded-2xl px-8 py-5 shadow-xl">
-                <img 
-                  src={uplaybookLogo} 
-                  alt="UPlaybook.AI" 
-                  className="h-16 sm:h-20 w-auto"
-                />
-              </div>
+              <img 
+                src={uplaybookLogo} 
+                alt="UPlaybook.AI" 
+                className="h-20 sm:h-24 w-auto mx-auto drop-shadow-lg"
+              />
             </div>
 
             {/* Primary Slogan */}
             <h1 
-              className="font-serif text-3xl sm:text-4xl lg:text-5xl xl:text-6xl text-primary-foreground tracking-tight animate-fade-in max-w-4xl mx-auto"
+              className="font-serif text-3xl sm:text-4xl lg:text-5xl xl:text-6xl text-foreground tracking-tight animate-fade-in max-w-4xl mx-auto"
               style={{ animationDelay: '0.2s' }}
             >
               Strategic Messaging Intelligence
-              <span className="block mt-2 text-secondary">for Higher Education</span>
+              <span className="block mt-2 text-primary">for Higher Education</span>
             </h1>
 
             {/* Secondary Tagline */}
             <p 
-              className="text-lg sm:text-xl text-primary-foreground/80 max-w-2xl mx-auto leading-relaxed animate-fade-in"
+              className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed animate-fade-in"
               style={{ animationDelay: '0.3s' }}
             >
               Design, evaluate, and distribute student-facing communication 
@@ -101,7 +99,7 @@ export default function LandingPage() {
               <Button 
                 asChild
                 size="lg"
-                className="bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-lg hover:shadow-xl transition-all duration-300 text-base px-8 py-6 font-semibold"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 text-base px-8 py-6 font-semibold"
               >
                 <Link to="/request-access">
                   Join the Beta
@@ -112,7 +110,7 @@ export default function LandingPage() {
                 asChild
                 variant="outline"
                 size="lg"
-                className="bg-transparent border-2 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 hover:border-primary-foreground/50 text-base px-8 py-6"
+                className="border-2 border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/50 text-base px-8 py-6"
               >
                 <Link to="/login">
                   Sign In
@@ -128,7 +126,7 @@ export default function LandingPage() {
               {trustIndicators.map((indicator) => (
                 <div 
                   key={indicator.label}
-                  className="flex items-center gap-2 text-primary-foreground/70 text-sm"
+                  className="flex items-center gap-2 text-muted-foreground text-sm"
                 >
                   <indicator.icon className="w-4 h-4" />
                   <span>{indicator.label}</span>
