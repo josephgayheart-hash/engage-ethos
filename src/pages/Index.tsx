@@ -7,7 +7,6 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useAuth } from "@/contexts/AuthContext";
 import { ResearchFoundation } from "@/components/ResearchFoundation";
-import { BetaBanner } from "@/components/BetaBanner";
 import { 
   Shield, 
   Brain, 
@@ -36,148 +35,76 @@ import {
   Monitor,
   TrendingUp,
   Languages,
-  Wrench
+  Wrench,
+  CheckCircle2,
+  CircleDot
 } from "lucide-react";
 
 const Index = () => {
   const { messages } = useMessageLibrary();
   const { templates } = useSharedLibrary();
-  const { isAdmin, isSuperAdmin } = useAuth();
+  const { isAdmin, isSuperAdmin, profile, tenant } = useAuth();
 
   const recentMessages = messages.slice(0, 3);
   const publishedTemplates = templates.filter(t => t.status === 'published').slice(0, 3);
 
-  const modeCards = [
-    { 
-      id: 'evaluate', 
-      title: 'Evaluate Message', 
-      description: 'Analyze existing messages using the five-pillar persuasion framework',
-      icon: FileText,
-      color: 'text-pillar-authority',
-      bgColor: 'bg-pillar-authority/10',
-      href: '/evaluate'
-    },
-    { 
-      id: 'build', 
-      title: 'Message Builder', 
-      description: 'Generate new AI-powered messages based on context and audience',
-      icon: PenTool,
-      color: 'text-pillar-cognitive',
-      bgColor: 'bg-pillar-cognitive/10',
-      href: '/build'
-    },
-    { 
-      id: 'strategy', 
-      title: 'Journey Designer', 
-      description: 'Design multi-channel communication journeys across goals, domains, and timing',
-      icon: Map,
-      color: 'text-pillar-consensus',
-      bgColor: 'bg-pillar-consensus/10',
-      href: '/strategy'
-    },
-    { 
-      id: 'call-script', 
-      title: 'Call Scripts', 
-      description: 'Generate research-informed phone scripts for student outreach calls',
-      icon: Phone,
-      color: 'text-pillar-ethics',
-      bgColor: 'bg-pillar-ethics/10',
-      href: '/call-script'
-    },
-    { 
-      id: 'playground', 
-      title: 'Playground', 
-      description: 'Chat with AI to brainstorm strategies, review ideas, and explore research',
-      icon: MessageCircle,
-      color: 'text-pillar-susceptibility',
-      bgColor: 'bg-pillar-susceptibility/10',
-      href: '/playground'
-    },
-    { 
-      id: 'byoc', 
-      title: 'Import & Evaluate', 
-      description: 'Bring your own comm: upload, evaluate, tag, and share existing content',
-      icon: Upload,
-      color: 'text-secondary',
-      bgColor: 'bg-secondary/10',
-      href: '/byoc'
-    },
-    { 
-      id: 'settings', 
-      title: 'Institutional Settings', 
-      description: 'Configure your institution\'s Content DNA, names, branding, and terminology',
-      icon: Settings,
-      color: 'text-primary',
-      bgColor: 'bg-primary/10',
-      href: '/settings'
-    },
-    { 
-      id: 'admin', 
-      title: isSuperAdmin ? 'UPlaybook System Admin' : 'Admin Console', 
-      description: isSuperAdmin 
-        ? 'Manage all institutions, users, and system-wide configuration' 
-        : 'Manage users, review requests, and configure your institution',
-      icon: Settings,
-      color: 'text-muted-foreground',
-      bgColor: 'bg-muted',
-      href: isSuperAdmin ? '/admin/panel' : '/admin/console'
-    },
-  ];
+  // Check if user has completed setup (has used the settings page)
+  const hasProfile = !!profile;
 
   const utilityTools = [
     {
       id: 'campaign-dashboard',
       title: 'Campaign Dashboard',
-      description: 'Track campaign performance with analytics and metrics',
+      description: 'Track campaign performance',
       icon: BarChart3,
       href: '/campaign-dashboard'
     },
     {
       id: 'calendar',
       title: 'Communication Calendar',
-      description: 'Visualize and plan messaging across the academic year',
+      description: 'Plan messaging timelines',
       icon: Calendar,
       href: '/calendar'
     },
     {
       id: 'subject-optimizer',
       title: 'Subject Line Optimizer',
-      description: 'Test and optimize email subject lines for engagement',
+      description: 'Optimize email subjects',
       icon: Type,
       href: '/subject-optimizer'
     },
     {
       id: 'accessibility',
       title: 'Accessibility Checker',
-      description: 'Ensure messages meet accessibility standards',
+      description: 'Verify accessibility compliance',
       icon: Eye,
       href: '/accessibility'
     },
     {
       id: 'brand-voice',
       title: 'Content DNA Scorer',
-      description: 'Verify messaging aligns with institutional Content DNA',
+      description: 'Check brand alignment',
       icon: Mic,
       href: '/brand-voice'
     },
     {
       id: 'email-preview',
       title: 'Email Preview',
-      description: 'Preview emails across devices and clients',
+      description: 'Preview across devices',
       icon: Monitor,
       href: '/email-preview'
     },
     {
       id: 'benchmarks',
       title: 'Performance Benchmarks',
-      description: 'Compare metrics against higher ed industry benchmarks',
+      description: 'Compare to industry metrics',
       icon: TrendingUp,
       href: '/benchmarks'
     },
     {
       id: 'translate',
       title: 'Translation Tool',
-      description: 'Translate messages for multilingual audiences',
+      description: 'Multilingual messaging',
       icon: Languages,
       href: '/translate'
     },
@@ -196,106 +123,20 @@ const Index = () => {
       <Header />
       
       {/* Hero Section */}
-      <section className="gradient-hero py-12 md:py-16">
+      <section className="gradient-hero py-10 md:py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            {/* Beta indicator */}
-            <div className="mb-4 animate-fade-in">
+            <div className="mb-3 animate-fade-in">
               <Badge className="bg-amber-100/20 text-amber-100 border-amber-200/30 hover:bg-amber-100/30">
                 Beta Release — We welcome your feedback
               </Badge>
             </div>
-            <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl font-bold text-primary-foreground mb-3 animate-fade-in">
-              Messaging Intelligence for Higher Education
+            <h1 className="font-serif text-2xl md:text-3xl font-bold text-primary-foreground mb-2 animate-fade-in">
+              Your Playbook for Student Success
             </h1>
-            <p className="text-base md:text-lg text-primary-foreground/80 mb-4 animate-fade-in" style={{ animationDelay: '100ms' }}>
-              Design, evaluate, and distribute student-facing communication using peer-reviewed research.
+            <p className="text-base text-primary-foreground/80 animate-fade-in" style={{ animationDelay: '100ms' }}>
+              AI-powered messaging intelligence that turns behavioral science into student action.
             </p>
-            <div className="flex flex-wrap justify-center gap-4 animate-fade-in" style={{ animationDelay: '200ms' }}>
-              <div className="flex items-center gap-2 text-primary-foreground/70 text-sm">
-                <Shield className="w-4 h-4" />
-                <span>Evidence-Based</span>
-              </div>
-              <div className="flex items-center gap-2 text-primary-foreground/70 text-sm">
-                <Brain className="w-4 h-4" />
-                <span>Cognitively Informed</span>
-              </div>
-              <div className="flex items-center gap-2 text-primary-foreground/70 text-sm">
-                <Target className="w-4 h-4" />
-                <span>Student-Centered</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Marketing Section */}
-      <section className="bg-gradient-to-b from-primary/5 to-background py-12">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-8">
-              <Badge className="mb-4 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
-                <Sparkles className="w-3 h-3 mr-1" />
-                Why UPlaybook?
-              </Badge>
-              <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-4">
-                Stop Guessing. Start Connecting.
-              </h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Most student communications are written on instinct. UPlaybook transforms your messaging 
-                with research-backed intelligence that actually moves students to action.
-              </p>
-            </div>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="border-none shadow-md bg-card/50 backdrop-blur">
-                <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 rounded-full bg-pillar-authority/10 flex items-center justify-center mx-auto mb-4">
-                    <Brain className="w-6 h-6 text-pillar-authority" />
-                  </div>
-                  <h3 className="font-semibold mb-2">Research-Grounded</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Powered by Cialdini, ELM, and Kaptein's persuasion research.
-                  </p>
-                </CardContent>
-              </Card>
-              
-              <Card className="border-none shadow-md bg-card/50 backdrop-blur">
-                <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 rounded-full bg-pillar-cognitive/10 flex items-center justify-center mx-auto mb-4">
-                    <Target className="w-6 h-6 text-pillar-cognitive" />
-                  </div>
-                  <h3 className="font-semibold mb-2">Student-Centered</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Built for university communicators and marketing teams.
-                  </p>
-                </CardContent>
-              </Card>
-              
-              <Card className="border-none shadow-md bg-card/50 backdrop-blur">
-                <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 rounded-full bg-pillar-consensus/10 flex items-center justify-center mx-auto mb-4">
-                    <Library className="w-6 h-6 text-pillar-consensus" />
-                  </div>
-                  <h3 className="font-semibold mb-2">Shared Libraries</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Save, share, and reuse institution-approved playbooks.
-                  </p>
-                </CardContent>
-              </Card>
-              
-              <Card className="border-none shadow-md bg-card/50 backdrop-blur">
-                <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 rounded-full bg-pillar-ethics/10 flex items-center justify-center mx-auto mb-4">
-                    <Settings className="w-6 h-6 text-pillar-ethics" />
-                  </div>
-                  <h3 className="font-semibold mb-2">Your Content DNA</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Customize terminology, naming, and brand tone.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
           </div>
         </div>
       </section>
@@ -303,67 +144,166 @@ const Index = () => {
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto space-y-10">
           
-          {/* Tools Section */}
+          {/* Getting Started Workflow */}
           <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-serif text-xl font-semibold">AI-Powered Tools</h2>
-              <Badge variant="outline" className="flex items-center gap-1">
-                <Sparkles className="w-3 h-3" />
-                Powered by AI
-              </Badge>
+            <div className="mb-6">
+              <h2 className="font-serif text-xl font-semibold mb-1">How It Works</h2>
+              <p className="text-sm text-muted-foreground">Follow these steps to get the most out of UPlaybook</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {modeCards
-                .filter(card => card.id !== 'admin' || isAdmin)
-                .map((card) => {
-                const Icon = card.icon;
-                return (
-                  <Link key={card.id} to={card.href}>
-                    <Card className="h-full cursor-pointer transition-all hover:shadow-lg hover:border-primary/50 group">
-                      <CardContent className="p-6">
-                        <div className={`w-12 h-12 rounded-xl ${card.bgColor} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                          <Icon className={`w-6 h-6 ${card.color}`} />
+            
+            <div className="grid md:grid-cols-3 gap-4">
+              {/* Step 1: Configure */}
+              <Link to="/settings">
+                <Card className="h-full cursor-pointer transition-all hover:shadow-lg hover:border-primary/50 group relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-primary/20 group-hover:bg-primary/40 transition-colors" />
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
+                        1
+                      </div>
+                      <Badge variant="outline" className="text-xs">Setup</Badge>
+                    </div>
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <Settings className="w-6 h-6 text-primary" />
+                    </div>
+                    <h3 className="font-serif font-semibold text-lg mb-2">Define Your Content DNA</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Configure your institution's voice, terminology, and branding so every message sounds like you.
+                    </p>
+                    <div className="flex items-center text-sm text-primary font-medium group-hover:gap-2 transition-all">
+                      Configure Settings
+                      <ArrowRight className="w-4 h-4 ml-1" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+
+              {/* Step 2: Create */}
+              <div className="space-y-4">
+                <Link to="/build">
+                  <Card className="cursor-pointer transition-all hover:shadow-lg hover:border-pillar-cognitive/50 group relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-pillar-cognitive/20 group-hover:bg-pillar-cognitive/40 transition-colors" />
+                    <CardContent className="p-5">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-8 h-8 rounded-full bg-pillar-cognitive/10 flex items-center justify-center text-sm font-bold text-pillar-cognitive">
+                          2
                         </div>
-                        <h3 className="font-serif font-semibold text-lg mb-2">{card.title}</h3>
-                        <p className="text-sm text-muted-foreground mb-4">{card.description}</p>
-                        <div className="flex items-center text-sm text-primary font-medium group-hover:gap-2 transition-all">
-                          Get Started
-                          <ArrowRight className="w-4 h-4 ml-1" />
+                        <Badge variant="outline" className="text-xs bg-pillar-cognitive/5">Create</Badge>
+                      </div>
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-lg bg-pillar-cognitive/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <PenTool className="w-5 h-5 text-pillar-cognitive" />
                         </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                );
-              })}
+                        <div>
+                          <h3 className="font-semibold">Message Builder</h3>
+                          <p className="text-xs text-muted-foreground">Generate AI-powered messages</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+                <Link to="/evaluate">
+                  <Card className="cursor-pointer transition-all hover:shadow-lg hover:border-pillar-authority/50 group relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-pillar-authority/20 group-hover:bg-pillar-authority/40 transition-colors" />
+                    <CardContent className="p-5">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-lg bg-pillar-authority/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <FileText className="w-5 h-5 text-pillar-authority" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">Evaluate Message</h3>
+                          <p className="text-xs text-muted-foreground">Score against persuasion framework</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </div>
+
+              {/* Step 3: Strategize */}
+              <Link to="/strategy">
+                <Card className="h-full cursor-pointer transition-all hover:shadow-lg hover:border-pillar-consensus/50 group relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-pillar-consensus/20 group-hover:bg-pillar-consensus/40 transition-colors" />
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-8 h-8 rounded-full bg-pillar-consensus/10 flex items-center justify-center text-sm font-bold text-pillar-consensus">
+                        3
+                      </div>
+                      <Badge variant="outline" className="text-xs bg-pillar-consensus/5">Strategize</Badge>
+                    </div>
+                    <div className="w-12 h-12 rounded-xl bg-pillar-consensus/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <Map className="w-6 h-6 text-pillar-consensus" />
+                    </div>
+                    <h3 className="font-serif font-semibold text-lg mb-2">Design Journeys</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Map multi-channel communication strategies across the student lifecycle.
+                    </p>
+                    <div className="flex items-center text-sm text-pillar-consensus font-medium group-hover:gap-2 transition-all">
+                      Plan Strategy
+                      <ArrowRight className="w-4 h-4 ml-1" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             </div>
           </section>
 
-          {/* Utility Tools Section */}
+          {/* More Tools Section */}
           <section>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-serif text-xl font-semibold">Utility Tools</h2>
+              <h2 className="font-serif text-xl font-semibold">More Tools</h2>
               <Badge variant="outline" className="flex items-center gap-1">
-                <Wrench className="w-3 h-3" />
-                Optimize & Analyze
+                <Sparkles className="w-3 h-3" />
+                AI-Powered
               </Badge>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              {utilityTools.map((tool) => {
-                const Icon = tool.icon;
-                return (
-                  <Link key={tool.id} to={tool.href}>
-                    <Card className="h-full cursor-pointer transition-all hover:shadow-md hover:border-primary/50 group">
-                      <CardContent className="p-4">
-                        <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center mb-3 group-hover:bg-primary/10 transition-colors">
-                          <Icon className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                        </div>
-                        <h3 className="font-medium text-sm mb-1">{tool.title}</h3>
-                        <p className="text-xs text-muted-foreground line-clamp-2">{tool.description}</p>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                );
-              })}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <Link to="/call-script">
+                <Card className="h-full cursor-pointer transition-all hover:shadow-md hover:border-pillar-ethics/50 group">
+                  <CardContent className="p-4">
+                    <div className="w-10 h-10 rounded-lg bg-pillar-ethics/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                      <Phone className="w-5 h-5 text-pillar-ethics" />
+                    </div>
+                    <h3 className="font-medium text-sm mb-1">Call Scripts</h3>
+                    <p className="text-xs text-muted-foreground">Phone outreach scripts</p>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link to="/playground">
+                <Card className="h-full cursor-pointer transition-all hover:shadow-md hover:border-pillar-susceptibility/50 group">
+                  <CardContent className="p-4">
+                    <div className="w-10 h-10 rounded-lg bg-pillar-susceptibility/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                      <MessageCircle className="w-5 h-5 text-pillar-susceptibility" />
+                    </div>
+                    <h3 className="font-medium text-sm mb-1">Playground</h3>
+                    <p className="text-xs text-muted-foreground">Chat with AI assistant</p>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link to="/byoc">
+                <Card className="h-full cursor-pointer transition-all hover:shadow-md hover:border-secondary/50 group">
+                  <CardContent className="p-4">
+                    <div className="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                      <Upload className="w-5 h-5 text-secondary" />
+                    </div>
+                    <h3 className="font-medium text-sm mb-1">Import & Evaluate</h3>
+                    <p className="text-xs text-muted-foreground">Upload existing content</p>
+                  </CardContent>
+                </Card>
+              </Link>
+              {isAdmin && (
+                <Link to={isSuperAdmin ? "/admin/panel" : "/admin/console"}>
+                  <Card className="h-full cursor-pointer transition-all hover:shadow-md hover:border-muted-foreground/30 group">
+                    <CardContent className="p-4">
+                      <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <Settings className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                      <h3 className="font-medium text-sm mb-1">{isSuperAdmin ? 'System Admin' : 'Admin Console'}</h3>
+                      <p className="text-xs text-muted-foreground">Manage users & settings</p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              )}
             </div>
           </section>
 
@@ -390,7 +330,7 @@ const Index = () => {
                   <div className="text-center py-6 text-muted-foreground">
                     <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
                     <p className="text-sm">No messages saved yet</p>
-                    <p className="text-xs mt-1">Start by evaluating or building a message</p>
+                    <p className="text-xs mt-1">Start by building or evaluating a message</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -484,6 +424,34 @@ const Index = () => {
             </Card>
           </section>
 
+          {/* Utility Tools Section */}
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-serif text-xl font-semibold">Utility Tools</h2>
+              <Badge variant="outline" className="flex items-center gap-1">
+                <Wrench className="w-3 h-3" />
+                Optimize & Analyze
+              </Badge>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {utilityTools.map((tool) => {
+                const Icon = tool.icon;
+                return (
+                  <Link key={tool.id} to={tool.href}>
+                    <Card className="h-full cursor-pointer transition-all hover:shadow-md hover:border-primary/50 group">
+                      <CardContent className="p-4">
+                        <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center mb-3 group-hover:bg-primary/10 transition-colors">
+                          <Icon className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </div>
+                        <h3 className="font-medium text-sm mb-1">{tool.title}</h3>
+                        <p className="text-xs text-muted-foreground line-clamp-2">{tool.description}</p>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
 
           {/* Research Foundation */}
           <ResearchFoundation />
@@ -494,30 +462,23 @@ const Index = () => {
       <footer className="border-t border-border bg-card py-8">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
-            {/* Tools */}
+            {/* Core Tools */}
             <div>
-              <h4 className="font-semibold text-sm mb-3">Tools</h4>
+              <h4 className="font-semibold text-sm mb-3">Core Tools</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link to="/evaluate" className="hover:text-foreground transition-colors">Evaluate Message</Link></li>
+                <li><Link to="/settings" className="hover:text-foreground transition-colors">Institutional Settings</Link></li>
                 <li><Link to="/build" className="hover:text-foreground transition-colors">Build Message</Link></li>
-                <li><Link to="/strategy" className="hover:text-foreground transition-colors">Plan Strategy</Link></li>
+                <li><Link to="/evaluate" className="hover:text-foreground transition-colors">Evaluate Message</Link></li>
+                <li><Link to="/strategy" className="hover:text-foreground transition-colors">Journey Designer</Link></li>
+              </ul>
+            </div>
+            {/* More Tools */}
+            <div>
+              <h4 className="font-semibold text-sm mb-3">More Tools</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link to="/call-script" className="hover:text-foreground transition-colors">Call Scripts</Link></li>
                 <li><Link to="/playground" className="hover:text-foreground transition-colors">Playground</Link></li>
                 <li><Link to="/byoc" className="hover:text-foreground transition-colors">Import & Evaluate</Link></li>
-              </ul>
-            </div>
-            {/* Utilities */}
-            <div>
-              <h4 className="font-semibold text-sm mb-3">Utilities</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link to="/campaign-dashboard" className="hover:text-foreground transition-colors">Campaign Dashboard</Link></li>
-                <li><Link to="/calendar" className="hover:text-foreground transition-colors">Communication Calendar</Link></li>
-                <li><Link to="/subject-optimizer" className="hover:text-foreground transition-colors">Subject Line Optimizer</Link></li>
-                <li><Link to="/accessibility" className="hover:text-foreground transition-colors">Accessibility Checker</Link></li>
-                <li><Link to="/brand-voice" className="hover:text-foreground transition-colors">Brand Voice Scorer</Link></li>
-                <li><Link to="/email-preview" className="hover:text-foreground transition-colors">Email Preview</Link></li>
-                <li><Link to="/benchmarks" className="hover:text-foreground transition-colors">Benchmarks</Link></li>
-                <li><Link to="/translate" className="hover:text-foreground transition-colors">Translation Tool</Link></li>
               </ul>
             </div>
             {/* Libraries */}
@@ -528,21 +489,22 @@ const Index = () => {
                 <li><Link to="/shared-library" className="hover:text-foreground transition-colors">Shared Library</Link></li>
               </ul>
             </div>
-            {/* Admin & Research */}
+            {/* Utilities */}
             <div>
-              <h4 className="font-semibold text-sm mb-3">Admin & Research</h4>
+              <h4 className="font-semibold text-sm mb-3">Utilities</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link to="/admin" className="hover:text-foreground transition-colors">Admin Panel</Link></li>
-                <li><a href="#about" className="hover:text-foreground transition-colors">Research Foundation</a></li>
+                <li><Link to="/campaign-dashboard" className="hover:text-foreground transition-colors">Campaign Dashboard</Link></li>
+                <li><Link to="/calendar" className="hover:text-foreground transition-colors">Communication Calendar</Link></li>
+                <li><Link to="/subject-optimizer" className="hover:text-foreground transition-colors">Subject Optimizer</Link></li>
               </ul>
             </div>
           </div>
           <div className="border-t border-border pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground">
-              UPlaybook — Strategic Messaging Intelligence for Higher Education
+              UPlaybook — Your Playbook for Student Success
             </p>
             <p className="text-xs text-muted-foreground">
-              Evidence-based messaging for higher education
+              Research-grounded messaging intelligence for higher education
             </p>
           </div>
         </div>
