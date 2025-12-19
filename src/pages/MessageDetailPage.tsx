@@ -253,18 +253,18 @@ const MessageDetailPage = () => {
                       </Button>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2">
-                      <ChannelIcon className="w-5 h-5 text-muted-foreground shrink-0" />
-                      <h1 className="font-serif text-xl md:text-2xl font-bold text-foreground truncate">
+                    <div className="flex items-start gap-2 min-w-0">
+                      <ChannelIcon className="w-5 h-5 text-muted-foreground shrink-0 mt-1" />
+                      <h1 className="font-serif text-base sm:text-lg md:text-xl font-bold text-foreground break-words">
                         {message.title}
                       </h1>
                       <Button 
                         size="icon" 
                         variant="ghost" 
-                        className="shrink-0 h-8 w-8"
+                        className="shrink-0 h-7 w-7"
                         onClick={handleStartEditTitle}
                       >
-                        <Pencil className="w-3.5 h-3.5" />
+                        <Pencil className="w-3 h-3" />
                       </Button>
                     </div>
                   )}
