@@ -680,32 +680,36 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
 
               {/* Quick Metrics */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <Card className="bg-muted/30">
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-primary">{samples.length}</div>
-                    <p className="text-xs text-muted-foreground">Content Samples</p>
+                <Card className="bg-muted/30 overflow-hidden">
+                  <CardContent className="p-3 text-center">
+                    <div className="text-lg sm:text-xl font-bold text-primary truncate">{samples.length}</div>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Content Samples</p>
                   </CardContent>
                 </Card>
-                <Card className="bg-muted/30">
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-primary">{analysis.voice_analysis.overallTone?.split(' ')[0] || 'Active'}</div>
-                    <p className="text-xs text-muted-foreground">Overall Tone</p>
+                <Card className="bg-muted/30 overflow-hidden">
+                  <CardContent className="p-3 text-center">
+                    <div className="text-sm sm:text-base font-bold text-primary truncate leading-tight" title={analysis.voice_analysis.overallTone || ''}>
+                      {analysis.voice_analysis.overallTone?.split(' ').slice(0, 2).join(' ') || 'Active'}
+                    </div>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Overall Tone</p>
                   </CardContent>
                 </Card>
-                <Card className="bg-muted/30">
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-primary">{analysis.voice_analysis.formalityLevel?.split(' ')[0] || 'Set'}</div>
-                    <p className="text-xs text-muted-foreground">Formality</p>
+                <Card className="bg-muted/30 overflow-hidden">
+                  <CardContent className="p-3 text-center">
+                    <div className="text-sm sm:text-base font-bold text-primary truncate leading-tight" title={analysis.voice_analysis.formalityLevel || ''}>
+                      {analysis.voice_analysis.formalityLevel?.split(' ').slice(0, 2).join(' ') || 'Set'}
+                    </div>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Formality</p>
                   </CardContent>
                 </Card>
-                <Card className="bg-muted/30">
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-primary">
+                <Card className="bg-muted/30 overflow-hidden">
+                  <CardContent className="p-3 text-center">
+                    <div className="text-sm sm:text-base font-bold text-primary truncate leading-tight">
                       {analysis.last_analyzed_at 
                         ? new Date(analysis.last_analyzed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                         : 'Recent'}
                     </div>
-                    <p className="text-xs text-muted-foreground">Last Analyzed</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Last Analyzed</p>
                   </CardContent>
                 </Card>
               </div>
