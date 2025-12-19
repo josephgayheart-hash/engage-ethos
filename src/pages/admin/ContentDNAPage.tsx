@@ -293,16 +293,17 @@ export default function ContentDNAPage() {
           
           {/* Institution Branding Header */}
           <div className="flex items-center gap-4 mb-4">
-            {tenant?.logo_url ? (
+            {/* Use profile logo if available, otherwise fall back to tenant logo */}
+            {(selectedProfile?.config?.logoUrl || tenant?.logo_url) ? (
               <img 
-                src={tenant.logo_url} 
-                alt={`${tenant.institution_name} logo`}
+                src={selectedProfile?.config?.logoUrl || tenant?.logo_url || ''}
+                alt={`${selectedProfile?.name || tenant?.institution_name} logo`}
                 className="w-16 h-16 object-contain rounded-lg border border-[hsl(220,13%,88%)] bg-white p-1"
               />
             ) : (
               <div 
                 className="w-16 h-16 rounded-lg flex items-center justify-center text-white font-bold text-xl"
-                style={{ backgroundColor: tenant?.primary_color || 'hsl(222,47%,14%)' }}
+                style={{ backgroundColor: selectedProfile?.config?.primaryColor || tenant?.primary_color || 'hsl(222,47%,14%)' }}
               >
                 {(selectedProfile?.name || tenant?.institution_name)?.charAt(0) || 'U'}
               </div>
