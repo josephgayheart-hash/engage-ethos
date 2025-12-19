@@ -299,12 +299,30 @@ export interface ChannelDrafts {
   'talking-points'?: TalkingPointsDraft;
 }
 
+// Brand Adherence Scoring
+export interface BrandElementScore {
+  element: string;
+  elementType: 'promise' | 'pillar' | 'proofPoint' | 'commitment' | 'pathway';
+  incorporated: boolean;
+  strength: 'strong' | 'moderate' | 'weak' | 'absent';
+  evidence?: string; // Quote or reference from the generated content
+}
+
+export interface BrandAdherenceResult {
+  overallScore: number; // 0-100
+  overallRating: 'Excellent' | 'Good' | 'Fair' | 'Needs Improvement';
+  elementScores: BrandElementScore[];
+  summary: string;
+  suggestions?: string[];
+}
+
 export interface BuilderResult {
   channelDrafts: ChannelDrafts;
   drafts: string[]; // Legacy fallback
   recommendedAuthority: string;
   recommendedSender: string;
   recommendedLength: string;
+  brandAdherence?: BrandAdherenceResult; // Brand adherence scoring
 }
 
 export interface MapperResult {
