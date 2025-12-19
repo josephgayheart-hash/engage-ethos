@@ -300,24 +300,38 @@ const BuildPage = () => {
   const handleShareToLibraryConfirm = (name: string): string | undefined => {
     if (!builderResult?.channelDrafts) return undefined;
 
-    const contentSummary = selectedChannels.map(ch => {
-      const content = builderResult.channelDrafts[ch];
-      if (typeof content === 'string') return `[${ch.toUpperCase()}]\n${content}`;
-      if (content && typeof content === 'object') {
-        if ('subject' in content) return `[EMAIL]\nSubject: ${content.subject}\n${content.body}`;
-        if ('opening' in content && 'purpose' in content) return `[PHONE CALL]\n${content.opening}`;
-        if ('body' in content && 'cta' in content) return `[LANDING PAGE]\n${content.headline}\n${content.body}`;
-        if ('headlines' in content) return `[SEARCH AD]\n${content.headlines.join(' | ')}`;
-        if ('primaryText' in content) return `[SOCIAL AD]\n${content.headline}\n${content.primaryText}`;
-        if ('keyMessages' in content) return `[TALKING POINTS]\n${(content as { keyMessages: string[] }).keyMessages.join('\n• ')}`;
-      }
-      return '';
-    }).filter(Boolean).join('\n\n---\n\n');
+    // For multi-channel kits, store the first channel's content as JSON for proper rendering
+    // and include metadata about all channels
+    const primaryChannel = selectedChannels[0];
+    const primaryContent = builderResult.channelDrafts[primaryChannel];
+    
+    // Store structured content as JSON string for proper parsing later
+    let contentToStore: string;
+    if (typeof primaryContent === 'object' && primaryContent !== null) {
+      contentToStore = JSON.stringify(primaryContent);
+    } else if (typeof primaryContent === 'string') {
+      contentToStore = primaryContent;
+    } else {
+      // Fallback to text summary for multiple channels
+      contentToStore = selectedChannels.map(ch => {
+        const content = builderResult.channelDrafts[ch];
+        if (typeof content === 'string') return `[${ch.toUpperCase()}]\n${content}`;
+        if (content && typeof content === 'object') {
+          if ('subject' in content) return `[EMAIL]\nSubject: ${content.subject}\n${content.body}`;
+          if ('opening' in content && 'purpose' in content) return `[PHONE CALL]\n${content.opening}`;
+          if ('body' in content && 'cta' in content) return `[LANDING PAGE]\n${content.headline}\n${content.body}`;
+          if ('headlines' in content) return `[SEARCH AD]\n${content.headlines.join(' | ')}`;
+          if ('primaryText' in content) return `[SOCIAL AD]\n${content.headline}\n${content.primaryText}`;
+          if ('keyMessages' in content) return `[TALKING POINTS]\n${(content as { keyMessages: string[] }).keyMessages.join('\n• ')}`;
+        }
+        return '';
+      }).filter(Boolean).join('\n\n---\n\n');
+    }
 
     const savedTemplate = addTemplate({
       title: name,
       intentStatement: `Multi-channel message kit for ${context.audience || 'students'} - ${context.moment || 'general'}`,
-      content: contentSummary,
+      content: contentToStore,
       playbook: 'Message Kits',
       owner: 'Current User',
       maintainer: 'Current User',
