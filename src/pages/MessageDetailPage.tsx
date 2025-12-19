@@ -25,7 +25,9 @@ import {
   MessageSquare,
   Globe,
   Layout,
-  FileText
+  FileText,
+  Edit,
+  GitBranch
 } from "lucide-react";
 import {
   Breadcrumb,
@@ -103,6 +105,32 @@ const MessageDetailPage = () => {
     navigate("/library");
   };
 
+  const handleEditJourney = () => {
+    // Navigate to strategy page with journey data for editing
+    const journeyWithMetadata = journeyData as (typeof journeyData & { _metadata?: any });
+    navigate('/strategy', { 
+      state: { 
+        editMode: 'edit',
+        journeyId: message.id,
+        journeyData: journeyData,
+        metadata: journeyWithMetadata?._metadata
+      } 
+    });
+  };
+
+  const handleRemixJourney = () => {
+    // Navigate to strategy page with journey data for remixing (creates a copy)
+    const journeyWithMetadata = journeyData as (typeof journeyData & { _metadata?: any });
+    navigate('/strategy', { 
+      state: { 
+        editMode: 'remix',
+        journeyData: journeyData,
+        metadata: journeyWithMetadata?._metadata,
+        originalTitle: message.title
+      } 
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -164,6 +192,18 @@ const MessageDetailPage = () => {
               </div>
             </div>
             <div className="flex items-center gap-2 md:shrink-0">
+              {isJourney && journeyData && (
+                <>
+                  <Button onClick={handleEditJourney} variant="outline" className="flex items-center gap-2">
+                    <Edit className="w-4 h-4" />
+                    Edit
+                  </Button>
+                  <Button onClick={handleRemixJourney} variant="outline" className="flex items-center gap-2">
+                    <GitBranch className="w-4 h-4" />
+                    Remix
+                  </Button>
+                </>
+              )}
               <Button onClick={handleCopy} variant="outline" className="flex items-center gap-2">
                 <Copy className="w-4 h-4" />
                 {copied ? "Copied!" : "Copy"}
