@@ -43,6 +43,14 @@ export async function buildMessage(
 ): Promise<BuilderResult> {
   console.log("Building message from context...");
   
+  // GUARDRAIL: Log the institutional config being used to help debug cross-profile contamination
+  if (institutionalConfig) {
+    console.log("Building with institution:", institutionalConfig.institutionName || "Unknown");
+    if (institutionalConfig.voiceAnalysis) {
+      console.log("Voice analysis present - tone:", institutionalConfig.voiceAnalysis.overallTone);
+    }
+  }
+  
   const { data, error } = await supabase.functions.invoke('evaluate-message', {
     body: { 
       context,
@@ -73,6 +81,14 @@ export async function mapMessages(
   endDate?: string
 ): Promise<MapperResult> {
   console.log("Generating messaging strategy...");
+  
+  // GUARDRAIL: Log the institutional config being used to help debug cross-profile contamination
+  if (institutionalConfig) {
+    console.log("Mapping with institution:", institutionalConfig.institutionName || "Unknown");
+    if (institutionalConfig.voiceAnalysis) {
+      console.log("Voice analysis present - tone:", institutionalConfig.voiceAnalysis.overallTone);
+    }
+  }
   
   const { data, error } = await supabase.functions.invoke('evaluate-message', {
     body: { 

@@ -22,9 +22,10 @@ serve(async (req) => {
     let contentDNAPrompt = "";
     if (contentDNA?.voiceAnalysis) {
       const va = contentDNA.voiceAnalysis;
+      const profileIdentifier = contentDNA.sourceProfileName || contentDNA.sourceProfileId || "selected profile";
       contentDNAPrompt = `
-CONTENT DNA - INSTITUTIONAL VOICE PROFILE:
-This institution has a specific voice profile that must be reflected in all generated messages:
+CONTENT DNA - INSTITUTIONAL VOICE PROFILE FOR: ${profileIdentifier}
+CRITICAL: This voice profile is SPECIFIC to this institution/profile. Do NOT mix in characteristics from any other institution.
 
 Overall Tone: ${va.overallTone || "Not specified"}
 Formality Level: ${va.formalityLevel || "Not specified"}
@@ -41,7 +42,7 @@ ${contentDNA.customInstructions ? `
 CUSTOM BRAND GUIDELINES:
 ${contentDNA.customInstructions}` : ""}
 
-IMPORTANT: Apply this Content DNA profile naturally throughout the message. Match the tone, use similar vocabulary patterns, and incorporate the messaging tactics identified in the voice analysis.
+IMPORTANT: Apply ONLY this Content DNA profile. Do not borrow language, phrases, mascots, slogans, or voice characteristics from any other institution. If you are unsure about a specific term, use generic alternatives rather than inventing institution-specific content.
 `;
     }
 

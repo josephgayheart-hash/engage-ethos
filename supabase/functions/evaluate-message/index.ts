@@ -293,7 +293,9 @@ ${context.department === 'health-wellbeing' ?
 
     const institutionalStr = institutionalConfig ? `
 
-INSTITUTIONAL CUSTOMIZATION (Use these EXACT values when generating content - do NOT use placeholders like "University Name"):
+INSTITUTIONAL CUSTOMIZATION FOR: ${institutionalConfig.institutionName || 'Selected Profile'}
+===================================================================================
+CRITICAL GUARDRAIL: Use ONLY the information provided below. Do NOT borrow mascots, slogans, system names, or any identifying information from ANY other institution. If a value is "Not specified", use a generic alternative - do NOT substitute information from other universities.
 
 IDENTITY:
 - Institution Name: ${institutionalConfig.institutionName || 'Not specified'}
@@ -380,7 +382,7 @@ STYLE & VOICE:
 - Important Dates: ${institutionalConfig.importantDates?.join(', ') || 'Not specified'}
 ${institutionalConfig.voiceAnalysis ? `
 BRAND VOICE PROFILE (CRITICAL - Match this voice in all generated content):
-The following voice profile was extracted from the institution's actual communications. You MUST match this voice:
+The following voice profile was extracted from THIS SPECIFIC institution's actual communications. You MUST match this voice and ONLY this voice:
 
 - Overall Tone: ${institutionalConfig.voiceAnalysis.overallTone || 'Not specified'}
 - Formality Level: ${institutionalConfig.voiceAnalysis.formalityLevel || 'Not specified'}
@@ -393,9 +395,14 @@ The following voice profile was extracted from the institution's actual communic
 
 Voice Summary: ${institutionalConfig.voiceAnalysis.summary || 'Not specified'}
 
-IMPORTANT: Emulate this voice profile closely. Use similar sentence structures, vocabulary choices, and emotional undertones as described above. Incorporate the common phrases naturally where appropriate.
+IMPORTANT: Emulate ONLY this voice profile. Do NOT borrow language, phrases, or characteristics from other institutions in your training data.
 ` : ''}
-CRITICAL: Use the EXACT institution name, system names, and terminology provided above. Do NOT use generic placeholders like "University Name", "[Portal Name]", or "[Institution]". Use the actual configured values.` : '';
+CRITICAL GUARDRAILS:
+1. Use the EXACT institution name, system names, and terminology provided above
+2. Do NOT use generic placeholders like "University Name", "[Portal Name]", or "[Institution]"
+3. Do NOT substitute information from other universities (e.g., do not use "Wildcats" if the mascot above is "Buckeyes")
+4. If a value is "Not specified", use a generic term (e.g., "your university") rather than borrowing from another institution
+5. Double-check that all mascots, slogans, and spirit phrases match ONLY what is listed above` : '';
 
     switch (mode) {
       case 'evaluator':
