@@ -11,11 +11,38 @@ serve(async (req) => {
   }
 
   try {
-    const { type, context, institutionalConfig, touchpoint, channels, startDate, endDate } = await req.json();
+    const { type, context, institutionalConfig, touchpoint, channels, startDate, endDate, contentDNA } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
+    }
+
+    // Build Content DNA prompt section if provided
+    let contentDNAPrompt = "";
+    if (contentDNA?.voiceAnalysis) {
+      const va = contentDNA.voiceAnalysis;
+      contentDNAPrompt = `
+CONTENT DNA - INSTITUTIONAL VOICE PROFILE:
+This institution has a specific voice profile that must be reflected in all generated messages:
+
+Overall Tone: ${va.overallTone || "Not specified"}
+Formality Level: ${va.formalityLevel || "Not specified"}
+Emotional Tone: ${va.emotionalTone || "Not specified"}
+Sentence Style: ${va.sentenceStyle || "Not specified"}
+
+Key Characteristics: ${va.keyCharacteristics?.join(", ") || "None specified"}
+Vocabulary Patterns: ${va.vocabularyPatterns?.join(", ") || "None specified"}
+Common Phrases to Use: ${va.commonPhrases?.join(", ") || "None specified"}
+Messaging Tactics: ${va.messagingTactics?.join(", ") || "None specified"}
+
+${va.summary ? `Voice Summary: ${va.summary}` : ""}
+${contentDNA.customInstructions ? `
+CUSTOM BRAND GUIDELINES:
+${contentDNA.customInstructions}` : ""}
+
+IMPORTANT: Apply this Content DNA profile naturally throughout the message. Match the tone, use similar vocabulary patterns, and incorporate the messaging tactics identified in the voice analysis.
+`;
     }
 
     let systemPrompt = `You are UPlaybook, an AI assistant specialized in creating effective, ethical communications for higher education institutions - both student-facing and employee-facing.
@@ -26,7 +53,7 @@ Your messages should:
 - Use appropriate authority cues without being authoritative
 - Minimize cognitive load with clear, scannable content
 - Include clear calls-to-action when appropriate
-
+${contentDNAPrompt}
 FOR STUDENT COMMUNICATIONS:
 - Focus on academic success, engagement, and persistence
 - Reference student-relevant resources (advising, tutoring, financial aid)

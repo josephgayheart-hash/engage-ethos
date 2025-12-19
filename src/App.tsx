@@ -39,6 +39,7 @@ import QADiagnosticsPage from "./pages/admin/QADiagnosticsPage";
 import SeedDataPage from "./pages/admin/SeedDataPage";
 import InstitutionDetailPage from "./pages/admin/InstitutionDetailPage";
 import UserDetailPage from "./pages/admin/UserDetailPage";
+import ContentDNAPage from "./pages/admin/ContentDNAPage";
 import ApprovalsPage from "./pages/ApprovalsPage";
 import InitialSetupPage from "./pages/InitialSetupPage";
 import MessageDetailPage from "./pages/MessageDetailPage";
@@ -199,6 +200,7 @@ const AppRoutes = () => (
     <Route path="/admin" element={<Navigate to="/admin/console" replace />} />
     <Route path="/admin/console" element={<RequireAuth><RequireAdmin><AdminConsolePage /></RequireAdmin></RequireAuth>} />
     <Route path="/admin/users" element={<RequireAuth><RequireAdmin><AdminUsersPage /></RequireAdmin></RequireAuth>} />
+    <Route path="/admin/content-dna" element={<RequireAuth><RequireAdmin><ContentDNAPage /></RequireAdmin></RequireAuth>} />
     
     {/* Catch-all */}
     <Route path="*" element={<NotFound />} />

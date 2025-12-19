@@ -28,7 +28,8 @@ import {
   Upload,
   Image,
   Palette,
-  Trash2
+  Trash2,
+  Dna
 } from 'lucide-react';
 
 interface UserStats {
@@ -414,6 +415,14 @@ export default function AdminConsolePage() {
       href: '/approvals',
       color: 'bg-[hsl(45,93%,47%)]',
       stat: 'Review queue'
+    },
+    {
+      title: 'Content DNA',
+      description: 'Refine your brand voice and messaging patterns',
+      icon: Dna,
+      href: '/admin/content-dna',
+      color: 'bg-[hsl(173,58%,39%)]',
+      stat: 'Voice refinement'
     },
     {
       title: 'Institution Settings',
