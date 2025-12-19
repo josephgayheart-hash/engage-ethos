@@ -1,5 +1,5 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,8 +12,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useJourneyExport } from "@/hooks/useJourneyExport";
+import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import { JourneyViewer, isJourneyContent, parseJourneyContent } from "@/components/library/JourneyViewer";
+import type { InstitutionalConfig } from "@/types/uplaybook";
 import { 
   ChevronRight, 
   ArrowLeft, 
@@ -75,15 +77,29 @@ const MessageDetailPage = () => {
   const { toast } = useToast();
   const { messages, deleteMessage, updateMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
+  const { getProfile } = useInstitutionalProfiles();
   const [copied, setCopied] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState("");
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const journeyContentRef = useRef<HTMLDivElement>(null);
+  const [profileConfig, setProfileConfig] = useState<InstitutionalConfig | null>(null);
 
   const message = messages.find(m => m.id === id);
   const isJourney = useMemo(() => message ? isJourneyContent(message.content) : false, [message]);
   const journeyData = useMemo(() => isJourney && message ? parseJourneyContent(message.content) : null, [message, isJourney]);
+
+  // Fetch institutional profile config if the message has one
+  useEffect(() => {
+    if (message?.institutionalProfileId) {
+      const profile = getProfile(message.institutionalProfileId);
+      if (profile) {
+        setProfileConfig(profile.config as InstitutionalConfig);
+      }
+    } else {
+      setProfileConfig(null);
+    }
+  }, [message?.institutionalProfileId, getProfile]);
 
   const { isExporting, exportToPdf, printJourney } = useJourneyExport({
     title: message?.title || "Journey Export",
@@ -395,7 +411,11 @@ const MessageDetailPage = () => {
                   </CardHeader>
                   <CardContent>
                     <div ref={journeyContentRef} data-pdf-section>
-                      <JourneyViewer journey={journeyData} />
+                      <JourneyViewer 
+                        journey={journeyData} 
+                        institutionalProfileId={message?.institutionalProfileId}
+                        institutionalConfig={profileConfig}
+                      />
                     </div>
                   </CardContent>
                 </Card>

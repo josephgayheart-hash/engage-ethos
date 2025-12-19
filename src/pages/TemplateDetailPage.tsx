@@ -13,8 +13,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useJourneyExport } from "@/hooks/useJourneyExport";
+import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { JourneyViewer, isJourneyContent, parseJourneyContent } from "@/components/library/JourneyViewer";
 import type { LibraryEntryStatus } from "@/types/library";
+import type { InstitutionalConfig } from "@/types/uplaybook";
 import { 
   ChevronRight, 
   ArrowLeft, 
@@ -87,9 +89,11 @@ const TemplateDetailPage = () => {
   const { toast } = useToast();
   const { templates, getTemplateById } = useSharedLibrary();
   const { addMessage } = useMessageLibrary();
+  const { getProfile } = useInstitutionalProfiles();
   const [copied, setCopied] = useState(false);
   const [placeholderValues, setPlaceholderValues] = useState<Record<string, string>>({});
   const journeyContentRef = useRef<HTMLDivElement>(null);
+  const [profileConfig, setProfileConfig] = useState<InstitutionalConfig | null>(null);
 
   const template = getTemplateById(id || '');
   const isJourney = useMemo(() => template ? isJourneyContent(template.content) : false, [template]);
@@ -100,6 +104,18 @@ const TemplateDetailPage = () => {
     title: template?.title || "Template Export",
     containerRef: journeyContentRef,
   });
+
+  // Fetch institutional profile config if the template has one
+  useEffect(() => {
+    if (template?.institutionalProfileId) {
+      const profile = getProfile(template.institutionalProfileId);
+      if (profile) {
+        setProfileConfig(profile.config as InstitutionalConfig);
+      }
+    } else {
+      setProfileConfig(null);
+    }
+  }, [template?.institutionalProfileId, getProfile]);
 
   // Initialize placeholder values
   useEffect(() => {
@@ -321,7 +337,11 @@ const TemplateDetailPage = () => {
                   </CardHeader>
                   <CardContent>
                     <div ref={journeyContentRef} data-pdf-section>
-                      <JourneyViewer journey={journeyData} />
+                      <JourneyViewer 
+                        journey={journeyData} 
+                        institutionalProfileId={template?.institutionalProfileId}
+                        institutionalConfig={profileConfig}
+                      />
                     </div>
                   </CardContent>
                 </Card>

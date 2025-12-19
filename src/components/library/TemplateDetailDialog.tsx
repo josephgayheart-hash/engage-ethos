@@ -9,10 +9,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import type { SharedTemplate } from "@/types/library";
+import type { InstitutionalConfig } from "@/types/uplaybook";
 import { JourneyViewer, isJourneyContent, parseJourneyContent } from "./JourneyViewer";
 import { Copy, Download, CheckCircle, AlertTriangle, Users, Lightbulb, ShieldCheck, Edit3, Map } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 
 interface TemplateDetailDialogProps {
   template: SharedTemplate;
@@ -54,9 +56,23 @@ const generateMockUsage = (templateId: string) => {
 
 export function TemplateDetailDialog({ template, open, onOpenChange, onPull }: TemplateDetailDialogProps) {
   const { toast } = useToast();
+  const { getProfile } = useInstitutionalProfiles();
   const [copied, setCopied] = useState(false);
   const [placeholderValues, setPlaceholderValues] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState('template');
+  const [profileConfig, setProfileConfig] = useState<InstitutionalConfig | null>(null);
+
+  // Fetch institutional profile config if the template has one
+  useEffect(() => {
+    if (template?.institutionalProfileId) {
+      const profile = getProfile(template.institutionalProfileId);
+      if (profile) {
+        setProfileConfig(profile.config as InstitutionalConfig);
+      }
+    } else {
+      setProfileConfig(null);
+    }
+  }, [template?.institutionalProfileId, getProfile]);
 
   // Initialize placeholder values with defaults
   useEffect(() => {
@@ -138,7 +154,11 @@ export function TemplateDetailDialog({ template, open, onOpenChange, onPull }: T
                       <Map className="w-4 h-4 text-primary" />
                       <Label className="text-sm font-medium">Strategy Journey</Label>
                     </div>
-                    <JourneyViewer journey={journeyData} />
+                    <JourneyViewer 
+                      journey={journeyData} 
+                      institutionalProfileId={template?.institutionalProfileId}
+                      institutionalConfig={profileConfig}
+                    />
                   </div>
                 ) : (
                   <div>
