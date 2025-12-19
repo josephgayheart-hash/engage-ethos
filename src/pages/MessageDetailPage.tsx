@@ -195,11 +195,17 @@ const MessageDetailPage = () => {
   const handleRemixJourney = () => {
     // Navigate to strategy page with journey data for remixing (creates a copy)
     const journeyWithMetadata = journeyData as (typeof journeyData & { _metadata?: any });
+    // Merge message-level profile info into metadata for remix
+    const enrichedMetadata = {
+      ...journeyWithMetadata?._metadata,
+      institutionalProfileId: journeyWithMetadata?._metadata?.institutionalProfileId || message.institutionalProfileId,
+      institutionalProfileName: journeyWithMetadata?._metadata?.institutionalProfileName || message.institutionalProfileName,
+    };
     navigate('/strategy', { 
       state: { 
         editMode: 'remix',
         journeyData: journeyData,
-        metadata: journeyWithMetadata?._metadata,
+        metadata: enrichedMetadata,
         originalTitle: message.title,
         originalId: message.id,
         source: 'personal'

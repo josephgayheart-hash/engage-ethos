@@ -270,6 +270,9 @@ const BuildPage = () => {
       },
       ethicalGuardrails: ['Review all content before publishing', 'Ensure messaging aligns with institutional voice'],
       placeholders: [],
+      // Persist institutional profile info for library generation
+      institutionalProfileId: selectedProfileId || undefined,
+      institutionalProfileName: selectedProfileName,
     });
 
     return savedTemplate.id;

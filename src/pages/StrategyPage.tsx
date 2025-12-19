@@ -159,6 +159,15 @@ const StrategyPage = () => {
         }
       }
 
+      // Restore profile and DNA settings from metadata
+      if (state.metadata?.institutionalProfileId) {
+        setSelectedProfileId(state.metadata.institutionalProfileId);
+        setSelectedProfileName(state.metadata.institutionalProfileName);
+      }
+      if (state.metadata?.useContentDNA !== undefined) {
+        setUseContentDNA(state.metadata.useContentDNA);
+      }
+
       // Restore dates
       if (state.metadata?.startDate) {
         setStartDate(new Date(state.metadata.startDate));
@@ -296,7 +305,7 @@ const StrategyPage = () => {
   const handleSaveToLibraryConfirm = (name: string): string | undefined => {
     if (!mapperResult?.journey) return undefined;
 
-    // Include journey data with metadata for diagram rendering
+    // Include journey data with metadata for diagram rendering AND profile/DNA info
     const journeyWithMetadata = {
       ...mapperResult.journey,
       _metadata: {
@@ -314,6 +323,10 @@ const StrategyPage = () => {
         startDate: startDate?.toISOString(),
         endDate: endDate?.toISOString(),
         channels: selectedChannels,
+        // Persist profile and DNA settings for library playback
+        institutionalProfileId: selectedProfileId,
+        institutionalProfileName: selectedProfileName,
+        useContentDNA: useContentDNA,
       }
     };
     
@@ -330,6 +343,9 @@ const StrategyPage = () => {
         moment: context.moment,
         goal: context.goal,
         tone: context.tone,
+        // Persist profile info
+        institutionalProfileId: selectedProfileId || undefined,
+        institutionalProfileName: selectedProfileName || undefined,
       }, true); // Add as new version
       
       toast({
@@ -357,6 +373,9 @@ const StrategyPage = () => {
       tone: context.tone,
       approved: false,
       mode: 'generated',
+      // Persist institutional profile info for library generation
+      institutionalProfileId: selectedProfileId || undefined,
+      institutionalProfileName: selectedProfileName || undefined,
       // Track remix source if this is a remix
       remixedFrom: remixedFrom || undefined,
     });
@@ -381,7 +400,7 @@ const StrategyPage = () => {
 
     const journey = mapperResult.journey;
     
-    // Include journey data with metadata for diagram rendering
+    // Include journey data with metadata for diagram rendering AND profile/DNA info
     const journeyWithMetadata = {
       ...journey,
       _metadata: {
@@ -396,6 +415,10 @@ const StrategyPage = () => {
         startDate: startDate?.toISOString(),
         endDate: endDate?.toISOString(),
         channels: selectedChannels,
+        // Persist profile and DNA settings for library playback
+        institutionalProfileId: selectedProfileId,
+        institutionalProfileName: selectedProfileName,
+        useContentDNA: useContentDNA,
       }
     };
     
@@ -419,6 +442,9 @@ const StrategyPage = () => {
       },
       ethicalGuardrails: ['Review all touchpoints before publishing', 'Ensure messaging aligns with institutional voice'],
       placeholders: [],
+      // Persist institutional profile info for library generation
+      institutionalProfileId: selectedProfileId || undefined,
+      institutionalProfileName: selectedProfileName || undefined,
     });
 
     return savedTemplate.id;
