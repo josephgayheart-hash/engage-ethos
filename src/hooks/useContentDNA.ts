@@ -7,6 +7,7 @@ export interface ContentDNASample {
   id: string;
   tenant_id: string;
   user_id: string;
+  profile_id: string | null;
   file_name: string;
   file_type: string | null;
   file_size: number | null;
@@ -33,6 +34,7 @@ export interface VoiceAnalysis {
 export interface ContentDNAAnalysis {
   id: string;
   tenant_id: string;
+  profile_id: string | null;
   voice_analysis: VoiceAnalysis;
   custom_instructions: string | null;
   sample_count: number;
@@ -41,7 +43,12 @@ export interface ContentDNAAnalysis {
   updated_at: string;
 }
 
-export function useContentDNA() {
+interface UseContentDNAOptions {
+  profileId?: string | null;
+}
+
+export function useContentDNA(options: UseContentDNAOptions = {}) {
+  const { profileId } = options;
   const { tenant, profile } = useAuth();
   const { toast } = useToast();
   const [samples, setSamples] = useState<ContentDNASample[]>([]);
@@ -54,28 +61,47 @@ export function useContentDNA() {
     if (!tenant?.id) return;
     
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('content_dna_samples')
         .select('*')
         .eq('tenant_id', tenant.id)
         .order('created_at', { ascending: false });
+
+      // If a profileId is specified, filter by it
+      if (profileId) {
+        query = query.eq('profile_id', profileId);
+      } else {
+        // If no profileId, get samples without a profile (legacy/fallback)
+        query = query.is('profile_id', null);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       setSamples((data || []) as ContentDNASample[]);
     } catch (error: any) {
       console.error('Error fetching samples:', error);
     }
-  }, [tenant?.id]);
+  }, [tenant?.id, profileId]);
 
   const fetchAnalysis = useCallback(async () => {
     if (!tenant?.id) return;
     
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('content_dna_analysis')
         .select('*')
-        .eq('tenant_id', tenant.id)
-        .maybeSingle();
+        .eq('tenant_id', tenant.id);
+
+      // If a profileId is specified, filter by it
+      if (profileId) {
+        query = query.eq('profile_id', profileId);
+      } else {
+        // If no profileId, get analysis without a profile (legacy/fallback)
+        query = query.is('profile_id', null);
+      }
+
+      const { data, error } = await query.maybeSingle();
 
       if (error) throw error;
       
@@ -84,11 +110,13 @@ export function useContentDNA() {
           ...data,
           voice_analysis: data.voice_analysis as unknown as VoiceAnalysis
         } as ContentDNAAnalysis);
+      } else {
+        setAnalysis(null);
       }
     } catch (error: any) {
       console.error('Error fetching analysis:', error);
     }
-  }, [tenant?.id]);
+  }, [tenant?.id, profileId]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -126,6 +154,7 @@ export function useContentDNA() {
         .insert({
           tenant_id: tenant.id,
           user_id: profile.id,
+          profile_id: profileId || null,
           content_text: content,
           file_name: fileName,
           file_type: options.fileType || 'text/plain',
@@ -211,26 +240,52 @@ export function useContentDNA() {
 
       const voiceAnalysis: VoiceAnalysis = data;
 
-      // Upsert the analysis
-      const { data: upsertedData, error: upsertError } = await supabase
-        .from('content_dna_analysis')
-        .upsert({
-          tenant_id: tenant.id,
-          voice_analysis: voiceAnalysis as any,
-          sample_count: sampleTexts.length,
-          last_analyzed_at: new Date().toISOString(),
-        }, {
-          onConflict: 'tenant_id'
-        })
-        .select()
-        .single();
+      // Build the upsert data
+      const upsertData: any = {
+        tenant_id: tenant.id,
+        profile_id: profileId || null,
+        voice_analysis: voiceAnalysis as any,
+        sample_count: sampleTexts.length,
+        last_analyzed_at: new Date().toISOString(),
+      };
 
-      if (upsertError) throw upsertError;
+      // Check if an analysis already exists for this profile
+      let existingAnalysis = analysis;
+      
+      if (existingAnalysis) {
+        // Update existing
+        const { data: updatedData, error: updateError } = await supabase
+          .from('content_dna_analysis')
+          .update({
+            voice_analysis: voiceAnalysis as any,
+            sample_count: sampleTexts.length,
+            last_analyzed_at: new Date().toISOString(),
+          })
+          .eq('id', existingAnalysis.id)
+          .select()
+          .single();
 
-      setAnalysis({
-        ...upsertedData,
-        voice_analysis: upsertedData.voice_analysis as unknown as VoiceAnalysis
-      } as ContentDNAAnalysis);
+        if (updateError) throw updateError;
+
+        setAnalysis({
+          ...updatedData,
+          voice_analysis: updatedData.voice_analysis as unknown as VoiceAnalysis
+        } as ContentDNAAnalysis);
+      } else {
+        // Insert new
+        const { data: insertedData, error: insertError } = await supabase
+          .from('content_dna_analysis')
+          .insert(upsertData)
+          .select()
+          .single();
+
+        if (insertError) throw insertError;
+
+        setAnalysis({
+          ...insertedData,
+          voice_analysis: insertedData.voice_analysis as unknown as VoiceAnalysis
+        } as ContentDNAAnalysis);
+      }
 
       toast({
         title: 'Analysis Complete',
@@ -253,25 +308,44 @@ export function useContentDNA() {
 
     setIsSaving(true);
     try {
-      const { data, error } = await supabase
-        .from('content_dna_analysis')
-        .upsert({
-          tenant_id: tenant.id,
-          custom_instructions: instructions,
-          voice_analysis: analysis?.voice_analysis || {},
-          sample_count: analysis?.sample_count || 0,
-        }, {
-          onConflict: 'tenant_id'
-        })
-        .select()
-        .single();
+      if (analysis) {
+        // Update existing
+        const { data, error } = await supabase
+          .from('content_dna_analysis')
+          .update({
+            custom_instructions: instructions,
+          })
+          .eq('id', analysis.id)
+          .select()
+          .single();
 
-      if (error) throw error;
+        if (error) throw error;
 
-      setAnalysis({
-        ...data,
-        voice_analysis: data.voice_analysis as unknown as VoiceAnalysis
-      } as ContentDNAAnalysis);
+        setAnalysis({
+          ...data,
+          voice_analysis: data.voice_analysis as unknown as VoiceAnalysis
+        } as ContentDNAAnalysis);
+      } else {
+        // Create new analysis with just custom instructions
+        const { data, error } = await supabase
+          .from('content_dna_analysis')
+          .insert({
+            tenant_id: tenant.id,
+            profile_id: profileId || null,
+            custom_instructions: instructions,
+            voice_analysis: {},
+            sample_count: 0,
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        setAnalysis({
+          ...data,
+          voice_analysis: data.voice_analysis as unknown as VoiceAnalysis
+        } as ContentDNAAnalysis);
+      }
 
       toast({
         title: 'Instructions Saved',

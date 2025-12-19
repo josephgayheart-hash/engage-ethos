@@ -286,7 +286,8 @@ const SettingsPage = () => {
                   <CardContent>
                     <InstitutionalConfig 
                       config={editingProfile.config} 
-                      onChange={handleUpdateConfig} 
+                      onChange={handleUpdateConfig}
+                      profileId={editingProfile.id}
                     />
                   </CardContent>
                 </Card>

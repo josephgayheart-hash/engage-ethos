@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useContentDNA, ContentDNASample } from '@/hooks/useContentDNA';
+import { useInstitutionalProfiles } from '@/hooks/useInstitutionalProfiles';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +14,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Home, 
   Upload, 
@@ -33,7 +35,9 @@ import {
   CheckCircle2,
   User,
   X,
-  Zap
+  Zap,
+  AlertCircle,
+  ArrowLeft
 } from 'lucide-react';
 import { extractTextFromFile, getAcceptString } from '@/lib/documentParser';
 
@@ -52,10 +56,20 @@ const SAMPLE_TYPES = [
 export default function ContentDNAPage() {
   const { tenant, profile, isAdmin } = useAuth();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Get profileId from URL query params
+  const profileIdFromUrl = searchParams.get('profileId');
   
   // Check if accessed via admin route
   const isAdminRoute = location.pathname.startsWith('/admin');
+  
+  // Get the institutional profiles to find the profile name
+  const { profiles } = useInstitutionalProfiles();
+  const selectedProfile = profileIdFromUrl 
+    ? profiles.find(p => p.id === profileIdFromUrl) 
+    : null;
   
   const {
     samples,
@@ -67,7 +81,7 @@ export default function ContentDNAPage() {
     deleteSample,
     analyzeVoice,
     updateCustomInstructions,
-  } = useContentDNA();
+  } = useContentDNA({ profileId: profileIdFromUrl });
 
   // Upload state
   const [textInput, setTextInput] = useState('');
@@ -225,7 +239,16 @@ export default function ContentDNAPage() {
               <Home className="w-4 h-4" />
             </Link>
             <ChevronRight className="w-4 h-4" />
-            {isAdminRoute ? (
+            {selectedProfile ? (
+              <>
+                <Link to="/settings" className="hover:text-[hsl(222,47%,11%)]">
+                  Profiles
+                </Link>
+                <ChevronRight className="w-4 h-4" />
+                <span className="text-[hsl(222,47%,11%)]">{selectedProfile.name}</span>
+                <ChevronRight className="w-4 h-4" />
+              </>
+            ) : isAdminRoute ? (
               <>
                 <Link to="/admin/console" className="hover:text-[hsl(222,47%,11%)]">
                   Admin
@@ -235,6 +258,28 @@ export default function ContentDNAPage() {
             ) : null}
             <span className="text-[hsl(222,47%,11%)]">Content DNA</span>
           </div>
+          
+          {/* Back button when viewing specific profile */}
+          {selectedProfile && (
+            <Link 
+              to="/settings" 
+              className="inline-flex items-center gap-1 text-sm text-[hsl(220,14%,46%)] hover:text-[hsl(222,47%,11%)] mb-4"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to {selectedProfile.name}
+            </Link>
+          )}
+          
+          {/* Profile Context Banner */}
+          {selectedProfile && (
+            <Alert className="mb-4 border-primary/30 bg-primary/5">
+              <Building2 className="h-4 w-4" />
+              <AlertDescription className="ml-2">
+                Configuring Content DNA for <strong>{selectedProfile.name}</strong>. 
+                Samples and analysis will be specific to this institutional profile.
+              </AlertDescription>
+            </Alert>
+          )}
           
           {/* Institution Branding Header */}
           <div className="flex items-center gap-4 mb-4">
@@ -249,15 +294,15 @@ export default function ContentDNAPage() {
                 className="w-16 h-16 rounded-lg flex items-center justify-center text-white font-bold text-xl"
                 style={{ backgroundColor: tenant?.primary_color || 'hsl(222,47%,14%)' }}
               >
-                {tenant?.institution_name?.charAt(0) || 'U'}
+                {(selectedProfile?.name || tenant?.institution_name)?.charAt(0) || 'U'}
               </div>
             )}
             <div className="flex-1">
               <h1 className="font-serif text-2xl font-bold text-[hsl(222,47%,11%)] flex items-center gap-2">
-                {tenant?.institution_name || 'Content DNA Center'}
+                {selectedProfile?.name || tenant?.institution_name || 'Content DNA Center'}
               </h1>
               <p className="text-[hsl(220,14%,46%)]">
-                Content DNA Center
+                Content DNA {selectedProfile ? `for ${selectedProfile.name}` : 'Center'}
               </p>
             </div>
             <div className="flex items-center gap-3">
