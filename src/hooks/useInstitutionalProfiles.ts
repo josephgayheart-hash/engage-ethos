@@ -4,6 +4,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import type { InstitutionalConfig } from '@/types/uplaybook';
 import type { Json } from '@/integrations/supabase/types';
 
+export type ProfileType = 'university' | 'college' | 'division' | 'unit' | 'department';
+
 export interface InstitutionalProfile {
   id: string;
   name: string;
@@ -11,6 +13,8 @@ export interface InstitutionalProfile {
   createdAt: string;
   updatedAt: string;
   createdByUserId?: string;
+  parentProfileId?: string | null;
+  profileType: ProfileType;
 }
 
 const createEmptyConfig = (): InstitutionalConfig => ({
@@ -134,6 +138,8 @@ export function useInstitutionalProfiles() {
           createdAt: p.created_at,
           updatedAt: p.updated_at,
           createdByUserId: p.created_by_user_id,
+          parentProfileId: p.parent_profile_id,
+          profileType: (p.profile_type || 'university') as ProfileType,
         }))
       );
     } catch (error) {
@@ -148,7 +154,12 @@ export function useInstitutionalProfiles() {
     fetchProfiles();
   }, [fetchProfiles]);
 
-  const createProfile = useCallback(async (name: string, config?: InstitutionalConfig): Promise<InstitutionalProfile | null> => {
+  const createProfile = useCallback(async (
+    name: string, 
+    config?: InstitutionalConfig,
+    parentProfileId?: string | null,
+    profileType: ProfileType = 'university'
+  ): Promise<InstitutionalProfile | null> => {
     if (!user || !tenant?.id) return null;
 
     try {
@@ -159,6 +170,8 @@ export function useInstitutionalProfiles() {
           created_by_user_id: user.id,
           name,
           config: JSON.parse(JSON.stringify(config || createEmptyConfig())) as Json,
+          parent_profile_id: parentProfileId || null,
+          profile_type: profileType,
         }])
         .select()
         .single();
@@ -172,6 +185,8 @@ export function useInstitutionalProfiles() {
         createdAt: data.created_at,
         updatedAt: data.updated_at,
         createdByUserId: data.created_by_user_id,
+        parentProfileId: data.parent_profile_id,
+        profileType: (data.profile_type || 'university') as ProfileType,
       };
 
       setProfiles(prev => [newProfile, ...prev]);
@@ -181,6 +196,23 @@ export function useInstitutionalProfiles() {
       return null;
     }
   }, [user, tenant?.id]);
+
+  // Get children of a profile
+  const getChildProfiles = useCallback((parentId: string): InstitutionalProfile[] => {
+    return profiles.filter(p => p.parentProfileId === parentId);
+  }, [profiles]);
+
+  // Get parent of a profile
+  const getParentProfile = useCallback((profileId: string): InstitutionalProfile | undefined => {
+    const profile = profiles.find(p => p.id === profileId);
+    if (!profile?.parentProfileId) return undefined;
+    return profiles.find(p => p.id === profile.parentProfileId);
+  }, [profiles]);
+
+  // Get root (university) profiles only
+  const getRootProfiles = useCallback((): InstitutionalProfile[] => {
+    return profiles.filter(p => !p.parentProfileId);
+  }, [profiles]);
 
   const updateProfile = useCallback(async (id: string, updates: Partial<Pick<InstitutionalProfile, 'name' | 'config'>>) => {
     try {
@@ -220,7 +252,11 @@ export function useInstitutionalProfiles() {
     }
   }, []);
 
-  const duplicateProfile = useCallback(async (id: string, newName: string): Promise<InstitutionalProfile | null> => {
+  const duplicateProfile = useCallback(async (
+    id: string, 
+    newName: string,
+    asSubUnit?: { parentProfileId: string; profileType: ProfileType }
+  ): Promise<InstitutionalProfile | null> => {
     const original = profiles.find(p => p.id === id);
     if (!original || !user || !tenant?.id) return null;
 
@@ -232,6 +268,8 @@ export function useInstitutionalProfiles() {
           created_by_user_id: user.id,
           name: newName,
           config: JSON.parse(JSON.stringify(original.config)) as Json,
+          parent_profile_id: asSubUnit?.parentProfileId || original.parentProfileId || null,
+          profile_type: asSubUnit?.profileType || original.profileType,
         }])
         .select()
         .single();
@@ -245,6 +283,8 @@ export function useInstitutionalProfiles() {
         createdAt: data.created_at,
         updatedAt: data.updated_at,
         createdByUserId: data.created_by_user_id,
+        parentProfileId: data.parent_profile_id,
+        profileType: (data.profile_type || 'university') as ProfileType,
       };
 
       setProfiles(prev => [newProfile, ...prev]);
@@ -267,6 +307,9 @@ export function useInstitutionalProfiles() {
     deleteProfile,
     duplicateProfile,
     getProfile,
+    getChildProfiles,
+    getParentProfile,
+    getRootProfiles,
     hasProfiles: profiles.length > 0,
     refreshProfiles: fetchProfiles,
   };

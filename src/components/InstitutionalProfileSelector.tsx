@@ -4,7 +4,9 @@ import {
   SelectContent, 
   SelectItem, 
   SelectTrigger, 
-  SelectValue 
+  SelectValue,
+  SelectGroup,
+  SelectLabel
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,10 +16,14 @@ import {
   Building2, 
   Settings, 
   ChevronRight,
-  Sparkles
+  Sparkles,
+  GraduationCap,
+  Layers,
+  Building,
+  Briefcase
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useInstitutionalProfiles, type InstitutionalProfile } from "@/hooks/useInstitutionalProfiles";
+import { useInstitutionalProfiles, type InstitutionalProfile, type ProfileType } from "@/hooks/useInstitutionalProfiles";
 import { useAuth } from "@/contexts/AuthContext";
 import type { InstitutionalConfig } from "@/types/uplaybook";
 
@@ -27,12 +33,20 @@ interface InstitutionalProfileSelectorProps {
   compact?: boolean;
 }
 
+const PROFILE_TYPE_ICONS: Record<ProfileType, React.ReactNode> = {
+  university: <Building2 className="w-3.5 h-3.5" />,
+  college: <GraduationCap className="w-3.5 h-3.5" />,
+  division: <Layers className="w-3.5 h-3.5" />,
+  unit: <Building className="w-3.5 h-3.5" />,
+  department: <Briefcase className="w-3.5 h-3.5" />,
+};
+
 export function InstitutionalProfileSelector({ 
   selectedProfileId, 
   onProfileChange,
   compact = false 
 }: InstitutionalProfileSelectorProps) {
-  const { profiles, getProfile } = useInstitutionalProfiles();
+  const { profiles, getProfile, getRootProfiles, getChildProfiles } = useInstitutionalProfiles();
   const { tenant } = useAuth();
   
   const handleChange = (value: string) => {
@@ -46,21 +60,17 @@ export function InstitutionalProfileSelector({
 
   const selectedProfile = selectedProfileId ? getProfile(selectedProfileId) : null;
 
-  const getProfileSummary = (profile: InstitutionalProfile) => {
-    const parts: string[] = [];
-    if (profile.config.institutionName) parts.push(profile.config.institutionName);
-    if (profile.config.mascot) parts.push(profile.config.mascot);
-    return parts.length > 0 ? parts.join(' • ') : 'Custom configuration';
-  };
-
   // Get initials for avatar fallback
   const getInitials = (name: string) => {
     return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
   };
 
   // Use tenant logo or profile-specific info
-  const logoUrl = tenant?.logo_url;
-  const institutionName = selectedProfile?.config?.institutionName || tenant?.institution_name;
+  const logoUrl = selectedProfile?.config?.logoUrl || tenant?.logo_url;
+  const institutionName = selectedProfile?.config?.institutionName || selectedProfile?.config?.unitName || tenant?.institution_name;
+
+  // Organize profiles hierarchically
+  const rootProfiles = getRootProfiles();
 
   if (profiles.length === 0) {
     return (
@@ -80,6 +90,30 @@ export function InstitutionalProfileSelector({
       </div>
     );
   }
+
+  // Render profile item with proper hierarchy indentation
+  const renderProfileItem = (profile: InstitutionalProfile, depth: number = 0) => {
+    const children = getChildProfiles(profile.id);
+    const displayName = profile.config.unitName || profile.name;
+    const typeIcon = PROFILE_TYPE_ICONS[profile.profileType];
+    
+    return (
+      <div key={profile.id}>
+        <SelectItem value={profile.id}>
+          <div className="flex items-center gap-2" style={{ paddingLeft: `${depth * 12}px` }}>
+            <span className="text-muted-foreground">{typeIcon}</span>
+            <span className="font-medium">{displayName}</span>
+            {profile.profileType !== 'university' && (
+              <Badge variant="outline" className="text-[10px] h-4 px-1">
+                {profile.profileType}
+              </Badge>
+            )}
+          </div>
+        </SelectItem>
+        {children.map(child => renderProfileItem(child, depth + 1))}
+      </div>
+    );
+  };
 
   return (
     <div className={`space-y-2 ${compact ? '' : 'p-4 rounded-lg border border-border bg-card'}`}>
@@ -104,18 +138,7 @@ export function InstitutionalProfileSelector({
           <SelectItem value="none">
             <span className="text-muted-foreground">No profile (generic)</span>
           </SelectItem>
-          {profiles.map(profile => (
-            <SelectItem key={profile.id} value={profile.id}>
-              <div className="flex items-center gap-2">
-                <span className="font-medium">{profile.name}</span>
-                {profile.config.institutionName && (
-                  <span className="text-xs text-muted-foreground">
-                    — {profile.config.institutionName}
-                  </span>
-                )}
-              </div>
-            </SelectItem>
-          ))}
+          {rootProfiles.map(profile => renderProfileItem(profile))}
         </SelectContent>
       </Select>
 
@@ -133,18 +156,20 @@ export function InstitutionalProfileSelector({
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-3 h-3 text-secondary shrink-0" />
+              <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[selectedProfile.profileType]}</span>
               <p className="text-sm font-medium text-foreground truncate">
-                {selectedProfile.name}
+                {selectedProfile.config.unitName || selectedProfile.name}
               </p>
             </div>
             <p className="text-xs text-muted-foreground truncate">
-              {institutionName || 'Custom configuration'}
+              {selectedProfile.profileType !== 'university' 
+                ? `${selectedProfile.profileType.charAt(0).toUpperCase() + selectedProfile.profileType.slice(1)} • ${selectedProfile.config.institutionName || ''}`
+                : selectedProfile.config.institutionName || 'Custom configuration'}
               {selectedProfile.config.mascot && ` • ${selectedProfile.config.mascot}`}
             </p>
           </div>
           
-          {selectedProfile.config.mascot && (
+          {selectedProfile.config.mascot && selectedProfile.profileType === 'university' && (
             <Badge variant="outline" className="text-xs h-5 shrink-0 hidden sm:flex">
               {selectedProfile.config.mascot}
             </Badge>
