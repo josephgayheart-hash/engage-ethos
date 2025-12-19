@@ -340,17 +340,24 @@ const PlaygroundPage = () => {
 
         {/* Main Chat Area */}
         <Card className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative">
-          {/* Sidebar toggle button - always visible on desktop when collapsed */}
+          {/* Sidebar toggle tab - visible when collapsed */}
           {!showSidebar && (
-            <Button
-              variant="ghost"
-              size="icon"
+            <button
               onClick={() => setShowSidebar(true)}
-              className="absolute left-2 top-2 z-30 h-8 w-8 hidden md:flex"
+              className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-30 
+                         flex-col items-center gap-1 px-1.5 py-3 
+                         bg-muted hover:bg-primary/10 border border-l-0 border-border 
+                         rounded-r-lg shadow-sm transition-all duration-200 
+                         hover:px-2 group"
               title="Show conversation history"
             >
-              <PanelLeft className="w-4 h-4" />
-            </Button>
+              <PanelLeft className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+              <span className="text-[10px] font-medium text-muted-foreground group-hover:text-primary 
+                             writing-mode-vertical rotate-180 transition-colors"
+                    style={{ writingMode: 'vertical-rl' }}>
+                History
+              </span>
+            </button>
           )}
 
           {/* Conversation sidebar */}
