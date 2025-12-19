@@ -6,9 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
+import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { CreateTemplateDialog } from "@/components/library/CreateTemplateDialog";
 import type { SavedMessage, LibraryFilters, SortOption } from "@/types/library";
 import { 
@@ -28,7 +30,8 @@ import {
   Library,
   Calendar,
   User,
-  ChevronRight
+  ChevronRight,
+  Building2
 } from "lucide-react";
 
 const channelIcons = {
@@ -43,6 +46,7 @@ const PersonalLibrary = () => {
   const navigate = useNavigate();
   const { messages, deleteMessage, duplicateMessage, exportMessage, filterMessages } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
+  const { getProfileHierarchy } = useInstitutionalProfiles();
   const [filters, setFilters] = useState<LibraryFilters>({ search: '' });
   const [sort, setSort] = useState<SortOption>('newest');
   const [showFilters, setShowFilters] = useState(false);
@@ -265,8 +269,44 @@ const PersonalLibrary = () => {
                           <Badge variant="secondary">{message.audience}</Badge>
                           <Badge variant="outline">{message.moment}</Badge>
                           {message.domain && <Badge variant="outline">{message.domain}</Badge>}
-                          {message.institutionalProfileName && (
+                          {/* Show profile hierarchy if available */}
+                          {message.institutionalProfileId && (() => {
+                            const hierarchy = getProfileHierarchy(message.institutionalProfileId);
+                            if (hierarchy.profiles.length > 0) {
+                              return (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Badge variant="default" className="bg-primary/10 text-primary border-primary/20 flex items-center gap-1">
+                                      <Building2 className="w-3 h-3" />
+                                      {hierarchy.profiles.length > 1 
+                                        ? `${hierarchy.profiles[0].name} > ${hierarchy.profiles[hierarchy.profiles.length - 1].name}`
+                                        : hierarchy.profiles[0].name
+                                      }
+                                    </Badge>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="bottom" className="max-w-xs">
+                                    <div className="text-xs">
+                                      <p className="font-medium mb-1">Profile Hierarchy</p>
+                                      <div className="flex items-center flex-wrap gap-0.5">
+                                        {hierarchy.profiles.map((profile, idx) => (
+                                          <span key={profile.id} className="flex items-center">
+                                            <span>{profile.name}</span>
+                                            {idx < hierarchy.profiles.length - 1 && (
+                                              <ChevronRight className="w-3 h-3 mx-0.5" />
+                                            )}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </TooltipContent>
+                                </Tooltip>
+                              );
+                            }
+                            return null;
+                          })()}
+                          {!message.institutionalProfileId && message.institutionalProfileName && (
                             <Badge variant="default" className="bg-primary/10 text-primary border-primary/20">
+                              <Building2 className="w-3 h-3 mr-1" />
                               {message.institutionalProfileName}
                             </Badge>
                           )}
