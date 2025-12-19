@@ -70,6 +70,10 @@ export function ContentDNAIndicator({
   const hasContentDNA = Boolean(contentDNA?.voiceAnalysis);
   const hasCustomInstructions = Boolean(contentDNA?.customInstructions);
   const voiceAnalysis = contentDNA?.voiceAnalysis;
+  
+  // Determine if DNA is inherited from a parent profile
+  const isInherited = contentDNA?.sourceProfileId && contentDNA?.sourceProfileId !== selectedProfileId;
+  const sourceDisplayName = contentDNA?.sourceProfileName || tenant?.institution_name;
 
   // If no Content DNA exists at all, show setup prompt
   if (!isLoading && !hasContentDNA) {
@@ -179,14 +183,21 @@ export function ContentDNAIndicator({
               </div>
               <p className="text-xs text-muted-foreground truncate">
                 {enabled && hasContentDNA 
-                  ? (selectedProfileName
-                      ? `${selectedProfileName} brand voice applied`
-                      : tenant?.institution_name
-                        ? `${tenant.institution_name} brand voice applied`
-                        : "Your brand voice is being applied")
+                  ? isInherited
+                    ? `Using ${sourceDisplayName} DNA`
+                    : (selectedProfileName
+                        ? `${selectedProfileName} brand voice applied`
+                        : tenant?.institution_name
+                          ? `${tenant.institution_name} brand voice applied`
+                          : "Your brand voice is being applied")
                   : "Toggle to use your brand voice"
                 }
               </p>
+              {enabled && hasContentDNA && isInherited && (
+                <p className="text-[10px] text-amber-600 truncate">
+                  Inherited from parent profile
+                </p>
+              )}
             </div>
           </div>
           
@@ -218,21 +229,30 @@ export function ContentDNAIndicator({
             
             {/* Institution & Profile Info */}
             <div className="grid grid-cols-2 gap-3 text-xs">
-              {tenant?.institution_name && (
+              {selectedProfileName && (
+                <div className="flex items-start gap-2">
+                  <FileText className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" />
+                  <div>
+                    <span className="text-muted-foreground">Selected Profile</span>
+                    <p className="font-medium text-foreground">{selectedProfileName}</p>
+                  </div>
+                </div>
+              )}
+              {isInherited && sourceDisplayName && (
+                <div className="flex items-start gap-2">
+                  <Building2 className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />
+                  <div>
+                    <span className="text-amber-600">DNA Source (Parent)</span>
+                    <p className="font-medium text-foreground">{sourceDisplayName}</p>
+                  </div>
+                </div>
+              )}
+              {!isInherited && tenant?.institution_name && !selectedProfileName && (
                 <div className="flex items-start gap-2">
                   <Building2 className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" />
                   <div>
                     <span className="text-muted-foreground">Institution</span>
                     <p className="font-medium text-foreground">{tenant.institution_name}</p>
-                  </div>
-                </div>
-              )}
-              {selectedProfileName && (
-                <div className="flex items-start gap-2">
-                  <FileText className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" />
-                  <div>
-                    <span className="text-muted-foreground">Profile</span>
-                    <p className="font-medium text-foreground">{selectedProfileName}</p>
                   </div>
                 </div>
               )}
