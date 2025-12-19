@@ -83,6 +83,80 @@ const parseTemplateContent = (content: string, channel: string): ChannelDrafts[k
         body: bodyStart > -1 ? content.slice(bodyStart + 2) : content,
       };
     }
+    
+    // Parse talking points from formatted text
+    if (channel === 'talking-points') {
+      const lines = content.split('\n');
+      const result: any = {
+        context: '',
+        audience: '',
+        openingHook: '',
+        keyMessages: [],
+        supportingData: [],
+        anticipatedQuestions: [],
+        suggestedResponses: [],
+        transitionPhrases: [],
+        closingStatement: '',
+      };
+      
+      let currentSection = '';
+      let questionIndex = 0;
+      
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        
+        if (line.startsWith('CONTEXT:')) {
+          result.context = line.replace('CONTEXT:', '').trim();
+        } else if (line.startsWith('AUDIENCE:')) {
+          result.audience = line.replace('AUDIENCE:', '').trim();
+        } else if (line === 'OPENING HOOK:') {
+          currentSection = 'openingHook';
+        } else if (line === 'KEY TALKING POINTS:' || line.includes('KEY TALKING POINTS')) {
+          currentSection = 'keyMessages';
+        } else if (line === 'SUPPORTING DATA & EVIDENCE:' || line.includes('SUPPORTING DATA')) {
+          currentSection = 'supportingData';
+        } else if (line === 'ANTICIPATED Q&A:' || line.includes('ANTICIPATED Q')) {
+          currentSection = 'anticipatedQuestions';
+          questionIndex = 0;
+        } else if (line === 'TRANSITION PHRASES:' || line.includes('TRANSITION PHRASES')) {
+          currentSection = 'transitionPhrases';
+        } else if (line === 'CLOSING STATEMENT:' || line.includes('CLOSING STATEMENT')) {
+          currentSection = 'closingStatement';
+        } else if (line && !line.match(/^[=]+$/)) {
+          // Process content based on current section
+          if (currentSection === 'openingHook' && line.startsWith('"')) {
+            result.openingHook = line.replace(/^"|"$/g, '');
+          } else if (currentSection === 'keyMessages') {
+            const match = line.match(/^\d+\.\s*(.+)/);
+            if (match) {
+              result.keyMessages.push(match[1]);
+            }
+          } else if (currentSection === 'supportingData') {
+            const cleaned = line.replace(/^📊\s*/, '');
+            if (cleaned) result.supportingData.push(cleaned);
+          } else if (currentSection === 'anticipatedQuestions') {
+            if (line.startsWith('Q:')) {
+              result.anticipatedQuestions.push(line.replace('Q:', '').trim());
+            } else if (line.startsWith('A:')) {
+              result.suggestedResponses.push(line.replace('A:', '').trim());
+            }
+          } else if (currentSection === 'transitionPhrases') {
+            const match = line.match(/^→\s*"?(.+?)"?$/);
+            if (match) {
+              result.transitionPhrases.push(match[1]);
+            }
+          } else if (currentSection === 'closingStatement' && line.startsWith('"')) {
+            result.closingStatement = line.replace(/^"|"$/g, '');
+          }
+        }
+      }
+      
+      // If we found any meaningful content, return the parsed result
+      if (result.keyMessages.length > 0 || result.openingHook || result.context) {
+        return result;
+      }
+    }
+    
     return content;
   }
 };
