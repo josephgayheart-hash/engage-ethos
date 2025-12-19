@@ -362,6 +362,34 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
     }
   };
 
+  const resetContentDNA = async () => {
+    if (!analysis?.id) return;
+
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from('content_dna_analysis')
+        .delete()
+        .eq('id', analysis.id);
+
+      if (error) throw error;
+
+      setAnalysis(null);
+      toast({
+        title: 'Content DNA Reset',
+        description: 'Your Content DNA has been cleared. Upload new samples to start fresh.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to reset Content DNA',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return {
     samples,
     analysis,
@@ -372,6 +400,7 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
     deleteSample,
     analyzeVoice,
     updateCustomInstructions,
+    resetContentDNA,
     refetch: async () => {
       await Promise.all([fetchSamples(), fetchAnalysis()]);
     }
