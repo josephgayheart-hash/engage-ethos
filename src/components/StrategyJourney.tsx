@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
 import { useContentDNAForGeneration, type ContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { supabase } from "@/integrations/supabase/client";
+import { openInGoogleDocs, formatForGoogleDocs } from "@/lib/googleDocsExport";
 import { 
   Mail, 
   MessageSquare, 
@@ -27,7 +28,8 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
-  Megaphone
+  Megaphone,
+  ExternalLink
 } from "lucide-react";
 import type { StrategyJourney, Channel, StrategyPhase, JourneyTouchpoint, MessageContext, InstitutionalConfig } from "@/types/uplaybook";
 
@@ -198,6 +200,21 @@ function TouchpointCard({
     setTimeout(() => setCopiedChannel(null), 2000);
   };
 
+  const handleOpenInGoogleDocs = async (content: string, channel: string) => {
+    const formattedContent = formatForGoogleDocs(content, {
+      title: `${touchpoint.title} - ${formatChannelName(channel)}`,
+      channel: formatChannelName(channel),
+      generatedAt: new Date(),
+    });
+    const success = await openInGoogleDocs(formattedContent);
+    if (success) {
+      toast({
+        title: "Opening Google Docs",
+        description: "Content copied! Paste (Ctrl/Cmd+V) in the new document.",
+      });
+    }
+  };
+
   const toggleChannel = (channel: Channel) => {
     setSelectedChannels(prev => 
       prev.includes(channel) 
@@ -357,17 +374,28 @@ function TouchpointCard({
                               {channelIcons[msg.channel]}
                               {formatChannelName(msg.channel)}
                             </Badge>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleCopy(contentText, msg.channel)}
-                            >
-                              {copiedChannel === msg.channel ? (
-                                <Check className="w-4 h-4 text-green-500" />
-                              ) : (
-                                <Copy className="w-4 h-4" />
-                              )}
-                            </Button>
+                            <div className="flex gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleCopy(contentText, msg.channel)}
+                                title="Copy to clipboard"
+                              >
+                                {copiedChannel === msg.channel ? (
+                                  <Check className="w-4 h-4 text-green-500" />
+                                ) : (
+                                  <Copy className="w-4 h-4" />
+                                )}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleOpenInGoogleDocs(contentText, msg.channel)}
+                                title="Open in Google Docs"
+                              >
+                                <ExternalLink className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </div>
                           <Textarea 
                             value={contentText} 

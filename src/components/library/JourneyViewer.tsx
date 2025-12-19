@@ -10,6 +10,7 @@ import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { supabase } from "@/integrations/supabase/client";
 import { JourneyFlowDiagram } from "@/components/JourneyFlowDiagram";
+import { openInGoogleDocs, formatForGoogleDocs } from "@/lib/googleDocsExport";
 import { 
   Mail, 
   MessageSquare, 
@@ -32,7 +33,8 @@ import {
   Megaphone,
   Building2,
   Dna,
-  ChevronRight
+  ChevronRight,
+  ExternalLink
 } from "lucide-react";
 import type { StrategyJourney, Channel, StrategyPhase, JourneyTouchpoint, MessageContext, InstitutionalConfig } from "@/types/uplaybook";
 
@@ -493,7 +495,7 @@ export function JourneyViewer({
               <pre className="whitespace-pre-wrap text-sm font-sans">{generatedMessage}</pre>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button variant="outline" size="sm" onClick={handleCopy}>
                 {copied ? <Check className="w-4 h-4 mr-1" /> : <Copy className="w-4 h-4 mr-1" />}
                 {copied ? 'Copied!' : 'Copy'}
@@ -501,6 +503,27 @@ export function JourneyViewer({
               <Button variant="outline" size="sm" onClick={handleRegenerate} disabled={generatingIndex !== null}>
                 <RefreshCw className={`w-4 h-4 mr-1 ${generatingIndex !== null ? 'animate-spin' : ''}`} />
                 Regenerate
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={async () => {
+                  const formattedContent = formatForGoogleDocs(generatedMessage || '', {
+                    title: selectedTouchpoint?.title,
+                    channel: selectedTouchpoint?.channel ? formatChannelName(selectedTouchpoint.channel) : undefined,
+                    generatedAt: new Date(),
+                  });
+                  const success = await openInGoogleDocs(formattedContent);
+                  if (success) {
+                    toast({
+                      title: "Opening Google Docs",
+                      description: "Content copied! Paste (Ctrl/Cmd+V) in the new document.",
+                    });
+                  }
+                }}
+              >
+                <ExternalLink className="w-4 h-4 mr-1" />
+                Open in Google Docs
               </Button>
             </div>
           </div>
