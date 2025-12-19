@@ -2,7 +2,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { MessageCircle, Plus, Trash2 } from 'lucide-react';
+import { MessageCircle, Plus, Trash2, PanelLeftClose } from 'lucide-react';
 import type { PlaygroundConversation } from '@/hooks/usePlaygroundConversations';
 
 interface ConversationListProps {
@@ -11,6 +11,7 @@ interface ConversationListProps {
   onSelect: (conversation: PlaygroundConversation) => void;
   onNew: () => void;
   onDelete: (id: string) => void;
+  onCollapse?: () => void;
   isLoading?: boolean;
 }
 
@@ -20,15 +21,27 @@ export function ConversationList({
   onSelect,
   onNew,
   onDelete,
+  onCollapse,
   isLoading
 }: ConversationListProps) {
   return (
     <div className="flex flex-col h-full border-r bg-muted/30">
-      <div className="p-3 border-b">
-        <Button onClick={onNew} className="w-full" size="sm">
+      <div className="p-3 border-b flex items-center gap-2">
+        <Button onClick={onNew} className="flex-1" size="sm">
           <Plus className="w-4 h-4 mr-2" />
-          New Conversation
+          New Chat
         </Button>
+        {onCollapse && (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onCollapse}
+            className="shrink-0 h-8 w-8"
+            title="Hide sidebar"
+          >
+            <PanelLeftClose className="w-4 h-4" />
+          </Button>
+        )}
       </div>
       
       <ScrollArea className="flex-1">
@@ -58,11 +71,11 @@ export function ConversationList({
                 >
                   <div className="flex items-start gap-2">
                     <MessageCircle className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <p className="text-sm font-medium truncate max-w-[160px]" title={conv.title}>
                         {conv.title}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground truncate">
                         {formatDistanceToNow(new Date(conv.updated_at), { addSuffix: true })}
                       </p>
                     </div>

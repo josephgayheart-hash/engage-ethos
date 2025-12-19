@@ -74,7 +74,7 @@ export function Header() {
             className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
           >
             <Bot className="w-4 h-4" />
-            <span className="hidden sm:inline">AI Assistant</span>
+            <span className="hidden sm:inline">Copywriter</span>
           </Link>
           <Link
             to="/library" 

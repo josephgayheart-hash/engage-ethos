@@ -18,7 +18,7 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    console.log("Playground chat request received");
+    console.log("Playground chat request received (streaming)");
     console.log("Has institutional config:", !!institutionalConfig);
     console.log("Has content DNA:", !!contentDNA);
     console.log("Has profile config:", !!profileConfig);
@@ -155,7 +155,7 @@ ${profileInstructions}
       { role: "user", content: message }
     ];
 
-    console.log("Calling AI gateway with gemini-2.5-pro...");
+    console.log("Calling AI gateway with streaming...");
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -164,8 +164,9 @@ ${profileInstructions}
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        model: "google/gemini-2.5-flash",
         messages: conversationMessages,
+        stream: true,
       }),
     });
 
@@ -189,17 +190,11 @@ ${profileInstructions}
       throw new Error(`AI gateway error: ${response.status}`);
     }
 
-    const data = await response.json();
-    const generatedResponse = data.choices?.[0]?.message?.content;
+    console.log("Streaming response back to client");
 
-    if (!generatedResponse) {
-      throw new Error("No response generated");
-    }
-
-    console.log("Playground chat response generated successfully");
-
-    return new Response(JSON.stringify({ response: generatedResponse }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    // Return the stream directly
+    return new Response(response.body, {
+      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
   } catch (error) {
     console.error("Error in playground chat:", error);

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Card } from "@/components/ui/card";
@@ -14,8 +14,7 @@ import { ChatInterface } from "@/components/playground/ChatInterface";
 import { ContextSelector } from "@/components/playground/ContextSelector";
 import { 
   ArrowLeft, 
-  MessageCircle, 
-  PanelLeftClose,
+  PenTool, 
   PanelLeft
 } from "lucide-react";
 
@@ -47,6 +46,7 @@ const PlaygroundPage = () => {
   const [input, setInput] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
+  const [streamingContent, setStreamingContent] = useState('');
   
   // Context selections
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
@@ -128,13 +128,104 @@ const PlaygroundPage = () => {
     await createConversation('New Conversation', selectedProfileId, selectedDNAId);
   }, [createConversation, selectedProfileId, selectedDNAId]);
 
-  // Send message
+  // Stream chat helper
+  const streamChat = async (
+    messageContent: string,
+    conversationId: string,
+    onDelta: (chunk: string) => void,
+    onDone: () => void
+  ) => {
+    const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/playground-chat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({
+        message: messageContent,
+        history: messages.map(m => ({ role: m.role, content: m.content })),
+        institutionalConfig: null,
+        contentDNA,
+        profileConfig
+      }),
+    });
+
+    if (!resp.ok) {
+      if (resp.status === 429) {
+        throw new Error("Rate limit exceeded. Please try again in a moment.");
+      }
+      if (resp.status === 402) {
+        throw new Error("AI credits exhausted. Please add credits to continue.");
+      }
+      throw new Error("Failed to start stream");
+    }
+
+    if (!resp.body) throw new Error("No response body");
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let textBuffer = "";
+    let streamDone = false;
+
+    while (!streamDone) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      textBuffer += decoder.decode(value, { stream: true });
+
+      let newlineIndex: number;
+      while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+        let line = textBuffer.slice(0, newlineIndex);
+        textBuffer = textBuffer.slice(newlineIndex + 1);
+
+        if (line.endsWith("\r")) line = line.slice(0, -1);
+        if (line.startsWith(":") || line.trim() === "") continue;
+        if (!line.startsWith("data: ")) continue;
+
+        const jsonStr = line.slice(6).trim();
+        if (jsonStr === "[DONE]") {
+          streamDone = true;
+          break;
+        }
+
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+          if (content) onDelta(content);
+        } catch {
+          textBuffer = line + "\n" + textBuffer;
+          break;
+        }
+      }
+    }
+
+    // Final flush
+    if (textBuffer.trim()) {
+      for (let raw of textBuffer.split("\n")) {
+        if (!raw) continue;
+        if (raw.endsWith("\r")) raw = raw.slice(0, -1);
+        if (raw.startsWith(":") || raw.trim() === "") continue;
+        if (!raw.startsWith("data: ")) continue;
+        const jsonStr = raw.slice(6).trim();
+        if (jsonStr === "[DONE]") continue;
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+          if (content) onDelta(content);
+        } catch { /* ignore */ }
+      }
+    }
+
+    onDone();
+  };
+
+  // Send message with streaming
   const handleSend = useCallback(async () => {
     if (!input.trim() || isSending || !user) return;
 
     const messageContent = input.trim();
     setInput('');
     setIsSending(true);
+    setStreamingContent('');
 
     try {
       // Create conversation if none exists
@@ -157,22 +248,21 @@ const PlaygroundPage = () => {
         await updateConversationTitle(conversationId, generateTitle(messageContent));
       }
 
-      // Call AI
-      const { data, error } = await supabase.functions.invoke('playground-chat', {
-        body: {
-          message: messageContent,
-          history: messages.map(m => ({ role: m.role, content: m.content })),
-          institutionalConfig: null,
-          contentDNA,
-          profileConfig
+      // Stream the response
+      let fullResponse = '';
+      await streamChat(
+        messageContent,
+        conversationId,
+        (chunk) => {
+          fullResponse += chunk;
+          setStreamingContent(fullResponse);
+        },
+        async () => {
+          // Save final message
+          await addMessage(conversationId!, 'assistant', fullResponse);
+          setStreamingContent('');
         }
-      });
-
-      if (error) throw error;
-      if (data.error) throw new Error(data.error);
-
-      // Add assistant message
-      await addMessage(conversationId, 'assistant', data.response);
+      );
     } catch (error) {
       console.error("Chat error:", error);
       toast({
@@ -180,6 +270,7 @@ const PlaygroundPage = () => {
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to get response. Please try again.",
       });
+      setStreamingContent('');
     } finally {
       setIsSending(false);
     }
@@ -215,14 +306,14 @@ const PlaygroundPage = () => {
               Home
             </Link>
             <span>/</span>
-            <span className="text-foreground">AI Assistant</span>
+            <span className="text-foreground">Copywriter</span>
           </div>
 
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
               <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
-                <MessageCircle className="w-7 h-7 text-pillar-susceptibility" />
-                AI Messaging Assistant
+                <PenTool className="w-7 h-7 text-pillar-susceptibility" />
+                Copywriter
               </h1>
               <p className="text-muted-foreground mt-1">
                 Create, review, and strategize communications with your institutional voice
@@ -244,38 +335,43 @@ const PlaygroundPage = () => {
                 disabled={isSending}
               />
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowSidebar(!showSidebar)}
-              className="shrink-0 md:hidden"
-            >
-              {showSidebar ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeft className="w-4 h-4" />}
-              <span className="ml-2 text-xs">History</span>
-            </Button>
           </div>
         </div>
 
         {/* Main Chat Area */}
         <Card className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative">
-          {/* Conversation sidebar - mobile overlay */}
+          {/* Sidebar toggle button - always visible on desktop when collapsed */}
+          {!showSidebar && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowSidebar(true)}
+              className="absolute left-2 top-2 z-30 h-8 w-8 hidden md:flex"
+              title="Show conversation history"
+            >
+              <PanelLeft className="w-4 h-4" />
+            </Button>
+          )}
+
+          {/* Conversation sidebar */}
           <div className={`
-            ${showSidebar ? 'translate-x-0' : '-translate-x-full'}
+            ${showSidebar ? 'translate-x-0' : '-translate-x-full md:hidden'}
             absolute inset-y-0 left-0 z-20 w-64 bg-card transition-transform duration-200
-            md:relative md:translate-x-0 md:block
+            md:relative md:translate-x-0 ${showSidebar ? 'md:block' : 'md:hidden'}
           `}>
             <ConversationList
               conversations={conversations}
               currentConversation={currentConversation}
               onSelect={(conv) => {
                 selectConversation(conv);
-                setShowSidebar(false);
+                if (window.innerWidth < 768) setShowSidebar(false);
               }}
               onNew={() => {
                 handleNewConversation();
-                setShowSidebar(false);
+                if (window.innerWidth < 768) setShowSidebar(false);
               }}
               onDelete={deleteConversation}
+              onCollapse={() => setShowSidebar(false)}
               isLoading={isLoading}
             />
           </div>
@@ -300,6 +396,7 @@ const PlaygroundPage = () => {
               hasContext={!!(selectedProfileId || selectedDNAId)}
               profileName={selectedProfile?.name}
               hasDNA={!!contentDNA}
+              streamingContent={streamingContent}
             />
           </div>
         </Card>

@@ -27,6 +27,7 @@ interface ChatInterfaceProps {
   hasContext: boolean;
   profileName?: string;
   hasDNA?: boolean;
+  streamingContent?: string;
 }
 
 const suggestedPrompts = [
@@ -61,7 +62,8 @@ export function ChatInterface({
   isLoadingMessages,
   hasContext,
   profileName,
-  hasDNA
+  hasDNA,
+  streamingContent
 }: ChatInterfaceProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -70,7 +72,7 @@ export function ChatInterface({
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, streamingContent]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -82,6 +84,22 @@ export function ChatInterface({
   const handleSuggestedPrompt = (prompt: string) => {
     onInputChange(prompt);
     textareaRef.current?.focus();
+  };
+
+  const renderMessageContent = (content: string) => {
+    return content.split('\n').map((line, i) => {
+      const parts = line.split(/(\*\*.*?\*\*)/g);
+      return (
+        <p key={i} className={i > 0 ? "mt-2" : ""}>
+          {parts.map((part, j) => {
+            if (part.startsWith('**') && part.endsWith('**')) {
+              return <strong key={j}>{part.slice(2, -2)}</strong>;
+            }
+            return part;
+          })}
+        </p>
+      );
+    });
   };
 
   return (
@@ -106,13 +124,13 @@ export function ChatInterface({
           <div className="flex items-center justify-center h-32">
             <RefreshCw className="w-5 h-5 animate-spin text-muted-foreground" />
           </div>
-        ) : messages.length === 0 ? (
+        ) : messages.length === 0 && !streamingContent ? (
           <div className="space-y-6">
             <div className="text-center py-8">
               <Bot className="w-12 h-12 mx-auto text-primary/60 mb-4" />
               <h3 className="text-lg font-medium mb-2">Start a conversation</h3>
               <p className="text-muted-foreground text-sm max-w-md mx-auto">
-                I'm your messaging assistant, informed by your institutional voice and Content DNA. 
+                I'm your copywriting assistant, informed by your institutional voice and Content DNA. 
                 I can help you create, review, and strategize communications.
               </p>
             </div>
@@ -168,19 +186,7 @@ export function ChatInterface({
                   )}
                 >
                   <div className="text-sm whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none">
-                    {message.content.split('\n').map((line, i) => {
-                      const parts = line.split(/(\*\*.*?\*\*)/g);
-                      return (
-                        <p key={i} className={i > 0 ? "mt-2" : ""}>
-                          {parts.map((part, j) => {
-                            if (part.startsWith('**') && part.endsWith('**')) {
-                              return <strong key={j}>{part.slice(2, -2)}</strong>;
-                            }
-                            return part;
-                          })}
-                        </p>
-                      );
-                    })}
+                    {renderMessageContent(message.content)}
                   </div>
                   <span className="text-xs opacity-60 mt-1 block">
                     {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -194,15 +200,34 @@ export function ChatInterface({
               </div>
             ))}
             
-            {isLoading && (
+            {/* Streaming response */}
+            {streamingContent && (
+              <div className="flex gap-3 justify-start">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Bot className="w-4 h-4 text-primary" />
+                </div>
+                <div className="max-w-[80%] bg-muted rounded-2xl px-4 py-3">
+                  <div className="text-sm whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none">
+                    {renderMessageContent(streamingContent)}
+                    <span className="inline-block w-2 h-4 bg-primary/60 animate-pulse ml-1" />
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Loading indicator when sending but not yet streaming */}
+            {isLoading && !streamingContent && (
               <div className="flex gap-3 justify-start">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                   <Bot className="w-4 h-4 text-primary" />
                 </div>
                 <div className="bg-muted rounded-2xl px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <RefreshCw className="w-4 h-4 animate-spin text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">Thinking...</span>
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
                   </div>
                 </div>
               </div>
