@@ -43,11 +43,12 @@ import type { InstitutionalConfig as InstitutionalConfigType, VoiceAnalysis } fr
 interface InstitutionalConfigProps {
   config: InstitutionalConfigType;
   onChange: (config: InstitutionalConfigType) => void;
+  profileId?: string;
 }
 
-export function InstitutionalConfig({ config, onChange }: InstitutionalConfigProps) {
+export function InstitutionalConfig({ config, onChange, profileId }: InstitutionalConfigProps) {
   const { toast } = useToast();
-  const { analysis, samples, isLoading: isContentDNALoading } = useContentDNA();
+  const { analysis, samples, isLoading: isContentDNALoading } = useContentDNA({ profileId });
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [sampleInput, setSampleInput] = useState('');
   const [inputs, setInputs] = useState({
@@ -763,7 +764,7 @@ export function InstitutionalConfig({ config, onChange }: InstitutionalConfigPro
                       </div>
                     </div>
                     <Button asChild size="sm">
-                      <Link to="/admin/content-dna">
+                      <Link to={profileId ? `/admin/content-dna?profileId=${profileId}` : "/admin/content-dna"}>
                         Open Content DNA
                         <ExternalLink className="w-4 h-4 ml-2" />
                       </Link>
@@ -805,7 +806,7 @@ export function InstitutionalConfig({ config, onChange }: InstitutionalConfigPro
                     </div>
                     
                     <Button asChild size="lg" className="gap-2">
-                      <Link to="/admin/content-dna">
+                      <Link to={profileId ? `/admin/content-dna?profileId=${profileId}` : "/admin/content-dna"}>
                         <Sparkles className="w-4 h-4" />
                         Configure Content DNA
                         <ExternalLink className="w-4 h-4" />

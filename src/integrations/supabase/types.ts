@@ -164,6 +164,7 @@ export type Database = {
           custom_instructions: string | null
           id: string
           last_analyzed_at: string | null
+          profile_id: string | null
           sample_count: number
           tenant_id: string
           updated_at: string
@@ -174,6 +175,7 @@ export type Database = {
           custom_instructions?: string | null
           id?: string
           last_analyzed_at?: string | null
+          profile_id?: string | null
           sample_count?: number
           tenant_id: string
           updated_at?: string
@@ -184,12 +186,20 @@ export type Database = {
           custom_instructions?: string | null
           id?: string
           last_analyzed_at?: string | null
+          profile_id?: string | null
           sample_count?: number
           tenant_id?: string
           updated_at?: string
           voice_analysis?: Json
         }
         Relationships: [
+          {
+            foreignKeyName: "content_dna_analysis_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "institutional_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "content_dna_analysis_tenant_id_fkey"
             columns: ["tenant_id"]
