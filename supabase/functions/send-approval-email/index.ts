@@ -45,80 +45,94 @@ const handler = async (req: Request): Promise<Response> => {
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="color-scheme" content="light only">
+        <meta name="supported-color-schemes" content="light only">
+        <style>
+          :root { color-scheme: light only; }
+          @media (prefers-color-scheme: dark) {
+            body, table, td, div, p, a, span, h1, h2, h3 { 
+              background-color: #ffffff !important; 
+              color: #1e293b !important; 
+            }
+          }
+        </style>
       </head>
-      <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f0fdf4;">
-        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f0fdf4; padding: 40px 20px;">
+      <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f0fdf4 !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
+        <div style="display: none; max-height: 0; overflow: hidden;">Your UPlaybook.AI account has been approved - login credentials inside</div>
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f0fdf4 !important; padding: 40px 20px;" bgcolor="#f0fdf4">
           <tr>
             <td align="center">
-              <table width="100%" max-width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); overflow: hidden;">
-                <!-- Logo Header -->
+              <table width="100%" max-width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff !important; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); overflow: hidden;" bgcolor="#ffffff">
+                <!-- Logo Header with solid white background -->
                 <tr>
-                  <td style="background-color: #ffffff; padding: 32px 40px 16px 40px; text-align: center;">
-                    <img src="https://uplaybook.ai/uplaybook-logo.png" alt="UPlaybook.AI" style="height: 60px; width: auto;" />
+                  <td style="background-color: #ffffff !important; padding: 32px 40px 16px 40px; text-align: center;" bgcolor="#ffffff">
+                    <div style="background-color: #ffffff !important; padding: 16px; border-radius: 12px; display: inline-block;" bgcolor="#ffffff">
+                      <img src="https://uplaybook.ai/uplaybook-logo.png" alt="UPlaybook.AI" style="height: 60px; width: auto; display: block;" />
+                    </div>
                   </td>
                 </tr>
                 
                 <!-- Success Banner -->
                 <tr>
-                  <td style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); padding: 32px 40px; text-align: center;">
-                    <div style="font-size: 48px; margin-bottom: 12px;">🎉</div>
-                    <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">You're Approved!</h1>
-                    <p style="margin: 8px 0 0 0; color: #d1fae5; font-size: 16px;">Welcome to the UPlaybook.AI community</p>
+                  <td style="background-color: #059669 !important; padding: 32px 40px; text-align: center;" bgcolor="#059669">
+                    <div style="font-size: 48px; margin-bottom: 12px; background-color: #059669 !important;" bgcolor="#059669">🎉</div>
+                    <h1 style="margin: 0; color: #ffffff !important; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; background-color: #059669 !important;" bgcolor="#059669">You're Approved!</h1>
+                    <p style="margin: 8px 0 0 0; color: #d1fae5 !important; font-size: 16px; background-color: #059669 !important;" bgcolor="#059669">Welcome to the UPlaybook.AI community</p>
                   </td>
                 </tr>
                 
                 <!-- Body -->
                 <tr>
-                  <td style="padding: 40px;">
-                    <h2 style="margin: 0 0 16px 0; color: #1e293b; font-size: 24px; font-weight: 600;">Great news, ${firstName}!</h2>
-                    <p style="margin: 0 0 24px 0; color: #475569; font-size: 16px; line-height: 1.7;">
-                      Your request to join <strong style="color: #059669;">${institutionName}</strong> on UPlaybook.AI has been <strong style="color: #059669;">approved</strong>! 
+                  <td style="padding: 40px; background-color: #ffffff !important;" bgcolor="#ffffff">
+                    <h2 style="margin: 0 0 16px 0; color: #1e293b !important; font-size: 24px; font-weight: 600; background-color: #ffffff !important;" bgcolor="#ffffff">Great news, ${firstName}!</h2>
+                    <p style="margin: 0 0 24px 0; color: #475569 !important; font-size: 16px; line-height: 1.7; background-color: #ffffff !important;" bgcolor="#ffffff">
+                      Your request to join <strong style="color: #059669 !important;">${institutionName}</strong> on UPlaybook.AI has been <strong style="color: #059669 !important;">approved</strong>! 
                       We're thrilled to have you as part of our growing community of communication professionals.
                     </p>
                     
-                    <p style="margin: 0 0 24px 0; color: #475569; font-size: 16px; line-height: 1.7;">
-                      You've been set up as a <strong>${roleDisplayName}</strong>. Below are your login credentials to get started right away.
+                    <p style="margin: 0 0 24px 0; color: #475569 !important; font-size: 16px; line-height: 1.7; background-color: #ffffff !important;" bgcolor="#ffffff">
+                      You've been set up as a <strong style="color: #1e293b !important;">${roleDisplayName}</strong>. Below are your login credentials to get started right away.
                     </p>
                     
                     <!-- Credentials Box -->
-                    <div style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-radius: 12px; padding: 28px; margin: 28px 0; border: 1px solid #a7f3d0;">
-                      <h3 style="margin: 0 0 20px 0; color: #065f46; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center;">
-                        <span style="margin-right: 8px;">🔐</span> Your Login Credentials
+                    <div style="background-color: #ecfdf5 !important; border-radius: 12px; padding: 28px; margin: 28px 0; border: 1px solid #a7f3d0;" bgcolor="#ecfdf5">
+                      <h3 style="margin: 0 0 20px 0; color: #065f46 !important; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; background-color: #ecfdf5 !important;" bgcolor="#ecfdf5">
+                        🔐 Your Login Credentials
                       </h3>
                       
                       <div style="margin-bottom: 16px;">
-                        <p style="margin: 0 0 6px 0; color: #047857; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Email Address</p>
-                        <p style="margin: 0; color: #065f46; font-size: 16px; font-family: 'SF Mono', Monaco, 'Courier New', monospace; background-color: #ffffff; padding: 12px 14px; border-radius: 8px; border: 2px solid #10b981;">${email}</p>
+                        <p style="margin: 0 0 6px 0; color: #047857 !important; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; background-color: #ecfdf5 !important;" bgcolor="#ecfdf5">Email Address</p>
+                        <p style="margin: 0; color: #065f46 !important; font-size: 16px; font-family: 'SF Mono', Monaco, 'Courier New', monospace; background-color: #ffffff !important; padding: 12px 14px; border-radius: 8px; border: 2px solid #10b981;" bgcolor="#ffffff">${email}</p>
                       </div>
                       
                       <div>
-                        <p style="margin: 0 0 6px 0; color: #047857; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Temporary Password</p>
-                        <p style="margin: 0; color: #065f46; font-size: 16px; font-family: 'SF Mono', Monaco, 'Courier New', monospace; background-color: #ffffff; padding: 12px 14px; border-radius: 8px; border: 2px solid #10b981;">${temporaryPassword}</p>
+                        <p style="margin: 0 0 6px 0; color: #047857 !important; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; background-color: #ecfdf5 !important;" bgcolor="#ecfdf5">Temporary Password</p>
+                        <p style="margin: 0; color: #065f46 !important; font-size: 16px; font-family: 'SF Mono', Monaco, 'Courier New', monospace; background-color: #ffffff !important; padding: 12px 14px; border-radius: 8px; border: 2px solid #10b981;" bgcolor="#ffffff">${temporaryPassword}</p>
                       </div>
                     </div>
                     
                     <!-- CTA Button -->
-                    <div style="text-align: center; margin: 36px 0;">
-                      <a href="https://uplaybook.ai/login" style="display: inline-block; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-size: 18px; font-weight: 700; box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.4); transition: all 0.2s;">
+                    <div style="text-align: center; margin: 36px 0; background-color: #ffffff !important;" bgcolor="#ffffff">
+                      <a href="https://uplaybook.ai/login" style="display: inline-block; background-color: #059669 !important; color: #ffffff !important; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-size: 18px; font-weight: 700; box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.4);" bgcolor="#059669">
                         🚀 Start Using UPlaybook.AI
                       </a>
                     </div>
                     
                     <!-- What's Next Section -->
-                    <div style="background-color: #f8fafc; border-radius: 12px; padding: 24px; margin-top: 28px;">
-                      <h3 style="margin: 0 0 16px 0; color: #1e293b; font-size: 16px; font-weight: 600;">✨ What's next?</h3>
-                      <ul style="margin: 0; padding-left: 20px; color: #475569; font-size: 14px; line-height: 1.8;">
-                        <li>Log in with your credentials above</li>
-                        <li>Set your permanent password when prompted</li>
-                        <li>Explore the AI-powered message builder and evaluator</li>
-                        <li>Create your first communication campaign!</li>
+                    <div style="background-color: #f8fafc !important; border-radius: 12px; padding: 24px; margin-top: 28px;" bgcolor="#f8fafc">
+                      <h3 style="margin: 0 0 16px 0; color: #1e293b !important; font-size: 16px; font-weight: 600; background-color: #f8fafc !important;" bgcolor="#f8fafc">✨ What's next?</h3>
+                      <ul style="margin: 0; padding-left: 20px; color: #475569 !important; font-size: 14px; line-height: 1.8; background-color: #f8fafc !important;" bgcolor="#f8fafc">
+                        <li style="color: #475569 !important;">Log in with your credentials above</li>
+                        <li style="color: #475569 !important;">Set your permanent password when prompted</li>
+                        <li style="color: #475569 !important;">Explore the AI-powered message builder and evaluator</li>
+                        <li style="color: #475569 !important;">Create your first communication campaign!</li>
                       </ul>
                     </div>
                     
                     <!-- Security Notice -->
-                    <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px 20px; border-radius: 0 8px 8px 0; margin-top: 24px;">
-                      <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.5;">
-                        <strong>🔒 Security tip:</strong> You'll be prompted to change your password on first login. Please keep your credentials secure and don't share them with anyone.
+                    <div style="background-color: #fef3c7 !important; border-left: 4px solid #f59e0b; padding: 16px 20px; border-radius: 0 8px 8px 0; margin-top: 24px;" bgcolor="#fef3c7">
+                      <p style="margin: 0; color: #92400e !important; font-size: 14px; line-height: 1.5; background-color: #fef3c7 !important;" bgcolor="#fef3c7">
+                        <strong style="color: #92400e !important;">🔒 Security tip:</strong> You'll be prompted to change your password on first login. Please keep your credentials secure and don't share them with anyone.
                       </p>
                     </div>
                   </td>
@@ -126,14 +140,14 @@ const handler = async (req: Request): Promise<Response> => {
                 
                 <!-- Footer -->
                 <tr>
-                  <td style="background-color: #f8fafc; padding: 28px 40px; border-top: 1px solid #e2e8f0;">
-                    <p style="margin: 0 0 12px 0; color: #475569; font-size: 15px; text-align: center; font-weight: 500;">
+                  <td style="background-color: #f8fafc !important; padding: 28px 40px; border-top: 1px solid #e2e8f0;" bgcolor="#f8fafc">
+                    <p style="margin: 0 0 12px 0; color: #475569 !important; font-size: 15px; text-align: center; font-weight: 500; background-color: #f8fafc !important;" bgcolor="#f8fafc">
                       🌟 We're excited to have you on board!
                     </p>
-                    <p style="margin: 0; color: #94a3b8; font-size: 13px; text-align: center;">
+                    <p style="margin: 0; color: #94a3b8 !important; font-size: 13px; text-align: center; background-color: #f8fafc !important;" bgcolor="#f8fafc">
                       Questions? Just reply to this email and our team will help you out.
                     </p>
-                    <p style="margin: 16px 0 0 0; color: #94a3b8; font-size: 12px; text-align: center;">
+                    <p style="margin: 16px 0 0 0; color: #94a3b8 !important; font-size: 12px; text-align: center; background-color: #f8fafc !important;" bgcolor="#f8fafc">
                       — The UPlaybook.AI Team 💙
                     </p>
                   </td>
@@ -141,7 +155,7 @@ const handler = async (req: Request): Promise<Response> => {
               </table>
               
               <!-- Sub-footer -->
-              <p style="margin: 24px 0 0 0; color: #64748b; font-size: 12px; text-align: center;">
+              <p style="margin: 24px 0 0 0; color: #64748b !important; font-size: 12px; text-align: center; background-color: #f0fdf4 !important;" bgcolor="#f0fdf4">
                 This is an automated message from UPlaybook.AI confirming your account approval.
               </p>
             </td>
