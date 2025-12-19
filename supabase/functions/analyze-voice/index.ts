@@ -80,6 +80,7 @@ Analyze these samples and extract the Content DNA profile as JSON.`;
           { role: "system", content: ANALYSIS_PROMPT },
           { role: "user", content: userPrompt },
         ],
+        response_format: { type: "json_object" },
       }),
     });
 
@@ -119,11 +120,15 @@ Analyze these samples and extract the Content DNA profile as JSON.`;
 
     console.log("AI response received, parsing JSON...");
 
+    // Clean the content - strip markdown code blocks if present
     let jsonContent = content;
     const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (jsonMatch) {
       jsonContent = jsonMatch[1].trim();
     }
+    
+    // Remove control characters that can break JSON parsing (except valid whitespace)
+    jsonContent = jsonContent.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
 
     try {
       const result = JSON.parse(jsonContent);
@@ -136,6 +141,7 @@ Analyze these samples and extract the Content DNA profile as JSON.`;
     } catch (parseError) {
       console.error("Failed to parse AI response as JSON:", parseError);
       console.error("Raw content:", content);
+      console.error("Cleaned content:", jsonContent.substring(0, 500));
       return new Response(
         JSON.stringify({ error: "Failed to parse analysis results" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
