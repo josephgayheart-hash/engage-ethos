@@ -171,8 +171,8 @@ const TemplateDetailPage = () => {
         <main className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto text-center py-12">
             <BookOpen className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-            <h1 className="font-serif text-2xl font-bold mb-2">Template Not Found</h1>
-            <p className="text-muted-foreground mb-6">This template may have been removed or doesn't exist.</p>
+            <h1 className="font-serif text-2xl font-bold mb-2">Playbook Not Found</h1>
+            <p className="text-muted-foreground mb-6">This playbook may have been removed or doesn't exist.</p>
             <Link to="/shared-library">
               <Button>Back to University Library</Button>
             </Link>
@@ -331,12 +331,10 @@ const TemplateDetailPage = () => {
                     </div>
                     {/* Primary actions in title bar */}
                     <div className="flex items-center gap-2 flex-wrap">
-                      {isJourney && journeyData && (
-                        <Button onClick={handleRemixJourney} variant="secondary" size="sm">
-                          <GitBranch className="w-4 h-4 mr-2" />
-                          Remix Journey
-                        </Button>
-                      )}
+                      <Button onClick={handleRemixJourney} variant="secondary" size="sm">
+                        <GitBranch className="w-4 h-4 mr-2" />
+                        Remix
+                      </Button>
                       <Button onClick={handlePull} size="sm">
                         <Download className="w-4 h-4 mr-2" />
                         Pull to My Library

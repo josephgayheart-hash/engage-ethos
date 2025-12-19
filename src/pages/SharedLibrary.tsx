@@ -67,8 +67,8 @@ const SharedLibrary = () => {
   const handleCreateTemplate = (template: Omit<SharedTemplate, 'id' | 'createdAt' | 'updatedAt' | 'changeHistory'>) => {
     addTemplate(template);
     toast({
-      title: "Template submitted",
-      description: "Your template has been saved as a draft for review.",
+      title: "Playbook submitted",
+      description: "Your playbook has been saved as a draft for review.",
     });
   };
 
@@ -108,7 +108,7 @@ const SharedLibrary = () => {
                 University Library
               </h1>
               <p className="text-muted-foreground mt-1">
-                Organization-approved templates and playbooks
+                Organization-approved playbooks
               </p>
             </div>
             <div className="flex gap-2">
@@ -125,7 +125,7 @@ const SharedLibrary = () => {
               )}
               <Button onClick={() => setCreateOpen(true)} className="flex items-center gap-2">
                 <Plus className="w-4 h-4" />
-                <span className="hidden sm:inline">Create Template</span>
+                <span className="hidden sm:inline">Create Playbook</span>
               </Button>
             </div>
           </div>
@@ -147,7 +147,7 @@ const SharedLibrary = () => {
                       <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <Input
-                          placeholder="Search templates..."
+                          placeholder="Search playbooks..."
                           value={filters.search}
                           onChange={(e) => setFilters(f => ({ ...f, search: e.target.value }))}
                           className="pl-10"
@@ -240,7 +240,7 @@ const SharedLibrary = () => {
                 <TabsList className="flex-wrap h-auto gap-1 p-1">
                   <TabsTrigger value="all" className="flex items-center gap-1">
                     <BookOpen className="w-4 h-4" />
-                    All Templates
+                    All Playbooks
                   </TabsTrigger>
                   {playbooks.map(playbook => (
                     <TabsTrigger key={playbook} value={playbook}>
@@ -250,16 +250,16 @@ const SharedLibrary = () => {
                 </TabsList>
               </Tabs>
 
-              {/* Templates Grid */}
+              {/* Playbooks Grid */}
               {filteredTemplates.length === 0 ? (
                 <Card className="text-center py-12">
                   <CardContent>
                     <BookOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="font-serif text-lg font-semibold mb-2">No templates found</h3>
+                    <h3 className="font-serif text-lg font-semibold mb-2">No playbooks found</h3>
                     <p className="text-muted-foreground mb-4">
-                      Try adjusting your filters or create a new template.
+                      Try adjusting your filters or create a new playbook.
                     </p>
-                    <Button onClick={() => setCreateOpen(true)}>Create Template</Button>
+                    <Button onClick={() => setCreateOpen(true)}>Create Playbook</Button>
                   </CardContent>
                 </Card>
               ) : (
