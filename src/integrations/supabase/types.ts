@@ -341,6 +341,8 @@ export type Database = {
           created_by_user_id: string | null
           id: string
           name: string
+          parent_profile_id: string | null
+          profile_type: string
           tenant_id: string
           updated_at: string
         }
@@ -350,6 +352,8 @@ export type Database = {
           created_by_user_id?: string | null
           id?: string
           name: string
+          parent_profile_id?: string | null
+          profile_type?: string
           tenant_id: string
           updated_at?: string
         }
@@ -359,10 +363,19 @@ export type Database = {
           created_by_user_id?: string | null
           id?: string
           name?: string
+          parent_profile_id?: string | null
+          profile_type?: string
           tenant_id?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "institutional_profiles_parent_profile_id_fkey"
+            columns: ["parent_profile_id"]
+            isOneToOne: false
+            referencedRelation: "institutional_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "institutional_profiles_tenant_id_fkey"
             columns: ["tenant_id"]

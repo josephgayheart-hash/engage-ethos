@@ -295,11 +295,41 @@ export interface MapperResult {
   journey: StrategyJourney;
 }
 
+export type ProfileType = 'university' | 'college' | 'division' | 'unit' | 'department';
+
 export interface InstitutionalConfig {
   // Visual Branding
   logoUrl?: string;              // Profile-specific logo
   primaryColor?: string;         // Primary brand color (hex)
   accentColor?: string;          // Accent/secondary color (hex)
+  
+  // Unit/College/Division-Specific Leadership (conditional fields)
+  unitType?: ProfileType;        // Type of organizational unit
+  deanName?: string;             // For colleges
+  deanTitle?: string;            // e.g., "Dean of Engineering"
+  deanEmail?: string;
+  associateDeans?: string[];     // List of associate deans
+  directorName?: string;         // For units/centers
+  directorTitle?: string;
+  directorEmail?: string;
+  vicePresidentName?: string;    // For divisions
+  vicePresidentTitle?: string;
+  vicePresidentEmail?: string;
+  departmentChairName?: string;  // For departments
+  departmentChairTitle?: string;
+  departmentChairEmail?: string;
+  executiveAssistantName?: string;
+  executiveAssistantEmail?: string;
+  
+  // Unit-Specific Branding (can override parent)
+  unitName?: string;             // e.g., "College of Engineering"
+  unitAbbreviation?: string;     // e.g., "CoE"
+  unitSlogan?: string;
+  unitWebsite?: string;
+  unitMainPhone?: string;
+  unitMainEmail?: string;
+  unitLocation?: string;         // Building/room
+  unitSocialMedia?: string[];
   
   // Branding & Identity
   institutionName?: string;
