@@ -32,7 +32,7 @@ export function SaveToLibraryDialog({
   defaultName = "",
   contentType = "item",
 }: SaveToLibraryDialogProps) {
-  const [name, setName] = useState(defaultName);
+  const [name, setName] = useState("");
   const [savedId, setSavedId] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
 
@@ -53,7 +53,7 @@ export function SaveToLibraryDialog({
   };
 
   const handleClose = () => {
-    setName(defaultName);
+    setName("");
     setSavedId(null);
     setIsSaved(false);
     onOpenChange(false);
