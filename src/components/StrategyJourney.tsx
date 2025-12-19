@@ -7,7 +7,7 @@ import { AIIndicator } from "@/components/ui/ai-indicator";
 import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import { useToast } from "@/hooks/use-toast";
 import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
-import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
+import { useContentDNAForGeneration, type ContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Mail, 
@@ -29,13 +29,22 @@ import {
   ChevronUp,
   Megaphone
 } from "lucide-react";
-import type { StrategyJourney, Channel, StrategyPhase, JourneyTouchpoint, MessageContext } from "@/types/uplaybook";
+import type { StrategyJourney, Channel, StrategyPhase, JourneyTouchpoint, MessageContext, InstitutionalConfig } from "@/types/uplaybook";
 
 interface StrategyJourneyProps {
   journey: StrategyJourney;
   context: MessageContext;
   startDate?: string;
   endDate?: string;
+
+  /** Institutional profile selection from Journey Designer (prevents cross-institution bleed). */
+  selectedProfileId?: string | null;
+  selectedProfileName?: string;
+  institutionalConfig?: InstitutionalConfig | null;
+
+  /** Whether to apply Content DNA to generation (UI toggle). */
+  useContentDNA?: boolean;
+  contentDNA?: ContentDNAForGeneration | null;
 }
 
 interface GeneratedMessage {
@@ -383,12 +392,24 @@ function TouchpointCard({
 }
 
 
-export function StrategyJourneyDisplay({ journey, context, startDate, endDate }: StrategyJourneyProps) {
+export function StrategyJourneyDisplay({
+  journey,
+  context,
+  startDate,
+  endDate,
+  selectedProfileId,
+  institutionalConfig,
+  useContentDNA = true,
+  contentDNA: contentDNAOverride,
+}: StrategyJourneyProps) {
   const { toast } = useToast();
-  const { config: institutionalConfig } = useInstitutionalConfig();
-  const { contentDNA } = useContentDNAForGeneration();
+  const { config: fallbackInstitutionalConfig } = useInstitutionalConfig();
+  const { contentDNA: fetchedContentDNA } = useContentDNAForGeneration({ profileId: selectedProfileId });
   const [generatedMessages, setGeneratedMessages] = useState<GeneratedMessage[]>([]);
   const [isGenerating, setIsGenerating] = useState<number | null>(null);
+
+  const institutionalConfigForGeneration = institutionalConfig ?? fallbackInstitutionalConfig;
+  const contentDNAForGeneration = useContentDNA ? (contentDNAOverride ?? fetchedContentDNA) : null;
 
   // Calculate analytics from touchpoints
   const analytics = journey.touchpoints.reduce((acc, tp) => {
@@ -407,10 +428,10 @@ export function StrategyJourneyDisplay({ journey, context, startDate, endDate }:
           touchpoint,
           channels,
           context,
-          institutionalConfig,
+          institutionalConfig: institutionalConfigForGeneration,
           startDate,
           endDate,
-          contentDNA: contentDNA || undefined,
+          contentDNA: contentDNAForGeneration || undefined,
         }
       });
 

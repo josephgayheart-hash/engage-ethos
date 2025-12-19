@@ -1031,6 +1031,11 @@ const StrategyPage = () => {
                     context={context} 
                     startDate={startDate?.toISOString()}
                     endDate={endDate?.toISOString()}
+                    selectedProfileId={selectedProfileId}
+                    selectedProfileName={selectedProfileName}
+                    institutionalConfig={institutionalConfig}
+                    useContentDNA={useContentDNA}
+                    contentDNA={contentDNA}
                   />
                 </div>
               </div>
