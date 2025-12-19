@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { imageBase64, mimeType } = await req.json();
+    const { imageBase64, mimeType, isPdf } = await req.json();
 
     if (!imageBase64) {
       return new Response(
@@ -30,9 +30,33 @@ serve(async (req) => {
       );
     }
 
-    console.log('Extracting text from image using vision AI...');
+    const docType = isPdf ? 'PDF document' : 'image/screenshot';
+    console.log(`Extracting text from ${docType} using vision AI...`);
 
-    // Use Lovable AI with vision to extract text from the image
+    const prompt = isPdf 
+      ? `Please extract and transcribe ALL text content from this PDF document.
+
+Instructions:
+- Extract every piece of text from all visible pages
+- Preserve the document structure, headings, paragraphs, and lists
+- Include headers, body text, footers, page numbers, signatures, dates, etc.
+- If there are tables, preserve the structure as much as possible
+- If the PDF contains no readable text, respond with exactly: "NO_TEXT_FOUND"
+- Do not add any commentary or explanation - just output the extracted text
+
+Extracted text:`
+      : `Please extract and transcribe ALL text content from this image. This appears to be a screenshot or document image. 
+
+Instructions:
+- Extract every piece of text you can see, preserving the structure as much as possible
+- Include headers, body text, signatures, dates, etc.
+- If there are multiple sections, separate them with line breaks
+- If the image contains no readable text, respond with exactly: "NO_TEXT_FOUND"
+- Do not add any commentary or explanation - just output the extracted text
+
+Extracted text:`;
+
+    // Use Lovable AI with vision to extract text
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -47,27 +71,18 @@ serve(async (req) => {
             content: [
               {
                 type: 'text',
-                text: `Please extract and transcribe ALL text content from this image. This appears to be a screenshot or document image. 
-
-Instructions:
-- Extract every piece of text you can see, preserving the structure as much as possible
-- Include headers, body text, signatures, dates, etc.
-- If there are multiple sections, separate them with line breaks
-- If the image contains no readable text, respond with exactly: "NO_TEXT_FOUND"
-- Do not add any commentary or explanation - just output the extracted text
-
-Extracted text:`
+                text: prompt
               },
               {
                 type: 'image_url',
                 image_url: {
-                  url: `data:${mimeType || 'image/png'};base64,${imageBase64}`
+                  url: `data:${mimeType || 'application/pdf'};base64,${imageBase64}`
                 }
               }
             ]
           }
         ],
-        max_tokens: 4000,
+        max_tokens: 8000,
       }),
     });
 
