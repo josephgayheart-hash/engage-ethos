@@ -314,7 +314,7 @@ const TemplateDetailPage = () => {
           {/* Header Card */}
           <Card className="mb-6">
             <CardContent className="pt-6">
-              {/* Top row: Back button + Title */}
+              {/* Top row: Back button + Title + Primary Actions */}
               <div className="flex items-start gap-4 mb-4">
                 <Link to="/shared-library">
                   <Button variant="ghost" size="icon" className="shrink-0 -ml-2">
@@ -322,83 +322,44 @@ const TemplateDetailPage = () => {
                   </Button>
                 </Link>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-2 flex-wrap">
-                    <h1 className="font-serif text-base sm:text-lg md:text-xl font-bold text-foreground break-words">
-                      {template.title}
-                    </h1>
-                    <StatusBadge status={template.status} />
+                  <div className="flex items-center justify-between gap-3 mb-2 flex-wrap">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <h1 className="font-serif text-base sm:text-lg md:text-xl font-bold text-foreground break-words">
+                        {template.title}
+                      </h1>
+                      <StatusBadge status={template.status} />
+                    </div>
+                    {/* Primary actions in title bar */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {isJourney && journeyData && (
+                        <Button onClick={handleRemixJourney} variant="secondary" size="sm">
+                          <GitBranch className="w-4 h-4 mr-2" />
+                          Remix Journey
+                        </Button>
+                      )}
+                      <Button onClick={handlePull} size="sm">
+                        <Download className="w-4 h-4 mr-2" />
+                        Pull to My Library
+                      </Button>
+                    </div>
                   </div>
                   <p className="text-muted-foreground text-sm">{template.intentStatement}</p>
                 </div>
               </div>
 
-              {/* Meta info row with Remix button */}
-              <div className="flex items-center justify-between gap-4 mb-5 pl-10 flex-wrap">
-                <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
-                  <span className="flex items-center gap-1.5">
-                    <Users className="w-3.5 h-3.5" />
-                    {template.owner}
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5" />
-                    v{template.version}
-                  </span>
-                  <span>
-                    Updated {new Date(template.updatedAt).toLocaleDateString()}
-                  </span>
-                </div>
-                {/* Remix button under user/date info */}
-                {isJourney && journeyData && (
-                  <Button onClick={handleRemixJourney} variant="secondary" size="sm" className="shrink-0">
-                    <GitBranch className="w-4 h-4 mr-2" />
-                    Remix Journey
-                  </Button>
-                )}
-              </div>
-
-              {/* Action buttons row - primary actions */}
-              <div className="flex items-center gap-2 pl-10 flex-wrap border-t pt-4">
-                {!isEditing ? (
-                  <Button onClick={handleStartEdit} variant="outline" size="sm">
-                    <Pencil className="w-4 h-4 mr-2" />
-                    Edit
-                  </Button>
-                ) : (
-                  <>
-                    <Button onClick={handleSaveEdit} size="sm" className="bg-green-600 hover:bg-green-700">
-                      <Save className="w-4 h-4 mr-2" />
-                      Save Changes
-                    </Button>
-                    <Button onClick={handleCancelEdit} variant="ghost" size="sm">
-                      <X className="w-4 h-4 mr-2" />
-                      Cancel
-                    </Button>
-                  </>
-                )}
-                <Button onClick={handleCopy} variant="outline" size="sm">
-                  <Copy className="w-4 h-4 mr-2" />
-                  {copied ? "Copied!" : "Copy"}
-                </Button>
-                <Button onClick={handleOpenInGoogleDocs} variant="outline" size="sm">
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  Open in Google Docs
-                </Button>
-                {isJourney && journeyData && (
-                  <>
-                    <Button onClick={exportToPdf} variant="outline" size="sm" disabled={isExporting}>
-                      <FileDown className="w-4 h-4 mr-2" />
-                      {isExporting ? "Exporting..." : "Export PDF"}
-                    </Button>
-                    <Button onClick={printJourney} variant="outline" size="sm">
-                      <Printer className="w-4 h-4 mr-2" />
-                      Print
-                    </Button>
-                  </>
-                )}
-                <Button onClick={handlePull} size="sm">
-                  <Download className="w-4 h-4 mr-2" />
-                  Pull to My Library
-                </Button>
+              {/* Meta info row */}
+              <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap pl-10">
+                <span className="flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5" />
+                  {template.owner}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5" />
+                  v{template.version}
+                </span>
+                <span>
+                  Updated {new Date(template.updatedAt).toLocaleDateString()}
+                </span>
               </div>
             </CardContent>
           </Card>
@@ -440,33 +401,79 @@ const TemplateDetailPage = () => {
                   </CardContent>
                 </Card>
               ) : (
-                <Card className="overflow-hidden">
-                  <CardHeader className="bg-gradient-to-r from-primary/5 to-secondary/5 border-b">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <FileText className="w-5 h-5 text-primary" />
-                        {isEditing ? 'Edit Content' : 'Live Preview'}
-                      </CardTitle>
-                      {isEditing && (
-                        <Badge variant="secondary" className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                          <Pencil className="w-3 h-3 mr-1" />
-                          Editing
-                        </Badge>
-                      )}
-                    </div>
+                <Card className="card-elevated">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-secondary" />
+                      {isEditing ? 'Edit Content' : 'Live Preview'}
+                    </CardTitle>
                   </CardHeader>
-                  <CardContent className="pt-6">
+                  <CardContent className="space-y-4">
                     {isEditing ? (
-                      <Textarea
-                        value={editedContent}
-                        onChange={(e) => setEditedContent(e.target.value)}
-                        className="min-h-[300px] font-sans text-sm leading-relaxed resize-y"
-                        placeholder="Edit the content here..."
-                      />
+                      <>
+                        <Textarea
+                          value={editedContent}
+                          onChange={(e) => setEditedContent(e.target.value)}
+                          className="min-h-[300px] font-sans text-sm leading-relaxed resize-y"
+                          placeholder="Edit the content here..."
+                        />
+                        <div className="flex items-center gap-2">
+                          <Button onClick={handleSaveEdit} size="sm" className="bg-green-600 hover:bg-green-700">
+                            <Save className="w-4 h-4 mr-2" />
+                            Save Changes
+                          </Button>
+                          <Button onClick={handleCancelEdit} variant="ghost" size="sm">
+                            <X className="w-4 h-4 mr-2" />
+                            Cancel
+                          </Button>
+                        </div>
+                      </>
                     ) : (
-                      <div className="bg-card rounded-lg p-6 border border-border shadow-sm">
-                        <pre className="whitespace-pre-wrap text-sm font-sans leading-relaxed text-foreground">{displayContent}</pre>
-                      </div>
+                      <>
+                        <div className="relative p-4 bg-card border border-border rounded-lg">
+                          <div className="absolute top-2 right-2 flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={handleCopy}
+                              title="Copy to clipboard"
+                            >
+                              {copied ? (
+                                <CheckCircle className="w-4 h-4 text-green-600" />
+                              ) : (
+                                <Copy className="w-4 h-4" />
+                              )}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={handleOpenInGoogleDocs}
+                              title="Open in Google Docs"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          <p className="text-sm whitespace-pre-wrap pr-24">{displayContent}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button onClick={handleStartEdit} variant="outline" size="sm">
+                            <Pencil className="w-4 h-4 mr-2" />
+                            Edit
+                          </Button>
+                          {isJourney && journeyData && (
+                            <>
+                              <Button onClick={exportToPdf} variant="outline" size="sm" disabled={isExporting}>
+                                <FileDown className="w-4 h-4 mr-2" />
+                                {isExporting ? "Exporting..." : "Export PDF"}
+                              </Button>
+                              <Button onClick={printJourney} variant="outline" size="sm">
+                                <Printer className="w-4 h-4 mr-2" />
+                                Print
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </>
                     )}
                   </CardContent>
                 </Card>
