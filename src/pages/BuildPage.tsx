@@ -242,6 +242,46 @@ const BuildPage = () => {
     setBuilderResult(null);
   };
 
+  const formatTalkingPointsForLibrary = (tp: any): string => {
+    const keyMessages = Array.isArray(tp?.keyMessages) ? tp.keyMessages : [];
+    const supportingData = Array.isArray(tp?.supportingData) ? tp.supportingData : [];
+    const anticipatedQuestions = Array.isArray(tp?.anticipatedQuestions) ? tp.anticipatedQuestions : [];
+    const suggestedResponses = Array.isArray(tp?.suggestedResponses) ? tp.suggestedResponses : [];
+    const transitionPhrases = Array.isArray(tp?.transitionPhrases) ? tp.transitionPhrases : [];
+
+    let result = `EXECUTIVE TALKING POINTS\n${'='.repeat(40)}\n\n`;
+    if (tp?.context) result += `CONTEXT: ${tp.context}\n`;
+    if (tp?.audience) result += `AUDIENCE: ${tp.audience}\n\n`;
+    if (tp?.openingHook) result += `OPENING HOOK:\n"${tp.openingHook}"\n\n`;
+
+    if (keyMessages.length) {
+      result += `KEY TALKING POINTS:\n${keyMessages.map((m: string, i: number) => `${i + 1}. ${m}`).join('\n\n')}\n\n`;
+    }
+
+    if (supportingData.length) {
+      result += `SUPPORTING DATA & EVIDENCE:\n${supportingData.map((d: string) => `📊 ${d}`).join('\n')}\n\n`;
+    }
+
+    if (anticipatedQuestions.length || suggestedResponses.length) {
+      result += `ANTICIPATED Q&A:\n`;
+      const max = Math.max(anticipatedQuestions.length, suggestedResponses.length);
+      for (let i = 0; i < max; i++) {
+        const q = anticipatedQuestions[i];
+        const a = suggestedResponses[i];
+        if (q) result += `Q: ${q}\n`;
+        if (a) result += `A: ${a}\n`;
+        result += `\n`;
+      }
+    }
+
+    if (transitionPhrases.length) {
+      result += `TRANSITION PHRASES:\n${transitionPhrases.map((t: string) => `→ "${t}"`).join('\n')}\n\n`;
+    }
+
+    if (tp?.closingStatement) result += `CLOSING STATEMENT:\n"${tp.closingStatement}"`;
+    return result.trim();
+  };
+
   const handleSaveToLibraryClick = () => {
     if (!builderResult?.channelDrafts) return;
     setSaveToLibraryChannel(null); // null means save all channels as kit
@@ -262,7 +302,7 @@ const BuildPage = () => {
         if ('body' in content && 'cta' in content) return `[LANDING PAGE]\n${content.headline}\n${content.body}`;
         if ('headlines' in content) return `[SEARCH AD]\n${content.headlines.join(' | ')}`;
         if ('primaryText' in content) return `[SOCIAL AD]\n${content.headline}\n${content.primaryText}`;
-        if ('keyMessages' in content) return `[TALKING POINTS]\n${(content as { keyMessages: string[] }).keyMessages.join('\n• ')}`;
+        if ('keyMessages' in content) return `[TALKING POINTS]\n${formatTalkingPointsForLibrary(content)}`;
       }
       return '';
     }).filter(Boolean).join('\n\n---\n\n');
@@ -322,7 +362,7 @@ const BuildPage = () => {
           if ('body' in content && 'cta' in content) return `[LANDING PAGE]\n${content.headline}\n${content.body}`;
           if ('headlines' in content) return `[SEARCH AD]\n${content.headlines.join(' | ')}`;
           if ('primaryText' in content) return `[SOCIAL AD]\n${content.headline}\n${content.primaryText}`;
-          if ('keyMessages' in content) return `[TALKING POINTS]\n${(content as { keyMessages: string[] }).keyMessages.join('\n• ')}`;
+          if ('keyMessages' in content) return `[TALKING POINTS]\n${formatTalkingPointsForLibrary(content)}`;
         }
         return '';
       }).filter(Boolean).join('\n\n---\n\n');
