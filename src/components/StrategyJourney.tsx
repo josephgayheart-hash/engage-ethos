@@ -391,7 +391,7 @@ function TouchpointCard({
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleOpenInGoogleDocs(contentText, msg.channel)}
-                                title="Open in Google Docs"
+                                title="Copy into Google Docs"
                               >
                                 <ExternalLink className="w-4 h-4" />
                               </Button>

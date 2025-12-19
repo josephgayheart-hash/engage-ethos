@@ -523,7 +523,7 @@ export function JourneyViewer({
                 }}
               >
                 <ExternalLink className="w-4 h-4 mr-1" />
-                Open in Google Docs
+                Copy into Google Docs
               </Button>
             </div>
           </div>
