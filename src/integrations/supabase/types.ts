@@ -572,6 +572,93 @@ export type Database = {
           },
         ]
       }
+      playground_conversations: {
+        Row: {
+          content_dna_id: string | null
+          created_at: string
+          id: string
+          institutional_profile_id: string | null
+          tenant_id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content_dna_id?: string | null
+          created_at?: string
+          id?: string
+          institutional_profile_id?: string | null
+          tenant_id: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content_dna_id?: string | null
+          created_at?: string
+          id?: string
+          institutional_profile_id?: string | null
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playground_conversations_content_dna_id_fkey"
+            columns: ["content_dna_id"]
+            isOneToOne: false
+            referencedRelation: "content_dna_analysis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "playground_conversations_institutional_profile_id_fkey"
+            columns: ["institutional_profile_id"]
+            isOneToOne: false
+            referencedRelation: "institutional_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "playground_conversations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      playground_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          role: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          role: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playground_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "playground_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
