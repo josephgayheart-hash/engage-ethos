@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useContentDNA } from "@/hooks/useContentDNA";
 import { supabase } from "@/integrations/supabase/client";
 import { extractTextFromFile, getAcceptString } from "@/lib/documentParser";
+import { ConfigTextField } from "@/components/ui/config-text-field";
+import { 
+  QuickAddTerms, 
+  COMMON_ACADEMIC_TERMS, 
+  COMMON_GRADING_TERMS, 
+  COMMON_ENROLLMENT_TERMS 
+} from "@/components/config/QuickAddTerms";
 import { 
   X, 
   Plus, 
@@ -213,39 +220,18 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
     </div>
   );
 
-  // Component for text fields with local state to prevent glitchy typing
-  const TextField = ({ 
-    label, 
-    field, 
-    placeholder, 
-    hint 
-  }: { 
-    label: string; 
-    field: keyof InstitutionalConfigType; 
-    placeholder: string; 
-    hint?: string;
-  }) => {
-    const [localValue, setLocalValue] = useState((config[field] as string) || '');
-    
-    const handleBlur = () => {
-      if (localValue !== (config[field] as string || '')) {
-        onChange({ ...config, [field]: localValue });
-      }
-    };
+  // Callback for updating a single text field
+  const handleTextFieldUpdate = useCallback((fieldKey: string, value: string) => {
+    onChange({ ...config, [fieldKey]: value });
+  }, [config, onChange]);
 
-    return (
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">{label}</Label>
-        {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
-        <Input
-          value={localValue}
-          onChange={(e) => setLocalValue(e.target.value)}
-          onBlur={handleBlur}
-          placeholder={placeholder}
-        />
-      </div>
-    );
-  };
+  // Helper to add a term directly (used by QuickAddTerms)
+  const addTermDirectly = useCallback((field: keyof InstitutionalConfigType, term: string) => {
+    const currentArray = (config[field] as string[]) || [];
+    if (!currentArray.includes(term)) {
+      onChange({ ...config, [field]: [...currentArray, term] });
+    }
+  }, [config, onChange]);
 
   const renderTextField = (
     label: string,
@@ -253,7 +239,14 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
     placeholder: string,
     hint?: string
   ) => (
-    <TextField label={label} field={field} placeholder={placeholder} hint={hint} />
+    <ConfigTextField 
+      label={label} 
+      fieldKey={field}
+      value={(config[field] as string) || ''}
+      placeholder={placeholder} 
+      hint={hint}
+      onUpdate={handleTextFieldUpdate}
+    />
   );
 
   const hasConfig = Object.values(config).some(v => 
@@ -594,29 +587,50 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
             {renderTextField('Next Term Name', 'nextTermName', 'e.g., Fall 2025')}
           </div>
 
-          {renderArrayField(
-            'Academic Terms', 
-            'academicTerms', 
-            'academicTerm', 
-            'e.g., credit hours, full-time status, prerequisite',
-            'Common academic vocabulary at your institution'
-          )}
+          <div className="space-y-2">
+            {renderArrayField(
+              'Academic Terms', 
+              'academicTerms', 
+              'academicTerm', 
+              'e.g., credit hours, full-time status, prerequisite',
+              'Common academic vocabulary at your institution'
+            )}
+            <QuickAddTerms
+              terms={COMMON_ACADEMIC_TERMS}
+              currentValues={(config.academicTerms as string[]) || []}
+              onAdd={(term) => addTermDirectly('academicTerms', term)}
+            />
+          </div>
           
-          {renderArrayField(
-            'Grading Terms', 
-            'gradingTerms', 
-            'gradingTerm', 
-            'e.g., midterm grade, GPA, academic standing',
-            'Grading-related terminology'
-          )}
+          <div className="space-y-2">
+            {renderArrayField(
+              'Grading Terms', 
+              'gradingTerms', 
+              'gradingTerm', 
+              'e.g., midterm grade, GPA, academic standing',
+              'Grading-related terminology'
+            )}
+            <QuickAddTerms
+              terms={COMMON_GRADING_TERMS}
+              currentValues={(config.gradingTerms as string[]) || []}
+              onAdd={(term) => addTermDirectly('gradingTerms', term)}
+            />
+          </div>
           
-          {renderArrayField(
-            'Enrollment Terms', 
-            'enrollmentTerms', 
-            'enrollmentTerm', 
-            'e.g., add/drop period, waitlist, course load',
-            'Registration and enrollment language'
-          )}
+          <div className="space-y-2">
+            {renderArrayField(
+              'Enrollment Terms', 
+              'enrollmentTerms', 
+              'enrollmentTerm', 
+              'e.g., add/drop period, waitlist, course load',
+              'Registration and enrollment language'
+            )}
+            <QuickAddTerms
+              terms={COMMON_ENROLLMENT_TERMS}
+              currentValues={(config.enrollmentTerms as string[]) || []}
+              onAdd={(term) => addTermDirectly('enrollmentTerms', term)}
+            />
+          </div>
         </TabsContent>
 
         {/* Style Tab */}
