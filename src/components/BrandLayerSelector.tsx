@@ -350,19 +350,16 @@ function BrandPlatformTabs({
                 <TabsTrigger 
                   key={tab.id} 
                   value={tab.id}
-                  className="flex flex-col gap-0.5 py-2 px-2 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  className="flex flex-col gap-0.5 py-2 px-2 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground [&[data-state=active]_span]:text-primary-foreground"
                 >
                   <div className="flex items-center gap-1">
                     <Icon className="w-3 h-3" />
                     <span className="hidden sm:inline">{tab.label}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Badge 
-                      variant={tab.selected > 0 ? "default" : "outline"} 
-                      className="text-[10px] px-1.5 py-0 h-4"
-                    >
+                    <span className="text-[10px] px-1.5 py-0 h-4 rounded-full bg-background/20 text-inherit inline-flex items-center">
                       {tab.selected}/{tab.count}
-                    </Badge>
+                    </span>
                   </div>
                 </TabsTrigger>
               );
