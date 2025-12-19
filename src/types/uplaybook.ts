@@ -178,6 +178,7 @@ export interface MessageContext {
   audience?: AudienceType;
   cohort?: CohortContext;
   moment?: CommunicationMoment;
+  moments?: CommunicationMoment[]; // For multi-select moments
   channel?: Channel;
   channels?: Channel[]; // For multi-channel selection (strategy page)
   domain?: MessageDomain;
