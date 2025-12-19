@@ -37,7 +37,8 @@ import {
   X,
   Zap,
   AlertCircle,
-  ArrowLeft
+  ArrowLeft,
+  RefreshCw
 } from 'lucide-react';
 import { extractTextFromFile, getAcceptString } from '@/lib/documentParser';
 
@@ -81,7 +82,16 @@ export default function ContentDNAPage() {
     deleteSample,
     analyzeVoice,
     updateCustomInstructions,
+    resetContentDNA,
   } = useContentDNA({ profileId: profileIdFromUrl });
+  
+  const [isResetting, setIsResetting] = useState(false);
+  
+  const handleResetContentDNA = async () => {
+    setIsResetting(true);
+    await resetContentDNA();
+    setIsResetting(false);
+  };
 
   // Upload state
   const [textInput, setTextInput] = useState('');
@@ -422,7 +432,44 @@ export default function ContentDNAPage() {
           </Card>
         )}
 
-        {/* Instructional Text */}
+        {/* Reset Content DNA Banner - Shows when no samples but analysis exists */}
+        {samples.length === 0 && analysis && isAdmin && (
+          <Card className="mb-6 border-2 border-muted bg-muted/30">
+            <CardContent className="py-5">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-muted rounded-lg">
+                    <RefreshCw className="w-6 h-6 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">No Samples Remaining</h3>
+                    <p className="text-muted-foreground text-sm">
+                      All content samples have been removed. Reset your Content DNA to start fresh with new samples.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  onClick={handleResetContentDNA}
+                  disabled={isResetting}
+                  variant="outline"
+                >
+                  {isResetting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Resetting...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Reset & Start Fresh
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <Card className="mb-6 border-[hsl(220,13%,88%)] bg-gradient-to-r from-[hsl(222,47%,14%)] to-[hsl(222,47%,20%)] text-white">
           <CardContent className="py-5">
             <div className="flex items-start gap-4">
