@@ -36,7 +36,7 @@ interface ChannelPreviewProps {
   content: ChannelDrafts[keyof ChannelDrafts];
   onCopy: (text: string) => void;
   onContentChange?: (channel: Channel, content: ChannelDrafts[keyof ChannelDrafts]) => void;
-  onSaveToLibrary?: (channel: Channel, content: ChannelDrafts[keyof ChannelDrafts], contentText: string) => void;
+  onSaveToLibrary?: (channel: Channel, content: ChannelDrafts[keyof ChannelDrafts], contentText: string) => void | (() => void);
 }
 
 const channelIcons: Record<Channel, React.ReactNode> = {
@@ -125,7 +125,12 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
   // Separate action to save to library
   const handleSaveToLibrary = () => {
     if (onSaveToLibrary) {
-      onSaveToLibrary(channel, editedContent, getFullContent(editedContent));
+      // Support both the full signature and a simple callback
+      if (onSaveToLibrary.length === 0) {
+        (onSaveToLibrary as () => void)();
+      } else {
+        onSaveToLibrary(channel, editedContent, getFullContent(editedContent));
+      }
     }
   };
 

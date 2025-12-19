@@ -20,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { CreateTemplateDialog } from "@/components/library/CreateTemplateDialog";
+import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
 import { cn } from "@/lib/utils";
 import { 
   ArrowLeft, 
@@ -96,10 +97,11 @@ const BuildPage = () => {
   const [autoSave, setAutoSave] = useState(true);
   const [copiedChannel, setCopiedChannel] = useState<string | null>(null);
   const [submitToSharedOpen, setSubmitToSharedOpen] = useState(false);
+  const [saveToLibraryOpen, setSaveToLibraryOpen] = useState(false);
+  const [saveToLibraryChannel, setSaveToLibraryChannel] = useState<Channel | null>(null);
   const [draftToSubmit, setDraftToSubmit] = useState('');
   const [useContentDNA, setUseContentDNA] = useState(true);
   const resultsRef = useRef<HTMLDivElement>(null);
-
   const canProcess = context.audience && context.moment && selectedChannels.length > 0;
 
   const toggleChannel = (channel: Channel) => {
@@ -157,11 +159,14 @@ const BuildPage = () => {
     setBuilderResult(null);
   };
 
-  const handleSaveToLibrary = () => {
+  const handleSaveToLibraryClick = () => {
     if (!builderResult?.channelDrafts) return;
-    
-    const channelList = selectedChannels.join(', ');
-    const title = `${audienceLabels[context.audience || ''] || 'Message'} Kit - ${channelList}`;
+    setSaveToLibraryChannel(null); // null means save all channels as kit
+    setSaveToLibraryOpen(true);
+  };
+
+  const handleSaveToLibraryConfirm = (name: string): string | undefined => {
+    if (!builderResult?.channelDrafts) return undefined;
     
     // Serialize channel drafts to content for backwards compatibility
     const contentSummary = selectedChannels.map(ch => {
@@ -177,8 +182,8 @@ const BuildPage = () => {
       return '';
     }).filter(Boolean).join('\n\n---\n\n');
 
-    addMessage({
-      title,
+    const savedMessage = addMessage({
+      title: name,
       content: contentSummary,
       channels: selectedChannels,
       channelDrafts: builderResult.channelDrafts,
@@ -194,10 +199,7 @@ const BuildPage = () => {
       institutionalProfileName: selectedProfileName,
     });
 
-    toast({
-      title: "Saved to Personal Library",
-      description: "Your message kit has been saved.",
-    });
+    return savedMessage.id;
   };
 
   const handleSubmitToShared = () => {
@@ -232,14 +234,29 @@ const BuildPage = () => {
     });
   };
 
-  const handleSaveIndividualChannel = (channel: Channel, channelContent: ChannelDrafts[keyof ChannelDrafts], contentText: string) => {
-    const channelLabel = channelOptions.find(c => c.value === channel)?.label || channel;
-    const title = `${audienceLabels[context.audience || ''] || 'Message'} - ${channelLabel}`;
+  const handleSaveIndividualChannelClick = (channel: Channel) => {
+    setSaveToLibraryChannel(channel);
+    setSaveToLibraryOpen(true);
+  };
 
-    addMessage({
-      title,
+  const handleSaveIndividualChannelConfirm = (name: string): string | undefined => {
+    if (!saveToLibraryChannel || !builderResult?.channelDrafts) return undefined;
+    
+    const content = builderResult.channelDrafts[saveToLibraryChannel];
+    let contentText = '';
+    if (typeof content === 'string') {
+      contentText = content;
+    } else if (content && typeof content === 'object') {
+      if ('subject' in content) contentText = `Subject: ${content.subject}\n\n${content.body}`;
+      else if ('opening' in content) contentText = content.opening;
+      else if ('body' in content && 'headline' in content) contentText = `${content.headline}\n\n${content.body}`;
+      else contentText = JSON.stringify(content, null, 2);
+    }
+
+    const savedMessage = addMessage({
+      title: name,
       content: contentText,
-      channel,
+      channel: saveToLibraryChannel,
       audience: context.audience,
       domain: context.domain,
       moment: context.moment,
@@ -252,10 +269,7 @@ const BuildPage = () => {
       institutionalProfileName: selectedProfileName,
     });
 
-    toast({
-      title: "Saved to Personal Library",
-      description: `Your ${channelLabel} message has been saved.`,
-    });
+    return savedMessage.id;
   };
 
   return (
@@ -532,7 +546,7 @@ const BuildPage = () => {
 
                   {/* Save Actions */}
                   <div className="flex gap-2 mt-4 pt-4 border-t border-border">
-                    <Button onClick={handleSaveToLibrary} variant="outline" className="flex-1">
+                    <Button onClick={handleSaveToLibraryClick} variant="outline" className="flex-1">
                       <FolderPlus className="w-4 h-4 mr-2" />
                       Save to Personal Library
                     </Button>
@@ -556,7 +570,7 @@ const BuildPage = () => {
                       content={content}
                       onCopy={handleCopyContent}
                       onContentChange={handleContentChange}
-                      onSaveToLibrary={handleSaveIndividualChannel}
+                      onSaveToLibrary={() => handleSaveIndividualChannelClick(channel)}
                     />
                   );
                 })}
@@ -578,6 +592,19 @@ const BuildPage = () => {
           setDraftToSubmit('');
         }}
         initialContent={draftToSubmit}
+      />
+
+      <SaveToLibraryDialog
+        open={saveToLibraryOpen}
+        onOpenChange={setSaveToLibraryOpen}
+        onSave={saveToLibraryChannel ? handleSaveIndividualChannelConfirm : handleSaveToLibraryConfirm}
+        libraryType="personal"
+        defaultName={
+          saveToLibraryChannel
+            ? `${audienceLabels[context.audience || ''] || 'Message'} - ${channelOptions.find(c => c.value === saveToLibraryChannel)?.label || saveToLibraryChannel}`
+            : `${audienceLabels[context.audience || ''] || 'Message'} Kit - ${selectedChannels.join(', ')}`
+        }
+        contentType={saveToLibraryChannel ? "message" : "message kit"}
       />
     </div>
   );
