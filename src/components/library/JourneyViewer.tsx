@@ -37,6 +37,10 @@ interface JourneyMetadata {
   startDate?: string;
   endDate?: string;
   channels?: string[];
+  // Profile and DNA settings persisted from Journey Designer
+  institutionalProfileId?: string | null;
+  institutionalProfileName?: string;
+  useContentDNA?: boolean;
 }
 
 interface JourneyViewerProps {
@@ -80,23 +84,28 @@ const phaseBorderColors: Record<StrategyPhase, string> = {
 export function JourneyViewer({ 
   journey, 
   allowGeneration = true,
-  institutionalProfileId,
+  institutionalProfileId: providedProfileId,
   institutionalConfig: providedInstitutionalConfig
 }: JourneyViewerProps) {
   const { toast } = useToast();
-  // Use profile-specific Content DNA if a profile ID is provided
-  const { contentDNA } = useContentDNAForGeneration({ profileId: institutionalProfileId });
-  const [generatingIndex, setGeneratingIndex] = useState<number | null>(null);
-  const [generatedMessage, setGeneratedMessage] = useState<string | null>(null);
-  const [selectedTouchpoint, setSelectedTouchpoint] = useState<JourneyTouchpoint | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [viewMode, setViewMode] = useState<'diagram' | 'timeline'>('diagram');
 
   // Extract metadata if available
   const metadata = journey._metadata;
   const context = metadata?.context;
   const startDate = metadata?.startDate;
   const endDate = metadata?.endDate;
+
+  // Use profile ID from props, or fall back to metadata (persisted from Journey Designer)
+  const effectiveProfileId = providedProfileId ?? metadata?.institutionalProfileId;
+  const useContentDNASetting = metadata?.useContentDNA !== false; // default true
+
+  // Use profile-specific Content DNA if a profile ID is available
+  const { contentDNA } = useContentDNAForGeneration({ profileId: effectiveProfileId });
+  const [generatingIndex, setGeneratingIndex] = useState<number | null>(null);
+  const [generatedMessage, setGeneratedMessage] = useState<string | null>(null);
+  const [selectedTouchpoint, setSelectedTouchpoint] = useState<JourneyTouchpoint | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [viewMode, setViewMode] = useState<'diagram' | 'timeline'>('diagram');
 
   // Calculate analytics
   const analytics = journey.touchpoints.reduce((acc, tp) => {
@@ -125,9 +134,13 @@ export function JourneyViewer({
             week: touchpoint.week,
             phase: touchpoint.phase,
           },
+          context: context || undefined,
+          startDate,
+          endDate,
           // Use the provided institutional config (from the template/profile)
           institutionalConfig: providedInstitutionalConfig || undefined,
-          contentDNA: contentDNA || undefined,
+          // Only send Content DNA if the setting was enabled when journey was saved
+          contentDNA: useContentDNASetting ? (contentDNA || undefined) : undefined,
         }
       });
 

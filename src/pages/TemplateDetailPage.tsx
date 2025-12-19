@@ -204,11 +204,17 @@ const TemplateDetailPage = () => {
     if (!journeyData) return;
     
     const journeyWithMetadata = journeyData as (typeof journeyData & { _metadata?: any });
+    // Merge template-level profile info into metadata for remix
+    const enrichedMetadata = {
+      ...journeyWithMetadata?._metadata,
+      institutionalProfileId: journeyWithMetadata?._metadata?.institutionalProfileId || template.institutionalProfileId,
+      institutionalProfileName: journeyWithMetadata?._metadata?.institutionalProfileName || template.institutionalProfileName,
+    };
     navigate('/strategy', { 
       state: { 
         editMode: 'remix',
         journeyData: journeyData,
-        metadata: journeyWithMetadata?._metadata,
+        metadata: enrichedMetadata,
         originalTitle: template.title,
         originalId: template.id,
         source: 'university'
