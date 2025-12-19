@@ -341,7 +341,16 @@ const PersonalLibrary = () => {
                         <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
                     </div>
-                    <div className="flex items-center gap-4 mt-4 pt-4 border-t text-xs text-muted-foreground">
+                    <div className="flex items-center gap-4 mt-4 pt-4 border-t text-xs text-muted-foreground flex-wrap">
+                      {message.createdByName && (
+                        <>
+                          <div className="flex items-center gap-1">
+                            <User className="w-3 h-3" />
+                            {message.createdByName}
+                          </div>
+                          <span>•</span>
+                        </>
+                      )}
                       <div className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
                         {new Date(message.createdAt).toLocaleDateString('en-US', { 

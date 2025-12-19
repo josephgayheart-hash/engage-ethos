@@ -29,6 +29,7 @@ import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target, Users, UserCheck, Mail, FileDown, MessageSquare, Globe, Phone, FileText, Search, Megaphone } from "lucide-react";
 import { mapMessages } from "@/lib/evaluateMessage";
+import { useAuth } from "@/contexts/AuthContext";
 import type { MessageContext, MapperResult, Channel, InstitutionalConfig } from "@/types/uplaybook";
 
 const channelOptions: { value: Channel; label: string }[] = [
@@ -74,6 +75,7 @@ const cohortLabels: Record<string, string> = {
 
 const StrategyPage = () => {
   const { toast } = useToast();
+  const { profile } = useAuth();
   const { addMessage, updateMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
   const location = useLocation();
@@ -378,6 +380,9 @@ const StrategyPage = () => {
       institutionalProfileName: selectedProfileName || undefined,
       // Track remix source if this is a remix
       remixedFrom: remixedFrom || undefined,
+      // Creator information
+      createdByUserId: profile?.id,
+      createdByName: profile ? `${profile.first_name} ${profile.last_name}` : undefined,
     });
 
     // Reset remix mode after saving

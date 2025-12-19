@@ -17,6 +17,7 @@ import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { JourneyViewer, isJourneyContent, parseJourneyContent } from "@/components/library/JourneyViewer";
 import type { LibraryEntryStatus } from "@/types/library";
 import type { InstitutionalConfig } from "@/types/uplaybook";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   ChevronRight, 
   ArrowLeft, 
@@ -87,6 +88,7 @@ const TemplateDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { profile } = useAuth();
   const { templates, getTemplateById } = useSharedLibrary();
   const { addMessage } = useMessageLibrary();
   const { getProfile } = useInstitutionalProfiles();
@@ -192,6 +194,8 @@ const TemplateDetailPage = () => {
       moment: template.requiredFields.moment[0] as any,
       approved: false,
       mode: 'generated',
+      createdByUserId: profile?.id,
+      createdByName: profile ? `${profile.first_name} ${profile.last_name}` : undefined,
     });
     toast({
       title: "Template added to My Library",

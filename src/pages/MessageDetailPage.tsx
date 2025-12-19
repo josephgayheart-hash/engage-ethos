@@ -295,13 +295,19 @@ const MessageDetailPage = () => {
 
               {/* Meta info row */}
               <div className="flex items-center gap-3 text-sm text-muted-foreground mb-5 flex-wrap pl-10">
+                {message.createdByName && (
+                  <span className="flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5" />
+                    {message.createdByName}
+                  </span>
+                )}
                 <span className="flex items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5" />
                   {new Date(message.createdAt).toLocaleDateString()}
                 </span>
                 {message.submittedToLibrary && (
                   <Badge variant="secondary" className="bg-blue-50 text-blue-600 border-blue-200">
-                    Submitted
+                    In University Library
                   </Badge>
                 )}
                 {message.remixedFrom && (
