@@ -305,10 +305,10 @@ const Index = () => {
                 <Card className="h-full cursor-pointer transition-all hover:shadow-md hover:border-pillar-susceptibility/50 group">
                   <CardContent className="p-4">
                     <div className="w-10 h-10 rounded-lg bg-pillar-susceptibility/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                      <MessageCircle className="w-5 h-5 text-pillar-susceptibility" />
+                      <PenTool className="w-5 h-5 text-pillar-susceptibility" />
                     </div>
-                    <h3 className="font-medium text-sm mb-1">Playground</h3>
-                    <p className="text-xs text-muted-foreground">Chat with AI assistant</p>
+                    <h3 className="font-medium text-sm mb-1">Copywriter</h3>
+                    <p className="text-xs text-muted-foreground">AI-powered messaging</p>
                   </CardContent>
                 </Card>
               </Link>
