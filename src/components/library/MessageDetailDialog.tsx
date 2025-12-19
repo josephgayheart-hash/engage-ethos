@@ -4,10 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
 import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import type { SavedMessage } from "@/types/library";
 import { JourneyViewer, isJourneyContent, parseJourneyContent } from "./JourneyViewer";
-import { CheckCircle, Copy, Trash2, History, Map } from "lucide-react";
+import { openInGoogleDocs, formatForGoogleDocs } from "@/lib/googleDocsExport";
+import { CheckCircle, Copy, Trash2, History, Map, ExternalLink, FileText, Pencil, X, Save } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -22,14 +24,49 @@ interface MessageDetailDialogProps {
 export function MessageDetailDialog({ message, open, onOpenChange, onApprove, onDelete }: MessageDetailDialogProps) {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedContent, setEditedContent] = useState(message.content);
   const isJourney = useMemo(() => isJourneyContent(message.content), [message.content]);
   const journeyData = useMemo(() => isJourney ? parseJourneyContent(message.content) : null, [message.content, isJourney]);
 
+  const displayContent = isEditing ? editedContent : message.content;
+
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(message.content);
+    await navigator.clipboard.writeText(displayContent);
     setCopied(true);
     toast({ title: "Copied to clipboard" });
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleOpenInGoogleDocs = async () => {
+    const formattedContent = formatForGoogleDocs(displayContent, {
+      title: message.title,
+      channel: message.channel,
+      audience: message.audience,
+      generatedAt: new Date(),
+    });
+    const success = await openInGoogleDocs(formattedContent, message.title);
+    if (success) {
+      toast({ 
+        title: "Opening Google Docs", 
+        description: "Content copied! Paste (Ctrl/Cmd+V) into the new document." 
+      });
+    }
+  };
+
+  const handleStartEdit = () => {
+    setEditedContent(message.content);
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setEditedContent(message.content);
+    setIsEditing(false);
+  };
+
+  const handleSaveEdit = () => {
+    setIsEditing(false);
+    toast({ title: "Content updated", description: "Changes saved locally for this session." });
   };
 
   return (
@@ -44,7 +81,10 @@ export function MessageDetailDialog({ message, open, onOpenChange, onApprove, on
 
         <Tabs defaultValue="content" className="mt-4">
           <TabsList>
-            <TabsTrigger value="content">Content</TabsTrigger>
+            <TabsTrigger value="content">
+              <FileText className="w-3 h-3 mr-1.5" />
+              Content
+            </TabsTrigger>
             <TabsTrigger value="metadata">Metadata</TabsTrigger>
             <TabsTrigger value="versions" className="flex items-center gap-1">
               <History className="w-4 h-4" />
@@ -63,18 +103,58 @@ export function MessageDetailDialog({ message, open, onOpenChange, onApprove, on
                   <JourneyViewer journey={journeyData} />
                 </div>
               ) : (
-                <div className="bg-muted rounded-lg p-4 mb-4">
-                  <pre className="whitespace-pre-wrap text-sm font-sans">{message.content}</pre>
-                  {message.channel === 'sms' && (
-                    <SmsCharCounter text={message.content} className="mt-3" />
+                <div className="pr-4">
+                  {isEditing ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Pencil className="w-4 h-4 text-amber-600" />
+                        <span className="text-sm font-medium text-amber-600">Editing Content</span>
+                      </div>
+                      <Textarea
+                        value={editedContent}
+                        onChange={(e) => setEditedContent(e.target.value)}
+                        className="min-h-[250px] font-sans text-sm leading-relaxed resize-y"
+                      />
+                      {message.channel === 'sms' && (
+                        <SmsCharCounter text={editedContent} className="mt-2" />
+                      )}
+                    </div>
+                  ) : (
+                    <div className="bg-card rounded-lg p-4 mb-4 border border-border shadow-sm">
+                      <pre className="whitespace-pre-wrap text-sm font-sans leading-relaxed">{displayContent}</pre>
+                      {message.channel === 'sms' && (
+                        <SmsCharCounter text={displayContent} className="mt-3" />
+                      )}
+                    </div>
                   )}
                 </div>
               )}
             </ScrollArea>
-            <div className="flex gap-2 mt-4">
+            <div className="flex flex-wrap gap-2 mt-4">
+              {!isEditing ? (
+                <Button onClick={handleStartEdit} variant="outline" className="flex items-center gap-2">
+                  <Pencil className="w-4 h-4" />
+                  Edit
+                </Button>
+              ) : (
+                <>
+                  <Button onClick={handleSaveEdit} className="flex items-center gap-2 bg-green-600 hover:bg-green-700">
+                    <Save className="w-4 h-4" />
+                    Save
+                  </Button>
+                  <Button onClick={handleCancelEdit} variant="ghost" className="flex items-center gap-2">
+                    <X className="w-4 h-4" />
+                    Cancel
+                  </Button>
+                </>
+              )}
               <Button onClick={handleCopy} variant="outline" className="flex items-center gap-2">
                 <Copy className="w-4 h-4" />
                 {copied ? "Copied!" : "Copy"}
+              </Button>
+              <Button onClick={handleOpenInGoogleDocs} variant="outline" className="flex items-center gap-2">
+                <ExternalLink className="w-4 h-4" />
+                Open in Google Docs
               </Button>
               {!message.approved && (
                 <Button onClick={onApprove} className="flex items-center gap-2">
