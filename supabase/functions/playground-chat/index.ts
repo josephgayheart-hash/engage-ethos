@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { message, history, institutionalConfig } = await req.json();
+    const { message, history, institutionalConfig, contentDNA, profileConfig } = await req.json();
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -19,6 +19,76 @@ serve(async (req) => {
     }
 
     console.log("Playground chat request received");
+    console.log("Has institutional config:", !!institutionalConfig);
+    console.log("Has content DNA:", !!contentDNA);
+    console.log("Has profile config:", !!profileConfig);
+
+    // Build the voice/style context from Content DNA
+    let voiceContext = "";
+    if (contentDNA?.voiceAnalysis) {
+      const va = contentDNA.voiceAnalysis;
+      voiceContext = `
+## Content DNA - Institutional Voice Profile
+You should write and advise in a style that matches this institutional voice:
+
+${va.summary ? `**Voice Summary:** ${va.summary}` : ""}
+
+${va.toneAttributes?.length ? `**Tone Attributes:** ${va.toneAttributes.join(", ")}` : ""}
+
+${va.sentenceStyle ? `**Sentence Style:** ${va.sentenceStyle}` : ""}
+
+${va.vocabularyLevel ? `**Vocabulary Level:** ${va.vocabularyLevel}` : ""}
+
+${va.persuasionApproach ? `**Persuasion Approach:** ${va.persuasionApproach}` : ""}
+
+${va.emotionalRegister ? `**Emotional Register:** ${va.emotionalRegister}` : ""}
+
+${va.keyPatterns?.length ? `**Key Patterns:**
+${va.keyPatterns.map((p: string) => `- ${p}`).join("\n")}` : ""}
+
+${va.recommendedApproaches?.length ? `**Recommended Approaches:**
+${va.recommendedApproaches.map((a: string) => `- ${a}`).join("\n")}` : ""}
+
+${va.avoidPatterns?.length ? `**Patterns to Avoid:**
+${va.avoidPatterns.map((a: string) => `- ${a}`).join("\n")}` : ""}
+`;
+    }
+
+    // Add custom instructions from Content DNA
+    let customInstructions = "";
+    if (contentDNA?.customInstructions) {
+      customInstructions = `
+## Additional Custom Instructions
+${contentDNA.customInstructions}
+`;
+    }
+
+    // Build profile-specific context
+    let profileContext = "";
+    if (profileConfig) {
+      profileContext = `
+## Active Profile Context
+${profileConfig.institutionName ? `**Institution/Unit:** ${profileConfig.institutionName}` : ""}
+${profileConfig.profileType ? `**Profile Type:** ${profileConfig.profileType}` : ""}
+${profileConfig.mascot ? `**Mascot:** ${profileConfig.mascot}` : ""}
+${profileConfig.preferredPhrases?.length ? `**Preferred Phrases:** ${profileConfig.preferredPhrases.join(", ")}` : ""}
+${profileConfig.wordsToAvoid?.length ? `**Words to Avoid:** ${profileConfig.wordsToAvoid.join(", ")}` : ""}
+${profileConfig.defaultTone ? `**Default Tone:** ${profileConfig.defaultTone}` : ""}
+${profileConfig.signatureElements?.length ? `**Signature Elements:** ${profileConfig.signatureElements.join(", ")}` : ""}
+`;
+    }
+
+    // Fallback to legacy institutionalConfig if no profileConfig
+    let legacyContext = "";
+    if (!profileConfig && institutionalConfig) {
+      legacyContext = `
+## Institutional Context (Legacy)
+${institutionalConfig.institutionName ? `Institution: ${institutionalConfig.institutionName}` : ""}
+${institutionalConfig.mascot ? `Mascot: ${institutionalConfig.mascot}` : ""}
+${institutionalConfig.preferredPhrases?.length ? `Preferred phrases: ${institutionalConfig.preferredPhrases.join(", ")}` : ""}
+${institutionalConfig.wordsToAvoid?.length ? `Words to avoid: ${institutionalConfig.wordsToAvoid.join(", ")}` : ""}
+`;
+    }
 
     const systemPrompt = `You are an expert AI assistant for UPlaybook, a strategic messaging intelligence platform designed for higher education communications. Your responses are grounded in peer-reviewed research and the UPlaybook methodology.
 
@@ -50,35 +120,35 @@ serve(async (req) => {
 - Timing alignment with academic calendar improves response
 
 ## Your Capabilities
-1. **Strategy Consultation**: Help brainstorm messaging approaches for specific scenarios
-2. **Content Review**: Analyze draft messages against the five-pillar framework
-3. **Research Explanation**: Explain persuasion research and how to apply it
-4. **Tool Guidance**: Direct users to appropriate UPlaybook tools (Evaluator, Builder, Strategy Mapper, Call Scripts)
+1. **Message Creation**: Draft complete messages or help refine existing content, matching the institutional voice
+2. **Content Review**: Analyze draft messages against the five-pillar framework and voice guidelines
+3. **Strategy Consultation**: Help brainstorm messaging approaches for specific scenarios
+4. **Research Explanation**: Explain persuasion research and how to apply it
+5. **Tool Guidance**: Direct users to appropriate UPlaybook tools (Evaluator, Builder, Strategy Mapper, Call Scripts)
+
+${voiceContext}
+${customInstructions}
+${profileContext}
+${legacyContext}
 
 ## Response Guidelines
 - Be conversational but professional
+- Match the institutional voice when creating or reviewing content
 - Ground advice in specific research when relevant
 - Provide actionable recommendations
 - When reviewing content, be constructive and specific
 - Reference UPlaybook tools when they would help the user
 - Keep responses focused and practical
-
-${institutionalConfig ? `
-## Institutional Context
-${institutionalConfig.institutionName ? `Institution: ${institutionalConfig.institutionName}` : ""}
-${institutionalConfig.mascot ? `Mascot: ${institutionalConfig.mascot}` : ""}
-${institutionalConfig.preferredPhrases?.length ? `Preferred phrases: ${institutionalConfig.preferredPhrases.join(", ")}` : ""}
-${institutionalConfig.wordsToAvoid?.length ? `Words to avoid: ${institutionalConfig.wordsToAvoid.join(", ")}` : ""}
-` : ""}`;
+- When drafting messages, write them in the established voice profile`;
 
     // Build conversation history
     const conversationMessages = [
       { role: "system", content: systemPrompt },
-      ...history.slice(-10), // Keep last 10 messages for context
+      ...history.slice(-20), // Keep last 20 messages for context
       { role: "user", content: message }
     ];
 
-    console.log("Calling AI gateway...");
+    console.log("Calling AI gateway with enhanced context...");
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

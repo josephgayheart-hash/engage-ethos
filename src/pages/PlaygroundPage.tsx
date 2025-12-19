@@ -1,126 +1,178 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { AIBadge } from "@/components/ui/ai-indicator";
 import { useToast } from "@/hooks/use-toast";
-import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
+import { useAuth } from "@/contexts/AuthContext";
+import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
+import { usePlaygroundConversations } from "@/hooks/usePlaygroundConversations";
 import { supabase } from "@/integrations/supabase/client";
-import { cn } from "@/lib/utils";
+import { ConversationList } from "@/components/playground/ConversationList";
+import { ChatInterface } from "@/components/playground/ChatInterface";
+import { ContextSelector } from "@/components/playground/ContextSelector";
 import { 
   ArrowLeft, 
   MessageCircle, 
-  Send,
-  RefreshCw,
-  Sparkles,
-  User,
-  Bot,
-  Lightbulb,
-  BookOpen,
-  Target,
-  Shield
+  PanelLeftClose,
+  PanelLeft
 } from "lucide-react";
 
-interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
+interface ContentDNAData {
+  voiceAnalysis: Record<string, unknown> | null;
+  customInstructions: string | null;
 }
-
-const suggestedPrompts = [
-  {
-    icon: Target,
-    text: "How can I improve a re-enrollment message for at-risk students?",
-    category: "Strategy"
-  },
-  {
-    icon: Shield,
-    text: "What are best practices for authority cues in academic communications?",
-    category: "Research"
-  },
-  {
-    icon: Lightbulb,
-    text: "Review my financial aid reminder: 'Your FAFSA is due soon. Complete it now.'",
-    category: "Evaluate"
-  },
-  {
-    icon: BookOpen,
-    text: "Explain how cognitive load affects message effectiveness",
-    category: "Learn"
-  }
-];
 
 const PlaygroundPage = () => {
   const { toast } = useToast();
-  const { config: institutionalConfig } = useInstitutionalConfig();
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { user, tenant } = useAuth();
+  const { profiles } = useInstitutionalProfiles();
   
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 'welcome',
-      role: 'assistant',
-      content: `Welcome to the UPlaybook Playground! 👋
+  const {
+    conversations,
+    currentConversation,
+    messages,
+    isLoading,
+    isLoadingMessages,
+    createConversation,
+    updateConversationTitle,
+    updateConversationContext,
+    addMessage,
+    deleteConversation,
+    selectConversation,
+    generateTitle
+  } = usePlaygroundConversations();
 
-I'm your AI assistant grounded in peer-reviewed persuasion research and the UPlaybook methodology. I can help you:
-
-• **Brainstorm** messaging strategies for specific student populations
-• **Review** draft messages and provide research-backed feedback
-• **Explain** persuasion principles and how to apply them
-• **Suggest** improvements based on the five-pillar framework
-
-What would you like to explore today?`,
-      timestamp: new Date()
-    }
-  ]);
   const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(true);
+  
+  // Context selections
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [selectedDNAId, setSelectedDNAId] = useState<string | null>(null);
+  const [contentDNA, setContentDNA] = useState<ContentDNAData | null>(null);
+  const [profileConfig, setProfileConfig] = useState<Record<string, unknown> | null>(null);
 
+  // Sync context when conversation changes
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+    if (currentConversation) {
+      setSelectedProfileId(currentConversation.institutional_profile_id);
+      setSelectedDNAId(currentConversation.content_dna_id);
     }
-  }, [messages]);
+  }, [currentConversation]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  // Fetch Content DNA when selection changes
+  useEffect(() => {
+    const fetchDNA = async () => {
+      if (!selectedDNAId) {
+        setContentDNA(null);
+        return;
+      }
 
-    const userMessage: ChatMessage = {
-      id: crypto.randomUUID(),
-      role: 'user',
-      content: input.trim(),
-      timestamp: new Date()
+      try {
+        const { data, error } = await supabase
+          .from('content_dna_analysis')
+          .select('voice_analysis, custom_instructions')
+          .eq('id', selectedDNAId)
+          .single();
+
+        if (error) throw error;
+        setContentDNA({
+          voiceAnalysis: data.voice_analysis as Record<string, unknown>,
+          customInstructions: data.custom_instructions
+        });
+      } catch (error) {
+        console.error('Error fetching Content DNA:', error);
+        setContentDNA(null);
+      }
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    fetchDNA();
+  }, [selectedDNAId]);
+
+  // Fetch profile config when selection changes
+  useEffect(() => {
+    if (!selectedProfileId) {
+      setProfileConfig(null);
+      return;
+    }
+
+    const profile = profiles.find(p => p.id === selectedProfileId);
+    if (profile) {
+      setProfileConfig({
+        institutionName: profile.name,
+        profileType: profile.profileType,
+        ...profile.config
+      });
+    }
+  }, [selectedProfileId, profiles]);
+
+  // Handle context change and update conversation
+  const handleProfileChange = useCallback(async (profileId: string | null) => {
+    setSelectedProfileId(profileId);
+    if (currentConversation) {
+      await updateConversationContext(currentConversation.id, profileId, selectedDNAId);
+    }
+  }, [currentConversation, selectedDNAId, updateConversationContext]);
+
+  const handleDNAChange = useCallback(async (dnaId: string | null) => {
+    setSelectedDNAId(dnaId);
+    if (currentConversation) {
+      await updateConversationContext(currentConversation.id, selectedProfileId, dnaId);
+    }
+  }, [currentConversation, selectedProfileId, updateConversationContext]);
+
+  // Create new conversation
+  const handleNewConversation = useCallback(async () => {
+    await createConversation('New Conversation', selectedProfileId, selectedDNAId);
+  }, [createConversation, selectedProfileId, selectedDNAId]);
+
+  // Send message
+  const handleSend = useCallback(async () => {
+    if (!input.trim() || isSending || !user) return;
+
+    const messageContent = input.trim();
     setInput('');
-    setIsLoading(true);
+    setIsSending(true);
 
     try {
+      // Create conversation if none exists
+      let conversationId = currentConversation?.id;
+      if (!conversationId) {
+        const newConv = await createConversation(
+          generateTitle(messageContent),
+          selectedProfileId,
+          selectedDNAId
+        );
+        if (!newConv) throw new Error('Failed to create conversation');
+        conversationId = newConv.id;
+      }
+
+      // Add user message
+      await addMessage(conversationId, 'user', messageContent);
+
+      // Update title if first message
+      if (messages.length === 0) {
+        await updateConversationTitle(conversationId, generateTitle(messageContent));
+      }
+
+      // Call AI
       const { data, error } = await supabase.functions.invoke('playground-chat', {
         body: {
-          message: userMessage.content,
+          message: messageContent,
           history: messages.map(m => ({ role: m.role, content: m.content })),
-          institutionalConfig
+          institutionalConfig: null,
+          contentDNA,
+          profileConfig
         }
       });
 
       if (error) throw error;
       if (data.error) throw new Error(data.error);
 
-      const assistantMessage: ChatMessage = {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: data.response,
-        timestamp: new Date()
-      };
-
-      setMessages(prev => [...prev, assistantMessage]);
+      // Add assistant message
+      await addMessage(conversationId, 'assistant', data.response);
     } catch (error) {
       console.error("Chat error:", error);
       toast({
@@ -129,36 +181,32 @@ What would you like to explore today?`,
         description: error instanceof Error ? error.message : "Failed to get response. Please try again.",
       });
     } finally {
-      setIsLoading(false);
+      setIsSending(false);
     }
-  };
+  }, [
+    input,
+    isSending,
+    user,
+    currentConversation,
+    messages,
+    createConversation,
+    addMessage,
+    updateConversationTitle,
+    generateTitle,
+    selectedProfileId,
+    selectedDNAId,
+    contentDNA,
+    profileConfig,
+    toast
+  ]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
-  const handleSuggestedPrompt = (prompt: string) => {
-    setInput(prompt);
-    textareaRef.current?.focus();
-  };
-
-  const handleClearChat = () => {
-    setMessages([{
-      id: 'welcome',
-      role: 'assistant',
-      content: `Welcome back! I'm ready to help you with messaging strategy, research questions, or content review. What would you like to explore?`,
-      timestamp: new Date()
-    }]);
-  };
+  const selectedProfile = profiles.find(p => p.id === selectedProfileId);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
       
-      <main className="flex-1 container mx-auto px-4 py-6 flex flex-col max-w-4xl">
+      <main className="flex-1 container mx-auto px-4 py-6 flex flex-col">
         {/* Breadcrumb & Header */}
         <div className="space-y-4 mb-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -167,156 +215,70 @@ What would you like to explore today?`,
               Home
             </Link>
             <span>/</span>
-            <span className="text-foreground">Playground</span>
+            <span className="text-foreground">AI Assistant</span>
           </div>
 
-          <div className="flex items-start justify-between">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
               <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
                 <MessageCircle className="w-7 h-7 text-pillar-susceptibility" />
-                UPlaybook Playground
+                AI Messaging Assistant
               </h1>
               <p className="text-muted-foreground mt-1">
-                Chat with AI grounded in persuasion research and UPlaybook methodology
+                Create, review, and strategize communications with your institutional voice
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handleClearChat}>
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Clear Chat
-              </Button>
               <AIBadge />
             </div>
           </div>
+
+          {/* Context Selector */}
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <ContextSelector
+              selectedProfileId={selectedProfileId}
+              selectedDNAId={selectedDNAId}
+              onProfileChange={handleProfileChange}
+              onDNAChange={handleDNAChange}
+              disabled={isSending}
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowSidebar(!showSidebar)}
+              className="md:hidden"
+            >
+              {showSidebar ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeft className="w-4 h-4" />}
+            </Button>
+          </div>
         </div>
 
-        {/* Chat Area */}
-        <Card className="flex-1 flex flex-col min-h-0">
-          <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
-            <div className="space-y-4">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={cn(
-                    "flex gap-3",
-                    message.role === 'user' ? "justify-end" : "justify-start"
-                  )}
-                >
-                  {message.role === 'assistant' && (
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                      <Bot className="w-4 h-4 text-primary" />
-                    </div>
-                  )}
-                  <div
-                    className={cn(
-                      "max-w-[80%] rounded-2xl px-4 py-3",
-                      message.role === 'user'
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted"
-                    )}
-                  >
-                    <div className="text-sm whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none">
-                      {message.content.split('\n').map((line, i) => {
-                        // Handle bold text
-                        const parts = line.split(/(\*\*.*?\*\*)/g);
-                        return (
-                          <p key={i} className={i > 0 ? "mt-2" : ""}>
-                            {parts.map((part, j) => {
-                              if (part.startsWith('**') && part.endsWith('**')) {
-                                return <strong key={j}>{part.slice(2, -2)}</strong>;
-                              }
-                              return part;
-                            })}
-                          </p>
-                        );
-                      })}
-                    </div>
-                    <span className="text-xs opacity-60 mt-1 block">
-                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-                  {message.role === 'user' && (
-                    <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shrink-0">
-                      <User className="w-4 h-4 text-secondary-foreground" />
-                    </div>
-                  )}
-                </div>
-              ))}
-              
-              {isLoading && (
-                <div className="flex gap-3 justify-start">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <Bot className="w-4 h-4 text-primary" />
-                  </div>
-                  <div className="bg-muted rounded-2xl px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <RefreshCw className="w-4 h-4 animate-spin text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">Thinking...</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </ScrollArea>
+        {/* Main Chat Area */}
+        <Card className="flex-1 flex min-h-0 overflow-hidden">
+          {/* Conversation sidebar */}
+          <div className={`w-64 shrink-0 ${showSidebar ? 'block' : 'hidden'} md:block`}>
+            <ConversationList
+              conversations={conversations}
+              currentConversation={currentConversation}
+              onSelect={selectConversation}
+              onNew={handleNewConversation}
+              onDelete={deleteConversation}
+              isLoading={isLoading}
+            />
+          </div>
 
-          {/* Suggested Prompts - only show if few messages */}
-          {messages.length <= 2 && (
-            <div className="px-4 pb-2">
-              <p className="text-xs text-muted-foreground mb-2">Try asking:</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {suggestedPrompts.map((prompt, i) => {
-                  const Icon = prompt.icon;
-                  return (
-                    <button
-                      key={i}
-                      onClick={() => handleSuggestedPrompt(prompt.text)}
-                      className="text-left p-3 rounded-lg border bg-card hover:bg-muted/50 hover:border-primary/30 transition-colors group"
-                    >
-                      <div className="flex items-start gap-2">
-                        <Icon className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                        <div>
-                          <Badge variant="outline" className="text-xs mb-1">{prompt.category}</Badge>
-                          <p className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">
-                            {prompt.text}
-                          </p>
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Input Area */}
-          <CardContent className="border-t pt-4">
-            <div className="flex gap-2">
-              <Textarea
-                ref={textareaRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Ask about messaging strategy, review content, or explore persuasion research..."
-                className="min-h-[60px] max-h-[120px] resize-none"
-                disabled={isLoading}
-              />
-              <Button 
-                onClick={handleSend} 
-                disabled={!input.trim() || isLoading}
-                size="icon"
-                className="h-[60px] w-[60px] shrink-0"
-              >
-                {isLoading ? (
-                  <RefreshCw className="w-5 h-5 animate-spin" />
-                ) : (
-                  <Send className="w-5 h-5" />
-                )}
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground mt-2 text-center">
-              Responses are grounded in UPlaybook's five-pillar framework and peer-reviewed research.
-            </p>
-          </CardContent>
+          {/* Chat interface */}
+          <ChatInterface
+            messages={messages}
+            input={input}
+            onInputChange={setInput}
+            onSend={handleSend}
+            isLoading={isSending}
+            isLoadingMessages={isLoadingMessages}
+            hasContext={!!(selectedProfileId || selectedDNAId)}
+            profileName={selectedProfile?.name}
+            hasDNA={!!contentDNA}
+          />
         </Card>
       </main>
     </div>
