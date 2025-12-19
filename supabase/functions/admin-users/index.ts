@@ -140,6 +140,8 @@ serve(async (req) => {
             rolesToCreate = ['user', 'approver'];
           } else if (role === 'super_admin') {
             rolesToCreate = ['super_admin', 'admin'];
+          } else if (role === 'admin') {
+            rolesToCreate = ['user', 'admin'];
           } else {
             rolesToCreate = [role];
           }
