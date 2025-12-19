@@ -33,6 +33,7 @@ import {
   CheckCircle2,
   User
 } from 'lucide-react';
+import { extractTextFromFile, getAcceptString } from '@/lib/documentParser';
 
 const SAMPLE_TYPES = [
   { value: 'email', label: 'Email' },
@@ -89,10 +90,19 @@ export default function ContentDNAPage() {
 
     setIsUploading(true);
     try {
-      const text = await file.text();
+      const { text, success, message } = await extractTextFromFile(file);
+      
+      if (!success || !text) {
+        console.error('Could not extract text:', message);
+        // Reset input so user can try again
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        setIsUploading(false);
+        return;
+      }
+
       await addSample(text, file.name, {
         sampleType,
-        title: sampleTitle || file.name,
+        title: sampleTitle || file.name.replace(/\.[^/.]+$/, ''),
         sourceDescription: sourceDescription || undefined,
         fileType: file.type,
         fileSize: file.size,
@@ -296,7 +306,7 @@ export default function ContentDNAPage() {
                     Upload File
                   </CardTitle>
                   <CardDescription>
-                    Upload text files (.txt, .md, .html) containing your communications
+                    Upload documents containing your communications
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -342,14 +352,14 @@ export default function ContentDNAPage() {
                         <Input
                           ref={fileInputRef}
                           type="file"
-                          accept=".txt,.md,.html,.htm"
+                          accept={getAcceptString()}
                           onChange={handleFileUpload}
                           disabled={isUploading}
                           className="hidden"
                         />
                       </label>
                       <p className="text-xs text-[hsl(220,14%,46%)] mt-1 text-center">
-                        Supports .txt, .md, .html files
+                        Supports .txt, .docx, .doc, .pdf files
                       </p>
                     </div>
                   </div>
