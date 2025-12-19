@@ -171,7 +171,7 @@ function getGeneratedMessageText(channel: Channel, content: unknown): string {
     const tp = content as { 
       context?: unknown; audience?: unknown; openingHook?: unknown; 
       keyMessages?: unknown; supportingData?: unknown; anticipatedQuestions?: unknown; 
-      transitionPhrases?: unknown; closingStatement?: unknown 
+      suggestedResponses?: unknown; transitionPhrases?: unknown; closingStatement?: unknown 
     };
     const contextStr = typeof tp.context === "string" ? tp.context : "";
     const audience = typeof tp.audience === "string" ? tp.audience : "";
@@ -179,6 +179,7 @@ function getGeneratedMessageText(channel: Channel, content: unknown): string {
     const keyMessages = Array.isArray(tp.keyMessages) ? tp.keyMessages.map(String) : [];
     const supportingData = Array.isArray(tp.supportingData) ? tp.supportingData.map(String) : [];
     const anticipatedQuestions = Array.isArray(tp.anticipatedQuestions) ? tp.anticipatedQuestions.map(String) : [];
+    const suggestedResponses = Array.isArray(tp.suggestedResponses) ? tp.suggestedResponses.map(String) : [];
     const transitionPhrases = Array.isArray(tp.transitionPhrases) ? tp.transitionPhrases.map(String) : [];
     const closingStatement = typeof tp.closingStatement === "string" ? tp.closingStatement : "";
 
@@ -186,11 +187,18 @@ function getGeneratedMessageText(channel: Channel, content: unknown): string {
     if (contextStr) result += `CONTEXT: ${contextStr}\n`;
     if (audience) result += `AUDIENCE: ${audience}\n\n`;
     if (openingHook) result += `OPENING HOOK:\n"${openingHook}"\n\n`;
-    if (keyMessages.length) result += `KEY MESSAGES:\n${keyMessages.map((m, i) => `${i + 1}. ${m}`).join("\n")}\n\n`;
-    if (supportingData.length) result += `SUPPORTING DATA:\n${supportingData.map(d => `• ${d}`).join("\n")}\n\n`;
-    if (anticipatedQuestions.length) result += `ANTICIPATED Q&A:\n${anticipatedQuestions.map(q => `Q: ${q}`).join("\n")}\n\n`;
-    if (transitionPhrases.length) result += `TRANSITIONS:\n${transitionPhrases.map(t => `→ "${t}"`).join("\n")}\n\n`;
-    if (closingStatement) result += `CLOSING:\n"${closingStatement}"`;
+    if (keyMessages.length) result += `KEY TALKING POINTS:\n${keyMessages.map((m, i) => `${i + 1}. ${m}`).join("\n\n")}\n\n`;
+    if (supportingData.length) result += `SUPPORTING DATA & EVIDENCE:\n${supportingData.map(d => `📊 ${d}`).join("\n")}\n\n`;
+    if (anticipatedQuestions.length) {
+      result += `ANTICIPATED Q&A:\n`;
+      anticipatedQuestions.forEach((q, i) => {
+        result += `Q: ${q}\n`;
+        if (suggestedResponses[i]) result += `A: ${suggestedResponses[i]}\n`;
+        result += "\n";
+      });
+    }
+    if (transitionPhrases.length) result += `TRANSITION PHRASES:\n${transitionPhrases.map(t => `→ "${t}"`).join("\n")}\n\n`;
+    if (closingStatement) result += `CLOSING STATEMENT:\n"${closingStatement}"`;
 
     return result;
   }

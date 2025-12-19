@@ -275,14 +275,15 @@ export interface SocialAdDraft {
 }
 
 export interface TalkingPointsDraft {
-  context: string; // e.g., "Individual meeting with donor", "Board presentation", "Commencement speech"
-  audience: string; // e.g., "Alumni donors", "Board of trustees", "Graduating class"
-  keyMessages: string[]; // Main talking points
-  supportingData?: string[]; // Stats, facts, or evidence to support points
-  anticipatedQuestions?: string[]; // Q&A preparation
-  transitionPhrases?: string[]; // Phrases to move between topics
-  openingHook?: string; // Attention-grabbing opener
-  closingStatement?: string; // Strong conclusion or call to action
+  context: string; // e.g., "Board of Trustees quarterly meeting", "Alumni donor reception"
+  audience: string; // e.g., "Board members focused on enrollment and financial sustainability"
+  openingHook?: string; // Compelling 2-3 sentence opening
+  keyMessages: string[]; // Complete, quotable talking points (2-3 sentences each)
+  supportingData?: string[]; // Specific stats, achievements, proof points
+  anticipatedQuestions?: string[]; // Full questions audience might ask
+  suggestedResponses?: string[]; // Brief, confident answers to anticipated questions
+  transitionPhrases?: string[]; // Natural transitions between topics
+  closingStatement?: string; // Powerful 2-3 sentence closing
 }
 
 export interface ChannelDrafts {
