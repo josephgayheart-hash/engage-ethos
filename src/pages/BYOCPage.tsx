@@ -291,7 +291,7 @@ const BYOCPage = () => {
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Supported formats: .txt, .docx, .pdf
+                  Supported formats: .txt, .docx, .pdf, .png, .jpg (screenshots)
                 </p>
               </div>
 

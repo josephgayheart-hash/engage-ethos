@@ -451,7 +451,7 @@ export default function ContentDNAPage() {
                         />
                       </label>
                       <p className="text-xs text-[hsl(220,14%,46%)] mt-1 text-center">
-                        Supports .txt, .docx, .doc, .pdf files
+                        Supports .txt, .docx, .pdf, .png, .jpg (screenshots)
                       </p>
                     </div>
                   </div>
