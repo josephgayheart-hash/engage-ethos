@@ -109,7 +109,9 @@ ${daysUntilDeadline ? `- Days Until Deadline: ${daysUntilDeadline} days remainin
         portal: "Portal notification message. Clear and informative. 50-100 words. Action-oriented.",
         "landing-page": "Landing page copy. Compelling headline and body. 100-200 words. Clear value proposition and CTA.",
         "direct-mail": "Direct mail letter opening paragraph and key message. Formal tone. 100-150 words.",
-        "phone-call": "Phone call script talking points. Bullet format. Include greeting, key message, and closing."
+        "phone-call": "Phone call script talking points. Bullet format. Include greeting, key message, and closing.",
+        "digital-ad-search": `Google/Bing Search Ad. Return JSON object with exact fields: { "headlines": ["Headline 1 (max 30 chars)", "Headline 2 (max 30 chars)", "Headline 3 (max 30 chars)"], "descriptions": ["Description 1 (max 90 chars)", "Description 2 (max 90 chars)"], "displayUrl": "university.edu/path" }`,
+        "digital-ad-social": `Meta/LinkedIn Social Ad. Return JSON object with exact fields: { "primaryText": "Main ad copy (125 chars ideal)", "headline": "Bold headline (40 chars max)", "description": "Link description (optional)", "ctaButton": "Learn More", "platform": "meta" }`
       };
 
       // Build comprehensive institutional config string for prompts
@@ -201,9 +203,14 @@ Respond with valid JSON only:
 {
   "messages": [
     { "channel": "email", "content": "Subject: ...\n\n..." },
-    { "channel": "sms", "content": "..." }
+    { "channel": "sms", "content": "..." },
+    { "channel": "digital-ad-search", "content": { "headlines": ["...", "...", "..."], "descriptions": ["...", "..."], "displayUrl": "..." } },
+    { "channel": "digital-ad-social", "content": { "primaryText": "...", "headline": "...", "description": "...", "ctaButton": "Learn More", "platform": "meta" } }
   ]
-}`;
+}
+
+IMPORTANT for digital-ad-search: content MUST be a JSON object with "headlines" (array of 3 strings), "descriptions" (array of 2 strings), and "displayUrl" (string).
+IMPORTANT for digital-ad-social: content MUST be a JSON object with "primaryText", "headline", "description", "ctaButton", and "platform" fields.`;
       } else {
         // Single channel touchpoint message generation
         userPrompt = `Generate a message for a strategy journey touchpoint.
