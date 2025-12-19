@@ -302,19 +302,36 @@ function tryBasicPdfExtraction(content: string): {
 
 /**
  * Extract PDF text using AI vision (handles scanned PDFs, complex layouts, etc.)
+ * Note: Has file size limits due to edge function memory constraints
  */
 async function extractPdfWithAI(file: File): Promise<{
   text: string;
   success: boolean;
   message?: string;
 }> {
+  // Check file size - AI extraction has limits (~5MB max for reliable processing)
+  const MAX_SIZE_MB = 5;
+  const fileSizeMB = file.size / (1024 * 1024);
+  
+  if (fileSizeMB > MAX_SIZE_MB) {
+    return {
+      text: '',
+      success: false,
+      message: `This PDF is too large (${fileSizeMB.toFixed(1)}MB) for AI text extraction. Please use a smaller PDF (under ${MAX_SIZE_MB}MB) or copy and paste the text content directly.`,
+    };
+  }
+
   try {
     // Convert PDF to base64
     const arrayBuffer = await file.arrayBuffer();
     const bytes = new Uint8Array(arrayBuffer);
+    
+    // Use chunked base64 encoding to avoid call stack issues with large files
     let binary = '';
-    for (let i = 0; i < bytes.length; i++) {
-      binary += String.fromCharCode(bytes[i]);
+    const chunkSize = 32768;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      const chunk = bytes.subarray(i, Math.min(i + chunkSize, bytes.length));
+      binary += String.fromCharCode.apply(null, Array.from(chunk));
     }
     const base64 = btoa(binary);
 
@@ -329,6 +346,16 @@ async function extractPdfWithAI(file: File): Promise<{
 
     if (error) {
       console.error('PDF AI extraction error:', error);
+      
+      // Check for specific error types
+      if (error.message?.includes('WORKER_LIMIT') || error.message?.includes('compute resources')) {
+        return {
+          text: '',
+          success: false,
+          message: 'This PDF is too complex for AI processing. Please try a smaller or simpler PDF, or copy and paste the text content directly.',
+        };
+      }
+      
       return {
         text: '',
         success: false,
