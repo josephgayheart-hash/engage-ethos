@@ -449,7 +449,19 @@ export interface InstitutionalConfig {
   
   // Brand Platform (extracted from Content DNA)
   brandPlatform?: BrandPlatform;
-  selectedPillars?: string[];  // User-selected pillars to emphasize in generation
+  // Brand layer selection for generation
+  brandSelection?: BrandLayerSelection;
+  // Legacy: selected pillars only (deprecated, use brandSelection)
+  selectedPillars?: string[];
+}
+
+// Brand layer selection for message generation
+export interface BrandLayerSelection {
+  pillars: string[];
+  proofPoints: string[];
+  commitments: string[];
+  pathways: string[];
+  includePromise: boolean;
 }
 
 export interface VoiceAnalysis {
