@@ -47,6 +47,8 @@ export function useContentDNAForGeneration(options: UseContentDNAForGenerationOp
       setIsLoading(false);
       return;
     }
+
+    setIsLoading(true);
     
     try {
       // If a profileId is specified, look for that specific profile's DNA
@@ -108,23 +110,8 @@ export function useContentDNAForGeneration(options: UseContentDNAForGenerationOp
           }
         }
 
-        // Fall back to tenant-level DNA
-        const { data: tenantDNA } = await supabase
-          .from('content_dna_analysis')
-          .select('voice_analysis, custom_instructions')
-          .eq('tenant_id', tenant.id)
-          .is('profile_id', null)
-          .maybeSingle();
-
-        if (tenantDNA) {
-          setContentDNA({
-            voiceAnalysis: tenantDNA.voice_analysis as ContentDNAForGeneration['voiceAnalysis'],
-            customInstructions: tenantDNA.custom_instructions,
-            sourceProfileId: null,
-          });
-          return;
-        }
-
+        // If no DNA exists for this profile (or its parent), do NOT fall back to tenant-level.
+        // This prevents one institution's DNA from "bleeding" into another when multiple universities exist in one tenant.
         setContentDNA(null);
       } else {
         // No profile selected - get tenant-level DNA

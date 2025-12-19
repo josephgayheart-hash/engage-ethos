@@ -179,9 +179,11 @@ export function ContentDNAIndicator({
               </div>
               <p className="text-xs text-muted-foreground truncate">
                 {enabled && hasContentDNA 
-                  ? tenant?.institution_name 
-                    ? `${tenant.institution_name} brand voice applied`
-                    : "Your brand voice is being applied"
+                  ? (selectedProfileName
+                      ? `${selectedProfileName} brand voice applied`
+                      : tenant?.institution_name
+                        ? `${tenant.institution_name} brand voice applied`
+                        : "Your brand voice is being applied")
                   : "Toggle to use your brand voice"
                 }
               </p>
