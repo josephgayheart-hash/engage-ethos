@@ -183,6 +183,7 @@ export interface MessageContext {
   channels?: Channel[]; // For multi-channel selection (strategy page)
   domain?: MessageDomain;
   goal?: PrimaryGoal;
+  goals?: PrimaryGoal[]; // For multi-select goals
   tone?: TonePreference;
   department?: Department;
   // Urgency & Timing

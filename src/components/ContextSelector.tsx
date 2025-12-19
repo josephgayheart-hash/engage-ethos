@@ -378,24 +378,18 @@ export function ContextSelector({ context, onChange, mode = 'evaluator' }: Conte
               <Target className="w-4 h-4 text-pillar-ethics" />
               Primary Goal
             </Label>
-            <Select
-              value={context.goal ?? ""}
-              onValueChange={(value) =>
-                onChange({ ...context, goal: value === "none" || value === "" ? undefined : value as PrimaryGoal })
+            <MultiSelectDropdown
+              options={goalOptions}
+              value={context.goals || (context.goal ? [context.goal] : [])}
+              onChange={(values) =>
+                onChange({ 
+                  ...context, 
+                  goals: values.length > 0 ? values as PrimaryGoal[] : undefined,
+                  goal: values.length > 0 ? values[0] as PrimaryGoal : undefined
+                })
               }
-            >
-              <SelectTrigger id="goal" className="w-full bg-background">
-                <SelectValue placeholder="Select goal..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">— None —</SelectItem>
-                {goalOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              placeholder="Select goals..."
+            />
           </div>
 
           <div className="space-y-2">
