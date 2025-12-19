@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Header } from "@/components/Header";
 import { InstitutionalConfig } from "@/components/InstitutionalConfig";
 import { ProfileSetupWizard } from "@/components/ProfileSetupWizard";
-import { useInstitutionalProfiles, type InstitutionalProfile } from "@/hooks/useInstitutionalProfiles";
+import { SubUnitSetupWizard } from "@/components/SubUnitSetupWizard";
+import { useInstitutionalProfiles, type InstitutionalProfile, type ProfileType } from "@/hooks/useInstitutionalProfiles";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,32 +42,86 @@ import {
   Palette,
   CheckCircle2,
   Circle,
-  Dna
+  Dna,
+  GraduationCap,
+  Layers,
+  Building,
+  Briefcase,
+  ChevronDown
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
-import type { InstitutionalConfig as InstitutionalConfigType } from "@/types/uplaybook";
+import type { InstitutionalConfig as InstitutionalConfigType, ProfileType as ConfigProfileType } from "@/types/uplaybook";
+
+const PROFILE_TYPE_ICONS: Record<ProfileType, React.ReactNode> = {
+  university: <Building2 className="w-4 h-4" />,
+  college: <GraduationCap className="w-4 h-4" />,
+  division: <Layers className="w-4 h-4" />,
+  unit: <Building className="w-4 h-4" />,
+  department: <Briefcase className="w-4 h-4" />,
+};
+
+const PROFILE_TYPE_LABELS: Record<ProfileType, string> = {
+  university: 'University',
+  college: 'College',
+  division: 'Division',
+  unit: 'Unit',
+  department: 'Department',
+};
 
 const SettingsPage = () => {
-  const { profiles, createProfile, updateProfile, deleteProfile, duplicateProfile } = useInstitutionalProfiles();
+  const { profiles, createProfile, updateProfile, deleteProfile, duplicateProfile, getChildProfiles, getRootProfiles, getParentProfile } = useInstitutionalProfiles();
   const { toast } = useToast();
   
   const [editingProfile, setEditingProfile] = useState<InstitutionalProfile | null>(null);
   const [showWizard, setShowWizard] = useState(false);
+  const [showSubUnitWizard, setShowSubUnitWizard] = useState(false);
+  const [subUnitParent, setSubUnitParent] = useState<InstitutionalProfile | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [profileToDelete, setProfileToDelete] = useState<InstitutionalProfile | null>(null);
   const [duplicateName, setDuplicateName] = useState("");
   const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
   const [profileToDuplicate, setProfileToDuplicate] = useState<InstitutionalProfile | null>(null);
+  const [expandedProfiles, setExpandedProfiles] = useState<Set<string>>(new Set());
+
+  const toggleExpanded = (profileId: string) => {
+    setExpandedProfiles(prev => {
+      const next = new Set(prev);
+      if (next.has(profileId)) {
+        next.delete(profileId);
+      } else {
+        next.add(profileId);
+      }
+      return next;
+    });
+  };
 
   const handleCreateProfile = async (name: string, config: InstitutionalConfigType) => {
-    const profile = await createProfile(name, config);
+    const profile = await createProfile(name, config, null, 'university');
     setShowWizard(false);
     if (profile) {
       setEditingProfile(profile);
       toast({ title: "Profile created", description: `"${profile.name}" is ready to use.` });
     }
+  };
+
+  const handleCreateSubUnit = async (name: string, config: InstitutionalConfigType, profileType: ConfigProfileType) => {
+    if (!subUnitParent) return;
+    const profile = await createProfile(name, config, subUnitParent.id, profileType as ProfileType);
+    setShowSubUnitWizard(false);
+    setSubUnitParent(null);
+    if (profile) {
+      // Expand parent to show the new sub-unit
+      setExpandedProfiles(prev => new Set([...prev, subUnitParent.id]));
+      setEditingProfile(profile);
+      toast({ title: `${PROFILE_TYPE_LABELS[profileType as ProfileType]} created`, description: `"${name}" is now part of ${subUnitParent.name}.` });
+    }
+  };
+
+  const openSubUnitWizard = (parentProfile: InstitutionalProfile) => {
+    setSubUnitParent(parentProfile);
+    setShowSubUnitWizard(true);
   };
 
   const handleUpdateConfig = async (config: InstitutionalConfigType) => {
@@ -242,6 +297,29 @@ const SettingsPage = () => {
                 />
               </CardContent>
             </Card>
+          ) : showSubUnitWizard && subUnitParent ? (
+            // Sub-Unit Setup Wizard
+            <Card className="col-span-full">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Layers className="w-5 h-5" />
+                  Create Sub-Unit
+                </CardTitle>
+                <CardDescription>
+                  Create a college, division, unit, or department under {subUnitParent.name}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <SubUnitSetupWizard
+                  parentProfile={subUnitParent}
+                  onComplete={handleCreateSubUnit}
+                  onCancel={() => {
+                    setShowSubUnitWizard(false);
+                    setSubUnitParent(null);
+                  }}
+                />
+              </CardContent>
+            </Card>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Profile List */}
@@ -271,68 +349,141 @@ const SettingsPage = () => {
                   </Card>
                 ) : (
                 <div className="space-y-2">
-                  {profiles.map(profile => (
-                    <Card 
-                      key={profile.id}
-                      className={`cursor-pointer transition-all hover:border-secondary/50 ${
-                        editingProfile?.id === profile.id 
-                          ? 'border-secondary bg-secondary/5 shadow-sm' 
-                          : ''
-                      }`}
-                      onClick={() => setEditingProfile(profile)}
-                    >
-                      <CardContent className="p-3">
-                        <div className="flex items-start gap-3">
-                          {/* Profile Icon/Logo */}
-                          {profile.config.logoUrl ? (
-                            <img
-                              src={profile.config.logoUrl}
-                              alt={profile.name}
-                              className="w-10 h-10 object-contain rounded bg-white border p-1 flex-shrink-0"
-                            />
-                          ) : (
-                            <div
-                              className="w-10 h-10 rounded flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
-                              style={{ backgroundColor: profile.config.primaryColor || '#1F2A44' }}
-                            >
-                              {(profile.config.institutionAbbreviation || profile.name)?.charAt(0) || 'U'}
-                            </div>
-                          )}
-                          
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-medium text-sm truncate">{profile.name}</h3>
-                              {editingProfile?.id === profile.id && (
-                                <Badge variant="secondary" className="text-[10px] h-4 px-1">
-                                  Editing
-                                </Badge>
+                  {/* Render profiles hierarchically */}
+                  {getRootProfiles().map(profile => {
+                    const children = getChildProfiles(profile.id);
+                    const hasChildren = children.length > 0;
+                    const isExpanded = expandedProfiles.has(profile.id);
+                    
+                    return (
+                      <div key={profile.id}>
+                        {/* Parent Profile Card */}
+                        <Card 
+                          className={`cursor-pointer transition-all hover:border-secondary/50 ${
+                            editingProfile?.id === profile.id 
+                              ? 'border-secondary bg-secondary/5 shadow-sm' 
+                              : ''
+                          }`}
+                        >
+                          <CardContent className="p-3">
+                            <div className="flex items-start gap-3">
+                              {/* Expand/Collapse button for profiles with children */}
+                              {hasChildren ? (
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleExpanded(profile.id);
+                                  }}
+                                  className="mt-2 p-0.5 hover:bg-muted rounded transition-colors"
+                                >
+                                  <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isExpanded ? '' : '-rotate-90'}`} />
+                                </button>
+                              ) : (
+                                <div className="w-5" />
                               )}
-                            </div>
-                            <p className="text-xs text-muted-foreground truncate mt-0.5">
-                              {getProfileSummary(profile)}
-                            </p>
-                            {/* Color swatches */}
-                            <div className="flex items-center gap-2 mt-1.5">
-                              <div className="flex items-center gap-1">
-                                <div
-                                  className="w-3 h-3 rounded-full border"
-                                  style={{ backgroundColor: profile.config.primaryColor || '#1F2A44' }}
-                                />
-                                <div
-                                  className="w-3 h-3 rounded-full border"
-                                  style={{ backgroundColor: profile.config.accentColor || '#2C7A7B' }}
-                                />
+                              
+                              {/* Profile Icon/Logo */}
+                              <div 
+                                className="flex-1 flex items-start gap-3"
+                                onClick={() => setEditingProfile(profile)}
+                              >
+                                {profile.config.logoUrl ? (
+                                  <img
+                                    src={profile.config.logoUrl}
+                                    alt={profile.name}
+                                    className="w-10 h-10 object-contain rounded bg-white border p-1 flex-shrink-0"
+                                  />
+                                ) : (
+                                  <div
+                                    className="w-10 h-10 rounded flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                                    style={{ backgroundColor: profile.config.primaryColor || '#1F2A44' }}
+                                  >
+                                    {(profile.config.institutionAbbreviation || profile.name)?.charAt(0) || 'U'}
+                                  </div>
+                                )}
+                                
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[profile.profileType]}</span>
+                                    <h3 className="font-medium text-sm truncate">{profile.name}</h3>
+                                    {editingProfile?.id === profile.id && (
+                                      <Badge variant="secondary" className="text-[10px] h-4 px-1">
+                                        Editing
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <p className="text-xs text-muted-foreground truncate mt-0.5">
+                                    {getProfileSummary(profile)}
+                                  </p>
+                                  {/* Color swatches and child count */}
+                                  <div className="flex items-center gap-2 mt-1.5">
+                                    <div className="flex items-center gap-1">
+                                      <div
+                                        className="w-3 h-3 rounded-full border"
+                                        style={{ backgroundColor: profile.config.primaryColor || '#1F2A44' }}
+                                      />
+                                      <div
+                                        className="w-3 h-3 rounded-full border"
+                                        style={{ backgroundColor: profile.config.accentColor || '#2C7A7B' }}
+                                      />
+                                    </div>
+                                    {hasChildren && (
+                                      <Badge variant="outline" className="text-[10px] h-4 px-1">
+                                        {children.length} sub-unit{children.length > 1 ? 's' : ''}
+                                      </Badge>
+                                    )}
+                                    <span className="text-[10px] text-muted-foreground">
+                                      {format(new Date(profile.updatedAt), 'MMM d')}
+                                    </span>
+                                  </div>
+                                </div>
+                                <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-1" />
                               </div>
-                              <span className="text-[10px] text-muted-foreground">
-                                {format(new Date(profile.updatedAt), 'MMM d')}
-                              </span>
                             </div>
+                          </CardContent>
+                        </Card>
+                        
+                        {/* Child Profiles (Sub-Units) */}
+                        {hasChildren && isExpanded && (
+                          <div className="ml-6 mt-1 space-y-1 border-l-2 border-muted pl-2">
+                            {children.map(child => (
+                              <Card 
+                                key={child.id}
+                                className={`cursor-pointer transition-all hover:border-secondary/50 ${
+                                  editingProfile?.id === child.id 
+                                    ? 'border-secondary bg-secondary/5 shadow-sm' 
+                                    : ''
+                                }`}
+                                onClick={() => setEditingProfile(child)}
+                              >
+                                <CardContent className="p-2.5">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[child.profileType]}</span>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-2">
+                                        <h4 className="font-medium text-sm truncate">
+                                          {child.config.unitName || child.name}
+                                        </h4>
+                                        <Badge variant="outline" className="text-[10px] h-4 px-1">
+                                          {PROFILE_TYPE_LABELS[child.profileType]}
+                                        </Badge>
+                                        {editingProfile?.id === child.id && (
+                                          <Badge variant="secondary" className="text-[10px] h-4 px-1">
+                                            Editing
+                                          </Badge>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <ChevronRight className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ))}
                           </div>
-                          <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-1" />
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -345,25 +496,49 @@ const SettingsPage = () => {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-3">
+                          <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[editingProfile.profileType]}</span>
                           <Input
-                            value={editingProfile.name}
-                            onChange={(e) => handleRenameProfile(e.target.value)}
+                            value={editingProfile.config.unitName || editingProfile.name}
+                            onChange={(e) => {
+                              if (editingProfile.profileType === 'university') {
+                                handleRenameProfile(e.target.value);
+                              } else {
+                                handleUpdateConfig({ ...editingProfile.config, unitName: e.target.value });
+                              }
+                            }}
                             className="font-serif text-lg font-bold h-auto py-1 px-2 border-transparent hover:border-border focus:border-border max-w-xs"
                           />
-                          <Sparkles className="w-4 h-4 text-secondary" />
+                          {editingProfile.profileType !== 'university' && (
+                            <Badge variant="outline">{PROFILE_TYPE_LABELS[editingProfile.profileType]}</Badge>
+                          )}
                         </div>
                         <CardDescription className="mt-1">
-                          Configure Content DNA, terminology, and branding for this profile
+                          {editingProfile.profileType === 'university' 
+                            ? 'Configure Content DNA, terminology, and branding for this profile'
+                            : `Part of ${getParentProfile(editingProfile.id)?.name || 'parent institution'}`
+                          }
                         </CardDescription>
                       </div>
                       <div className="flex items-center gap-1">
+                        {/* Add Sub-Unit button for university profiles */}
+                        {editingProfile.profileType === 'university' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 gap-1"
+                            onClick={() => openSubUnitWizard(editingProfile)}
+                          >
+                            <Plus className="w-3 h-3" />
+                            Add Sub-Unit
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8"
                           onClick={() => {
                             setProfileToDuplicate(editingProfile);
-                            setDuplicateName(`${editingProfile.name} (Copy)`);
+                            setDuplicateName(`${editingProfile.config.unitName || editingProfile.name} (Copy)`);
                             setDuplicateDialogOpen(true);
                           }}
                         >
