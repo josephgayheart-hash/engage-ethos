@@ -16,9 +16,10 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useJourneyExport } from "@/hooks/useJourneyExport";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { JourneyViewer, isJourneyContent, parseJourneyContent } from "@/components/library/JourneyViewer";
+import { ChannelPreview } from "@/components/ChannelPreview";
 import { openInGoogleDocs, formatForGoogleDocs } from "@/lib/googleDocsExport";
 import type { LibraryEntryStatus } from "@/types/library";
-import type { InstitutionalConfig } from "@/types/uplaybook";
+import type { InstitutionalConfig, Channel, ChannelDrafts } from "@/types/uplaybook";
 import { useAuth } from "@/contexts/AuthContext";
 import { 
   ChevronRight, 
@@ -53,6 +54,26 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+
+// Helper to parse structured content from template
+const parseTemplateContent = (content: string, channel: string): ChannelDrafts[keyof ChannelDrafts] | null => {
+  try {
+    // Try to parse as JSON first (for structured content like talking points)
+    const parsed = JSON.parse(content);
+    return parsed;
+  } catch {
+    // If not JSON, treat as plain text based on channel type
+    if (channel === 'email') {
+      const subjectMatch = content.match(/Subject:\s*(.+?)(?:\n|$)/i);
+      const bodyStart = content.indexOf('\n\n');
+      return {
+        subject: subjectMatch?.[1] || 'No subject',
+        body: bodyStart > -1 ? content.slice(bodyStart + 2) : content,
+      };
+    }
+    return content;
+  }
+};
 
 const statusConfig: Record<LibraryEntryStatus, { label: string; icon: typeof CheckCircle; variant: 'default' | 'secondary' | 'outline' }> = {
   draft: { label: 'Draft', icon: FileText, variant: 'outline' },
@@ -193,8 +214,8 @@ const TemplateDetailPage = () => {
     );
   };
 
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(customizedContent);
+  const handleCopy = async (text?: string) => {
+    await navigator.clipboard.writeText(text || customizedContent);
     setCopied(true);
     toast({ title: "Copied to clipboard" });
     setTimeout(() => setCopied(false), 2000);
@@ -420,82 +441,22 @@ const TemplateDetailPage = () => {
                   </CardContent>
                 </Card>
               ) : (
-                <Card className="card-elevated">
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <FileText className="w-5 h-5 text-secondary" />
-                      {isEditing ? 'Edit Content' : 'Live Preview'}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {isEditing ? (
-                      <>
-                        <Textarea
-                          value={editedContent}
-                          onChange={(e) => setEditedContent(e.target.value)}
-                          className="min-h-[300px] font-sans text-sm leading-relaxed resize-y"
-                          placeholder="Edit the content here..."
-                        />
-                        <div className="flex items-center gap-2">
-                          <Button onClick={handleSaveEdit} size="sm" className="bg-green-600 hover:bg-green-700">
-                            <Save className="w-4 h-4 mr-2" />
-                            Save Changes
-                          </Button>
-                          <Button onClick={handleCancelEdit} variant="ghost" size="sm">
-                            <X className="w-4 h-4 mr-2" />
-                            Cancel
-                          </Button>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="relative p-4 bg-card border border-border rounded-lg">
-                          <div className="absolute top-2 right-2 flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={handleCopy}
-                              title="Copy to clipboard"
-                            >
-                              {copied ? (
-                                <CheckCircle className="w-4 h-4 text-green-600" />
-                              ) : (
-                                <Copy className="w-4 h-4" />
-                              )}
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={handleOpenInGoogleDocs}
-                              title="Open in Google Docs"
-                            >
-                              <ExternalLink className="w-4 h-4" />
-                            </Button>
-                          </div>
-                          <p className="text-sm whitespace-pre-wrap pr-24">{displayContent}</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button onClick={handleStartEdit} variant="outline" size="sm">
-                            <Pencil className="w-4 h-4 mr-2" />
-                            Edit
-                          </Button>
-                          {isJourney && journeyData && (
-                            <>
-                              <Button onClick={exportToPdf} variant="outline" size="sm" disabled={isExporting}>
-                                <FileDown className="w-4 h-4 mr-2" />
-                                {isExporting ? "Exporting..." : "Export PDF"}
-                              </Button>
-                              <Button onClick={printJourney} variant="outline" size="sm">
-                                <Printer className="w-4 h-4 mr-2" />
-                                Print
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </CardContent>
-                </Card>
+                (() => {
+                  // Determine the channel from template's requiredFields
+                  const templateChannel = (template.requiredFields.channel[0] || 'email') as Channel;
+                  
+                  // Try to parse the content into structured format
+                  const parsedContent = parseTemplateContent(displayContent, templateChannel);
+                  
+                  return (
+                    <ChannelPreview
+                      channel={templateChannel}
+                      content={parsedContent}
+                      onCopy={handleCopy}
+                      onSaveToLibrary={() => handlePull()}
+                    />
+                  );
+                })()
               )}
 
               {/* Use Cases - only show if data exists */}
