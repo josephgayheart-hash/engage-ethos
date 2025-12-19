@@ -12,6 +12,7 @@ import { LibraryNav } from "@/components/LibraryNav";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
 import { ContentDNAIndicator, ContentDNAActiveBadge } from "@/components/ContentDNAIndicator";
 import { CadenceSelector, CadenceFrequency, EscalationPattern } from "@/components/CadenceSelector";
+import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,6 +92,8 @@ const StrategyPage = () => {
   const [escalation, setEscalation] = useState<EscalationPattern>('none');
   const [estimatedTouchpoints, setEstimatedTouchpoints] = useState<number>(12);
   const [useContentDNA, setUseContentDNA] = useState(true);
+  const [saveToLibraryOpen, setSaveToLibraryOpen] = useState(false);
+  const [saveToLibraryType, setSaveToLibraryType] = useState<'personal' | 'shared'>('personal');
 
   // Auto-calculate weeks when dates change
   const handleStartDateChange = (date: Date | undefined) => {
@@ -177,8 +180,14 @@ const StrategyPage = () => {
     setMapperResult(null);
   };
 
-  const handleSaveToLibrary = () => {
+  const handleSaveToLibraryClick = () => {
     if (!mapperResult?.journey) return;
+    setSaveToLibraryType('personal');
+    setSaveToLibraryOpen(true);
+  };
+
+  const handleSaveToLibraryConfirm = (name: string): string | undefined => {
+    if (!mapperResult?.journey) return undefined;
 
     // Include journey data with metadata for diagram rendering
     const journeyWithMetadata = {
@@ -199,10 +208,9 @@ const StrategyPage = () => {
     };
     
     const journeyContent = JSON.stringify(journeyWithMetadata, null, 2);
-    const title = `Strategy Journey: ${context.audience} - ${context.moment} (${journeyWeeks} weeks)`;
     
-    addMessage({
-      title,
+    const savedMessage = addMessage({
+      title: name,
       content: journeyContent,
       channel: context.channel,
       audience: context.audience,
@@ -215,14 +223,17 @@ const StrategyPage = () => {
       mode: 'generated',
     });
 
-    toast({
-      title: "Saved to Personal Library",
-      description: "Your strategy journey has been saved.",
-    });
+    return savedMessage.id;
   };
 
-  const handleShareToLibrary = () => {
+  const handleShareToLibraryClick = () => {
     if (!mapperResult?.journey) return;
+    setSaveToLibraryType('shared');
+    setSaveToLibraryOpen(true);
+  };
+
+  const handleShareToLibraryConfirm = (name: string): string | undefined => {
+    if (!mapperResult?.journey) return undefined;
 
     const journey = mapperResult.journey;
     
@@ -244,8 +255,8 @@ const StrategyPage = () => {
       }
     };
     
-    addTemplate({
-      title: `Strategy Journey: ${context.audience} - ${context.moment}`,
+    const savedTemplate = addTemplate({
+      title: name,
       intentStatement: journey.overview,
       content: JSON.stringify(journeyWithMetadata, null, 2),
       playbook: 'Strategy Journeys',
@@ -266,10 +277,7 @@ const StrategyPage = () => {
       placeholders: [],
     });
 
-    toast({
-      title: "Submitted for Review",
-      description: "Your strategy journey has been submitted to the shared library for admin approval.",
-    });
+    return savedTemplate.id;
   };
 
   // PDF Export function
@@ -740,11 +748,11 @@ const StrategyPage = () => {
                           </>
                         )}
                       </Button>
-                      <Button variant="outline" onClick={handleSaveToLibrary}>
+                      <Button variant="outline" onClick={handleSaveToLibraryClick}>
                         <Save className="w-4 h-4 mr-2" />
                         Save to My Library
                       </Button>
-                      <Button variant="default" onClick={handleShareToLibrary}>
+                      <Button variant="default" onClick={handleShareToLibraryClick}>
                         <Share2 className="w-4 h-4 mr-2" />
                         Send to Shared Library
                       </Button>
@@ -875,6 +883,15 @@ const StrategyPage = () => {
           )}
         </div>
       </main>
+
+      <SaveToLibraryDialog
+        open={saveToLibraryOpen}
+        onOpenChange={setSaveToLibraryOpen}
+        onSave={saveToLibraryType === 'personal' ? handleSaveToLibraryConfirm : handleShareToLibraryConfirm}
+        libraryType={saveToLibraryType}
+        defaultName={`Strategy Journey: ${audienceLabels[context.audience || ''] || context.audience} - ${context.moment} (${journeyWeeks} weeks)`}
+        contentType="journey"
+      />
     </div>
   );
 };
