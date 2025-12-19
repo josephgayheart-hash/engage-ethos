@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Users, Clock, Mail, Briefcase, Target, MessageSquare, Building2 } from "lucide-react";
+import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown";
 import type { 
   MessageContext, 
   AudienceType, 
@@ -278,24 +279,18 @@ export function ContextSelector({ context, onChange, mode = 'evaluator' }: Conte
             <Clock className="w-4 h-4 text-pillar-cognitive" />
             Communication Moment
           </Label>
-          <Select
-            value={context.moment ?? ""}
-            onValueChange={(value) =>
-              onChange({ ...context, moment: value === "none" || value === "" ? undefined : value as CommunicationMoment })
+          <MultiSelectDropdown
+            options={momentOptions}
+            value={context.moments || (context.moment ? [context.moment] : [])}
+            onChange={(values) =>
+              onChange({ 
+                ...context, 
+                moments: values.length > 0 ? values as CommunicationMoment[] : undefined,
+                moment: values.length > 0 ? values[0] as CommunicationMoment : undefined
+              })
             }
-          >
-            <SelectTrigger id="moment" className="w-full bg-background">
-              <SelectValue placeholder="Select moment..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">— None —</SelectItem>
-              {momentOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            placeholder="Select moments..."
+          />
         </div>
 
         {!hideChannel && (
