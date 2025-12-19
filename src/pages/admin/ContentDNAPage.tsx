@@ -171,17 +171,53 @@ export default function ContentDNAPage() {
             ) : null}
             <span className="text-[hsl(222,47%,11%)]">Content DNA</span>
           </div>
-          <div className="flex items-center justify-between">
-            <div>
+          
+          {/* Institution Branding Header */}
+          <div className="flex items-center gap-4 mb-4">
+            {tenant?.logo_url ? (
+              <img 
+                src={tenant.logo_url} 
+                alt={`${tenant.institution_name} logo`}
+                className="w-16 h-16 object-contain rounded-lg border border-[hsl(220,13%,88%)] bg-white p-1"
+              />
+            ) : (
+              <div 
+                className="w-16 h-16 rounded-lg flex items-center justify-center text-white font-bold text-xl"
+                style={{ backgroundColor: tenant?.primary_color || 'hsl(222,47%,14%)' }}
+              >
+                {tenant?.institution_name?.charAt(0) || 'U'}
+              </div>
+            )}
+            <div className="flex-1">
               <h1 className="font-serif text-2xl font-bold text-[hsl(222,47%,11%)] flex items-center gap-2">
-                <Dna className="w-6 h-6" />
-                Content DNA Center
+                {tenant?.institution_name || 'Content DNA Center'}
               </h1>
               <p className="text-[hsl(220,14%,46%)]">
-                Refine your institution's voice and messaging patterns
+                Content DNA Center
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              {/* Color Swatches */}
+              <div className="flex items-center gap-2">
+                <Tooltip>
+                  <TooltipTrigger>
+                    <div 
+                      className="w-6 h-6 rounded-full border border-[hsl(220,13%,88%)]"
+                      style={{ backgroundColor: tenant?.primary_color || 'hsl(222,47%,14%)' }}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>Primary Color</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <div 
+                      className="w-6 h-6 rounded-full border border-[hsl(220,13%,88%)]"
+                      style={{ backgroundColor: tenant?.accent_color || 'hsl(173,58%,39%)' }}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>Accent Color</TooltipContent>
+                </Tooltip>
+              </div>
               <Badge variant="outline" className="flex items-center gap-1">
                 <FileText className="w-3 h-3" />
                 {samples.length} samples
@@ -198,12 +234,39 @@ export default function ContentDNAPage() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="samples" className="space-y-6">
+        {/* Instructional Text */}
+        <Card className="mb-6 border-[hsl(220,13%,88%)] bg-gradient-to-r from-[hsl(222,47%,14%)] to-[hsl(222,47%,20%)] text-white">
+          <CardContent className="py-5">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-white/10 rounded-lg shrink-0">
+                <Dna className="w-8 h-8" />
+              </div>
+              <div>
+                <h2 className="font-serif text-xl font-bold mb-2">What is Content DNA?</h2>
+                <p className="text-white/80 text-sm leading-relaxed">
+                  Content DNA captures your institution's unique voice and communication style. By uploading examples of your best communications—emails, newsletters, news stories, and more—our AI analyzes the patterns, tone, and vocabulary that make your messaging distinctly yours. This analysis then guides all AI-generated content to match your established brand voice.
+                </p>
+                <div className="flex items-center gap-4 mt-3 text-sm text-white/60">
+                  <span className="flex items-center gap-1">
+                    <Upload className="w-4 h-4" />
+                    Upload content samples
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Sparkles className="w-4 h-4" />
+                    Analyze your voice
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <CheckCircle2 className="w-4 h-4" />
+                    Generate on-brand content
+                  </span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Tabs defaultValue="upload" className="space-y-6">
           <TabsList className="bg-white border border-[hsl(220,13%,88%)]">
-            <TabsTrigger value="samples" className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4" />
-              Sample Library
-            </TabsTrigger>
             <TabsTrigger value="upload" className="flex items-center gap-2">
               <Upload className="w-4 h-4" />
               Upload Content
@@ -216,127 +279,11 @@ export default function ContentDNAPage() {
               <Settings className="w-4 h-4" />
               Brand Guidelines
             </TabsTrigger>
+            <TabsTrigger value="library" className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              Content Library
+            </TabsTrigger>
           </TabsList>
-
-          {/* Sample Library Tab */}
-          <TabsContent value="samples">
-            <Card className="border-[hsl(220,13%,88%)]">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-[hsl(222,47%,11%)]">Content Samples</CardTitle>
-                    <CardDescription>
-                      Your collection of brand communications used for voice analysis
-                    </CardDescription>
-                  </div>
-                  {isAdmin && (
-                    <Button
-                      onClick={analyzeVoice}
-                      disabled={isAnalyzing || samples.length === 0}
-                      className="bg-[hsl(173,58%,39%)] hover:bg-[hsl(173,58%,34%)]"
-                    >
-                      {isAnalyzing ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Analyzing...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-4 h-4 mr-2" />
-                          Analyze All Samples
-                        </>
-                      )}
-                    </Button>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                {samples.length === 0 ? (
-                  <div className="text-center py-12 text-[hsl(220,14%,46%)]">
-                    <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p className="font-medium">No samples yet</p>
-                    <p className="text-sm">Upload content to start building your Content DNA profile</p>
-                  </div>
-                ) : (
-                  <ScrollArea className="h-[400px]">
-                    <div className="space-y-3">
-                      {samples.map((sample) => {
-                        const isOwnSample = sample.user_id === profile?.id;
-                        const canDelete = isOwnSample || isAdmin;
-                        
-                        return (
-                          <div
-                            key={sample.id}
-                            className="p-4 border border-[hsl(220,13%,88%)] rounded-lg bg-white hover:bg-[hsl(210,20%,98%)] transition-colors"
-                          >
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <h4 className="font-medium text-[hsl(222,47%,11%)] truncate">
-                                    {sample.title || sample.file_name}
-                                  </h4>
-                                  <Badge variant="outline" className="text-xs">
-                                    {SAMPLE_TYPES.find(t => t.value === sample.sample_type)?.label || sample.sample_type}
-                                  </Badge>
-                                  {!isOwnSample && (
-                                    <Tooltip>
-                                      <TooltipTrigger>
-                                        <Badge variant="secondary" className="text-xs flex items-center gap-1">
-                                          <User className="w-3 h-3" />
-                                          Team
-                                        </Badge>
-                                      </TooltipTrigger>
-                                      <TooltipContent>
-                                        <p>Added by a teammate</p>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  )}
-                                </div>
-                                {sample.source_description && (
-                                  <p className="text-sm text-[hsl(220,14%,46%)] mb-2">
-                                    {sample.source_description}
-                                  </p>
-                                )}
-                                <p className="text-sm text-[hsl(220,14%,46%)] line-clamp-2">
-                                  {sample.content_text?.substring(0, 200)}...
-                                </p>
-                                <div className="flex items-center gap-4 mt-2 text-xs text-[hsl(220,14%,46%)]">
-                                  <span className="flex items-center gap-1">
-                                    <Clock className="w-3 h-3" />
-                                    {formatDate(sample.created_at)}
-                                  </span>
-                                  {sample.file_size && (
-                                    <span>{Math.round(sample.file_size / 1024)} KB</span>
-                                  )}
-                                </div>
-                              </div>
-                              {canDelete && (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="text-[hsl(0,84%,60%)] hover:text-[hsl(0,84%,50%)] hover:bg-red-50"
-                                      onClick={() => deleteSample(sample.id)}
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>{isOwnSample ? 'Delete your sample' : 'Delete (admin)'}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </ScrollArea>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
 
           {/* Upload Content Tab */}
           <TabsContent value="upload">
@@ -469,90 +416,43 @@ export default function ContentDNAPage() {
               </CardContent>
             </Card>
 
-            {/* Uploaded Samples Table */}
+            {/* Recent Uploads Summary */}
             {samples.length > 0 && (
-              <Card className="mt-6 border-[hsl(220,13%,88%)]">
-                <CardHeader>
-                  <CardTitle className="text-[hsl(222,47%,11%)] flex items-center gap-2">
-                    <FileText className="w-5 h-5" />
-                    Uploaded Samples
-                  </CardTitle>
-                  <CardDescription>
-                    {samples.length} content samples in your library
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="border rounded-lg overflow-hidden">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="bg-[hsl(210,20%,98%)]">
-                          <TableHead className="font-semibold">Title</TableHead>
-                          <TableHead className="font-semibold">Type</TableHead>
-                          <TableHead className="font-semibold">Added By</TableHead>
-                          <TableHead className="font-semibold">Date Added</TableHead>
-                          <TableHead className="font-semibold">Size</TableHead>
-                          <TableHead className="w-12"></TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {samples.map((sample) => {
-                          const isOwnSample = sample.user_id === profile?.id;
-                          const canDelete = isOwnSample || isAdmin;
-                          
-                          return (
-                            <TableRow key={sample.id} className="hover:bg-[hsl(210,20%,98%)]">
-                              <TableCell>
-                                <div>
-                                  <p className="font-medium text-[hsl(222,47%,11%)]">
-                                    {sample.title || sample.file_name}
-                                  </p>
-                                  {sample.source_description && (
-                                    <p className="text-xs text-[hsl(220,14%,46%)] truncate max-w-[250px]">
-                                      {sample.source_description}
-                                    </p>
-                                  )}
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <Badge variant="outline" className="text-xs">
-                                  {SAMPLE_TYPES.find(t => t.value === sample.sample_type)?.label || sample.sample_type}
-                                </Badge>
-                              </TableCell>
-                              <TableCell>
-                                <Badge variant={isOwnSample ? 'default' : 'secondary'} className="text-xs">
-                                  {isOwnSample ? 'You' : 'Team'}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-sm text-[hsl(220,14%,46%)]">
-                                {formatDate(sample.created_at)}
-                              </TableCell>
-                              <TableCell className="text-sm text-[hsl(220,14%,46%)]">
-                                {sample.file_size ? `${Math.round(sample.file_size / 1024)} KB` : '—'}
-                              </TableCell>
-                              <TableCell>
-                                {canDelete && (
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="text-[hsl(0,84%,60%)] hover:text-[hsl(0,84%,50%)] hover:bg-red-50"
-                                        onClick={() => deleteSample(sample.id)}
-                                      >
-                                        <Trash2 className="w-4 h-4" />
-                                      </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>{isOwnSample ? 'Delete your sample' : 'Delete (admin)'}</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
+              <Card className="mt-6 border-[hsl(220,13%,88%)] bg-[hsl(173,58%,39%)]/5">
+                <CardContent className="py-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-[hsl(173,58%,39%)]/10">
+                        <CheckCircle2 className="w-5 h-5 text-[hsl(173,58%,39%)]" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-[hsl(222,47%,11%)]">
+                          {samples.length} content sample{samples.length !== 1 ? 's' : ''} uploaded
+                        </p>
+                        <p className="text-sm text-[hsl(220,14%,46%)]">
+                          View all samples in the Content Library tab
+                        </p>
+                      </div>
+                    </div>
+                    {isAdmin && (
+                      <Button
+                        onClick={analyzeVoice}
+                        disabled={isAnalyzing}
+                        className="bg-[hsl(173,58%,39%)] hover:bg-[hsl(173,58%,34%)]"
+                      >
+                        {isAnalyzing ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Analyzing...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            Analyze Samples
+                          </>
+                        )}
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -772,41 +672,120 @@ export default function ContentDNAPage() {
               </CardContent>
             </Card>
 
-            {/* How it Works */}
-            <Card className="mt-6 border-[hsl(220,13%,88%)] bg-[hsl(210,20%,98%)]">
+          </TabsContent>
+
+          {/* Content Library Tab */}
+          <TabsContent value="library">
+            <Card className="border-[hsl(220,13%,88%)]">
               <CardHeader>
-                <CardTitle className="text-[hsl(222,47%,11%)] text-lg">How Content DNA Works</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-3 gap-6">
-                  <div className="text-center">
-                    <div className="w-12 h-12 rounded-full bg-[hsl(222,47%,14%)] text-white flex items-center justify-center mx-auto mb-3">
-                      1
-                    </div>
-                    <h4 className="font-medium text-[hsl(222,47%,11%)] mb-1">Upload Samples</h4>
-                    <p className="text-sm text-[hsl(220,14%,46%)]">
-                      Add emails, newsletters, and other communications that represent your brand voice
-                    </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-[hsl(222,47%,11%)]">Content Library</CardTitle>
+                    <CardDescription>
+                      Your collection of brand communications used for voice analysis
+                    </CardDescription>
                   </div>
-                  <div className="text-center">
-                    <div className="w-12 h-12 rounded-full bg-[hsl(173,58%,39%)] text-white flex items-center justify-center mx-auto mb-3">
-                      2
-                    </div>
-                    <h4 className="font-medium text-[hsl(222,47%,11%)] mb-1">Analyze Voice</h4>
-                    <p className="text-sm text-[hsl(220,14%,46%)]">
-                      AI extracts tone, style, vocabulary patterns, and messaging characteristics
-                    </p>
-                  </div>
-                  <div className="text-center">
-                    <div className="w-12 h-12 rounded-full bg-[hsl(45,93%,47%)] text-white flex items-center justify-center mx-auto mb-3">
-                      3
-                    </div>
-                    <h4 className="font-medium text-[hsl(222,47%,11%)] mb-1">Generate On-Brand</h4>
-                    <p className="text-sm text-[hsl(220,14%,46%)]">
-                      All AI-generated messages automatically reflect your institution's unique voice
-                    </p>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="flex items-center gap-1">
+                      <FileText className="w-3 h-3" />
+                      {samples.length} samples
+                    </Badge>
+                    {isAdmin && samples.length > 0 && (
+                      <Button
+                        onClick={analyzeVoice}
+                        disabled={isAnalyzing}
+                        className="bg-[hsl(173,58%,39%)] hover:bg-[hsl(173,58%,34%)]"
+                      >
+                        {isAnalyzing ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Analyzing...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            Re-analyze Voice
+                          </>
+                        )}
+                      </Button>
+                    )}
                   </div>
                 </div>
+              </CardHeader>
+              <CardContent>
+                {samples.length === 0 ? (
+                  <div className="text-center py-12 text-[hsl(220,14%,46%)]">
+                    <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p className="font-medium">No content samples yet</p>
+                    <p className="text-sm">Upload content using the Upload Content tab to start building your Content DNA profile</p>
+                  </div>
+                ) : (
+                  <ScrollArea className="h-[500px]">
+                    <div className="space-y-3">
+                      {samples.map((sample) => {
+                        const isOwnSample = sample.user_id === profile?.id;
+                        const canDelete = isOwnSample || isAdmin;
+                        
+                        return (
+                          <div
+                            key={sample.id}
+                            className="p-4 border border-[hsl(220,13%,88%)] rounded-lg bg-white hover:bg-[hsl(210,20%,98%)] transition-colors"
+                          >
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h4 className="font-medium text-[hsl(222,47%,11%)] truncate">
+                                    {sample.title || sample.file_name}
+                                  </h4>
+                                  <Badge variant="outline" className="text-xs">
+                                    {SAMPLE_TYPES.find(t => t.value === sample.sample_type)?.label || sample.sample_type}
+                                  </Badge>
+                                  <Badge variant={isOwnSample ? 'default' : 'secondary'} className="text-xs">
+                                    {isOwnSample ? 'You' : 'Team'}
+                                  </Badge>
+                                </div>
+                                {sample.source_description && (
+                                  <p className="text-sm text-[hsl(220,14%,46%)] mb-2">
+                                    {sample.source_description}
+                                  </p>
+                                )}
+                                <p className="text-sm text-[hsl(220,14%,46%)] line-clamp-2">
+                                  {sample.content_text?.substring(0, 200)}...
+                                </p>
+                                <div className="flex items-center gap-4 mt-2 text-xs text-[hsl(220,14%,46%)]">
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="w-3 h-3" />
+                                    {formatDate(sample.created_at)}
+                                  </span>
+                                  {sample.file_size && (
+                                    <span>{Math.round(sample.file_size / 1024)} KB</span>
+                                  )}
+                                </div>
+                              </div>
+                              {canDelete && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="text-[hsl(0,84%,60%)] hover:text-[hsl(0,84%,50%)] hover:bg-red-50"
+                                      onClick={() => deleteSample(sample.id)}
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>{isOwnSample ? 'Delete your sample' : 'Delete (admin)'}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </ScrollArea>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
