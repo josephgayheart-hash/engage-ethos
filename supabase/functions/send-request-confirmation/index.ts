@@ -34,64 +34,78 @@ const handler = async (req: Request): Promise<Response> => {
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="color-scheme" content="light only">
+        <meta name="supported-color-schemes" content="light only">
+        <style>
+          :root { color-scheme: light only; }
+          @media (prefers-color-scheme: dark) {
+            body, table, td, div, p, a, span, h1, h2, h3 { 
+              background-color: #ffffff !important; 
+              color: #1e293b !important; 
+            }
+          }
+        </style>
       </head>
-      <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc;">
-        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; padding: 40px 20px;">
+      <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
+        <div style="display: none; max-height: 0; overflow: hidden;">Your UPlaybook.AI access request has been received</div>
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc !important; padding: 40px 20px;" bgcolor="#f8fafc">
           <tr>
             <td align="center">
-              <table width="100%" max-width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden;">
-                <!-- Logo Header -->
+              <table width="100%" max-width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff !important; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden;" bgcolor="#ffffff">
+                <!-- Logo Header with solid white background -->
                 <tr>
-                  <td style="background-color: #ffffff; padding: 32px 40px 16px 40px; text-align: center;">
-                    <img src="https://uplaybook.ai/uplaybook-logo.png" alt="UPlaybook.AI" style="height: 60px; width: auto;" />
+                  <td style="background-color: #ffffff !important; padding: 32px 40px 16px 40px; text-align: center;" bgcolor="#ffffff">
+                    <div style="background-color: #ffffff !important; padding: 16px; border-radius: 12px; display: inline-block;" bgcolor="#ffffff">
+                      <img src="https://uplaybook.ai/uplaybook-logo.png" alt="UPlaybook.AI" style="height: 60px; width: auto; display: block;" />
+                    </div>
                   </td>
                 </tr>
                 
                 <!-- Header Banner -->
                 <tr>
-                  <td style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); padding: 24px 40px; text-align: center;">
-                    <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">Request Received</h1>
-                    <p style="margin: 8px 0 0 0; color: #94a3b8; font-size: 14px;">We're reviewing your access request</p>
+                  <td style="background-color: #1e293b !important; padding: 24px 40px; text-align: center;" bgcolor="#1e293b">
+                    <h1 style="margin: 0; color: #ffffff !important; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; background-color: #1e293b !important;" bgcolor="#1e293b">Request Received</h1>
+                    <p style="margin: 8px 0 0 0; color: #94a3b8 !important; font-size: 14px; background-color: #1e293b !important;" bgcolor="#1e293b">We're reviewing your access request</p>
                   </td>
                 </tr>
                 
                 <!-- Body -->
                 <tr>
-                  <td style="padding: 40px;">
-                    <h2 style="margin: 0 0 16px 0; color: #1e293b; font-size: 24px; font-weight: 600;">Hi ${firstName},</h2>
-                    <p style="margin: 0 0 24px 0; color: #475569; font-size: 16px; line-height: 1.6;">
-                      Thank you for your interest in <strong>UPlaybook.AI</strong>! We've received your access request for <strong>${institutionName}</strong>.
+                  <td style="padding: 40px; background-color: #ffffff !important;" bgcolor="#ffffff">
+                    <h2 style="margin: 0 0 16px 0; color: #1e293b !important; font-size: 24px; font-weight: 600; background-color: #ffffff !important;" bgcolor="#ffffff">Hi ${firstName},</h2>
+                    <p style="margin: 0 0 24px 0; color: #475569 !important; font-size: 16px; line-height: 1.6; background-color: #ffffff !important;" bgcolor="#ffffff">
+                      Thank you for your interest in <strong style="color: #1e293b !important;">UPlaybook.AI</strong>! We've received your access request for <strong style="color: #1e293b !important;">${institutionName}</strong>.
                     </p>
                     
                     <!-- Status Box -->
-                    <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; border-radius: 0 8px 8px 0; margin: 24px 0;">
-                      <p style="margin: 0; color: #166534; font-size: 14px; line-height: 1.5;">
-                        <strong>What happens next?</strong><br />
+                    <div style="background-color: #f0fdf4 !important; border-left: 4px solid #22c55e; padding: 16px; border-radius: 0 8px 8px 0; margin: 24px 0;" bgcolor="#f0fdf4">
+                      <p style="margin: 0; color: #166534 !important; font-size: 14px; line-height: 1.5; background-color: #f0fdf4 !important;" bgcolor="#f0fdf4">
+                        <strong style="color: #166534 !important;">What happens next?</strong><br />
                         An administrator will review your request and you'll receive an email with your login credentials once approved.
                       </p>
                     </div>
                     
                     <!-- Request Details -->
-                    <div style="background-color: #f1f5f9; border-radius: 8px; padding: 24px; margin: 24px 0;">
-                      <h3 style="margin: 0 0 16px 0; color: #1e293b; font-size: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Your Request Details</h3>
+                    <div style="background-color: #f1f5f9 !important; border-radius: 8px; padding: 24px; margin: 24px 0;" bgcolor="#f1f5f9">
+                      <h3 style="margin: 0 0 16px 0; color: #1e293b !important; font-size: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; background-color: #f1f5f9 !important;" bgcolor="#f1f5f9">Your Request Details</h3>
                       
                       <div style="margin-bottom: 12px;">
-                        <p style="margin: 0 0 4px 0; color: #64748b; font-size: 12px; font-weight: 500; text-transform: uppercase;">Name</p>
-                        <p style="margin: 0; color: #1e293b; font-size: 16px;">${firstName} ${lastName}</p>
+                        <p style="margin: 0 0 4px 0; color: #64748b !important; font-size: 12px; font-weight: 500; text-transform: uppercase; background-color: #f1f5f9 !important;" bgcolor="#f1f5f9">Name</p>
+                        <p style="margin: 0; color: #1e293b !important; font-size: 16px; background-color: #f1f5f9 !important;" bgcolor="#f1f5f9">${firstName} ${lastName}</p>
                       </div>
                       
                       <div style="margin-bottom: 12px;">
-                        <p style="margin: 0 0 4px 0; color: #64748b; font-size: 12px; font-weight: 500; text-transform: uppercase;">Email</p>
-                        <p style="margin: 0; color: #1e293b; font-size: 16px;">${email}</p>
+                        <p style="margin: 0 0 4px 0; color: #64748b !important; font-size: 12px; font-weight: 500; text-transform: uppercase; background-color: #f1f5f9 !important;" bgcolor="#f1f5f9">Email</p>
+                        <p style="margin: 0; color: #1e293b !important; font-size: 16px; background-color: #f1f5f9 !important;" bgcolor="#f1f5f9">${email}</p>
                       </div>
                       
                       <div>
-                        <p style="margin: 0 0 4px 0; color: #64748b; font-size: 12px; font-weight: 500; text-transform: uppercase;">Institution</p>
-                        <p style="margin: 0; color: #1e293b; font-size: 16px;">${institutionName}</p>
+                        <p style="margin: 0 0 4px 0; color: #64748b !important; font-size: 12px; font-weight: 500; text-transform: uppercase; background-color: #f1f5f9 !important;" bgcolor="#f1f5f9">Institution</p>
+                        <p style="margin: 0; color: #1e293b !important; font-size: 16px; background-color: #f1f5f9 !important;" bgcolor="#f1f5f9">${institutionName}</p>
                       </div>
                     </div>
                     
-                    <p style="margin: 24px 0 0 0; color: #475569; font-size: 14px; line-height: 1.6;">
+                    <p style="margin: 24px 0 0 0; color: #475569 !important; font-size: 14px; line-height: 1.6; background-color: #ffffff !important;" bgcolor="#ffffff">
                       If you have any questions, please contact your institution's administrator.
                     </p>
                   </td>
@@ -99,11 +113,11 @@ const handler = async (req: Request): Promise<Response> => {
                 
                 <!-- Footer -->
                 <tr>
-                  <td style="background-color: #f8fafc; padding: 24px 40px; border-top: 1px solid #e2e8f0;">
-                    <p style="margin: 0 0 8px 0; color: #64748b; font-size: 14px; text-align: center;">
+                  <td style="background-color: #f8fafc !important; padding: 24px 40px; border-top: 1px solid #e2e8f0;" bgcolor="#f8fafc">
+                    <p style="margin: 0 0 8px 0; color: #64748b !important; font-size: 14px; text-align: center; background-color: #f8fafc !important;" bgcolor="#f8fafc">
                       Thank you for your patience!
                     </p>
-                    <p style="margin: 0; color: #94a3b8; font-size: 12px; text-align: center;">
+                    <p style="margin: 0; color: #94a3b8 !important; font-size: 12px; text-align: center; background-color: #f8fafc !important;" bgcolor="#f8fafc">
                       — The UPlaybook.AI Team
                     </p>
                   </td>
@@ -111,7 +125,7 @@ const handler = async (req: Request): Promise<Response> => {
               </table>
               
               <!-- Sub-footer -->
-              <p style="margin: 24px 0 0 0; color: #94a3b8; font-size: 12px; text-align: center;">
+              <p style="margin: 24px 0 0 0; color: #94a3b8 !important; font-size: 12px; text-align: center; background-color: #f8fafc !important;" bgcolor="#f8fafc">
                 This email was sent by UPlaybook.AI. If you didn't submit this request, please disregard this message.
               </p>
             </td>
