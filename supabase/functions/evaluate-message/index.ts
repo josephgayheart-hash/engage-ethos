@@ -397,6 +397,22 @@ Voice Summary: ${institutionalConfig.voiceAnalysis.summary || 'Not specified'}
 
 IMPORTANT: Emulate ONLY this voice profile. Do NOT borrow language, phrases, or characteristics from other institutions in your training data.
 ` : ''}
+${institutionalConfig.brandPlatform ? `
+BRAND PLATFORM (Use these elements to guide messaging):
+- Brand Promise: ${institutionalConfig.brandPlatform.brandPromise || 'Not specified'}
+- Brand Pillars: ${institutionalConfig.brandPlatform.brandPillars?.map((p: { name: string; description: string }) => `${p.name}: ${p.description}`).join('; ') || 'Not specified'}
+- Proof Points: ${institutionalConfig.brandPlatform.proofPoints?.join('; ') || 'Not specified'}
+- Commitments: ${institutionalConfig.brandPlatform.commitments?.join('; ') || 'Not specified'}
+- Brand Pathways: ${institutionalConfig.brandPlatform.brandPathways?.map((p: { name: string; description: string }) => `${p.name}: ${p.description}`).join('; ') || 'Not specified'}
+${institutionalConfig.selectedPillars && institutionalConfig.selectedPillars.length > 0 ? `
+SELECTED BRAND PILLARS TO EMPHASIZE (CRITICAL - prioritize these in the messaging):
+${institutionalConfig.selectedPillars.map((pillarName: string) => {
+  const pillar = institutionalConfig.brandPlatform?.brandPillars?.find((p: { name: string }) => p.name === pillarName);
+  return pillar ? `- ${pillar.name}: ${pillar.description}` : `- ${pillarName}`;
+}).join('\n')}
+
+IMPORTANT: The user has specifically selected these pillars to emphasize. Make sure the generated content strongly reflects these themes.
+` : ''}` : ''}
 CRITICAL GUARDRAILS:
 1. Use the EXACT institution name, system names, and terminology provided above
 2. Do NOT use generic placeholders like "University Name", "[Portal Name]", or "[Institution]"

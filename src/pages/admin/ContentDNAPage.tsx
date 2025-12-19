@@ -38,7 +38,10 @@ import {
   Zap,
   AlertCircle,
   ArrowLeft,
-  RefreshCw
+  RefreshCw,
+  Target,
+  Award,
+  Compass
 } from 'lucide-react';
 import { extractTextFromFile, getAcceptString } from '@/lib/documentParser';
 
@@ -511,6 +514,10 @@ export default function ContentDNAPage() {
               <Sparkles className="w-4 h-4" />
               Voice Analysis
             </TabsTrigger>
+            <TabsTrigger value="brand-platform" className="flex items-center gap-2">
+              <Target className="w-4 h-4" />
+              Brand Platform
+            </TabsTrigger>
             <TabsTrigger value="instructions" className="flex items-center gap-2">
               <Settings className="w-4 h-4" />
               Brand Guidelines
@@ -907,6 +914,197 @@ export default function ContentDNAPage() {
                   <h3 className="font-medium text-[hsl(222,47%,11%)] mb-2">No Analysis Yet</h3>
                   <p className="text-[hsl(220,14%,46%)] mb-4">
                     Upload content samples and run an analysis to see your Content DNA profile
+                  </p>
+                  {isAdmin && (
+                    <Button
+                      onClick={analyzeVoice}
+                      disabled={isAnalyzing || samples.length === 0}
+                      className="bg-[hsl(173,58%,39%)] hover:bg-[hsl(173,58%,34%)]"
+                    >
+                      {isAnalyzing ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Analyzing...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-4 h-4 mr-2" />
+                          Analyze {samples.length} Sample{samples.length !== 1 ? 's' : ''}
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Brand Platform Tab */}
+          <TabsContent value="brand-platform">
+            {analysis?.brand_platform ? (
+              <div className="space-y-6">
+                {/* Brand Promise */}
+                {analysis.brand_platform.brandPromise && (
+                  <Card className="border-[hsl(220,13%,88%)] bg-gradient-to-r from-[hsl(222,47%,14%)] to-[hsl(222,47%,20%)] text-white">
+                    <CardContent className="py-6">
+                      <div className="flex items-start gap-4">
+                        <div className="p-3 bg-white/10 rounded-lg">
+                          <Quote className="w-8 h-8" />
+                        </div>
+                        <div>
+                          <h3 className="font-serif text-xl font-bold mb-2">Brand Promise</h3>
+                          <p className="text-white/90 text-lg italic">"{analysis.brand_platform.brandPromise}"</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Brand Pillars */}
+                {analysis.brand_platform.brandPillars && analysis.brand_platform.brandPillars.length > 0 && (
+                  <Card className="border-[hsl(220,13%,88%)]">
+                    <CardHeader>
+                      <CardTitle className="text-[hsl(222,47%,11%)] text-lg flex items-center gap-2">
+                        <Award className="w-5 h-5" />
+                        Brand Pillars
+                      </CardTitle>
+                      <CardDescription>
+                        Core themes and values that define your institution's messaging
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        {analysis.brand_platform.brandPillars.map((pillar: { name: string; description: string; keywords?: string[] }, idx: number) => (
+                          <div 
+                            key={idx} 
+                            className="p-4 rounded-lg border border-[hsl(220,13%,88%)] bg-[hsl(210,20%,98%)]"
+                          >
+                            <h4 className="font-medium text-[hsl(222,47%,11%)] mb-1">{pillar.name}</h4>
+                            <p className="text-sm text-[hsl(220,14%,46%)] mb-2">{pillar.description}</p>
+                            {pillar.keywords && pillar.keywords.length > 0 && (
+                              <div className="flex flex-wrap gap-1">
+                                {pillar.keywords.map((keyword: string, kidx: number) => (
+                                  <Badge key={kidx} variant="outline" className="text-xs">
+                                    {keyword}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Proof Points & Commitments */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  {analysis.brand_platform.proofPoints && analysis.brand_platform.proofPoints.length > 0 && (
+                    <Card className="border-[hsl(220,13%,88%)]">
+                      <CardHeader>
+                        <CardTitle className="text-[hsl(222,47%,11%)] text-lg flex items-center gap-2">
+                          <Compass className="w-5 h-5" />
+                          Proof Points
+                        </CardTitle>
+                        <CardDescription>
+                          Evidence and facts that support your brand claims
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <ul className="space-y-2">
+                          {analysis.brand_platform.proofPoints.map((point: string, idx: number) => (
+                            <li key={idx} className="flex items-start gap-2 text-sm text-[hsl(222,47%,11%)]">
+                              <CheckCircle2 className="w-4 h-4 text-[hsl(173,58%,39%)] mt-0.5 shrink-0" />
+                              {point}
+                            </li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {analysis.brand_platform.commitments && analysis.brand_platform.commitments.length > 0 && (
+                    <Card className="border-[hsl(220,13%,88%)]">
+                      <CardHeader>
+                        <CardTitle className="text-[hsl(222,47%,11%)] text-lg flex items-center gap-2">
+                          <Target className="w-5 h-5" />
+                          Commitments
+                        </CardTitle>
+                        <CardDescription>
+                          Promises your institution makes to students
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <ul className="space-y-2">
+                          {analysis.brand_platform.commitments.map((commitment: string, idx: number) => (
+                            <li key={idx} className="flex items-start gap-2 text-sm text-[hsl(222,47%,11%)]">
+                              <Award className="w-4 h-4 text-[hsl(45,93%,47%)] mt-0.5 shrink-0" />
+                              {commitment}
+                            </li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+
+                {/* Brand Pathways */}
+                {analysis.brand_platform.brandPathways && analysis.brand_platform.brandPathways.length > 0 && (
+                  <Card className="border-[hsl(220,13%,88%)]">
+                    <CardHeader>
+                      <CardTitle className="text-[hsl(222,47%,11%)] text-lg flex items-center gap-2">
+                        <Compass className="w-5 h-5" />
+                        Brand Pathways
+                      </CardTitle>
+                      <CardDescription>
+                        Journey narratives and outcome themes extracted from your content
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        {analysis.brand_platform.brandPathways.map((pathway: { name: string; description: string }, idx: number) => (
+                          <div 
+                            key={idx} 
+                            className="p-4 rounded-lg border border-[hsl(220,13%,88%)] bg-[hsl(210,20%,98%)]"
+                          >
+                            <h4 className="font-medium text-[hsl(222,47%,11%)] mb-1">{pathway.name}</h4>
+                            <p className="text-sm text-[hsl(220,14%,46%)]">{pathway.description}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Re-analyze Button */}
+                <div className="text-center">
+                  <Button
+                    onClick={analyzeVoice}
+                    disabled={isAnalyzing || samples.length === 0}
+                    variant="outline"
+                    className="border-[hsl(222,47%,14%)] text-[hsl(222,47%,14%)]"
+                  >
+                    {isAnalyzing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Re-analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Re-extract Brand Platform
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Card className="border-[hsl(220,13%,88%)]">
+                <CardContent className="py-12 text-center">
+                  <Target className="w-12 h-12 mx-auto mb-4 text-[hsl(220,14%,46%)] opacity-50" />
+                  <h3 className="font-medium text-[hsl(222,47%,11%)] mb-2">No Brand Platform Yet</h3>
+                  <p className="text-[hsl(220,14%,46%)] mb-4">
+                    Upload content samples and run an analysis to extract your brand pillars, promise, and proof points
                   </p>
                   {isAdmin && (
                     <Button
