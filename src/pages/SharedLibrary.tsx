@@ -103,7 +103,7 @@ const SharedLibrary = () => {
                 <ArrowLeft className="w-5 h-5" />
               </Button>
             </Link>
-            <div className="flex-1">
+            <div>
               <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground">
                 University Library
               </h1>
