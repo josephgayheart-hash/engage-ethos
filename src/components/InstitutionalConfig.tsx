@@ -717,7 +717,7 @@ export function InstitutionalConfig({ config, onChange }: InstitutionalConfigPro
                 <label htmlFor="voice-file-upload" className="cursor-pointer">
                   <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
                   <p className="text-sm font-medium">Click to upload files</p>
-                  <p className="text-xs text-muted-foreground">.txt, .docx, .doc, .pdf supported</p>
+                  <p className="text-xs text-muted-foreground">.txt, .docx, .pdf, .png, .jpg supported</p>
                 </label>
               </div>
             </div>
