@@ -1,6 +1,6 @@
 // Strategy Page - Journey Designer with PDF Export
-import { useState, useRef, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { format, differenceInWeeks, addWeeks } from "date-fns";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
@@ -14,6 +14,7 @@ import { ContentDNAIndicator, ContentDNAActiveBadge } from "@/components/Content
 import { CadenceSelector, CadenceFrequency, EscalationPattern } from "@/components/CadenceSelector";
 import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -73,8 +74,9 @@ const cohortLabels: Record<string, string> = {
 
 const StrategyPage = () => {
   const { toast } = useToast();
-  const { addMessage } = useMessageLibrary();
+  const { addMessage, updateMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
+  const location = useLocation();
   const resultsRef = useRef<HTMLDivElement>(null);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
@@ -99,6 +101,72 @@ const StrategyPage = () => {
   const { contentDNA, isLoading: isContentDNALoading } = useContentDNAForGeneration({ profileId: selectedProfileId });
   const [saveToLibraryOpen, setSaveToLibraryOpen] = useState(false);
   const [saveToLibraryType, setSaveToLibraryType] = useState<'personal' | 'shared'>('personal');
+  
+  // Edit/Remix mode state
+  const [editMode, setEditMode] = useState<'new' | 'edit' | 'remix'>('new');
+  const [editingJourneyId, setEditingJourneyId] = useState<string | null>(null);
+
+  // Load journey data from navigation state (for edit/remix)
+  useEffect(() => {
+    const state = location.state as { 
+      editMode?: 'edit' | 'remix';
+      journeyId?: string;
+      journeyData?: any;
+      metadata?: any;
+      originalTitle?: string;
+    } | null;
+
+    if (state?.journeyData) {
+      // Set the journey result
+      setMapperResult({ journey: state.journeyData });
+      
+      // Set edit mode
+      setEditMode(state.editMode || 'remix');
+      
+      if (state.editMode === 'edit' && state.journeyId) {
+        setEditingJourneyId(state.journeyId);
+      }
+
+      // Restore context from metadata if available
+      if (state.metadata?.context) {
+        const ctx = state.metadata.context;
+        setContext(prev => ({
+          ...prev,
+          audience: ctx.audience || prev.audience,
+          moment: ctx.moment || prev.moment,
+          moments: ctx.moments || prev.moments,
+          goal: ctx.goal || prev.goal,
+          goals: ctx.goals || prev.goals,
+          cohort: ctx.cohort || prev.cohort,
+          domain: ctx.domain || prev.domain,
+          tone: ctx.tone || prev.tone,
+        }));
+        
+        if (ctx.channels) {
+          setSelectedChannels(ctx.channels);
+        }
+      }
+
+      // Restore dates
+      if (state.metadata?.startDate) {
+        setStartDate(new Date(state.metadata.startDate));
+      }
+      if (state.metadata?.endDate) {
+        setEndDate(new Date(state.metadata.endDate));
+      }
+
+      // Show toast
+      toast({
+        title: state.editMode === 'edit' ? "Editing Journey" : "Remixing Journey",
+        description: state.editMode === 'edit' 
+          ? "Make changes and save to update the original."
+          : `Creating a remix of "${state.originalTitle}"`,
+      });
+
+      // Clear the navigation state to prevent reloading on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, toast]);
 
   // Auto-calculate weeks when dates change
   const handleStartDateChange = (date: Date | undefined) => {
@@ -202,6 +270,9 @@ const StrategyPage = () => {
 
   const handleReset = () => {
     setMapperResult(null);
+    // Also reset edit mode when clearing results
+    setEditMode('new');
+    setEditingJourneyId(null);
   };
 
   const handleSaveToLibraryClick = () => {
@@ -221,9 +292,12 @@ const StrategyPage = () => {
           audience: context.audience,
           cohort: context.cohort,
           moment: context.moment,
+          moments: context.moments,
           goal: context.goal,
+          goals: context.goals,
           domain: context.domain,
           tone: context.tone,
+          channels: selectedChannels,
         },
         startDate: startDate?.toISOString(),
         endDate: endDate?.toISOString(),
@@ -233,6 +307,32 @@ const StrategyPage = () => {
     
     const journeyContent = JSON.stringify(journeyWithMetadata, null, 2);
     
+    // If editing an existing journey, update it instead of creating new
+    if (editMode === 'edit' && editingJourneyId) {
+      updateMessage(editingJourneyId, {
+        title: name,
+        content: journeyContent,
+        audience: context.audience,
+        cohort: context.cohort ? [context.cohort] : undefined,
+        domain: context.domain,
+        moment: context.moment,
+        goal: context.goal,
+        tone: context.tone,
+      }, true); // Add as new version
+      
+      toast({
+        title: "Journey Updated",
+        description: "Your changes have been saved to the original journey.",
+      });
+      
+      // Reset edit mode
+      setEditMode('new');
+      setEditingJourneyId(null);
+      
+      return editingJourneyId;
+    }
+    
+    // Create new journey (for new or remix mode)
     const savedMessage = addMessage({
       title: name,
       content: journeyContent,
@@ -246,6 +346,11 @@ const StrategyPage = () => {
       approved: false,
       mode: 'generated',
     });
+
+    // Reset remix mode after saving
+    if (editMode === 'remix') {
+      setEditMode('new');
+    }
 
     return savedMessage.id;
   };
@@ -504,9 +609,19 @@ const StrategyPage = () => {
               <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
                 <Map className="w-7 h-7 text-pillar-consensus" />
                 Journey Designer
+                {editMode !== 'new' && (
+                  <Badge variant={editMode === 'edit' ? 'default' : 'secondary'} className="ml-2 text-xs">
+                    {editMode === 'edit' ? 'Editing' : 'Remixing'}
+                  </Badge>
+                )}
               </h1>
               <p className="text-muted-foreground mt-1">
-                Design detailed week-by-week communication journeys with behavioral nudges and channel recommendations
+                {editMode === 'edit' 
+                  ? "Make changes to your journey and save to update the original"
+                  : editMode === 'remix'
+                    ? "Customize this journey and save as a new copy"
+                    : "Design detailed week-by-week communication journeys with behavioral nudges and channel recommendations"
+                }
               </p>
             </div>
             <AIBadge />

@@ -29,7 +29,9 @@ import {
   Clock,
   BookOpen,
   FileText,
-  Send
+  Send,
+  Edit,
+  GitBranch
 } from "lucide-react";
 import {
   Breadcrumb,
@@ -173,6 +175,20 @@ const TemplateDetailPage = () => {
     navigate("/library");
   };
 
+  const handleRemixJourney = () => {
+    if (!journeyData) return;
+    
+    const journeyWithMetadata = journeyData as (typeof journeyData & { _metadata?: any });
+    navigate('/strategy', { 
+      state: { 
+        editMode: 'remix',
+        journeyData: journeyData,
+        metadata: journeyWithMetadata?._metadata,
+        originalTitle: template.title
+      } 
+    });
+  };
+
   const updatePlaceholder = (key: string, value: string) => {
     setPlaceholderValues(prev => ({ ...prev, [key]: value }));
   };
@@ -240,6 +256,12 @@ const TemplateDetailPage = () => {
               </div>
             </div>
             <div className="flex items-center gap-2 md:shrink-0">
+              {isJourney && journeyData && (
+                <Button onClick={handleRemixJourney} variant="outline" className="flex items-center gap-2">
+                  <GitBranch className="w-4 h-4" />
+                  Remix Journey
+                </Button>
+              )}
               <Button onClick={handleCopy} variant="outline" className="flex items-center gap-2">
                 <Copy className="w-4 h-4" />
                 {copied ? "Copied!" : "Copy"}
