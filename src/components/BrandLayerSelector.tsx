@@ -350,7 +350,7 @@ function BrandPlatformTabs({
                 <TabsTrigger 
                   key={tab.id} 
                   value={tab.id}
-                  className="flex flex-col gap-0.5 py-2 px-2 text-xs data-[state=active]:bg-background"
+                  className="flex flex-col gap-0.5 py-2 px-2 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                 >
                   <div className="flex items-center gap-1">
                     <Icon className="w-3 h-3" />
