@@ -6,6 +6,7 @@ import { ContextSelector } from "@/components/ContextSelector";
 import { LibraryNav } from "@/components/LibraryNav";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
 import { ChannelPreview } from "@/components/ChannelPreview";
+import { ContentDNAIndicator, ContentDNAActiveBadge } from "@/components/ContentDNAIndicator";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -96,6 +97,7 @@ const BuildPage = () => {
   const [copiedChannel, setCopiedChannel] = useState<string | null>(null);
   const [submitToSharedOpen, setSubmitToSharedOpen] = useState(false);
   const [draftToSubmit, setDraftToSubmit] = useState('');
+  const [useContentDNA, setUseContentDNA] = useState(true);
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const canProcess = context.audience && context.moment && selectedChannels.length > 0;
@@ -307,6 +309,13 @@ const BuildPage = () => {
                 }}
               />
 
+              {/* Content DNA Indicator */}
+              <ContentDNAIndicator
+                enabled={useContentDNA}
+                onToggle={setUseContentDNA}
+                selectedProfileName={selectedProfileName}
+              />
+
               <ContextSelector context={context} onChange={setContext} mode="builder" />
 
               {/* Channel Selection */}
@@ -464,14 +473,17 @@ const BuildPage = () => {
             <div ref={resultsRef} className="space-y-6 animate-fade-in scroll-mt-6">
               {/* Header with metadata */}
               <Card>
-                <CardHeader>
+              <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle className="font-serif text-lg flex items-center gap-2">
-                      Generated Content
-                      <Badge variant="secondary" className="text-xs">
-                        {selectedChannels.length} channel{selectedChannels.length > 1 ? 's' : ''}
-                      </Badge>
-                    </CardTitle>
+                    <div className="flex items-center gap-3">
+                      <CardTitle className="font-serif text-lg flex items-center gap-2">
+                        Generated Content
+                        <Badge variant="secondary" className="text-xs">
+                          {selectedChannels.length} channel{selectedChannels.length > 1 ? 's' : ''}
+                        </Badge>
+                      </CardTitle>
+                      {useContentDNA && <ContentDNAActiveBadge />}
+                    </div>
                     <Button variant="outline" size="sm" onClick={handleReset}>
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Start Over
