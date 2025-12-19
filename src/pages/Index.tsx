@@ -151,8 +151,8 @@ const Index = () => {
               <p className="text-sm text-muted-foreground">Follow these steps to get the most out of UPlaybook</p>
             </div>
             
-            <div className="grid md:grid-cols-3 gap-4">
-              {/* Step 1: Configure */}
+            <div className="grid md:grid-cols-4 gap-4">
+              {/* Step 1: Setup Institution */}
               <Link to="/settings">
                 <Card className="h-full cursor-pointer transition-all hover:shadow-lg hover:border-primary/50 group relative overflow-hidden">
                   <div className="absolute top-0 left-0 w-full h-1 bg-primary/20 group-hover:bg-primary/40 transition-colors" />
@@ -161,14 +161,14 @@ const Index = () => {
                       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
                         1
                       </div>
-                      <Badge variant="outline" className="text-xs">Setup</Badge>
+                      <Badge variant="outline" className="text-xs">Configure</Badge>
                     </div>
                     <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <Settings className="w-6 h-6 text-primary" />
                     </div>
-                    <h3 className="font-serif font-semibold text-lg mb-2">Define Your Content DNA</h3>
+                    <h3 className="font-serif font-semibold text-lg mb-2">Setup Your Institution</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Configure your institution's voice, terminology, and branding so every message sounds like you.
+                      Configure your institution's voice, terminology, and branding preferences.
                     </p>
                     <div className="flex items-center text-sm text-primary font-medium group-hover:gap-2 transition-all">
                       Configure Settings
@@ -246,6 +246,32 @@ const Index = () => {
                     </p>
                     <div className="flex items-center text-sm text-pillar-consensus font-medium group-hover:gap-2 transition-all">
                       Plan Strategy
+                      <ArrowRight className="w-4 h-4 ml-1" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+
+              {/* Step 4: Refine Content DNA */}
+              <Link to="/content-dna">
+                <Card className="h-full cursor-pointer transition-all hover:shadow-lg hover:border-amber-500/50 group relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-amber-500/20 group-hover:bg-amber-500/40 transition-colors" />
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center text-sm font-bold text-amber-600">
+                        4
+                      </div>
+                      <Badge variant="outline" className="text-xs bg-amber-500/5 text-amber-600 border-amber-200">Refine</Badge>
+                    </div>
+                    <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <Sparkles className="w-6 h-6 text-amber-600" />
+                    </div>
+                    <h3 className="font-serif font-semibold text-lg mb-2">Refine Content DNA</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Upload your communications and articles to perfect your institutional voice.
+                    </p>
+                    <div className="flex items-center text-sm text-amber-600 font-medium group-hover:gap-2 transition-all">
+                      Refine Voice
                       <ArrowRight className="w-4 h-4 ml-1" />
                     </div>
                   </CardContent>

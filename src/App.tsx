@@ -196,11 +196,14 @@ const AppRoutes = () => (
     <Route path="/admin/institution/:id" element={<RequireAuth><RequireSuperAdmin><InstitutionDetailPage /></RequireSuperAdmin></RequireAuth>} />
     <Route path="/admin/user/:id" element={<RequireAuth><RequireSuperAdmin><UserDetailPage /></RequireSuperAdmin></RequireAuth>} />
     
+    {/* Content DNA - accessible to all authenticated users */}
+    <Route path="/content-dna" element={<RequireAuth><ContentDNAPage /></RequireAuth>} />
+    
     {/* Admin routes - tenant-scoped for university admins */}
     <Route path="/admin" element={<Navigate to="/admin/console" replace />} />
     <Route path="/admin/console" element={<RequireAuth><RequireAdmin><AdminConsolePage /></RequireAdmin></RequireAuth>} />
     <Route path="/admin/users" element={<RequireAuth><RequireAdmin><AdminUsersPage /></RequireAdmin></RequireAuth>} />
-    <Route path="/admin/content-dna" element={<RequireAuth><RequireAdmin><ContentDNAPage /></RequireAdmin></RequireAuth>} />
+    <Route path="/admin/content-dna" element={<RequireAuth><ContentDNAPage /></RequireAuth>} />
     
     {/* Catch-all */}
     <Route path="*" element={<NotFound />} />
