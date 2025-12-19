@@ -113,32 +113,84 @@ const SettingsPage = () => {
     return parts.length > 0 ? parts.join(' • ') : 'Empty profile';
   };
 
-  // Calculate profile completion percentage and missing items
+  // Calculate profile completion percentage and missing items - organized by category
   const getProfileCompletion = (config: InstitutionalConfigType) => {
     const checks = [
-      { key: 'name', label: 'Institution Name', done: !!config.institutionName?.trim() },
-      { key: 'abbrev', label: 'Abbreviation', done: !!config.institutionAbbreviation?.trim() },
-      { key: 'logo', label: 'Logo', done: !!config.logoUrl?.trim() },
-      { key: 'primary', label: 'Primary Color', done: !!config.primaryColor && config.primaryColor !== '#1F2A44' },
-      { key: 'accent', label: 'Accent Color', done: !!config.accentColor && config.accentColor !== '#2C7A7B' },
-      { key: 'email', label: 'Email Domain', done: !!config.emailDomain?.trim() },
-      { key: 'contact', label: 'Contact Email', done: !!config.primaryContactEmail?.trim() },
-      { key: 'website', label: 'Website Links', done: (config.websiteLinks?.length || 0) > 0 },
+      // Identity (Essential)
+      { key: 'name', label: 'Institution Name', category: 'Identity', priority: 1, done: !!config.institutionName?.trim() },
+      { key: 'abbrev', label: 'Abbreviation', category: 'Identity', priority: 1, done: !!config.institutionAbbreviation?.trim() },
+      { key: 'mascot', label: 'Mascot', category: 'Identity', priority: 2, done: !!config.mascot?.trim() },
+      { key: 'slogans', label: 'Slogans', category: 'Identity', priority: 3, done: (config.slogans?.length || 0) > 0 },
+      
+      // Visual Branding
+      { key: 'logo', label: 'Logo', category: 'Branding', priority: 1, done: !!config.logoUrl?.trim() },
+      { key: 'primary', label: 'Primary Color', category: 'Branding', priority: 1, done: !!config.primaryColor && config.primaryColor !== '#1F2A44' },
+      { key: 'accent', label: 'Accent Color', category: 'Branding', priority: 2, done: !!config.accentColor && config.accentColor !== '#2C7A7B' },
+      
+      // Contact Information
+      { key: 'emailDomain', label: 'Email Domain', category: 'Contact', priority: 1, done: !!config.emailDomain?.trim() },
+      { key: 'contactEmail', label: 'Contact Email', category: 'Contact', priority: 1, done: !!config.primaryContactEmail?.trim() },
+      { key: 'contactPhone', label: 'Contact Phone', category: 'Contact', priority: 2, done: !!config.primaryContactPhone?.trim() },
+      { key: 'website', label: 'Website Links', category: 'Contact', priority: 2, done: (config.websiteLinks?.length || 0) > 0 },
+      
+      // Digital Systems
+      { key: 'portal', label: 'Student Portal', category: 'Systems', priority: 1, done: !!config.portalName?.trim() },
+      { key: 'lms', label: 'LMS Name', category: 'Systems', priority: 2, done: !!config.lmsName?.trim() },
+      { key: 'advising', label: 'Advising System', category: 'Systems', priority: 3, done: !!config.advisingSystemName?.trim() },
+      
+      // Locations & Facilities
+      { key: 'buildings', label: 'Building Names', category: 'Locations', priority: 2, done: (config.buildingNames?.length || 0) > 0 },
+      { key: 'supportCenters', label: 'Support Centers', category: 'Locations', priority: 2, done: (config.supportCenters?.length || 0) > 0 },
+      { key: 'campusTerms', label: 'Campus Terms', category: 'Locations', priority: 3, done: (config.campusTerms?.length || 0) > 0 },
+      
+      // Offices
+      { key: 'registrar', label: 'Registrar Office', category: 'Offices', priority: 2, done: !!config.registrarOffice?.trim() },
+      { key: 'finaid', label: 'Financial Aid Office', category: 'Offices', priority: 2, done: !!config.financialAidOffice?.trim() },
+      { key: 'admissions', label: 'Admissions Office', category: 'Offices', priority: 2, done: !!config.admissionsOffice?.trim() },
+      
+      // Academic Terms
+      { key: 'academicTerms', label: 'Academic Terms', category: 'Terms', priority: 2, done: (config.academicTerms?.length || 0) > 0 },
+      { key: 'currentTerm', label: 'Current Term', category: 'Terms', priority: 2, done: !!config.currentTermName?.trim() },
+      { key: 'gradingTerms', label: 'Grading Terms', category: 'Terms', priority: 3, done: (config.gradingTerms?.length || 0) > 0 },
+      
+      // Style & Tone
+      { key: 'toneRules', label: 'Tone Rules', category: 'Style', priority: 2, done: (config.toneRules?.length || 0) > 0 },
+      { key: 'wordsToAvoid', label: 'Words to Avoid', category: 'Style', priority: 3, done: (config.wordsToAvoid?.length || 0) > 0 },
+      { key: 'preferredPhrases', label: 'Preferred Phrases', category: 'Style', priority: 3, done: (config.preferredPhrases?.length || 0) > 0 },
+      
+      // CTAs
+      { key: 'primaryCTAs', label: 'Primary CTAs', category: 'CTAs', priority: 2, done: (config.primaryCTAs?.length || 0) > 0 },
+      { key: 'secondaryCTAs', label: 'Secondary CTAs', category: 'CTAs', priority: 3, done: (config.secondaryCTAs?.length || 0) > 0 },
     ];
     
     const completed = checks.filter(c => c.done).length;
     const total = checks.length;
     const percentage = Math.round((completed / total) * 100);
     
-    return { checks, completed, total, percentage };
+    // Group missing items by category
+    const missingByCategory = checks
+      .filter(c => !c.done)
+      .reduce((acc, check) => {
+        if (!acc[check.category]) acc[check.category] = [];
+        acc[check.category].push(check);
+        return acc;
+      }, {} as Record<string, typeof checks>);
+    
+    // Get priority missing items (priority 1 and 2 first)
+    const priorityMissing = checks
+      .filter(c => !c.done && c.priority <= 2)
+      .sort((a, b) => a.priority - b.priority);
+    
+    return { checks, completed, total, percentage, missingByCategory, priorityMissing };
   };
 
-  const getEncouragingMessage = (percentage: number) => {
+  const getEncouragingMessage = (percentage: number, missingCount: number) => {
     if (percentage === 100) return "Profile complete! Your institutional identity is fully configured.";
-    if (percentage >= 75) return "Almost there! Just a few more details to complete your profile.";
-    if (percentage >= 50) return "Great progress! Continue adding details to strengthen your brand identity.";
-    if (percentage >= 25) return "Good start! Keep going to unlock the full power of branded content generation.";
-    return "Let's build your institution's identity. Complete more fields to get better AI-generated content.";
+    if (percentage >= 80) return `Almost there! Just ${missingCount} more items to complete your profile.`;
+    if (percentage >= 60) return "Great progress! Add more details to unlock better AI-generated content.";
+    if (percentage >= 40) return "Good foundation! Continue adding terms, locations, and style preferences.";
+    if (percentage >= 20) return "Getting started! Fill in key details to help generate on-brand content.";
+    return "Let's build your institution's identity. The more details you add, the better your AI content.";
   };
 
   return (
@@ -352,21 +404,32 @@ const SettingsPage = () => {
                           </div>
                           <Progress value={completion.percentage} className="h-2" />
                           <p className="text-sm text-muted-foreground">
-                            {getEncouragingMessage(completion.percentage)}
+                            {getEncouragingMessage(completion.percentage, completion.total - completion.completed)}
                           </p>
                           {completion.percentage < 100 && (
-                            <div className="flex flex-wrap gap-2 pt-1">
-                              {completion.checks.filter(c => !c.done).slice(0, 4).map(check => (
-                                <Badge key={check.key} variant="outline" className="text-xs gap-1">
-                                  <Circle className="w-2 h-2" />
-                                  {check.label}
-                                </Badge>
-                              ))}
-                              {completion.checks.filter(c => !c.done).length > 4 && (
-                                <Badge variant="outline" className="text-xs">
-                                  +{completion.checks.filter(c => !c.done).length - 4} more
-                                </Badge>
-                              )}
+                            <div className="space-y-2 pt-1">
+                              {/* Show missing items grouped by category */}
+                              <div className="flex flex-wrap gap-1.5">
+                                {completion.priorityMissing.slice(0, 6).map(check => (
+                                  <Badge key={check.key} variant="outline" className="text-xs gap-1">
+                                    <Circle className="w-2 h-2" />
+                                    {check.label}
+                                  </Badge>
+                                ))}
+                                {(completion.total - completion.completed) > 6 && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    +{(completion.total - completion.completed) - 6} more
+                                  </Badge>
+                                )}
+                              </div>
+                              {/* Category breakdown */}
+                              <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                                {Object.entries(completion.missingByCategory).slice(0, 4).map(([cat, items]) => (
+                                  <span key={cat} className="flex items-center gap-1">
+                                    <span className="font-medium">{cat}:</span> {items.length} missing
+                                  </span>
+                                ))}
+                              </div>
                             </div>
                           )}
                         </div>
