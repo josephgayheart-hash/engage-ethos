@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { 
   Dialog, 
   DialogContent, 
@@ -37,7 +38,10 @@ import {
   ChevronRight,
   FolderOpen,
   Sparkles,
-  Palette
+  Palette,
+  CheckCircle2,
+  Circle,
+  Dna
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -107,6 +111,34 @@ const SettingsPage = () => {
                      (profile.config.secondaryCTAs?.length || 0);
     if (ctaCount > 0) parts.push(`${ctaCount} CTAs`);
     return parts.length > 0 ? parts.join(' • ') : 'Empty profile';
+  };
+
+  // Calculate profile completion percentage and missing items
+  const getProfileCompletion = (config: InstitutionalConfigType) => {
+    const checks = [
+      { key: 'name', label: 'Institution Name', done: !!config.institutionName?.trim() },
+      { key: 'abbrev', label: 'Abbreviation', done: !!config.institutionAbbreviation?.trim() },
+      { key: 'logo', label: 'Logo', done: !!config.logoUrl?.trim() },
+      { key: 'primary', label: 'Primary Color', done: !!config.primaryColor && config.primaryColor !== '#1F2A44' },
+      { key: 'accent', label: 'Accent Color', done: !!config.accentColor && config.accentColor !== '#2C7A7B' },
+      { key: 'email', label: 'Email Domain', done: !!config.emailDomain?.trim() },
+      { key: 'contact', label: 'Contact Email', done: !!config.primaryContactEmail?.trim() },
+      { key: 'website', label: 'Website Links', done: (config.websiteLinks?.length || 0) > 0 },
+    ];
+    
+    const completed = checks.filter(c => c.done).length;
+    const total = checks.length;
+    const percentage = Math.round((completed / total) * 100);
+    
+    return { checks, completed, total, percentage };
+  };
+
+  const getEncouragingMessage = (percentage: number) => {
+    if (percentage === 100) return "Profile complete! Your institutional identity is fully configured.";
+    if (percentage >= 75) return "Almost there! Just a few more details to complete your profile.";
+    if (percentage >= 50) return "Great progress! Continue adding details to strengthen your brand identity.";
+    if (percentage >= 25) return "Good start! Keep going to unlock the full power of branded content generation.";
+    return "Let's build your institution's identity. Complete more fields to get better AI-generated content.";
   };
 
   return (
@@ -299,7 +331,48 @@ const SettingsPage = () => {
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="space-y-6">
+                    {/* Profile Completion Progress */}
+                    {(() => {
+                      const completion = getProfileCompletion(editingProfile.config);
+                      return (
+                        <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              {completion.percentage === 100 ? (
+                                <CheckCircle2 className="w-5 h-5 text-green-600" />
+                              ) : (
+                                <Dna className="w-5 h-5 text-secondary" />
+                              )}
+                              <span className="font-medium text-sm">Profile Completion</span>
+                            </div>
+                            <Badge variant={completion.percentage === 100 ? "default" : "secondary"}>
+                              {completion.percentage}%
+                            </Badge>
+                          </div>
+                          <Progress value={completion.percentage} className="h-2" />
+                          <p className="text-sm text-muted-foreground">
+                            {getEncouragingMessage(completion.percentage)}
+                          </p>
+                          {completion.percentage < 100 && (
+                            <div className="flex flex-wrap gap-2 pt-1">
+                              {completion.checks.filter(c => !c.done).slice(0, 4).map(check => (
+                                <Badge key={check.key} variant="outline" className="text-xs gap-1">
+                                  <Circle className="w-2 h-2" />
+                                  {check.label}
+                                </Badge>
+                              ))}
+                              {completion.checks.filter(c => !c.done).length > 4 && (
+                                <Badge variant="outline" className="text-xs">
+                                  +{completion.checks.filter(c => !c.done).length - 4} more
+                                </Badge>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+                    
                     <InstitutionalConfig 
                       config={editingProfile.config} 
                       onChange={handleUpdateConfig}
