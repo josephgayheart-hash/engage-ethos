@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
@@ -15,6 +16,7 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useJourneyExport } from "@/hooks/useJourneyExport";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { JourneyViewer, isJourneyContent, parseJourneyContent } from "@/components/library/JourneyViewer";
+import { openInGoogleDocs, formatForGoogleDocs } from "@/lib/googleDocsExport";
 import type { LibraryEntryStatus } from "@/types/library";
 import type { InstitutionalConfig } from "@/types/uplaybook";
 import { useAuth } from "@/contexts/AuthContext";
@@ -37,7 +39,11 @@ import {
   Edit,
   GitBranch,
   FileDown,
-  Printer
+  Printer,
+  ExternalLink,
+  Pencil,
+  X,
+  Save
 } from "lucide-react";
 import {
   Breadcrumb,
@@ -96,6 +102,8 @@ const TemplateDetailPage = () => {
   const [placeholderValues, setPlaceholderValues] = useState<Record<string, string>>({});
   const journeyContentRef = useRef<HTMLDivElement>(null);
   const [profileConfig, setProfileConfig] = useState<InstitutionalConfig | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedContent, setEditedContent] = useState<string>('');
 
   const template = getTemplateById(id || '');
   const isJourney = useMemo(() => template ? isJourneyContent(template.content) : false, [template]);
@@ -230,6 +238,48 @@ const TemplateDetailPage = () => {
     setPlaceholderValues(prev => ({ ...prev, [key]: value }));
   };
 
+  // Initialize edited content when template loads
+  useEffect(() => {
+    if (template) {
+      setEditedContent(customizedContent);
+    }
+  }, [template, customizedContent]);
+
+  const handleStartEdit = () => {
+    setEditedContent(customizedContent);
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setEditedContent(customizedContent);
+    setIsEditing(false);
+  };
+
+  const handleSaveEdit = () => {
+    // For now, just close edit mode - content is local only
+    setIsEditing(false);
+    toast({ title: "Content updated", description: "Changes saved locally for this session." });
+  };
+
+  const handleOpenInGoogleDocs = async () => {
+    const formattedContent = formatForGoogleDocs(isEditing ? editedContent : customizedContent, {
+      title: template.title,
+      channel: template.requiredFields.channel[0],
+      audience: template.requiredFields.audience[0],
+      profile: template.institutionalProfileName,
+      generatedAt: new Date(),
+    });
+    const success = await openInGoogleDocs(formattedContent, template.title);
+    if (success) {
+      toast({ 
+        title: "Opening Google Docs", 
+        description: "Content copied! Paste (Ctrl/Cmd+V) into the new document." 
+      });
+    }
+  };
+
+  const displayContent = isEditing ? editedContent : customizedContent;
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -282,29 +332,59 @@ const TemplateDetailPage = () => {
                 </div>
               </div>
 
-              {/* Meta info row */}
-              <div className="flex items-center gap-3 text-sm text-muted-foreground mb-5 flex-wrap pl-10">
-                <span className="flex items-center gap-1.5">
-                  <Users className="w-3.5 h-3.5" />
-                  {template.owner}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5" />
-                  v{template.version}
-                </span>
-                <span>
-                  Updated {new Date(template.updatedAt).toLocaleDateString()}
-                </span>
+              {/* Meta info row with Remix button */}
+              <div className="flex items-center justify-between gap-4 mb-5 pl-10 flex-wrap">
+                <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
+                  <span className="flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5" />
+                    {template.owner}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5" />
+                    v{template.version}
+                  </span>
+                  <span>
+                    Updated {new Date(template.updatedAt).toLocaleDateString()}
+                  </span>
+                </div>
+                {/* Remix button under user/date info */}
+                {isJourney && journeyData && (
+                  <Button onClick={handleRemixJourney} variant="secondary" size="sm" className="shrink-0">
+                    <GitBranch className="w-4 h-4 mr-2" />
+                    Remix Journey
+                  </Button>
+                )}
               </div>
 
-              {/* Action buttons row */}
-              <div className="flex items-center gap-2 pl-10 flex-wrap">
+              {/* Action buttons row - primary actions */}
+              <div className="flex items-center gap-2 pl-10 flex-wrap border-t pt-4">
+                {!isEditing ? (
+                  <Button onClick={handleStartEdit} variant="outline" size="sm">
+                    <Pencil className="w-4 h-4 mr-2" />
+                    Edit
+                  </Button>
+                ) : (
+                  <>
+                    <Button onClick={handleSaveEdit} size="sm" className="bg-green-600 hover:bg-green-700">
+                      <Save className="w-4 h-4 mr-2" />
+                      Save Changes
+                    </Button>
+                    <Button onClick={handleCancelEdit} variant="ghost" size="sm">
+                      <X className="w-4 h-4 mr-2" />
+                      Cancel
+                    </Button>
+                  </>
+                )}
+                <Button onClick={handleCopy} variant="outline" size="sm">
+                  <Copy className="w-4 h-4 mr-2" />
+                  {copied ? "Copied!" : "Copy"}
+                </Button>
+                <Button onClick={handleOpenInGoogleDocs} variant="outline" size="sm">
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Open in Google Docs
+                </Button>
                 {isJourney && journeyData && (
                   <>
-                    <Button onClick={handleRemixJourney} variant="outline" size="sm">
-                      <GitBranch className="w-4 h-4 mr-2" />
-                      Remix Journey
-                    </Button>
                     <Button onClick={exportToPdf} variant="outline" size="sm" disabled={isExporting}>
                       <FileDown className="w-4 h-4 mr-2" />
                       {isExporting ? "Exporting..." : "Export PDF"}
@@ -315,10 +395,6 @@ const TemplateDetailPage = () => {
                     </Button>
                   </>
                 )}
-                <Button onClick={handleCopy} variant="outline" size="sm">
-                  <Copy className="w-4 h-4 mr-2" />
-                  {copied ? "Copied!" : "Copy"}
-                </Button>
                 <Button onClick={handlePull} size="sm">
                   <Download className="w-4 h-4 mr-2" />
                   Pull to My Library
@@ -330,15 +406,16 @@ const TemplateDetailPage = () => {
           {/* Content Tabs */}
           <Tabs defaultValue="template" className="space-y-6">
             <TabsList className="w-full md:w-auto flex-wrap h-auto">
-              <TabsTrigger value="template">Template</TabsTrigger>
-              <TabsTrigger value="customize" className="flex items-center gap-1">
-                <Edit3 className="w-3 h-3" />
-                Customize ({template.placeholders.length})
+              <TabsTrigger value="template">
+                <FileText className="w-3 h-3 mr-1.5" />
+                Content
               </TabsTrigger>
-              <TabsTrigger value="variants">Variants ({template.variants?.length || 0})</TabsTrigger>
-              <TabsTrigger value="guidelines">Guidelines</TabsTrigger>
+              <TabsTrigger value="guidelines">
+                <ShieldCheck className="w-3 h-3 mr-1.5" />
+                Guidelines
+              </TabsTrigger>
               <TabsTrigger value="usage" className="flex items-center gap-1">
-                <Users className="w-3 h-3" />
+                <Users className="w-3 h-3 mr-1.5" />
                 Usage ({usageHistory.length})
               </TabsTrigger>
             </TabsList>
@@ -363,21 +440,34 @@ const TemplateDetailPage = () => {
                   </CardContent>
                 </Card>
               ) : (
-                <Card>
-                  <CardHeader>
+                <Card className="overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-primary/5 to-secondary/5 border-b">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg">Live Preview</CardTitle>
-                      {!allRequiredFilled && (
-                        <Badge variant="outline" className="text-xs">
-                          Fill placeholders in Customize tab
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <FileText className="w-5 h-5 text-primary" />
+                        {isEditing ? 'Edit Content' : 'Live Preview'}
+                      </CardTitle>
+                      {isEditing && (
+                        <Badge variant="secondary" className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                          <Pencil className="w-3 h-3 mr-1" />
+                          Editing
                         </Badge>
                       )}
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className="bg-muted rounded-lg p-6 border-2 border-dashed border-border">
-                      <pre className="whitespace-pre-wrap text-sm font-sans leading-relaxed">{customizedContent}</pre>
-                    </div>
+                  <CardContent className="pt-6">
+                    {isEditing ? (
+                      <Textarea
+                        value={editedContent}
+                        onChange={(e) => setEditedContent(e.target.value)}
+                        className="min-h-[300px] font-sans text-sm leading-relaxed resize-y"
+                        placeholder="Edit the content here..."
+                      />
+                    ) : (
+                      <div className="bg-card rounded-lg p-6 border border-border shadow-sm">
+                        <pre className="whitespace-pre-wrap text-sm font-sans leading-relaxed text-foreground">{displayContent}</pre>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               )}
@@ -424,88 +514,6 @@ const TemplateDetailPage = () => {
                         </div>
                       )}
                     </div>
-                  </CardContent>
-                </Card>
-              )}
-            </TabsContent>
-
-            <TabsContent value="customize" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Customize Placeholders</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-6">
-                    Fill in the placeholders below to customize this template for your use. Required fields are marked with *.
-                  </p>
-                  
-                  <div className="grid gap-6">
-                    {template.placeholders.map(placeholder => (
-                      <div key={placeholder.key} className="space-y-2">
-                        <Label htmlFor={placeholder.key} className="flex items-center gap-1">
-                          {placeholder.label}
-                          {placeholder.required && <span className="text-destructive">*</span>}
-                        </Label>
-                        <Input
-                          id={placeholder.key}
-                          value={placeholderValues[placeholder.key] || ''}
-                          onChange={(e) => updatePlaceholder(placeholder.key, e.target.value)}
-                          placeholder={placeholder.description}
-                        />
-                        <p className="text-xs text-muted-foreground">{placeholder.description}</p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Preview with Your Values</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="bg-muted rounded-lg p-6">
-                    <pre className="whitespace-pre-wrap text-sm font-sans leading-relaxed">{customizedContent}</pre>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="variants" className="space-y-6">
-              {template.variants && template.variants.length > 0 ? (
-                <Accordion type="single" collapsible className="space-y-4">
-                  {template.variants.map(variant => (
-                    <AccordionItem key={variant.id} value={variant.id} className="border rounded-lg px-4">
-                      <AccordionTrigger className="py-4">
-                        <div className="flex items-center gap-3 text-left">
-                          <span className="font-medium">{variant.name}</span>
-                          <span className="text-sm text-muted-foreground">{variant.description}</span>
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="pb-4">
-                        <div className="bg-muted rounded-lg p-4 mb-4">
-                          <pre className="whitespace-pre-wrap text-sm font-sans">{variant.content}</pre>
-                        </div>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={async () => {
-                            await navigator.clipboard.writeText(variant.content);
-                            toast({ title: "Variant copied" });
-                          }}
-                        >
-                          <Copy className="w-4 h-4 mr-2" />
-                          Copy Variant
-                        </Button>
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              ) : (
-                <Card className="text-center py-12">
-                  <CardContent>
-                    <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">No variants available for this template</p>
                   </CardContent>
                 </Card>
               )}

@@ -172,7 +172,7 @@ const PersonalLibrary = () => {
                 {showFilters && (
                   <div className="flex flex-wrap gap-4 pt-4 border-t">
                     <Select value={filters.channel || 'all'} onValueChange={(v) => setFilters(f => ({ ...f, channel: v === 'all' ? undefined : v }))}>
-                      <SelectTrigger className="w-[140px]">
+                      <SelectTrigger className="w-[160px]">
                         <SelectValue placeholder="Channel" />
                       </SelectTrigger>
                       <SelectContent>
@@ -183,6 +183,10 @@ const PersonalLibrary = () => {
                         <SelectItem value="landing-page">Landing Page</SelectItem>
                         <SelectItem value="social-media">Social Media</SelectItem>
                         <SelectItem value="direct-mail">Direct Mail</SelectItem>
+                        <SelectItem value="phone-call">Phone Script</SelectItem>
+                        <SelectItem value="talking-points">Talking Points</SelectItem>
+                        <SelectItem value="digital-ad-search">Search Ads</SelectItem>
+                        <SelectItem value="digital-ad-social">Social Ads</SelectItem>
                       </SelectContent>
                     </Select>
                     <Select value={filters.audience || 'all'} onValueChange={(v) => setFilters(f => ({ ...f, audience: v === 'all' ? undefined : v }))}>
