@@ -5,9 +5,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const ANALYSIS_PROMPT = `You are a Content DNA analyst for higher education communications. Analyze the provided sample communications to extract the institution's unique Content DNA—voice, tone, and messaging patterns.
+const ANALYSIS_PROMPT = `You are a Content DNA analyst for higher education communications. Analyze the provided sample communications to extract the institution's unique Content DNA—voice, tone, messaging patterns, AND brand platform elements.
 
 Examine the samples for:
+
+## VOICE & TONE ANALYSIS:
 1. Overall tone (warm, formal, casual, authoritative, etc.)
 2. Key characteristics of the writing style
 3. Vocabulary patterns (academic vs casual, specific terminology used)
@@ -17,19 +19,53 @@ Examine the samples for:
 7. Common phrases or expressions that recur
 8. Messaging tactics used (appeals to authority, social proof, urgency, personalization, etc.)
 
-Provide a comprehensive summary of the Content DNA that can be used to generate new messages matching this style.
+## BRAND PLATFORM EXTRACTION:
+Carefully analyze the samples to extract these brand elements:
+
+1. **Brand Promise** - The core value proposition or transformation the institution offers to students/stakeholders. Look for recurring themes about what the institution delivers or enables.
+
+2. **Brand Pillars** (3-5 maximum) - The key themes, values, or differentiators that recur across communications. Each pillar should have:
+   - A clear name (e.g., "Innovation", "Student Success", "Community", "Research Excellence")
+   - A brief description of what it means for the institution
+   - Keywords/phrases associated with this pillar
+
+3. **Brand Pathways** - Conceptual journeys or transformation narratives. These describe how someone evolves through their relationship with the institution (e.g., "From curious explorer to confident leader").
+
+4. **Proof Points** - Specific achievements, statistics, rankings, or evidence used to back up claims. Extract concrete numbers and facts.
+
+5. **Commitments** - Explicit promises or commitments the institution makes to its stakeholders. Look for "We commit to...", "Our promise is...", "We guarantee..." type statements.
 
 IMPORTANT: Respond ONLY with valid JSON:
 {
-  "overallTone": "Description of the overall tone",
-  "keyCharacteristics": ["characteristic 1", "characteristic 2", "characteristic 3"],
-  "vocabularyPatterns": ["pattern 1", "pattern 2", "pattern 3"],
-  "sentenceStyle": "Description of sentence structure and style",
-  "formalityLevel": "Description of formality level",
-  "emotionalTone": "Description of emotional undertone",
-  "commonPhrases": ["phrase 1", "phrase 2", "phrase 3"],
-  "messagingTactics": ["tactic 1", "tactic 2", "tactic 3"],
-  "summary": "2-3 paragraph summary of the Content DNA that can guide future message generation"
+  "voiceAnalysis": {
+    "overallTone": "Description of the overall tone",
+    "keyCharacteristics": ["characteristic 1", "characteristic 2", "characteristic 3"],
+    "vocabularyPatterns": ["pattern 1", "pattern 2", "pattern 3"],
+    "sentenceStyle": "Description of sentence structure and style",
+    "formalityLevel": "Description of formality level",
+    "emotionalTone": "Description of emotional undertone",
+    "commonPhrases": ["phrase 1", "phrase 2", "phrase 3"],
+    "messagingTactics": ["tactic 1", "tactic 2", "tactic 3"],
+    "summary": "2-3 paragraph summary of the Content DNA that can guide future message generation"
+  },
+  "brandPlatform": {
+    "brandPromise": "Single sentence capturing the core promise/value proposition",
+    "brandPillars": [
+      {
+        "name": "Pillar Name",
+        "description": "Brief description of what this pillar means",
+        "keywords": ["keyword1", "keyword2", "keyword3"]
+      }
+    ],
+    "brandPathways": [
+      {
+        "name": "Pathway Name",
+        "description": "The transformation narrative this pathway represents"
+      }
+    ],
+    "proofPoints": ["Specific stat or achievement 1", "Specific stat or achievement 2"],
+    "commitments": ["Commitment statement 1", "Commitment statement 2"]
+  }
 }`;
 
 serve(async (req) => {
@@ -60,13 +96,13 @@ serve(async (req) => {
       `--- SAMPLE ${index + 1} ---\n${sample}\n`
     ).join('\n');
 
-    const userPrompt = `Please analyze the following sample communications to extract the Content DNA and messaging patterns:
+    const userPrompt = `Please analyze the following sample communications to extract the Content DNA (voice analysis AND brand platform elements):
 
 ${samplesText}
 
-Analyze these samples and extract the Content DNA profile as JSON.`;
+Analyze these samples and extract both the voice profile and brand platform as JSON.`;
 
-    console.log(`Analyzing ${samples.length} Content DNA samples...`);
+    console.log(`Analyzing ${samples.length} Content DNA samples for voice AND brand platform...`);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -132,10 +168,35 @@ Analyze these samples and extract the Content DNA profile as JSON.`;
 
     try {
       const result = JSON.parse(jsonContent);
-      result.analyzedAt = new Date().toISOString();
-      console.log("Content DNA analysis completed successfully");
       
-      return new Response(JSON.stringify(result), {
+      // Handle both new format (nested) and legacy format (flat)
+      const finalResult: any = {
+        analyzedAt: new Date().toISOString(),
+      };
+
+      // If the response has the new nested structure
+      if (result.voiceAnalysis) {
+        finalResult.voiceAnalysis = result.voiceAnalysis;
+        finalResult.brandPlatform = result.brandPlatform || null;
+      } else {
+        // Legacy flat format - treat entire response as voice analysis
+        finalResult.voiceAnalysis = {
+          overallTone: result.overallTone,
+          keyCharacteristics: result.keyCharacteristics,
+          vocabularyPatterns: result.vocabularyPatterns,
+          sentenceStyle: result.sentenceStyle,
+          formalityLevel: result.formalityLevel,
+          emotionalTone: result.emotionalTone,
+          commonPhrases: result.commonPhrases,
+          messagingTactics: result.messagingTactics,
+          summary: result.summary,
+        };
+        finalResult.brandPlatform = null;
+      }
+
+      console.log("Content DNA analysis completed successfully with brand platform:", !!finalResult.brandPlatform);
+      
+      return new Response(JSON.stringify(finalResult), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     } catch (parseError) {

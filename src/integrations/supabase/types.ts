@@ -160,6 +160,7 @@ export type Database = {
       }
       content_dna_analysis: {
         Row: {
+          brand_platform: Json | null
           created_at: string
           custom_instructions: string | null
           id: string
@@ -171,6 +172,7 @@ export type Database = {
           voice_analysis: Json
         }
         Insert: {
+          brand_platform?: Json | null
           created_at?: string
           custom_instructions?: string | null
           id?: string
@@ -182,6 +184,7 @@ export type Database = {
           voice_analysis?: Json
         }
         Update: {
+          brand_platform?: Json | null
           created_at?: string
           custom_instructions?: string | null
           id?: string

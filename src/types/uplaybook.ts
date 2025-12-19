@@ -461,6 +461,26 @@ export interface VoiceAnalysis {
   analyzedAt: string;
 }
 
+// Brand Platform types - extracted from Content DNA analysis
+export interface BrandPillar {
+  name: string;
+  description: string;
+  keywords: string[];
+}
+
+export interface BrandPathway {
+  name: string;
+  description: string;
+}
+
+export interface BrandPlatform {
+  brandPromise: string;
+  brandPillars: BrandPillar[];
+  brandPathways: BrandPathway[];
+  proofPoints: string[];
+  commitments: string[];
+}
+
 export interface UserProfile {
   department: Department;
   onboardingComplete: boolean;

@@ -22,6 +22,7 @@ serve(async (req) => {
     let contentDNAPrompt = "";
     if (contentDNA?.voiceAnalysis) {
       const va = contentDNA.voiceAnalysis;
+      const bp = contentDNA.brandPlatform;
       const profileIdentifier = contentDNA.sourceProfileName || contentDNA.sourceProfileId || "selected profile";
       contentDNAPrompt = `
 CONTENT DNA - INSTITUTIONAL VOICE PROFILE FOR: ${profileIdentifier}
@@ -38,6 +39,22 @@ Common Phrases to Use: ${va.commonPhrases?.join(", ") || "None specified"}
 Messaging Tactics: ${va.messagingTactics?.join(", ") || "None specified"}
 
 ${va.summary ? `Voice Summary: ${va.summary}` : ""}
+${bp ? `
+BRAND PLATFORM:
+${bp.brandPromise ? `Brand Promise: ${bp.brandPromise}` : ""}
+${bp.brandPillars?.length ? `
+Brand Pillars (incorporate these themes naturally):
+${bp.brandPillars.map((p: any) => `- ${p.name}: ${p.description}${p.keywords?.length ? ` (Keywords: ${p.keywords.join(", ")})` : ""}`).join("\n")}` : ""}
+${bp.proofPoints?.length ? `
+Proof Points (use as evidence when relevant):
+${bp.proofPoints.map((p: string) => `- ${p}`).join("\n")}` : ""}
+${bp.commitments?.length ? `
+Commitments (reinforce these promises):
+${bp.commitments.map((c: string) => `- ${c}`).join("\n")}` : ""}
+${bp.brandPathways?.length ? `
+Brand Pathways (transformation narratives):
+${bp.brandPathways.map((p: any) => `- ${p.name}: ${p.description}`).join("\n")}` : ""}
+` : ""}
 ${contentDNA.customInstructions ? `
 CUSTOM BRAND GUIDELINES:
 ${contentDNA.customInstructions}` : ""}

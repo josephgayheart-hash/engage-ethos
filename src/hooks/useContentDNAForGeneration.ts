@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import type { BrandPlatform } from '@/types/uplaybook';
 
 export interface ContentDNAForGeneration {
   voiceAnalysis: {
@@ -14,6 +15,7 @@ export interface ContentDNAForGeneration {
     messagingTactics?: string[];
     summary?: string;
   } | null;
+  brandPlatform: BrandPlatform | null;
   customInstructions: string | null;
   sourceProfileId?: string | null;
   sourceProfileName?: string | null;
@@ -56,7 +58,7 @@ export function useContentDNAForGeneration(options: UseContentDNAForGenerationOp
         // First, try to get the selected profile's DNA
         const { data, error } = await supabase
           .from('content_dna_analysis')
-          .select('voice_analysis, custom_instructions')
+          .select('voice_analysis, brand_platform, custom_instructions')
           .eq('tenant_id', tenant.id)
           .eq('profile_id', profileId)
           .maybeSingle();
@@ -70,6 +72,7 @@ export function useContentDNAForGeneration(options: UseContentDNAForGenerationOp
         if (data) {
           setContentDNA({
             voiceAnalysis: data.voice_analysis as ContentDNAForGeneration['voiceAnalysis'],
+            brandPlatform: data.brand_platform as unknown as BrandPlatform | null,
             customInstructions: data.custom_instructions,
             sourceProfileId: profileId,
           });
@@ -87,7 +90,7 @@ export function useContentDNAForGeneration(options: UseContentDNAForGenerationOp
           // Try to get parent profile's DNA
           const { data: parentDNA } = await supabase
             .from('content_dna_analysis')
-            .select('voice_analysis, custom_instructions')
+            .select('voice_analysis, brand_platform, custom_instructions')
             .eq('tenant_id', tenant.id)
             .eq('profile_id', profileData.parent_profile_id)
             .maybeSingle();
@@ -102,6 +105,7 @@ export function useContentDNAForGeneration(options: UseContentDNAForGenerationOp
 
             setContentDNA({
               voiceAnalysis: parentDNA.voice_analysis as ContentDNAForGeneration['voiceAnalysis'],
+              brandPlatform: parentDNA.brand_platform as unknown as BrandPlatform | null,
               customInstructions: parentDNA.custom_instructions,
               sourceProfileId: profileData.parent_profile_id,
               sourceProfileName: parentProfile?.name || null,
@@ -117,7 +121,7 @@ export function useContentDNAForGeneration(options: UseContentDNAForGenerationOp
         // No profile selected - get tenant-level DNA
         const { data, error } = await supabase
           .from('content_dna_analysis')
-          .select('voice_analysis, custom_instructions')
+          .select('voice_analysis, brand_platform, custom_instructions')
           .eq('tenant_id', tenant.id)
           .is('profile_id', null)
           .maybeSingle();
@@ -128,6 +132,7 @@ export function useContentDNAForGeneration(options: UseContentDNAForGenerationOp
         } else if (data) {
           setContentDNA({
             voiceAnalysis: data.voice_analysis as ContentDNAForGeneration['voiceAnalysis'],
+            brandPlatform: data.brand_platform as unknown as BrandPlatform | null,
             customInstructions: data.custom_instructions,
             sourceProfileId: null,
           });
