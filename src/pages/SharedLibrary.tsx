@@ -97,21 +97,19 @@ const SharedLibrary = () => {
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
-          <div className="flex items-center justify-between gap-4 mb-8">
-            <div className="flex items-center gap-4">
-              <Link to="/dashboard">
-                <Button variant="ghost" size="icon">
-                  <ArrowLeft className="w-5 h-5" />
-                </Button>
-              </Link>
-              <div>
-                <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground">
-                  University Library
-                </h1>
-                <p className="text-muted-foreground mt-1">
-                  Organization-approved templates and playbooks
-                </p>
-              </div>
+          <div className="flex items-center gap-4 mb-8">
+            <Link to="/dashboard">
+              <Button variant="ghost" size="icon">
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+            </Link>
+            <div className="flex-1">
+              <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground">
+                University Library
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Organization-approved templates and playbooks
+              </p>
             </div>
             <div className="flex gap-2">
               {pendingCount > 0 && (
