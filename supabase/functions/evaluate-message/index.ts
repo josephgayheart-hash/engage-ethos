@@ -412,11 +412,26 @@ Provide draft messages and recommendations as JSON.`;
         const channelsList = context.channels?.length > 0 
           ? context.channels.join(', ') 
           : 'email, sms, phone-call';
+        
+        // Use estimated touchpoints from cadence selector, or calculate a default
+        const targetTouchpoints = context.estimatedTouchpoints || Math.max(8, Math.min(20, Math.round(totalWeeks * 1.2)));
+        
+        // Cadence and escalation pattern info
+        const cadenceInfo = context.cadence ? `
+CADENCE SETTINGS:
+- Target Frequency: ${context.cadence} (${context.cadence === 'daily' ? '~7 per week' : context.cadence === 'every-other-day' ? '~3-4 per week' : context.cadence === '2-3x-week' ? '~2-3 per week' : context.cadence === 'weekly' ? '1 per week' : '~0.5 per week'})
+- Escalation Pattern: ${context.escalation || 'none'} ${context.escalation === 'gradual-increase' ? '(start slow, build up)' : context.escalation === 'gradual-decrease' ? '(start strong, taper off)' : context.escalation === 'peak-middle' ? '(build to peak, then taper)' : context.escalation === 'bookend' ? '(heavy start & end)' : '(consistent throughout)'}
+- Target Touchpoint Count: ${targetTouchpoints} touchpoints
+IMPORTANT: Generate approximately ${targetTouchpoints} touchpoints to match the user's selected cadence and intensity settings.` : '';
+        
         userPrompt = `Please create a detailed ${totalWeeks}-week messaging strategy journey for this context:
 ${contextStr}
+${cadenceInfo}
 ${institutionalStr}
 
-Create a comprehensive journey with touchpoints distributed across short-term (weeks 1-4), mid-term (weeks 5-8), and long-term (weeks 9+) phases. Include 8-15 touchpoints depending on the journey length.
+Create a comprehensive journey with touchpoints distributed across short-term (weeks 1-${Math.min(4, Math.floor(totalWeeks * 0.3))}), mid-term (weeks ${Math.min(5, Math.floor(totalWeeks * 0.3) + 1)}-${Math.min(8, Math.floor(totalWeeks * 0.65))}), and long-term (weeks ${Math.min(9, Math.floor(totalWeeks * 0.65) + 1)}+) phases.
+
+CRITICAL: Generate approximately ${targetTouchpoints} touchpoints total (user selected this based on their cadence preferences). Distribute them according to the escalation pattern specified.
 
 IMPORTANT: Only use these channels for touchpoints: ${channelsList}
 Distribute touchpoints across the selected channels based on best practices for the audience and moment.
