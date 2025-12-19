@@ -1,5 +1,5 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { useToast } from "@/hooks/use-toast";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
+import { useJourneyExport } from "@/hooks/useJourneyExport";
 import { JourneyViewer, isJourneyContent, parseJourneyContent } from "@/components/library/JourneyViewer";
 import type { LibraryEntryStatus } from "@/types/library";
 import { 
@@ -31,7 +32,9 @@ import {
   FileText,
   Send,
   Edit,
-  GitBranch
+  GitBranch,
+  FileDown,
+  Printer
 } from "lucide-react";
 import {
   Breadcrumb,
@@ -86,11 +89,17 @@ const TemplateDetailPage = () => {
   const { addMessage } = useMessageLibrary();
   const [copied, setCopied] = useState(false);
   const [placeholderValues, setPlaceholderValues] = useState<Record<string, string>>({});
+  const journeyContentRef = useRef<HTMLDivElement>(null);
 
   const template = getTemplateById(id || '');
   const isJourney = useMemo(() => template ? isJourneyContent(template.content) : false, [template]);
   const journeyData = useMemo(() => isJourney && template ? parseJourneyContent(template.content) : null, [template, isJourney]);
   const usageHistory = useMemo(() => template ? generateMockUsage(template.id) : [], [template]);
+
+  const { isExporting, exportToPdf, printJourney } = useJourneyExport({
+    title: template?.title || "Template Export",
+    containerRef: journeyContentRef,
+  });
 
   // Initialize placeholder values
   useEffect(() => {
@@ -255,12 +264,22 @@ const TemplateDetailPage = () => {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2 md:shrink-0">
+            <div className="flex items-center gap-2 md:shrink-0 flex-wrap">
               {isJourney && journeyData && (
-                <Button onClick={handleRemixJourney} variant="outline" className="flex items-center gap-2">
-                  <GitBranch className="w-4 h-4" />
-                  Remix Journey
-                </Button>
+                <>
+                  <Button onClick={handleRemixJourney} variant="outline" className="flex items-center gap-2">
+                    <GitBranch className="w-4 h-4" />
+                    Remix Journey
+                  </Button>
+                  <Button onClick={exportToPdf} variant="outline" className="flex items-center gap-2" disabled={isExporting}>
+                    <FileDown className="w-4 h-4" />
+                    {isExporting ? "Exporting..." : "Export PDF"}
+                  </Button>
+                  <Button onClick={printJourney} variant="outline" className="flex items-center gap-2">
+                    <Printer className="w-4 h-4" />
+                    Print
+                  </Button>
+                </>
               )}
               <Button onClick={handleCopy} variant="outline" className="flex items-center gap-2">
                 <Copy className="w-4 h-4" />
@@ -299,7 +318,9 @@ const TemplateDetailPage = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <JourneyViewer journey={journeyData} />
+                    <div ref={journeyContentRef} data-pdf-section>
+                      <JourneyViewer journey={journeyData} />
+                    </div>
                   </CardContent>
                 </Card>
               ) : (
