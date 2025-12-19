@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import type { BrandPlatform, BrandPillar, BrandPathway } from '@/types/uplaybook';
 
 export interface ContentDNASample {
   id: string;
@@ -36,12 +37,16 @@ export interface ContentDNAAnalysis {
   tenant_id: string;
   profile_id: string | null;
   voice_analysis: VoiceAnalysis;
+  brand_platform: BrandPlatform | null;
   custom_instructions: string | null;
   sample_count: number;
   last_analyzed_at: string | null;
   created_at: string;
   updated_at: string;
 }
+
+// Re-export brand platform types
+export type { BrandPlatform, BrandPillar, BrandPathway };
 
 interface UseContentDNAOptions {
   profileId?: string | null;
@@ -108,7 +113,8 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
       if (data) {
         setAnalysis({
           ...data,
-          voice_analysis: data.voice_analysis as unknown as VoiceAnalysis
+          voice_analysis: data.voice_analysis as unknown as VoiceAnalysis,
+          brand_platform: data.brand_platform as unknown as BrandPlatform | null,
         } as ContentDNAAnalysis);
       } else {
         setAnalysis(null);
@@ -238,13 +244,16 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
 
       if (error) throw error;
 
-      const voiceAnalysis: VoiceAnalysis = data;
+      // Handle new response format with both voiceAnalysis and brandPlatform
+      const voiceAnalysis: VoiceAnalysis = data.voiceAnalysis || data;
+      const brandPlatform: BrandPlatform | null = data.brandPlatform || null;
 
       // Build the upsert data
       const upsertData: any = {
         tenant_id: tenant.id,
         profile_id: profileId || null,
         voice_analysis: voiceAnalysis as any,
+        brand_platform: brandPlatform as any,
         sample_count: sampleTexts.length,
         last_analyzed_at: new Date().toISOString(),
       };
@@ -258,6 +267,7 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
           .from('content_dna_analysis')
           .update({
             voice_analysis: voiceAnalysis as any,
+            brand_platform: brandPlatform as any,
             sample_count: sampleTexts.length,
             last_analyzed_at: new Date().toISOString(),
           })
@@ -269,7 +279,8 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
 
         setAnalysis({
           ...updatedData,
-          voice_analysis: updatedData.voice_analysis as unknown as VoiceAnalysis
+          voice_analysis: updatedData.voice_analysis as unknown as VoiceAnalysis,
+          brand_platform: updatedData.brand_platform as unknown as BrandPlatform | null,
         } as ContentDNAAnalysis);
       } else {
         // Insert new
@@ -283,13 +294,18 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
 
         setAnalysis({
           ...insertedData,
-          voice_analysis: insertedData.voice_analysis as unknown as VoiceAnalysis
+          voice_analysis: insertedData.voice_analysis as unknown as VoiceAnalysis,
+          brand_platform: insertedData.brand_platform as unknown as BrandPlatform | null,
         } as ContentDNAAnalysis);
       }
 
+      const brandPlatformMsg = brandPlatform?.brandPillars?.length 
+        ? ` Extracted ${brandPlatform.brandPillars.length} brand pillars.`
+        : '';
+
       toast({
         title: 'Analysis Complete',
-        description: `Analyzed ${sampleTexts.length} samples. Your Content DNA profile has been updated.`,
+        description: `Analyzed ${sampleTexts.length} samples. Your Content DNA profile has been updated.${brandPlatformMsg}`,
       });
     } catch (error: any) {
       console.error('Analysis error:', error);
@@ -323,7 +339,8 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
 
         setAnalysis({
           ...data,
-          voice_analysis: data.voice_analysis as unknown as VoiceAnalysis
+          voice_analysis: data.voice_analysis as unknown as VoiceAnalysis,
+          brand_platform: data.brand_platform as unknown as BrandPlatform | null,
         } as ContentDNAAnalysis);
       } else {
         // Create new analysis with just custom instructions
@@ -343,7 +360,8 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
 
         setAnalysis({
           ...data,
-          voice_analysis: data.voice_analysis as unknown as VoiceAnalysis
+          voice_analysis: data.voice_analysis as unknown as VoiceAnalysis,
+          brand_platform: data.brand_platform as unknown as BrandPlatform | null,
         } as ContentDNAAnalysis);
       }
 
@@ -355,6 +373,43 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
       toast({
         title: 'Error',
         description: error.message || 'Failed to save instructions',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const updateBrandPlatform = async (brandPlatform: BrandPlatform) => {
+    if (!tenant?.id || !analysis) return;
+
+    setIsSaving(true);
+    try {
+      const { data, error } = await supabase
+        .from('content_dna_analysis')
+        .update({
+          brand_platform: brandPlatform as any,
+        })
+        .eq('id', analysis.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setAnalysis({
+        ...data,
+        voice_analysis: data.voice_analysis as unknown as VoiceAnalysis,
+        brand_platform: data.brand_platform as unknown as BrandPlatform | null,
+      } as ContentDNAAnalysis);
+
+      toast({
+        title: 'Brand Platform Saved',
+        description: 'Your brand platform has been updated.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to save brand platform',
         variant: 'destructive',
       });
     } finally {
@@ -400,6 +455,7 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
     deleteSample,
     analyzeVoice,
     updateCustomInstructions,
+    updateBrandPlatform,
     resetContentDNA,
     refetch: async () => {
       await Promise.all([fetchSamples(), fetchAnalysis()]);
