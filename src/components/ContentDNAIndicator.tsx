@@ -73,7 +73,9 @@ export function ContentDNAIndicator({
   
   // Determine if DNA is inherited from a parent profile
   const isInherited = contentDNA?.sourceProfileId && contentDNA?.sourceProfileId !== selectedProfileId;
-  const sourceDisplayName = contentDNA?.sourceProfileName || tenant?.institution_name;
+  const sourceDisplayName = isInherited
+    ? (contentDNA?.sourceProfileName || "Parent profile")
+    : (selectedProfileName || tenant?.institution_name);
 
   // If no Content DNA exists at all, show setup prompt
   if (!isLoading && !hasContentDNA) {
@@ -109,8 +111,16 @@ export function ContentDNAIndicator({
 
   // Compact mode - just show a badge
   if (compact) {
-    const displayName = tenant?.institution_name;
-    
+    const compactLabel = enabled && hasContentDNA
+      ? (isInherited
+          ? `${sourceDisplayName} DNA`
+          : selectedProfileName
+            ? `${selectedProfileName} DNA`
+            : tenant?.institution_name
+              ? `${tenant.institution_name} DNA`
+              : "DNA Active")
+      : "DNA Off";
+
     return (
       <Tooltip>
         <TooltipTrigger asChild>
@@ -126,20 +136,19 @@ export function ContentDNAIndicator({
             onClick={() => hasContentDNA && onToggle(!enabled)}
           >
             <Dna className="w-3 h-3 mr-1" />
-            {enabled && hasContentDNA 
-              ? displayName 
-                ? `${displayName} DNA` 
-                : "DNA Active" 
-              : "DNA Off"
-            }
+            {compactLabel}
           </Badge>
         </TooltipTrigger>
         <TooltipContent side="bottom" className="max-w-xs">
           <p className="text-xs">
             {enabled && hasContentDNA 
-              ? displayName
-                ? `${displayName}'s Content DNA is being used to match your brand voice.`
-                : "Your institution's Content DNA is being used to match your brand voice."
+              ? isInherited
+                ? `Using inherited Content DNA from ${sourceDisplayName}.`
+                : selectedProfileName
+                  ? `Using ${selectedProfileName}'s Content DNA to match your brand voice.`
+                  : tenant?.institution_name
+                    ? `Using ${tenant.institution_name}'s Content DNA to match your brand voice.`
+                    : "Your institution's Content DNA is being used to match your brand voice."
               : "Click to enable Content DNA for on-brand messaging."
             }
           </p>
