@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useContentDNAForGeneration } from '@/hooks/useContentDNAForGeneration';
+import { useInstitutionalProfiles } from '@/hooks/useInstitutionalProfiles';
 import { useAuth } from '@/contexts/AuthContext';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
@@ -17,7 +18,8 @@ import {
   Building2,
   Settings,
   FileText,
-  Quote
+  Quote,
+  ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -64,6 +66,7 @@ export function ContentDNAIndicator({
   className,
 }: ContentDNAIndicatorProps) {
   const { contentDNA, isLoading } = useContentDNAForGeneration({ profileId: selectedProfileId });
+  const { getProfileHierarchy } = useInstitutionalProfiles();
   const { tenant, isAdmin } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -71,11 +74,20 @@ export function ContentDNAIndicator({
   const hasCustomInstructions = Boolean(contentDNA?.customInstructions);
   const voiceAnalysis = contentDNA?.voiceAnalysis;
   
+  // Build profile hierarchy path
+  const profileHierarchy = selectedProfileId ? getProfileHierarchy(selectedProfileId) : null;
+  const hierarchyPath = profileHierarchy?.path || selectedProfileName || tenant?.institution_name;
+  
   // Determine if DNA is inherited from a parent profile
   const isInherited = contentDNA?.sourceProfileId && contentDNA?.sourceProfileId !== selectedProfileId;
   const sourceDisplayName = isInherited
     ? (contentDNA?.sourceProfileName || "Parent profile")
     : (selectedProfileName || tenant?.institution_name);
+  
+  // Build DNA source hierarchy if inherited
+  const dnaSourceHierarchy = isInherited && contentDNA?.sourceProfileId 
+    ? getProfileHierarchy(contentDNA.sourceProfileId) 
+    : null;
 
   // If no Content DNA exists at all, show setup prompt
   if (!isLoading && !hasContentDNA) {
@@ -111,14 +123,9 @@ export function ContentDNAIndicator({
 
   // Compact mode - just show a badge
   if (compact) {
+    // Show hierarchy in compact view if available
     const compactLabel = enabled && hasContentDNA
-      ? (isInherited
-          ? `${sourceDisplayName} DNA`
-          : selectedProfileName
-            ? `${selectedProfileName} DNA`
-            : tenant?.institution_name
-              ? `${tenant.institution_name} DNA`
-              : "DNA Active")
+      ? (hierarchyPath || "DNA Active")
       : "DNA Off";
 
     return (
@@ -140,18 +147,19 @@ export function ContentDNAIndicator({
           </Badge>
         </TooltipTrigger>
         <TooltipContent side="bottom" className="max-w-xs">
-          <p className="text-xs">
-            {enabled && hasContentDNA 
-              ? isInherited
-                ? `Using inherited Content DNA from ${sourceDisplayName}.`
-                : selectedProfileName
-                  ? `Using ${selectedProfileName}'s Content DNA to match your brand voice.`
-                  : tenant?.institution_name
-                    ? `Using ${tenant.institution_name}'s Content DNA to match your brand voice.`
-                    : "Your institution's Content DNA is being used to match your brand voice."
-              : "Click to enable Content DNA for on-brand messaging."
-            }
-          </p>
+          <div className="space-y-1">
+            {hierarchyPath && (
+              <p className="text-xs font-medium">{hierarchyPath}</p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              {enabled && hasContentDNA 
+                ? isInherited
+                  ? `DNA inherited from: ${dnaSourceHierarchy?.path || sourceDisplayName}`
+                  : "Content DNA is being applied to match your brand voice."
+                : "Click to enable Content DNA for on-brand messaging."
+              }
+            </p>
+          </div>
         </TooltipContent>
       </Tooltip>
     );
@@ -236,36 +244,45 @@ export function ContentDNAIndicator({
           <div className="px-3 pb-3 pt-0 space-y-3">
             <div className="h-px bg-border" />
             
-            {/* Institution & Profile Info */}
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              {selectedProfileName && (
-                <div className="flex items-start gap-2">
-                  <FileText className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" />
-                  <div>
-                    <span className="text-muted-foreground">Selected Profile</span>
-                    <p className="font-medium text-foreground">{selectedProfileName}</p>
+            {/* Profile Hierarchy Display */}
+            {profileHierarchy && profileHierarchy.profiles.length > 0 && (
+              <div className="flex items-start gap-2 text-xs">
+                <Building2 className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+                <div>
+                  <span className="text-muted-foreground">Profile Hierarchy</span>
+                  <div className="flex items-center flex-wrap gap-1 mt-0.5">
+                    {profileHierarchy.profiles.map((profile, idx) => (
+                      <span key={profile.id} className="flex items-center">
+                        <span className="font-medium text-foreground">{profile.name}</span>
+                        {idx < profileHierarchy.profiles.length - 1 && (
+                          <ChevronRight className="w-3 h-3 text-muted-foreground mx-0.5" />
+                        )}
+                      </span>
+                    ))}
                   </div>
                 </div>
-              )}
-              {isInherited && sourceDisplayName && (
-                <div className="flex items-start gap-2">
-                  <Building2 className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />
-                  <div>
-                    <span className="text-amber-600">DNA Source (Parent)</span>
-                    <p className="font-medium text-foreground">{sourceDisplayName}</p>
+              </div>
+            )}
+            
+            {/* DNA Source Info - show if inherited */}
+            {isInherited && dnaSourceHierarchy && (
+              <div className="flex items-start gap-2 text-xs">
+                <Dna className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />
+                <div>
+                  <span className="text-amber-600">DNA Inherited From</span>
+                  <div className="flex items-center flex-wrap gap-1 mt-0.5">
+                    {dnaSourceHierarchy.profiles.map((profile, idx) => (
+                      <span key={profile.id} className="flex items-center">
+                        <span className="font-medium text-foreground">{profile.name}</span>
+                        {idx < dnaSourceHierarchy.profiles.length - 1 && (
+                          <ChevronRight className="w-3 h-3 text-muted-foreground mx-0.5" />
+                        )}
+                      </span>
+                    ))}
                   </div>
                 </div>
-              )}
-              {!isInherited && tenant?.institution_name && !selectedProfileName && (
-                <div className="flex items-start gap-2">
-                  <Building2 className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" />
-                  <div>
-                    <span className="text-muted-foreground">Institution</span>
-                    <p className="font-medium text-foreground">{tenant.institution_name}</p>
-                  </div>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Voice Analysis Summary */}
             {enabled && hasContentDNA && voiceAnalysis && (

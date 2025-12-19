@@ -4,8 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
+import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { supabase } from "@/integrations/supabase/client";
 import { JourneyFlowDiagram } from "@/components/JourneyFlowDiagram";
 import { 
@@ -27,7 +29,10 @@ import {
   RefreshCw,
   Map,
   List,
-  Megaphone
+  Megaphone,
+  Building2,
+  Dna,
+  ChevronRight
 } from "lucide-react";
 import type { StrategyJourney, Channel, StrategyPhase, JourneyTouchpoint, MessageContext, InstitutionalConfig } from "@/types/uplaybook";
 
@@ -88,6 +93,7 @@ export function JourneyViewer({
   institutionalConfig: providedInstitutionalConfig
 }: JourneyViewerProps) {
   const { toast } = useToast();
+  const { getProfileHierarchy } = useInstitutionalProfiles();
 
   // Extract metadata if available
   const metadata = journey._metadata;
@@ -99,8 +105,18 @@ export function JourneyViewer({
   const effectiveProfileId = providedProfileId ?? metadata?.institutionalProfileId;
   const useContentDNASetting = metadata?.useContentDNA !== false; // default true
 
+  // Build profile hierarchy for display
+  const profileHierarchy = effectiveProfileId ? getProfileHierarchy(effectiveProfileId) : null;
+
   // Use profile-specific Content DNA if a profile ID is available
   const { contentDNA } = useContentDNAForGeneration({ profileId: effectiveProfileId });
+  
+  // Build DNA source hierarchy if inherited
+  const isDNAInherited = contentDNA?.sourceProfileId && contentDNA?.sourceProfileId !== effectiveProfileId;
+  const dnaSourceHierarchy = isDNAInherited && contentDNA?.sourceProfileId 
+    ? getProfileHierarchy(contentDNA.sourceProfileId) 
+    : null;
+    
   const [generatingIndex, setGeneratingIndex] = useState<number | null>(null);
   const [generatedMessage, setGeneratedMessage] = useState<string | null>(null);
   const [selectedTouchpoint, setSelectedTouchpoint] = useState<JourneyTouchpoint | null>(null);
@@ -183,6 +199,81 @@ export function JourneyViewer({
 
   return (
     <div className="space-y-4">
+      {/* Profile & Content DNA Info Bar */}
+      {(profileHierarchy?.profiles.length || useContentDNASetting) && (
+        <Card className="bg-muted/30 border-dashed">
+          <CardContent className="py-3">
+            <div className="flex flex-wrap items-center gap-4 text-xs">
+              {profileHierarchy && profileHierarchy.profiles.length > 0 && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1.5">
+                      <Building2 className="w-3.5 h-3.5 text-primary shrink-0" />
+                      <span className="text-muted-foreground">Profile:</span>
+                      <div className="flex items-center gap-0.5 font-medium text-foreground">
+                        {profileHierarchy.profiles.map((profile, idx) => (
+                          <span key={profile.id} className="flex items-center">
+                            <span>{profile.name}</span>
+                            {idx < profileHierarchy.profiles.length - 1 && (
+                              <ChevronRight className="w-3 h-3 text-muted-foreground mx-0.5" />
+                            )}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Content generated using this institutional profile</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+              
+              {useContentDNASetting && contentDNA?.voiceAnalysis && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1.5">
+                      <Dna className={`w-3.5 h-3.5 shrink-0 ${isDNAInherited ? 'text-amber-500' : 'text-emerald-500'}`} />
+                      <span className="text-muted-foreground">DNA:</span>
+                      {isDNAInherited && dnaSourceHierarchy ? (
+                        <div className="flex items-center gap-0.5 font-medium text-foreground">
+                          {dnaSourceHierarchy.profiles.map((profile, idx) => (
+                            <span key={profile.id} className="flex items-center">
+                              <span>{profile.name}</span>
+                              {idx < dnaSourceHierarchy.profiles.length - 1 && (
+                                <ChevronRight className="w-3 h-3 text-muted-foreground mx-0.5" />
+                              )}
+                            </span>
+                          ))}
+                          <Badge variant="outline" className="ml-1 text-[10px] py-0 text-amber-600 border-amber-300">
+                            inherited
+                          </Badge>
+                        </div>
+                      ) : (
+                        <span className="font-medium text-emerald-600">Active</span>
+                      )}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">
+                      {isDNAInherited 
+                        ? `Content DNA inherited from parent profile`
+                        : `Content DNA applied for brand voice consistency`
+                      }
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+              
+              {useContentDNASetting && !contentDNA?.voiceAnalysis && (
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <Dna className="w-3.5 h-3.5 shrink-0" />
+                  <span>DNA: Not configured</span>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
       {/* View Mode Toggle */}
       <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'diagram' | 'timeline')} className="w-full">
         <TabsList className="grid w-full grid-cols-2 max-w-xs">

@@ -299,6 +299,27 @@ export function useInstitutionalProfiles() {
     return profiles.find(p => p.id === id);
   }, [profiles]);
 
+  // Build the full hierarchy path for a profile (e.g., "Ohio State > College of Arts and Sciences")
+  const getProfileHierarchy = useCallback((profileId: string): { path: string; profiles: InstitutionalProfile[] } => {
+    const hierarchy: InstitutionalProfile[] = [];
+    let currentId: string | null | undefined = profileId;
+    
+    while (currentId) {
+      const profile = profiles.find(p => p.id === currentId);
+      if (profile) {
+        hierarchy.unshift(profile); // Add to beginning to build top-down path
+        currentId = profile.parentProfileId;
+      } else {
+        break;
+      }
+    }
+    
+    return {
+      path: hierarchy.map(p => p.name).join(' > '),
+      profiles: hierarchy,
+    };
+  }, [profiles]);
+
   return {
     profiles,
     isLoading,
@@ -310,6 +331,7 @@ export function useInstitutionalProfiles() {
     getChildProfiles,
     getParentProfile,
     getRootProfiles,
+    getProfileHierarchy,
     hasProfiles: profiles.length > 0,
     refreshProfiles: fetchProfiles,
   };

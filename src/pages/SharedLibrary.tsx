@@ -7,9 +7,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
+import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { CreateTemplateDialog } from "@/components/library/CreateTemplateDialog";
 import { AdminApprovalPanel } from "@/components/library/AdminApprovalPanel";
 import type { SharedTemplate, LibraryFilters, LibraryEntryStatus } from "@/types/library";
@@ -27,7 +29,9 @@ import {
   X,
   ShieldCheck,
   ChevronRight,
-  Calendar
+  Calendar,
+  Building2,
+  Dna
 } from "lucide-react";
 
 const statusConfig: Record<LibraryEntryStatus, { label: string; icon: typeof CheckCircle; variant: 'default' | 'secondary' | 'outline' }> = {
@@ -42,6 +46,7 @@ const SharedLibrary = () => {
   const navigate = useNavigate();
   const { templates, filterTemplates, getPlaybooks, addTemplate, updateTemplateStatus } = useSharedLibrary();
   const { addMessage } = useMessageLibrary();
+  const { getProfileHierarchy } = useInstitutionalProfiles();
   const [filters, setFilters] = useState<LibraryFilters>({ search: '' });
   const [createOpen, setCreateOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
@@ -283,8 +288,44 @@ const SharedLibrary = () => {
                           {template.requiredFields.audience.length > 2 && (
                             <Badge variant="outline" className="text-xs">+{template.requiredFields.audience.length - 2}</Badge>
                           )}
-                          {template.institutionalProfileName && (
+                          {/* Show profile hierarchy if available */}
+                          {template.institutionalProfileId && (() => {
+                            const hierarchy = getProfileHierarchy(template.institutionalProfileId);
+                            if (hierarchy.profiles.length > 0) {
+                              return (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Badge variant="default" className="text-xs bg-primary/10 text-primary border-primary/20 flex items-center gap-1">
+                                      <Building2 className="w-3 h-3" />
+                                      {hierarchy.profiles.length > 1 
+                                        ? `${hierarchy.profiles[0].name} > ${hierarchy.profiles[hierarchy.profiles.length - 1].name}`
+                                        : hierarchy.profiles[0].name
+                                      }
+                                    </Badge>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="bottom" className="max-w-xs">
+                                    <div className="text-xs">
+                                      <p className="font-medium mb-1">Profile Hierarchy</p>
+                                      <div className="flex items-center flex-wrap gap-0.5">
+                                        {hierarchy.profiles.map((profile, idx) => (
+                                          <span key={profile.id} className="flex items-center">
+                                            <span>{profile.name}</span>
+                                            {idx < hierarchy.profiles.length - 1 && (
+                                              <ChevronRight className="w-3 h-3 mx-0.5" />
+                                            )}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </TooltipContent>
+                                </Tooltip>
+                              );
+                            }
+                            return null;
+                          })()}
+                          {!template.institutionalProfileId && template.institutionalProfileName && (
                             <Badge variant="default" className="text-xs bg-primary/10 text-primary border-primary/20">
+                              <Building2 className="w-3 h-3 mr-1" />
                               {template.institutionalProfileName}
                             </Badge>
                           )}
