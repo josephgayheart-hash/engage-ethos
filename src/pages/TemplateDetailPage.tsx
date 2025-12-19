@@ -257,64 +257,71 @@ const TemplateDetailPage = () => {
             </BreadcrumbList>
           </Breadcrumb>
 
-          {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8">
-            <div className="flex items-start gap-4">
-              <Link to="/shared-library">
-                <Button variant="ghost" size="icon" className="shrink-0">
-                  <ArrowLeft className="w-5 h-5" />
-                </Button>
-              </Link>
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground">
-                    {template.title}
-                  </h1>
-                  <StatusBadge status={template.status} />
-                </div>
-                <p className="text-muted-foreground">{template.intentStatement}</p>
-                <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Users className="w-4 h-4" />
-                    {template.owner}
+          {/* Header Card */}
+          <Card className="mb-6">
+            <CardContent className="pt-6">
+              {/* Top row: Back button + Title */}
+              <div className="flex items-start gap-4 mb-4">
+                <Link to="/shared-library">
+                  <Button variant="ghost" size="icon" className="shrink-0 -ml-2">
+                    <ArrowLeft className="w-5 h-5" />
+                  </Button>
+                </Link>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3 mb-2 flex-wrap">
+                    <h1 className="font-serif text-base sm:text-lg md:text-xl font-bold text-foreground break-words">
+                      {template.title}
+                    </h1>
+                    <StatusBadge status={template.status} />
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    v{template.version}
-                  </div>
-                  <span>
-                    Updated {new Date(template.updatedAt).toLocaleDateString()}
-                  </span>
+                  <p className="text-muted-foreground text-sm">{template.intentStatement}</p>
                 </div>
               </div>
-            </div>
-            <div className="flex items-center gap-2 md:shrink-0 flex-wrap">
-              {isJourney && journeyData && (
-                <>
-                  <Button onClick={handleRemixJourney} variant="outline" className="flex items-center gap-2">
-                    <GitBranch className="w-4 h-4" />
-                    Remix Journey
-                  </Button>
-                  <Button onClick={exportToPdf} variant="outline" className="flex items-center gap-2" disabled={isExporting}>
-                    <FileDown className="w-4 h-4" />
-                    {isExporting ? "Exporting..." : "Export PDF"}
-                  </Button>
-                  <Button onClick={printJourney} variant="outline" className="flex items-center gap-2">
-                    <Printer className="w-4 h-4" />
-                    Print
-                  </Button>
-                </>
-              )}
-              <Button onClick={handleCopy} variant="outline" className="flex items-center gap-2">
-                <Copy className="w-4 h-4" />
-                {copied ? "Copied!" : "Copy"}
-              </Button>
-              <Button onClick={handlePull} className="flex items-center gap-2">
-                <Download className="w-4 h-4" />
-                Pull to My Library
-              </Button>
-            </div>
-          </div>
+
+              {/* Meta info row */}
+              <div className="flex items-center gap-3 text-sm text-muted-foreground mb-5 flex-wrap pl-10">
+                <span className="flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5" />
+                  {template.owner}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5" />
+                  v{template.version}
+                </span>
+                <span>
+                  Updated {new Date(template.updatedAt).toLocaleDateString()}
+                </span>
+              </div>
+
+              {/* Action buttons row */}
+              <div className="flex items-center gap-2 pl-10 flex-wrap">
+                {isJourney && journeyData && (
+                  <>
+                    <Button onClick={handleRemixJourney} variant="outline" size="sm">
+                      <GitBranch className="w-4 h-4 mr-2" />
+                      Remix Journey
+                    </Button>
+                    <Button onClick={exportToPdf} variant="outline" size="sm" disabled={isExporting}>
+                      <FileDown className="w-4 h-4 mr-2" />
+                      {isExporting ? "Exporting..." : "Export PDF"}
+                    </Button>
+                    <Button onClick={printJourney} variant="outline" size="sm">
+                      <Printer className="w-4 h-4 mr-2" />
+                      Print
+                    </Button>
+                  </>
+                )}
+                <Button onClick={handleCopy} variant="outline" size="sm">
+                  <Copy className="w-4 h-4 mr-2" />
+                  {copied ? "Copied!" : "Copy"}
+                </Button>
+                <Button onClick={handlePull} size="sm">
+                  <Download className="w-4 h-4 mr-2" />
+                  Pull to My Library
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Content Tabs */}
           <Tabs defaultValue="template" className="space-y-6">
