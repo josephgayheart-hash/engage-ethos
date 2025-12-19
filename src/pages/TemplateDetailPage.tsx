@@ -44,8 +44,20 @@ import {
   ExternalLink,
   Pencil,
   X,
-  Save
+  Save,
+  Trash2
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -116,7 +128,7 @@ const TemplateDetailPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { profile } = useAuth();
-  const { templates, getTemplateById } = useSharedLibrary();
+  const { templates, getTemplateById, deleteTemplate } = useSharedLibrary();
   const { addMessage } = useMessageLibrary();
   const { getProfile } = useInstitutionalProfiles();
   const [copied, setCopied] = useState(false);
@@ -320,6 +332,15 @@ const TemplateDetailPage = () => {
     }
   };
 
+  const handleDelete = () => {
+    deleteTemplate(template.id);
+    toast({ 
+      title: "Playbook deleted", 
+      description: "The playbook has been removed from the University Library." 
+    });
+    navigate('/shared-library');
+  };
+
   const displayContent = isEditing ? editedContent : customizedContent;
 
   return (
@@ -373,6 +394,28 @@ const TemplateDetailPage = () => {
                     </div>
                     {/* Primary actions in title bar */}
                     <div className="flex items-center gap-2 flex-wrap">
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Playbook</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete "{template.title}"? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                       <Button onClick={handleRemix} variant="secondary" size="sm">
                         <GitBranch className="w-4 h-4 mr-2" />
                         Remix
