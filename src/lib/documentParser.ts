@@ -98,7 +98,7 @@ export async function extractTextFromFile(file: File): Promise<{
 
 /**
  * Extract text from Word documents (.docx, .doc)
- * Uses basic XML parsing for .docx files
+ * Uses mammoth library for proper DOCX parsing
  */
 async function extractTextFromWord(file: File): Promise<{
   text: string;
@@ -106,53 +106,51 @@ async function extractTextFromWord(file: File): Promise<{
   message?: string;
 }> {
   try {
+    // Dynamic import of mammoth to avoid bundling issues
+    const mammoth = await import('mammoth');
+    
     const arrayBuffer = await file.arrayBuffer();
-    const decoder = new TextDecoder('utf-8', { fatal: false });
-    const rawContent = decoder.decode(arrayBuffer);
-
-    // Try to extract from DOCX XML structure (w:t tags contain text)
-    const textMatches = rawContent.match(/<w:t[^>]*>([^<]*)<\/w:t>/g);
-    if (textMatches && textMatches.length > 0) {
-      const text = textMatches
-        .map(match => match.replace(/<[^>]+>/g, ''))
-        .join(' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-      
-      if (text.length > 20) {
-        return { text, success: true };
-      }
+    
+    // Use mammoth to extract raw text from the DOCX
+    const result = await mammoth.extractRawText({ arrayBuffer });
+    
+    const text = result.value.trim();
+    
+    if (text.length < 20) {
+      return {
+        text: '',
+        success: false,
+        message: 'File does not contain enough text content (minimum 20 characters). Please try a different file or paste the content directly.',
+      };
     }
 
-    // Fallback: try to extract any readable text from XML
-    const cleanText = rawContent
-      .replace(/<[^>]+>/g, ' ')
-      .replace(/[^\x20-\x7E\s]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-
-    // Filter out binary garbage - look for sequences of readable words
-    const words = cleanText.split(' ').filter(word => 
-      word.length > 1 && 
-      word.length < 30 && 
-      /^[a-zA-Z0-9.,!?'"()-]+$/.test(word)
-    );
-
-    if (words.length > 10) {
-      return { text: words.join(' '), success: true };
+    // Log any warnings from mammoth
+    if (result.messages && result.messages.length > 0) {
+      console.warn('Mammoth extraction warnings:', result.messages);
     }
 
-    return {
-      text: '',
-      success: false,
-      message: 'Could not extract text from this Word document. The file may be corrupted or in an unsupported format. Please copy and paste the content directly.',
+    return { 
+      text, 
+      success: true,
+      message: `Successfully extracted ${text.length.toLocaleString()} characters from Word document.`
     };
   } catch (error) {
     console.error('Word extraction error:', error);
+    
+    // Check if it's a .doc file (older format)
+    const extension = '.' + (file.name.split('.').pop()?.toLowerCase() || '');
+    if (extension === '.doc') {
+      return {
+        text: '',
+        success: false,
+        message: 'Old .doc format is not fully supported. Please save the file as .docx or copy and paste the content directly.',
+      };
+    }
+    
     return {
       text: '',
       success: false,
-      message: 'Error reading Word document. Please try copying and pasting the content directly.',
+      message: 'Error reading Word document. The file may be corrupted. Please try copying and pasting the content directly.',
     };
   }
 }
