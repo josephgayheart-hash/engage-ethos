@@ -31,6 +31,11 @@ interface ContentDNAIndicatorProps {
    */
   onToggle: (enabled: boolean) => void;
   /**
+   * The currently selected institutional profile ID (optional)
+   * Used to fetch profile-specific Content DNA
+   */
+  selectedProfileId?: string | null;
+  /**
    * The currently selected institutional profile name (optional)
    */
   selectedProfileName?: string;
@@ -53,11 +58,12 @@ interface ContentDNAIndicatorProps {
 export function ContentDNAIndicator({
   enabled,
   onToggle,
+  selectedProfileId,
   selectedProfileName,
   compact = false,
   className,
 }: ContentDNAIndicatorProps) {
-  const { contentDNA, isLoading } = useContentDNAForGeneration();
+  const { contentDNA, isLoading } = useContentDNAForGeneration({ profileId: selectedProfileId });
   const { tenant, isAdmin } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -288,12 +294,14 @@ export function ContentDNAIndicator({
  */
 export function ContentDNAActiveBadge({ 
   className,
-  institutionName 
+  institutionName,
+  profileId,
 }: { 
   className?: string;
   institutionName?: string;
+  profileId?: string | null;
 }) {
-  const { contentDNA } = useContentDNAForGeneration();
+  const { contentDNA } = useContentDNAForGeneration({ profileId });
   const { tenant } = useAuth();
   
   if (!contentDNA?.voiceAnalysis) return null;
