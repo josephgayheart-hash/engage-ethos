@@ -20,7 +20,8 @@ import {
   FolderPlus,
   Search,
   Megaphone,
-  Mic
+  Mic,
+  Target
 } from "lucide-react";
 import type { 
   ChannelDrafts, 
@@ -120,12 +121,19 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
       let result = `EXECUTIVE TALKING POINTS\n${'='.repeat(40)}\n\n`;
       if (tp.context) result += `CONTEXT: ${tp.context}\n`;
       if (tp.audience) result += `AUDIENCE: ${tp.audience}\n\n`;
-      if (tp.openingHook) result += `OPENING HOOK:\n${tp.openingHook}\n\n`;
-      if (tp.keyMessages?.length) result += `KEY MESSAGES:\n${tp.keyMessages.map((m, i) => `${i + 1}. ${m}`).join('\n')}\n\n`;
-      if (tp.supportingData?.length) result += `SUPPORTING DATA:\n${tp.supportingData.map(d => `• ${d}`).join('\n')}\n\n`;
-      if (tp.anticipatedQuestions?.length) result += `ANTICIPATED Q&A:\n${tp.anticipatedQuestions.map(q => `Q: ${q}`).join('\n')}\n\n`;
-      if (tp.transitionPhrases?.length) result += `TRANSITIONS:\n${tp.transitionPhrases.map(t => `→ "${t}"`).join('\n')}\n\n`;
-      if (tp.closingStatement) result += `CLOSING:\n${tp.closingStatement}`;
+      if (tp.openingHook) result += `OPENING HOOK:\n"${tp.openingHook}"\n\n`;
+      if (tp.keyMessages?.length) result += `KEY TALKING POINTS:\n${tp.keyMessages.map((m, i) => `${i + 1}. ${m}`).join('\n\n')}\n\n`;
+      if (tp.supportingData?.length) result += `SUPPORTING DATA & EVIDENCE:\n${tp.supportingData.map(d => `📊 ${d}`).join('\n')}\n\n`;
+      if (tp.anticipatedQuestions?.length) {
+        result += `ANTICIPATED Q&A:\n`;
+        tp.anticipatedQuestions.forEach((q, i) => {
+          result += `Q: ${q}\n`;
+          if (tp.suggestedResponses?.[i]) result += `A: ${tp.suggestedResponses[i]}\n`;
+          result += '\n';
+        });
+      }
+      if (tp.transitionPhrases?.length) result += `TRANSITION PHRASES:\n${tp.transitionPhrases.map(t => `→ "${t}"`).join('\n')}\n\n`;
+      if (tp.closingStatement) result += `CLOSING STATEMENT:\n"${tp.closingStatement}"`;
       return result;
     }
     return '';
@@ -420,6 +428,15 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
           />
         </div>
         <div>
+          <Label className="text-xs text-muted-foreground">Suggested Responses (one per line, matches questions above)</Label>
+          <Textarea
+            value={(tp.suggestedResponses || []).join('\n')}
+            onChange={(e) => setEditedContent({ ...tp, suggestedResponses: e.target.value.split('\n').filter(Boolean) })}
+            className="mt-1 min-h-[80px]"
+            placeholder="Answer 1&#10;Answer 2&#10;Answer 3"
+          />
+        </div>
+        <div>
           <Label className="text-xs text-muted-foreground">Transition Phrases (one per line)</Label>
           <Textarea
             value={(tp.transitionPhrases || []).join('\n')}
@@ -667,73 +684,95 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     <div className="space-y-4">
       {/* Header with context */}
       <div className="bg-teal-50 dark:bg-teal-950/30 rounded-lg p-4 border border-teal-200 dark:border-teal-800">
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-2 mb-3">
           <Mic className="w-5 h-5 text-teal-600 dark:text-teal-400" />
-          <span className="font-semibold text-teal-700 dark:text-teal-300">Executive Talking Points</span>
+          <span className="font-semibold text-lg text-teal-700 dark:text-teal-300">Executive Talking Points</span>
         </div>
-        {tp.context && <p className="text-sm"><span className="font-medium">Context:</span> {tp.context}</p>}
-        {tp.audience && <p className="text-sm"><span className="font-medium">Audience:</span> {tp.audience}</p>}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {tp.context && (
+            <div className="bg-white/50 dark:bg-black/20 rounded p-2">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Context</p>
+              <p className="text-sm font-medium">{tp.context}</p>
+            </div>
+          )}
+          {tp.audience && (
+            <div className="bg-white/50 dark:bg-black/20 rounded p-2">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Audience</p>
+              <p className="text-sm font-medium">{tp.audience}</p>
+            </div>
+          )}
+        </div>
       </div>
       
       {/* Opening Hook */}
       {tp.openingHook && (
         <div className="bg-green-50 dark:bg-green-950/30 rounded-lg p-4 border border-green-200 dark:border-green-800">
-          <p className="text-xs font-semibold text-green-700 dark:text-green-400 mb-1">OPENING HOOK</p>
-          <p className="text-sm italic">"{tp.openingHook}"</p>
+          <p className="text-xs font-semibold text-green-700 dark:text-green-400 mb-2 uppercase tracking-wide">Opening Hook</p>
+          <p className="text-sm leading-relaxed italic border-l-2 border-green-400 pl-3">"{tp.openingHook}"</p>
         </div>
       )}
       
-      {/* Key Messages */}
+      {/* Key Messages - Enhanced display */}
       {tp.keyMessages && tp.keyMessages.length > 0 && (
-        <div className="bg-card rounded-lg p-4 border border-border">
-          <p className="text-xs font-semibold text-muted-foreground mb-3">KEY MESSAGES</p>
-          <ul className="space-y-3">
+        <div className="bg-card rounded-lg p-4 border-2 border-primary/20">
+          <p className="text-xs font-semibold text-primary mb-4 uppercase tracking-wide flex items-center gap-2">
+            <Target className="w-4 h-4" />
+            Key Talking Points
+          </p>
+          <div className="space-y-4">
             {tp.keyMessages.map((message, i) => (
-              <li key={i} className="flex gap-3">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-medium">{i + 1}</span>
-                <span className="text-sm">{message}</span>
-              </li>
+              <div key={i} className="flex gap-3 bg-muted/30 rounded-lg p-3">
+                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">{i + 1}</span>
+                <p className="text-sm leading-relaxed pt-0.5">{message}</p>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       )}
       
       {/* Supporting Data */}
       {tp.supportingData && tp.supportingData.length > 0 && (
         <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
-          <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">SUPPORTING DATA & EVIDENCE</p>
-          <ul className="space-y-1">
+          <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-3 uppercase tracking-wide">Supporting Data & Evidence</p>
+          <div className="grid gap-2">
             {tp.supportingData.map((data, i) => (
-              <li key={i} className="text-sm flex items-start gap-2">
-                <span className="text-blue-500">•</span>
-                <span>{data}</span>
-              </li>
+              <div key={i} className="flex items-start gap-2 bg-white/50 dark:bg-black/20 rounded p-2">
+                <span className="text-blue-500 font-bold">📊</span>
+                <span className="text-sm">{data}</span>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       )}
       
-      {/* Anticipated Questions */}
+      {/* Anticipated Q&A - Now with suggested responses */}
       {tp.anticipatedQuestions && tp.anticipatedQuestions.length > 0 && (
         <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-4 border border-amber-200 dark:border-amber-800">
-          <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 mb-2">ANTICIPATED Q&A</p>
-          <ul className="space-y-2">
+          <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 mb-3 uppercase tracking-wide">Anticipated Q&A</p>
+          <div className="space-y-3">
             {tp.anticipatedQuestions.map((question, i) => (
-              <li key={i} className="text-sm">
-                <span className="font-medium text-amber-700 dark:text-amber-400">Q:</span> {question}
-              </li>
+              <div key={i} className="bg-white/50 dark:bg-black/20 rounded-lg p-3 space-y-2">
+                <p className="text-sm">
+                  <span className="font-bold text-amber-700 dark:text-amber-400">Q:</span> {question}
+                </p>
+                {tp.suggestedResponses && tp.suggestedResponses[i] && (
+                  <p className="text-sm pl-4 border-l-2 border-amber-300 text-muted-foreground">
+                    <span className="font-bold text-green-600 dark:text-green-400">A:</span> {tp.suggestedResponses[i]}
+                  </p>
+                )}
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       )}
       
       {/* Transition Phrases */}
       {tp.transitionPhrases && tp.transitionPhrases.length > 0 && (
         <div className="bg-muted/50 rounded-lg p-4 border border-border">
-          <p className="text-xs font-semibold text-muted-foreground mb-2">TRANSITION PHRASES</p>
+          <p className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wide">Transition Phrases</p>
           <div className="flex flex-wrap gap-2">
             {tp.transitionPhrases.map((phrase, i) => (
-              <span key={i} className="text-xs bg-background px-2 py-1 rounded border">"{phrase}"</span>
+              <span key={i} className="text-sm bg-background px-3 py-1.5 rounded-full border shadow-sm italic">"{phrase}"</span>
             ))}
           </div>
         </div>
@@ -742,8 +781,8 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
       {/* Closing Statement */}
       {tp.closingStatement && (
         <div className="bg-purple-50 dark:bg-purple-950/30 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
-          <p className="text-xs font-semibold text-purple-700 dark:text-purple-400 mb-1">CLOSING STATEMENT</p>
-          <p className="text-sm font-medium">"{tp.closingStatement}"</p>
+          <p className="text-xs font-semibold text-purple-700 dark:text-purple-400 mb-2 uppercase tracking-wide">Closing Statement</p>
+          <p className="text-sm leading-relaxed font-medium border-l-2 border-purple-400 pl-3">"{tp.closingStatement}"</p>
         </div>
       )}
     </div>

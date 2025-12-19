@@ -161,7 +161,41 @@ ${daysUntilDeadline ? `- Days Until Deadline: ${daysUntilDeadline} days remainin
         "phone-call": "Phone call script talking points. Bullet format. Include greeting, key message, and closing.",
         "digital-ad-search": `Google/Bing Search Ad. Return JSON object with exact fields: { "headlines": ["Headline 1 (max 30 chars)", "Headline 2 (max 30 chars)", "Headline 3 (max 30 chars)"], "descriptions": ["Description 1 (max 90 chars)", "Description 2 (max 90 chars)"], "displayUrl": "university.edu/path" }`,
         "digital-ad-social": `Meta/LinkedIn Social Ad. Return JSON object with exact fields: { "primaryText": "Main ad copy (125 chars ideal)", "headline": "Bold headline (40 chars max)", "description": "Link description (optional)", "ctaButton": "Learn More", "platform": "meta" }`,
-        "talking-points": `Executive Talking Points for a president, dean, or executive. Return JSON object with exact fields: { "context": "Meeting/speech context", "audience": "Target audience", "openingHook": "Attention-grabbing opening statement", "keyMessages": ["Message 1", "Message 2", "Message 3", "Message 4", "Message 5"], "supportingData": ["Stat or fact 1", "Stat or fact 2", "Stat or fact 3"], "anticipatedQuestions": ["Q1", "Q2", "Q3"], "transitionPhrases": ["Transition 1", "Transition 2"], "closingStatement": "Strong closing call to action" }. Base content on brand pillars, institutional promise, pathways, foundation, and proof points.`
+        "talking-points": `Executive Talking Points for a president, dean, provost, or senior leader. MUST return valid JSON with these fields:
+{
+  "context": "Specific meeting/speech context (e.g., 'Board of Trustees quarterly meeting', 'Alumni donor reception')",
+  "audience": "Target audience with their priorities (e.g., 'Board members focused on enrollment and financial sustainability')",
+  "openingHook": "A compelling 2-3 sentence opening that grabs attention and sets the tone. Use a powerful statistic, story, or bold statement grounded in the institution's brand promise.",
+  "keyMessages": [
+    "First key message - a complete, quotable talking point (2-3 sentences each)",
+    "Second key message - directly tied to institutional pillars or proof points",
+    "Third key message - addresses audience concerns or priorities",
+    "Fourth key message - forward-looking vision or commitment",
+    "Fifth key message - call to partnership or support"
+  ],
+  "supportingData": [
+    "Specific statistic or achievement (e.g., '94% first-year retention rate, up 3% from last year')",
+    "Proof point or evidence (e.g., '$2.3M in new scholarship funding')",
+    "Comparative data or benchmark (e.g., 'Top 10 in regional rankings for student outcomes')"
+  ],
+  "anticipatedQuestions": [
+    "Question 1: Full question an audience member might ask",
+    "Question 2: Another likely question",
+    "Question 3: A challenging question to prepare for"
+  ],
+  "suggestedResponses": [
+    "Response to Q1: Brief, confident answer with supporting evidence",
+    "Response to Q2: Brief, confident answer",
+    "Response to Q3: Brief, confident answer that acknowledges complexity"
+  ],
+  "transitionPhrases": [
+    "A natural transition phrase (e.g., 'This brings me to an exciting development...')",
+    "Another transition (e.g., 'What makes this possible is...')"
+  ],
+  "closingStatement": "A powerful 2-3 sentence closing that reinforces the brand promise, inspires action, and leaves a memorable impression."
+}
+
+CRITICAL: Each field must contain SUBSTANTIAL, SPECIFIC content. Key messages should be complete talking points (2-3 sentences each), not fragments. Ground all content in the institutional brand platform, pillars, proof points, and pathways. Make this immediately usable by an executive.`
       };
 
       // Build comprehensive institutional config string for prompts
@@ -256,13 +290,13 @@ Respond with valid JSON only:
     { "channel": "sms", "content": "..." },
     { "channel": "digital-ad-search", "content": { "headlines": ["...", "...", "..."], "descriptions": ["...", "..."], "displayUrl": "..." } },
     { "channel": "digital-ad-social", "content": { "primaryText": "...", "headline": "...", "description": "...", "ctaButton": "Learn More", "platform": "meta" } },
-    { "channel": "talking-points", "content": { "context": "...", "audience": "...", "openingHook": "...", "keyMessages": ["...", "...", "..."], "supportingData": ["...", "..."], "anticipatedQuestions": ["...", "..."], "transitionPhrases": ["...", "..."], "closingStatement": "..." } }
+    { "channel": "talking-points", "content": { "context": "Specific meeting context", "audience": "Target audience with priorities", "openingHook": "Compelling 2-3 sentence opening", "keyMessages": ["Full talking point 1 (2-3 sentences)", "Full talking point 2", "Full talking point 3", "Full talking point 4", "Full talking point 5"], "supportingData": ["Specific stat 1", "Specific stat 2", "Specific stat 3"], "anticipatedQuestions": ["Full question 1", "Full question 2", "Full question 3"], "suggestedResponses": ["Answer to Q1", "Answer to Q2", "Answer to Q3"], "transitionPhrases": ["Transition phrase 1", "Transition phrase 2"], "closingStatement": "Powerful 2-3 sentence closing" } }
   ]
 }
 
 IMPORTANT for digital-ad-search: content MUST be a JSON object with "headlines" (array of 3 strings), "descriptions" (array of 2 strings), and "displayUrl" (string).
 IMPORTANT for digital-ad-social: content MUST be a JSON object with "primaryText", "headline", "description", "ctaButton", and "platform" fields.
-IMPORTANT for talking-points: content MUST be a JSON object with "context", "audience", "openingHook", "keyMessages" (array of 5+ key talking points), "supportingData" (array of relevant stats/facts), "anticipatedQuestions" (array of likely questions), "transitionPhrases" (array), and "closingStatement". Base the content on institutional brand pillars, promise, pathways, foundation, and proof points.`;
+IMPORTANT for talking-points: content MUST be a JSON object with ALL these fields: "context", "audience", "openingHook" (2-3 compelling sentences), "keyMessages" (array of 5 COMPLETE talking points, each 2-3 sentences), "supportingData" (array of 3 SPECIFIC stats/facts), "anticipatedQuestions" (array of 3 FULL questions), "suggestedResponses" (array of 3 brief answers), "transitionPhrases" (array of 2), and "closingStatement" (2-3 powerful sentences). Each talking point in keyMessages MUST be substantial and quotable. Ground content in brand pillars, promise, proof points, and pathways.`;
       } else {
         // Single channel touchpoint message generation
         userPrompt = `Generate a message for a strategy journey touchpoint.
