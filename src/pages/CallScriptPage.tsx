@@ -17,6 +17,7 @@ import { AIBadge } from "@/components/ui/ai-indicator";
 import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
+import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { 
@@ -98,6 +99,7 @@ const toneOptions: { value: TonePreference; label: string }[] = [
 const CallScriptPage = () => {
   const { toast } = useToast();
   const { addMessage } = useMessageLibrary();
+  const { contentDNA } = useContentDNAForGeneration();
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [selectedProfileName, setSelectedProfileName] = useState<string | undefined>(undefined);
   const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfig | null>(null);
@@ -136,6 +138,7 @@ const CallScriptPage = () => {
             urgencyLabel,
           },
           institutionalConfig,
+          contentDNA: contentDNA || undefined,
         }
       });
 

@@ -13,6 +13,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AIBadge } from "@/components/ui/ai-indicator";
 import { useToast } from "@/hooks/use-toast";
 import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
+import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   ArrowLeft, 
@@ -33,6 +34,7 @@ import {
 const SubjectLineOptimizer = () => {
   const { toast } = useToast();
   const { config: institutionalConfig } = useInstitutionalConfig();
+  const { contentDNA } = useContentDNAForGeneration();
   const [subjectLine, setSubjectLine] = useState("");
   const [previewText, setPreviewText] = useState("");
   const [audience, setAudience] = useState("first-year");
@@ -79,7 +81,8 @@ const SubjectLineOptimizer = () => {
             audience,
             goal,
             institutionName: institutionalConfig?.institutionName,
-          }
+          },
+          contentDNA: contentDNA || undefined,
         }
       });
 

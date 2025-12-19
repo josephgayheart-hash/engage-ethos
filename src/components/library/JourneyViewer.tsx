@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
+import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { supabase } from "@/integrations/supabase/client";
 import { JourneyFlowDiagram } from "@/components/JourneyFlowDiagram";
 import { 
@@ -76,6 +77,7 @@ const phaseBorderColors: Record<StrategyPhase, string> = {
 export function JourneyViewer({ journey, allowGeneration = true }: JourneyViewerProps) {
   const { toast } = useToast();
   const { config: institutionalConfig } = useInstitutionalConfig();
+  const { contentDNA } = useContentDNAForGeneration();
   const [generatingIndex, setGeneratingIndex] = useState<number | null>(null);
   const [generatedMessage, setGeneratedMessage] = useState<string | null>(null);
   const [selectedTouchpoint, setSelectedTouchpoint] = useState<JourneyTouchpoint | null>(null);
@@ -115,7 +117,8 @@ export function JourneyViewer({ journey, allowGeneration = true }: JourneyViewer
             week: touchpoint.week,
             phase: touchpoint.phase,
           },
-          institutionalConfig
+          institutionalConfig,
+          contentDNA: contentDNA || undefined,
         }
       });
 
