@@ -21,6 +21,7 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { BrandLayerSelector, BrandLayerActiveBadge, BrandLayerSelection } from "@/components/BrandLayerSelector";
+import { BrandAdherenceScore } from "@/components/BrandAdherenceScore";
 
 import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
 import { cn } from "@/lib/utils";
@@ -650,6 +651,13 @@ const BuildPage = () => {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Brand Adherence Score */}
+              {builderResult.brandAdherence && (
+                <BrandAdherenceScore 
+                  adherence={builderResult.brandAdherence} 
+                />
+              )}
 
               {/* Channel-specific previews */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

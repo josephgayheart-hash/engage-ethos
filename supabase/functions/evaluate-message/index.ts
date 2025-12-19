@@ -642,6 +642,141 @@ Provide your evaluation as JSON.`;
         }
       }
 
+      // Brand Adherence Scoring for builder mode
+      if (mode === 'builder' && institutionalConfig?.brandSelection && institutionalConfig?.brandPlatform) {
+        const bs = institutionalConfig.brandSelection;
+        const bp = institutionalConfig.brandPlatform;
+        
+        // Collect selected brand elements to evaluate
+        const selectedElements: { element: string; elementType: string }[] = [];
+        
+        if (bs.includePromise && bp.brandPromise) {
+          selectedElements.push({ element: bp.brandPromise, elementType: 'promise' });
+        }
+        if (bs.pillars?.length > 0) {
+          bs.pillars.forEach((name: string) => {
+            const pillar = bp.brandPillars?.find((p: any) => p.name === name);
+            if (pillar) {
+              selectedElements.push({ element: `${pillar.name}: ${pillar.description}`, elementType: 'pillar' });
+            }
+          });
+        }
+        if (bs.proofPoints?.length > 0) {
+          bs.proofPoints.forEach((point: string) => {
+            selectedElements.push({ element: point, elementType: 'proofPoint' });
+          });
+        }
+        if (bs.commitments?.length > 0) {
+          bs.commitments.forEach((commitment: string) => {
+            selectedElements.push({ element: commitment, elementType: 'commitment' });
+          });
+        }
+        if (bs.pathways?.length > 0) {
+          bs.pathways.forEach((name: string) => {
+            const pathway = bp.brandPathways?.find((p: any) => p.name === name);
+            if (pathway) {
+              selectedElements.push({ element: `${pathway.name}: ${pathway.description}`, elementType: 'pathway' });
+            }
+          });
+        }
+
+        if (selectedElements.length > 0) {
+          console.log(`Evaluating brand adherence for ${selectedElements.length} elements...`);
+          
+          // Serialize generated content for analysis
+          const generatedContentSummary = Object.entries(result.channelDrafts || {})
+            .map(([channel, content]) => {
+              if (typeof content === 'string') return `[${channel.toUpperCase()}]: ${content}`;
+              if (content && typeof content === 'object') {
+                return `[${channel.toUpperCase()}]: ${JSON.stringify(content)}`;
+              }
+              return '';
+            })
+            .filter(Boolean)
+            .join('\n\n');
+
+          const brandAdherencePrompt = `Analyze the following generated content for brand adherence.
+
+GENERATED CONTENT:
+${generatedContentSummary}
+
+SELECTED BRAND ELEMENTS TO EVALUATE:
+${selectedElements.map((e, i) => `${i + 1}. [${e.elementType.toUpperCase()}] ${e.element}`).join('\n')}
+
+For each brand element, determine:
+1. Was it incorporated into the content? (true/false)
+2. How strongly? (strong = explicit/prominent, moderate = implied/referenced, weak = barely present, absent = not found)
+3. Provide a brief quote or reference from the content as evidence (if incorporated)
+
+Then provide an overall brand adherence score (0-100) and summary.
+
+IMPORTANT: Respond ONLY with valid JSON:
+{
+  "overallScore": <number 0-100>,
+  "overallRating": "Excellent|Good|Fair|Needs Improvement",
+  "elementScores": [
+    {
+      "element": "Element text",
+      "elementType": "promise|pillar|proofPoint|commitment|pathway",
+      "incorporated": true|false,
+      "strength": "strong|moderate|weak|absent",
+      "evidence": "Quote from content if applicable"
+    }
+  ],
+  "summary": "2-3 sentence summary of brand adherence",
+  "suggestions": ["Suggestion for improvement 1", "Suggestion 2"]
+}
+
+Scoring guide:
+- 90-100: Excellent - All selected elements strongly incorporated
+- 70-89: Good - Most elements incorporated, some moderately
+- 50-69: Fair - Some elements incorporated, several missing or weak
+- 0-49: Needs Improvement - Many elements missing or not reflected`;
+
+          try {
+            const brandResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${LOVABLE_API_KEY}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                model: "google/gemini-2.5-flash",
+                messages: [
+                  { role: "system", content: "You are a brand adherence analyst for higher education communications. Evaluate how well generated content reflects the selected brand elements." },
+                  { role: "user", content: brandAdherencePrompt },
+                ],
+              }),
+            });
+
+            if (brandResponse.ok) {
+              const brandData = await brandResponse.json();
+              const brandContent = brandData.choices?.[0]?.message?.content;
+              
+              if (brandContent) {
+                let brandJsonContent = brandContent;
+                const brandJsonMatch = brandContent.match(/```(?:json)?\s*([\s\S]*?)```/);
+                if (brandJsonMatch) {
+                  brandJsonContent = brandJsonMatch[1].trim();
+                }
+                
+                try {
+                  const brandAdherence = JSON.parse(brandJsonContent);
+                  result.brandAdherence = brandAdherence;
+                  console.log(`Brand adherence score: ${brandAdherence.overallScore}%`);
+                } catch (brandParseError) {
+                  console.error("Failed to parse brand adherence response:", brandParseError);
+                }
+              }
+            } else {
+              console.error("Brand adherence API call failed:", brandResponse.status);
+            }
+          } catch (brandError) {
+            console.error("Error during brand adherence evaluation:", brandError);
+          }
+        }
+      }
+
       console.log("Result parsed successfully");
 
       return new Response(JSON.stringify(result), {
