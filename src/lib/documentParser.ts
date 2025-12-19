@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { extractTextFromPdfWithPdfJs } from '@/lib/pdfTextExtractor';
 
 export const SUPPORTED_DOCUMENT_TYPES = [
   'text/plain',
@@ -158,63 +159,33 @@ async function extractTextFromWord(file: File): Promise<{
 
 /**
  * Extract text from PDF files
- * First tries basic extraction, then falls back to AI vision for complex PDFs
+ * Uses PDF.js (client-side) so we can handle large PDFs without backend limits.
+ * Falls back to AI OCR only for smaller PDFs that appear to be scanned.
  */
 async function extractTextFromPdf(file: File): Promise<{
   text: string;
   success: boolean;
   message?: string;
 }> {
-  try {
-    const arrayBuffer = await file.arrayBuffer();
-    const bytes = new Uint8Array(arrayBuffer);
-    
-    // Check if it's a valid PDF
-    const header = String.fromCharCode(...bytes.slice(0, 8));
-    if (!header.startsWith('%PDF')) {
-      return {
-        text: '',
-        success: false,
-        message: 'This file does not appear to be a valid PDF.',
-      };
-    }
+  // 1) Try PDF.js extraction (works for embedded fonts, compression, and large PDFs)
+  const pdfJsResult = await extractTextFromPdfWithPdfJs(file);
+  if (pdfJsResult.success) return pdfJsResult;
 
-    const decoder = new TextDecoder('utf-8', { fatal: false });
-    const content = decoder.decode(arrayBuffer);
+  // 2) If it looks like the PDF has no selectable text, try AI OCR for SMALL PDFs only
+  const MAX_AI_PDF_MB = 5;
+  const sizeMb = file.size / (1024 * 1024);
 
-    // Check for encryption
-    if (content.includes('/Encrypt')) {
-      return {
-        text: '',
-        success: false,
-        message: 'This PDF is password-protected or encrypted. Please provide an unprotected version or paste the content directly.',
-      };
-    }
-
-    // Try basic text extraction first
-    const basicResult = tryBasicPdfExtraction(content);
-    
-    if (basicResult.success && basicResult.text.length > 50) {
-      return basicResult;
-    }
-
-    // Fall back to AI vision for complex PDFs
-    console.log('Basic PDF extraction failed, falling back to AI vision...');
+  if (sizeMb <= MAX_AI_PDF_MB) {
     return await extractPdfWithAI(file);
-
-  } catch (error) {
-    console.error('PDF parsing error:', error);
-    // Try AI extraction as last resort
-    try {
-      return await extractPdfWithAI(file);
-    } catch {
-      return {
-        text: '',
-        success: false,
-        message: 'Error reading PDF file. Please try a different file or paste the content directly.',
-      };
-    }
   }
+
+  return {
+    text: '',
+    success: false,
+    message:
+      pdfJsResult.message ||
+      `This PDF is ${sizeMb.toFixed(1)}MB and appears to have little/no selectable text (likely scanned). Please export an OCR'd version, upload key pages as screenshots (.png/.jpg), or paste the relevant text.`,
+  };
 }
 
 /**
