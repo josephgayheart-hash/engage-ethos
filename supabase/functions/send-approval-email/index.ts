@@ -45,19 +45,19 @@ const handler = async (req: Request): Promise<Response> => {
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="color-scheme" content="light only">
-        <meta name="supported-color-schemes" content="light only">
+        <meta name="color-scheme" content="light dark">
+        <meta name="supported-color-schemes" content="light dark">
         <style>
-          :root { color-scheme: light only; }
+          :root { color-scheme: light dark; }
           * { -webkit-text-fill-color: inherit !important; }
-          img { -webkit-filter: none !important; filter: none !important; }
+          .logo-img { -webkit-filter: invert(0) contrast(1.08) saturate(1.08) !important; filter: invert(0) contrast(1.08) saturate(1.08) !important; }
           u + .body { background-color: #f0fdf4 !important; }
           @media (prefers-color-scheme: dark) {
             .body-wrapper { background-color: #f0fdf4 !important; }
             .main-card { background-color: #ffffff !important; }
             .logo-area { background-color: #ffffff !important; }
             .logo-tile { background-color: #ffffff !important; }
-            .logo-img { background-color: #ffffff !important; -webkit-filter: none !important; filter: none !important; opacity: 1 !important; }
+            .logo-img { background-color: #ffffff !important; -webkit-filter: invert(0) contrast(1.22) saturate(1.22) !important; filter: invert(0) contrast(1.22) saturate(1.22) !important; opacity: 1 !important; mix-blend-mode: normal !important; }
             .credentials-box { background-color: #ecfdf5 !important; }
             .credentials-field { background-color: #ffffff !important; color: #065f46 !important; }
             .content-area { background-color: #ffffff !important; }
@@ -85,8 +85,8 @@ const handler = async (req: Request): Promise<Response> => {
                   <td class="logo-area" style="background-color: #ffffff !important; padding: 32px 40px 16px 40px; text-align: center; -webkit-background-color: #ffffff !important;" bgcolor="#ffffff">
                     <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto; background-color: #ffffff !important;" bgcolor="#ffffff">
                       <tr>
-                        <td class="logo-tile" style="background-color: #ffffff !important; padding: 20px 24px; border-radius: 12px; border: 1px solid #e2e8f0;" bgcolor="#ffffff">
-                          <img class="logo-img" src="https://uplaybook.ai/uplaybook-logo.png" alt="UPlaybook.AI" style="height: 60px; width: auto; display: block; background-color: #ffffff !important; -webkit-filter: none !important; filter: none !important;" />
+                        <td class="logo-tile" style="background-color: #ffffff !important; padding: 20px 24px; border-radius: 12px; border: 1px solid #cbd5e1; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.10);" bgcolor="#ffffff">
+                          <img class="logo-img" src="https://uplaybook.ai/uplaybook-logo.png" alt="UPlaybook.AI" style="height: 60px; width: auto; display: block; background-color: #ffffff !important; -webkit-filter: invert(0) contrast(1.08) saturate(1.08) !important; filter: invert(0) contrast(1.08) saturate(1.08) !important;" />
                         </td>
                       </tr>
                     </table>
