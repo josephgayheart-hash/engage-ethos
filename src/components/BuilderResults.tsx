@@ -206,7 +206,7 @@ export function BuilderResults({
                         variant="ghost"
                         size="sm"
                         onClick={() => handleOpenInGoogleDocs(draft, index)}
-                        title="Open in Google Docs"
+                        title="Copy into Google Docs"
                       >
                         <ExternalLink className="w-4 h-4" />
                       </Button>

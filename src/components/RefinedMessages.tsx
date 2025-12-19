@@ -84,7 +84,7 @@ export function RefinedMessages({
                     variant="ghost"
                     size="sm"
                     onClick={() => handleOpenInGoogleDocs(refinedMessage, 'Clarity & Authority Message')}
-                    title="Open in Google Docs"
+                    title="Copy into Google Docs"
                   >
                     <ExternalLink className="w-4 h-4" />
                   </Button>
@@ -117,7 +117,7 @@ export function RefinedMessages({
                     variant="ghost"
                     size="sm"
                     onClick={() => handleOpenInGoogleDocs(reducedLoadMessage, 'Reduced Load Message')}
-                    title="Open in Google Docs"
+                    title="Copy into Google Docs"
                   >
                     <ExternalLink className="w-4 h-4" />
                   </Button>
