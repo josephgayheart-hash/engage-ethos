@@ -20,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
+import { BrandLayerSelector, BrandLayerActiveBadge } from "@/components/BrandLayerSelector";
 
 import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
 import { cn } from "@/lib/utils";
@@ -107,6 +108,7 @@ const BuildPage = () => {
   const [saveToLibraryChannel, setSaveToLibraryChannel] = useState<Channel | null>(null);
   const [saveToLibraryType, setSaveToLibraryType] = useState<'personal' | 'shared'>('personal');
   const [useContentDNA, setUseContentDNA] = useState(true);
+  const [selectedPillars, setSelectedPillars] = useState<string[]>([]);
   const { contentDNA, isLoading: isContentDNALoading } = useContentDNAForGeneration({ profileId: selectedProfileId });
   const resultsRef = useRef<HTMLDivElement>(null);
   const canProcess = context.audience && context.moment && selectedChannels.length > 0;
@@ -147,6 +149,9 @@ const BuildPage = () => {
             voiceAnalysis: useContentDNA
               ? ((contentDNA?.voiceAnalysis ?? undefined) as any)
               : undefined,
+            // Pass brand platform and selected pillars for generation
+            brandPlatform: useContentDNA ? contentDNA?.brandPlatform : undefined,
+            selectedPillars: useContentDNA ? selectedPillars : undefined,
           }
         : undefined;
 
@@ -395,6 +400,17 @@ const BuildPage = () => {
                 selectedProfileName={selectedProfileName}
               />
 
+              {/* Brand Layer Selector - only show when Content DNA is enabled and brand platform exists */}
+              {useContentDNA && contentDNA?.brandPlatform && (
+                <BrandLayerSelector
+                  brandPlatform={contentDNA.brandPlatform}
+                  selectedPillars={selectedPillars}
+                  onPillarsChange={setSelectedPillars}
+                  isLoading={isContentDNALoading}
+                  compact
+                />
+              )}
+
               <ContextSelector context={context} onChange={setContext} mode="builder" />
 
               {/* Channel Selection */}
@@ -562,6 +578,12 @@ const BuildPage = () => {
                         </Badge>
                       </CardTitle>
                       {useContentDNA && <ContentDNAActiveBadge profileId={selectedProfileId} institutionName={selectedProfileName} />}
+                      {useContentDNA && contentDNA?.brandPlatform && (
+                        <BrandLayerActiveBadge 
+                          brandPlatform={contentDNA.brandPlatform} 
+                          selectedPillars={selectedPillars} 
+                        />
+                      )}
                     </div>
                     <Button variant="outline" size="sm" onClick={handleReset}>
                       <RefreshCw className="w-4 h-4 mr-2" />

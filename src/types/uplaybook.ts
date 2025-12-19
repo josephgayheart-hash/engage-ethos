@@ -446,6 +446,10 @@ export interface InstitutionalConfig {
   // Brand Voice Samples & Analysis
   brandVoiceSamples?: string[];
   voiceAnalysis?: VoiceAnalysis;
+  
+  // Brand Platform (extracted from Content DNA)
+  brandPlatform?: BrandPlatform;
+  selectedPillars?: string[];  // User-selected pillars to emphasize in generation
 }
 
 export interface VoiceAnalysis {

@@ -49,6 +49,12 @@ export async function buildMessage(
     if (institutionalConfig.voiceAnalysis) {
       console.log("Voice analysis present - tone:", institutionalConfig.voiceAnalysis.overallTone);
     }
+    if (institutionalConfig.brandPlatform) {
+      console.log("Brand platform present - promise:", institutionalConfig.brandPlatform.brandPromise?.substring(0, 50));
+    }
+    if (institutionalConfig.selectedPillars && institutionalConfig.selectedPillars.length > 0) {
+      console.log("Selected pillars:", institutionalConfig.selectedPillars.join(", "));
+    }
   }
   
   const { data, error } = await supabase.functions.invoke('evaluate-message', {
@@ -87,6 +93,12 @@ export async function mapMessages(
     console.log("Mapping with institution:", institutionalConfig.institutionName || "Unknown");
     if (institutionalConfig.voiceAnalysis) {
       console.log("Voice analysis present - tone:", institutionalConfig.voiceAnalysis.overallTone);
+    }
+    if (institutionalConfig.brandPlatform) {
+      console.log("Brand platform present - promise:", institutionalConfig.brandPlatform.brandPromise?.substring(0, 50));
+    }
+    if (institutionalConfig.selectedPillars && institutionalConfig.selectedPillars.length > 0) {
+      console.log("Selected pillars:", institutionalConfig.selectedPillars.join(", "));
     }
   }
   
