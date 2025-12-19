@@ -50,11 +50,14 @@ const handler = async (req: Request): Promise<Response> => {
         <style>
           :root { color-scheme: light only; }
           * { -webkit-text-fill-color: inherit !important; }
+          img { -webkit-filter: none !important; filter: none !important; }
           u + .body { background-color: #f8fafc !important; }
           @media (prefers-color-scheme: dark) {
             .body-wrapper { background-color: #f8fafc !important; }
             .main-card { background-color: #ffffff !important; }
             .logo-area { background-color: #ffffff !important; }
+            .logo-tile { background-color: #ffffff !important; }
+            .logo-img { background-color: #ffffff !important; -webkit-filter: none !important; filter: none !important; opacity: 1 !important; }
             .credentials-box { background-color: #f1f5f9 !important; }
             .credentials-field { background-color: #ffffff !important; color: #1e293b !important; }
             .content-area { background-color: #ffffff !important; }
@@ -69,18 +72,22 @@ const handler = async (req: Request): Promise<Response> => {
           }
         </style>
       </head>
-      <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
+      <body class="body" style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
         <div style="display: none; max-height: 0; overflow: hidden;">Welcome to UPlaybook.AI - Your login credentials inside</div>
-        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc !important; padding: 40px 20px;" bgcolor="#f8fafc">
+        <table class="body-wrapper" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc !important; padding: 40px 20px;" bgcolor="#f8fafc">
           <tr>
             <td align="center">
-              <table width="100%" max-width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff !important; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden;" bgcolor="#ffffff">
+              <table class="main-card" width="100%" max-width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff !important; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden;" bgcolor="#ffffff">
                 <!-- Logo Header with solid white background -->
                 <tr>
-                  <td style="background-color: #ffffff !important; padding: 32px 40px 16px 40px; text-align: center;" bgcolor="#ffffff">
-                    <div style="background-color: #ffffff !important; padding: 16px; border-radius: 12px; display: inline-block;" bgcolor="#ffffff">
-                      <img src="https://uplaybook.ai/uplaybook-logo.png" alt="UPlaybook.AI" style="height: 60px; width: auto; display: block;" />
-                    </div>
+                  <td class="logo-area" style="background-color: #ffffff !important; padding: 32px 40px 16px 40px; text-align: center;" bgcolor="#ffffff">
+                    <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto; background-color: #ffffff !important;" bgcolor="#ffffff">
+                      <tr>
+                        <td class="logo-tile" style="background-color: #ffffff !important; padding: 20px 24px; border-radius: 12px; border: 1px solid #e2e8f0;" bgcolor="#ffffff">
+                          <img class="logo-img" src="https://uplaybook.ai/uplaybook-logo.png" alt="UPlaybook.AI" style="height: 60px; width: auto; display: block; background-color: #ffffff !important; -webkit-filter: none !important; filter: none !important;" />
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
                 
