@@ -13,7 +13,7 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { toPng, toSvg } from 'html-to-image';
-import { Mail, MessageSquare, Globe, Phone, Share2, FileText, Download, Image, FileCode, Users, Target, Calendar, Megaphone, Search } from 'lucide-react';
+import { Mail, MessageSquare, Globe, Phone, Share2, FileText, Download, Image, FileCode, Users, Target, Calendar, Megaphone, Search, FileSpreadsheet } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -251,6 +251,102 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
     }).then(downloadImage).catch(console.error);
   }, [exportBg, exportQuality]);
 
+  // Export to Lucidchart CSV format
+  const exportToLucidchartCSV = useCallback(() => {
+    const timestamp = new Date().toISOString().split('T')[0];
+    
+    // Lucidchart CSV format for flowchart import
+    // Headers: Id, Name, Shape Library, Page ID, Contained By, Group, Link, Text Area 1, Text Area 2, Line Source, Line Destination
+    const headers = ['Id', 'Name', 'Shape Library', 'Page ID', 'Contained By', 'Group', 'Link', 'Text Area 1', 'Text Area 2', 'Line Source', 'Line Destination'];
+    
+    const rows: string[][] = [];
+    
+    // Add journey info as a container/swimlane
+    rows.push([
+      'journey-header',
+      'Journey Strategy',
+      'Standard',
+      '1',
+      '',
+      '',
+      '',
+      journey.overview,
+      `${journey.totalWeeks} weeks | ${journey.touchpoints.length} touchpoints`,
+      '',
+      ''
+    ]);
+    
+    // Add touchpoint nodes
+    journey.touchpoints.forEach((touchpoint, index) => {
+      rows.push([
+        `touchpoint-${index + 1}`,
+        touchpoint.title,
+        'Flowchart',
+        '1',
+        '',
+        '',
+        '',
+        `Week ${touchpoint.week} - ${formatChannelName(touchpoint.channel)}`,
+        touchpoint.description,
+        '',
+        ''
+      ]);
+    });
+    
+    // Add connection lines
+    journey.touchpoints.forEach((_, index) => {
+      if (index > 0) {
+        rows.push([
+          `connection-${index}`,
+          '',
+          '',
+          '1',
+          '',
+          '',
+          '',
+          '',
+          '',
+          `touchpoint-${index}`,
+          `touchpoint-${index + 1}`
+        ]);
+      }
+    });
+    
+    // Build CSV content
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(','))
+    ].join('\n');
+    
+    // Download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('download', `journey-lucidchart-${timestamp}.csv`);
+    a.setAttribute('href', url);
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [journey]);
+
+  // Export as clean SVG for Lucidchart import
+  const exportToLucidchartSVG = useCallback(() => {
+    const flowElement = flowRef.current?.querySelector('.react-flow') as HTMLElement;
+    if (!flowElement) return;
+
+    const timestamp = new Date().toISOString().split('T')[0];
+    
+    toSvg(flowElement, {
+      backgroundColor: '#ffffff',
+      quality: 1,
+      pixelRatio: 2,
+    }).then((dataUrl) => {
+      const a = document.createElement('a');
+      a.setAttribute('download', `journey-lucidchart-${timestamp}.svg`);
+      a.setAttribute('href', dataUrl);
+      a.click();
+    }).catch(console.error);
+  }, []);
+
   // Convert journey phases and touchpoints to React Flow nodes - ZIG-ZAG GRID LAYOUT
   const { initialNodes, initialEdges, dynamicHeight } = useMemo(() => {
     const nodes: Node[] = [];
@@ -473,6 +569,7 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
                 </DropdownMenuCheckboxItem>
                 
                 <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-xs text-muted-foreground">Standard Export</DropdownMenuLabel>
                 <DropdownMenuItem onClick={() => exportToImage('png')}>
                   <Image className="w-4 h-4 mr-2" />
                   Export as PNG
@@ -480,6 +577,19 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
                 <DropdownMenuItem onClick={() => exportToImage('svg')}>
                   <FileCode className="w-4 h-4 mr-2" />
                   Export as SVG
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-xs text-muted-foreground flex items-center gap-1">
+                  <span className="text-primary font-medium">Lucidchart</span> Export
+                </DropdownMenuLabel>
+                <DropdownMenuItem onClick={exportToLucidchartCSV}>
+                  <FileSpreadsheet className="w-4 h-4 mr-2" />
+                  Export CSV for Lucidchart
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={exportToLucidchartSVG}>
+                  <FileCode className="w-4 h-4 mr-2" />
+                  Export SVG for Lucidchart
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
