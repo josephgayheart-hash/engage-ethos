@@ -90,7 +90,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <tr>
                   <td style="background-color: #059669 !important; padding: 32px 40px; text-align: center;" bgcolor="#059669">
                     <div style="font-size: 48px; margin-bottom: 12px; background-color: #059669 !important;" bgcolor="#059669">🎉</div>
-                    <h1 style="margin: 0; color: #ffffff !important; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; background-color: #059669 !important;" bgcolor="#059669">You're Approved!</h1>
+                    <h1 style="margin: 0; color: #ffffff !important; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; background-color: #059669 !important;" bgcolor="#059669">You're In!</h1>
                     <p style="margin: 8px 0 0 0; color: #d1fae5 !important; font-size: 16px; background-color: #059669 !important;" bgcolor="#059669">Welcome to the UPlaybook.AI community</p>
                   </td>
                 </tr>
@@ -158,10 +158,7 @@ const handler = async (req: Request): Promise<Response> => {
                     <p style="margin: 0 0 12px 0; color: #475569 !important; font-size: 15px; text-align: center; font-weight: 500; background-color: #f8fafc !important;" bgcolor="#f8fafc">
                       🌟 We're excited to have you on board!
                     </p>
-                    <p style="margin: 0; color: #94a3b8 !important; font-size: 13px; text-align: center; background-color: #f8fafc !important;" bgcolor="#f8fafc">
-                      Questions? Just reply to this email and our team will help you out.
-                    </p>
-                    <p style="margin: 16px 0 0 0; color: #94a3b8 !important; font-size: 12px; text-align: center; background-color: #f8fafc !important;" bgcolor="#f8fafc">
+                    <p style="margin: 0; color: #94a3b8 !important; font-size: 12px; text-align: center; background-color: #f8fafc !important;" bgcolor="#f8fafc">
                       — The UPlaybook.AI Team 💙
                     </p>
                   </td>
@@ -189,7 +186,7 @@ const handler = async (req: Request): Promise<Response> => {
       body: JSON.stringify({
         from: "UPlaybook.AI <noreply@uplaybook.ai>",
         to: [email],
-        subject: `🎉 You're Approved! Welcome to UPlaybook.AI - ${institutionName}`,
+        subject: `🎉 You're In! Welcome to UPlaybook.AI - ${institutionName}`,
         html: htmlContent,
       }),
     });
