@@ -234,51 +234,74 @@ const PlaygroundPage = () => {
           </div>
 
           {/* Context Selector */}
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <ContextSelector
-              selectedProfileId={selectedProfileId}
-              selectedDNAId={selectedDNAId}
-              onProfileChange={handleProfileChange}
-              onDNAChange={handleDNAChange}
-              disabled={isSending}
-            />
+          <div className="flex items-center justify-between gap-2 sm:gap-4">
+            <div className="flex-1 min-w-0 overflow-x-auto">
+              <ContextSelector
+                selectedProfileId={selectedProfileId}
+                selectedDNAId={selectedDNAId}
+                onProfileChange={handleProfileChange}
+                onDNAChange={handleDNAChange}
+                disabled={isSending}
+              />
+            </div>
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => setShowSidebar(!showSidebar)}
-              className="md:hidden"
+              className="shrink-0 md:hidden"
             >
               {showSidebar ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeft className="w-4 h-4" />}
+              <span className="ml-2 text-xs">History</span>
             </Button>
           </div>
         </div>
 
         {/* Main Chat Area */}
-        <Card className="flex-1 flex min-h-0 overflow-hidden">
-          {/* Conversation sidebar */}
-          <div className={`w-64 shrink-0 ${showSidebar ? 'block' : 'hidden'} md:block`}>
+        <Card className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative">
+          {/* Conversation sidebar - mobile overlay */}
+          <div className={`
+            ${showSidebar ? 'translate-x-0' : '-translate-x-full'}
+            absolute inset-y-0 left-0 z-20 w-64 bg-card transition-transform duration-200
+            md:relative md:translate-x-0 md:block
+          `}>
             <ConversationList
               conversations={conversations}
               currentConversation={currentConversation}
-              onSelect={selectConversation}
-              onNew={handleNewConversation}
+              onSelect={(conv) => {
+                selectConversation(conv);
+                setShowSidebar(false);
+              }}
+              onNew={() => {
+                handleNewConversation();
+                setShowSidebar(false);
+              }}
               onDelete={deleteConversation}
               isLoading={isLoading}
             />
           </div>
 
+          {/* Mobile backdrop */}
+          {showSidebar && (
+            <div 
+              className="absolute inset-0 bg-black/30 z-10 md:hidden"
+              onClick={() => setShowSidebar(false)}
+            />
+          )}
+
           {/* Chat interface */}
-          <ChatInterface
-            messages={messages}
-            input={input}
-            onInputChange={setInput}
-            onSend={handleSend}
-            isLoading={isSending}
-            isLoadingMessages={isLoadingMessages}
-            hasContext={!!(selectedProfileId || selectedDNAId)}
-            profileName={selectedProfile?.name}
-            hasDNA={!!contentDNA}
-          />
+          <div className="flex-1 flex flex-col min-h-0 min-w-0">
+            <ChatInterface
+              messages={messages}
+              input={input}
+              onInputChange={setInput}
+              onSend={handleSend}
+              isLoading={isSending}
+              isLoadingMessages={isLoadingMessages}
+              hasContext={!!(selectedProfileId || selectedDNAId)}
+              profileName={selectedProfile?.name}
+              hasDNA={!!contentDNA}
+            />
+          </div>
         </Card>
       </main>
     </div>
