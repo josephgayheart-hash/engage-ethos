@@ -262,10 +262,7 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
     const xSpacing = 280;
     const ySpacing = 170;
     const nodesPerRow = touchpointCount > 10 ? 4 : touchpointCount > 6 ? 3 : Math.min(touchpointCount, 4);
-    const yBase = 200;
-    
-    // Calculate total width for centering
-    const totalWidth = nodesPerRow * xSpacing;
+    const yBase = 80; // Reduced since we removed phase nodes
     
     // Add journey info header node
     nodes.push({
@@ -286,23 +283,7 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
       draggable: true,
     });
     
-    // Add phase header nodes
-    const phaseWidth = totalWidth / journey.phases.length;
-    journey.phases.forEach((phase, phaseIndex) => {
-      nodes.push({
-        id: `phase-${phaseIndex}`,
-        type: 'phase',
-        position: { x: phaseIndex * phaseWidth + (phaseWidth / 2) - 75, y: 40 },
-        data: { 
-          name: phase.name,
-          weekRange: phase.weekRange,
-          focus: phase.focus,
-        },
-        draggable: true,
-      });
-    });
-    
-    // Add touchpoint nodes in a ZIG-ZAG / SERPENTINE pattern
+    // Add touchpoint nodes in a ZIG-ZAG / SERPENTINE pattern (no phase nodes)
     const totalRows = Math.ceil(touchpointCount / nodesPerRow);
     
     journey.touchpoints.forEach((touchpoint, index) => {
@@ -363,8 +344,8 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
     
     // Calculate dynamic height based on rows - proportionate to actual content
     const rowCount = Math.ceil(touchpointCount / nodesPerRow);
-    // Base: header info node + phase nodes (~180px), then ~180px per row of touchpoints
-    const dynamicHeight = Math.max(350, 200 + rowCount * 180);
+    // Base: header info node (~100px), then ~180px per row of touchpoints
+    const dynamicHeight = Math.max(300, 100 + rowCount * 180);
     
     return { initialNodes: nodes, initialEdges: edges, dynamicHeight };
   }, [journey, context, startDate, endDate]);
