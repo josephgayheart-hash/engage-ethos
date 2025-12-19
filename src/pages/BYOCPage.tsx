@@ -19,6 +19,7 @@ import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
 import { evaluateMessage } from "@/lib/evaluateMessage";
 import { extractTextFromFile, getAcceptString } from "@/lib/documentParser";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   ArrowLeft, 
   ArrowRight, 
@@ -38,6 +39,7 @@ import type { MessageContext, EvaluationResult } from "@/types/uplaybook";
 
 const BYOCPage = () => {
   const { toast } = useToast();
+  const { profile } = useAuth();
   const { addMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
   const { config: institutionalConfig } = useInstitutionalConfig();
@@ -146,6 +148,8 @@ const BYOCPage = () => {
       approved: false,
       mode: 'evaluated',
       notes: customTags.length > 0 ? `Tags: ${customTags.join(', ')}` : undefined,
+      createdByUserId: profile?.id,
+      createdByName: profile ? `${profile.first_name} ${profile.last_name}` : undefined,
     });
 
     toast({

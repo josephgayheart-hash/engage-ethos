@@ -41,7 +41,7 @@ import {
   Library
 } from "lucide-react";
 import { buildMessage } from "@/lib/evaluateMessage";
-
+import { useAuth } from "@/contexts/AuthContext";
 import type { MessageContext, BuilderResult, InstitutionalConfig, Channel, ChannelDrafts } from "@/types/uplaybook";
 
 const channelOptions: { value: Channel; label: string }[] = [
@@ -87,6 +87,7 @@ const cohortLabels: Record<string, string> = {
 
 const BuildPage = () => {
   const { toast } = useToast();
+  const { profile } = useAuth();
   const { addMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
@@ -222,6 +223,9 @@ const BuildPage = () => {
       mode: 'kit',
       institutionalProfileId: selectedProfileId || undefined,
       institutionalProfileName: selectedProfileName,
+      // Creator information
+      createdByUserId: profile?.id,
+      createdByName: profile ? `${profile.first_name} ${profile.last_name}` : undefined,
     });
 
     return savedMessage.id;
@@ -322,6 +326,8 @@ const BuildPage = () => {
       mode: 'generated',
       institutionalProfileId: selectedProfileId || undefined,
       institutionalProfileName: selectedProfileName,
+      createdByUserId: profile?.id,
+      createdByName: profile ? `${profile.first_name} ${profile.last_name}` : undefined,
     });
 
     return savedMessage.id;

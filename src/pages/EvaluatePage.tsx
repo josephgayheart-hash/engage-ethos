@@ -20,10 +20,12 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, ArrowRight, FileText, AlertCircle, Save, RefreshCw, CalendarIcon, Clock } from "lucide-react";
 import { evaluateMessage } from "@/lib/evaluateMessage";
+import { useAuth } from "@/contexts/AuthContext";
 import type { MessageContext, EvaluationResult, InstitutionalConfig } from "@/types/uplaybook";
 
 const EvaluatePage = () => {
   const { toast } = useToast();
+  const { profile } = useAuth();
   const { addMessage } = useMessageLibrary();
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [selectedProfileName, setSelectedProfileName] = useState<string | undefined>(undefined);
@@ -66,6 +68,8 @@ const EvaluatePage = () => {
           mode: 'evaluated',
           institutionalProfileId: selectedProfileId || undefined,
           institutionalProfileName: selectedProfileName,
+          createdByUserId: profile?.id,
+          createdByName: profile ? `${profile.first_name} ${profile.last_name}` : undefined,
         });
         toast({
           title: "Evaluation Complete",

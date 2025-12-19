@@ -39,6 +39,7 @@ import {
   HelpCircle
 } from "lucide-react";
 import type { AudienceType, CommunicationMoment, MessageDomain, PrimaryGoal, TonePreference, InstitutionalConfig } from "@/types/uplaybook";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface CallScript {
   opening: string;
@@ -98,6 +99,7 @@ const toneOptions: { value: TonePreference; label: string }[] = [
 
 const CallScriptPage = () => {
   const { toast } = useToast();
+  const { profile } = useAuth();
   const { addMessage } = useMessageLibrary();
   const { contentDNA } = useContentDNAForGeneration();
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
@@ -208,6 +210,8 @@ ${callScript.followUpNotes}`;
       mode: 'generated',
       institutionalProfileId: selectedProfileId || undefined,
       institutionalProfileName: selectedProfileName,
+      createdByUserId: profile?.id,
+      createdByName: profile ? `${profile.first_name} ${profile.last_name}` : undefined,
     });
 
     toast({

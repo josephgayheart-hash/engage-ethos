@@ -33,6 +33,9 @@ export interface SavedMessage {
   // Track if submitted to university library
   submittedToLibrary?: boolean;
   submittedAt?: string;
+  // Creator information
+  createdByUserId?: string;
+  createdByName?: string;
 }
 
 export interface MessageVersion {
