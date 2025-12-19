@@ -352,8 +352,8 @@ const BuildPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto space-y-6">
+      <main className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="space-y-6">
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Link to="/dashboard" className="hover:text-foreground transition-colors flex items-center gap-1">
@@ -660,7 +660,10 @@ const BuildPage = () => {
               )}
 
               {/* Channel-specific previews */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className={cn(
+                "grid gap-4",
+                selectedChannels.length === 1 ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2"
+              )}>
                 {selectedChannels.map(channel => {
                   const content = builderResult.channelDrafts[channel];
                   if (!content) return null;
