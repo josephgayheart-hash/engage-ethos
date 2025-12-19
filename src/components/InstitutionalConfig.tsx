@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useContentDNA } from "@/hooks/useContentDNA";
 import { supabase } from "@/integrations/supabase/client";
 import { extractTextFromFile, getAcceptString } from "@/lib/documentParser";
 import { 
@@ -30,7 +32,11 @@ import {
   Loader2,
   FileText,
   Trash2,
-  Upload
+  Upload,
+  ExternalLink,
+  Dna,
+  CheckCircle2,
+  AlertCircle
 } from "lucide-react";
 import type { InstitutionalConfig as InstitutionalConfigType, VoiceAnalysis } from "@/types/uplaybook";
 
@@ -41,6 +47,7 @@ interface InstitutionalConfigProps {
 
 export function InstitutionalConfig({ config, onChange }: InstitutionalConfigProps) {
   const { toast } = useToast();
+  const { analysis, samples, isLoading: isContentDNALoading } = useContentDNA();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [sampleInput, setSampleInput] = useState('');
   const [inputs, setInputs] = useState({
@@ -648,295 +655,178 @@ export function InstitutionalConfig({ config, onChange }: InstitutionalConfigPro
 
         {/* Content DNA Tab */}
         <TabsContent value="voice" className="space-y-6">
-          <div className="p-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg mb-4 border border-primary/20">
-            <h4 className="font-medium text-sm flex items-center gap-2 mb-2">
-              <Sparkles className="w-4 h-4 text-primary" />
-              Content DNA Learning
-            </h4>
-            <p className="text-xs text-muted-foreground">
-              Upload sample communications and let AI analyze your institution's unique Content DNA—tone, style, and messaging patterns. 
-              This analysis will be applied to all generated messages.
-            </p>
-          </div>
+          {isContentDNALoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : analysis?.voice_analysis ? (
+            // Content DNA is configured - show status and summary
+            <div className="space-y-6">
+              {/* Active Status Banner */}
+              <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 rounded-lg bg-green-500/20">
+                    <CheckCircle2 className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-green-800 dark:text-green-400">Content DNA Active</h4>
+                    <p className="text-xs text-green-700 dark:text-green-500">
+                      Your institution's voice profile is being applied to all AI-generated messages
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-          {/* File Upload */}
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Upload Sample Files</Label>
-              <p className="text-xs text-muted-foreground">
-                Upload .txt or .docx files containing emails, newsletters, or marketing materials. The content will be extracted and analyzed.
-              </p>
-              <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
-                <input
-                  type="file"
-                  id="voice-file-upload"
-                  accept={getAcceptString()}
-                  multiple
-                  className="hidden"
-                  onChange={async (e) => {
-                    const files = e.target.files;
-                    if (!files || files.length === 0) return;
+              {/* Quick Metrics */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <Card className="bg-muted/30">
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl font-bold text-primary">{samples.length}</div>
+                    <p className="text-xs text-muted-foreground">Content Samples</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-muted/30">
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl font-bold text-primary">{analysis.voice_analysis.overallTone?.split(' ')[0] || 'Active'}</div>
+                    <p className="text-xs text-muted-foreground">Overall Tone</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-muted/30">
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl font-bold text-primary">{analysis.voice_analysis.formalityLevel?.split(' ')[0] || 'Set'}</div>
+                    <p className="text-xs text-muted-foreground">Formality</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-muted/30">
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl font-bold text-primary">
+                      {analysis.last_analyzed_at 
+                        ? new Date(analysis.last_analyzed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                        : 'Recent'}
+                    </div>
+                    <p className="text-xs text-muted-foreground">Last Analyzed</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Voice Summary */}
+              {analysis.voice_analysis.summary && (
+                <Card className="border-border">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                      Voice Profile Summary
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {analysis.voice_analysis.summary}
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Key Characteristics Preview */}
+              {analysis.voice_analysis.keyCharacteristics && analysis.voice_analysis.keyCharacteristics.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Key Characteristics
+                  </Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {analysis.voice_analysis.keyCharacteristics.slice(0, 6).map((item, i) => (
+                      <Badge key={i} variant="secondary" className="text-xs font-normal">
+                        {item}
+                      </Badge>
+                    ))}
+                    {analysis.voice_analysis.keyCharacteristics.length > 6 && (
+                      <Badge variant="outline" className="text-xs font-normal">
+                        +{analysis.voice_analysis.keyCharacteristics.length - 6} more
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Link to Full Content DNA Page */}
+              <Card className="border-primary/30 bg-primary/5">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-primary/10">
+                        <Dna className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-sm">Manage Content DNA</h4>
+                        <p className="text-xs text-muted-foreground">
+                          Upload new samples, view full analysis, and update brand guidelines
+                        </p>
+                      </div>
+                    </div>
+                    <Button asChild size="sm">
+                      <Link to="/admin/content-dna">
+                        Open Content DNA
+                        <ExternalLink className="w-4 h-4 ml-2" />
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            // Content DNA not configured - show setup prompt
+            <div className="space-y-6">
+              {/* Setup Prompt */}
+              <Card className="border-2 border-dashed border-primary/40">
+                <CardContent className="py-10">
+                  <div className="text-center max-w-md mx-auto">
+                    <div className="p-4 rounded-full bg-primary/10 w-fit mx-auto mb-4">
+                      <Dna className="w-10 h-10 text-primary" />
+                    </div>
+                    <h3 className="font-serif text-xl font-semibold mb-2">Set Up Content DNA</h3>
+                    <p className="text-muted-foreground text-sm mb-6">
+                      Content DNA captures your institution's unique voice and communication style. 
+                      Upload sample communications and let AI analyze your patterns, tone, and vocabulary.
+                    </p>
                     
-                    for (const file of Array.from(files)) {
-                      try {
-                        const { text, success, message } = await extractTextFromFile(file);
-
-                        if (success && text && text.length > 50) {
-                          const currentSamples = config.brandVoiceSamples || [];
-                          onChange({ ...config, brandVoiceSamples: [...currentSamples, text] });
-                          toast({
-                            title: "File loaded",
-                            description: `"${file.name}" has been added to Content DNA samples.`,
-                          });
-                        } else if (!success) {
-                          toast({
-                            title: "Could not extract content",
-                            description: message || `Could not read "${file.name}". Try a different format.`,
-                            variant: "destructive",
-                          });
-                        } else {
-                          toast({
-                            title: "File too short",
-                            description: `"${file.name}" doesn't contain enough text to analyze.`,
-                            variant: "destructive",
-                          });
-                        }
-                      } catch (error) {
-                        console.error('Error reading file:', error);
-                        toast({
-                          title: "Error reading file",
-                          description: `Could not read "${file.name}". Try a different format.`,
-                          variant: "destructive",
-                        });
-                      }
-                    }
-                    // Reset input
-                    e.target.value = '';
-                  }}
-                />
-                <label htmlFor="voice-file-upload" className="cursor-pointer">
-                  <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm font-medium">Click to upload files</p>
-                  <p className="text-xs text-muted-foreground">.txt, .docx, .pdf, .png, .jpg supported</p>
-                </label>
-              </div>
-            </div>
-
-            {/* Manual Input */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Or Paste Sample Text</Label>
-              <p className="text-xs text-muted-foreground">
-                Paste emails, SMS messages, or marketing copy directly. Add 2-5 samples for best results.
-              </p>
-              <Textarea
-                value={sampleInput}
-                onChange={(e) => setSampleInput(e.target.value)}
-                placeholder="Paste a sample email, SMS, or marketing message here..."
-                rows={6}
-                className="resize-none"
-              />
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={addVoiceSample}
-                disabled={!sampleInput.trim()}
-                className="w-full"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Sample
-              </Button>
-            </div>
-
-            {/* Sample List */}
-            {(config.brandVoiceSamples?.length ?? 0) > 0 && (
-              <div className="space-y-3">
-                <Label className="text-sm font-medium">
-                  Added Samples ({config.brandVoiceSamples?.length})
-                </Label>
-                <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {config.brandVoiceSamples?.map((sample, index) => (
-                    <Card key={index} className="bg-muted/30">
-                      <CardContent className="p-3">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-start gap-2 flex-1 min-w-0">
-                            <FileText className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
-                            <p className="text-xs text-muted-foreground line-clamp-3">
-                              {sample.substring(0, 200)}{sample.length > 200 ? '...' : ''}
-                            </p>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="shrink-0 h-6 w-6 hover:text-destructive"
-                            onClick={() => removeVoiceSample(index)}
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-
-                <Button 
-                  type="button"
-                  onClick={analyzeVoiceSamples}
-                  disabled={isAnalyzing}
-                  className="w-full"
-                >
-                  {isAnalyzing ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Analyzing Voice...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      Analyze Voice Samples
-                    </>
-                  )}
-                </Button>
-              </div>
-            )}
-          </div>
-
-          {/* Voice Analysis Results */}
-          {config.voiceAnalysis && (
-            <Card className="border border-border bg-card shadow-sm">
-              <CardHeader className="pb-4 border-b border-border">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <Mic className="w-5 h-5 text-primary" />
+                    {/* Benefits List */}
+                    <div className="grid gap-2 text-left mb-6">
+                      <div className="flex items-center gap-2 text-sm">
+                        <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
+                        <span>AI-generated messages match your brand voice</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
+                        <span>Consistent tone across all communications</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
+                        <span>Custom vocabulary and phrase patterns</span>
+                      </div>
                     </div>
-                    <div>
-                      <CardTitle className="text-base font-semibold">Voice Profile</CardTitle>
-                      <CardDescription className="text-xs mt-0.5">
-                        Analyzed {new Date(config.voiceAnalysis.analyzedAt).toLocaleDateString()}
-                      </CardDescription>
-                    </div>
+                    
+                    <Button asChild size="lg" className="gap-2">
+                      <Link to="/admin/content-dna">
+                        <Sparkles className="w-4 h-4" />
+                        Configure Content DNA
+                        <ExternalLink className="w-4 h-4" />
+                      </Link>
+                    </Button>
                   </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={clearVoiceAnalysis}
-                    className="text-muted-foreground hover:text-destructive h-8"
-                  >
-                    <Trash2 className="w-4 h-4 mr-1" />
-                    Clear
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-4 space-y-5">
-                {/* AI Summary */}
-                <div className="p-4 bg-muted/50 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className="w-4 h-4 text-primary" />
-                    <h5 className="font-medium text-sm">AI Summary</h5>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {config.voiceAnalysis.summary}
+                </CardContent>
+              </Card>
+
+              {/* Info Note */}
+              <div className="flex items-start gap-3 p-4 bg-muted/50 rounded-lg">
+                <AlertCircle className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
+                <div className="text-sm text-muted-foreground">
+                  <p className="font-medium text-foreground mb-1">What happens without Content DNA?</p>
+                  <p>
+                    AI-generated messages will use general best practices. Setting up Content DNA ensures 
+                    outputs are tailored to your institution's specific voice and style guidelines.
                   </p>
                 </div>
-
-                {/* Voice Attributes Grid */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 bg-muted/30 rounded-lg border border-border/50">
-                    <p className="text-xs text-muted-foreground mb-1.5">Overall Tone</p>
-                    <p className="text-sm font-medium">{config.voiceAnalysis.overallTone}</p>
-                  </div>
-                  <div className="p-3 bg-muted/30 rounded-lg border border-border/50">
-                    <p className="text-xs text-muted-foreground mb-1.5">Formality</p>
-                    <p className="text-sm font-medium">{config.voiceAnalysis.formalityLevel}</p>
-                  </div>
-                  <div className="p-3 bg-muted/30 rounded-lg border border-border/50">
-                    <p className="text-xs text-muted-foreground mb-1.5">Emotional Tone</p>
-                    <p className="text-sm font-medium">{config.voiceAnalysis.emotionalTone}</p>
-                  </div>
-                  <div className="p-3 bg-muted/30 rounded-lg border border-border/50">
-                    <p className="text-xs text-muted-foreground mb-1.5">Sentence Style</p>
-                    <p className="text-sm font-medium">{config.voiceAnalysis.sentenceStyle}</p>
-                  </div>
-                </div>
-
-                {/* Expandable Sections */}
-                <div className="space-y-3">
-                  {/* Key Characteristics */}
-                  {config.voiceAnalysis.keyCharacteristics && config.voiceAnalysis.keyCharacteristics.length > 0 && (
-                    <div className="p-3 border border-border/50 rounded-lg">
-                      <h5 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                        Key Characteristics
-                      </h5>
-                      <div className="flex flex-wrap gap-1.5">
-                        {config.voiceAnalysis.keyCharacteristics.map((item, i) => (
-                          <Badge key={i} variant="secondary" className="text-xs font-normal">
-                            {item}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Vocabulary Patterns */}
-                  {config.voiceAnalysis.vocabularyPatterns && config.voiceAnalysis.vocabularyPatterns.length > 0 && (
-                    <div className="p-3 border border-border/50 rounded-lg">
-                      <h5 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                        Vocabulary Patterns
-                      </h5>
-                      <div className="flex flex-wrap gap-1.5">
-                        {config.voiceAnalysis.vocabularyPatterns.map((item, i) => (
-                          <Badge key={i} variant="outline" className="text-xs font-normal">
-                            {item}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Common Phrases */}
-                  {config.voiceAnalysis.commonPhrases && config.voiceAnalysis.commonPhrases.length > 0 && (
-                    <div className="p-3 border border-border/50 rounded-lg">
-                      <h5 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                        Common Phrases
-                      </h5>
-                      <div className="flex flex-wrap gap-1.5">
-                        {config.voiceAnalysis.commonPhrases.map((item, i) => (
-                          <Badge key={i} variant="outline" className="text-xs font-normal bg-primary/5">
-                            "{item}"
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Messaging Tactics */}
-                  {config.voiceAnalysis.messagingTactics && config.voiceAnalysis.messagingTactics.length > 0 && (
-                    <div className="p-3 border border-border/50 rounded-lg">
-                      <h5 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                        Messaging Tactics
-                      </h5>
-                      <div className="flex flex-wrap gap-1.5">
-                        {config.voiceAnalysis.messagingTactics.map((item, i) => (
-                          <Badge key={i} variant="outline" className="text-xs font-normal">
-                            {item}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Status Banner */}
-                <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
-                  <Check className="w-4 h-4 text-green-600 shrink-0" />
-                  <p className="text-xs text-green-700 dark:text-green-400">
-                    Voice profile active — applied to all AI-generated messages
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
         </TabsContent>
       </Tabs>
