@@ -29,7 +29,10 @@ import {
   Image,
   Palette,
   Trash2,
-  Dna
+  Dna,
+  FolderTree,
+  FileText,
+  MessageSquare
 } from 'lucide-react';
 
 interface UserStats {
@@ -45,6 +48,13 @@ interface OnboardingStats {
   rejected: number;
 }
 
+interface ContentStats {
+  institutionalProfiles: number;
+  contentDNASamples: number;
+  personalMessages: number;
+  sharedTemplates: number;
+}
+
 const MAX_LOGO_SIZE = 2 * 1024 * 1024; // 2MB
 const MAX_LOGO_DIMENSION = 400; // Max width/height in pixels
 
@@ -54,6 +64,7 @@ export default function AdminConsolePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [userStats, setUserStats] = useState<UserStats>({ total: 0, active: 0, pending: 0, recentLogins: 0 });
   const [onboardingStats, setOnboardingStats] = useState<OnboardingStats>({ pending: 0, approved: 0, rejected: 0 });
+  const [contentStats, setContentStats] = useState<ContentStats>({ institutionalProfiles: 0, contentDNASamples: 0, personalMessages: 0, sharedTemplates: 0 });
   const [recentUsers, setRecentUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -364,6 +375,21 @@ export default function AdminConsolePage() {
             });
           }
         }
+
+        // Fetch content stats for the tenant
+        const [profilesResult, dnaSamplesResult, messagesResult, templatesResult] = await Promise.all([
+          supabase.from('institutional_profiles').select('id').eq('tenant_id', tenant.id),
+          supabase.from('content_dna_samples').select('id').eq('tenant_id', tenant.id),
+          supabase.from('personal_messages').select('id').eq('tenant_id', tenant.id),
+          supabase.from('shared_templates').select('id').eq('tenant_id', tenant.id),
+        ]);
+
+        setContentStats({
+          institutionalProfiles: profilesResult.data?.length || 0,
+          contentDNASamples: dnaSamplesResult.data?.length || 0,
+          personalMessages: messagesResult.data?.length || 0,
+          sharedTemplates: templatesResult.data?.length || 0,
+        });
       } catch (error) {
         console.error('Error fetching admin stats:', error);
       } finally {
@@ -409,6 +435,30 @@ export default function AdminConsolePage() {
       stat: onboardingStats.pending > 0 ? `${onboardingStats.pending} pending` : 'No pending'
     }] : []),
     {
+      title: 'Institutional Profiles',
+      description: 'Manage sub-units, colleges, and departments',
+      icon: FolderTree,
+      href: '/settings',
+      color: 'bg-[hsl(262,52%,47%)]',
+      stat: contentStats.institutionalProfiles > 0 ? `${contentStats.institutionalProfiles} profiles` : 'Configure'
+    },
+    {
+      title: 'Content DNA',
+      description: 'Refine your brand voice and messaging patterns',
+      icon: Dna,
+      href: '/admin/content-dna',
+      color: 'bg-[hsl(173,58%,39%)]',
+      stat: contentStats.contentDNASamples > 0 ? `${contentStats.contentDNASamples} samples` : 'Add samples'
+    },
+    {
+      title: 'Message Library',
+      description: 'Personal and shared message templates',
+      icon: MessageSquare,
+      href: '/personal-library',
+      color: 'bg-[hsl(210,70%,50%)]',
+      stat: `${contentStats.personalMessages} messages`
+    },
+    {
       title: 'Library Approvals',
       description: 'Review submitted templates and playbooks',
       icon: Library,
@@ -417,19 +467,11 @@ export default function AdminConsolePage() {
       stat: 'Review queue'
     },
     {
-      title: 'Content DNA',
-      description: 'Refine your brand voice and messaging patterns',
-      icon: Dna,
-      href: '/admin/content-dna',
-      color: 'bg-[hsl(173,58%,39%)]',
-      stat: 'Voice refinement'
-    },
-    {
       title: 'Institution Settings',
       description: 'Configure voice, lexicon, and branding',
       icon: Settings,
       href: '/settings',
-      color: 'bg-[hsl(262,52%,47%)]',
+      color: 'bg-[hsl(220,14%,46%)]',
       stat: 'Configuration'
     },
   ];
@@ -719,73 +761,105 @@ export default function AdminConsolePage() {
         </Card>
 
         {/* Quick Stats */}
-        <div className={`grid grid-cols-2 ${isSuperAdmin ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4 mb-6`}>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
           <Card className="border-[hsl(220,13%,88%)]">
-            <CardContent className="pt-4 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-[hsl(222,47%,14%)]/10">
-                  <Users className="w-5 h-5 text-[hsl(222,47%,14%)]" />
+            <CardContent className="pt-3 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-[hsl(222,47%,14%)]/10">
+                  <Users className="w-4 h-4 text-[hsl(222,47%,14%)]" />
                 </div>
                 <div>
                   {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin text-[hsl(220,14%,46%)]" />
+                    <Loader2 className="w-4 h-4 animate-spin text-[hsl(220,14%,46%)]" />
                   ) : (
-                    <p className="text-2xl font-bold text-[hsl(222,47%,11%)]">{userStats.total}</p>
+                    <p className="text-xl font-bold text-[hsl(222,47%,11%)]">{userStats.total}</p>
                   )}
-                  <p className="text-xs text-[hsl(220,14%,46%)]">Total Users</p>
+                  <p className="text-[10px] text-[hsl(220,14%,46%)]">Users</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card className="border-[hsl(220,13%,88%)]">
-            <CardContent className="pt-4 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-[hsl(158,64%,42%)]/10">
-                  <Activity className="w-5 h-5 text-[hsl(158,64%,42%)]" />
+            <CardContent className="pt-3 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-[hsl(158,64%,42%)]/10">
+                  <Activity className="w-4 h-4 text-[hsl(158,64%,42%)]" />
                 </div>
                 <div>
                   {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin text-[hsl(220,14%,46%)]" />
+                    <Loader2 className="w-4 h-4 animate-spin text-[hsl(220,14%,46%)]" />
                   ) : (
-                    <p className="text-2xl font-bold text-[hsl(222,47%,11%)]">{userStats.active}</p>
+                    <p className="text-xl font-bold text-[hsl(222,47%,11%)]">{userStats.active}</p>
                   )}
-                  <p className="text-xs text-[hsl(220,14%,46%)]">Active Users</p>
+                  <p className="text-[10px] text-[hsl(220,14%,46%)]">Active</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          {isSuperAdmin && (
-            <Card className="border-[hsl(220,13%,88%)]">
-              <CardContent className="pt-4 pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-[hsl(173,58%,39%)]/10">
-                    <UserPlus className="w-5 h-5 text-[hsl(173,58%,39%)]" />
-                  </div>
-                  <div>
-                    {isLoading ? (
-                      <Loader2 className="w-5 h-5 animate-spin text-[hsl(220,14%,46%)]" />
-                    ) : (
-                      <p className="text-2xl font-bold text-[hsl(222,47%,11%)]">{onboardingStats.pending}</p>
-                    )}
-                    <p className="text-xs text-[hsl(220,14%,46%)]">Pending Requests</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
           <Card className="border-[hsl(220,13%,88%)]">
-            <CardContent className="pt-4 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-[hsl(45,93%,47%)]/10">
-                  <TrendingUp className="w-5 h-5 text-[hsl(45,93%,47%)]" />
+            <CardContent className="pt-3 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-[hsl(262,52%,47%)]/10">
+                  <FolderTree className="w-4 h-4 text-[hsl(262,52%,47%)]" />
                 </div>
                 <div>
                   {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin text-[hsl(220,14%,46%)]" />
+                    <Loader2 className="w-4 h-4 animate-spin text-[hsl(220,14%,46%)]" />
                   ) : (
-                    <p className="text-2xl font-bold text-[hsl(222,47%,11%)]">{userStats.recentLogins}</p>
+                    <p className="text-xl font-bold text-[hsl(222,47%,11%)]">{contentStats.institutionalProfiles}</p>
                   )}
-                  <p className="text-xs text-[hsl(220,14%,46%)]">Active This Week</p>
+                  <p className="text-[10px] text-[hsl(220,14%,46%)]">Profiles</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-[hsl(220,13%,88%)]">
+            <CardContent className="pt-3 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-[hsl(173,58%,39%)]/10">
+                  <Dna className="w-4 h-4 text-[hsl(173,58%,39%)]" />
+                </div>
+                <div>
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-[hsl(220,14%,46%)]" />
+                  ) : (
+                    <p className="text-xl font-bold text-[hsl(222,47%,11%)]">{contentStats.contentDNASamples}</p>
+                  )}
+                  <p className="text-[10px] text-[hsl(220,14%,46%)]">DNA Samples</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-[hsl(220,13%,88%)]">
+            <CardContent className="pt-3 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-[hsl(210,70%,50%)]/10">
+                  <MessageSquare className="w-4 h-4 text-[hsl(210,70%,50%)]" />
+                </div>
+                <div>
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-[hsl(220,14%,46%)]" />
+                  ) : (
+                    <p className="text-xl font-bold text-[hsl(222,47%,11%)]">{contentStats.personalMessages}</p>
+                  )}
+                  <p className="text-[10px] text-[hsl(220,14%,46%)]">Messages</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-[hsl(220,13%,88%)]">
+            <CardContent className="pt-3 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-[hsl(45,93%,47%)]/10">
+                  <Library className="w-4 h-4 text-[hsl(45,93%,47%)]" />
+                </div>
+                <div>
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-[hsl(220,14%,46%)]" />
+                  ) : (
+                    <p className="text-xl font-bold text-[hsl(222,47%,11%)]">{contentStats.sharedTemplates}</p>
+                  )}
+                  <p className="text-[10px] text-[hsl(220,14%,46%)]">Templates</p>
                 </div>
               </div>
             </CardContent>

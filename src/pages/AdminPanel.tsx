@@ -74,7 +74,9 @@ import {
   GraduationCap,
   MessageSquarePlus,
   Star,
-  Eye
+  Eye,
+  FolderTree,
+  Dna
 } from "lucide-react";
 
 // Mock Ivy League user data
@@ -686,7 +688,7 @@ const AdminPanel = () => {
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+          <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-3">
             <Card>
               <CardContent className="p-3">
                 <div className="flex items-center gap-2">
@@ -782,11 +784,24 @@ const AdminPanel = () => {
               <CardContent className="p-3">
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 rounded bg-indigo-500/10">
-                    <Settings className="w-4 h-4 text-indigo-600" />
+                    <FolderTree className="w-4 h-4 text-indigo-600" />
                   </div>
                   <div>
                     <p className="text-xl font-bold">{isLoadingUsers ? '...' : institutionalProfiles.length}</p>
                     <p className="text-[10px] text-muted-foreground">Profiles</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded bg-teal-500/10">
+                    <Upload className="w-4 h-4 text-teal-600" />
+                  </div>
+                  <div>
+                    <p className="text-xl font-bold">{isLoadingUsers ? '...' : byocUploads.length}</p>
+                    <p className="text-[10px] text-muted-foreground">BYOC Uploads</p>
                   </div>
                 </div>
               </CardContent>
@@ -1503,8 +1518,22 @@ const AdminPanel = () => {
                     </Button>
                     <Button variant="outline" className="w-full justify-start" size="sm" asChild>
                       <Link to="/settings">
-                        <Building2 className="w-4 h-4 mr-2" />
-                        Institutional Profiles
+                        <FolderTree className="w-4 h-4 mr-2" />
+                        Institutional Profiles & Sub-Units
+                        <ChevronRight className="w-4 h-4 ml-auto" />
+                      </Link>
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start" size="sm" asChild>
+                      <Link to="/admin/content-dna">
+                        <Dna className="w-4 h-4 mr-2" />
+                        Content DNA Center
+                        <ChevronRight className="w-4 h-4 ml-auto" />
+                      </Link>
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start" size="sm" asChild>
+                      <Link to="/byoc">
+                        <Upload className="w-4 h-4 mr-2" />
+                        Bring Your Own Content
                         <ChevronRight className="w-4 h-4 ml-auto" />
                       </Link>
                     </Button>
