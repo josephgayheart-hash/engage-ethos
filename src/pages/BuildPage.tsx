@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { format } from "date-fns";
 import { Header } from "@/components/Header";
 import { ContextSelector } from "@/components/ContextSelector";
@@ -40,7 +40,9 @@ import {
   Users,
   UserCheck,
   FolderPlus,
-  Library
+  Library,
+  GitBranch,
+  X
 } from "lucide-react";
 import { buildMessage } from "@/lib/evaluateMessage";
 import { useAuth } from "@/contexts/AuthContext";
@@ -91,17 +93,42 @@ const cohortLabels: Record<string, string> = {
 const BuildPage = () => {
   const { toast } = useToast();
   const { profile } = useAuth();
+  const location = useLocation();
   const { addMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
-  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
-  const [selectedProfileName, setSelectedProfileName] = useState<string | undefined>(undefined);
+  
+  // Check for remix state from navigation
+  const remixState = location.state as {
+    remixMode?: boolean;
+    remixContext?: {
+      audience: string;
+      moment: string;
+      channel: string;
+      channels: string[];
+    };
+    remixContent?: string;
+    institutionalProfileId?: string;
+    institutionalProfileName?: string;
+    originalTitle?: string;
+    originalId?: string;
+    source?: string;
+  } | null;
+
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(
+    remixState?.institutionalProfileId || null
+  );
+  const [selectedProfileName, setSelectedProfileName] = useState<string | undefined>(
+    remixState?.institutionalProfileName
+  );
   const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfig | null>(null);
   const [context, setContext] = useState<MessageContext>({
-    audience: 'first-year',
-    moment: 'early-term',
-    channel: 'email',
+    audience: (remixState?.remixContext?.audience as any) || 'first-year',
+    moment: (remixState?.remixContext?.moment as any) || 'early-term',
+    channel: (remixState?.remixContext?.channel as any) || 'email',
   });
-  const [selectedChannels, setSelectedChannels] = useState<Channel[]>(['email']);
+  const [selectedChannels, setSelectedChannels] = useState<Channel[]>(
+    (remixState?.remixContext?.channels as Channel[]) || ['email']
+  );
   const [builderResult, setBuilderResult] = useState<BuilderResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [autoSave, setAutoSave] = useState(true);
@@ -119,6 +146,14 @@ const BuildPage = () => {
   const { contentDNA, isLoading: isContentDNALoading } = useContentDNAForGeneration({ profileId: selectedProfileId });
   const resultsRef = useRef<HTMLDivElement>(null);
   const canProcess = context.audience && context.moment && selectedChannels.length > 0;
+
+  // If remix mode, show the original content as a starting point
+  const [remixOriginalContent, setRemixOriginalContent] = useState<string | null>(
+    remixState?.remixContent || null
+  );
+  const [remixOriginalTitle, setRemixOriginalTitle] = useState<string | null>(
+    remixState?.originalTitle || null
+  );
 
   const toggleChannel = (channel: Channel) => {
     setSelectedChannels(prev => 
@@ -187,6 +222,16 @@ const BuildPage = () => {
       resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [builderResult]);
+
+  // Show remix notification
+  useEffect(() => {
+    if (remixState?.remixMode && remixOriginalTitle) {
+      toast({
+        title: "Remixing Playbook",
+        description: `Loaded settings from "${remixOriginalTitle}". Adjust context and generate new content.`,
+      });
+    }
+  }, []);
 
   const handleCopyContent = async (text: string) => {
     await navigator.clipboard.writeText(text);
@@ -377,6 +422,39 @@ const BuildPage = () => {
             </div>
             <AIBadge />
           </div>
+
+          {/* Remix Banner */}
+          {remixState?.remixMode && remixOriginalTitle && (
+            <Card className="border-secondary/50 bg-secondary/5">
+              <CardContent className="py-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center">
+                      <GitBranch className="w-5 h-5 text-secondary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">Remixing: {remixOriginalTitle}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Context loaded from university library. Adjust settings and generate new content.
+                      </p>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => {
+                      setRemixOriginalContent(null);
+                      setRemixOriginalTitle(null);
+                      // Clear the location state
+                      window.history.replaceState({}, document.title);
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Library Navigation */}
           <LibraryNav mode="messages" />
