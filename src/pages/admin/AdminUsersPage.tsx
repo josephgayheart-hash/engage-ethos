@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth, UserProfile, UserStatus } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -60,11 +60,18 @@ import { Checkbox } from '@/components/ui/checkbox';
 
 type RoleType = 'admin' | 'user' | 'approver' | 'super_admin';
 
+interface TenantInfo {
+  id: string;
+  institution_name: string;
+}
+
 interface UserWithRole extends UserProfile {
   roles: RoleType[];
+  tenant_name?: string;
 }
 
 export default function AdminUsersPage() {
+  const navigate = useNavigate();
   const { tenant, isSuperAdmin, startImpersonation, user: currentUser } = useAuth();
   const { toast } = useToast();
   const [users, setUsers] = useState<UserWithRole[]>([]);
@@ -124,6 +131,17 @@ export default function AdminUsersPage() {
         .from('user_roles')
         .select('user_id, role');
 
+      // Fetch all tenants for institution names
+      const { data: tenants } = await supabase
+        .from('tenants')
+        .select('id, institution_name');
+
+      // Create a map of tenant_id to institution_name
+      const tenantMap: Record<string, string> = {};
+      tenants?.forEach(t => {
+        tenantMap[t.id] = t.institution_name;
+      });
+
       // Group roles by user_id
       const rolesByUser: Record<string, RoleType[]> = {};
       roles?.forEach(r => {
@@ -136,6 +154,7 @@ export default function AdminUsersPage() {
       const usersWithRoles: UserWithRole[] = (profiles || []).map(profile => ({
         ...profile,
         roles: rolesByUser[profile.id] || ['user'],
+        tenant_name: tenantMap[profile.tenant_id] || 'Unknown',
       }));
 
       setUsers(usersWithRoles);
@@ -509,6 +528,7 @@ export default function AdminUsersPage() {
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
+                    {isSuperAdmin && <TableHead>Institution</TableHead>}
                     <TableHead>Department</TableHead>
                     <TableHead>Role</TableHead>
                     <TableHead>Last Login</TableHead>
@@ -518,7 +538,11 @@ export default function AdminUsersPage() {
                 </TableHeader>
                 <TableBody>
                   {filteredUsers.map((user) => (
-                    <TableRow key={user.id}>
+                    <TableRow 
+                      key={user.id} 
+                      className={isSuperAdmin ? "cursor-pointer hover:bg-muted/50" : ""}
+                      onClick={isSuperAdmin ? () => navigate(`/admin/user/${user.id}`) : undefined}
+                    >
                       <TableCell className="font-medium">
                         {user.first_name} {user.last_name}
                         {user.title && (
@@ -526,6 +550,17 @@ export default function AdminUsersPage() {
                         )}
                       </TableCell>
                       <TableCell>{user.email}</TableCell>
+                      {isSuperAdmin && (
+                        <TableCell>
+                          <Link 
+                            to={`/admin/institution/${user.tenant_id}`}
+                            className="text-sm text-primary hover:underline"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {user.tenant_name}
+                          </Link>
+                        </TableCell>
+                      )}
                       <TableCell>{user.department || '—'}</TableCell>
                       <TableCell>
                         <div className="flex gap-1 flex-wrap">
@@ -547,7 +582,7 @@ export default function AdminUsersPage() {
                       </TableCell>
                       <TableCell>{getStatusBadge(user.status)}</TableCell>
                       {isSuperAdmin && (
-                        <TableCell>
+                        <TableCell onClick={(e) => e.stopPropagation()}>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="sm">
@@ -648,7 +683,7 @@ export default function AdminUsersPage() {
                   ))}
                   {filteredUsers.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={isSuperAdmin ? 7 : 6} className="text-center py-8 text-[hsl(220,14%,46%)]">
+                      <TableCell colSpan={isSuperAdmin ? 8 : 6} className="text-center py-8 text-[hsl(220,14%,46%)]">
                         No users found
                       </TableCell>
                     </TableRow>
