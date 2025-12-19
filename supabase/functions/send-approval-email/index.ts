@@ -49,11 +49,25 @@ const handler = async (req: Request): Promise<Response> => {
         <meta name="supported-color-schemes" content="light only">
         <style>
           :root { color-scheme: light only; }
+          * { -webkit-text-fill-color: inherit !important; }
+          u + .body { background-color: #f0fdf4 !important; }
           @media (prefers-color-scheme: dark) {
-            body, table, td, div, p, a, span, h1, h2, h3 { 
-              background-color: #ffffff !important; 
-              color: #1e293b !important; 
+            .body-wrapper { background-color: #f0fdf4 !important; }
+            .main-card { background-color: #ffffff !important; }
+            .logo-area { background-color: #ffffff !important; }
+            .credentials-box { background-color: #ecfdf5 !important; }
+            .credentials-field { background-color: #ffffff !important; color: #065f46 !important; }
+            .content-area { background-color: #ffffff !important; }
+            .whats-next-box { background-color: #f8fafc !important; }
+            .security-box { background-color: #fef3c7 !important; }
+            .footer-area { background-color: #f8fafc !important; }
+            body, table, td, div, p, a, span, h1, h2, h3, li, ul { 
+              -webkit-text-fill-color: inherit !important;
             }
+            .dark-text { color: #1e293b !important; -webkit-text-fill-color: #1e293b !important; }
+            .green-text { color: #065f46 !important; -webkit-text-fill-color: #065f46 !important; }
+            .muted-text { color: #475569 !important; -webkit-text-fill-color: #475569 !important; }
+            .white-text { color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; }
           }
         </style>
       </head>
