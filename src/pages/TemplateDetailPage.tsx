@@ -86,7 +86,13 @@ const parseTemplateContent = (content: string, channel: string): ChannelDrafts[k
     
     // Parse talking points from formatted text
     if (channel === 'talking-points') {
-      const lines = content.split('\n');
+      // Remove [TALKING POINTS] prefix if present
+      let textToParse = content;
+      if (textToParse.startsWith('[TALKING POINTS]')) {
+        textToParse = textToParse.replace(/^\[TALKING POINTS\]\s*\n?/, '');
+      }
+      
+      const lines = textToParse.split('\n');
       const result: any = {
         context: '',
         audience: '',
@@ -100,7 +106,6 @@ const parseTemplateContent = (content: string, channel: string): ChannelDrafts[k
       };
       
       let currentSection = '';
-      let questionIndex = 0;
       
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
@@ -109,31 +114,40 @@ const parseTemplateContent = (content: string, channel: string): ChannelDrafts[k
           result.context = line.replace('CONTEXT:', '').trim();
         } else if (line.startsWith('AUDIENCE:')) {
           result.audience = line.replace('AUDIENCE:', '').trim();
-        } else if (line === 'OPENING HOOK:') {
+        } else if (line === 'OPENING HOOK:' || line.includes('OPENING HOOK')) {
           currentSection = 'openingHook';
-        } else if (line === 'KEY TALKING POINTS:' || line.includes('KEY TALKING POINTS')) {
+        } else if (line === 'KEY TALKING POINTS:' || line.includes('KEY TALKING POINTS') || line.includes('Key Talking Points')) {
           currentSection = 'keyMessages';
-        } else if (line === 'SUPPORTING DATA & EVIDENCE:' || line.includes('SUPPORTING DATA')) {
+        } else if (line === 'SUPPORTING DATA & EVIDENCE:' || line.includes('SUPPORTING DATA') || line.includes('Supporting Data')) {
           currentSection = 'supportingData';
-        } else if (line === 'ANTICIPATED Q&A:' || line.includes('ANTICIPATED Q')) {
+        } else if (line === 'ANTICIPATED Q&A:' || line.includes('ANTICIPATED Q') || line.includes('Anticipated Q')) {
           currentSection = 'anticipatedQuestions';
-          questionIndex = 0;
-        } else if (line === 'TRANSITION PHRASES:' || line.includes('TRANSITION PHRASES')) {
+        } else if (line === 'TRANSITION PHRASES:' || line.includes('TRANSITION PHRASES') || line.includes('Transition Phrases')) {
           currentSection = 'transitionPhrases';
-        } else if (line === 'CLOSING STATEMENT:' || line.includes('CLOSING STATEMENT')) {
+        } else if (line === 'CLOSING STATEMENT:' || line.includes('CLOSING STATEMENT') || line.includes('Closing Statement')) {
           currentSection = 'closingStatement';
-        } else if (line && !line.match(/^[=]+$/)) {
+        } else if (line === 'EXECUTIVE TALKING POINTS' || line.match(/^[=]+$/)) {
+          // Skip header lines
+          continue;
+        } else if (line && line !== '') {
           // Process content based on current section
-          if (currentSection === 'openingHook' && line.startsWith('"')) {
-            result.openingHook = line.replace(/^"|"$/g, '');
+          if (currentSection === 'openingHook') {
+            const cleanedLine = line.replace(/^"|"$/g, '');
+            if (cleanedLine && !result.openingHook) {
+              result.openingHook = cleanedLine;
+            }
           } else if (currentSection === 'keyMessages') {
-            const match = line.match(/^\d+\.\s*(.+)/);
+            // Match numbered items like "1. message" or bullet points "• message"
+            const match = line.match(/^(?:\d+\.|\•)\s*(.+)/);
             if (match) {
               result.keyMessages.push(match[1]);
+            } else if (line && !line.startsWith('[') && line.length > 10) {
+              // Also add lines that look like messages without numbering
+              result.keyMessages.push(line);
             }
           } else if (currentSection === 'supportingData') {
-            const cleaned = line.replace(/^📊\s*/, '');
-            if (cleaned) result.supportingData.push(cleaned);
+            const cleaned = line.replace(/^📊\s*/, '').replace(/^•\s*/, '');
+            if (cleaned && cleaned.length > 3) result.supportingData.push(cleaned);
           } else if (currentSection === 'anticipatedQuestions') {
             if (line.startsWith('Q:')) {
               result.anticipatedQuestions.push(line.replace('Q:', '').trim());
@@ -141,18 +155,24 @@ const parseTemplateContent = (content: string, channel: string): ChannelDrafts[k
               result.suggestedResponses.push(line.replace('A:', '').trim());
             }
           } else if (currentSection === 'transitionPhrases') {
-            const match = line.match(/^→\s*"?(.+?)"?$/);
-            if (match) {
-              result.transitionPhrases.push(match[1]);
+            const match = line.match(/^(?:→|•)?\s*"?(.+?)"?$/);
+            if (match && match[1].length > 3) {
+              result.transitionPhrases.push(match[1].replace(/^"|"$/g, ''));
             }
-          } else if (currentSection === 'closingStatement' && line.startsWith('"')) {
-            result.closingStatement = line.replace(/^"|"$/g, '');
+          } else if (currentSection === 'closingStatement') {
+            const cleanedLine = line.replace(/^"|"$/g, '');
+            if (cleanedLine && !result.closingStatement) {
+              result.closingStatement = cleanedLine;
+            }
+          } else if (!currentSection && line.length > 10) {
+            // If we haven't hit a section yet but have content, treat as key messages
+            result.keyMessages.push(line.replace(/^•\s*/, ''));
           }
         }
       }
       
       // If we found any meaningful content, return the parsed result
-      if (result.keyMessages.length > 0 || result.openingHook || result.context) {
+      if (result.keyMessages.length > 0 || result.openingHook || result.context || result.audience) {
         return result;
       }
     }

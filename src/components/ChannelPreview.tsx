@@ -813,7 +813,8 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
         return renderSocialAdPreview(displayContent as SocialAdDraft);
       case 'talking-points':
         // Check if content is a valid TalkingPointsDraft object
-        if (typeof displayContent === 'object' && displayContent !== null && 'keyMessages' in displayContent) {
+        if (typeof displayContent === 'object' && displayContent !== null && 
+            ('keyMessages' in displayContent || 'context' in displayContent || 'audience' in displayContent || 'openingHook' in displayContent)) {
           return renderTalkingPointsPreview(displayContent as TalkingPointsDraft);
         }
         // Fallback to displaying as formatted text
