@@ -65,6 +65,9 @@ const audienceLabels: Record<string, string> = {
   'alumni': 'Alumni',
   'parents': 'Parents/Family',
   'donors': 'Donors',
+  'policy-makers': 'Policy Makers',
+  'community-partners': 'Community Partners',
+  'higher-ed-leaders': 'Higher Education Leaders',
 };
 
 const cohortLabels: Record<string, string> = {

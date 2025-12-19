@@ -50,6 +50,9 @@ const audienceOptions: { value: AudienceType; label: string }[] = [
   { value: 'alumni', label: 'Alumni' },
   { value: 'parents', label: 'Parents/Family' },
   { value: 'donors', label: 'Donors' },
+  { value: 'policy-makers', label: 'Policy Makers' },
+  { value: 'community-partners', label: 'Community Partners' },
+  { value: 'higher-ed-leaders', label: 'Higher Education Leaders' },
 ];
 
 const studentCohortOptions: { value: CohortContext; label: string }[] = [
@@ -106,6 +109,30 @@ const employeeMomentOptions: { value: CommunicationMoment; label: string }[] = [
   { value: 'budget-cycle', label: 'Budget Cycle' },
   { value: 'strategic-planning', label: 'Strategic Planning' },
   { value: 'seasonal', label: 'Seasonal' },
+];
+
+const policyMakerMomentOptions: { value: CommunicationMoment; label: string }[] = [
+  { value: 'advocacy-support', label: 'Support University Priorities' },
+  { value: 'funding-advocacy', label: 'Advocate for Increased Funding' },
+  { value: 'legislative-event', label: 'Attend Legislative Events' },
+  { value: 'campus-event', label: 'Campus Visit/Event' },
+  { value: 'recognition', label: 'Recognition/Appreciation' },
+];
+
+const communityPartnerMomentOptions: { value: CommunicationMoment; label: string }[] = [
+  { value: 'partnership-initiation', label: 'Initiate Partnership' },
+  { value: 'partnership-sustain', label: 'Sustain Partnership' },
+  { value: 'community-event', label: 'Participate in Events' },
+  { value: 'success-story-share', label: 'Share Success Stories' },
+  { value: 'campus-event', label: 'Campus Engagement' },
+];
+
+const higherEdLeaderMomentOptions: { value: CommunicationMoment; label: string }[] = [
+  { value: 'research-collaboration', label: 'Initiate Research Collaboration' },
+  { value: 'programming-collaboration', label: 'Program Collaboration' },
+  { value: 'best-practices-share', label: 'Share Best Practices at Conferences' },
+  { value: 'peer-reputation', label: 'Increase Peer Reputation' },
+  { value: 'campus-event', label: 'Campus Visit/Event' },
 ];
 
 const channelOptions: { value: Channel; label: string }[] = [
@@ -176,8 +203,23 @@ export function ContextSelector({ context, onChange, mode = 'evaluator' }: Conte
   
   // Dynamic options based on audience type
   const isEmployee = context.audience === 'employee';
+  const isPolicyMaker = context.audience === 'policy-makers';
+  const isCommunityPartner = context.audience === 'community-partners';
+  const isHigherEdLeader = context.audience === 'higher-ed-leaders';
+  
   const cohortOptions = isEmployee ? employeeCohortOptions : studentCohortOptions;
-  const momentOptions = isEmployee ? employeeMomentOptions : studentMomentOptions;
+  
+  // Select the appropriate moment options based on audience
+  let momentOptions = studentMomentOptions;
+  if (isEmployee) {
+    momentOptions = employeeMomentOptions;
+  } else if (isPolicyMaker) {
+    momentOptions = policyMakerMomentOptions;
+  } else if (isCommunityPartner) {
+    momentOptions = communityPartnerMomentOptions;
+  } else if (isHigherEdLeader) {
+    momentOptions = higherEdLeaderMomentOptions;
+  }
 
   return (
     <div className="space-y-4">
