@@ -212,6 +212,36 @@ export type Database = {
           },
         ]
       }
+      email_nudges: {
+        Row: {
+          created_at: string
+          email_count: number
+          id: string
+          nudge_type: string
+          sent_at: string
+          tenant_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_count?: number
+          id?: string
+          nudge_type: string
+          sent_at?: string
+          tenant_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_count?: number
+          id?: string
+          nudge_type?: string
+          sent_at?: string
+          tenant_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       institutional_config: {
         Row: {
           config: Json
@@ -527,6 +557,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      referrals: {
+        Row: {
+          created_at: string
+          id: string
+          joined_at: string | null
+          personal_message: string | null
+          referee_email: string
+          referee_name: string | null
+          referral_type: string
+          referrer_tenant_id: string
+          referrer_user_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          joined_at?: string | null
+          personal_message?: string | null
+          referee_email: string
+          referee_name?: string | null
+          referral_type: string
+          referrer_tenant_id: string
+          referrer_user_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          joined_at?: string | null
+          personal_message?: string | null
+          referee_email?: string
+          referee_name?: string | null
+          referral_type?: string
+          referrer_tenant_id?: string
+          referrer_user_id?: string
+          status?: string
+        }
+        Relationships: []
       }
       shared_templates: {
         Row: {
