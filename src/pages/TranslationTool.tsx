@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AIBadge } from "@/components/ui/ai-indicator";
 import { useToast } from "@/hooks/use-toast";
+import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   ArrowLeft, 
@@ -35,6 +36,7 @@ const languages = [
 
 const TranslationTool = () => {
   const { toast } = useToast();
+  const { contentDNA } = useContentDNAForGeneration();
   const [sourceText, setSourceText] = useState("");
   const [sourceLanguage, setSourceLanguage] = useState("en");
   const [targetLanguage, setTargetLanguage] = useState("es");
@@ -57,7 +59,8 @@ const TranslationTool = () => {
             sourceLanguage,
             targetLanguage,
             targetLanguageName: languages.find(l => l.code === targetLanguage)?.name || targetLanguage,
-          }
+          },
+          contentDNA: contentDNA || undefined,
         }
       });
 

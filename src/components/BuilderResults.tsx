@@ -7,8 +7,8 @@ import { EvaluationResults } from "./EvaluationResults";
 import { AIBadge } from "@/components/ui/ai-indicator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import type { BuilderResult, MessageContext, InstitutionalConfig } from "@/types/uplaybook";
-
 interface BuilderResultsProps {
   result: BuilderResult;
   context?: MessageContext;
@@ -27,6 +27,7 @@ export function BuilderResults({
   onRegeneratedDraft 
 }: BuilderResultsProps) {
   const { toast } = useToast();
+  const { contentDNA } = useContentDNAForGeneration();
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [savedIndex, setSavedIndex] = useState<number | null>(null);
   const [activeDraft, setActiveDraft] = useState(0);
@@ -68,7 +69,8 @@ export function BuilderResults({
         body: { 
           type: 'builder',
           context,
-          institutionalConfig 
+          institutionalConfig,
+          contentDNA: contentDNA || undefined
         }
       });
 

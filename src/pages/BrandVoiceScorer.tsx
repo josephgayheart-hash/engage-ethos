@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { AIBadge } from "@/components/ui/ai-indicator";
 import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
+import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { 
@@ -34,6 +35,7 @@ interface BrandVoiceAnalysis {
 const BrandVoiceScorer = () => {
   const { toast } = useToast();
   const { config } = useInstitutionalConfig();
+  const { contentDNA } = useContentDNAForGeneration();
   const [content, setContent] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<BrandVoiceAnalysis | null>(null);
@@ -156,7 +158,8 @@ const BrandVoiceScorer = () => {
             institutionName: config?.institutionName,
             preferredPhrases: config?.preferredPhrases,
             wordsToAvoid: config?.wordsToAvoid,
-          }
+          },
+          contentDNA: contentDNA || undefined,
         }
       });
 

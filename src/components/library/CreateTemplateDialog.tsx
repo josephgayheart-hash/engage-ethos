@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AIBadge } from "@/components/ui/ai-indicator";
 import { useToast } from "@/hooks/use-toast";
+import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, X, Sparkles, RefreshCw } from "lucide-react";
 import type { SharedTemplate } from "@/types/library";
@@ -21,6 +22,7 @@ interface CreateTemplateDialogProps {
 
 export function CreateTemplateDialog({ open, onOpenChange, onSubmit, initialContent = '' }: CreateTemplateDialogProps) {
   const { toast } = useToast();
+  const { contentDNA } = useContentDNAForGeneration();
   const [title, setTitle] = useState('');
   const [intentStatement, setIntentStatement] = useState('');
   const [content, setContent] = useState(initialContent);
@@ -84,7 +86,8 @@ export function CreateTemplateDialog({ open, onOpenChange, onSubmit, initialCont
           institutionalConfig: {
             institutionName: collegeName || undefined,
             departmentName: departmentName || undefined,
-          }
+          },
+          contentDNA: contentDNA || undefined,
         }
       });
 

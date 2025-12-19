@@ -7,6 +7,7 @@ import { AIIndicator } from "@/components/ui/ai-indicator";
 import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import { useToast } from "@/hooks/use-toast";
 import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
+import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Mail, 
@@ -349,6 +350,7 @@ function TouchpointCard({
 export function StrategyJourneyDisplay({ journey, context, startDate, endDate }: StrategyJourneyProps) {
   const { toast } = useToast();
   const { config: institutionalConfig } = useInstitutionalConfig();
+  const { contentDNA } = useContentDNAForGeneration();
   const [generatedMessages, setGeneratedMessages] = useState<GeneratedMessage[]>([]);
   const [isGenerating, setIsGenerating] = useState<number | null>(null);
 
@@ -372,6 +374,7 @@ export function StrategyJourneyDisplay({ journey, context, startDate, endDate }:
           institutionalConfig,
           startDate,
           endDate,
+          contentDNA: contentDNA || undefined,
         }
       });
 
