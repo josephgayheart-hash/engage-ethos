@@ -112,7 +112,8 @@ ${daysUntilDeadline ? `- Days Until Deadline: ${daysUntilDeadline} days remainin
         "direct-mail": "Direct mail letter opening paragraph and key message. Formal tone. 100-150 words.",
         "phone-call": "Phone call script talking points. Bullet format. Include greeting, key message, and closing.",
         "digital-ad-search": `Google/Bing Search Ad. Return JSON object with exact fields: { "headlines": ["Headline 1 (max 30 chars)", "Headline 2 (max 30 chars)", "Headline 3 (max 30 chars)"], "descriptions": ["Description 1 (max 90 chars)", "Description 2 (max 90 chars)"], "displayUrl": "university.edu/path" }`,
-        "digital-ad-social": `Meta/LinkedIn Social Ad. Return JSON object with exact fields: { "primaryText": "Main ad copy (125 chars ideal)", "headline": "Bold headline (40 chars max)", "description": "Link description (optional)", "ctaButton": "Learn More", "platform": "meta" }`
+        "digital-ad-social": `Meta/LinkedIn Social Ad. Return JSON object with exact fields: { "primaryText": "Main ad copy (125 chars ideal)", "headline": "Bold headline (40 chars max)", "description": "Link description (optional)", "ctaButton": "Learn More", "platform": "meta" }`,
+        "talking-points": `Executive Talking Points for a president, dean, or executive. Return JSON object with exact fields: { "context": "Meeting/speech context", "audience": "Target audience", "openingHook": "Attention-grabbing opening statement", "keyMessages": ["Message 1", "Message 2", "Message 3", "Message 4", "Message 5"], "supportingData": ["Stat or fact 1", "Stat or fact 2", "Stat or fact 3"], "anticipatedQuestions": ["Q1", "Q2", "Q3"], "transitionPhrases": ["Transition 1", "Transition 2"], "closingStatement": "Strong closing call to action" }. Base content on brand pillars, institutional promise, pathways, foundation, and proof points.`
       };
 
       // Build comprehensive institutional config string for prompts
@@ -206,12 +207,14 @@ Respond with valid JSON only:
     { "channel": "email", "content": "Subject: ...\n\n..." },
     { "channel": "sms", "content": "..." },
     { "channel": "digital-ad-search", "content": { "headlines": ["...", "...", "..."], "descriptions": ["...", "..."], "displayUrl": "..." } },
-    { "channel": "digital-ad-social", "content": { "primaryText": "...", "headline": "...", "description": "...", "ctaButton": "Learn More", "platform": "meta" } }
+    { "channel": "digital-ad-social", "content": { "primaryText": "...", "headline": "...", "description": "...", "ctaButton": "Learn More", "platform": "meta" } },
+    { "channel": "talking-points", "content": { "context": "...", "audience": "...", "openingHook": "...", "keyMessages": ["...", "...", "..."], "supportingData": ["...", "..."], "anticipatedQuestions": ["...", "..."], "transitionPhrases": ["...", "..."], "closingStatement": "..." } }
   ]
 }
 
 IMPORTANT for digital-ad-search: content MUST be a JSON object with "headlines" (array of 3 strings), "descriptions" (array of 2 strings), and "displayUrl" (string).
-IMPORTANT for digital-ad-social: content MUST be a JSON object with "primaryText", "headline", "description", "ctaButton", and "platform" fields.`;
+IMPORTANT for digital-ad-social: content MUST be a JSON object with "primaryText", "headline", "description", "ctaButton", and "platform" fields.
+IMPORTANT for talking-points: content MUST be a JSON object with "context", "audience", "openingHook", "keyMessages" (array of 5+ key talking points), "supportingData" (array of relevant stats/facts), "anticipatedQuestions" (array of likely questions), "transitionPhrases" (array), and "closingStatement". Base the content on institutional brand pillars, promise, pathways, foundation, and proof points.`;
       } else {
         // Single channel touchpoint message generation
         userPrompt = `Generate a message for a strategy journey touchpoint.

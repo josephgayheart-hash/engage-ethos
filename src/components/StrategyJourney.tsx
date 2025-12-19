@@ -167,6 +167,34 @@ function getGeneratedMessageText(channel: Channel, content: unknown): string {
     return `PRIMARY TEXT:\n${primaryText}\n\nHEADLINE: ${headline}${description ? `\nDESCRIPTION: ${description}` : ""}\n\nCTA: ${ctaButton}${platform ? `\nPLATFORM: ${platform}` : ""}`;
   }
 
+  if (channel === "talking-points") {
+    const tp = content as { 
+      context?: unknown; audience?: unknown; openingHook?: unknown; 
+      keyMessages?: unknown; supportingData?: unknown; anticipatedQuestions?: unknown; 
+      transitionPhrases?: unknown; closingStatement?: unknown 
+    };
+    const contextStr = typeof tp.context === "string" ? tp.context : "";
+    const audience = typeof tp.audience === "string" ? tp.audience : "";
+    const openingHook = typeof tp.openingHook === "string" ? tp.openingHook : "";
+    const keyMessages = Array.isArray(tp.keyMessages) ? tp.keyMessages.map(String) : [];
+    const supportingData = Array.isArray(tp.supportingData) ? tp.supportingData.map(String) : [];
+    const anticipatedQuestions = Array.isArray(tp.anticipatedQuestions) ? tp.anticipatedQuestions.map(String) : [];
+    const transitionPhrases = Array.isArray(tp.transitionPhrases) ? tp.transitionPhrases.map(String) : [];
+    const closingStatement = typeof tp.closingStatement === "string" ? tp.closingStatement : "";
+
+    let result = "EXECUTIVE TALKING POINTS\n" + "=".repeat(40) + "\n\n";
+    if (contextStr) result += `CONTEXT: ${contextStr}\n`;
+    if (audience) result += `AUDIENCE: ${audience}\n\n`;
+    if (openingHook) result += `OPENING HOOK:\n"${openingHook}"\n\n`;
+    if (keyMessages.length) result += `KEY MESSAGES:\n${keyMessages.map((m, i) => `${i + 1}. ${m}`).join("\n")}\n\n`;
+    if (supportingData.length) result += `SUPPORTING DATA:\n${supportingData.map(d => `• ${d}`).join("\n")}\n\n`;
+    if (anticipatedQuestions.length) result += `ANTICIPATED Q&A:\n${anticipatedQuestions.map(q => `Q: ${q}`).join("\n")}\n\n`;
+    if (transitionPhrases.length) result += `TRANSITIONS:\n${transitionPhrases.map(t => `→ "${t}"`).join("\n")}\n\n`;
+    if (closingStatement) result += `CLOSING:\n"${closingStatement}"`;
+
+    return result;
+  }
+
   try {
     return JSON.stringify(content, null, 2);
   } catch {
