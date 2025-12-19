@@ -19,7 +19,7 @@ import { AIBadge } from "@/components/ui/ai-indicator";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
-import { CreateTemplateDialog } from "@/components/library/CreateTemplateDialog";
+
 import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
 import { cn } from "@/lib/utils";
 import { 
@@ -51,6 +51,8 @@ const channelOptions: { value: Channel; label: string }[] = [
   { value: 'landing-page', label: 'Landing Page' },
   { value: 'direct-mail', label: 'Direct Mail' },
   { value: 'phone-call', label: 'Phone Call' },
+  { value: 'digital-ad-search', label: 'Search Ads (Google/Bing)' },
+  { value: 'digital-ad-social', label: 'Social Ads (Meta/LinkedIn)' },
 ];
 
 const audienceLabels: Record<string, string> = {
@@ -95,11 +97,9 @@ const BuildPage = () => {
   const [builderResult, setBuilderResult] = useState<BuilderResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [autoSave, setAutoSave] = useState(true);
-  const [copiedChannel, setCopiedChannel] = useState<string | null>(null);
-  const [submitToSharedOpen, setSubmitToSharedOpen] = useState(false);
   const [saveToLibraryOpen, setSaveToLibraryOpen] = useState(false);
   const [saveToLibraryChannel, setSaveToLibraryChannel] = useState<Channel | null>(null);
-  const [draftToSubmit, setDraftToSubmit] = useState('');
+  const [saveToLibraryType, setSaveToLibraryType] = useState<'personal' | 'shared'>('personal');
   const [useContentDNA, setUseContentDNA] = useState(true);
   const resultsRef = useRef<HTMLDivElement>(null);
   const canProcess = context.audience && context.moment && selectedChannels.length > 0;
@@ -162,6 +162,7 @@ const BuildPage = () => {
   const handleSaveToLibraryClick = () => {
     if (!builderResult?.channelDrafts) return;
     setSaveToLibraryChannel(null); // null means save all channels as kit
+    setSaveToLibraryType('personal');
     setSaveToLibraryOpen(true);
   };
 
@@ -202,10 +203,16 @@ const BuildPage = () => {
     return savedMessage.id;
   };
 
-  const handleSubmitToShared = () => {
+  const handleShareToLibraryClick = () => {
     if (!builderResult?.channelDrafts) return;
-    
-    const channelList = selectedChannels.join(', ');
+    setSaveToLibraryChannel(null);
+    setSaveToLibraryType('shared');
+    setSaveToLibraryOpen(true);
+  };
+
+  const handleShareToLibraryConfirm = (name: string): string | undefined => {
+    if (!builderResult?.channelDrafts) return undefined;
+
     const contentSummary = selectedChannels.map(ch => {
       const content = builderResult.channelDrafts[ch];
       if (typeof content === 'string') return `[${ch.toUpperCase()}]\n${content}`;
@@ -219,8 +226,29 @@ const BuildPage = () => {
       return '';
     }).filter(Boolean).join('\n\n---\n\n');
 
-    setDraftToSubmit(contentSummary);
-    setSubmitToSharedOpen(true);
+    const savedTemplate = addTemplate({
+      title: name,
+      intentStatement: `Multi-channel message kit for ${context.audience || 'students'} - ${context.moment || 'general'}`,
+      content: contentSummary,
+      playbook: 'Message Kits',
+      owner: 'Current User',
+      maintainer: 'Current User',
+      status: 'submitted' as const,
+      version: '1.0',
+      requiredFields: {
+        audience: context.audience ? [context.audience] : [],
+        moment: context.moment ? [context.moment] : [],
+        channel: selectedChannels,
+      },
+      useCases: {
+        whenToUse: [`${context.audience || 'Student'} communications via ${selectedChannels.join(', ')}`],
+        whenNotToUse: [],
+      },
+      ethicalGuardrails: ['Review all content before publishing', 'Ensure messaging aligns with institutional voice'],
+      placeholders: [],
+    });
+
+    return savedTemplate.id;
   };
 
   const handleContentChange = (channel: Channel, newContent: ChannelDrafts[keyof ChannelDrafts]) => {
@@ -548,11 +576,11 @@ const BuildPage = () => {
                   <div className="flex gap-2 mt-4 pt-4 border-t border-border">
                     <Button onClick={handleSaveToLibraryClick} variant="outline" className="flex-1">
                       <FolderPlus className="w-4 h-4 mr-2" />
-                      Save to Personal Library
+                      Save to My Library
                     </Button>
-                    <Button onClick={handleSubmitToShared} variant="secondary" className="flex-1">
+                    <Button onClick={handleShareToLibraryClick} variant="secondary" className="flex-1">
                       <Library className="w-4 h-4 mr-2" />
-                      Submit to Shared Library
+                      Submit to University Library
                     </Button>
                   </div>
                 </CardContent>
@@ -580,25 +608,17 @@ const BuildPage = () => {
         </div>
       </main>
 
-      <CreateTemplateDialog
-        open={submitToSharedOpen}
-        onOpenChange={setSubmitToSharedOpen}
-        onSubmit={(template) => {
-          addTemplate(template);
-          toast({
-            title: "Template submitted",
-            description: "Your message has been submitted to the Shared Library for review.",
-          });
-          setDraftToSubmit('');
-        }}
-        initialContent={draftToSubmit}
-      />
-
       <SaveToLibraryDialog
         open={saveToLibraryOpen}
         onOpenChange={setSaveToLibraryOpen}
-        onSave={saveToLibraryChannel ? handleSaveIndividualChannelConfirm : handleSaveToLibraryConfirm}
-        libraryType="personal"
+        onSave={
+          saveToLibraryType === 'shared'
+            ? handleShareToLibraryConfirm
+            : saveToLibraryChannel
+            ? handleSaveIndividualChannelConfirm
+            : handleSaveToLibraryConfirm
+        }
+        libraryType={saveToLibraryType}
         defaultName={
           saveToLibraryChannel
             ? `${audienceLabels[context.audience || ''] || 'Message'} - ${channelOptions.find(c => c.value === saveToLibraryChannel)?.label || saveToLibraryChannel}`
