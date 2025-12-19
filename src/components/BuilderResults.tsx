@@ -2,12 +2,13 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Copy, Check, PenTool, User, FileText, Ruler, FolderPlus, Library, RefreshCw, Sparkles } from "lucide-react";
+import { Copy, Check, PenTool, User, FileText, Ruler, FolderPlus, Library, RefreshCw, Sparkles, ExternalLink } from "lucide-react";
 import { EvaluationResults } from "./EvaluationResults";
 import { AIBadge } from "@/components/ui/ai-indicator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
+import { openInGoogleDocs, formatForGoogleDocs } from "@/lib/googleDocsExport";
 import type { BuilderResult, MessageContext, InstitutionalConfig } from "@/types/uplaybook";
 interface BuilderResultsProps {
   result: BuilderResult;
@@ -38,6 +39,22 @@ export function BuilderResults({
     await navigator.clipboard.writeText(text);
     setCopiedIndex(index);
     setTimeout(() => setCopiedIndex(null), 2000);
+  };
+
+  const handleOpenInGoogleDocs = async (draft: string, index: number) => {
+    const formattedContent = formatForGoogleDocs(draft, {
+      title: `Draft ${index + 1}: ${context?.domain || 'Message'}`,
+      channel: context?.channel,
+      audience: context?.audience,
+      generatedAt: new Date(),
+    });
+    const success = await openInGoogleDocs(formattedContent);
+    if (success) {
+      toast({
+        title: "Opening Google Docs",
+        description: "Content copied! Paste (Ctrl/Cmd+V) in the new document.",
+      });
+    }
   };
 
   const handleSaveToLibrary = (draft: string, index: number) => {
@@ -172,21 +189,29 @@ export function BuilderResults({
             {drafts.map((draft, index) => (
               <TabsContent key={index} value={`draft-${index}`}>
                 <div className="relative p-4 bg-card border border-border rounded-lg">
-                  <div className="absolute top-2 right-2 flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyToClipboard(draft, index)}
-                      title="Copy to clipboard"
-                    >
-                      {copiedIndex === index ? (
-                        <Check className="w-4 h-4 text-green-600" />
-                      ) : (
-                        <Copy className="w-4 h-4" />
-                      )}
-                    </Button>
-                  </div>
-                  <p className="text-sm whitespace-pre-wrap pr-20">{draft}</p>
+                    <div className="absolute top-2 right-2 flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyToClipboard(draft, index)}
+                        title="Copy to clipboard"
+                      >
+                        {copiedIndex === index ? (
+                          <Check className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <Copy className="w-4 h-4" />
+                        )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleOpenInGoogleDocs(draft, index)}
+                        title="Open in Google Docs"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <p className="text-sm whitespace-pre-wrap pr-24">{draft}</p>
                 </div>
                 
                 {/* Save Actions */}
