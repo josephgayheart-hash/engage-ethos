@@ -158,7 +158,7 @@ async function extractTextFromWord(file: File): Promise<{
 
 /**
  * Extract text from PDF files
- * Basic extraction that works for PDFs with uncompressed text streams
+ * First tries basic extraction, then falls back to AI vision for complex PDFs
  */
 async function extractTextFromPdf(file: File): Promise<{
   text: string;
@@ -191,87 +191,171 @@ async function extractTextFromPdf(file: File): Promise<{
       };
     }
 
-    const textParts: string[] = [];
-
-    // Method 1: Extract text between BT (Begin Text) and ET (End Text) markers
-    const textBlocks = content.match(/BT[\s\S]*?ET/g) || [];
-    for (const block of textBlocks) {
-      // Extract text from Tj operator (single string)
-      const tjMatches = block.match(/\(([^)]+)\)\s*Tj/g) || [];
-      for (const match of tjMatches) {
-        const text = match.replace(/\(([^)]+)\)\s*Tj/, '$1');
-        if (text && /[a-zA-Z]/.test(text)) {
-          textParts.push(decodePdfString(text));
-        }
-      }
-      
-      // Extract text from TJ operator (array of strings)
-      const tjArrayMatches = block.match(/\[([^\]]+)\]\s*TJ/g) || [];
-      for (const match of tjArrayMatches) {
-        const innerStrings = match.match(/\(([^)]*)\)/g) || [];
-        for (const str of innerStrings) {
-          const cleaned = str.replace(/[()]/g, '');
-          if (cleaned && /[a-zA-Z]/.test(cleaned)) {
-            textParts.push(decodePdfString(cleaned));
-          }
-        }
-      }
+    // Try basic text extraction first
+    const basicResult = tryBasicPdfExtraction(content);
+    
+    if (basicResult.success && basicResult.text.length > 50) {
+      return basicResult;
     }
 
-    // Method 2: Look for stream contents with readable text
-    const streamMatches = content.match(/stream\s*([\s\S]*?)\s*endstream/g) || [];
-    for (const stream of streamMatches) {
-      // Look for readable text sequences in uncompressed streams
-      const readableText = stream.match(/[A-Za-z][A-Za-z0-9\s.,!?'"()\-:;]{15,}/g) || [];
-      textParts.push(...readableText);
-    }
-
-    // Clean and combine
-    let combinedText = textParts
-      .join(' ')
-      .replace(/\s+/g, ' ')
-      .replace(/[^\x20-\x7E\s]/g, '')
-      .trim();
-
-    // Remove duplicate fragments
-    const sentences = combinedText.split(/[.!?]+/).filter(s => s.trim().length > 10);
-    const uniqueSentences = [...new Set(sentences)];
-    combinedText = uniqueSentences.join('. ').trim();
-
-    // Check if we got meaningful content
-    if (combinedText.length < 20) {
-      return {
-        text: '',
-        success: false,
-        message: 'This PDF appears to be scanned or image-based without searchable text (no OCR). Please use a PDF that has been OCR-processed, or copy and paste the text content directly.',
-      };
-    }
-
-    // Check quality of extracted text
-    const wordCount = combinedText.split(/\s+/).filter(w => /^[a-zA-Z]{2,}$/.test(w)).length;
-    const totalWords = combinedText.split(/\s+/).length;
-    const wordRatio = wordCount / (totalWords || 1);
-
-    if (wordRatio < 0.3) {
-      return {
-        text: '',
-        success: false,
-        message: 'Could not extract readable text from this PDF. The file may use embedded fonts or compression that prevents text extraction. Please copy and paste the content directly.',
-      };
-    }
-
-    return {
-      text: combinedText,
-      success: true,
-      message: 'PDF text extracted successfully.',
-    };
+    // Fall back to AI vision for complex PDFs
+    console.log('Basic PDF extraction failed, falling back to AI vision...');
+    return await extractPdfWithAI(file);
 
   } catch (error) {
     console.error('PDF parsing error:', error);
+    // Try AI extraction as last resort
+    try {
+      return await extractPdfWithAI(file);
+    } catch {
+      return {
+        text: '',
+        success: false,
+        message: 'Error reading PDF file. Please try a different file or paste the content directly.',
+      };
+    }
+  }
+}
+
+/**
+ * Try basic PDF text extraction (works for simple, uncompressed PDFs)
+ */
+function tryBasicPdfExtraction(content: string): {
+  text: string;
+  success: boolean;
+  message?: string;
+} {
+  const textParts: string[] = [];
+
+  // Method 1: Extract text between BT (Begin Text) and ET (End Text) markers
+  const textBlocks = content.match(/BT[\s\S]*?ET/g) || [];
+  for (const block of textBlocks) {
+    // Extract text from Tj operator (single string)
+    const tjMatches = block.match(/\(([^)]+)\)\s*Tj/g) || [];
+    for (const match of tjMatches) {
+      const text = match.replace(/\(([^)]+)\)\s*Tj/, '$1');
+      if (text && /[a-zA-Z]/.test(text)) {
+        textParts.push(decodePdfString(text));
+      }
+    }
+    
+    // Extract text from TJ operator (array of strings)
+    const tjArrayMatches = block.match(/\[([^\]]+)\]\s*TJ/g) || [];
+    for (const match of tjArrayMatches) {
+      const innerStrings = match.match(/\(([^)]*)\)/g) || [];
+      for (const str of innerStrings) {
+        const cleaned = str.replace(/[()]/g, '');
+        if (cleaned && /[a-zA-Z]/.test(cleaned)) {
+          textParts.push(decodePdfString(cleaned));
+        }
+      }
+    }
+  }
+
+  // Method 2: Look for stream contents with readable text
+  const streamMatches = content.match(/stream\s*([\s\S]*?)\s*endstream/g) || [];
+  for (const stream of streamMatches) {
+    const readableText = stream.match(/[A-Za-z][A-Za-z0-9\s.,!?'"()\-:;]{15,}/g) || [];
+    textParts.push(...readableText);
+  }
+
+  // Clean and combine
+  let combinedText = textParts
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .replace(/[^\x20-\x7E\s]/g, '')
+    .trim();
+
+  // Remove duplicate fragments
+  const sentences = combinedText.split(/[.!?]+/).filter(s => s.trim().length > 10);
+  const uniqueSentences = [...new Set(sentences)];
+  combinedText = uniqueSentences.join('. ').trim();
+
+  // Check if we got meaningful content
+  if (combinedText.length < 50) {
     return {
       text: '',
       success: false,
-      message: 'Error reading PDF file. Please try a different file or paste the content directly.',
+      message: 'Basic extraction did not find enough text.',
+    };
+  }
+
+  // Check quality of extracted text
+  const wordCount = combinedText.split(/\s+/).filter(w => /^[a-zA-Z]{2,}$/.test(w)).length;
+  const totalWords = combinedText.split(/\s+/).length;
+  const wordRatio = wordCount / (totalWords || 1);
+
+  if (wordRatio < 0.3) {
+    return {
+      text: '',
+      success: false,
+      message: 'Extracted text quality is too low.',
+    };
+  }
+
+  return {
+    text: combinedText,
+    success: true,
+    message: 'PDF text extracted successfully.',
+  };
+}
+
+/**
+ * Extract PDF text using AI vision (handles scanned PDFs, complex layouts, etc.)
+ */
+async function extractPdfWithAI(file: File): Promise<{
+  text: string;
+  success: boolean;
+  message?: string;
+}> {
+  try {
+    // Convert PDF to base64
+    const arrayBuffer = await file.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuffer);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    const base64 = btoa(binary);
+
+    // Call the edge function to extract text using AI
+    const { data, error } = await supabase.functions.invoke('extract-text-from-image', {
+      body: {
+        imageBase64: base64,
+        mimeType: 'application/pdf',
+        isPdf: true,
+      },
+    });
+
+    if (error) {
+      console.error('PDF AI extraction error:', error);
+      return {
+        text: '',
+        success: false,
+        message: 'Error processing PDF with AI. Please paste the content directly.',
+      };
+    }
+
+    if (!data.success) {
+      return {
+        text: '',
+        success: false,
+        message: data.message || 'Could not extract text from this PDF.',
+      };
+    }
+
+    return {
+      text: data.text,
+      success: true,
+      message: 'PDF text extracted successfully using AI.',
+    };
+
+  } catch (error) {
+    console.error('PDF AI extraction error:', error);
+    return {
+      text: '',
+      success: false,
+      message: 'Error processing PDF. Please paste the content directly.',
     };
   }
 }
