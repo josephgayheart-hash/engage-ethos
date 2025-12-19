@@ -19,7 +19,8 @@ import {
   X,
   FolderPlus,
   Search,
-  Megaphone
+  Megaphone,
+  Mic
 } from "lucide-react";
 import type { 
   ChannelDrafts, 
@@ -28,6 +29,7 @@ import type {
   CallScriptDraft,
   SearchAdDraft,
   SocialAdDraft,
+  TalkingPointsDraft,
   Channel 
 } from "@/types/uplaybook";
 
@@ -49,6 +51,7 @@ const channelIcons: Record<Channel, React.ReactNode> = {
   'phone-call': <Phone className="w-4 h-4" />,
   'digital-ad-search': <Search className="w-4 h-4" />,
   'digital-ad-social': <Megaphone className="w-4 h-4" />,
+  'talking-points': <Mic className="w-4 h-4" />,
 };
 
 const channelLabels: Record<Channel, string> = {
@@ -61,6 +64,7 @@ const channelLabels: Record<Channel, string> = {
   'phone-call': 'Phone Script',
   'digital-ad-search': 'Search Ad (Google/Bing)',
   'digital-ad-social': 'Social Ad (Meta/LinkedIn)',
+  'talking-points': 'Executive Talking Points',
 };
 
 export function ChannelPreview({ channel, content, onCopy, onContentChange, onSaveToLibrary }: ChannelPreviewProps) {
@@ -110,6 +114,19 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     if (channel === 'digital-ad-social') {
       const ad = c as SocialAdDraft;
       return `PRIMARY TEXT:\n${ad.primaryText}\n\nHEADLINE: ${ad.headline}${ad.description ? `\nDESCRIPTION: ${ad.description}` : ''}\n\nCTA: ${ad.ctaButton}`;
+    }
+    if (channel === 'talking-points') {
+      const tp = c as TalkingPointsDraft;
+      let result = `EXECUTIVE TALKING POINTS\n${'='.repeat(40)}\n\n`;
+      if (tp.context) result += `CONTEXT: ${tp.context}\n`;
+      if (tp.audience) result += `AUDIENCE: ${tp.audience}\n\n`;
+      if (tp.openingHook) result += `OPENING HOOK:\n${tp.openingHook}\n\n`;
+      if (tp.keyMessages?.length) result += `KEY MESSAGES:\n${tp.keyMessages.map((m, i) => `${i + 1}. ${m}`).join('\n')}\n\n`;
+      if (tp.supportingData?.length) result += `SUPPORTING DATA:\n${tp.supportingData.map(d => `• ${d}`).join('\n')}\n\n`;
+      if (tp.anticipatedQuestions?.length) result += `ANTICIPATED Q&A:\n${tp.anticipatedQuestions.map(q => `Q: ${q}`).join('\n')}\n\n`;
+      if (tp.transitionPhrases?.length) result += `TRANSITIONS:\n${tp.transitionPhrases.map(t => `→ "${t}"`).join('\n')}\n\n`;
+      if (tp.closingStatement) result += `CLOSING:\n${tp.closingStatement}`;
+      return result;
     }
     return '';
   };
@@ -348,6 +365,80 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     );
   };
 
+  const renderTalkingPointsEdit = () => {
+    const tp = editedContent as TalkingPointsDraft;
+    return (
+      <div className="space-y-3">
+        <div>
+          <Label className="text-xs text-muted-foreground">Context (e.g., "Board meeting", "Donor lunch")</Label>
+          <Input
+            value={tp.context || ''}
+            onChange={(e) => setEditedContent({ ...tp, context: e.target.value })}
+            className="mt-1"
+            placeholder="Board presentation, individual meeting, speech..."
+          />
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">Audience</Label>
+          <Input
+            value={tp.audience || ''}
+            onChange={(e) => setEditedContent({ ...tp, audience: e.target.value })}
+            className="mt-1"
+            placeholder="Board of trustees, alumni donors..."
+          />
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">Opening Hook</Label>
+          <Textarea
+            value={tp.openingHook || ''}
+            onChange={(e) => setEditedContent({ ...tp, openingHook: e.target.value })}
+            className="mt-1 min-h-[60px]"
+          />
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">Key Messages (one per line)</Label>
+          <Textarea
+            value={(tp.keyMessages || []).join('\n')}
+            onChange={(e) => setEditedContent({ ...tp, keyMessages: e.target.value.split('\n').filter(Boolean) })}
+            className="mt-1 min-h-[120px]"
+          />
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">Supporting Data/Evidence (one per line)</Label>
+          <Textarea
+            value={(tp.supportingData || []).join('\n')}
+            onChange={(e) => setEditedContent({ ...tp, supportingData: e.target.value.split('\n').filter(Boolean) })}
+            className="mt-1 min-h-[80px]"
+          />
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">Anticipated Questions (one per line)</Label>
+          <Textarea
+            value={(tp.anticipatedQuestions || []).join('\n')}
+            onChange={(e) => setEditedContent({ ...tp, anticipatedQuestions: e.target.value.split('\n').filter(Boolean) })}
+            className="mt-1 min-h-[80px]"
+          />
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">Transition Phrases (one per line)</Label>
+          <Textarea
+            value={(tp.transitionPhrases || []).join('\n')}
+            onChange={(e) => setEditedContent({ ...tp, transitionPhrases: e.target.value.split('\n').filter(Boolean) })}
+            className="mt-1 min-h-[60px]"
+          />
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">Closing Statement</Label>
+          <Textarea
+            value={tp.closingStatement || ''}
+            onChange={(e) => setEditedContent({ ...tp, closingStatement: e.target.value })}
+            className="mt-1 min-h-[60px]"
+          />
+        </div>
+      </div>
+    );
+  };
+
   const renderEditContent = () => {
     switch (channel) {
       case 'email':
@@ -365,6 +456,8 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
         return renderSearchAdEdit();
       case 'digital-ad-social':
         return renderSocialAdEdit();
+      case 'talking-points':
+        return renderTalkingPointsEdit();
       default:
         return renderSimpleTextEdit();
     }
@@ -570,6 +663,92 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     </div>
   );
 
+  const renderTalkingPointsPreview = (tp: TalkingPointsDraft) => (
+    <div className="space-y-4">
+      {/* Header with context */}
+      <div className="bg-teal-50 dark:bg-teal-950/30 rounded-lg p-4 border border-teal-200 dark:border-teal-800">
+        <div className="flex items-center gap-2 mb-2">
+          <Mic className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+          <span className="font-semibold text-teal-700 dark:text-teal-300">Executive Talking Points</span>
+        </div>
+        {tp.context && <p className="text-sm"><span className="font-medium">Context:</span> {tp.context}</p>}
+        {tp.audience && <p className="text-sm"><span className="font-medium">Audience:</span> {tp.audience}</p>}
+      </div>
+      
+      {/* Opening Hook */}
+      {tp.openingHook && (
+        <div className="bg-green-50 dark:bg-green-950/30 rounded-lg p-4 border border-green-200 dark:border-green-800">
+          <p className="text-xs font-semibold text-green-700 dark:text-green-400 mb-1">OPENING HOOK</p>
+          <p className="text-sm italic">"{tp.openingHook}"</p>
+        </div>
+      )}
+      
+      {/* Key Messages */}
+      {tp.keyMessages && tp.keyMessages.length > 0 && (
+        <div className="bg-card rounded-lg p-4 border border-border">
+          <p className="text-xs font-semibold text-muted-foreground mb-3">KEY MESSAGES</p>
+          <ul className="space-y-3">
+            {tp.keyMessages.map((message, i) => (
+              <li key={i} className="flex gap-3">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-medium">{i + 1}</span>
+                <span className="text-sm">{message}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      
+      {/* Supporting Data */}
+      {tp.supportingData && tp.supportingData.length > 0 && (
+        <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+          <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">SUPPORTING DATA & EVIDENCE</p>
+          <ul className="space-y-1">
+            {tp.supportingData.map((data, i) => (
+              <li key={i} className="text-sm flex items-start gap-2">
+                <span className="text-blue-500">•</span>
+                <span>{data}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      
+      {/* Anticipated Questions */}
+      {tp.anticipatedQuestions && tp.anticipatedQuestions.length > 0 && (
+        <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-4 border border-amber-200 dark:border-amber-800">
+          <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 mb-2">ANTICIPATED Q&A</p>
+          <ul className="space-y-2">
+            {tp.anticipatedQuestions.map((question, i) => (
+              <li key={i} className="text-sm">
+                <span className="font-medium text-amber-700 dark:text-amber-400">Q:</span> {question}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      
+      {/* Transition Phrases */}
+      {tp.transitionPhrases && tp.transitionPhrases.length > 0 && (
+        <div className="bg-muted/50 rounded-lg p-4 border border-border">
+          <p className="text-xs font-semibold text-muted-foreground mb-2">TRANSITION PHRASES</p>
+          <div className="flex flex-wrap gap-2">
+            {tp.transitionPhrases.map((phrase, i) => (
+              <span key={i} className="text-xs bg-background px-2 py-1 rounded border">"{phrase}"</span>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {/* Closing Statement */}
+      {tp.closingStatement && (
+        <div className="bg-purple-50 dark:bg-purple-950/30 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
+          <p className="text-xs font-semibold text-purple-700 dark:text-purple-400 mb-1">CLOSING STATEMENT</p>
+          <p className="text-sm font-medium">"{tp.closingStatement}"</p>
+        </div>
+      )}
+    </div>
+  );
+
   const renderContent = () => {
     const displayContent = isEditing ? editedContent : content;
     if (!displayContent) return <p className="text-muted-foreground text-sm">No content generated</p>;
@@ -593,6 +772,8 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
         return renderSearchAdPreview(displayContent as SearchAdDraft);
       case 'digital-ad-social':
         return renderSocialAdPreview(displayContent as SocialAdDraft);
+      case 'talking-points':
+        return renderTalkingPointsPreview(displayContent as TalkingPointsDraft);
       default:
         return <p className="text-sm whitespace-pre-wrap">{String(displayContent)}</p>;
     }

@@ -34,7 +34,8 @@ import {
   Building2,
   Dna,
   ChevronRight,
-  ExternalLink
+  ExternalLink,
+  Mic
 } from "lucide-react";
 import type { StrategyJourney, Channel, StrategyPhase, JourneyTouchpoint, MessageContext, InstitutionalConfig } from "@/types/uplaybook";
 
@@ -69,6 +70,7 @@ const channelIcons: Record<Channel, React.ReactNode> = {
   'phone-call': <Phone className="w-4 h-4" />,
   'digital-ad-search': <Target className="w-4 h-4" />,
   'digital-ad-social': <Megaphone className="w-4 h-4" />,
+  'talking-points': <Mic className="w-4 h-4" />,
 };
 
 const formatChannelName = (channel: string): string => {

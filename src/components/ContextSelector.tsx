@@ -144,6 +144,7 @@ const channelOptions: { value: Channel; label: string }[] = [
   { value: 'social-media', label: 'Social Media' },
   { value: 'direct-mail', label: 'Direct Mail' },
   { value: 'phone-call', label: 'Phone Call' },
+  { value: 'talking-points', label: 'Executive Talking Points' },
 ];
 
 const domainOptions: { value: MessageDomain; label: string }[] = [
