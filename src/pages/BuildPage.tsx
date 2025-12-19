@@ -358,6 +358,7 @@ const BuildPage = () => {
               <ContentDNAIndicator
                 enabled={useContentDNA}
                 onToggle={setUseContentDNA}
+                selectedProfileId={selectedProfileId}
                 selectedProfileName={selectedProfileName}
               />
 
@@ -527,7 +528,7 @@ const BuildPage = () => {
                           {selectedChannels.length} channel{selectedChannels.length > 1 ? 's' : ''}
                         </Badge>
                       </CardTitle>
-                      {useContentDNA && <ContentDNAActiveBadge />}
+                      {useContentDNA && <ContentDNAActiveBadge profileId={selectedProfileId} institutionName={selectedProfileName} />}
                     </div>
                     <Button variant="outline" size="sm" onClick={handleReset}>
                       <RefreshCw className="w-4 h-4 mr-2" />
