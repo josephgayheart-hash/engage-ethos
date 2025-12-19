@@ -44,7 +44,7 @@ const channelIcons = {
 const PersonalLibrary = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { messages, deleteMessage, duplicateMessage, exportMessage, filterMessages } = useMessageLibrary();
+  const { messages, deleteMessage, duplicateMessage, exportMessage, filterMessages, updateMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
   const { getProfileHierarchy } = useInstitutionalProfiles();
   const [filters, setFilters] = useState<LibraryFilters>({ search: '' });
@@ -81,6 +81,13 @@ const PersonalLibrary = () => {
 
   const handleCreateTemplate = (template: any) => {
     addTemplate(template);
+    // Mark the original message as submitted to University Library
+    if (messageToSubmit) {
+      updateMessage(messageToSubmit.id, {
+        submittedToLibrary: true,
+        submittedAt: new Date().toISOString(),
+      });
+    }
     toast({
       title: "Template submitted",
       description: "Your message has been submitted to the University Library for review.",
@@ -259,6 +266,12 @@ const PersonalLibrary = () => {
                             <Badge variant="default" className="shrink-0 bg-green-600">
                               <CheckCircle className="w-3 h-3 mr-1" />
                               Approved
+                            </Badge>
+                          )}
+                          {message.submittedToLibrary && (
+                            <Badge variant="secondary" className="shrink-0 bg-blue-50 text-blue-600 border-blue-200">
+                              <Library className="w-3 h-3 mr-1" />
+                              In University Library
                             </Badge>
                           )}
                         </div>
