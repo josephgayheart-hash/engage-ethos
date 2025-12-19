@@ -158,6 +158,47 @@ export type Database = {
           },
         ]
       }
+      content_dna_analysis: {
+        Row: {
+          created_at: string
+          custom_instructions: string | null
+          id: string
+          last_analyzed_at: string | null
+          sample_count: number
+          tenant_id: string
+          updated_at: string
+          voice_analysis: Json
+        }
+        Insert: {
+          created_at?: string
+          custom_instructions?: string | null
+          id?: string
+          last_analyzed_at?: string | null
+          sample_count?: number
+          tenant_id: string
+          updated_at?: string
+          voice_analysis?: Json
+        }
+        Update: {
+          created_at?: string
+          custom_instructions?: string | null
+          id?: string
+          last_analyzed_at?: string | null
+          sample_count?: number
+          tenant_id?: string
+          updated_at?: string
+          voice_analysis?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_dna_analysis_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_dna_samples: {
         Row: {
           content_text: string | null
@@ -167,8 +208,11 @@ export type Database = {
           file_type: string | null
           id: string
           profile_id: string | null
+          sample_type: string | null
+          source_description: string | null
           source_type: string | null
           tenant_id: string
+          title: string | null
           user_id: string
         }
         Insert: {
@@ -179,8 +223,11 @@ export type Database = {
           file_type?: string | null
           id?: string
           profile_id?: string | null
+          sample_type?: string | null
+          source_description?: string | null
           source_type?: string | null
           tenant_id: string
+          title?: string | null
           user_id: string
         }
         Update: {
@@ -191,8 +238,11 @@ export type Database = {
           file_type?: string | null
           id?: string
           profile_id?: string | null
+          sample_type?: string | null
+          source_description?: string | null
           source_type?: string | null
           tenant_id?: string
+          title?: string | null
           user_id?: string
         }
         Relationships: [

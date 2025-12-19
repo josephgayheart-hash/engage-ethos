@@ -1,0 +1,669 @@
+import { useState, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { useContentDNA, ContentDNASample } from '@/hooks/useContentDNA';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { 
+  Home, 
+  Upload, 
+  FileText, 
+  Trash2, 
+  Sparkles, 
+  Clock, 
+  Loader2,
+  ChevronRight,
+  Building2,
+  Dna,
+  BookOpen,
+  Settings,
+  MessageSquare,
+  TrendingUp,
+  Quote,
+  Lightbulb,
+  CheckCircle2
+} from 'lucide-react';
+
+const SAMPLE_TYPES = [
+  { value: 'email', label: 'Email' },
+  { value: 'sms', label: 'SMS/Text' },
+  { value: 'newsletter', label: 'Newsletter' },
+  { value: 'news_story', label: 'News Story' },
+  { value: 'speech', label: 'Speech/Remarks' },
+  { value: 'social', label: 'Social Media' },
+  { value: 'web_copy', label: 'Website Copy' },
+  { value: 'marketing', label: 'Marketing Material' },
+  { value: 'other', label: 'Other' },
+];
+
+export default function ContentDNAPage() {
+  const { tenant, profile } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const {
+    samples,
+    analysis,
+    isLoading,
+    isAnalyzing,
+    isSaving,
+    addSample,
+    deleteSample,
+    analyzeVoice,
+    updateCustomInstructions,
+  } = useContentDNA();
+
+  // Upload state
+  const [textInput, setTextInput] = useState('');
+  const [sampleTitle, setSampleTitle] = useState('');
+  const [sampleType, setSampleType] = useState('email');
+  const [sourceDescription, setSourceDescription] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Instructions state
+  const [customInstructions, setCustomInstructions] = useState(analysis?.custom_instructions || '');
+
+  // Update local instructions when analysis loads
+  useState(() => {
+    if (analysis?.custom_instructions) {
+      setCustomInstructions(analysis.custom_instructions);
+    }
+  });
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const text = await file.text();
+      await addSample(text, file.name, {
+        sampleType,
+        title: sampleTitle || file.name,
+        sourceDescription: sourceDescription || undefined,
+        fileType: file.type,
+        fileSize: file.size,
+      });
+      
+      // Reset form
+      setSampleTitle('');
+      setSourceDescription('');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    } catch (error) {
+      console.error('Upload error:', error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleTextSubmit = async () => {
+    if (!textInput.trim()) return;
+
+    setIsUploading(true);
+    try {
+      await addSample(textInput, `Pasted content - ${new Date().toLocaleDateString()}`, {
+        sampleType,
+        title: sampleTitle || `${SAMPLE_TYPES.find(t => t.value === sampleType)?.label || 'Content'} Sample`,
+        sourceDescription: sourceDescription || undefined,
+      });
+      
+      // Reset form
+      setTextInput('');
+      setSampleTitle('');
+      setSourceDescription('');
+    } catch (error) {
+      console.error('Submit error:', error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleSaveInstructions = () => {
+    updateCustomInstructions(customInstructions);
+  };
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[hsl(210,20%,98%)] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[hsl(222,47%,14%)]" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[hsl(210,20%,98%)]">
+      {/* Header */}
+      <div className="border-b border-[hsl(220,13%,88%)] bg-white">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center gap-2 text-sm text-[hsl(220,14%,46%)] mb-2">
+            <Link to="/dashboard" className="hover:text-[hsl(222,47%,11%)]">
+              <Home className="w-4 h-4" />
+            </Link>
+            <ChevronRight className="w-4 h-4" />
+            <Link to="/admin/console" className="hover:text-[hsl(222,47%,11%)]">
+              Admin
+            </Link>
+            <ChevronRight className="w-4 h-4" />
+            <span className="text-[hsl(222,47%,11%)]">Content DNA</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="font-serif text-2xl font-bold text-[hsl(222,47%,11%)] flex items-center gap-2">
+                <Dna className="w-6 h-6" />
+                Content DNA Center
+              </h1>
+              <p className="text-[hsl(220,14%,46%)]">
+                Refine your institution's voice and messaging patterns
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="flex items-center gap-1">
+                <FileText className="w-3 h-3" />
+                {samples.length} samples
+              </Badge>
+              {analysis && (
+                <Badge className="bg-[hsl(173,58%,39%)]">
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  DNA Analyzed
+                </Badge>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-8">
+        <Tabs defaultValue="samples" className="space-y-6">
+          <TabsList className="bg-white border border-[hsl(220,13%,88%)]">
+            <TabsTrigger value="samples" className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              Sample Library
+            </TabsTrigger>
+            <TabsTrigger value="upload" className="flex items-center gap-2">
+              <Upload className="w-4 h-4" />
+              Upload Content
+            </TabsTrigger>
+            <TabsTrigger value="analysis" className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
+              Voice Analysis
+            </TabsTrigger>
+            <TabsTrigger value="instructions" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Brand Guidelines
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Sample Library Tab */}
+          <TabsContent value="samples">
+            <Card className="border-[hsl(220,13%,88%)]">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-[hsl(222,47%,11%)]">Content Samples</CardTitle>
+                    <CardDescription>
+                      Your collection of brand communications used for voice analysis
+                    </CardDescription>
+                  </div>
+                  <Button
+                    onClick={analyzeVoice}
+                    disabled={isAnalyzing || samples.length === 0}
+                    className="bg-[hsl(173,58%,39%)] hover:bg-[hsl(173,58%,34%)]"
+                  >
+                    {isAnalyzing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Analyze All Samples
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {samples.length === 0 ? (
+                  <div className="text-center py-12 text-[hsl(220,14%,46%)]">
+                    <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p className="font-medium">No samples yet</p>
+                    <p className="text-sm">Upload content to start building your Content DNA profile</p>
+                  </div>
+                ) : (
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-3">
+                      {samples.map((sample) => (
+                        <div
+                          key={sample.id}
+                          className="p-4 border border-[hsl(220,13%,88%)] rounded-lg bg-white hover:bg-[hsl(210,20%,98%)] transition-colors"
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h4 className="font-medium text-[hsl(222,47%,11%)] truncate">
+                                  {sample.title || sample.file_name}
+                                </h4>
+                                <Badge variant="outline" className="text-xs">
+                                  {SAMPLE_TYPES.find(t => t.value === sample.sample_type)?.label || sample.sample_type}
+                                </Badge>
+                              </div>
+                              {sample.source_description && (
+                                <p className="text-sm text-[hsl(220,14%,46%)] mb-2">
+                                  {sample.source_description}
+                                </p>
+                              )}
+                              <p className="text-sm text-[hsl(220,14%,46%)] line-clamp-2">
+                                {sample.content_text?.substring(0, 200)}...
+                              </p>
+                              <div className="flex items-center gap-4 mt-2 text-xs text-[hsl(220,14%,46%)]">
+                                <span className="flex items-center gap-1">
+                                  <Clock className="w-3 h-3" />
+                                  {formatDate(sample.created_at)}
+                                </span>
+                                {sample.file_size && (
+                                  <span>{Math.round(sample.file_size / 1024)} KB</span>
+                                )}
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-[hsl(0,84%,60%)] hover:text-[hsl(0,84%,50%)] hover:bg-red-50"
+                              onClick={() => deleteSample(sample.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Upload Content Tab */}
+          <TabsContent value="upload">
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Upload File */}
+              <Card className="border-[hsl(220,13%,88%)]">
+                <CardHeader>
+                  <CardTitle className="text-[hsl(222,47%,11%)] flex items-center gap-2">
+                    <Upload className="w-5 h-5" />
+                    Upload File
+                  </CardTitle>
+                  <CardDescription>
+                    Upload text files (.txt, .md, .html) containing your communications
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label>Sample Type</Label>
+                    <Select value={sampleType} onValueChange={setSampleType}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SAMPLE_TYPES.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Title (optional)</Label>
+                    <Input
+                      value={sampleTitle}
+                      onChange={(e) => setSampleTitle(e.target.value)}
+                      placeholder="e.g., President's Welcome Letter 2024"
+                    />
+                  </div>
+                  <div>
+                    <Label>Source Description (optional)</Label>
+                    <Input
+                      value={sourceDescription}
+                      onChange={(e) => setSourceDescription(e.target.value)}
+                      placeholder="e.g., Annual new student welcome email"
+                    />
+                  </div>
+                  <div>
+                    <Label>Select File</Label>
+                    <Input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".txt,.md,.html,.htm"
+                      onChange={handleFileUpload}
+                      disabled={isUploading}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Paste Text */}
+              <Card className="border-[hsl(220,13%,88%)]">
+                <CardHeader>
+                  <CardTitle className="text-[hsl(222,47%,11%)] flex items-center gap-2">
+                    <MessageSquare className="w-5 h-5" />
+                    Paste Content
+                  </CardTitle>
+                  <CardDescription>
+                    Paste communication content directly
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label>Content</Label>
+                    <Textarea
+                      value={textInput}
+                      onChange={(e) => setTextInput(e.target.value)}
+                      placeholder="Paste your email, newsletter, or other communication here..."
+                      className="h-[180px]"
+                    />
+                  </div>
+                  <Button
+                    onClick={handleTextSubmit}
+                    disabled={isUploading || !textInput.trim()}
+                    className="w-full bg-[hsl(222,47%,14%)] hover:bg-[hsl(222,47%,20%)]"
+                  >
+                    {isUploading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <FileText className="w-4 h-4 mr-2" />
+                        Add Sample
+                      </>
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Tips Card */}
+            <Card className="mt-6 border-[hsl(220,13%,88%)] bg-[hsl(45,93%,97%)]">
+              <CardContent className="py-4">
+                <div className="flex items-start gap-3">
+                  <Lightbulb className="w-5 h-5 text-[hsl(45,93%,47%)] flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-[hsl(222,47%,11%)] mb-1">Tips for best results</h4>
+                    <ul className="text-sm text-[hsl(220,14%,46%)] space-y-1">
+                      <li>• Include a variety of content types (emails, newsletters, news stories)</li>
+                      <li>• Add samples from different departments and communication contexts</li>
+                      <li>• Include both formal and informal communications for comprehensive analysis</li>
+                      <li>• 10-20 samples typically provide the best voice analysis</li>
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Voice Analysis Tab */}
+          <TabsContent value="analysis">
+            {analysis?.voice_analysis ? (
+              <div className="space-y-6">
+                {/* Analysis Summary */}
+                <Card className="border-[hsl(220,13%,88%)] bg-gradient-to-r from-[hsl(222,47%,14%)] to-[hsl(222,47%,20%)] text-white">
+                  <CardContent className="py-6">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 bg-white/10 rounded-lg">
+                        <Dna className="w-8 h-8" />
+                      </div>
+                      <div>
+                        <h3 className="font-serif text-xl font-bold mb-2">Your Content DNA Profile</h3>
+                        <p className="text-white/80">{analysis.voice_analysis.summary}</p>
+                        <div className="flex items-center gap-4 mt-4 text-sm text-white/60">
+                          <span className="flex items-center gap-1">
+                            <FileText className="w-4 h-4" />
+                            Based on {analysis.sample_count} samples
+                          </span>
+                          {analysis.last_analyzed_at && (
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-4 h-4" />
+                              Analyzed {formatDate(analysis.last_analyzed_at)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Analysis Details */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Card className="border-[hsl(220,13%,88%)]">
+                    <CardHeader>
+                      <CardTitle className="text-[hsl(222,47%,11%)] text-lg">Tone & Style</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <Label className="text-[hsl(220,14%,46%)]">Overall Tone</Label>
+                        <p className="font-medium text-[hsl(222,47%,11%)]">{analysis.voice_analysis.overallTone}</p>
+                      </div>
+                      <div>
+                        <Label className="text-[hsl(220,14%,46%)]">Sentence Style</Label>
+                        <p className="font-medium text-[hsl(222,47%,11%)]">{analysis.voice_analysis.sentenceStyle}</p>
+                      </div>
+                      <div>
+                        <Label className="text-[hsl(220,14%,46%)]">Formality Level</Label>
+                        <p className="font-medium text-[hsl(222,47%,11%)]">{analysis.voice_analysis.formalityLevel}</p>
+                      </div>
+                      <div>
+                        <Label className="text-[hsl(220,14%,46%)]">Emotional Tone</Label>
+                        <p className="font-medium text-[hsl(222,47%,11%)]">{analysis.voice_analysis.emotionalTone}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-[hsl(220,13%,88%)]">
+                    <CardHeader>
+                      <CardTitle className="text-[hsl(222,47%,11%)] text-lg flex items-center gap-2">
+                        <TrendingUp className="w-5 h-5" />
+                        Key Characteristics
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-wrap gap-2">
+                        {analysis.voice_analysis.keyCharacteristics.map((char, i) => (
+                          <Badge key={i} variant="secondary" className="bg-[hsl(210,20%,94%)]">
+                            <CheckCircle2 className="w-3 h-3 mr-1" />
+                            {char}
+                          </Badge>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-[hsl(220,13%,88%)]">
+                    <CardHeader>
+                      <CardTitle className="text-[hsl(222,47%,11%)] text-lg flex items-center gap-2">
+                        <Quote className="w-5 h-5" />
+                        Common Phrases
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {analysis.voice_analysis.commonPhrases.map((phrase, i) => (
+                          <li key={i} className="text-sm text-[hsl(222,47%,11%)] italic">
+                            "{phrase}"
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-[hsl(220,13%,88%)]">
+                    <CardHeader>
+                      <CardTitle className="text-[hsl(222,47%,11%)] text-lg flex items-center gap-2">
+                        <Lightbulb className="w-5 h-5" />
+                        Messaging Tactics
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-wrap gap-2">
+                        {analysis.voice_analysis.messagingTactics.map((tactic, i) => (
+                          <Badge key={i} className="bg-[hsl(173,58%,39%)]">
+                            {tactic}
+                          </Badge>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Re-analyze Button */}
+                <div className="text-center">
+                  <Button
+                    onClick={analyzeVoice}
+                    disabled={isAnalyzing || samples.length === 0}
+                    variant="outline"
+                    className="border-[hsl(222,47%,14%)] text-[hsl(222,47%,14%)]"
+                  >
+                    {isAnalyzing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Re-analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Re-analyze with Current Samples
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Card className="border-[hsl(220,13%,88%)]">
+                <CardContent className="py-12 text-center">
+                  <Sparkles className="w-12 h-12 mx-auto mb-4 text-[hsl(220,14%,46%)] opacity-50" />
+                  <h3 className="font-medium text-[hsl(222,47%,11%)] mb-2">No Analysis Yet</h3>
+                  <p className="text-[hsl(220,14%,46%)] mb-4">
+                    Upload content samples and run an analysis to see your Content DNA profile
+                  </p>
+                  <Button
+                    onClick={analyzeVoice}
+                    disabled={isAnalyzing || samples.length === 0}
+                    className="bg-[hsl(173,58%,39%)] hover:bg-[hsl(173,58%,34%)]"
+                  >
+                    {isAnalyzing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Analyze {samples.length} Sample{samples.length !== 1 ? 's' : ''}
+                      </>
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Brand Guidelines Tab */}
+          <TabsContent value="instructions">
+            <Card className="border-[hsl(220,13%,88%)]">
+              <CardHeader>
+                <CardTitle className="text-[hsl(222,47%,11%)]">Custom Brand Guidelines</CardTitle>
+                <CardDescription>
+                  Add specific instructions, rules, and guidelines for AI-generated messages.
+                  These will be applied alongside the Content DNA analysis.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Textarea
+                  value={customInstructions}
+                  onChange={(e) => setCustomInstructions(e.target.value)}
+                  placeholder={`Examples:
+• Always refer to our institution as "The University" or "TU", never spell out the full name
+• Use "Go Tigers!" as a sign-off for student communications
+• Avoid using the word "requirements" - prefer "opportunities" or "next steps"
+• Include our motto "Excellence in Action" when appropriate
+• For prospective students, always mention our campus visit program
+• Never use all-caps for emphasis`}
+                  className="h-[250px]"
+                />
+                <div className="flex justify-end">
+                  <Button
+                    onClick={handleSaveInstructions}
+                    disabled={isSaving}
+                    className="bg-[hsl(222,47%,14%)] hover:bg-[hsl(222,47%,20%)]"
+                  >
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      'Save Guidelines'
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* How it Works */}
+            <Card className="mt-6 border-[hsl(220,13%,88%)] bg-[hsl(210,20%,98%)]">
+              <CardHeader>
+                <CardTitle className="text-[hsl(222,47%,11%)] text-lg">How Content DNA Works</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div className="text-center">
+                    <div className="w-12 h-12 rounded-full bg-[hsl(222,47%,14%)] text-white flex items-center justify-center mx-auto mb-3">
+                      1
+                    </div>
+                    <h4 className="font-medium text-[hsl(222,47%,11%)] mb-1">Upload Samples</h4>
+                    <p className="text-sm text-[hsl(220,14%,46%)]">
+                      Add emails, newsletters, and other communications that represent your brand voice
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <div className="w-12 h-12 rounded-full bg-[hsl(173,58%,39%)] text-white flex items-center justify-center mx-auto mb-3">
+                      2
+                    </div>
+                    <h4 className="font-medium text-[hsl(222,47%,11%)] mb-1">Analyze Voice</h4>
+                    <p className="text-sm text-[hsl(220,14%,46%)]">
+                      AI extracts tone, style, vocabulary patterns, and messaging characteristics
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <div className="w-12 h-12 rounded-full bg-[hsl(45,93%,47%)] text-white flex items-center justify-center mx-auto mb-3">
+                      3
+                    </div>
+                    <h4 className="font-medium text-[hsl(222,47%,11%)] mb-1">Generate On-Brand</h4>
+                    <p className="text-sm text-[hsl(220,14%,46%)]">
+                      All AI-generated messages automatically reflect your institution's unique voice
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}
