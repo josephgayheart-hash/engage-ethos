@@ -203,7 +203,7 @@ export type Database = {
           {
             foreignKeyName: "content_dna_analysis_tenant_id_fkey"
             columns: ["tenant_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
