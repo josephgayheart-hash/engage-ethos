@@ -79,6 +79,7 @@ export default function ContentDNAPage() {
   // Staged file state - file is selected but not yet uploaded
   const [stagedFile, setStagedFile] = useState<File | null>(null);
   const [stagedFileText, setStagedFileText] = useState<string | null>(null);
+  const [stagedFileError, setStagedFileError] = useState<string | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
   
   // Tips dismissal state (persisted in localStorage)
@@ -110,26 +111,27 @@ export default function ContentDNAPage() {
     setIsExtracting(true);
     setStagedFile(file);
     setStagedFileText(null);
+    setStagedFileError(null);
     
     try {
       const { text, success, message } = await extractTextFromFile(file);
       
       if (!success || !text) {
         console.error('Could not extract text:', message);
-        setStagedFile(null);
+        setStagedFileError(message || 'Could not extract text from this file.');
         setStagedFileText(null);
-        if (fileInputRef.current) fileInputRef.current.value = '';
         return;
       }
 
       setStagedFileText(text);
+      setStagedFileError(null);
       // Auto-fill title from filename if empty
       if (!sampleTitle) {
         setSampleTitle(file.name.replace(/\.[^/.]+$/, ''));
       }
     } catch (error) {
       console.error('Extract error:', error);
-      setStagedFile(null);
+      setStagedFileError('Error reading file. Please try a different file.');
       setStagedFileText(null);
     } finally {
       setIsExtracting(false);
@@ -167,6 +169,7 @@ export default function ContentDNAPage() {
   const handleClearStagedFile = () => {
     setStagedFile(null);
     setStagedFileText(null);
+    setStagedFileError(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -528,6 +531,23 @@ export default function ContentDNAPage() {
                                 )}
                               </Button>
                             </>
+                          ) : stagedFileError ? (
+                            <div className="space-y-2">
+                              <div className="text-xs text-red-600 bg-red-50 p-3 rounded-lg">
+                                <div className="flex items-start gap-2">
+                                  <X className="w-4 h-4 shrink-0 mt-0.5" />
+                                  <span>{stagedFileError}</span>
+                                </div>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleClearStagedFile}
+                                className="w-full"
+                              >
+                                Try Another File
+                              </Button>
+                            </div>
                           ) : (
                             <div className="text-xs text-red-500 flex items-center gap-1">
                               <X className="w-3 h-3" />
