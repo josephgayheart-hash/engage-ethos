@@ -404,7 +404,37 @@ BRAND PLATFORM (Use these elements to guide messaging):
 - Proof Points: ${institutionalConfig.brandPlatform.proofPoints?.join('; ') || 'Not specified'}
 - Commitments: ${institutionalConfig.brandPlatform.commitments?.join('; ') || 'Not specified'}
 - Brand Pathways: ${institutionalConfig.brandPlatform.brandPathways?.map((p: { name: string; description: string }) => `${p.name}: ${p.description}`).join('; ') || 'Not specified'}
-${institutionalConfig.selectedPillars && institutionalConfig.selectedPillars.length > 0 ? `
+${institutionalConfig.brandSelection ? `
+=== SELECTED BRAND ELEMENTS TO EMPHASIZE (CRITICAL - prioritize these in the messaging) ===
+${institutionalConfig.brandSelection.includePromise && institutionalConfig.brandPlatform.brandPromise ? `
+BRAND PROMISE (MUST incorporate):
+"${institutionalConfig.brandPlatform.brandPromise}"
+` : ''}
+${institutionalConfig.brandSelection.pillars?.length > 0 ? `
+SELECTED BRAND PILLARS (${institutionalConfig.brandSelection.pillars.length} selected - emphasize these themes):
+${institutionalConfig.brandSelection.pillars.map((pillarName: string) => {
+  const pillar = institutionalConfig.brandPlatform?.brandPillars?.find((p: { name: string }) => p.name === pillarName);
+  return pillar ? `• ${pillar.name}: ${pillar.description}${pillar.keywords?.length ? ` [Keywords: ${pillar.keywords.join(', ')}]` : ''}` : `• ${pillarName}`;
+}).join('\n')}
+` : ''}
+${institutionalConfig.brandSelection.proofPoints?.length > 0 ? `
+SELECTED PROOF POINTS (${institutionalConfig.brandSelection.proofPoints.length} selected - use as evidence):
+${institutionalConfig.brandSelection.proofPoints.map((point: string) => `• ${point}`).join('\n')}
+` : ''}
+${institutionalConfig.brandSelection.commitments?.length > 0 ? `
+SELECTED COMMITMENTS (${institutionalConfig.brandSelection.commitments.length} selected - reinforce these promises):
+${institutionalConfig.brandSelection.commitments.map((commitment: string) => `• ${commitment}`).join('\n')}
+` : ''}
+${institutionalConfig.brandSelection.pathways?.length > 0 ? `
+SELECTED BRAND PATHWAYS (${institutionalConfig.brandSelection.pathways.length} selected - weave in transformation narratives):
+${institutionalConfig.brandSelection.pathways.map((pathwayName: string) => {
+  const pathway = institutionalConfig.brandPlatform?.brandPathways?.find((p: { name: string }) => p.name === pathwayName);
+  return pathway ? `• ${pathway.name}: ${pathway.description}` : `• ${pathwayName}`;
+}).join('\n')}
+` : ''}
+IMPORTANT: The user has specifically selected these brand elements. The generated content MUST strongly reflect these themes, proof points, and commitments.
+` : ''}
+${institutionalConfig.selectedPillars && institutionalConfig.selectedPillars.length > 0 && !institutionalConfig.brandSelection ? `
 SELECTED BRAND PILLARS TO EMPHASIZE (CRITICAL - prioritize these in the messaging):
 ${institutionalConfig.selectedPillars.map((pillarName: string) => {
   const pillar = institutionalConfig.brandPlatform?.brandPillars?.find((p: { name: string }) => p.name === pillarName);

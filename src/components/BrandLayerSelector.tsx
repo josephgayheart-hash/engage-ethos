@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -17,23 +17,42 @@ import {
   Quote,
   CheckCircle2,
   AlertCircle,
-  Info
+  Info,
+  FileCheck,
+  Route
 } from 'lucide-react';
-import type { BrandPlatform, BrandPillar } from '@/types/uplaybook';
+import type { BrandPlatform, BrandPillar, BrandPathway } from '@/types/uplaybook';
+
+// Selected brand elements for generation
+export interface BrandLayerSelection {
+  pillars: string[];
+  proofPoints: string[];
+  commitments: string[];
+  pathways: string[];
+  includePromise: boolean;
+}
 
 interface BrandLayerSelectorProps {
   brandPlatform: BrandPlatform | null;
-  selectedPillars: string[];
-  onPillarsChange: (pillars: string[]) => void;
+  selection: BrandLayerSelection;
+  onSelectionChange: (selection: BrandLayerSelection) => void;
   isLoading?: boolean;
   className?: string;
   compact?: boolean;
 }
 
+const defaultSelection: BrandLayerSelection = {
+  pillars: [],
+  proofPoints: [],
+  commitments: [],
+  pathways: [],
+  includePromise: true,
+};
+
 export function BrandLayerSelector({
   brandPlatform,
-  selectedPillars,
-  onPillarsChange,
+  selection = defaultSelection,
+  onSelectionChange,
   isLoading = false,
   className = '',
   compact = false,
@@ -68,21 +87,58 @@ export function BrandLayerSelector({
   }
 
   const togglePillar = (pillarName: string) => {
-    if (selectedPillars.includes(pillarName)) {
-      onPillarsChange(selectedPillars.filter(p => p !== pillarName));
-    } else {
-      onPillarsChange([...selectedPillars, pillarName]);
-    }
+    const newPillars = selection.pillars.includes(pillarName)
+      ? selection.pillars.filter(p => p !== pillarName)
+      : [...selection.pillars, pillarName];
+    onSelectionChange({ ...selection, pillars: newPillars });
   };
 
-  const selectAllPillars = () => {
+  const toggleProofPoint = (point: string) => {
+    const newPoints = selection.proofPoints.includes(point)
+      ? selection.proofPoints.filter(p => p !== point)
+      : [...selection.proofPoints, point];
+    onSelectionChange({ ...selection, proofPoints: newPoints });
+  };
+
+  const toggleCommitment = (commitment: string) => {
+    const newCommitments = selection.commitments.includes(commitment)
+      ? selection.commitments.filter(c => c !== commitment)
+      : [...selection.commitments, commitment];
+    onSelectionChange({ ...selection, commitments: newCommitments });
+  };
+
+  const togglePathway = (pathwayName: string) => {
+    const newPathways = selection.pathways.includes(pathwayName)
+      ? selection.pathways.filter(p => p !== pathwayName)
+      : [...selection.pathways, pathwayName];
+    onSelectionChange({ ...selection, pathways: newPathways });
+  };
+
+  const togglePromise = () => {
+    onSelectionChange({ ...selection, includePromise: !selection.includePromise });
+  };
+
+  const selectAll = () => {
     if (!brandPlatform) return;
-    onPillarsChange(brandPlatform.brandPillars.map(p => p.name));
+    onSelectionChange({
+      pillars: brandPlatform.brandPillars?.map(p => p.name) || [],
+      proofPoints: brandPlatform.proofPoints || [],
+      commitments: brandPlatform.commitments || [],
+      pathways: brandPlatform.brandPathways?.map(p => p.name) || [],
+      includePromise: true,
+    });
   };
 
-  const clearAllPillars = () => {
-    onPillarsChange([]);
+  const clearAll = () => {
+    onSelectionChange(defaultSelection);
   };
+
+  const totalSelected = 
+    selection.pillars.length + 
+    selection.proofPoints.length + 
+    selection.commitments.length + 
+    selection.pathways.length +
+    (selection.includePromise ? 1 : 0);
 
   if (compact) {
     return (
@@ -92,9 +148,9 @@ export function BrandLayerSelector({
             <div className="flex items-center gap-2">
               <Target className="w-4 h-4 text-primary" />
               <span>Brand Layer</span>
-              {selectedPillars.length > 0 && (
+              {totalSelected > 0 && (
                 <Badge variant="secondary" className="ml-1">
-                  {selectedPillars.length} pillar{selectedPillars.length !== 1 ? 's' : ''}
+                  {totalSelected} selected
                 </Badge>
               )}
             </div>
@@ -104,10 +160,14 @@ export function BrandLayerSelector({
         <CollapsibleContent className="mt-2">
           <BrandPlatformDetails 
             brandPlatform={brandPlatform!}
-            selectedPillars={selectedPillars}
+            selection={selection}
             onTogglePillar={togglePillar}
-            onSelectAll={selectAllPillars}
-            onClearAll={clearAllPillars}
+            onToggleProofPoint={toggleProofPoint}
+            onToggleCommitment={toggleCommitment}
+            onTogglePathway={togglePathway}
+            onTogglePromise={togglePromise}
+            onSelectAll={selectAll}
+            onClearAll={clearAll}
           />
         </CollapsibleContent>
       </Collapsible>
@@ -120,28 +180,32 @@ export function BrandLayerSelector({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Target className="w-5 h-5 text-primary" />
-            <CardTitle className="text-base">Brand Layer</CardTitle>
+            <CardTitle className="text-base">Brand Platform</CardTitle>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={selectAllPillars}>
+            <Button variant="ghost" size="sm" onClick={selectAll}>
               Select All
             </Button>
-            <Button variant="ghost" size="sm" onClick={clearAllPillars}>
+            <Button variant="ghost" size="sm" onClick={clearAll}>
               Clear
             </Button>
           </div>
         </div>
         <CardDescription>
-          Select which brand pillars to emphasize in your message
+          Select brand elements to emphasize in your message - pillars, proof points, commitments, and pathways
         </CardDescription>
       </CardHeader>
       <CardContent>
         <BrandPlatformDetails 
           brandPlatform={brandPlatform!}
-          selectedPillars={selectedPillars}
+          selection={selection}
           onTogglePillar={togglePillar}
-          onSelectAll={selectAllPillars}
-          onClearAll={clearAllPillars}
+          onToggleProofPoint={toggleProofPoint}
+          onToggleCommitment={toggleCommitment}
+          onTogglePathway={togglePathway}
+          onTogglePromise={togglePromise}
+          onSelectAll={selectAll}
+          onClearAll={clearAll}
         />
       </CardContent>
     </Card>
@@ -150,29 +214,56 @@ export function BrandLayerSelector({
 
 interface BrandPlatformDetailsProps {
   brandPlatform: BrandPlatform;
-  selectedPillars: string[];
+  selection: BrandLayerSelection;
   onTogglePillar: (name: string) => void;
+  onToggleProofPoint: (point: string) => void;
+  onToggleCommitment: (commitment: string) => void;
+  onTogglePathway: (name: string) => void;
+  onTogglePromise: () => void;
   onSelectAll: () => void;
   onClearAll: () => void;
 }
 
 function BrandPlatformDetails({
   brandPlatform,
-  selectedPillars,
+  selection,
   onTogglePillar,
+  onToggleProofPoint,
+  onToggleCommitment,
+  onTogglePathway,
+  onTogglePromise,
 }: BrandPlatformDetailsProps) {
   return (
     <div className="space-y-4">
       {/* Brand Promise */}
       {brandPlatform.brandPromise && (
-        <div className="p-3 rounded-lg bg-background border">
-          <div className="flex items-center gap-2 mb-1">
-            <Quote className="w-4 h-4 text-muted-foreground" />
-            <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Brand Promise
-            </Label>
+        <div 
+          className={`p-3 rounded-lg border cursor-pointer transition-all ${
+            selection.includePromise
+              ? 'border-primary bg-primary/10'
+              : 'border-border bg-background hover:border-primary/50'
+          }`}
+          onClick={onTogglePromise}
+        >
+          <div className="flex items-start gap-3">
+            <Checkbox
+              checked={selection.includePromise}
+              onCheckedChange={onTogglePromise}
+              className="mt-0.5"
+            />
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <Quote className="w-4 h-4 text-muted-foreground" />
+                <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Brand Promise
+                </Label>
+                {selection.includePromise && (
+                  <CheckCircle2 className="w-4 h-4 text-primary" />
+                )}
+              </div>
+              <p className="text-sm font-medium">{brandPlatform.brandPromise}</p>
+            </div>
           </div>
-          <p className="text-sm font-medium">{brandPlatform.brandPromise}</p>
         </div>
       )}
 
@@ -181,14 +272,14 @@ function BrandPlatformDetails({
         <div>
           <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1">
             <Award className="w-3 h-3" />
-            Brand Pillars (select to emphasize)
+            Brand Pillars ({selection.pillars.length}/{brandPlatform.brandPillars.length} selected)
           </Label>
           <div className="space-y-2 mt-2">
             {brandPlatform.brandPillars.map((pillar) => (
               <div
                 key={pillar.name}
                 className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                  selectedPillars.includes(pillar.name)
+                  selection.pillars.includes(pillar.name)
                     ? 'border-primary bg-primary/10'
                     : 'border-border bg-background hover:border-primary/50'
                 }`}
@@ -196,14 +287,14 @@ function BrandPlatformDetails({
               >
                 <div className="flex items-start gap-3">
                   <Checkbox
-                    checked={selectedPillars.includes(pillar.name)}
+                    checked={selection.pillars.includes(pillar.name)}
                     onCheckedChange={() => onTogglePillar(pillar.name)}
                     className="mt-0.5"
                   />
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-sm">{pillar.name}</span>
-                      {selectedPillars.includes(pillar.name) && (
+                      {selection.pillars.includes(pillar.name) && (
                         <CheckCircle2 className="w-4 h-4 text-primary" />
                       )}
                     </div>
@@ -230,64 +321,116 @@ function BrandPlatformDetails({
         </div>
       )}
 
-      {/* Proof Points - Collapsible */}
+      {/* Proof Points - Selectable */}
       {brandPlatform.proofPoints && brandPlatform.proofPoints.length > 0 && (
-        <Collapsible>
-          <CollapsibleTrigger className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide hover:text-foreground transition-colors">
-            <Compass className="w-3 h-3" />
-            Proof Points ({brandPlatform.proofPoints.length})
+        <Collapsible defaultOpen={selection.proofPoints.length > 0}>
+          <CollapsibleTrigger className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide hover:text-foreground transition-colors w-full justify-between">
+            <div className="flex items-center gap-1">
+              <FileCheck className="w-3 h-3" />
+              Proof Points ({selection.proofPoints.length}/{brandPlatform.proofPoints.length} selected)
+            </div>
             <ChevronDown className="w-3 h-3" />
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-2">
-            <ScrollArea className="max-h-32">
-              <ul className="space-y-1 text-sm">
+            <ScrollArea className="max-h-48">
+              <div className="space-y-2">
                 {brandPlatform.proofPoints.map((point, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-muted-foreground">
-                    <span className="text-primary">•</span>
-                    {point}
-                  </li>
+                  <div
+                    key={idx}
+                    className={`p-2 rounded-lg border cursor-pointer transition-all flex items-start gap-2 ${
+                      selection.proofPoints.includes(point)
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border bg-background hover:border-primary/50'
+                    }`}
+                    onClick={() => onToggleProofPoint(point)}
+                  >
+                    <Checkbox
+                      checked={selection.proofPoints.includes(point)}
+                      onCheckedChange={() => onToggleProofPoint(point)}
+                      className="mt-0.5"
+                    />
+                    <span className="text-sm text-foreground">{point}</span>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </ScrollArea>
           </CollapsibleContent>
         </Collapsible>
       )}
 
-      {/* Commitments - Collapsible */}
+      {/* Commitments - Selectable */}
       {brandPlatform.commitments && brandPlatform.commitments.length > 0 && (
-        <Collapsible>
-          <CollapsibleTrigger className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide hover:text-foreground transition-colors">
-            <CheckCircle2 className="w-3 h-3" />
-            Commitments ({brandPlatform.commitments.length})
+        <Collapsible defaultOpen={selection.commitments.length > 0}>
+          <CollapsibleTrigger className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide hover:text-foreground transition-colors w-full justify-between">
+            <div className="flex items-center gap-1">
+              <CheckCircle2 className="w-3 h-3" />
+              Commitments ({selection.commitments.length}/{brandPlatform.commitments.length} selected)
+            </div>
             <ChevronDown className="w-3 h-3" />
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-2">
-            <ul className="space-y-1 text-sm">
+            <div className="space-y-2">
               {brandPlatform.commitments.map((commitment, idx) => (
-                <li key={idx} className="flex items-start gap-2 text-muted-foreground">
-                  <span className="text-primary">•</span>
-                  {commitment}
-                </li>
+                <div
+                  key={idx}
+                  className={`p-2 rounded-lg border cursor-pointer transition-all flex items-start gap-2 ${
+                    selection.commitments.includes(commitment)
+                      ? 'border-primary bg-primary/10'
+                      : 'border-border bg-background hover:border-primary/50'
+                  }`}
+                  onClick={() => onToggleCommitment(commitment)}
+                >
+                  <Checkbox
+                    checked={selection.commitments.includes(commitment)}
+                    onCheckedChange={() => onToggleCommitment(commitment)}
+                    className="mt-0.5"
+                  />
+                  <span className="text-sm text-foreground">{commitment}</span>
+                </div>
               ))}
-            </ul>
+            </div>
           </CollapsibleContent>
         </Collapsible>
       )}
 
-      {/* Pathways - Collapsible */}
+      {/* Pathways - Selectable */}
       {brandPlatform.brandPathways && brandPlatform.brandPathways.length > 0 && (
-        <Collapsible>
-          <CollapsibleTrigger className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide hover:text-foreground transition-colors">
-            <Compass className="w-3 h-3" />
-            Brand Pathways ({brandPlatform.brandPathways.length})
+        <Collapsible defaultOpen={selection.pathways.length > 0}>
+          <CollapsibleTrigger className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide hover:text-foreground transition-colors w-full justify-between">
+            <div className="flex items-center gap-1">
+              <Route className="w-3 h-3" />
+              Brand Pathways ({selection.pathways.length}/{brandPlatform.brandPathways.length} selected)
+            </div>
             <ChevronDown className="w-3 h-3" />
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-2">
             <div className="space-y-2">
               {brandPlatform.brandPathways.map((pathway, idx) => (
-                <div key={idx} className="p-2 rounded bg-muted/50">
-                  <p className="font-medium text-sm">{pathway.name}</p>
-                  <p className="text-xs text-muted-foreground">{pathway.description}</p>
+                <div
+                  key={idx}
+                  className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                    selection.pathways.includes(pathway.name)
+                      ? 'border-primary bg-primary/10'
+                      : 'border-border bg-background hover:border-primary/50'
+                  }`}
+                  onClick={() => onTogglePathway(pathway.name)}
+                >
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      checked={selection.pathways.includes(pathway.name)}
+                      onCheckedChange={() => onTogglePathway(pathway.name)}
+                      className="mt-0.5"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-sm">{pathway.name}</span>
+                        {selection.pathways.includes(pathway.name) && (
+                          <CheckCircle2 className="w-4 h-4 text-primary" />
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">{pathway.description}</p>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -301,31 +444,88 @@ function BrandPlatformDetails({
 // Active indicator badge for displaying in generated content
 export function BrandLayerActiveBadge({
   brandPlatform,
-  selectedPillars,
+  selection,
   className = '',
 }: {
   brandPlatform: BrandPlatform | null;
-  selectedPillars: string[];
+  selection: BrandLayerSelection;
   className?: string;
 }) {
-  if (!brandPlatform || selectedPillars.length === 0) return null;
+  if (!brandPlatform) return null;
+
+  const totalSelected = 
+    selection.pillars.length + 
+    selection.proofPoints.length + 
+    selection.commitments.length + 
+    selection.pathways.length +
+    (selection.includePromise ? 1 : 0);
+
+  if (totalSelected === 0) return null;
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <Badge variant="outline" className={`bg-primary/10 border-primary/30 ${className}`}>
           <Target className="w-3 h-3 mr-1" />
-          {selectedPillars.length} Pillar{selectedPillars.length !== 1 ? 's' : ''} Applied
+          {totalSelected} Brand Element{totalSelected !== 1 ? 's' : ''} Applied
         </Badge>
       </TooltipTrigger>
       <TooltipContent className="max-w-xs">
-        <p className="font-medium mb-1">Active Brand Pillars:</p>
-        <ul className="text-xs">
-          {selectedPillars.map(p => (
-            <li key={p}>• {p}</li>
-          ))}
-        </ul>
+        <div className="space-y-2">
+          {selection.includePromise && (
+            <div>
+              <p className="font-medium text-xs">Brand Promise</p>
+              <p className="text-xs text-muted-foreground">✓ Included</p>
+            </div>
+          )}
+          {selection.pillars.length > 0 && (
+            <div>
+              <p className="font-medium text-xs">Pillars ({selection.pillars.length})</p>
+              <ul className="text-xs text-muted-foreground">
+                {selection.pillars.map(p => <li key={p}>• {p}</li>)}
+              </ul>
+            </div>
+          )}
+          {selection.proofPoints.length > 0 && (
+            <div>
+              <p className="font-medium text-xs">Proof Points ({selection.proofPoints.length})</p>
+            </div>
+          )}
+          {selection.commitments.length > 0 && (
+            <div>
+              <p className="font-medium text-xs">Commitments ({selection.commitments.length})</p>
+            </div>
+          )}
+          {selection.pathways.length > 0 && (
+            <div>
+              <p className="font-medium text-xs">Pathways ({selection.pathways.length})</p>
+              <ul className="text-xs text-muted-foreground">
+                {selection.pathways.map(p => <li key={p}>• {p}</li>)}
+              </ul>
+            </div>
+          )}
+        </div>
       </TooltipContent>
     </Tooltip>
   );
+}
+
+// Legacy adapter for backward compatibility with selectedPillars
+export function useBrandLayerSelectionAdapter(
+  selectedPillars: string[],
+  onPillarsChange: (pillars: string[]) => void
+): [BrandLayerSelection, (selection: BrandLayerSelection) => void] {
+  const selection: BrandLayerSelection = {
+    pillars: selectedPillars,
+    proofPoints: [],
+    commitments: [],
+    pathways: [],
+    includePromise: true,
+  };
+
+  const setSelection = (newSelection: BrandLayerSelection) => {
+    onPillarsChange(newSelection.pillars);
+  };
+
+  return [selection, setSelection];
 }

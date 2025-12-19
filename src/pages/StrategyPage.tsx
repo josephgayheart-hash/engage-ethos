@@ -11,6 +11,7 @@ import { JourneyFlowDiagram } from "@/components/JourneyFlowDiagram";
 import { LibraryNav } from "@/components/LibraryNav";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
 import { ContentDNAIndicator, ContentDNAActiveBadge } from "@/components/ContentDNAIndicator";
+import { BrandLayerSelector, BrandLayerActiveBadge, BrandLayerSelection } from "@/components/BrandLayerSelector";
 import { CadenceSelector, CadenceFrequency, EscalationPattern } from "@/components/CadenceSelector";
 import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -101,6 +102,13 @@ const StrategyPage = () => {
   const [escalation, setEscalation] = useState<EscalationPattern>('none');
   const [estimatedTouchpoints, setEstimatedTouchpoints] = useState<number>(12);
   const [useContentDNA, setUseContentDNA] = useState(true);
+  const [brandSelection, setBrandSelection] = useState<BrandLayerSelection>({
+    pillars: [],
+    proofPoints: [],
+    commitments: [],
+    pathways: [],
+    includePromise: true,
+  });
   const { contentDNA, isLoading: isContentDNALoading } = useContentDNAForGeneration({ profileId: selectedProfileId });
   const [saveToLibraryOpen, setSaveToLibraryOpen] = useState(false);
   const [saveToLibraryType, setSaveToLibraryType] = useState<'personal' | 'shared'>('personal');
@@ -265,6 +273,9 @@ const StrategyPage = () => {
             voiceAnalysis: useContentDNA
               ? ((contentDNA?.voiceAnalysis ?? undefined) as any)
               : undefined,
+            // Pass brand platform and selected brand elements for generation
+            brandPlatform: useContentDNA ? contentDNA?.brandPlatform : undefined,
+            brandSelection: useContentDNA ? brandSelection : undefined,
           }
         : undefined;
 
@@ -703,6 +714,17 @@ const StrategyPage = () => {
                 selectedProfileId={selectedProfileId}
                 selectedProfileName={selectedProfileName}
               />
+
+              {/* Brand Layer Selector - only show when Content DNA is enabled and brand platform exists */}
+              {useContentDNA && contentDNA?.brandPlatform && (
+                <BrandLayerSelector
+                  brandPlatform={contentDNA.brandPlatform}
+                  selection={brandSelection}
+                  onSelectionChange={setBrandSelection}
+                  isLoading={isContentDNALoading}
+                  compact
+                />
+              )}
 
               <ContextSelector context={context} onChange={setContext} mode="mapper" />
 

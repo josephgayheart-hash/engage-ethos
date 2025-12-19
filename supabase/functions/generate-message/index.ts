@@ -23,6 +23,7 @@ serve(async (req) => {
     if (contentDNA?.voiceAnalysis) {
       const va = contentDNA.voiceAnalysis;
       const bp = contentDNA.brandPlatform;
+      const bs = contentDNA.brandSelection; // Brand layer selection
       const profileIdentifier = contentDNA.sourceProfileName || contentDNA.sourceProfileId || "selected profile";
       contentDNAPrompt = `
 CONTENT DNA - INSTITUTIONAL VOICE PROFILE FOR: ${profileIdentifier}
@@ -43,17 +44,47 @@ ${bp ? `
 BRAND PLATFORM:
 ${bp.brandPromise ? `Brand Promise: ${bp.brandPromise}` : ""}
 ${bp.brandPillars?.length ? `
-Brand Pillars (incorporate these themes naturally):
+Brand Pillars:
 ${bp.brandPillars.map((p: any) => `- ${p.name}: ${p.description}${p.keywords?.length ? ` (Keywords: ${p.keywords.join(", ")})` : ""}`).join("\n")}` : ""}
 ${bp.proofPoints?.length ? `
-Proof Points (use as evidence when relevant):
+Proof Points:
 ${bp.proofPoints.map((p: string) => `- ${p}`).join("\n")}` : ""}
 ${bp.commitments?.length ? `
-Commitments (reinforce these promises):
+Commitments:
 ${bp.commitments.map((c: string) => `- ${c}`).join("\n")}` : ""}
 ${bp.brandPathways?.length ? `
-Brand Pathways (transformation narratives):
+Brand Pathways:
 ${bp.brandPathways.map((p: any) => `- ${p.name}: ${p.description}`).join("\n")}` : ""}
+${bs ? `
+=== SELECTED BRAND ELEMENTS TO EMPHASIZE (CRITICAL) ===
+${bs.includePromise && bp.brandPromise ? `
+BRAND PROMISE (MUST incorporate):
+"${bp.brandPromise}"
+` : ""}
+${bs.pillars?.length > 0 ? `
+SELECTED BRAND PILLARS (${bs.pillars.length} selected):
+${bs.pillars.map((pillarName: string) => {
+  const pillar = bp.brandPillars?.find((p: any) => p.name === pillarName);
+  return pillar ? `• ${pillar.name}: ${pillar.description}${pillar.keywords?.length ? ` [Keywords: ${pillar.keywords.join(", ")}]` : ""}` : `• ${pillarName}`;
+}).join("\n")}
+` : ""}
+${bs.proofPoints?.length > 0 ? `
+SELECTED PROOF POINTS (${bs.proofPoints.length} selected):
+${bs.proofPoints.map((point: string) => `• ${point}`).join("\n")}
+` : ""}
+${bs.commitments?.length > 0 ? `
+SELECTED COMMITMENTS (${bs.commitments.length} selected):
+${bs.commitments.map((commitment: string) => `• ${commitment}`).join("\n")}
+` : ""}
+${bs.pathways?.length > 0 ? `
+SELECTED BRAND PATHWAYS (${bs.pathways.length} selected):
+${bs.pathways.map((pathwayName: string) => {
+  const pathway = bp.brandPathways?.find((p: any) => p.name === pathwayName);
+  return pathway ? `• ${pathway.name}: ${pathway.description}` : `• ${pathwayName}`;
+}).join("\n")}
+` : ""}
+IMPORTANT: The user has specifically selected these brand elements. The generated content MUST strongly reflect these themes.
+` : ""}
 ` : ""}
 ${contentDNA.customInstructions ? `
 CUSTOM BRAND GUIDELINES:
