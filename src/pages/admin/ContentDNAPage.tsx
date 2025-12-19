@@ -31,7 +31,9 @@ import {
   Quote,
   Lightbulb,
   CheckCircle2,
-  User
+  User,
+  X,
+  Zap
 } from 'lucide-react';
 import { extractTextFromFile, getAcceptString } from '@/lib/documentParser';
 
@@ -73,6 +75,17 @@ export default function ContentDNAPage() {
   const [sampleType, setSampleType] = useState('email');
   const [sourceDescription, setSourceDescription] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  
+  // Tips dismissal state (persisted in localStorage)
+  const [tipsVisible, setTipsVisible] = useState(() => {
+    const stored = localStorage.getItem('contentDnaTipsVisible');
+    return stored !== 'false';
+  });
+  
+  const dismissTips = () => {
+    setTipsVisible(false);
+    localStorage.setItem('contentDnaTipsVisible', 'false');
+  };
 
   // Instructions state
   const [customInstructions, setCustomInstructions] = useState(analysis?.custom_instructions || '');
@@ -244,6 +257,85 @@ export default function ContentDNAPage() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {/* PROMINENT: Ready to Analyze Banner - Shows when samples exist but no analysis yet, or samples added since last analysis */}
+        {samples.length > 0 && isAdmin && !analysis?.voice_analysis && (
+          <Card className="mb-6 border-2 border-[hsl(173,58%,39%)] bg-gradient-to-r from-[hsl(173,58%,39%)] to-[hsl(173,58%,30%)] text-white shadow-lg animate-in fade-in slide-in-from-top-2 duration-500">
+            <CardContent className="py-6">
+              <div className="flex items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                  <div className="p-4 bg-white/20 rounded-xl">
+                    <Zap className="w-10 h-10" />
+                  </div>
+                  <div>
+                    <h2 className="font-serif text-2xl font-bold mb-1">Ready to Analyze!</h2>
+                    <p className="text-white/90">
+                      You have {samples.length} content sample{samples.length !== 1 ? 's' : ''} ready for voice analysis. 
+                      Click the button to generate your institution's Content DNA profile.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  onClick={analyzeVoice}
+                  disabled={isAnalyzing}
+                  size="lg"
+                  className="bg-white text-[hsl(173,58%,30%)] hover:bg-white/90 font-bold px-8 py-6 text-lg shadow-lg"
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-5 h-5 mr-2" />
+                      Analyze Voice Now
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Re-analyze Banner - Shows when samples were added after last analysis */}
+        {samples.length > 0 && isAdmin && analysis?.voice_analysis && analysis.last_analyzed_at && 
+          samples.some(s => new Date(s.created_at) > new Date(analysis.last_analyzed_at!)) && (
+          <Card className="mb-6 border-2 border-[hsl(45,93%,47%)] bg-gradient-to-r from-[hsl(45,93%,47%)] to-[hsl(35,93%,40%)] text-white shadow-lg">
+            <CardContent className="py-5">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-white/20 rounded-lg">
+                    <Sparkles className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">New Content Added</h3>
+                    <p className="text-white/90 text-sm">
+                      You've added new samples since your last analysis. Re-analyze to update your Content DNA.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  onClick={analyzeVoice}
+                  disabled={isAnalyzing}
+                  className="bg-white text-[hsl(35,93%,35%)] hover:bg-white/90 font-bold"
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Re-Analyze
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Instructional Text */}
         <Card className="mb-6 border-[hsl(220,13%,88%)] bg-gradient-to-r from-[hsl(222,47%,14%)] to-[hsl(222,47%,20%)] text-white">
           <CardContent className="py-5">
@@ -408,61 +500,49 @@ export default function ContentDNAPage() {
               </Card>
             </div>
 
-            {/* Tips Card */}
-            <Card className="mt-6 border-[hsl(220,13%,88%)] bg-[hsl(45,93%,97%)]">
-              <CardContent className="py-4">
-                <div className="flex items-start gap-3">
-                  <Lightbulb className="w-5 h-5 text-[hsl(45,93%,47%)] flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium text-[hsl(222,47%,11%)] mb-1">Tips for best results</h4>
-                    <ul className="text-sm text-[hsl(220,14%,46%)] space-y-1">
-                      <li>• Include a variety of content types (emails, newsletters, news stories)</li>
-                      <li>• Add samples from different departments and communication contexts</li>
-                      <li>• Include both formal and informal communications for comprehensive analysis</li>
-                      <li>• 10-20 samples typically provide the best voice analysis</li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Recent Uploads Summary */}
+            {/* Recent Uploads Summary - Simplified since main CTA is at top */}
             {samples.length > 0 && (
               <Card className="mt-6 border-[hsl(220,13%,88%)] bg-[hsl(173,58%,39%)]/5">
                 <CardContent className="py-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-[hsl(173,58%,39%)]/10">
-                        <CheckCircle2 className="w-5 h-5 text-[hsl(173,58%,39%)]" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-[hsl(222,47%,11%)]">
-                          {samples.length} content sample{samples.length !== 1 ? 's' : ''} uploaded
-                        </p>
-                        <p className="text-sm text-[hsl(220,14%,46%)]">
-                          View all samples in the Content Library tab
-                        </p>
-                      </div>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-[hsl(173,58%,39%)]/10">
+                      <CheckCircle2 className="w-5 h-5 text-[hsl(173,58%,39%)]" />
                     </div>
-                    {isAdmin && (
-                      <Button
-                        onClick={analyzeVoice}
-                        disabled={isAnalyzing}
-                        className="bg-[hsl(173,58%,39%)] hover:bg-[hsl(173,58%,34%)]"
-                      >
-                        {isAnalyzing ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Analyzing...
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="w-4 h-4 mr-2" />
-                            Analyze Samples
-                          </>
-                        )}
-                      </Button>
-                    )}
+                    <div>
+                      <p className="font-medium text-[hsl(222,47%,11%)]">
+                        {samples.length} content sample{samples.length !== 1 ? 's' : ''} uploaded
+                      </p>
+                      <p className="text-sm text-[hsl(220,14%,46%)]">
+                        View all samples in the Content Library tab
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Dismissible Tips Card - at bottom */}
+            {tipsVisible && (
+              <Card className="mt-6 border-[hsl(220,13%,88%)] bg-[hsl(45,93%,97%)]">
+                <CardContent className="py-4">
+                  <div className="flex items-start gap-3">
+                    <Lightbulb className="w-5 h-5 text-[hsl(45,93%,47%)] flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <h4 className="font-medium text-[hsl(222,47%,11%)] mb-1">Tips for best results</h4>
+                      <ul className="text-sm text-[hsl(220,14%,46%)] space-y-1">
+                        <li>• Include a variety of content types (emails, newsletters, news stories)</li>
+                        <li>• Add samples from different departments and communication contexts</li>
+                        <li>• Include both formal and informal communications for comprehensive analysis</li>
+                        <li>• 10-20 samples typically provide the best voice analysis</li>
+                      </ul>
+                    </div>
+                    <button
+                      onClick={dismissTips}
+                      className="p-1 rounded hover:bg-[hsl(45,93%,90%)] text-[hsl(220,14%,46%)] hover:text-[hsl(222,47%,11%)] transition-colors"
+                      aria-label="Dismiss tips"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
                   </div>
                 </CardContent>
               </Card>
