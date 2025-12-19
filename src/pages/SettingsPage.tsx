@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { InstitutionalConfig } from "@/components/InstitutionalConfig";
+import { ProfileSetupWizard } from "@/components/ProfileSetupWizard";
 import { useInstitutionalProfiles, type InstitutionalProfile } from "@/hooks/useInstitutionalProfiles";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,7 +36,8 @@ import {
   Copy, 
   ChevronRight,
   FolderOpen,
-  Sparkles
+  Sparkles,
+  Palette
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -47,22 +49,19 @@ const SettingsPage = () => {
   const { toast } = useToast();
   
   const [editingProfile, setEditingProfile] = useState<InstitutionalProfile | null>(null);
-  const [newProfileName, setNewProfileName] = useState("");
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [showWizard, setShowWizard] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [profileToDelete, setProfileToDelete] = useState<InstitutionalProfile | null>(null);
   const [duplicateName, setDuplicateName] = useState("");
   const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
   const [profileToDuplicate, setProfileToDuplicate] = useState<InstitutionalProfile | null>(null);
 
-  const handleCreateProfile = async () => {
-    if (!newProfileName.trim()) return;
-    const profile = await createProfile(newProfileName.trim());
-    setNewProfileName("");
-    setCreateDialogOpen(false);
+  const handleCreateProfile = async (name: string, config: InstitutionalConfigType) => {
+    const profile = await createProfile(name, config);
+    setShowWizard(false);
     if (profile) {
       setEditingProfile(profile);
-      toast({ title: "Profile created", description: `"${profile.name}" is ready to configure.` });
+      toast({ title: "Profile created", description: `"${profile.name}" is ready to use.` });
     }
   };
 
@@ -140,65 +139,53 @@ const SettingsPage = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Profile List */}
-            <div className="lg:col-span-1 space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
-                  Your Profiles
-                </h2>
-                <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="sm" className="h-8">
-                      <Plus className="w-3 h-3 mr-1" />
-                      New
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Create New Profile</DialogTitle>
-                      <DialogDescription>
-                        Give your profile a name. You can configure the settings after creation.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="profile-name">Profile Name</Label>
-                        <Input
-                          id="profile-name"
-                          placeholder="e.g., Lakewood University, Spring Campaign"
-                          value={newProfileName}
-                          onChange={(e) => setNewProfileName(e.target.value)}
-                          onKeyDown={(e) => e.key === 'Enter' && handleCreateProfile()}
-                        />
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
-                        Cancel
-                      </Button>
-                      <Button onClick={handleCreateProfile} disabled={!newProfileName.trim()}>
-                        Create Profile
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
+          {showWizard ? (
+            // Profile Setup Wizard (full screen)
+            <Card className="col-span-full">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="w-5 h-5" />
+                  Create Institutional Profile
+                </CardTitle>
+                <CardDescription>
+                  Set up a new institution profile with branding, contact info, and key systems
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ProfileSetupWizard
+                  onComplete={handleCreateProfile}
+                  onCancel={() => setShowWizard(false)}
+                />
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Profile List */}
+              <div className="lg:col-span-1 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
+                    Your Profiles
+                  </h2>
+                  <Button size="sm" className="h-8" onClick={() => setShowWizard(true)}>
+                    <Plus className="w-3 h-3 mr-1" />
+                    New
+                  </Button>
+                </div>
 
-              {profiles.length === 0 ? (
-                <Card className="border-dashed">
-                  <CardContent className="flex flex-col items-center justify-center py-8 text-center">
-                    <FolderOpen className="w-10 h-10 text-muted-foreground/50 mb-3" />
-                    <p className="text-sm text-muted-foreground mb-3">
-                      No profiles yet. Create one to get started.
-                    </p>
-                    <Button size="sm" variant="outline" onClick={() => setCreateDialogOpen(true)}>
-                      <Plus className="w-3 h-3 mr-1" />
-                      Create First Profile
-                    </Button>
-                  </CardContent>
-                </Card>
-              ) : (
+                {profiles.length === 0 ? (
+                  <Card className="border-dashed">
+                    <CardContent className="flex flex-col items-center justify-center py-8 text-center">
+                      <FolderOpen className="w-10 h-10 text-muted-foreground/50 mb-3" />
+                      <p className="text-sm text-muted-foreground mb-3">
+                        No profiles yet. Create one to get started.
+                      </p>
+                      <Button size="sm" variant="outline" onClick={() => setShowWizard(true)}>
+                        <Plus className="w-3 h-3 mr-1" />
+                        Create First Profile
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ) : (
                 <div className="space-y-2">
                   {profiles.map(profile => (
                     <Card 
@@ -211,7 +198,23 @@ const SettingsPage = () => {
                       onClick={() => setEditingProfile(profile)}
                     >
                       <CardContent className="p-3">
-                        <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-start gap-3">
+                          {/* Profile Icon/Logo */}
+                          {profile.config.logoUrl ? (
+                            <img
+                              src={profile.config.logoUrl}
+                              alt={profile.name}
+                              className="w-10 h-10 object-contain rounded bg-white border p-1 flex-shrink-0"
+                            />
+                          ) : (
+                            <div
+                              className="w-10 h-10 rounded flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                              style={{ backgroundColor: profile.config.primaryColor || '#1F2A44' }}
+                            >
+                              {(profile.config.institutionAbbreviation || profile.name)?.charAt(0) || 'U'}
+                            </div>
+                          )}
+                          
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <h3 className="font-medium text-sm truncate">{profile.name}</h3>
@@ -224,11 +227,24 @@ const SettingsPage = () => {
                             <p className="text-xs text-muted-foreground truncate mt-0.5">
                               {getProfileSummary(profile)}
                             </p>
-                            <p className="text-[10px] text-muted-foreground mt-1">
-                              Updated {format(new Date(profile.updatedAt), 'MMM d, yyyy')}
-                            </p>
+                            {/* Color swatches */}
+                            <div className="flex items-center gap-2 mt-1.5">
+                              <div className="flex items-center gap-1">
+                                <div
+                                  className="w-3 h-3 rounded-full border"
+                                  style={{ backgroundColor: profile.config.primaryColor || '#1F2A44' }}
+                                />
+                                <div
+                                  className="w-3 h-3 rounded-full border"
+                                  style={{ backgroundColor: profile.config.accentColor || '#2C7A7B' }}
+                                />
+                              </div>
+                              <span className="text-[10px] text-muted-foreground">
+                                {format(new Date(profile.updatedAt), 'MMM d')}
+                              </span>
+                            </div>
                           </div>
-                          <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                          <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-1" />
                         </div>
                       </CardContent>
                     </Card>
@@ -304,6 +320,7 @@ const SettingsPage = () => {
               )}
             </div>
           </div>
+        )}
         </div>
       </main>
 

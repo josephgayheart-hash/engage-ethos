@@ -296,6 +296,11 @@ export interface MapperResult {
 }
 
 export interface InstitutionalConfig {
+  // Visual Branding
+  logoUrl?: string;              // Profile-specific logo
+  primaryColor?: string;         // Primary brand color (hex)
+  accentColor?: string;          // Accent/secondary color (hex)
+  
   // Branding & Identity
   institutionName?: string;
   institutionAbbreviation?: string;
