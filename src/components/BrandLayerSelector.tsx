@@ -268,7 +268,47 @@ function BrandPlatformTabs({
 
   return (
     <div className="space-y-4">
-      {/* Brand Promise - Always visible at top */}
+      {/* Selection Summary - At the top for visibility */}
+      {(selection.pillars.length > 0 || selection.proofPoints.length > 0 || 
+        selection.commitments.length > 0 || selection.pathways.length > 0 || selection.includePromise) && (
+        <div className="p-3 rounded-lg bg-primary/10 border border-primary/30">
+          <Label className="text-xs font-semibold text-primary mb-2 block">Active Brand Elements</Label>
+          <div className="flex flex-wrap gap-1.5">
+            {selection.includePromise && (
+              <Badge className="text-xs bg-primary text-primary-foreground">
+                <Quote className="w-3 h-3 mr-1" />
+                Promise
+              </Badge>
+            )}
+            {selection.pillars.map(p => (
+              <Badge key={p} className="text-xs bg-primary text-primary-foreground">
+                <Award className="w-3 h-3 mr-1" />
+                {p}
+              </Badge>
+            ))}
+            {selection.proofPoints.length > 0 && (
+              <Badge className="text-xs bg-secondary text-secondary-foreground border border-border">
+                <FileCheck className="w-3 h-3 mr-1" />
+                {selection.proofPoints.length} proof point{selection.proofPoints.length > 1 ? 's' : ''}
+              </Badge>
+            )}
+            {selection.commitments.length > 0 && (
+              <Badge className="text-xs bg-secondary text-secondary-foreground border border-border">
+                <Handshake className="w-3 h-3 mr-1" />
+                {selection.commitments.length} commitment{selection.commitments.length > 1 ? 's' : ''}
+              </Badge>
+            )}
+            {selection.pathways.map(p => (
+              <Badge key={p} className="text-xs bg-accent text-accent-foreground">
+                <Route className="w-3 h-3 mr-1" />
+                {p}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Brand Promise */}
       {brandPlatform.brandPromise && (
         <div 
           className={`p-3 rounded-lg border cursor-pointer transition-all ${
@@ -540,45 +580,6 @@ function BrandPlatformTabs({
         </Tabs>
       )}
 
-      {/* Selection Summary */}
-      {(selection.pillars.length > 0 || selection.proofPoints.length > 0 || 
-        selection.commitments.length > 0 || selection.pathways.length > 0) && (
-        <div className="pt-3 border-t border-border">
-          <Label className="text-xs text-muted-foreground mb-2 block">Selected Elements</Label>
-          <div className="flex flex-wrap gap-1.5">
-            {selection.includePromise && (
-              <Badge variant="secondary" className="text-xs">
-                <Quote className="w-3 h-3 mr-1" />
-                Promise
-              </Badge>
-            )}
-            {selection.pillars.map(p => (
-              <Badge key={p} variant="default" className="text-xs">
-                <Award className="w-3 h-3 mr-1" />
-                {p}
-              </Badge>
-            ))}
-            {selection.proofPoints.length > 0 && (
-              <Badge variant="outline" className="text-xs">
-                <FileCheck className="w-3 h-3 mr-1" />
-                {selection.proofPoints.length} proof point{selection.proofPoints.length > 1 ? 's' : ''}
-              </Badge>
-            )}
-            {selection.commitments.length > 0 && (
-              <Badge variant="outline" className="text-xs">
-                <Handshake className="w-3 h-3 mr-1" />
-                {selection.commitments.length} commitment{selection.commitments.length > 1 ? 's' : ''}
-              </Badge>
-            )}
-            {selection.pathways.map(p => (
-              <Badge key={p} variant="secondary" className="text-xs">
-                <Route className="w-3 h-3 mr-1" />
-                {p}
-              </Badge>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
