@@ -113,7 +113,8 @@ export type Channel =
   | 'direct-mail'
   | 'phone-call'
   | 'digital-ad-search'
-  | 'digital-ad-social';
+  | 'digital-ad-social'
+  | 'talking-points';
 
 export type MessageDomain = 
   | 'academic'
@@ -273,6 +274,17 @@ export interface SocialAdDraft {
   platform: 'meta' | 'linkedin' | 'other';
 }
 
+export interface TalkingPointsDraft {
+  context: string; // e.g., "Individual meeting with donor", "Board presentation", "Commencement speech"
+  audience: string; // e.g., "Alumni donors", "Board of trustees", "Graduating class"
+  keyMessages: string[]; // Main talking points
+  supportingData?: string[]; // Stats, facts, or evidence to support points
+  anticipatedQuestions?: string[]; // Q&A preparation
+  transitionPhrases?: string[]; // Phrases to move between topics
+  openingHook?: string; // Attention-grabbing opener
+  closingStatement?: string; // Strong conclusion or call to action
+}
+
 export interface ChannelDrafts {
   email?: EmailDraft;
   sms?: string;
@@ -283,6 +295,7 @@ export interface ChannelDrafts {
   'phone-call'?: CallScriptDraft;
   'digital-ad-search'?: SearchAdDraft;
   'digital-ad-social'?: SocialAdDraft;
+  'talking-points'?: TalkingPointsDraft;
 }
 
 export interface BuilderResult {

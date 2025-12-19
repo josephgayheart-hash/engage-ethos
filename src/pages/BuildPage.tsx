@@ -54,6 +54,7 @@ const channelOptions: { value: Channel; label: string }[] = [
   { value: 'phone-call', label: 'Phone Call' },
   { value: 'digital-ad-search', label: 'Search Ads (Google/Bing)' },
   { value: 'digital-ad-social', label: 'Social Ads (Meta/LinkedIn)' },
+  { value: 'talking-points', label: 'Executive Talking Points' },
 ];
 
 const audienceLabels: Record<string, string> = {
