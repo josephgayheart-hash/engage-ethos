@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { supabase } from "@/integrations/supabase/client";
 import { JourneyFlowDiagram } from "@/components/JourneyFlowDiagram";
@@ -30,7 +29,7 @@ import {
   List,
   Megaphone
 } from "lucide-react";
-import type { StrategyJourney, Channel, StrategyPhase, JourneyTouchpoint, MessageContext } from "@/types/uplaybook";
+import type { StrategyJourney, Channel, StrategyPhase, JourneyTouchpoint, MessageContext, InstitutionalConfig } from "@/types/uplaybook";
 
 // Metadata stored with saved journeys
 interface JourneyMetadata {
@@ -43,6 +42,10 @@ interface JourneyMetadata {
 interface JourneyViewerProps {
   journey: StrategyJourney & { _metadata?: JourneyMetadata };
   allowGeneration?: boolean;
+  /** The institutional profile ID to use for content generation */
+  institutionalProfileId?: string | null;
+  /** The institutional config to use for message generation (profile-specific) */
+  institutionalConfig?: InstitutionalConfig | null;
 }
 
 const channelIcons: Record<Channel, React.ReactNode> = {
@@ -74,10 +77,15 @@ const phaseBorderColors: Record<StrategyPhase, string> = {
   'long-term': 'border-l-violet-500',
 };
 
-export function JourneyViewer({ journey, allowGeneration = true }: JourneyViewerProps) {
+export function JourneyViewer({ 
+  journey, 
+  allowGeneration = true,
+  institutionalProfileId,
+  institutionalConfig: providedInstitutionalConfig
+}: JourneyViewerProps) {
   const { toast } = useToast();
-  const { config: institutionalConfig } = useInstitutionalConfig();
-  const { contentDNA } = useContentDNAForGeneration();
+  // Use profile-specific Content DNA if a profile ID is provided
+  const { contentDNA } = useContentDNAForGeneration({ profileId: institutionalProfileId });
   const [generatingIndex, setGeneratingIndex] = useState<number | null>(null);
   const [generatedMessage, setGeneratedMessage] = useState<string | null>(null);
   const [selectedTouchpoint, setSelectedTouchpoint] = useState<JourneyTouchpoint | null>(null);
@@ -117,7 +125,8 @@ export function JourneyViewer({ journey, allowGeneration = true }: JourneyViewer
             week: touchpoint.week,
             phase: touchpoint.phase,
           },
-          institutionalConfig,
+          // Use the provided institutional config (from the template/profile)
+          institutionalConfig: providedInstitutionalConfig || undefined,
           contentDNA: contentDNA || undefined,
         }
       });
