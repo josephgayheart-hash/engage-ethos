@@ -103,6 +103,9 @@ CHANNEL-SPECIFIC REQUIREMENTS:
 - LANDING PAGE: Include compelling headline, subheadline, body copy, and clear CTA button text
 - DIRECT MAIL: Formal letter format with salutation, body paragraphs, and closing
 - PHONE CALL: Include opening statement, purpose statement, 3-5 talking points, objection handlers, closing options, and voicemail script
+- DIGITAL-AD-SEARCH: Google/Bing search ad with 3 headlines (max 30 chars each) and 2 descriptions (max 90 chars each)
+- DIGITAL-AD-SOCIAL: Meta/LinkedIn ad with primary text, headline, description, and CTA button
+- TALKING-POINTS: Executive talking points for senior leaders with opening hook, 5 key messages (2-3 sentences each), supporting data, anticipated Q&A with responses, and closing statement
 
 IMPORTANT: Respond ONLY with valid JSON:
 {
@@ -120,6 +123,38 @@ IMPORTANT: Respond ONLY with valid JSON:
       "objectionHandlers": ["If busy: ...", "If not interested: ..."],
       "closing": "Thank you for your time...",
       "voicemail": "Hi, this is [Name] from..."
+    },
+    "digital-ad-search": {
+      "headlines": ["Headline 1 (max 30 chars)", "Headline 2", "Headline 3"],
+      "descriptions": ["Description 1 (max 90 chars)", "Description 2"],
+      "displayUrl": "university.edu/path"
+    },
+    "digital-ad-social": {
+      "primaryText": "Main ad copy (125 chars ideal)",
+      "headline": "Bold headline (40 chars max)",
+      "description": "Link description",
+      "ctaButton": "Learn More"
+    },
+    "talking-points": {
+      "context": "Specific meeting/speech context",
+      "audience": "Target audience with their priorities",
+      "openingHook": "A compelling 2-3 sentence opening that grabs attention",
+      "keyMessages": [
+        "First key message - complete, quotable (2-3 sentences)",
+        "Second key message - tied to institutional pillars",
+        "Third key message - addresses audience concerns",
+        "Fourth key message - forward-looking vision",
+        "Fifth key message - call to partnership"
+      ],
+      "supportingData": [
+        "Specific statistic or achievement",
+        "Proof point or evidence",
+        "Comparative data or benchmark"
+      ],
+      "anticipatedQuestions": ["Question 1", "Question 2", "Question 3"],
+      "suggestedResponses": ["Response to Q1", "Response to Q2", "Response to Q3"],
+      "transitionPhrases": ["Transition phrase 1", "Transition phrase 2"],
+      "closingStatement": "Powerful 2-3 sentence closing"
     }
   },
   "recommendedAuthority": "...",
