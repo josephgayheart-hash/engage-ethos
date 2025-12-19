@@ -76,6 +76,11 @@ export default function ContentDNAPage() {
   const [sourceDescription, setSourceDescription] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   
+  // Staged file state - file is selected but not yet uploaded
+  const [stagedFile, setStagedFile] = useState<File | null>(null);
+  const [stagedFileText, setStagedFileText] = useState<string | null>(null);
+  const [isExtracting, setIsExtracting] = useState(false);
+  
   // Tips dismissal state (persisted in localStorage)
   const [tipsVisible, setTipsVisible] = useState(() => {
     const stored = localStorage.getItem('contentDnaTipsVisible');
@@ -97,39 +102,72 @@ export default function ContentDNAPage() {
     }
   });
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Stage file - extract text but don't save yet
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setIsUploading(true);
+    setIsExtracting(true);
+    setStagedFile(file);
+    setStagedFileText(null);
+    
     try {
       const { text, success, message } = await extractTextFromFile(file);
       
       if (!success || !text) {
         console.error('Could not extract text:', message);
-        // Reset input so user can try again
+        setStagedFile(null);
+        setStagedFileText(null);
         if (fileInputRef.current) fileInputRef.current.value = '';
-        setIsUploading(false);
         return;
       }
 
-      await addSample(text, file.name, {
+      setStagedFileText(text);
+      // Auto-fill title from filename if empty
+      if (!sampleTitle) {
+        setSampleTitle(file.name.replace(/\.[^/.]+$/, ''));
+      }
+    } catch (error) {
+      console.error('Extract error:', error);
+      setStagedFile(null);
+      setStagedFileText(null);
+    } finally {
+      setIsExtracting(false);
+    }
+  };
+
+  // Actually save the staged file
+  const handleAddStagedFile = async () => {
+    if (!stagedFile || !stagedFileText) return;
+
+    setIsUploading(true);
+    try {
+      await addSample(stagedFileText, stagedFile.name, {
         sampleType,
-        title: sampleTitle || file.name.replace(/\.[^/.]+$/, ''),
+        title: sampleTitle || stagedFile.name.replace(/\.[^/.]+$/, ''),
         sourceDescription: sourceDescription || undefined,
-        fileType: file.type,
-        fileSize: file.size,
+        fileType: stagedFile.type,
+        fileSize: stagedFile.size,
       });
       
-      // Reset form
+      // Reset form and staged file
       setSampleTitle('');
       setSourceDescription('');
+      setStagedFile(null);
+      setStagedFileText(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (error) {
       console.error('Upload error:', error);
     } finally {
       setIsUploading(false);
     }
+  };
+
+  // Clear staged file
+  const handleClearStagedFile = () => {
+    setStagedFile(null);
+    setStagedFileText(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleTextSubmit = async () => {
@@ -436,23 +474,88 @@ export default function ContentDNAPage() {
                   <div>
                     <Label>Select File</Label>
                     <div className="mt-1">
-                      <label className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-[hsl(220,13%,88%)] rounded-lg cursor-pointer hover:border-[hsl(222,47%,14%)] hover:bg-[hsl(210,20%,98%)] transition-colors">
-                        <Upload className="w-5 h-5 text-[hsl(220,14%,46%)]" />
-                        <span className="text-sm font-medium text-[hsl(222,47%,14%)]">
-                          {isUploading ? 'Uploading...' : 'Choose File'}
-                        </span>
-                        <Input
-                          ref={fileInputRef}
-                          type="file"
-                          accept={getAcceptString()}
-                          onChange={handleFileUpload}
-                          disabled={isUploading}
-                          className="hidden"
-                        />
-                      </label>
-                      <p className="text-xs text-[hsl(220,14%,46%)] mt-1 text-center">
-                        Supports .txt, .docx, .pdf, .png, .jpg (screenshots)
-                      </p>
+                      {/* Staged File Display */}
+                      {stagedFile ? (
+                        <div className="border-2 border-[hsl(173,58%,39%)] rounded-lg p-4 bg-[hsl(173,58%,39%)]/5">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-[hsl(173,58%,39%)]/10 rounded-lg">
+                                <FileText className="w-5 h-5 text-[hsl(173,58%,39%)]" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-[hsl(222,47%,11%)] text-sm">{stagedFile.name}</p>
+                                <p className="text-xs text-[hsl(220,14%,46%)]">
+                                  {(stagedFile.size / 1024).toFixed(1)} KB
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={handleClearStagedFile}
+                              className="text-[hsl(220,14%,46%)] hover:text-red-500"
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          
+                          {isExtracting ? (
+                            <div className="flex items-center justify-center gap-2 py-3 text-[hsl(220,14%,46%)]">
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              <span className="text-sm">Extracting text...</span>
+                            </div>
+                          ) : stagedFileText ? (
+                            <>
+                              <div className="text-xs text-[hsl(173,58%,39%)] flex items-center gap-1 mb-3">
+                                <CheckCircle2 className="w-3 h-3" />
+                                Ready to add ({stagedFileText.length.toLocaleString()} characters extracted)
+                              </div>
+                              <Button
+                                onClick={handleAddStagedFile}
+                                disabled={isUploading}
+                                className="w-full bg-[hsl(173,58%,39%)] hover:bg-[hsl(173,58%,30%)] text-white"
+                              >
+                                {isUploading ? (
+                                  <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    Adding...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Sparkles className="w-4 h-4 mr-2" />
+                                    Add to Content Library
+                                  </>
+                                )}
+                              </Button>
+                            </>
+                          ) : (
+                            <div className="text-xs text-red-500 flex items-center gap-1">
+                              <X className="w-3 h-3" />
+                              Could not extract text from this file
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <>
+                          <label className="flex items-center justify-center gap-2 px-4 py-6 border-2 border-dashed border-[hsl(220,13%,88%)] rounded-lg cursor-pointer hover:border-[hsl(222,47%,14%)] hover:bg-[hsl(210,20%,98%)] transition-colors">
+                            <Upload className="w-6 h-6 text-[hsl(220,14%,46%)]" />
+                            <span className="text-sm font-medium text-[hsl(222,47%,14%)]">
+                              Choose File
+                            </span>
+                            <Input
+                              ref={fileInputRef}
+                              type="file"
+                              accept={getAcceptString()}
+                              onChange={handleFileSelect}
+                              disabled={isUploading || isExtracting}
+                              className="hidden"
+                            />
+                          </label>
+                          <p className="text-xs text-[hsl(220,14%,46%)] mt-1 text-center">
+                            Supports .txt, .docx, .pdf, .png, .jpg (screenshots)
+                          </p>
+                        </>
+                      )}
                     </div>
                   </div>
                 </CardContent>
