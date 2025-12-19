@@ -611,10 +611,10 @@ serve(async (req) => {
           }
         }
 
-        // Send welcome/invite email
+        // Send approval email with credentials
         try {
           const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-          const emailResponse = await fetch(`${SUPABASE_URL}/functions/v1/send-invite-email`, {
+          const emailResponse = await fetch(`${SUPABASE_URL}/functions/v1/send-approval-email`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -631,12 +631,12 @@ serve(async (req) => {
 
           if (!emailResponse.ok) {
             const emailError = await emailResponse.text();
-            console.error("Failed to send welcome email:", emailError);
+            console.error("Failed to send approval email:", emailError);
           } else {
-            console.log(`Welcome email sent successfully to ${request.email}`);
+            console.log(`Approval email sent successfully to ${request.email}`);
           }
         } catch (emailErr) {
-          console.error("Error sending welcome email:", emailErr);
+          console.error("Error sending approval email:", emailErr);
           // Don't fail the approval if email fails
         }
 
