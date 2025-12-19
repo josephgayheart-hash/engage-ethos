@@ -79,29 +79,26 @@ export function ContextSelector({
     fetchDNAOptions();
   }, [tenant, profiles]);
 
-  const selectedProfile = profiles.find(p => p.id === selectedProfileId);
-  const selectedDNA = dnaOptions.find(d => d.id === selectedDNAId);
-
   return (
-    <div className="flex items-center gap-3 flex-wrap">
+    <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
       {/* Profile Selector */}
-      <div className="flex items-center gap-2">
-        <Building2 className="w-4 h-4 text-muted-foreground" />
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        <Building2 className="w-4 h-4 text-muted-foreground hidden sm:block" />
         <Select
           value={selectedProfileId || 'none'}
           onValueChange={(v) => onProfileChange(v === 'none' ? null : v)}
           disabled={disabled || profilesLoading}
         >
-          <SelectTrigger className="w-[200px] h-9">
-            <SelectValue placeholder="Select profile..." />
+          <SelectTrigger className="w-[140px] sm:w-[180px] h-8 sm:h-9 text-xs sm:text-sm">
+            <SelectValue placeholder="Profile..." />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="none">No profile selected</SelectItem>
+            <SelectItem value="none">No profile</SelectItem>
             {profiles.map((profile) => (
               <SelectItem key={profile.id} value={profile.id}>
                 <div className="flex items-center gap-2">
-                  <span>{profile.name}</span>
-                  <Badge variant="outline" className="text-xs">{profile.profileType}</Badge>
+                  <span className="truncate">{profile.name}</span>
+                  <Badge variant="outline" className="text-xs hidden sm:inline-flex">{profile.profileType}</Badge>
                 </div>
               </SelectItem>
             ))}
@@ -110,45 +107,29 @@ export function ContextSelector({
       </div>
 
       {/* DNA Selector */}
-      <div className="flex items-center gap-2">
-        <Dna className="w-4 h-4 text-muted-foreground" />
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        <Dna className="w-4 h-4 text-muted-foreground hidden sm:block" />
         <Select
           value={selectedDNAId || 'none'}
           onValueChange={(v) => onDNAChange(v === 'none' ? null : v)}
           disabled={disabled || dnaLoading}
         >
-          <SelectTrigger className="w-[200px] h-9">
-            <SelectValue placeholder="Select Content DNA..." />
+          <SelectTrigger className="w-[140px] sm:w-[180px] h-8 sm:h-9 text-xs sm:text-sm">
+            <SelectValue placeholder="DNA..." />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="none">No Content DNA</SelectItem>
+            <SelectItem value="none">No DNA</SelectItem>
             {dnaOptions.map((dna) => (
               <SelectItem key={dna.id} value={dna.id}>
                 <div className="flex items-center gap-2">
-                  <span>{dna.profile_name || 'Tenant-level DNA'}</span>
-                  <Badge variant="secondary" className="text-xs">{dna.sample_count} samples</Badge>
+                  <span className="truncate">{dna.profile_name || 'Tenant DNA'}</span>
+                  <Badge variant="secondary" className="text-xs hidden sm:inline-flex">{dna.sample_count}</Badge>
                 </div>
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
-
-      {/* Status badges */}
-      {(selectedProfile || selectedDNA) && (
-        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          {selectedProfile && (
-            <Badge variant="secondary" className="text-xs">
-              {selectedProfile.name}
-            </Badge>
-          )}
-          {selectedDNA && (
-            <Badge variant="outline" className="text-xs">
-              DNA Active
-            </Badge>
-          )}
-        </div>
-      )}
     </div>
   );
 }

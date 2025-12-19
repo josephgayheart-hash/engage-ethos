@@ -118,9 +118,9 @@ export function ChatInterface({
             </div>
             
             {/* Suggested prompts */}
-            <div className="max-w-xl mx-auto">
+            <div className="max-w-xl mx-auto px-2">
               <p className="text-xs text-muted-foreground mb-2 text-center">Try asking:</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-2">
                 {suggestedPrompts.map((prompt, i) => {
                   const Icon = prompt.icon;
                   return (
@@ -131,9 +131,9 @@ export function ChatInterface({
                     >
                       <div className="flex items-start gap-2">
                         <Icon className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                        <div>
+                        <div className="flex-1 min-w-0">
                           <Badge variant="outline" className="text-xs mb-1">{prompt.category}</Badge>
-                          <p className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">
+                          <p className="text-xs text-muted-foreground group-hover:text-foreground transition-colors line-clamp-2">
                             {prompt.text}
                           </p>
                         </div>
@@ -212,31 +212,31 @@ export function ChatInterface({
       </ScrollArea>
 
       {/* Input Area */}
-      <div className="border-t p-4">
+      <div className="border-t p-3 sm:p-4">
         <div className="flex gap-2">
           <Textarea
             ref={textareaRef}
             value={input}
             onChange={(e) => onInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask for help creating, reviewing, or strategizing your communications..."
-            className="min-h-[60px] max-h-[120px] resize-none"
+            placeholder="Ask about creating, reviewing, or strategizing..."
+            className="min-h-[50px] sm:min-h-[60px] max-h-[100px] sm:max-h-[120px] resize-none text-sm"
             disabled={isLoading}
           />
           <Button 
             onClick={onSend} 
             disabled={!input.trim() || isLoading}
             size="icon"
-            className="h-[60px] w-[60px] shrink-0"
+            className="h-[50px] w-[50px] sm:h-[60px] sm:w-[60px] shrink-0"
           >
             {isLoading ? (
-              <RefreshCw className="w-5 h-5 animate-spin" />
+              <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
             ) : (
-              <Send className="w-5 h-5" />
+              <Send className="w-4 h-4 sm:w-5 sm:h-5" />
             )}
           </Button>
         </div>
-        <p className="text-xs text-muted-foreground mt-2 text-center">
+        <p className="text-xs text-muted-foreground mt-2 text-center hidden sm:block">
           Responses are shaped by your institutional voice and Content DNA settings.
         </p>
       </div>
