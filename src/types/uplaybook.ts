@@ -35,7 +35,10 @@ export type AudienceType =
   | 'employee'
   | 'alumni'
   | 'parents'
-  | 'donors';
+  | 'donors'
+  | 'policy-makers'
+  | 'community-partners'
+  | 'higher-ed-leaders';
 
 export type CohortContext = 
   // Student cohorts
@@ -85,7 +88,21 @@ export type CommunicationMoment =
   | 'wellness-initiative'
   | 'recognition'
   | 'budget-cycle'
-  | 'strategic-planning';
+  | 'strategic-planning'
+  // Policy Maker moments
+  | 'advocacy-support'
+  | 'funding-advocacy'
+  | 'legislative-event'
+  // Community Partner moments
+  | 'partnership-initiation'
+  | 'partnership-sustain'
+  | 'community-event'
+  | 'success-story-share'
+  // Higher Ed Leader moments
+  | 'research-collaboration'
+  | 'programming-collaboration'
+  | 'best-practices-share'
+  | 'peer-reputation';
 
 export type Channel = 
   | 'email' 
