@@ -49,11 +49,23 @@ const handler = async (req: Request): Promise<Response> => {
         <meta name="supported-color-schemes" content="light only">
         <style>
           :root { color-scheme: light only; }
+          * { -webkit-text-fill-color: inherit !important; }
+          u + .body { background-color: #f8fafc !important; }
           @media (prefers-color-scheme: dark) {
+            .body-wrapper { background-color: #f8fafc !important; }
+            .main-card { background-color: #ffffff !important; }
+            .logo-area { background-color: #ffffff !important; }
+            .credentials-box { background-color: #f1f5f9 !important; }
+            .credentials-field { background-color: #ffffff !important; color: #1e293b !important; }
+            .content-area { background-color: #ffffff !important; }
+            .notice-box { background-color: #fef3c7 !important; }
+            .footer-area { background-color: #f8fafc !important; }
             body, table, td, div, p, a, span, h1, h2, h3 { 
-              background-color: #ffffff !important; 
-              color: #1e293b !important; 
+              -webkit-text-fill-color: inherit !important;
             }
+            .dark-text { color: #1e293b !important; -webkit-text-fill-color: #1e293b !important; }
+            .muted-text { color: #475569 !important; -webkit-text-fill-color: #475569 !important; }
+            .white-text { color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; }
           }
         </style>
       </head>
