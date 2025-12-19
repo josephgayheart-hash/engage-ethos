@@ -123,6 +123,14 @@ export function CadenceSelector({
   const estimatedTouchpoints = calculateEstimatedTouchpoints(journeyWeeks, cadence, escalation);
   const intensity = getIntensityLevel(cadence);
 
+  // This is an estimate — generation may vary slightly.
+  const estimateVariance = 0.15;
+  const estimatedMinTouchpoints = Math.max(1, Math.round(estimatedTouchpoints * (1 - estimateVariance)));
+  const estimatedMaxTouchpoints = Math.max(
+    estimatedMinTouchpoints,
+    Math.round(estimatedTouchpoints * (1 + estimateVariance))
+  );
+
   useEffect(() => {
     onCadenceChange(cadence);
   }, [cadence, onCadenceChange]);
@@ -229,10 +237,10 @@ export function CadenceSelector({
       {/* Estimated Touchpoints */}
       <div className="pt-3 border-t border-border">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">Estimated Touchpoints</span>
+          <span className="text-xs text-muted-foreground">Estimated touchpoints (approx.)</span>
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-primary">{estimatedTouchpoints}</span>
-            <span className="text-xs text-muted-foreground">over {journeyWeeks} weeks</span>
+            <span className="text-lg font-bold text-primary">~{estimatedTouchpoints}</span>
+            <span className="text-xs text-muted-foreground">({estimatedMinTouchpoints}–{estimatedMaxTouchpoints}) over {journeyWeeks} weeks</span>
           </div>
         </div>
         <div className="mt-2 h-2 bg-muted rounded-full overflow-hidden">
