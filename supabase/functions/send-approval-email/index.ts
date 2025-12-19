@@ -79,10 +79,14 @@ const handler = async (req: Request): Promise<Response> => {
               <table width="100%" max-width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff !important; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); overflow: hidden;" bgcolor="#ffffff">
                 <!-- Logo Header with solid white background -->
                 <tr>
-                  <td style="background-color: #ffffff !important; padding: 32px 40px 16px 40px; text-align: center;" bgcolor="#ffffff">
-                    <div style="background-color: #ffffff !important; padding: 16px; border-radius: 12px; display: inline-block;" bgcolor="#ffffff">
-                      <img src="https://uplaybook.ai/uplaybook-logo.png" alt="UPlaybook.AI" style="height: 60px; width: auto; display: block;" />
-                    </div>
+                  <td style="background-color: #ffffff !important; padding: 32px 40px 16px 40px; text-align: center; -webkit-background-color: #ffffff !important;" bgcolor="#ffffff">
+                    <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto; background-color: #ffffff !important;" bgcolor="#ffffff">
+                      <tr>
+                        <td style="background-color: #ffffff !important; padding: 20px 24px; border-radius: 12px; border: 1px solid #e2e8f0;" bgcolor="#ffffff">
+                          <img src="https://uplaybook.ai/uplaybook-logo.png" alt="UPlaybook.AI" style="height: 60px; width: auto; display: block; background-color: #ffffff !important;" />
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
                 
@@ -90,8 +94,8 @@ const handler = async (req: Request): Promise<Response> => {
                 <tr>
                   <td style="background-color: #059669 !important; padding: 32px 40px; text-align: center;" bgcolor="#059669">
                     <div style="font-size: 48px; margin-bottom: 12px; background-color: #059669 !important;" bgcolor="#059669">🎉</div>
-                    <h1 style="margin: 0; color: #ffffff !important; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; background-color: #059669 !important;" bgcolor="#059669">You're In!</h1>
-                    <p style="margin: 8px 0 0 0; color: #d1fae5 !important; font-size: 16px; background-color: #059669 !important;" bgcolor="#059669">Welcome to the UPlaybook.AI community</p>
+                    <h1 style="margin: 0; color: #ffffff !important; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; background-color: #059669 !important; -webkit-text-fill-color: #ffffff !important;" bgcolor="#059669">You're In!</h1>
+                    <p style="margin: 8px 0 0 0; color: #d1fae5 !important; font-size: 16px; font-weight: 700; background-color: #059669 !important; -webkit-text-fill-color: #d1fae5 !important;" bgcolor="#059669">Welcome to the UPlaybook.AI community</p>
                   </td>
                 </tr>
                 
