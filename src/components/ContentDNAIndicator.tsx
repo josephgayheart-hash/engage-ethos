@@ -99,6 +99,8 @@ export function ContentDNAIndicator({
 
   // Compact mode - just show a badge
   if (compact) {
+    const displayName = tenant?.institution_name;
+    
     return (
       <Tooltip>
         <TooltipTrigger asChild>
@@ -114,13 +116,20 @@ export function ContentDNAIndicator({
             onClick={() => hasContentDNA && onToggle(!enabled)}
           >
             <Dna className="w-3 h-3 mr-1" />
-            {enabled && hasContentDNA ? "DNA Active" : "DNA Off"}
+            {enabled && hasContentDNA 
+              ? displayName 
+                ? `${displayName} DNA` 
+                : "DNA Active" 
+              : "DNA Off"
+            }
           </Badge>
         </TooltipTrigger>
         <TooltipContent side="bottom" className="max-w-xs">
           <p className="text-xs">
             {enabled && hasContentDNA 
-              ? "Your institution's Content DNA is being used to match your brand voice." 
+              ? displayName
+                ? `${displayName}'s Content DNA is being used to match your brand voice.`
+                : "Your institution's Content DNA is being used to match your brand voice."
               : "Click to enable Content DNA for on-brand messaging."
             }
           </p>
@@ -164,7 +173,9 @@ export function ContentDNAIndicator({
               </div>
               <p className="text-xs text-muted-foreground truncate">
                 {enabled && hasContentDNA 
-                  ? "Your brand voice is being applied" 
+                  ? tenant?.institution_name 
+                    ? `${tenant.institution_name} brand voice applied`
+                    : "Your brand voice is being applied"
                   : "Toggle to use your brand voice"
                 }
               </p>
@@ -275,10 +286,19 @@ export function ContentDNAIndicator({
  * Inline affirmation badge - shows when Content DNA is actively being used
  * Use this inside generated content areas to confirm brand voice is applied
  */
-export function ContentDNAActiveBadge({ className }: { className?: string }) {
+export function ContentDNAActiveBadge({ 
+  className,
+  institutionName 
+}: { 
+  className?: string;
+  institutionName?: string;
+}) {
   const { contentDNA } = useContentDNAForGeneration();
+  const { tenant } = useAuth();
   
   if (!contentDNA?.voiceAnalysis) return null;
+
+  const displayName = institutionName || tenant?.institution_name;
 
   return (
     <Tooltip>
@@ -291,12 +311,17 @@ export function ContentDNAActiveBadge({ className }: { className?: string }) {
           )}
         >
           <Dna className="w-2.5 h-2.5" />
-          <span>Brand Voice Applied</span>
+          <span>
+            {displayName ? `${displayName} Voice` : "Brand Voice Applied"}
+          </span>
         </Badge>
       </TooltipTrigger>
       <TooltipContent side="top" className="max-w-xs">
         <p className="text-xs">
-          This content was generated using your institution's Content DNA profile to match your brand voice and style.
+          {displayName 
+            ? `This content was generated using ${displayName}'s Content DNA profile to match your brand voice and style.`
+            : "This content was generated using your institution's Content DNA profile to match your brand voice and style."
+          }
         </p>
       </TooltipContent>
     </Tooltip>

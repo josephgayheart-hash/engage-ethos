@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Building2, 
   Settings, 
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useInstitutionalProfiles, type InstitutionalProfile } from "@/hooks/useInstitutionalProfiles";
+import { useAuth } from "@/contexts/AuthContext";
 import type { InstitutionalConfig } from "@/types/uplaybook";
 
 interface InstitutionalProfileSelectorProps {
@@ -31,6 +33,7 @@ export function InstitutionalProfileSelector({
   compact = false 
 }: InstitutionalProfileSelectorProps) {
   const { profiles, getProfile } = useInstitutionalProfiles();
+  const { tenant } = useAuth();
   
   const handleChange = (value: string) => {
     if (value === 'none') {
@@ -49,6 +52,15 @@ export function InstitutionalProfileSelector({
     if (profile.config.mascot) parts.push(profile.config.mascot);
     return parts.length > 0 ? parts.join(' • ') : 'Custom configuration';
   };
+
+  // Get initials for avatar fallback
+  const getInitials = (name: string) => {
+    return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  // Use tenant logo or profile-specific info
+  const logoUrl = tenant?.logo_url;
+  const institutionName = selectedProfile?.config?.institutionName || tenant?.institution_name;
 
   if (profiles.length === 0) {
     return (
@@ -108,13 +120,32 @@ export function InstitutionalProfileSelector({
       </Select>
 
       {selectedProfile && !compact && (
-        <div className="flex items-center gap-2 mt-2">
-          <Sparkles className="w-3 h-3 text-secondary" />
-          <p className="text-xs text-muted-foreground">
-            Generating with <span className="font-medium text-foreground">{selectedProfile.name}</span> settings
-          </p>
+        <div className="flex items-center gap-3 mt-3 p-3 rounded-lg bg-secondary/10 border border-secondary/20">
+          {/* Institution Logo/Avatar */}
+          <Avatar className="h-10 w-10 border-2 border-secondary/30">
+            {logoUrl ? (
+              <AvatarImage src={logoUrl} alt={institutionName || 'Institution'} />
+            ) : null}
+            <AvatarFallback className="bg-secondary/20 text-secondary font-semibold text-sm">
+              {institutionName ? getInitials(institutionName) : <Building2 className="w-4 h-4" />}
+            </AvatarFallback>
+          </Avatar>
+          
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-3 h-3 text-secondary shrink-0" />
+              <p className="text-sm font-medium text-foreground truncate">
+                {selectedProfile.name}
+              </p>
+            </div>
+            <p className="text-xs text-muted-foreground truncate">
+              {institutionName || 'Custom configuration'}
+              {selectedProfile.config.mascot && ` • ${selectedProfile.config.mascot}`}
+            </p>
+          </div>
+          
           {selectedProfile.config.mascot && (
-            <Badge variant="outline" className="text-xs h-5">
+            <Badge variant="outline" className="text-xs h-5 shrink-0 hidden sm:flex">
               {selectedProfile.config.mascot}
             </Badge>
           )}
