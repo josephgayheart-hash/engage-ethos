@@ -193,7 +193,9 @@ const TemplateDetailPage = () => {
         editMode: 'remix',
         journeyData: journeyData,
         metadata: journeyWithMetadata?._metadata,
-        originalTitle: template.title
+        originalTitle: template.title,
+        originalId: template.id,
+        source: 'university'
       } 
     });
   };

@@ -105,6 +105,7 @@ const StrategyPage = () => {
   // Edit/Remix mode state
   const [editMode, setEditMode] = useState<'new' | 'edit' | 'remix'>('new');
   const [editingJourneyId, setEditingJourneyId] = useState<string | null>(null);
+  const [remixedFrom, setRemixedFrom] = useState<{ title: string; id?: string; source: 'personal' | 'university' } | null>(null);
 
   // Load journey data from navigation state (for edit/remix)
   useEffect(() => {
@@ -114,6 +115,8 @@ const StrategyPage = () => {
       journeyData?: any;
       metadata?: any;
       originalTitle?: string;
+      originalId?: string;
+      source?: 'personal' | 'university';
     } | null;
 
     if (state?.journeyData) {
@@ -125,6 +128,15 @@ const StrategyPage = () => {
       
       if (state.editMode === 'edit' && state.journeyId) {
         setEditingJourneyId(state.journeyId);
+      }
+
+      // Track remix source
+      if (state.editMode === 'remix' && state.originalTitle) {
+        setRemixedFrom({
+          title: state.originalTitle,
+          id: state.originalId,
+          source: state.source || 'personal',
+        });
       }
 
       // Restore context from metadata if available
@@ -345,11 +357,14 @@ const StrategyPage = () => {
       tone: context.tone,
       approved: false,
       mode: 'generated',
+      // Track remix source if this is a remix
+      remixedFrom: remixedFrom || undefined,
     });
 
     // Reset remix mode after saving
     if (editMode === 'remix') {
       setEditMode('new');
+      setRemixedFrom(null);
     }
 
     return savedMessage.id;

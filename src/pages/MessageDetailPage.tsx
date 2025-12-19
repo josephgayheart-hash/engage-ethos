@@ -6,8 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
+import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useJourneyExport } from "@/hooks/useJourneyExport";
 import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import { JourneyViewer, isJourneyContent, parseJourneyContent } from "@/components/library/JourneyViewer";
@@ -16,7 +19,6 @@ import {
   ArrowLeft, 
   Copy, 
   Trash2, 
-  CheckCircle, 
   History, 
   Map,
   Calendar,
@@ -30,7 +32,10 @@ import {
   Edit,
   GitBranch,
   FileDown,
-  Printer
+  Printer,
+  Send,
+  Check,
+  Pencil
 } from "lucide-react";
 import {
   Breadcrumb,
@@ -51,6 +56,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const channelIcons = {
   'email': Mail,
@@ -64,7 +77,11 @@ const MessageDetailPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { messages, deleteMessage, updateMessage } = useMessageLibrary();
+  const { addTemplate } = useSharedLibrary();
   const [copied, setCopied] = useState(false);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editedTitle, setEditedTitle] = useState("");
+  const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const journeyContentRef = useRef<HTMLDivElement>(null);
 
   const message = messages.find(m => m.id === id);
@@ -103,27 +120,62 @@ const MessageDetailPage = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleApprove = () => {
-    updateMessage(message.id, { approved: true });
-    toast({ title: "Message approved" });
-  };
-
   const handleDelete = () => {
     deleteMessage(message.id);
     toast({ title: "Message deleted" });
     navigate("/library");
   };
 
-  const handleEditJourney = () => {
-    // Navigate to strategy page with journey data for editing
+  const handleStartEditTitle = () => {
+    setEditedTitle(message.title);
+    setIsEditingTitle(true);
+  };
+
+  const handleSaveTitle = () => {
+    if (editedTitle.trim() && editedTitle !== message.title) {
+      updateMessage(message.id, { title: editedTitle.trim() });
+      toast({ title: "Title updated" });
+    }
+    setIsEditingTitle(false);
+  };
+
+  const handleSubmitToLibrary = () => {
+    // Add to shared library as submitted
     const journeyWithMetadata = journeyData as (typeof journeyData & { _metadata?: any });
-    navigate('/strategy', { 
-      state: { 
-        editMode: 'edit',
-        journeyId: message.id,
-        journeyData: journeyData,
-        metadata: journeyWithMetadata?._metadata
-      } 
+    
+    addTemplate({
+      title: message.title,
+      intentStatement: `Strategy journey for ${message.audience || 'students'}`,
+      content: message.content,
+      status: 'submitted',
+      version: '1.0',
+      owner: 'Current User',
+      maintainer: 'Current User',
+      placeholders: [],
+      requiredFields: {
+        audience: message.audience ? [message.audience] : [],
+        moment: message.moment ? [message.moment] : [],
+        channel: message.channels || (message.channel ? [message.channel] : []),
+      },
+      useCases: {
+        whenToUse: journeyWithMetadata?._metadata?.phases?.map((p: any) => p.focus) || [],
+        whenNotToUse: [],
+      },
+      ethicalGuardrails: ['Review all touchpoints before publishing'],
+      institutionalProfileId: message.institutionalProfileId,
+      institutionalProfileName: message.institutionalProfileName,
+    });
+
+    // Mark as submitted in personal library
+    updateMessage(message.id, { 
+      submittedToLibrary: true, 
+      submittedAt: new Date().toISOString() 
+    });
+
+    setShowSubmitDialog(false);
+    toast({ 
+      title: "Submitted to University Library",
+      description: "Your journey has been sent for approval.",
     });
   };
 
@@ -135,7 +187,9 @@ const MessageDetailPage = () => {
         editMode: 'remix',
         journeyData: journeyData,
         metadata: journeyWithMetadata?._metadata,
-        originalTitle: message.title
+        originalTitle: message.title,
+        originalId: message.id,
+        source: 'personal'
       } 
     });
   };
@@ -182,19 +236,43 @@ const MessageDetailPage = () => {
               <div>
                 <div className="flex items-center gap-3 mb-2">
                   <ChannelIcon className="w-5 h-5 text-muted-foreground" />
-                  <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground">
-                    {message.title}
-                  </h1>
+                  {isEditingTitle ? (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        value={editedTitle}
+                        onChange={(e) => setEditedTitle(e.target.value)}
+                        className="text-xl font-bold h-10"
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleSaveTitle();
+                          if (e.key === 'Escape') setIsEditingTitle(false);
+                        }}
+                      />
+                      <Button size="icon" variant="ghost" onClick={handleSaveTitle}>
+                        <Check className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground">
+                      {message.title}
+                    </h1>
+                  )}
                 </div>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
                   <div className="flex items-center gap-1">
                     <Calendar className="w-4 h-4" />
                     Created {new Date(message.createdAt).toLocaleDateString()}
                   </div>
-                  {message.approved && (
-                    <Badge variant="default" className="bg-green-600">
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                      Approved
+                  {message.submittedToLibrary && (
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                      <Send className="w-3 h-3 mr-1" />
+                      Submitted to Library
+                    </Badge>
+                  )}
+                  {message.remixedFrom && (
+                    <Badge variant="outline" className="text-muted-foreground">
+                      <GitBranch className="w-3 h-3 mr-1" />
+                      Remixed from: {message.remixedFrom.title}
                     </Badge>
                   )}
                 </div>
@@ -203,9 +281,9 @@ const MessageDetailPage = () => {
             <div className="flex items-center gap-2 md:shrink-0 flex-wrap">
               {isJourney && journeyData && (
                 <>
-                  <Button onClick={handleEditJourney} variant="outline" className="flex items-center gap-2">
-                    <Edit className="w-4 h-4" />
-                    Edit
+                  <Button onClick={handleStartEditTitle} variant="outline" className="flex items-center gap-2">
+                    <Pencil className="w-4 h-4" />
+                    Rename
                   </Button>
                   <Button onClick={handleRemixJourney} variant="outline" className="flex items-center gap-2">
                     <GitBranch className="w-4 h-4" />
@@ -225,10 +303,10 @@ const MessageDetailPage = () => {
                 <Copy className="w-4 h-4" />
                 {copied ? "Copied!" : "Copy"}
               </Button>
-              {!message.approved && (
-                <Button onClick={handleApprove} className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4" />
-                  Approve
+              {!message.submittedToLibrary && isJourney && (
+                <Button onClick={() => setShowSubmitDialog(true)} className="flex items-center gap-2">
+                  <Send className="w-4 h-4" />
+                  Send to University Library
                 </Button>
               )}
               <AlertDialog>
@@ -252,6 +330,32 @@ const MessageDetailPage = () => {
               </AlertDialog>
             </div>
           </div>
+
+          {/* Submit to Library Dialog */}
+          <Dialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Send to University Library</DialogTitle>
+                <DialogDescription>
+                  This will submit your journey "{message.title}" for approval. Once approved, it will be available to all users in the University Library.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="py-4">
+                <p className="text-sm text-muted-foreground">
+                  The journey will be reviewed by library administrators before being published.
+                </p>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowSubmitDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSubmitToLibrary} className="flex items-center gap-2">
+                  <Send className="w-4 h-4" />
+                  Submit for Approval
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
           {/* Content Tabs */}
           <Tabs defaultValue="content" className="space-y-6">
