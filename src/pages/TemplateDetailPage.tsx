@@ -157,6 +157,13 @@ const TemplateDetailPage = () => {
       .every(p => placeholderValues[p.key]?.trim());
   }, [template, placeholderValues]);
 
+  // Initialize edited content when template loads - MUST be before early return
+  useEffect(() => {
+    if (template) {
+      setEditedContent(customizedContent);
+    }
+  }, [template, customizedContent]);
+
   if (!template) {
     return (
       <div className="min-h-screen bg-background">
@@ -237,13 +244,6 @@ const TemplateDetailPage = () => {
   const updatePlaceholder = (key: string, value: string) => {
     setPlaceholderValues(prev => ({ ...prev, [key]: value }));
   };
-
-  // Initialize edited content when template loads
-  useEffect(() => {
-    if (template) {
-      setEditedContent(customizedContent);
-    }
-  }, [template, customizedContent]);
 
   const handleStartEdit = () => {
     setEditedContent(customizedContent);
