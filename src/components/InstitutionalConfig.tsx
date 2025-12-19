@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { extractTextFromFile, getAcceptString } from "@/lib/documentParser";
 import { 
   X, 
   Plus, 
@@ -669,7 +670,7 @@ export function InstitutionalConfig({ config, onChange }: InstitutionalConfigPro
                 <input
                   type="file"
                   id="voice-file-upload"
-                  accept=".txt,.doc,.docx,.pdf"
+                  accept={getAcceptString()}
                   multiple
                   className="hidden"
                   onChange={async (e) => {
@@ -678,43 +679,20 @@ export function InstitutionalConfig({ config, onChange }: InstitutionalConfigPro
                     
                     for (const file of Array.from(files)) {
                       try {
-                        let text = '';
-                        
-                        if (file.name.endsWith('.txt')) {
-                          text = await file.text();
-                        } else if (file.name.endsWith('.docx') || file.name.endsWith('.doc')) {
-                          // Read as text for basic extraction
-                          const arrayBuffer = await file.arrayBuffer();
-                          const decoder = new TextDecoder('utf-8');
-                          const rawText = decoder.decode(arrayBuffer);
-                          // Extract readable text from XML content
-                          const textMatches = rawText.match(/<w:t[^>]*>([^<]+)<\/w:t>/g);
-                          if (textMatches) {
-                            text = textMatches
-                              .map(match => match.replace(/<[^>]+>/g, ''))
-                              .join(' ')
-                              .replace(/\s+/g, ' ')
-                              .trim();
-                          } else {
-                            // Fallback to plain text extraction
-                            text = rawText.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-                          }
-                        } else if (file.name.endsWith('.pdf')) {
-                          text = `[PDF file: ${file.name}] - PDF parsing requires server-side processing. Please paste the text content directly or use .txt format.`;
-                          toast({
-                            title: "PDF not fully supported",
-                            description: "Please copy/paste the PDF content or convert to .txt format for best results.",
-                            variant: "destructive",
-                          });
-                          continue;
-                        }
+                        const { text, success, message } = await extractTextFromFile(file);
 
-                        if (text && text.length > 50) {
+                        if (success && text && text.length > 50) {
                           const currentSamples = config.brandVoiceSamples || [];
                           onChange({ ...config, brandVoiceSamples: [...currentSamples, text] });
                           toast({
                             title: "File loaded",
                             description: `"${file.name}" has been added to Content DNA samples.`,
+                          });
+                        } else if (!success) {
+                          toast({
+                            title: "Could not extract content",
+                            description: message || `Could not read "${file.name}". Try a different format.`,
+                            variant: "destructive",
                           });
                         } else {
                           toast({
@@ -739,7 +717,7 @@ export function InstitutionalConfig({ config, onChange }: InstitutionalConfigPro
                 <label htmlFor="voice-file-upload" className="cursor-pointer">
                   <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
                   <p className="text-sm font-medium">Click to upload files</p>
-                  <p className="text-xs text-muted-foreground">.txt, .docx supported</p>
+                  <p className="text-xs text-muted-foreground">.txt, .docx, .doc, .pdf supported</p>
                 </label>
               </div>
             </div>

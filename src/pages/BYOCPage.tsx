@@ -18,6 +18,7 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
 import { evaluateMessage } from "@/lib/evaluateMessage";
+import { extractTextFromFile, getAcceptString } from "@/lib/documentParser";
 import { 
   ArrowLeft, 
   ArrowRight, 
@@ -62,40 +63,24 @@ const BYOCPage = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const allowedTypes = [
-      'text/plain',
-      'application/pdf',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/msword'
-    ];
-
-    if (!allowedTypes.includes(file.type) && !file.name.endsWith('.txt')) {
-      toast({
-        variant: "destructive",
-        title: "Invalid File Type",
-        description: "Please upload a .txt, .docx, or .pdf file.",
-      });
-      return;
-    }
-
     setFileName(file.name);
 
-    // For text files, read directly
-    if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
-      const text = await file.text();
+    const { text, success, message } = await extractTextFromFile(file);
+    
+    if (success && text) {
       setMessageContent(text);
       if (!messageTitle) {
         setMessageTitle(file.name.replace(/\.[^/.]+$/, ""));
       }
       toast({
         title: "File Loaded",
-        description: `Content from "${file.name}" has been loaded.`,
+        description: message || `Content from "${file.name}" has been loaded.`,
       });
     } else {
-      // For PDF/DOCX, inform user to paste content manually for now
       toast({
-        title: "File Selected",
-        description: "For PDF/DOCX files, please copy and paste the content directly. Full parsing coming soon!",
+        variant: "destructive",
+        title: "Could not extract content",
+        description: message || "Please copy and paste the content directly.",
       });
     }
   };
@@ -257,7 +242,7 @@ const BYOCPage = () => {
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept=".txt,.pdf,.docx,.doc"
+                    accept={getAcceptString()}
                     onChange={handleFileUpload}
                     className="hidden"
                   />
