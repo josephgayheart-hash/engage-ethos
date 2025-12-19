@@ -29,14 +29,22 @@ import {
   Globe,
   Layout,
   FileText,
-  Edit,
   GitBranch,
   FileDown,
   Printer,
   Send,
   Check,
-  Pencil
+  Pencil,
+  MoreHorizontal,
+  X
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -45,17 +53,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import {
   Dialog,
   DialogContent,
@@ -225,111 +222,130 @@ const MessageDetailPage = () => {
             </BreadcrumbList>
           </Breadcrumb>
 
-          {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8">
-            <div className="flex items-start gap-4">
-              <Link to="/library">
-                <Button variant="ghost" size="icon" className="shrink-0">
-                  <ArrowLeft className="w-5 h-5" />
-                </Button>
-              </Link>
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <ChannelIcon className="w-5 h-5 text-muted-foreground" />
+          {/* Header Card */}
+          <Card className="mb-6">
+            <CardContent className="pt-6">
+              {/* Top row: Back button + Title */}
+              <div className="flex items-start gap-4 mb-4">
+                <Link to="/library">
+                  <Button variant="ghost" size="icon" className="shrink-0 -ml-2">
+                    <ArrowLeft className="w-5 h-5" />
+                  </Button>
+                </Link>
+                <div className="flex-1 min-w-0">
                   {isEditingTitle ? (
                     <div className="flex items-center gap-2">
                       <Input
                         value={editedTitle}
                         onChange={(e) => setEditedTitle(e.target.value)}
-                        className="text-xl font-bold h-10"
+                        className="text-xl font-bold h-10 flex-1"
                         autoFocus
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') handleSaveTitle();
                           if (e.key === 'Escape') setIsEditingTitle(false);
                         }}
                       />
-                      <Button size="icon" variant="ghost" onClick={handleSaveTitle}>
+                      <Button size="icon" variant="default" onClick={handleSaveTitle}>
                         <Check className="w-4 h-4" />
+                      </Button>
+                      <Button size="icon" variant="ghost" onClick={() => setIsEditingTitle(false)}>
+                        <X className="w-4 h-4" />
                       </Button>
                     </div>
                   ) : (
-                    <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground">
-                      {message.title}
-                    </h1>
-                  )}
-                </div>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-4 h-4" />
-                    Created {new Date(message.createdAt).toLocaleDateString()}
-                  </div>
-                  {message.submittedToLibrary && (
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                      <Send className="w-3 h-3 mr-1" />
-                      Submitted to Library
-                    </Badge>
-                  )}
-                  {message.remixedFrom && (
-                    <Badge variant="outline" className="text-muted-foreground">
-                      <GitBranch className="w-3 h-3 mr-1" />
-                      Remixed from: {message.remixedFrom.title}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <ChannelIcon className="w-5 h-5 text-muted-foreground shrink-0" />
+                      <h1 className="font-serif text-xl md:text-2xl font-bold text-foreground truncate">
+                        {message.title}
+                      </h1>
+                      <Button 
+                        size="icon" 
+                        variant="ghost" 
+                        className="shrink-0 h-8 w-8"
+                        onClick={handleStartEditTitle}
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>
-            </div>
-            <div className="flex items-center gap-2 md:shrink-0 flex-wrap">
-              {isJourney && journeyData && (
-                <>
-                  <Button onClick={handleStartEditTitle} variant="outline" className="flex items-center gap-2">
-                    <Pencil className="w-4 h-4" />
-                    Rename
+
+              {/* Meta info row */}
+              <div className="flex items-center gap-3 text-sm text-muted-foreground mb-5 flex-wrap pl-10">
+                <span className="flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5" />
+                  {new Date(message.createdAt).toLocaleDateString()}
+                </span>
+                {message.submittedToLibrary && (
+                  <Badge variant="secondary" className="bg-blue-50 text-blue-600 border-blue-200">
+                    Submitted
+                  </Badge>
+                )}
+                {message.remixedFrom && (
+                  <Badge variant="outline" className="text-muted-foreground font-normal">
+                    <GitBranch className="w-3 h-3 mr-1" />
+                    From: {message.remixedFrom.title}
+                  </Badge>
+                )}
+              </div>
+
+              {/* Action buttons row */}
+              <div className="flex items-center gap-2 pl-10 flex-wrap">
+                {/* Primary action */}
+                {!message.submittedToLibrary && isJourney && (
+                  <Button onClick={() => setShowSubmitDialog(true)} size="sm">
+                    <Send className="w-4 h-4 mr-2" />
+                    Send to University Library
                   </Button>
-                  <Button onClick={handleRemixJourney} variant="outline" className="flex items-center gap-2">
-                    <GitBranch className="w-4 h-4" />
+                )}
+                
+                {isJourney && journeyData && (
+                  <Button onClick={handleRemixJourney} variant="outline" size="sm">
+                    <GitBranch className="w-4 h-4 mr-2" />
                     Remix
                   </Button>
-                  <Button onClick={exportToPdf} variant="outline" className="flex items-center gap-2" disabled={isExporting}>
-                    <FileDown className="w-4 h-4" />
-                    {isExporting ? "Exporting..." : "Export PDF"}
-                  </Button>
-                  <Button onClick={printJourney} variant="outline" className="flex items-center gap-2">
-                    <Printer className="w-4 h-4" />
-                    Print
-                  </Button>
-                </>
-              )}
-              <Button onClick={handleCopy} variant="outline" className="flex items-center gap-2">
-                <Copy className="w-4 h-4" />
-                {copied ? "Copied!" : "Copy"}
-              </Button>
-              {!message.submittedToLibrary && isJourney && (
-                <Button onClick={() => setShowSubmitDialog(true)} className="flex items-center gap-2">
-                  <Send className="w-4 h-4" />
-                  Send to University Library
+                )}
+
+                <Button onClick={handleCopy} variant="outline" size="sm">
+                  <Copy className="w-4 h-4 mr-2" />
+                  {copied ? "Copied!" : "Copy"}
                 </Button>
-              )}
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive" size="icon">
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Message</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to delete this message? This action cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          </div>
+
+                {/* More actions dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <MoreHorizontal className="w-4 h-4 mr-2" />
+                      More
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {isJourney && journeyData && (
+                      <>
+                        <DropdownMenuItem onClick={exportToPdf} disabled={isExporting}>
+                          <FileDown className="w-4 h-4 mr-2" />
+                          {isExporting ? "Exporting..." : "Export PDF"}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={printJourney}>
+                          <Printer className="w-4 h-4 mr-2" />
+                          Print
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
+                    <DropdownMenuItem 
+                      onClick={handleDelete}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Submit to Library Dialog */}
           <Dialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
