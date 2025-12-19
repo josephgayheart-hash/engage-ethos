@@ -10,6 +10,7 @@ import { StrategyJourneyDisplay } from "@/components/StrategyJourney";
 import { JourneyFlowDiagram } from "@/components/JourneyFlowDiagram";
 import { LibraryNav } from "@/components/LibraryNav";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
+import { ContentDNAIndicator, ContentDNAActiveBadge } from "@/components/ContentDNAIndicator";
 import { CadenceSelector, CadenceFrequency, EscalationPattern } from "@/components/CadenceSelector";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -89,6 +90,7 @@ const StrategyPage = () => {
   const [cadence, setCadence] = useState<CadenceFrequency>('weekly');
   const [escalation, setEscalation] = useState<EscalationPattern>('none');
   const [estimatedTouchpoints, setEstimatedTouchpoints] = useState<number>(12);
+  const [useContentDNA, setUseContentDNA] = useState(true);
 
   // Auto-calculate weeks when dates change
   const handleStartDateChange = (date: Date | undefined) => {
@@ -500,6 +502,13 @@ const StrategyPage = () => {
                 }}
               />
 
+              {/* Content DNA Indicator */}
+              <ContentDNAIndicator
+                enabled={useContentDNA}
+                onToggle={setUseContentDNA}
+                selectedProfileName={selectedProfileName}
+              />
+
               <ContextSelector context={context} onChange={setContext} mode="mapper" />
 
               {/* Channel Selection */}
@@ -708,9 +717,10 @@ const StrategyPage = () => {
               <Card className="bg-primary/5 border-primary/20">
                 <CardContent className="py-4">
                   <div className="flex flex-wrap items-center justify-between gap-4">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <BookMarked className="w-5 h-5 text-primary" />
                       <span className="font-medium">Save this journey</span>
+                      {useContentDNA && <ContentDNAActiveBadge />}
                     </div>
                     <div className="flex gap-2">
                       <Button 
