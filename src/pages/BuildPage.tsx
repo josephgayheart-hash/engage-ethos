@@ -19,6 +19,7 @@ import { AIBadge } from "@/components/ui/ai-indicator";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
+import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 
 import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
 import { cn } from "@/lib/utils";
@@ -104,6 +105,7 @@ const BuildPage = () => {
   const [saveToLibraryChannel, setSaveToLibraryChannel] = useState<Channel | null>(null);
   const [saveToLibraryType, setSaveToLibraryType] = useState<'personal' | 'shared'>('personal');
   const [useContentDNA, setUseContentDNA] = useState(true);
+  const { contentDNA, isLoading: isContentDNALoading } = useContentDNAForGeneration({ profileId: selectedProfileId });
   const resultsRef = useRef<HTMLDivElement>(null);
   const canProcess = context.audience && context.moment && selectedChannels.length > 0;
 
@@ -121,13 +123,32 @@ const BuildPage = () => {
 
   const handleBuild = async () => {
     if (!canProcess) return;
+
+    if (useContentDNA && isContentDNALoading) {
+      toast({
+        title: "Loading Content DNA",
+        description: "Please try again in a moment.",
+      });
+      return;
+    }
     
     setIsProcessing(true);
     setBuilderResult(null);
     
     try {
       const contextWithChannels = { ...context, channel: selectedChannels[0], channels: selectedChannels };
-      const result = await buildMessage(contextWithChannels, institutionalConfig || undefined);
+
+      const configForGeneration = institutionalConfig
+        ? {
+            ...institutionalConfig,
+            // IMPORTANT: Always use the selected profile's Content DNA when enabled (never a cloned/stale voiceAnalysis).
+            voiceAnalysis: useContentDNA
+              ? ((contentDNA?.voiceAnalysis ?? undefined) as any)
+              : undefined,
+          }
+        : undefined;
+
+      const result = await buildMessage(contextWithChannels, configForGeneration);
       setBuilderResult(result);
       
       toast({

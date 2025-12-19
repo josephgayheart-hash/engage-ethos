@@ -24,6 +24,7 @@ import { AIBadge } from "@/components/ui/ai-indicator";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
+import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target, Users, UserCheck, Mail, FileDown, MessageSquare, Globe, Phone, FileText, Search, Megaphone } from "lucide-react";
 import { mapMessages } from "@/lib/evaluateMessage";
@@ -95,6 +96,7 @@ const StrategyPage = () => {
   const [escalation, setEscalation] = useState<EscalationPattern>('none');
   const [estimatedTouchpoints, setEstimatedTouchpoints] = useState<number>(12);
   const [useContentDNA, setUseContentDNA] = useState(true);
+  const { contentDNA, isLoading: isContentDNALoading } = useContentDNAForGeneration({ profileId: selectedProfileId });
   const [saveToLibraryOpen, setSaveToLibraryOpen] = useState(false);
   const [saveToLibraryType, setSaveToLibraryType] = useState<'personal' | 'shared'>('personal');
 
@@ -141,6 +143,14 @@ const StrategyPage = () => {
 
   const handleGenerateStrategy = async () => {
     if (!canProcess) return;
+
+    if (useContentDNA && isContentDNALoading) {
+      toast({
+        title: "Loading Content DNA",
+        description: "Please try again in a moment.",
+      });
+      return;
+    }
     
     setIsProcessing(true);
     setMapperResult(null);
@@ -155,9 +165,20 @@ const StrategyPage = () => {
         escalation,
         estimatedTouchpoints,
       };
+
+      const configForGeneration = institutionalConfig
+        ? {
+            ...institutionalConfig,
+            // IMPORTANT: Always use the selected profile's Content DNA when enabled (never a cloned/stale voiceAnalysis).
+            voiceAnalysis: useContentDNA
+              ? ((contentDNA?.voiceAnalysis ?? undefined) as any)
+              : undefined,
+          }
+        : undefined;
+
       const result = await mapMessages(
         contextWithChannels, 
-        institutionalConfig || undefined, 
+        configForGeneration, 
         journeyWeeks,
         startDate?.toISOString(),
         endDate?.toISOString()
