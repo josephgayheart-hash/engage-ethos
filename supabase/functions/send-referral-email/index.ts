@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,12 +14,20 @@ interface ReferralEmailRequest {
   refereeEmail: string;
   referrerName: string;
   referrerEmail: string;
-  institutionName: string;
+  institutionName: string; // For same: referrer's institution. For other: referee's new institution
+  referrerInstitution: string; // Always the referrer's institution
+  tenantId?: string; // For same_institution, the tenant they'll join
   personalMessage?: string;
-  adminEmail?: string; // For same_institution, notify the admin
 }
 
-const getSameInstitutionAdminHtml = (refereeName: string, refereeEmail: string, referrerName: string, institutionName: string, personalMessage?: string) => `
+// Same institution: Direct invite to join the referrer's team
+const getSameInstitutionHtml = (
+  refereeName: string,
+  referrerName: string,
+  institutionName: string,
+  tenantId: string,
+  personalMessage?: string
+) => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -43,52 +52,53 @@ const getSameInstitutionAdminHtml = (refereeName: string, refereeEmail: string, 
                   </td>
                 </tr>
               </table>
-              <h1 style="margin: 20px 0 0 0; color: #ffffff; font-size: 22px; font-weight: 600;">New Colleague Referral</h1>
+              <h1 style="margin: 20px 0 0 0; color: #ffffff; font-size: 22px; font-weight: 600;">You're Invited to Join!</h1>
             </td>
           </tr>
           
           <!-- Body -->
           <tr>
             <td style="padding: 40px; background-color: #ffffff;">
-              <p style="margin: 0 0 20px 0; color: #1e293b; font-size: 18px; font-weight: 600;">Hello Admin,</p>
+              <p style="margin: 0 0 20px 0; color: #1e293b; font-size: 18px; font-weight: 600;">Hi ${refereeName},</p>
               <p style="margin: 0 0 24px 0; color: #475569; font-size: 16px; line-height: 1.6;">
-                <strong style="color: #1e293b;">${referrerName}</strong> from your team would like to invite a colleague to UPlaybook.AI.
+                Great news! <strong style="color: #1e293b;">${referrerName}</strong> has invited you to join the <strong style="color: #1e293b;">${institutionName}</strong> team on <strong style="color: #1e293b;">UPlaybook.AI</strong>.
               </p>
               
-              <!-- Referral details box -->
-              <div style="background-color: #f1f5f9; border-radius: 8px; padding: 24px; margin: 24px 0;">
-                <h3 style="margin: 0 0 16px 0; color: #1e293b; font-size: 16px; font-weight: 600;">Referral Details</h3>
+              ${personalMessage ? `
+              <div style="background-color: #fef3c7; border-radius: 8px; padding: 20px; margin: 24px 0; border-left: 4px solid #f59e0b;">
+                <p style="margin: 0 0 8px 0; color: #92400e; font-size: 12px; font-weight: 600; text-transform: uppercase;">Message from ${referrerName}:</p>
+                <p style="margin: 0; color: #78350f; font-size: 15px; font-style: italic;">"${personalMessage}"</p>
+              </div>
+              ` : ''}
+              
+              <!-- What you can do box -->
+              <div style="background-color: #eff6ff; border-radius: 8px; padding: 24px; margin: 24px 0; border-left: 4px solid #3b82f6;">
+                <h3 style="margin: 0 0 16px 0; color: #1e40af; font-size: 16px; font-weight: 600;">What is UPlaybook.AI?</h3>
                 <table cellpadding="0" cellspacing="0" width="100%">
                   <tr>
-                    <td style="padding: 8px 0; color: #64748b; font-size: 14px; width: 120px;">Name:</td>
-                    <td style="padding: 8px 0; color: #1e293b; font-size: 14px; font-weight: 500;">${refereeName}</td>
+                    <td style="padding: 8px 0; color: #1e40af; font-size: 15px;">✨ <strong>AI-powered message creation</strong> for emails, texts, and more</td>
                   </tr>
                   <tr>
-                    <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Email:</td>
-                    <td style="padding: 8px 0; color: #1e293b; font-size: 14px; font-weight: 500;">${refereeEmail}</td>
+                    <td style="padding: 8px 0; color: #1e40af; font-size: 15px;">📊 <strong>Content scoring</strong> to improve your communications</td>
                   </tr>
                   <tr>
-                    <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Referred by:</td>
-                    <td style="padding: 8px 0; color: #1e293b; font-size: 14px; font-weight: 500;">${referrerName}</td>
+                    <td style="padding: 8px 0; color: #1e40af; font-size: 15px;">🎓 <strong>Built for higher ed</strong> enrollment & student success teams</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #1e40af; font-size: 15px;">📚 <strong>Shared templates</strong> with your team</td>
                   </tr>
                 </table>
-                ${personalMessage ? `
-                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e2e8f0;">
-                  <p style="margin: 0 0 8px 0; color: #64748b; font-size: 12px; font-weight: 500; text-transform: uppercase;">Personal Message:</p>
-                  <p style="margin: 0; color: #475569; font-size: 14px; font-style: italic;">"${personalMessage}"</p>
-                </div>
-                ` : ''}
               </div>
               
-              <!-- CTA -->
+              <!-- CTA Button -->
               <div style="text-align: center; margin: 32px 0;">
-                <a href="https://uplaybook.ai/admin/users" style="display: inline-block; background-color: #1e293b; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600;">
-                  Review & Invite User →
+                <a href="https://uplaybook.ai/request-access?ref=colleague&tenant=${tenantId}&institution=${encodeURIComponent(institutionName)}" style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600;">
+                  Complete Your Profile →
                 </a>
               </div>
               
               <p style="margin: 24px 0 0 0; color: #64748b; font-size: 14px; line-height: 1.5; text-align: center;">
-                You can invite this user from your Admin Panel → Users section.
+                Click above to set up your account and join your team!
               </p>
             </td>
           </tr>
@@ -107,7 +117,14 @@ const getSameInstitutionAdminHtml = (refereeName: string, refereeEmail: string, 
 </html>
 `;
 
-const getOtherInstitutionHtml = (refereeName: string, referrerName: string, referrerInstitution: string, personalMessage?: string) => `
+// Other institution: Invite to request access for their own institution
+const getOtherInstitutionHtml = (
+  refereeName: string,
+  referrerName: string,
+  referrerInstitution: string,
+  refereeInstitution: string,
+  personalMessage?: string
+) => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -141,7 +158,7 @@ const getOtherInstitutionHtml = (refereeName: string, referrerName: string, refe
             <td style="padding: 40px; background-color: #ffffff;">
               <p style="margin: 0 0 20px 0; color: #1e293b; font-size: 18px; font-weight: 600;">Hi ${refereeName},</p>
               <p style="margin: 0 0 24px 0; color: #475569; font-size: 16px; line-height: 1.6;">
-                Your colleague <strong style="color: #1e293b;">${referrerName}</strong> from <strong style="color: #1e293b;">${referrerInstitution}</strong> thinks you'd love <strong style="color: #1e293b;">UPlaybook.AI</strong> — an AI-powered platform for higher education communications.
+                Your colleague <strong style="color: #1e293b;">${referrerName}</strong> from <strong style="color: #1e293b;">${referrerInstitution}</strong> thinks you and <strong style="color: #1e293b;">${refereeInstitution}</strong> would love <strong style="color: #1e293b;">UPlaybook.AI</strong>!
               </p>
               
               ${personalMessage ? `
@@ -172,13 +189,13 @@ const getOtherInstitutionHtml = (refereeName: string, referrerName: string, refe
               
               <!-- CTA Button -->
               <div style="text-align: center; margin: 32px 0;">
-                <a href="https://uplaybook.ai/request-access" style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600;">
-                  Request Access for Your Institution →
+                <a href="https://uplaybook.ai/request-access?ref=colleague&institution=${encodeURIComponent(refereeInstitution)}" style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600;">
+                  Request Access for ${refereeInstitution} →
                 </a>
               </div>
               
               <p style="margin: 24px 0 0 0; color: #64748b; font-size: 14px; line-height: 1.5; text-align: center;">
-                Fill out a quick form and our team will get you set up!
+                Complete your profile and we'll get your institution set up!
               </p>
             </td>
           </tr>
@@ -206,63 +223,55 @@ const handler = async (req: Request): Promise<Response> => {
     const data: ReferralEmailRequest = await req.json();
     console.log("Processing referral email:", data.referralType, "for", data.refereeEmail);
 
-    const emailsToSend = [];
+    let emailHtml: string;
+    let subject: string;
 
     if (data.referralType === "same_institution") {
-      // Send email to admin
-      if (data.adminEmail) {
-        emailsToSend.push({
-          to: [data.adminEmail],
-          subject: `Colleague Referral Request: ${data.refereeName}`,
-          html: getSameInstitutionAdminHtml(
-            data.refereeName,
-            data.refereeEmail,
-            data.referrerName,
-            data.institutionName,
-            data.personalMessage
-          ),
-        });
-      }
+      // Direct invite to join the same institution/tenant
+      subject = `${data.referrerName} invited you to join ${data.institutionName} on UPlaybook.AI`;
+      emailHtml = getSameInstitutionHtml(
+        data.refereeName,
+        data.referrerName,
+        data.institutionName,
+        data.tenantId || "",
+        data.personalMessage
+      );
     } else {
-      // Send email to the referee (person being referred)
-      emailsToSend.push({
+      // Invite to request access for a different institution
+      subject = `${data.referrerName} thinks you'd love UPlaybook.AI!`;
+      emailHtml = getOtherInstitutionHtml(
+        data.refereeName,
+        data.referrerName,
+        data.referrerInstitution,
+        data.institutionName, // This is the referee's institution for other_institution type
+        data.personalMessage
+      );
+    }
+
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${RESEND_API_KEY}`,
+      },
+      body: JSON.stringify({
+        from: "UPlaybook.AI <noreply@uplaybook.ai>",
         to: [data.refereeEmail],
-        subject: `${data.referrerName} thinks you'd love UPlaybook.AI!`,
-        html: getOtherInstitutionHtml(
-          data.refereeName,
-          data.referrerName,
-          data.institutionName,
-          data.personalMessage
-        ),
-      });
+        subject,
+        html: emailHtml,
+      }),
+    });
+
+    const responseData = await response.json();
+    
+    if (!response.ok) {
+      console.error("Resend API error:", responseData);
+      throw new Error(responseData.message || "Failed to send email");
     }
 
-    const results = [];
-    for (const emailData of emailsToSend) {
-      const response = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${RESEND_API_KEY}`,
-        },
-        body: JSON.stringify({
-          from: "UPlaybook.AI <noreply@uplaybook.ai>",
-          ...emailData,
-        }),
-      });
+    console.log("Referral email sent successfully:", responseData);
 
-      const responseData = await response.json();
-      
-      if (!response.ok) {
-        console.error("Resend API error:", responseData);
-        throw new Error(responseData.message || "Failed to send email");
-      }
-
-      results.push(responseData);
-      console.log("Referral email sent successfully:", responseData);
-    }
-
-    return new Response(JSON.stringify({ success: true, results }), {
+    return new Response(JSON.stringify({ success: true, result: responseData }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });

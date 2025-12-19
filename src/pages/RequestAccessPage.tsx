@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { UserPlus, CheckCircle2, Loader2, ArrowLeft } from 'lucide-react';
+import { UserPlus, CheckCircle2, Loader2, ArrowLeft, Users } from 'lucide-react';
 import uplaybookLogo from '@/assets/uplaybook-logo.png';
 
 const REFERRAL_OPTIONS = [
@@ -23,19 +23,38 @@ const REFERRAL_OPTIONS = [
 ];
 
 export default function RequestAccessPage() {
+  const [searchParams] = useSearchParams();
+  
+  // Check for referral parameters
+  const refSource = searchParams.get('ref');
+  const tenantId = searchParams.get('tenant');
+  const institutionFromUrl = searchParams.get('institution');
+  const isColleagueReferral = refSource === 'colleague';
+  const isSameInstitution = isColleagueReferral && !!tenantId;
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
-    institutionName: '',
+    institutionName: institutionFromUrl || '',
     department: '',
     title: '',
-    referralSource: '',
+    referralSource: isColleagueReferral ? 'colleague' : '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Pre-fill institution name from URL if provided
+  useEffect(() => {
+    if (institutionFromUrl && !formData.institutionName) {
+      setFormData(prev => ({ ...prev, institutionName: institutionFromUrl }));
+    }
+    if (isColleagueReferral && !formData.referralSource) {
+      setFormData(prev => ({ ...prev, referralSource: 'colleague' }));
+    }
+  }, [institutionFromUrl, isColleagueReferral]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -62,6 +81,8 @@ export default function RequestAccessPage() {
           title: formData.title || null,
           referral_source: formData.referralSource || null,
           request_status: 'submitted',
+          // Store tenant_id if this is a same-institution referral
+          tenant_id: isSameInstitution ? tenantId : null,
         });
 
       if (insertError) {
@@ -141,13 +162,32 @@ export default function RequestAccessPage() {
 
         <Card className="border-[hsl(220,13%,88%)]">
           <CardHeader className="text-center">
-            <div className="mx-auto p-3 rounded-full bg-[hsl(173,58%,39%)]/10 w-fit mb-2">
-              <UserPlus className="w-6 h-6 text-[hsl(173,58%,39%)]" />
-            </div>
-            <CardTitle className="font-serif text-[hsl(222,47%,11%)]">Request Access</CardTitle>
-            <CardDescription className="text-[hsl(220,14%,46%)]">
-              Fill out the form below to request access to UPlaybook
-            </CardDescription>
+            {isColleagueReferral ? (
+              <>
+                <div className="mx-auto p-3 rounded-full bg-[hsl(217,91%,60%)]/10 w-fit mb-2">
+                  <Users className="w-6 h-6 text-[hsl(217,91%,60%)]" />
+                </div>
+                <CardTitle className="font-serif text-[hsl(222,47%,11%)]">
+                  {isSameInstitution ? `Join ${institutionFromUrl || 'Your Team'}` : 'Complete Your Profile'}
+                </CardTitle>
+                <CardDescription className="text-[hsl(220,14%,46%)]">
+                  {isSameInstitution 
+                    ? "A colleague invited you to join their team on UPlaybook"
+                    : "A colleague recommended UPlaybook for your institution"
+                  }
+                </CardDescription>
+              </>
+            ) : (
+              <>
+                <div className="mx-auto p-3 rounded-full bg-[hsl(173,58%,39%)]/10 w-fit mb-2">
+                  <UserPlus className="w-6 h-6 text-[hsl(173,58%,39%)]" />
+                </div>
+                <CardTitle className="font-serif text-[hsl(222,47%,11%)]">Request Access</CardTitle>
+                <CardDescription className="text-[hsl(220,14%,46%)]">
+                  Fill out the form below to request access to UPlaybook
+                </CardDescription>
+              </>
+            )}
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -219,7 +259,13 @@ export default function RequestAccessPage() {
                   placeholder="University Name"
                   className="border-[hsl(220,13%,88%)]"
                   required
+                  disabled={isSameInstitution && !!institutionFromUrl}
                 />
+                {isSameInstitution && institutionFromUrl && (
+                  <p className="text-xs text-muted-foreground">
+                    You'll be joining the existing {institutionFromUrl} team
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">

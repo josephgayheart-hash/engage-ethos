@@ -22,6 +22,7 @@ export function ReferColleagueDialog({ open, onOpenChange }: ReferColleagueDialo
   const [formData, setFormData] = useState({
     refereeName: "",
     refereeEmail: "",
+    refereeInstitution: "", // For other_institution referrals
     personalMessage: "",
   });
 
@@ -31,26 +32,6 @@ export function ReferColleagueDialog({ open, onOpenChange }: ReferColleagueDialo
 
     setIsSubmitting(true);
     try {
-      // First, get admin email if same institution
-      let adminEmail: string | undefined;
-      if (referralType === "same_institution") {
-        const { data: admins } = await supabase
-          .from("user_roles")
-          .select("user_id")
-          .eq("tenant_id", profile.tenant_id)
-          .eq("role", "admin")
-          .limit(1);
-
-        if (admins && admins.length > 0) {
-          const { data: adminProfile } = await supabase
-            .from("profiles")
-            .select("email")
-            .eq("id", admins[0].user_id)
-            .single();
-          adminEmail = adminProfile?.email;
-        }
-      }
-
       // Save referral to database
       const { error: insertError } = await supabase.from("referrals").insert({
         referrer_user_id: profile.id,
@@ -59,7 +40,7 @@ export function ReferColleagueDialog({ open, onOpenChange }: ReferColleagueDialo
         referee_name: formData.refereeName,
         referral_type: referralType,
         personal_message: formData.personalMessage || null,
-        status: referralType === "same_institution" ? "notified" : "pending",
+        status: "pending",
       });
 
       if (insertError) throw insertError;
@@ -72,9 +53,14 @@ export function ReferColleagueDialog({ open, onOpenChange }: ReferColleagueDialo
           refereeEmail: formData.refereeEmail,
           referrerName: `${profile.first_name} ${profile.last_name}`,
           referrerEmail: profile.email,
-          institutionName: tenant.institution_name,
+          // For same institution, use the referrer's tenant info
+          // For other institution, use the referee's institution name they provided
+          institutionName: referralType === "same_institution" 
+            ? tenant.institution_name 
+            : formData.refereeInstitution,
+          referrerInstitution: tenant.institution_name, // Always include referrer's institution
+          tenantId: referralType === "same_institution" ? profile.tenant_id : undefined,
           personalMessage: formData.personalMessage,
-          adminEmail,
         },
       });
 
@@ -82,12 +68,12 @@ export function ReferColleagueDialog({ open, onOpenChange }: ReferColleagueDialo
 
       toast.success(
         referralType === "same_institution"
-          ? "Request sent to your admin!"
+          ? "Invitation sent to your colleague!"
           : "Invitation sent to your colleague!"
       );
       
       // Reset form
-      setFormData({ refereeName: "", refereeEmail: "", personalMessage: "" });
+      setFormData({ refereeName: "", refereeEmail: "", refereeInstitution: "", personalMessage: "" });
       onOpenChange(false);
     } catch (error: any) {
       console.error("Error sending referral:", error);
@@ -127,7 +113,7 @@ export function ReferColleagueDialog({ open, onOpenChange }: ReferColleagueDialo
               <RadioGroupItem value="same_institution" id="same" className="sr-only" />
               <Building2 className="h-6 w-6" />
               <span className="text-sm font-medium text-center">Same Institution</span>
-              <span className="text-xs text-muted-foreground text-center">Notifies your admin</span>
+              <span className="text-xs text-muted-foreground text-center">Joins your team</span>
             </Label>
 
             <Label
@@ -141,7 +127,7 @@ export function ReferColleagueDialog({ open, onOpenChange }: ReferColleagueDialo
               <RadioGroupItem value="other_institution" id="other" className="sr-only" />
               <Users className="h-6 w-6" />
               <span className="text-sm font-medium text-center">Other Institution</span>
-              <span className="text-xs text-muted-foreground text-center">Sends invite directly</span>
+              <span className="text-xs text-muted-foreground text-center">New school signup</span>
             </Label>
           </RadioGroup>
 
@@ -167,6 +153,19 @@ export function ReferColleagueDialog({ open, onOpenChange }: ReferColleagueDialo
               required
             />
           </div>
+
+          {referralType === "other_institution" && (
+            <div className="space-y-2">
+              <Label htmlFor="refereeInstitution">Their Institution Name</Label>
+              <Input
+                id="refereeInstitution"
+                value={formData.refereeInstitution}
+                onChange={(e) => setFormData({ ...formData, refereeInstitution: e.target.value })}
+                placeholder="State University"
+                required
+              />
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="personalMessage">Personal Message (optional)</Label>
