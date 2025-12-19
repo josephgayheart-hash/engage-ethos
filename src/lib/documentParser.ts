@@ -1,7 +1,9 @@
 /**
  * Document parsing utilities for extracting text from various file formats
- * Supports: .txt, .md, .html, .doc, .docx, .pdf (basic text extraction)
+ * Supports: .txt, .md, .html, .doc, .docx, .pdf, .png, .jpg, .jpeg (screenshots via AI)
  */
+
+import { supabase } from '@/integrations/supabase/client';
 
 export const SUPPORTED_DOCUMENT_TYPES = [
   'text/plain',
@@ -10,12 +12,15 @@ export const SUPPORTED_DOCUMENT_TYPES = [
   'application/pdf',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/msword',
+  'image/png',
+  'image/jpeg',
+  'image/jpg',
 ];
 
-export const SUPPORTED_EXTENSIONS = ['.txt', '.md', '.html', '.htm', '.doc', '.docx', '.pdf'];
+export const SUPPORTED_EXTENSIONS = ['.txt', '.md', '.html', '.htm', '.doc', '.docx', '.pdf', '.png', '.jpg', '.jpeg'];
 
 export function getAcceptString(): string {
-  return '.txt,.md,.html,.htm,.doc,.docx,.pdf';
+  return '.txt,.md,.html,.htm,.doc,.docx,.pdf,.png,.jpg,.jpeg';
 }
 
 export function isSupported(file: File): boolean {
@@ -25,6 +30,11 @@ export function isSupported(file: File): boolean {
 
 export function getFileExtension(file: File): string {
   return '.' + (file.name.split('.').pop()?.toLowerCase() || '');
+}
+
+export function isImageFile(file: File): boolean {
+  const extension = getFileExtension(file);
+  return ['.png', '.jpg', '.jpeg'].includes(extension) || file.type.startsWith('image/');
 }
 
 /**
@@ -64,10 +74,16 @@ export async function extractTextFromFile(file: File): Promise<{
       return result;
     }
 
+    // Image files (screenshots) - use AI vision
+    if (isImageFile(file)) {
+      const result = await extractTextFromImage(file);
+      return result;
+    }
+
     return {
       text: '',
       success: false,
-      message: 'Unsupported file type. Please use .txt, .docx, or .pdf files.',
+      message: 'Unsupported file type. Please use .txt, .docx, .pdf, or image files (.png, .jpg).',
     };
   } catch (error) {
     console.error('Error extracting text:', error);
@@ -256,6 +272,65 @@ async function extractTextFromPdf(file: File): Promise<{
       text: '',
       success: false,
       message: 'Error reading PDF file. Please try a different file or paste the content directly.',
+    };
+  }
+}
+
+/**
+ * Extract text from image files (screenshots) using AI vision
+ */
+async function extractTextFromImage(file: File): Promise<{
+  text: string;
+  success: boolean;
+  message?: string;
+}> {
+  try {
+    // Convert image to base64
+    const arrayBuffer = await file.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuffer);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    const base64 = btoa(binary);
+
+    // Call the edge function to extract text using AI vision
+    const { data, error } = await supabase.functions.invoke('extract-text-from-image', {
+      body: {
+        imageBase64: base64,
+        mimeType: file.type || 'image/png',
+      },
+    });
+
+    if (error) {
+      console.error('Edge function error:', error);
+      return {
+        text: '',
+        success: false,
+        message: 'Error processing screenshot. Please try again or paste the content directly.',
+      };
+    }
+
+    if (!data.success) {
+      return {
+        text: '',
+        success: false,
+        message: data.message || 'Could not extract text from this image.',
+      };
+    }
+
+    return {
+      text: data.text,
+      success: true,
+      message: data.message || 'Screenshot text extracted successfully.',
+    };
+
+  } catch (error) {
+    console.error('Image extraction error:', error);
+    return {
+      text: '',
+      success: false,
+      message: 'Error processing screenshot. Please paste the content directly.',
     };
   }
 }
