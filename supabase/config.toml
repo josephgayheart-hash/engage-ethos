@@ -14,3 +14,9 @@ verify_jwt = false
 
 [functions.send-request-confirmation]
 verify_jwt = false
+
+[functions.send-engagement-emails]
+verify_jwt = false
+
+[functions.send-referral-email]
+verify_jwt = false

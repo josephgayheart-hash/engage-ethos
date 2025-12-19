@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Library, FolderOpen, Settings, Home, LogOut, User, CheckCircle } from "lucide-react";
+import { Library, FolderOpen, Settings, Home, LogOut, User, CheckCircle, UserPlus } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { BetaBanner } from "@/components/BetaBanner";
+import { ReferColleagueDialog } from "@/components/ReferColleagueDialog";
 import uplaybookLogo from "@/assets/uplaybook-logo.png";
 
 const MAX_LOGO_HEIGHT = 32;
@@ -19,6 +21,7 @@ const MAX_LOGO_WIDTH = 120;
 export function Header() {
   const { user, profile, tenant, isAdmin, isSuperAdmin, isApprover, logout } = useAuth();
   const navigate = useNavigate();
+  const [referDialogOpen, setReferDialogOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -129,6 +132,10 @@ export function Header() {
                     My Profile
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setReferDialogOpen(true)} className="cursor-pointer">
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Invite a Colleague
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive cursor-pointer">
                   <LogOut className="w-4 h-4 mr-2" />
@@ -146,6 +153,9 @@ export function Header() {
           style={{ backgroundColor: accentColor }}
         />
       )}
+      
+      {/* Refer Colleague Dialog */}
+      <ReferColleagueDialog open={referDialogOpen} onOpenChange={setReferDialogOpen} />
     </header>
   );
 }
