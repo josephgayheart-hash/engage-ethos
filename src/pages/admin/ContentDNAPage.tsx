@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useContentDNA, ContentDNASample } from '@/hooks/useContentDNA';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { 
   Home, 
   Upload, 
@@ -29,7 +30,8 @@ import {
   TrendingUp,
   Quote,
   Lightbulb,
-  CheckCircle2
+  CheckCircle2,
+  User
 } from 'lucide-react';
 
 const SAMPLE_TYPES = [
@@ -45,8 +47,13 @@ const SAMPLE_TYPES = [
 ];
 
 export default function ContentDNAPage() {
-  const { tenant, profile } = useAuth();
+  const { tenant, profile, isAdmin } = useAuth();
+  const location = useLocation();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Check if accessed via admin route
+  const isAdminRoute = location.pathname.startsWith('/admin');
+  
   const {
     samples,
     analysis,
@@ -154,10 +161,14 @@ export default function ContentDNAPage() {
               <Home className="w-4 h-4" />
             </Link>
             <ChevronRight className="w-4 h-4" />
-            <Link to="/admin/console" className="hover:text-[hsl(222,47%,11%)]">
-              Admin
-            </Link>
-            <ChevronRight className="w-4 h-4" />
+            {isAdminRoute ? (
+              <>
+                <Link to="/admin/console" className="hover:text-[hsl(222,47%,11%)]">
+                  Admin
+                </Link>
+                <ChevronRight className="w-4 h-4" />
+              </>
+            ) : null}
             <span className="text-[hsl(222,47%,11%)]">Content DNA</span>
           </div>
           <div className="flex items-center justify-between">
@@ -218,23 +229,25 @@ export default function ContentDNAPage() {
                       Your collection of brand communications used for voice analysis
                     </CardDescription>
                   </div>
-                  <Button
-                    onClick={analyzeVoice}
-                    disabled={isAnalyzing || samples.length === 0}
-                    className="bg-[hsl(173,58%,39%)] hover:bg-[hsl(173,58%,34%)]"
-                  >
-                    {isAnalyzing ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Analyzing...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4 mr-2" />
-                        Analyze All Samples
-                      </>
-                    )}
-                  </Button>
+                  {isAdmin && (
+                    <Button
+                      onClick={analyzeVoice}
+                      disabled={isAnalyzing || samples.length === 0}
+                      className="bg-[hsl(173,58%,39%)] hover:bg-[hsl(173,58%,34%)]"
+                    >
+                      {isAnalyzing ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Analyzing...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-4 h-4 mr-2" />
+                          Analyze All Samples
+                        </>
+                      )}
+                    </Button>
+                  )}
                 </div>
               </CardHeader>
               <CardContent>
@@ -247,50 +260,77 @@ export default function ContentDNAPage() {
                 ) : (
                   <ScrollArea className="h-[400px]">
                     <div className="space-y-3">
-                      {samples.map((sample) => (
-                        <div
-                          key={sample.id}
-                          className="p-4 border border-[hsl(220,13%,88%)] rounded-lg bg-white hover:bg-[hsl(210,20%,98%)] transition-colors"
-                        >
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h4 className="font-medium text-[hsl(222,47%,11%)] truncate">
-                                  {sample.title || sample.file_name}
-                                </h4>
-                                <Badge variant="outline" className="text-xs">
-                                  {SAMPLE_TYPES.find(t => t.value === sample.sample_type)?.label || sample.sample_type}
-                                </Badge>
-                              </div>
-                              {sample.source_description && (
-                                <p className="text-sm text-[hsl(220,14%,46%)] mb-2">
-                                  {sample.source_description}
-                                </p>
-                              )}
-                              <p className="text-sm text-[hsl(220,14%,46%)] line-clamp-2">
-                                {sample.content_text?.substring(0, 200)}...
-                              </p>
-                              <div className="flex items-center gap-4 mt-2 text-xs text-[hsl(220,14%,46%)]">
-                                <span className="flex items-center gap-1">
-                                  <Clock className="w-3 h-3" />
-                                  {formatDate(sample.created_at)}
-                                </span>
-                                {sample.file_size && (
-                                  <span>{Math.round(sample.file_size / 1024)} KB</span>
+                      {samples.map((sample) => {
+                        const isOwnSample = sample.user_id === profile?.id;
+                        const canDelete = isOwnSample || isAdmin;
+                        
+                        return (
+                          <div
+                            key={sample.id}
+                            className="p-4 border border-[hsl(220,13%,88%)] rounded-lg bg-white hover:bg-[hsl(210,20%,98%)] transition-colors"
+                          >
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h4 className="font-medium text-[hsl(222,47%,11%)] truncate">
+                                    {sample.title || sample.file_name}
+                                  </h4>
+                                  <Badge variant="outline" className="text-xs">
+                                    {SAMPLE_TYPES.find(t => t.value === sample.sample_type)?.label || sample.sample_type}
+                                  </Badge>
+                                  {!isOwnSample && (
+                                    <Tooltip>
+                                      <TooltipTrigger>
+                                        <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                                          <User className="w-3 h-3" />
+                                          Team
+                                        </Badge>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>Added by a teammate</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  )}
+                                </div>
+                                {sample.source_description && (
+                                  <p className="text-sm text-[hsl(220,14%,46%)] mb-2">
+                                    {sample.source_description}
+                                  </p>
                                 )}
+                                <p className="text-sm text-[hsl(220,14%,46%)] line-clamp-2">
+                                  {sample.content_text?.substring(0, 200)}...
+                                </p>
+                                <div className="flex items-center gap-4 mt-2 text-xs text-[hsl(220,14%,46%)]">
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="w-3 h-3" />
+                                    {formatDate(sample.created_at)}
+                                  </span>
+                                  {sample.file_size && (
+                                    <span>{Math.round(sample.file_size / 1024)} KB</span>
+                                  )}
+                                </div>
                               </div>
+                              {canDelete && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="text-[hsl(0,84%,60%)] hover:text-[hsl(0,84%,50%)] hover:bg-red-50"
+                                      onClick={() => deleteSample(sample.id)}
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>{isOwnSample ? 'Delete your sample' : 'Delete (admin)'}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
                             </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-[hsl(0,84%,60%)] hover:text-[hsl(0,84%,50%)] hover:bg-red-50"
-                              onClick={() => deleteSample(sample.id)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </ScrollArea>
                 )}
@@ -448,49 +488,69 @@ export default function ContentDNAPage() {
                         <TableRow className="bg-[hsl(210,20%,98%)]">
                           <TableHead className="font-semibold">Title</TableHead>
                           <TableHead className="font-semibold">Type</TableHead>
+                          <TableHead className="font-semibold">Added By</TableHead>
                           <TableHead className="font-semibold">Date Added</TableHead>
                           <TableHead className="font-semibold">Size</TableHead>
                           <TableHead className="w-12"></TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {samples.map((sample) => (
-                          <TableRow key={sample.id} className="hover:bg-[hsl(210,20%,98%)]">
-                            <TableCell>
-                              <div>
-                                <p className="font-medium text-[hsl(222,47%,11%)]">
-                                  {sample.title || sample.file_name}
-                                </p>
-                                {sample.source_description && (
-                                  <p className="text-xs text-[hsl(220,14%,46%)] truncate max-w-[250px]">
-                                    {sample.source_description}
+                        {samples.map((sample) => {
+                          const isOwnSample = sample.user_id === profile?.id;
+                          const canDelete = isOwnSample || isAdmin;
+                          
+                          return (
+                            <TableRow key={sample.id} className="hover:bg-[hsl(210,20%,98%)]">
+                              <TableCell>
+                                <div>
+                                  <p className="font-medium text-[hsl(222,47%,11%)]">
+                                    {sample.title || sample.file_name}
                                   </p>
+                                  {sample.source_description && (
+                                    <p className="text-xs text-[hsl(220,14%,46%)] truncate max-w-[250px]">
+                                      {sample.source_description}
+                                    </p>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="text-xs">
+                                  {SAMPLE_TYPES.find(t => t.value === sample.sample_type)?.label || sample.sample_type}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant={isOwnSample ? 'default' : 'secondary'} className="text-xs">
+                                  {isOwnSample ? 'You' : 'Team'}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-sm text-[hsl(220,14%,46%)]">
+                                {formatDate(sample.created_at)}
+                              </TableCell>
+                              <TableCell className="text-sm text-[hsl(220,14%,46%)]">
+                                {sample.file_size ? `${Math.round(sample.file_size / 1024)} KB` : '—'}
+                              </TableCell>
+                              <TableCell>
+                                {canDelete && (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="text-[hsl(0,84%,60%)] hover:text-[hsl(0,84%,50%)] hover:bg-red-50"
+                                        onClick={() => deleteSample(sample.id)}
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>{isOwnSample ? 'Delete your sample' : 'Delete (admin)'}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
                                 )}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className="text-xs">
-                                {SAMPLE_TYPES.find(t => t.value === sample.sample_type)?.label || sample.sample_type}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-sm text-[hsl(220,14%,46%)]">
-                              {formatDate(sample.created_at)}
-                            </TableCell>
-                            <TableCell className="text-sm text-[hsl(220,14%,46%)]">
-                              {sample.file_size ? `${Math.round(sample.file_size / 1024)} KB` : '—'}
-                            </TableCell>
-                            <TableCell>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="text-[hsl(0,84%,60%)] hover:text-[hsl(0,84%,50%)] hover:bg-red-50"
-                                onClick={() => deleteSample(sample.id)}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
                       </TableBody>
                     </Table>
                   </div>
@@ -642,23 +702,25 @@ export default function ContentDNAPage() {
                   <p className="text-[hsl(220,14%,46%)] mb-4">
                     Upload content samples and run an analysis to see your Content DNA profile
                   </p>
-                  <Button
-                    onClick={analyzeVoice}
-                    disabled={isAnalyzing || samples.length === 0}
-                    className="bg-[hsl(173,58%,39%)] hover:bg-[hsl(173,58%,34%)]"
-                  >
-                    {isAnalyzing ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Analyzing...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4 mr-2" />
-                        Analyze {samples.length} Sample{samples.length !== 1 ? 's' : ''}
-                      </>
-                    )}
-                  </Button>
+                  {isAdmin && (
+                    <Button
+                      onClick={analyzeVoice}
+                      disabled={isAnalyzing || samples.length === 0}
+                      className="bg-[hsl(173,58%,39%)] hover:bg-[hsl(173,58%,34%)]"
+                    >
+                      {isAnalyzing ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Analyzing...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-4 h-4 mr-2" />
+                          Analyze {samples.length} Sample{samples.length !== 1 ? 's' : ''}
+                        </>
+                      )}
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             )}
@@ -670,39 +732,43 @@ export default function ContentDNAPage() {
               <CardHeader>
                 <CardTitle className="text-[hsl(222,47%,11%)]">Custom Brand Guidelines</CardTitle>
                 <CardDescription>
-                  Add specific instructions, rules, and guidelines for AI-generated messages.
-                  These will be applied alongside the Content DNA analysis.
+                  {isAdmin 
+                    ? 'Add specific instructions, rules, and guidelines for AI-generated messages. These will be applied alongside the Content DNA analysis.'
+                    : 'View the brand guidelines that admins have set for AI-generated messages.'}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Textarea
                   value={customInstructions}
                   onChange={(e) => setCustomInstructions(e.target.value)}
-                  placeholder={`Examples:
+                  placeholder={isAdmin ? `Examples:
 • Always refer to our institution as "The University" or "TU", never spell out the full name
 • Use "Go Tigers!" as a sign-off for student communications
 • Avoid using the word "requirements" - prefer "opportunities" or "next steps"
 • Include our motto "Excellence in Action" when appropriate
 • For prospective students, always mention our campus visit program
-• Never use all-caps for emphasis`}
+• Never use all-caps for emphasis` : 'No custom guidelines set yet.'}
                   className="h-[250px]"
+                  disabled={!isAdmin}
                 />
-                <div className="flex justify-end">
-                  <Button
-                    onClick={handleSaveInstructions}
-                    disabled={isSaving}
-                    className="bg-[hsl(222,47%,14%)] hover:bg-[hsl(222,47%,20%)]"
-                  >
-                    {isSaving ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      'Save Guidelines'
-                    )}
-                  </Button>
-                </div>
+                {isAdmin && (
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={handleSaveInstructions}
+                      disabled={isSaving}
+                      className="bg-[hsl(222,47%,14%)] hover:bg-[hsl(222,47%,20%)]"
+                    >
+                      {isSaving ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        'Save Guidelines'
+                      )}
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
