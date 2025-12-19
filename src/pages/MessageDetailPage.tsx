@@ -1,5 +1,5 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
+import { useJourneyExport } from "@/hooks/useJourneyExport";
 import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import { JourneyViewer, isJourneyContent, parseJourneyContent } from "@/components/library/JourneyViewer";
 import { 
@@ -27,7 +28,9 @@ import {
   Layout,
   FileText,
   Edit,
-  GitBranch
+  GitBranch,
+  FileDown,
+  Printer
 } from "lucide-react";
 import {
   Breadcrumb,
@@ -62,10 +65,16 @@ const MessageDetailPage = () => {
   const { toast } = useToast();
   const { messages, deleteMessage, updateMessage } = useMessageLibrary();
   const [copied, setCopied] = useState(false);
+  const journeyContentRef = useRef<HTMLDivElement>(null);
 
   const message = messages.find(m => m.id === id);
   const isJourney = useMemo(() => message ? isJourneyContent(message.content) : false, [message]);
   const journeyData = useMemo(() => isJourney && message ? parseJourneyContent(message.content) : null, [message, isJourney]);
+
+  const { isExporting, exportToPdf, printJourney } = useJourneyExport({
+    title: message?.title || "Journey Export",
+    containerRef: journeyContentRef,
+  });
 
   if (!message) {
     return (
@@ -191,7 +200,7 @@ const MessageDetailPage = () => {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2 md:shrink-0">
+            <div className="flex items-center gap-2 md:shrink-0 flex-wrap">
               {isJourney && journeyData && (
                 <>
                   <Button onClick={handleEditJourney} variant="outline" className="flex items-center gap-2">
@@ -201,6 +210,14 @@ const MessageDetailPage = () => {
                   <Button onClick={handleRemixJourney} variant="outline" className="flex items-center gap-2">
                     <GitBranch className="w-4 h-4" />
                     Remix
+                  </Button>
+                  <Button onClick={exportToPdf} variant="outline" className="flex items-center gap-2" disabled={isExporting}>
+                    <FileDown className="w-4 h-4" />
+                    {isExporting ? "Exporting..." : "Export PDF"}
+                  </Button>
+                  <Button onClick={printJourney} variant="outline" className="flex items-center gap-2">
+                    <Printer className="w-4 h-4" />
+                    Print
                   </Button>
                 </>
               )}
@@ -257,7 +274,9 @@ const MessageDetailPage = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <JourneyViewer journey={journeyData} />
+                    <div ref={journeyContentRef} data-pdf-section>
+                      <JourneyViewer journey={journeyData} />
+                    </div>
                   </CardContent>
                 </Card>
               ) : (
