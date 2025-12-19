@@ -80,13 +80,13 @@ const handler = async (req: Request): Promise<Response> => {
           <tr>
             <td align="center">
               <table class="main-card" width="100%" max-width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff !important; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); overflow: hidden;" bgcolor="#ffffff">
-                <!-- Logo Header with solid white background -->
+                <!-- Navy Header Banner with Logo -->
                 <tr>
-                  <td class="logo-area" style="background-color: #ffffff !important; padding: 32px 40px 16px 40px; text-align: center; -webkit-background-color: #ffffff !important;" bgcolor="#ffffff">
-                    <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto; background-color: #ffffff !important;" bgcolor="#ffffff">
+                  <td class="logo-area" style="background-color: #1a2036 !important; padding: 40px 40px 32px 40px; text-align: center;" bgcolor="#1a2036">
+                    <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;" bgcolor="#1a2036">
                       <tr>
-                        <td class="logo-tile" style="background-color: #ffffff !important; padding: 20px 24px; border-radius: 12px; border: 1px solid #cbd5e1; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.10);" bgcolor="#ffffff">
-                          <img class="logo-img" src="https://uplaybook.ai/uplaybook-logo.png" alt="UPlaybook.AI" style="height: 60px; width: auto; display: block; background-color: #ffffff !important; -webkit-filter: invert(0) contrast(1.08) saturate(1.08) !important; filter: invert(0) contrast(1.08) saturate(1.08) !important;" />
+                        <td style="background-color: #ffffff !important; padding: 16px 20px; border-radius: 10px;" bgcolor="#ffffff">
+                          <img class="logo-img" src="https://uplaybook.ai/uplaybook-logo.png" alt="UPlaybook.AI" style="height: 50px; width: auto; display: block; background-color: #ffffff !important;" />
                         </td>
                       </tr>
                     </table>

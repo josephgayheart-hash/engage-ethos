@@ -67,24 +67,18 @@ const handler = async (req: Request): Promise<Response> => {
           <tr>
             <td align="center">
               <table class="main-card" width="100%" max-width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff !important; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden;" bgcolor="#ffffff">
-                <!-- Logo Header with solid white background -->
+                <!-- Navy Header Banner with Logo -->
                 <tr>
-                  <td class="logo-area" style="background-color: #ffffff !important; padding: 32px 40px 16px 40px; text-align: center;" bgcolor="#ffffff">
-                    <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto; background-color: #ffffff !important;" bgcolor="#ffffff">
+                  <td class="logo-area" style="background-color: #1a2036 !important; padding: 40px 40px 32px 40px; text-align: center;" bgcolor="#1a2036">
+                    <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;" bgcolor="#1a2036">
                       <tr>
-                        <td class="logo-tile" style="background-color: #ffffff !important; padding: 20px 24px; border-radius: 12px; border: 1px solid #cbd5e1; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.10);" bgcolor="#ffffff">
-                          <img class="logo-img" src="https://uplaybook.ai/uplaybook-logo.png" alt="UPlaybook.AI" style="height: 60px; width: auto; display: block; background-color: #ffffff !important; -webkit-filter: invert(0) contrast(1.08) saturate(1.08) !important; filter: invert(0) contrast(1.08) saturate(1.08) !important;" />
+                        <td style="background-color: #ffffff !important; padding: 16px 20px; border-radius: 10px;" bgcolor="#ffffff">
+                          <img class="logo-img" src="https://uplaybook.ai/uplaybook-logo.png" alt="UPlaybook.AI" style="height: 50px; width: auto; display: block; background-color: #ffffff !important;" />
                         </td>
                       </tr>
                     </table>
-                  </td>
-                </tr>
-                
-                <!-- Header Banner -->
-                <tr>
-                  <td style="background-color: #1e293b !important; padding: 24px 40px; text-align: center;" bgcolor="#1e293b">
-                    <h1 style="margin: 0; color: #ffffff !important; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; background-color: #1e293b !important;" bgcolor="#1e293b">Request Received</h1>
-                    <p style="margin: 8px 0 0 0; color: #94a3b8 !important; font-size: 14px; background-color: #1e293b !important;" bgcolor="#1e293b">We're reviewing your access request</p>
+                    <h1 style="margin: 24px 0 0 0; color: #ffffff !important; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; background-color: #1a2036 !important; -webkit-text-fill-color: #ffffff !important;" bgcolor="#1a2036">Request Received</h1>
+                    <p style="margin: 8px 0 0 0; color: #94a3b8 !important; font-size: 14px; font-weight: 600; background-color: #1a2036 !important; -webkit-text-fill-color: #94a3b8 !important;" bgcolor="#1a2036">We're reviewing your access request</p>
                   </td>
                 </tr>
                 
