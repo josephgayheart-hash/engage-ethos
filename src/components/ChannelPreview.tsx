@@ -812,7 +812,12 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
       case 'digital-ad-social':
         return renderSocialAdPreview(displayContent as SocialAdDraft);
       case 'talking-points':
-        return renderTalkingPointsPreview(displayContent as TalkingPointsDraft);
+        // Check if content is a valid TalkingPointsDraft object
+        if (typeof displayContent === 'object' && displayContent !== null && 'keyMessages' in displayContent) {
+          return renderTalkingPointsPreview(displayContent as TalkingPointsDraft);
+        }
+        // Fallback to displaying as formatted text
+        return <p className="text-sm whitespace-pre-wrap">{String(displayContent)}</p>;
       default:
         return <p className="text-sm whitespace-pre-wrap">{String(displayContent)}</p>;
     }
