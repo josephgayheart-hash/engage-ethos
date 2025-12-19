@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -26,6 +28,8 @@ import {
   Briefcase,
   GraduationCap,
   Eye,
+  Shield,
+  Save,
 } from 'lucide-react';
 
 interface UserProfile {
@@ -67,6 +71,8 @@ interface ToolUsageEvent {
   created_at: string;
 }
 
+type RoleType = 'admin' | 'user' | 'approver' | 'super_admin';
+
 export default function UserDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -76,9 +82,11 @@ export default function UserDetailPage() {
   
   const [user, setUser] = useState<UserProfile | null>(null);
   const [tenant, setTenant] = useState<TenantInfo | null>(null);
+  const [userRoles, setUserRoles] = useState<RoleType[]>([]);
   const [messages, setMessages] = useState<PersonalMessage[]>([]);
   const [toolUsage, setToolUsage] = useState<ToolUsageEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSavingRoles, setIsSavingRoles] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
 
   const fetchData = async () => {
@@ -108,6 +116,13 @@ export default function UserDetailPage() {
         .eq('id', userData.tenant_id)
         .maybeSingle();
       setTenant(tenantData);
+
+      // Fetch user roles
+      const { data: rolesData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', id);
+      setUserRoles((rolesData || []).map(r => r.role as RoleType));
 
       // Fetch personal messages
       const { data: messagesData } = await supabase
@@ -175,6 +190,55 @@ export default function UserDetailPage() {
       'byoc': 'BYOC',
     };
     return names[tool] || tool;
+  };
+
+  const toggleRole = (role: RoleType) => {
+    setUserRoles(prev => {
+      if (prev.includes(role)) {
+        // Don't allow removing the last role - must have at least 'user'
+        if (prev.length === 1) return prev;
+        return prev.filter(r => r !== role);
+      } else {
+        return [...prev, role];
+      }
+    });
+  };
+
+  const handleSaveRoles = async () => {
+    if (!id || !user) return;
+    
+    // Ensure at least 'user' role is present
+    const rolesToSave = userRoles.length > 0 ? userRoles : ['user'];
+    
+    setIsSavingRoles(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-users', {
+        body: {
+          action: 'update_user_roles',
+          userId: id,
+          roles: rolesToSave,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast({
+        title: 'Roles Updated',
+        description: `Permissions for ${user.first_name} ${user.last_name} have been updated.`,
+      });
+      
+      // Refresh to get updated data
+      fetchData();
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to update roles',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSavingRoles(false);
+    }
   };
 
   // Group messages by channel
@@ -496,7 +560,103 @@ export default function UserDetailPage() {
                 </TabsContent>
 
                 {/* Profile Tab */}
-                <TabsContent value="profile" className="mt-4">
+                <TabsContent value="profile" className="mt-4 space-y-4">
+                  {/* Roles & Permissions Card */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="font-serif flex items-center gap-2">
+                        <Shield className="w-5 h-5" />
+                        Roles & Permissions
+                      </CardTitle>
+                      <CardDescription>
+                        Manage what this user can access and do within the platform
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid gap-4">
+                        <div className="flex items-start space-x-3">
+                          <Checkbox 
+                            id="role-user" 
+                            checked={userRoles.includes('user')} 
+                            onCheckedChange={() => toggleRole('user')}
+                          />
+                          <div className="grid gap-1.5 leading-none">
+                            <Label htmlFor="role-user" className="text-sm font-medium cursor-pointer">
+                              University User
+                            </Label>
+                            <p className="text-xs text-muted-foreground">
+                              Can create and evaluate messages, access personal library
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start space-x-3">
+                          <Checkbox 
+                            id="role-approver" 
+                            checked={userRoles.includes('approver')} 
+                            onCheckedChange={() => toggleRole('approver')}
+                          />
+                          <div className="grid gap-1.5 leading-none">
+                            <Label htmlFor="role-approver" className="text-sm font-medium cursor-pointer">
+                              Approver
+                            </Label>
+                            <p className="text-xs text-muted-foreground">
+                              Can review and approve messages submitted to the shared library
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start space-x-3">
+                          <Checkbox 
+                            id="role-admin" 
+                            checked={userRoles.includes('admin')} 
+                            onCheckedChange={() => toggleRole('admin')}
+                          />
+                          <div className="grid gap-1.5 leading-none">
+                            <Label htmlFor="role-admin" className="text-sm font-medium cursor-pointer">
+                              University Admin
+                            </Label>
+                            <p className="text-xs text-muted-foreground">
+                              Full admin access to their institution including user management, Content DNA, and branding
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start space-x-3">
+                          <Checkbox 
+                            id="role-super-admin" 
+                            checked={userRoles.includes('super_admin')} 
+                            onCheckedChange={() => toggleRole('super_admin')}
+                          />
+                          <div className="grid gap-1.5 leading-none">
+                            <Label htmlFor="role-super-admin" className="text-sm font-medium cursor-pointer">
+                              UPlaybook Super Admin
+                            </Label>
+                            <p className="text-xs text-muted-foreground">
+                              Full access to all institutions and system-wide settings
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="pt-4 border-t">
+                        <Button 
+                          onClick={handleSaveRoles} 
+                          disabled={isSavingRoles}
+                          className="gap-2"
+                        >
+                          {isSavingRoles ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Save className="w-4 h-4" />
+                          )}
+                          Save Permissions
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* User Profile Card */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="font-serif">User Profile</CardTitle>
