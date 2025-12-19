@@ -41,7 +41,7 @@ interface StrategyJourneyProps {
 interface GeneratedMessage {
   touchpointIndex: number;
   channel: Channel;
-  content: string;
+  content: unknown;
 }
 
 const channelIcons: Record<Channel, React.ReactNode> = {
@@ -125,6 +125,38 @@ const calculateWeekDate = (startDate: string | undefined, weekNumber: number): s
     return null;
   }
 };
+
+function getGeneratedMessageText(channel: Channel, content: unknown): string {
+  if (typeof content === "string") return content;
+  if (content == null) return "";
+  if (typeof content !== "object") return String(content);
+
+  if (channel === "digital-ad-search") {
+    const ad = content as { headlines?: unknown; descriptions?: unknown; displayUrl?: unknown };
+    const headlines = Array.isArray(ad.headlines) ? ad.headlines.map(String) : [];
+    const descriptions = Array.isArray(ad.descriptions) ? ad.descriptions.map(String) : [];
+    const displayUrl = typeof ad.displayUrl === "string" ? ad.displayUrl : "";
+
+    return `HEADLINES:\n${headlines.join("\n")}\n\nDESCRIPTIONS:\n${descriptions.join("\n")}${displayUrl ? `\n\nDISPLAY URL: ${displayUrl}` : ""}`;
+  }
+
+  if (channel === "digital-ad-social") {
+    const ad = content as { primaryText?: unknown; headline?: unknown; description?: unknown; ctaButton?: unknown; platform?: unknown };
+    const primaryText = typeof ad.primaryText === "string" ? ad.primaryText : "";
+    const headline = typeof ad.headline === "string" ? ad.headline : "";
+    const description = typeof ad.description === "string" ? ad.description : "";
+    const ctaButton = typeof ad.ctaButton === "string" ? ad.ctaButton : "";
+    const platform = typeof ad.platform === "string" ? ad.platform : "";
+
+    return `PRIMARY TEXT:\n${primaryText}\n\nHEADLINE: ${headline}${description ? `\nDESCRIPTION: ${description}` : ""}\n\nCTA: ${ctaButton}${platform ? `\nPLATFORM: ${platform}` : ""}`;
+  }
+
+  try {
+    return JSON.stringify(content, null, 2);
+  } catch {
+    return String(content);
+  }
+}
 
 function TouchpointCard({ 
   touchpoint, 
@@ -306,35 +338,39 @@ function TouchpointCard({
                 {/* Generated Messages */}
                 {thisMessages.length > 0 && (
                   <div className="space-y-3">
-                    {thisMessages.map((msg, i) => (
-                      <div key={i} className="p-3 bg-primary/5 border border-primary/20 rounded-lg space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Badge variant="secondary" className="flex items-center gap-1">
-                            {channelIcons[msg.channel]}
-                            {formatChannelName(msg.channel)}
-                          </Badge>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleCopy(msg.content, msg.channel)}
-                          >
-                            {copiedChannel === msg.channel ? (
-                              <Check className="w-4 h-4 text-green-500" />
-                            ) : (
-                              <Copy className="w-4 h-4" />
-                            )}
-                          </Button>
+                    {thisMessages.map((msg, i) => {
+                      const contentText = getGeneratedMessageText(msg.channel, msg.content);
+
+                      return (
+                        <div key={i} className="p-3 bg-primary/5 border border-primary/20 rounded-lg space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Badge variant="secondary" className="flex items-center gap-1">
+                              {channelIcons[msg.channel]}
+                              {formatChannelName(msg.channel)}
+                            </Badge>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleCopy(contentText, msg.channel)}
+                            >
+                              {copiedChannel === msg.channel ? (
+                                <Check className="w-4 h-4 text-green-500" />
+                              ) : (
+                                <Copy className="w-4 h-4" />
+                              )}
+                            </Button>
+                          </div>
+                          <Textarea 
+                            value={contentText} 
+                            readOnly 
+                            className="min-h-[100px] text-sm bg-background"
+                          />
+                          {msg.channel === 'sms' && (
+                            <SmsCharCounter text={contentText} />
+                          )}
                         </div>
-                        <Textarea 
-                          value={msg.content} 
-                          readOnly 
-                          className="min-h-[100px] text-sm bg-background"
-                        />
-                        {msg.channel === 'sms' && (
-                          <SmsCharCounter text={msg.content} />
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -381,7 +417,7 @@ export function StrategyJourneyDisplay({ journey, context, startDate, endDate }:
       if (error) throw error;
       if (data.error) throw new Error(data.error);
 
-      const newMessages: GeneratedMessage[] = data.messages.map((msg: { channel: Channel; content: string }) => ({
+      const newMessages: GeneratedMessage[] = data.messages.map((msg: { channel: Channel; content: unknown }) => ({
         touchpointIndex,
         channel: msg.channel,
         content: msg.content,
