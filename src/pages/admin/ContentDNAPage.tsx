@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Home, 
@@ -345,13 +346,25 @@ export default function ContentDNAPage() {
                   </div>
                   <div>
                     <Label>Select File</Label>
-                    <Input
-                      ref={fileInputRef}
-                      type="file"
-                      accept=".txt,.md,.html,.htm"
-                      onChange={handleFileUpload}
-                      disabled={isUploading}
-                    />
+                    <div className="mt-1">
+                      <label className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-[hsl(220,13%,88%)] rounded-lg cursor-pointer hover:border-[hsl(222,47%,14%)] hover:bg-[hsl(210,20%,98%)] transition-colors">
+                        <Upload className="w-5 h-5 text-[hsl(220,14%,46%)]" />
+                        <span className="text-sm font-medium text-[hsl(222,47%,14%)]">
+                          {isUploading ? 'Uploading...' : 'Choose File'}
+                        </span>
+                        <Input
+                          ref={fileInputRef}
+                          type="file"
+                          accept=".txt,.md,.html,.htm"
+                          onChange={handleFileUpload}
+                          disabled={isUploading}
+                          className="hidden"
+                        />
+                      </label>
+                      <p className="text-xs text-[hsl(220,14%,46%)] mt-1 text-center">
+                        Supports .txt, .md, .html files
+                      </p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -415,6 +428,75 @@ export default function ContentDNAPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Uploaded Samples Table */}
+            {samples.length > 0 && (
+              <Card className="mt-6 border-[hsl(220,13%,88%)]">
+                <CardHeader>
+                  <CardTitle className="text-[hsl(222,47%,11%)] flex items-center gap-2">
+                    <FileText className="w-5 h-5" />
+                    Uploaded Samples
+                  </CardTitle>
+                  <CardDescription>
+                    {samples.length} content samples in your library
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="border rounded-lg overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-[hsl(210,20%,98%)]">
+                          <TableHead className="font-semibold">Title</TableHead>
+                          <TableHead className="font-semibold">Type</TableHead>
+                          <TableHead className="font-semibold">Date Added</TableHead>
+                          <TableHead className="font-semibold">Size</TableHead>
+                          <TableHead className="w-12"></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {samples.map((sample) => (
+                          <TableRow key={sample.id} className="hover:bg-[hsl(210,20%,98%)]">
+                            <TableCell>
+                              <div>
+                                <p className="font-medium text-[hsl(222,47%,11%)]">
+                                  {sample.title || sample.file_name}
+                                </p>
+                                {sample.source_description && (
+                                  <p className="text-xs text-[hsl(220,14%,46%)] truncate max-w-[250px]">
+                                    {sample.source_description}
+                                  </p>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="text-xs">
+                                {SAMPLE_TYPES.find(t => t.value === sample.sample_type)?.label || sample.sample_type}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-sm text-[hsl(220,14%,46%)]">
+                              {formatDate(sample.created_at)}
+                            </TableCell>
+                            <TableCell className="text-sm text-[hsl(220,14%,46%)]">
+                              {sample.file_size ? `${Math.round(sample.file_size / 1024)} KB` : '—'}
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-[hsl(0,84%,60%)] hover:text-[hsl(0,84%,50%)] hover:bg-red-50"
+                                onClick={() => deleteSample(sample.id)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Voice Analysis Tab */}
