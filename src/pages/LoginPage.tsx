@@ -7,9 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Lock, Mail, AlertCircle, Loader2 } from 'lucide-react';
+import { Lock, Mail, AlertCircle, Loader2, MailCheck } from 'lucide-react';
 import { BetaBanner } from '@/components/BetaBanner';
 import uplaybookLogo from '@/assets/uplaybook-logo.png';
+
+// Invite expiration time in hours
+const INVITE_EXPIRATION_HOURS = 72;
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -20,11 +23,21 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [inviteResent, setInviteResent] = useState(false);
+
+  // Check if invite has expired (created more than 72 hours ago)
+  const isInviteExpired = (createdAt: string): boolean => {
+    const created = new Date(createdAt);
+    const now = new Date();
+    const hoursSinceCreated = (now.getTime() - created.getTime()) / (1000 * 60 * 60);
+    return hoursSinceCreated > INVITE_EXPIRATION_HOURS;
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    setInviteResent(false);
 
     try {
       const { data, error: authError } = await supabase.auth.signInWithPassword({
@@ -42,10 +55,10 @@ export default function LoginPage() {
       }
 
       if (data.user) {
-        // Check user status
+        // Check user status and created_at
         const { data: profile } = await supabase
           .from('profiles')
-          .select('status, password_reset_required')
+          .select('status, password_reset_required, created_at, updated_at')
           .eq('id', data.user.id)
           .single();
 
@@ -53,6 +66,37 @@ export default function LoginPage() {
           setError('Your account is not properly configured. Please contact your administrator.');
           await supabase.auth.signOut();
           return;
+        }
+
+        // Check for expired invite - use updated_at if available (reset when invite is resent), otherwise created_at
+        const inviteTimestamp = profile.updated_at || profile.created_at;
+        if (profile.status === 'invited' && isInviteExpired(inviteTimestamp)) {
+          console.log('Invite expired, resending...');
+          
+          // Sign out first
+          await supabase.auth.signOut();
+          
+          // Call edge function to resend invite
+          try {
+            const { data: resendData, error: resendError } = await supabase.functions.invoke('resend-invite', {
+              body: { userId: data.user.id }
+            });
+
+            if (resendError) {
+              console.error('Resend invite error:', resendError);
+              setError('Your invitation has expired. Please contact your administrator for a new invitation.');
+              return;
+            }
+
+            // Show success state
+            setInviteResent(true);
+            setPassword(''); // Clear the old password
+            return;
+          } catch (resendErr) {
+            console.error('Resend invite error:', resendErr);
+            setError('Your invitation has expired. Please contact your administrator for a new invitation.');
+            return;
+          }
         }
 
         if (profile.status === 'locked') {
@@ -144,12 +188,20 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
-              {error && (
-                <Alert variant="destructive" className="bg-red-50 border-red-200">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
+            {inviteResent ? (
+              <Alert className="bg-emerald-50 border-emerald-200">
+                <MailCheck className="h-4 w-4 text-emerald-600" />
+                <AlertDescription className="text-emerald-800">
+                  <strong>New credentials sent!</strong> Your previous invitation expired for security reasons. 
+                  We've sent a fresh login email to <strong>{email}</strong>. Please check your inbox and use the new temporary password.
+                </AlertDescription>
+              </Alert>
+            ) : error ? (
+              <Alert variant="destructive" className="bg-red-50 border-red-200">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            ) : null}
 
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-[hsl(222,47%,11%)]">Email</Label>

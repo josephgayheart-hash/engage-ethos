@@ -1,5 +1,8 @@
 project_id = "yeuwpuzbccqnqdlnjhfm"
 
+[functions.resend-invite]
+verify_jwt = false
+
 [functions.impersonate-user]
 verify_jwt = false
 
