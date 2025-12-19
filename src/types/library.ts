@@ -24,6 +24,15 @@ export interface SavedMessage {
   mode: 'evaluated' | 'generated' | 'kit';
   institutionalProfileId?: string;
   institutionalProfileName?: string;
+  // Track if this was remixed from another journey
+  remixedFrom?: {
+    title: string;
+    id?: string;
+    source: 'personal' | 'university';
+  };
+  // Track if submitted to university library
+  submittedToLibrary?: boolean;
+  submittedAt?: string;
 }
 
 export interface MessageVersion {
