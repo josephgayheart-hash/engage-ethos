@@ -219,26 +219,47 @@ const TemplateDetailPage = () => {
     navigate("/library");
   };
 
-  const handleRemixJourney = () => {
-    if (!journeyData) return;
-    
-    const journeyWithMetadata = journeyData as (typeof journeyData & { _metadata?: any });
-    // Merge template-level profile info into metadata for remix
-    const enrichedMetadata = {
-      ...journeyWithMetadata?._metadata,
-      institutionalProfileId: journeyWithMetadata?._metadata?.institutionalProfileId || template.institutionalProfileId,
-      institutionalProfileName: journeyWithMetadata?._metadata?.institutionalProfileName || template.institutionalProfileName,
-    };
-    navigate('/strategy', { 
-      state: { 
-        editMode: 'remix',
-        journeyData: journeyData,
-        metadata: enrichedMetadata,
-        originalTitle: template.title,
-        originalId: template.id,
-        source: 'university'
-      } 
-    });
+  const handleRemix = () => {
+    if (isJourney && journeyData) {
+      // Remix journey - navigate to strategy page
+      const journeyWithMetadata = journeyData as (typeof journeyData & { _metadata?: any });
+      const enrichedMetadata = {
+        ...journeyWithMetadata?._metadata,
+        institutionalProfileId: journeyWithMetadata?._metadata?.institutionalProfileId || template.institutionalProfileId,
+        institutionalProfileName: journeyWithMetadata?._metadata?.institutionalProfileName || template.institutionalProfileName,
+      };
+      navigate('/strategy', { 
+        state: { 
+          editMode: 'remix',
+          journeyData: journeyData,
+          metadata: enrichedMetadata,
+          originalTitle: template.title,
+          originalId: template.id,
+          source: 'university'
+        } 
+      });
+    } else {
+      // Remix regular playbook - navigate to build page with prefilled context
+      const remixContext = {
+        audience: template.requiredFields.audience[0] || 'first-year',
+        moment: template.requiredFields.moment[0] || 'early-term',
+        channel: template.requiredFields.channel[0] || 'email',
+        channels: template.requiredFields.channel || ['email'],
+      };
+      
+      navigate('/build', { 
+        state: { 
+          remixMode: true,
+          remixContext,
+          remixContent: customizedContent,
+          institutionalProfileId: template.institutionalProfileId,
+          institutionalProfileName: template.institutionalProfileName,
+          originalTitle: template.title,
+          originalId: template.id,
+          source: 'university'
+        } 
+      });
+    }
   };
 
   const updatePlaceholder = (key: string, value: string) => {
@@ -331,7 +352,7 @@ const TemplateDetailPage = () => {
                     </div>
                     {/* Primary actions in title bar */}
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Button onClick={handleRemixJourney} variant="secondary" size="sm">
+                      <Button onClick={handleRemix} variant="secondary" size="sm">
                         <GitBranch className="w-4 h-4 mr-2" />
                         Remix
                       </Button>
