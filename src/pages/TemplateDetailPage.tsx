@@ -382,80 +382,51 @@ const TemplateDetailPage = () => {
                 </Card>
               )}
 
-              {/* Use Cases */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Lightbulb className="w-5 h-5" />
-                    Use Cases
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <p className="text-sm font-medium text-green-600 mb-3 flex items-center gap-1">
-                        <CheckCircle className="w-4 h-4" /> When to use
-                      </p>
-                      <ul className="text-sm space-y-2">
-                        {template.useCases.whenToUse.map((u, i) => (
-                          <li key={i} className="text-muted-foreground flex items-start gap-2">
-                            <span className="text-green-500">•</span>
-                            {u}
-                          </li>
-                        ))}
-                      </ul>
+              {/* Use Cases - only show if data exists */}
+              {template.useCases && (template.useCases.whenToUse?.length > 0 || template.useCases.whenNotToUse?.length > 0) && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Lightbulb className="w-5 h-5" />
+                      Use Cases
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {template.useCases.whenToUse?.length > 0 && (
+                        <div>
+                          <p className="text-sm font-medium text-green-600 mb-3 flex items-center gap-1">
+                            <CheckCircle className="w-4 h-4" /> When to use
+                          </p>
+                          <ul className="text-sm space-y-2">
+                            {template.useCases.whenToUse.map((u, i) => (
+                              <li key={i} className="text-muted-foreground flex items-start gap-2">
+                                <span className="text-green-500">•</span>
+                                {u}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {template.useCases.whenNotToUse?.length > 0 && (
+                        <div>
+                          <p className="text-sm font-medium text-amber-600 mb-3 flex items-center gap-1">
+                            <AlertTriangle className="w-4 h-4" /> When not to use
+                          </p>
+                          <ul className="text-sm space-y-2">
+                            {template.useCases.whenNotToUse.map((u, i) => (
+                              <li key={i} className="text-muted-foreground flex items-start gap-2">
+                                <span className="text-amber-500">•</span>
+                                {u}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-amber-600 mb-3 flex items-center gap-1">
-                        <AlertTriangle className="w-4 h-4" /> When not to use
-                      </p>
-                      <ul className="text-sm space-y-2">
-                        {template.useCases.whenNotToUse.map((u, i) => (
-                          <li key={i} className="text-muted-foreground flex items-start gap-2">
-                            <span className="text-amber-500">•</span>
-                            {u}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Required Fields */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Target Audiences & Channels</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-3 gap-6">
-                    <div>
-                      <p className="font-medium text-muted-foreground mb-2">Audiences</p>
-                      <div className="flex flex-wrap gap-2">
-                        {template.requiredFields.audience.map(a => (
-                          <Badge key={a} variant="secondary">{a}</Badge>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <p className="font-medium text-muted-foreground mb-2">Channels</p>
-                      <div className="flex flex-wrap gap-2">
-                        {template.requiredFields.channel.map(c => (
-                          <Badge key={c} variant="outline">{c}</Badge>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <p className="font-medium text-muted-foreground mb-2">Moments</p>
-                      <div className="flex flex-wrap gap-2">
-                        {template.requiredFields.moment.map(m => (
-                          <Badge key={m} variant="outline">{m}</Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
 
             <TabsContent value="customize" className="space-y-6">
