@@ -76,10 +76,12 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_hsl(173_58%_85%_/_0.3),_transparent_50%)]" />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-40" />
         
-        {/* Subtle lens flares - blurred and faint */}
-        <div className="absolute top-24 right-[15%] w-28 h-28 bg-[hsl(270_70%_60%_/_0.1)] rounded-full blur-3xl" />
-        <div className="absolute bottom-32 left-[10%] w-36 h-36 bg-[hsl(82_85%_55%_/_0.08)] rounded-full blur-3xl" />
-        <div className="absolute top-40 left-[25%] w-20 h-20 bg-[hsl(200_100%_50%_/_0.1)] rounded-full blur-2xl" />
+        {/* Lens flares - blurred and varied */}
+        <div className="absolute top-20 right-[12%] w-32 h-32 bg-[hsl(270_70%_60%_/_0.18)] rounded-full blur-2xl" />
+        <div className="absolute bottom-36 left-[8%] w-40 h-40 bg-[hsl(82_85%_55%_/_0.15)] rounded-full blur-3xl" />
+        <div className="absolute top-44 left-[22%] w-24 h-24 bg-[hsl(200_100%_50%_/_0.15)] rounded-full blur-2xl" />
+        <div className="absolute bottom-48 right-[25%] w-20 h-20 bg-[hsl(340_75%_55%_/_0.12)] rounded-full blur-2xl" />
+        <div className="absolute top-32 right-[35%] w-16 h-16 bg-[hsl(82_85%_55%_/_0.2)] rounded-full blur-xl" />
         
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-28">
           <div className="text-center space-y-6">
@@ -191,10 +193,11 @@ export default function LandingPage() {
 
       {/* Value Proposition Section - Fun Yellow Background */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(48_100%_90%)] relative overflow-hidden">
-        {/* Subtle blurred lens flares */}
-        <div className="absolute top-16 right-[12%] w-24 h-24 bg-[hsl(270_70%_60%_/_0.12)] rounded-full blur-2xl" />
-        <div className="absolute bottom-20 left-[8%] w-32 h-32 bg-[hsl(82_85%_55%_/_0.1)] rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-[35%] w-20 h-20 bg-[hsl(200_100%_50%_/_0.08)] rounded-full blur-2xl" />
+        {/* Lens flares - blurred and varied */}
+        <div className="absolute top-12 right-[10%] w-28 h-28 bg-[hsl(270_70%_60%_/_0.2)] rounded-full blur-2xl" />
+        <div className="absolute bottom-28 left-[6%] w-36 h-36 bg-[hsl(82_85%_55%_/_0.18)] rounded-full blur-3xl" />
+        <div className="absolute top-1/3 left-[40%] w-20 h-20 bg-[hsl(200_100%_50%_/_0.15)] rounded-full blur-2xl" />
+        <div className="absolute bottom-1/3 right-[20%] w-16 h-16 bg-[hsl(340_75%_55%_/_0.15)] rounded-full blur-xl" />
         
         {/* Wave transition at bottom to mint section */}
         <div className="absolute bottom-0 left-0 right-0">
@@ -248,9 +251,11 @@ export default function LandingPage() {
 
       {/* Features Section - Fresh Mint Background */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(173_40%_92%)] relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute top-0 left-1/4 w-40 h-40 bg-[hsl(200_100%_50%_/_0.1)] rounded-full blur-2xl" />
-        <div className="absolute bottom-0 right-1/4 w-60 h-60 bg-[hsl(270_70%_60%_/_0.1)] rounded-full blur-2xl" />
+        {/* Lens flares - blurred and varied */}
+        <div className="absolute top-16 left-[18%] w-32 h-32 bg-[hsl(200_100%_50%_/_0.18)] rounded-full blur-2xl" />
+        <div className="absolute bottom-20 right-[15%] w-44 h-44 bg-[hsl(270_70%_60%_/_0.12)] rounded-full blur-3xl" />
+        <div className="absolute top-1/2 right-[8%] w-24 h-24 bg-[hsl(82_85%_55%_/_0.2)] rounded-full blur-2xl" />
+        <div className="absolute bottom-1/3 left-[5%] w-20 h-20 bg-[hsl(340_75%_55%_/_0.12)] rounded-full blur-xl" />
         
         <div className="max-w-6xl mx-auto relative z-10">
           <div className="text-center mb-12">
@@ -314,11 +319,12 @@ export default function LandingPage() {
 
       {/* Secondary CTA Section - Vibrant Purple */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(270_60%_50%)] relative overflow-hidden">
-        {/* Subtle blurred lens flares */}
+        {/* Lens flares - blurred and varied */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-10 right-[15%] w-36 h-36 bg-[hsl(82_85%_55%_/_0.15)] rounded-full blur-3xl" />
-          <div className="absolute bottom-16 left-[10%] w-44 h-44 bg-[hsl(200_100%_50%_/_0.1)] rounded-full blur-3xl" />
-          <div className="absolute top-1/2 right-[30%] w-28 h-28 bg-[hsl(340_75%_55%_/_0.1)] rounded-full blur-2xl" />
+          <div className="absolute top-12 right-[12%] w-40 h-40 bg-[hsl(82_85%_55%_/_0.2)] rounded-full blur-3xl" />
+          <div className="absolute bottom-20 left-[8%] w-48 h-48 bg-[hsl(200_100%_50%_/_0.15)] rounded-full blur-3xl" />
+          <div className="absolute top-1/3 left-[25%] w-28 h-28 bg-[hsl(340_75%_60%_/_0.18)] rounded-full blur-2xl" />
+          <div className="absolute bottom-1/3 right-[35%] w-20 h-20 bg-[hsl(82_85%_60%_/_0.15)] rounded-full blur-xl" />
         </div>
         
         <div className="max-w-3xl mx-auto text-center relative z-10">
