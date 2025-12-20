@@ -135,7 +135,7 @@ const Index = () => {
               Plan. Strategize. Execute.
             </h1>
             <p className="text-base text-primary-foreground/80 animate-fade-in" style={{ animationDelay: '100ms' }}>
-              The strategy layer for higher ed communications—organize your thinking before you hit send.
+              Your digital playbook for higher ed. Craft meaningful, research-driven, brand-informed messaging at scale.
             </p>
           </div>
         </div>
@@ -168,7 +168,7 @@ const Index = () => {
                     </div>
                     <h3 className="font-serif font-semibold text-lg mb-2">Setup Your Institution</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Configure your institution's voice, terminology, and branding preferences.
+                      Build your institution profile. Subunits inherit brand elements with clear hierarchy and control.
                     </p>
                     <div className="flex items-center text-sm text-primary font-medium group-hover:gap-2 transition-all">
                       Configure Settings
@@ -268,7 +268,7 @@ const Index = () => {
                     </div>
                     <h3 className="font-serif font-semibold text-lg mb-2">Refine Content DNA</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Upload your communications and articles to perfect your institutional voice.
+                      Ground your AI in brand promise, pillars, and positioning. Upload samples to perfect your institutional voice.
                     </p>
                     <div className="flex items-center text-sm text-amber-600 font-medium group-hover:gap-2 transition-all">
                       Refine Voice
@@ -412,7 +412,7 @@ const Index = () => {
                     </Button>
                   </Link>
                 </div>
-                <CardDescription className="text-xs">Institutional playbooks and templates</CardDescription>
+                <CardDescription className="text-xs">Brand-governed playbooks with approval workflows</CardDescription>
               </CardHeader>
               <CardContent>
                 {publishedTemplates.length === 0 ? (
