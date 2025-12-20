@@ -62,6 +62,28 @@ export type CohortContext =
   | 'new-hire'
   | 'supervisor'
   | 'remote-employee'
+  // Alumni cohorts
+  | 'young-alumni'
+  | 'established-alumni'
+  | 'lapsed-alumni'
+  | 'engaged-alumni'
+  | 'legacy-family'
+  // Parent cohorts
+  | 'prospective-parent'
+  | 'current-parent'
+  | 'new-family'
+  | 'graduating-family'
+  // Donor cohorts
+  | 'first-time-donor'
+  | 'recurring-donor'
+  | 'major-gift-prospect'
+  | 'lapsed-donor'
+  | 'planned-giving'
+  // External audience cohorts
+  | 'government-official'
+  | 'business-leader'
+  | 'nonprofit-leader'
+  | 'peer-institution'
   | 'none';
 
 export type CommunicationMoment = 
@@ -89,6 +111,28 @@ export type CommunicationMoment =
   | 'recognition'
   | 'budget-cycle'
   | 'strategic-planning'
+  // Alumni moments
+  | 'reunion-campaign'
+  | 'homecoming'
+  | 'alumni-giving-day'
+  | 'career-networking'
+  | 'chapter-event'
+  | 'alumni-recognition'
+  | 'alumni-newsletter'
+  // Parent/Family moments
+  | 'family-orientation'
+  | 'family-weekend'
+  | 'parent-giving'
+  | 'parent-newsletter'
+  | 'tuition-notification'
+  // Donor moments
+  | 'annual-fund'
+  | 'capital-campaign'
+  | 'giving-day'
+  | 'stewardship'
+  | 'impact-report'
+  | 'planned-giving-outreach'
+  | 'donor-recognition'
   // Policy Maker moments
   | 'advocacy-support'
   | 'funding-advocacy'
@@ -117,6 +161,7 @@ export type Channel =
   | 'talking-points';
 
 export type MessageDomain = 
+  // Student domains
   | 'academic'
   | 'financial'
   | 'wellbeing'
@@ -126,8 +171,6 @@ export type MessageDomain =
   | 'athletics'
   | 'compliance'
   | 'scholastic'
-  | 'giving'
-  | 'alumni-relations'
   | 'admissions'
   | 'recruitment'
   // Employee domains
@@ -135,15 +178,21 @@ export type MessageDomain =
   | 'professional-growth'
   | 'workplace-culture'
   | 'operations'
-  | 'safety-security';
+  | 'safety-security'
+  // External/Advancement domains
+  | 'giving'
+  | 'alumni-relations'
+  | 'stewardship'
+  | 'advocacy'
+  | 'partnership';
 
 export type PrimaryGoal = 
+  // Student goals
   | 'persist'
   | 'attend'
   | 'submit'
   | 'respond'
   | 'check-in'
-  | 'donate'
   | 'register'
   | 'enroll'
   | 'inquiry'
@@ -155,7 +204,16 @@ export type PrimaryGoal =
   | 'complete-training'
   | 'acknowledge'
   | 'participate'
-  | 'review-update';
+  | 'review-update'
+  // External/Advancement goals
+  | 'donate'
+  | 'engage'
+  | 'attend-event'
+  | 'register-event'
+  | 'advocate'
+  | 'connect'
+  | 'renew-giving'
+  | 'upgrade-giving';
 
 export type TonePreference = 
   | 'supportive'
