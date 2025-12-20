@@ -170,6 +170,14 @@ interface EmailNudge {
   user_name?: string;
   user_email?: string;
   institution_name?: string;
+  // Delivery tracking fields
+  provider?: string;
+  provider_message_id?: string;
+  delivery_status?: string;
+  delivered_at?: string;
+  opened_at?: string;
+  clicked_at?: string;
+  bounced_at?: string;
 }
 
 interface Referral {
@@ -385,8 +393,33 @@ const AdminPanel = () => {
   useEffect(() => {
     if (isSuperAdmin) {
       fetchData();
-      // Auto-refresh disabled - use manual refresh button instead
     }
+  }, [isSuperAdmin]);
+
+  // Realtime subscription for email_nudges
+  useEffect(() => {
+    if (!isSuperAdmin) return;
+
+    const channel = supabase
+      .channel('email-nudges-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'email_nudges'
+        },
+        (payload) => {
+          console.log('Email nudge realtime update:', payload);
+          // Refetch data on any change
+          fetchData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [isSuperAdmin]);
 
   const handleClearPersonalLibrary = () => {
@@ -1342,16 +1375,23 @@ const AdminPanel = () => {
                               <TableCell className="text-sm">{nudge.institution_name}</TableCell>
                               <TableCell className="text-sm">{formatTime(nudge.sent_at)}</TableCell>
                               <TableCell>
-                                <Badge className={nudge.status === 'sent' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}>
-                                  {nudge.status === 'sent' ? (
-                                    <>
-                                      <CheckCircle2 className="w-3 h-3 mr-1" />
-                                      Sent
-                                    </>
-                                  ) : (
-                                    nudge.status || 'Sent'
-                                  )}
-                                </Badge>
+                                {(() => {
+                                  const deliveryStatus = nudge.delivery_status || nudge.status || 'sent';
+                                  const statusConfig: Record<string, { bg: string; text: string; icon: React.ReactNode; label: string }> = {
+                                    sent: { bg: 'bg-blue-100', text: 'text-blue-700', icon: <Send className="w-3 h-3 mr-1" />, label: 'Sent' },
+                                    delivered: { bg: 'bg-green-100', text: 'text-green-700', icon: <CheckCircle2 className="w-3 h-3 mr-1" />, label: 'Delivered' },
+                                    opened: { bg: 'bg-purple-100', text: 'text-purple-700', icon: <Eye className="w-3 h-3 mr-1" />, label: 'Opened' },
+                                    clicked: { bg: 'bg-indigo-100', text: 'text-indigo-700', icon: <ExternalLink className="w-3 h-3 mr-1" />, label: 'Clicked' },
+                                    bounced: { bg: 'bg-red-100', text: 'text-red-700', icon: <XCircle className="w-3 h-3 mr-1" />, label: 'Bounced' },
+                                  };
+                                  const config = statusConfig[deliveryStatus] || statusConfig.sent;
+                                  return (
+                                    <Badge className={`${config.bg} ${config.text}`}>
+                                      {config.icon}
+                                      {config.label}
+                                    </Badge>
+                                  );
+                                })()}
                               </TableCell>
                             </TableRow>
                           ))}
