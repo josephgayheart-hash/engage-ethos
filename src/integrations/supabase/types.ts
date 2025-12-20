@@ -323,6 +323,99 @@ export type Database = {
         }
         Relationships: []
       }
+      email_sends: {
+        Row: {
+          id: string
+          metadata: Json | null
+          sent_at: string
+          status: string
+          template_id: string
+          tenant_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          metadata?: Json | null
+          sent_at?: string
+          status?: string
+          template_id: string
+          tenant_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          metadata?: Json | null
+          sent_at?: string
+          status?: string
+          template_id?: string
+          tenant_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_sends_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "email_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_sends_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_templates: {
+        Row: {
+          created_at: string
+          description: string | null
+          html_content: string
+          id: string
+          is_active: boolean
+          last_sent_at: string | null
+          name: string
+          send_count: number | null
+          subject: string
+          template_key: string
+          trigger_config: Json | null
+          trigger_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          html_content: string
+          id?: string
+          is_active?: boolean
+          last_sent_at?: string | null
+          name: string
+          send_count?: number | null
+          subject: string
+          template_key: string
+          trigger_config?: Json | null
+          trigger_type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          html_content?: string
+          id?: string
+          is_active?: boolean
+          last_sent_at?: string | null
+          name?: string
+          send_count?: number | null
+          subject?: string
+          template_key?: string
+          trigger_config?: Json | null
+          trigger_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       institutional_config: {
         Row: {
           config: Json

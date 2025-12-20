@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.send-reengagement-email]
 verify_jwt = false
+
+[functions.send-beta-feedback-email]
+verify_jwt = false
