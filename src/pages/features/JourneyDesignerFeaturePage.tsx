@@ -322,7 +322,7 @@ export default function JourneyDesignerFeaturePage() {
         {/* Lens flares */}
         <div className="absolute top-16 left-[18%] w-32 h-32 bg-[hsl(200_100%_50%_/_0.1)] rounded-full blur-2xl" />
         <div className="absolute bottom-20 right-[15%] w-44 h-44 bg-[hsl(270_70%_60%_/_0.08)] rounded-full blur-3xl" />
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="font-serif text-3xl font-bold text-foreground mb-4">
@@ -409,7 +409,7 @@ export default function JourneyDesignerFeaturePage() {
         {/* Lens flares */}
         <div className="absolute top-1/4 right-[8%] w-36 h-36 bg-[hsl(82_85%_55%_/_0.1)] rounded-full blur-3xl" />
         <div className="absolute bottom-1/3 left-[12%] w-28 h-28 bg-[hsl(200_100%_50%_/_0.1)] rounded-full blur-2xl" />
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-8">
               <h2 className="font-serif text-3xl font-bold text-foreground mb-4">
