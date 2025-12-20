@@ -11,7 +11,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import type { SharedTemplate } from "@/types/library";
 import type { InstitutionalConfig } from "@/types/uplaybook";
 import { JourneyViewer, isJourneyContent, parseJourneyContent } from "./JourneyViewer";
-import { Copy, Download, CheckCircle, AlertTriangle, Users, Lightbulb, ShieldCheck, Edit3, Map } from "lucide-react";
+import { SalesforceCredentialsDialog } from "@/components/SalesforceCredentialsDialog";
+import { Copy, Download, CheckCircle, AlertTriangle, Users, Lightbulb, ShieldCheck, Edit3, Map, Cloud } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
@@ -61,6 +62,7 @@ export function TemplateDetailDialog({ template, open, onOpenChange, onPull }: T
   const [placeholderValues, setPlaceholderValues] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState('template');
   const [profileConfig, setProfileConfig] = useState<InstitutionalConfig | null>(null);
+  const [sfmcDialogOpen, setSfmcDialogOpen] = useState(false);
 
   // Fetch institutional profile config if the template has one
   useEffect(() => {
@@ -436,6 +438,10 @@ export function TemplateDetailDialog({ template, open, onOpenChange, onPull }: T
               <Copy className="w-4 h-4" />
               {copied ? "Copied!" : "Copy"}
             </Button>
+            <Button onClick={() => setSfmcDialogOpen(true)} variant="outline" size="sm" className="flex items-center gap-2">
+              <Cloud className="w-4 h-4 text-blue-500" />
+              Salesforce
+            </Button>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
@@ -447,6 +453,14 @@ export function TemplateDetailDialog({ template, open, onOpenChange, onPull }: T
             </Button>
           </div>
         </div>
+
+        <SalesforceCredentialsDialog
+          open={sfmcDialogOpen}
+          onOpenChange={setSfmcDialogOpen}
+          content={customizedContent}
+          contentName={template.title}
+          channel={template.requiredFields?.channel?.[0] || 'email'}
+        />
       </DialogContent>
     </Dialog>
   );

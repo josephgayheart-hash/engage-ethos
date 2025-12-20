@@ -9,7 +9,8 @@ import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import type { SavedMessage } from "@/types/library";
 import { JourneyViewer, isJourneyContent, parseJourneyContent } from "./JourneyViewer";
 import { openInGoogleDocs, formatForGoogleDocs } from "@/lib/googleDocsExport";
-import { CheckCircle, Copy, Trash2, History, Map, ExternalLink, FileText, Pencil, X, Save } from "lucide-react";
+import { SalesforceCredentialsDialog } from "@/components/SalesforceCredentialsDialog";
+import { CheckCircle, Copy, Trash2, History, Map, ExternalLink, FileText, Pencil, X, Save, Cloud } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -26,6 +27,7 @@ export function MessageDetailDialog({ message, open, onOpenChange, onApprove, on
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(message.content);
+  const [sfmcDialogOpen, setSfmcDialogOpen] = useState(false);
   const isJourney = useMemo(() => isJourneyContent(message.content), [message.content]);
   const journeyData = useMemo(() => isJourney ? parseJourneyContent(message.content) : null, [message.content, isJourney]);
 
@@ -154,7 +156,11 @@ export function MessageDetailDialog({ message, open, onOpenChange, onApprove, on
               </Button>
               <Button onClick={handleOpenInGoogleDocs} variant="outline" className="flex items-center gap-2">
                 <ExternalLink className="w-4 h-4" />
-                Open in Google Docs
+                Google Docs
+              </Button>
+              <Button onClick={() => setSfmcDialogOpen(true)} variant="outline" className="flex items-center gap-2">
+                <Cloud className="w-4 h-4 text-blue-500" />
+                Salesforce
               </Button>
               {!message.approved && (
                 <Button onClick={onApprove} className="flex items-center gap-2">
@@ -253,6 +259,14 @@ export function MessageDetailDialog({ message, open, onOpenChange, onApprove, on
             Close
           </Button>
         </div>
+
+        <SalesforceCredentialsDialog
+          open={sfmcDialogOpen}
+          onOpenChange={setSfmcDialogOpen}
+          content={displayContent}
+          contentName={message.title}
+          channel={message.channel || 'email'}
+        />
       </DialogContent>
     </Dialog>
   );

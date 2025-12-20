@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import { useToast } from "@/hooks/use-toast";
+import { SalesforceCredentialsDialog } from "@/components/SalesforceCredentialsDialog";
 import { 
   Copy, 
   Check, 
@@ -74,6 +75,7 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState<ChannelDrafts[keyof ChannelDrafts]>(content);
+  const [sfmcDialogOpen, setSfmcDialogOpen] = useState(false);
   const { toast } = useToast();
 
   // Sync editedContent with parent content when it changes
@@ -204,31 +206,7 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
   };
 
   const handleExportToSalesforce = () => {
-    const sfmcContent = {
-      contentBlock: buildSfmcContent(),
-      exportedFrom: "uPlaybook",
-      exportedAt: new Date().toISOString(),
-      importInstructions: {
-        platform: "Salesforce Marketing Cloud",
-        destination: "Content Builder",
-        notes: "Import as HTML content block or paste into CloudPages/Email template",
-      },
-    };
-
-    const blob = new Blob([JSON.stringify(sfmcContent, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${channel}-sfmc-export-${Date.now()}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-
-    toast({
-      title: "Exported for Salesforce",
-      description: "Content exported for Marketing Cloud import",
-    });
+    setSfmcDialogOpen(true);
   };
 
   const handleStartEdit = () => {
@@ -1047,6 +1025,14 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
       <CardContent>
         {isEditing ? renderEditContent() : renderContent()}
       </CardContent>
+
+      <SalesforceCredentialsDialog
+        open={sfmcDialogOpen}
+        onOpenChange={setSfmcDialogOpen}
+        content={getFullContent(editedContent)}
+        contentName={`${channelLabels[channel]} - ${new Date().toLocaleDateString()}`}
+        channel={channel}
+      />
     </Card>
   );
 }
