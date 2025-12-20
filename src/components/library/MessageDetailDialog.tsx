@@ -158,10 +158,12 @@ export function MessageDetailDialog({ message, open, onOpenChange, onApprove, on
                 <ExternalLink className="w-4 h-4" />
                 Google Docs
               </Button>
-              <Button onClick={() => setSfmcDialogOpen(true)} variant="outline" className="flex items-center gap-2">
-                <Cloud className="w-4 h-4 text-blue-500" />
-                Salesforce
-              </Button>
+              {message.channel && ['email', 'sms', 'landing-page'].includes(message.channel) && (
+                <Button onClick={() => setSfmcDialogOpen(true)} variant="outline" className="flex items-center gap-2">
+                  <Cloud className="w-4 h-4 text-blue-500" />
+                  Salesforce
+                </Button>
+              )}
               {!message.approved && (
                 <Button onClick={onApprove} className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4" />

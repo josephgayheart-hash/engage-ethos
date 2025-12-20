@@ -438,10 +438,12 @@ export function TemplateDetailDialog({ template, open, onOpenChange, onPull }: T
               <Copy className="w-4 h-4" />
               {copied ? "Copied!" : "Copy"}
             </Button>
-            <Button onClick={() => setSfmcDialogOpen(true)} variant="outline" size="sm" className="flex items-center gap-2">
-              <Cloud className="w-4 h-4 text-blue-500" />
-              Salesforce
-            </Button>
+            {template.requiredFields?.channel?.some(ch => ['email', 'sms', 'landing-page'].includes(ch)) && (
+              <Button onClick={() => setSfmcDialogOpen(true)} variant="outline" size="sm" className="flex items-center gap-2">
+                <Cloud className="w-4 h-4 text-blue-500" />
+                Salesforce
+              </Button>
+            )}
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>

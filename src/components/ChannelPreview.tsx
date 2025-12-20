@@ -998,14 +998,16 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
                     <FolderPlus className="w-4 h-4" />
                   </Button>
                 )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleExportToSalesforce}
-                  title="Export for Salesforce Marketing Cloud"
-                >
-                  <Cloud className="w-4 h-4 text-blue-500" />
-                </Button>
+                {['email', 'sms', 'landing-page'].includes(channel) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleExportToSalesforce}
+                    title="Push to Salesforce Marketing Cloud"
+                  >
+                    <Cloud className="w-4 h-4 text-blue-500" />
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
