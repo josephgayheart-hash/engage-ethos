@@ -20,48 +20,48 @@ import uplaybookLogo from '@/assets/uplaybook-logo.png';
 const features = [
   {
     icon: MessageSquare,
-    title: 'Build Messages',
-    description: 'Generate research-backed communications tailored to your audience, moment, and goal.',
+    title: 'Brand-Aligned Messaging',
+    description: 'Generate content grounded in your brand promise, pillars, and positioning. Not just voice.',
   },
   {
     icon: BarChart3,
-    title: 'Evaluate Content',
-    description: 'Score existing messages against Cialdini\'s persuasion framework and cognitive load principles.',
+    title: 'Content DNA Scoring',
+    description: 'Score messages against your institutional brand platform, not just generic persuasion principles.',
   },
   {
     icon: Target,
-    title: 'Design Journeys',
-    description: 'Map multi-channel communication strategies for any initiative, campaign, or audience.',
+    title: 'Journey Flow Builder',
+    description: 'Map multi-channel strategies with duration, intensity, and ramp-up controls. The differentiator for comms leaders.',
   },
   {
     icon: BookOpen,
     title: 'University Library',
-    description: 'Personal and shared libraries with approval workflows—build your institution\'s playbook of vetted messages.',
+    description: 'Governed content with approval workflows. Personal drafts for experimentation. Shared libraries for approved, on-brand plays.',
   },
 ];
 
 const valueProps = [
   {
-    title: 'From meeting to message in minutes',
-    description: 'Turn leadership directives into structured communication plans instantly—not days.',
+    title: 'Brand protection at scale',
+    description: '"Finally, a way to protect our brand across every college without being in every meeting." — A CMO\'s perspective',
   },
   {
-    title: 'Speak with one institutional voice',
-    description: 'Define your Content DNA once, and every AI-generated message reflects your brand.',
+    title: 'University-to-subunit governance',
+    description: 'Build your institution profile once. Subunits inherit or customize brand elements with clear hierarchy and control.',
   },
   {
-    title: 'Strategy first, execution second',
-    description: 'Not a CRM—the organized pre-work that makes your marketing tools actually effective.',
+    title: 'Audience-first, brand-aligned',
+    description: 'Start with your audience. Align to brand pillars. Then craft messages that resonate.',
   },
   {
-    title: 'Institutional message governance',
-    description: 'Personal libraries for drafts, shared libraries for approved plays—your whole institution on the same page.',
+    title: 'Journey planning that solves real problems',
+    description: 'Map multi-week communication flows with intensity controls, ramp-up patterns, and visual timelines your team will actually use.',
   },
 ];
 
 const trustIndicators = [
-  { icon: Shield, label: 'Research-Grounded' },
-  { icon: Brain, label: 'Behavioral Science' },
+  { icon: Shield, label: 'Brand Governance' },
+  { icon: Brain, label: 'Brand Platform-Driven' },
   { icon: GraduationCap, label: 'Built for Higher Ed' },
 ];
 
@@ -102,7 +102,7 @@ export default function LandingPage() {
               style={{ animationDelay: '0.2s' }}
             >
               Plan. Strategize. Execute.
-              <span className="block text-primary text-2xl sm:text-3xl lg:text-4xl mt-2">Your Playbook for Higher Ed Communications</span>
+              <span className="block text-primary text-2xl sm:text-3xl lg:text-4xl mt-2">Your Digital Playbook for Higher Ed Communications</span>
             </h1>
 
             {/* Secondary Tagline */}
@@ -110,7 +110,7 @@ export default function LandingPage() {
               className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed animate-fade-in"
               style={{ animationDelay: '0.3s' }}
             >
-              The strategy and planning layer for university communications. From boardroom to inbox—organize your thinking before you hit send.
+              Craft meaningful, research-driven, brand-informed messaging at scale. From the boardroom to every inbox.
             </p>
 
             {/* CTA Buttons */}
@@ -249,10 +249,10 @@ export default function LandingPage() {
         
         <div className="max-w-3xl mx-auto text-center relative z-10">
           <h2 className="font-serif text-2xl sm:text-3xl text-white mb-4">
-            Ready to transform how your institution plans communications?
+            Ready to become your institution's digital brand enforcer?
           </h2>
           <p className="text-white/70 mb-8 text-lg">
-            Join forward-thinking institutions using UPlaybook to organize and execute strategic messaging.
+            Small comms teams. Big brand protection. AI that keeps everyone on-brand while still allowing human edits.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 

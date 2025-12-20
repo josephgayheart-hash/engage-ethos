@@ -108,7 +108,7 @@ const SharedLibrary = () => {
                 University Library
               </h1>
               <p className="text-muted-foreground mt-1">
-                Organization-approved playbooks
+                Brand-governed content with approval workflows. Your institution's playbook of vetted, on-brand messaging.
               </p>
             </div>
             <div className="flex gap-2">
