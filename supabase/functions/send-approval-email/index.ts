@@ -1,6 +1,10 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
 if (!RESEND_API_KEY) {
   console.error("Missing RESEND_API_KEY secret");
 }
@@ -17,16 +21,18 @@ interface ApprovalEmailRequest {
   temporaryPassword: string;
   institutionName: string;
   role: string;
+  userId?: string;
+  tenantId?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { email, firstName, lastName, temporaryPassword, institutionName, role }: ApprovalEmailRequest = await req.json();
+    const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
+    const { email, firstName, lastName, temporaryPassword, institutionName, role, userId, tenantId }: ApprovalEmailRequest = await req.json();
 
     console.log(`Sending approval email to ${email} for ${institutionName}`);
 
@@ -38,6 +44,8 @@ const handler = async (req: Request): Promise<Response> => {
         : role === 'approver' || role === 'user_approver'
           ? 'University User + Approver'
           : 'University User';
+
+    const subject = `🎉 You're In! Welcome to UPlaybook.AI - ${institutionName}`;
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -193,7 +201,7 @@ const handler = async (req: Request): Promise<Response> => {
       body: JSON.stringify({
         from: "UPlaybook.AI <noreply@uplaybook.ai>",
         to: [email],
-        subject: `🎉 You're In! Welcome to UPlaybook.AI - ${institutionName}`,
+        subject,
         html: htmlContent,
       }),
     });
@@ -206,6 +214,33 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     console.log("Approval email sent successfully:", responseData);
+
+    // Log to email_nudges for tracking
+    if (userId && tenantId) {
+      const { error: nudgeError } = await supabase.from("email_nudges").insert({
+        user_id: userId,
+        tenant_id: tenantId,
+        nudge_type: "approval",
+        email_type: "approval",
+        email_count: 1,
+        subject: subject,
+        recipient_name: `${firstName} ${lastName}`,
+        recipient_email: email,
+        provider: "resend",
+        provider_message_id: responseData.id,
+        delivery_status: "sent",
+        metadata: {
+          institution_name: institutionName,
+          role: role,
+        },
+      });
+
+      if (nudgeError) {
+        console.error("Error logging email nudge:", nudgeError);
+      } else {
+        console.log("Email nudge logged successfully");
+      }
+    }
 
     return new Response(JSON.stringify({ success: true, ...responseData }), {
       status: 200,

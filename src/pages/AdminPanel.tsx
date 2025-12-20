@@ -1350,7 +1350,7 @@ const AdminPanel = () => {
                             <TableHead>Subject</TableHead>
                             <TableHead>Institution</TableHead>
                             <TableHead>Sent</TableHead>
-                            <TableHead>Status</TableHead>
+                            <TableHead>Delivery</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -1375,23 +1375,41 @@ const AdminPanel = () => {
                               <TableCell className="text-sm">{nudge.institution_name}</TableCell>
                               <TableCell className="text-sm">{formatTime(nudge.sent_at)}</TableCell>
                               <TableCell>
-                                {(() => {
-                                  const deliveryStatus = nudge.delivery_status || nudge.status || 'sent';
-                                  const statusConfig: Record<string, { bg: string; text: string; icon: React.ReactNode; label: string }> = {
-                                    sent: { bg: 'bg-blue-100', text: 'text-blue-700', icon: <Send className="w-3 h-3 mr-1" />, label: 'Sent' },
-                                    delivered: { bg: 'bg-green-100', text: 'text-green-700', icon: <CheckCircle2 className="w-3 h-3 mr-1" />, label: 'Delivered' },
-                                    opened: { bg: 'bg-purple-100', text: 'text-purple-700', icon: <Eye className="w-3 h-3 mr-1" />, label: 'Opened' },
-                                    clicked: { bg: 'bg-indigo-100', text: 'text-indigo-700', icon: <ExternalLink className="w-3 h-3 mr-1" />, label: 'Clicked' },
-                                    bounced: { bg: 'bg-red-100', text: 'text-red-700', icon: <XCircle className="w-3 h-3 mr-1" />, label: 'Bounced' },
-                                  };
-                                  const config = statusConfig[deliveryStatus] || statusConfig.sent;
-                                  return (
-                                    <Badge className={`${config.bg} ${config.text}`}>
-                                      {config.icon}
-                                      {config.label}
+                                <div className="flex flex-wrap gap-1">
+                                  {/* Sent indicator */}
+                                  <Badge className="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0.5">
+                                    <Send className="w-2.5 h-2.5 mr-0.5" />
+                                    Sent
+                                  </Badge>
+                                  {/* Delivered */}
+                                  {nudge.delivered_at && (
+                                    <Badge className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0.5" title={`Delivered: ${new Date(nudge.delivered_at).toLocaleString()}`}>
+                                      <CheckCircle2 className="w-2.5 h-2.5 mr-0.5" />
+                                      Delivered
                                     </Badge>
-                                  );
-                                })()}
+                                  )}
+                                  {/* Opened */}
+                                  {nudge.opened_at && (
+                                    <Badge className="bg-purple-100 text-purple-700 text-[10px] px-1.5 py-0.5" title={`Opened: ${new Date(nudge.opened_at).toLocaleString()}`}>
+                                      <Eye className="w-2.5 h-2.5 mr-0.5" />
+                                      Opened
+                                    </Badge>
+                                  )}
+                                  {/* Clicked */}
+                                  {nudge.clicked_at && (
+                                    <Badge className="bg-indigo-100 text-indigo-700 text-[10px] px-1.5 py-0.5" title={`Clicked: ${new Date(nudge.clicked_at).toLocaleString()}`}>
+                                      <ExternalLink className="w-2.5 h-2.5 mr-0.5" />
+                                      Clicked
+                                    </Badge>
+                                  )}
+                                  {/* Bounced */}
+                                  {nudge.bounced_at && (
+                                    <Badge className="bg-red-100 text-red-700 text-[10px] px-1.5 py-0.5" title={`Bounced: ${new Date(nudge.bounced_at).toLocaleString()}`}>
+                                      <XCircle className="w-2.5 h-2.5 mr-0.5" />
+                                      Bounced
+                                    </Badge>
+                                  )}
+                                </div>
                               </TableCell>
                             </TableRow>
                           ))}

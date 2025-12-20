@@ -211,7 +211,7 @@ const handler = async (req: Request): Promise<Response> => {
     const { data: invitedUsers, error: invitedError } = await supabase
       .from("profiles")
       .select(`
-        id, email, first_name, last_name, status, created_at, last_login_at,
+        id, email, first_name, last_name, status, created_at, last_login_at, tenant_id,
         tenants!inner(institution_name)
       `)
       .eq("status", "invited")
@@ -227,20 +227,16 @@ const handler = async (req: Request): Promise<Response> => {
         const createdAt = new Date(user.created_at);
         const hoursSinceCreated = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60);
         
-        // Determine which reminder to send
         let shouldSend = false;
         let reminderNumber = 0;
         
         if (hoursSinceCreated >= 48 && hoursSinceCreated < 120) {
-          // 48 hours - first reminder
           reminderNumber = 1;
         } else if (hoursSinceCreated >= 120) {
-          // 5 days - second reminder
           reminderNumber = 2;
         }
 
         if (reminderNumber > 0) {
-          // Check if we already sent this reminder
           const { data: existingNudges } = await supabase
             .from("email_nudges")
             .select("email_count")
@@ -254,9 +250,9 @@ const handler = async (req: Request): Promise<Response> => {
         if (shouldSend) {
           const daysAgo = reminderNumber === 1 ? 2 : 5;
           const institutionName = (user.tenants as any)?.institution_name || "your institution";
+          const subject = "Your UPlaybook.AI account is waiting!";
           
           try {
-            // Send email
             const response = await fetch("https://api.resend.com/emails", {
               method: "POST",
               headers: {
@@ -266,13 +262,14 @@ const handler = async (req: Request): Promise<Response> => {
               body: JSON.stringify({
                 from: "UPlaybook.AI <noreply@uplaybook.ai>",
                 to: [user.email],
-                subject: "Your UPlaybook.AI account is waiting!",
+                subject,
                 html: getInviteReminderHtml(user.first_name, institutionName, daysAgo),
               }),
             });
 
+            const responseData = await response.json();
+
             if (response.ok) {
-              // Record the nudge
               const { data: existingNudge } = await supabase
                 .from("email_nudges")
                 .select("id, email_count")
@@ -283,29 +280,35 @@ const handler = async (req: Request): Promise<Response> => {
               if (existingNudge) {
                 await supabase
                   .from("email_nudges")
-                  .update({ email_count: existingNudge.email_count + 1, sent_at: now.toISOString() })
+                  .update({ 
+                    email_count: existingNudge.email_count + 1, 
+                    sent_at: now.toISOString(),
+                    provider: "resend",
+                    provider_message_id: responseData.id,
+                    delivery_status: "sent",
+                  })
                   .eq("id", existingNudge.id);
               } else {
-                // Get tenant_id from profiles
-                const { data: profile } = await supabase
-                  .from("profiles")
-                  .select("tenant_id")
-                  .eq("id", user.id)
-                  .single();
-
                 await supabase.from("email_nudges").insert({
                   user_id: user.id,
-                  tenant_id: profile?.tenant_id,
+                  tenant_id: user.tenant_id,
                   nudge_type: "invite_reminder",
+                  email_type: "invite_reminder",
                   email_count: 1,
+                  subject: subject,
+                  recipient_name: `${user.first_name} ${user.last_name}`,
+                  recipient_email: user.email,
+                  provider: "resend",
+                  provider_message_id: responseData.id,
+                  delivery_status: "sent",
+                  metadata: { institution_name: institutionName, reminder_number: reminderNumber },
                 });
               }
 
               results.inviteReminders++;
               console.log(`Sent invite reminder ${reminderNumber} to ${user.email}`);
             } else {
-              const errorData = await response.json();
-              results.errors.push(`Failed to send to ${user.email}: ${errorData.message}`);
+              results.errors.push(`Failed to send to ${user.email}: ${responseData.message}`);
             }
           } catch (err: any) {
             results.errors.push(`Error sending to ${user.email}: ${err.message}`);
@@ -318,7 +321,7 @@ const handler = async (req: Request): Promise<Response> => {
     const { data: inactiveUsers, error: inactiveError } = await supabase
       .from("profiles")
       .select(`
-        id, email, first_name, last_name, status, last_login_at,
+        id, email, first_name, last_name, status, last_login_at, tenant_id,
         tenants!inner(institution_name)
       `)
       .eq("status", "active")
@@ -334,7 +337,6 @@ const handler = async (req: Request): Promise<Response> => {
         const lastLogin = new Date(user.last_login_at!);
         const daysSinceLogin = Math.floor((now.getTime() - lastLogin.getTime()) / (1000 * 60 * 60 * 24));
 
-        // Check if we sent a "we miss you" email in the last 14 days
         const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
         const { data: recentNudge } = await supabase
           .from("email_nudges")
@@ -346,6 +348,7 @@ const handler = async (req: Request): Promise<Response> => {
 
         if (!recentNudge) {
           const institutionName = (user.tenants as any)?.institution_name || "your institution";
+          const subject = "We miss you at UPlaybook.AI! 👋";
           
           try {
             const response = await fetch("https://api.resend.com/emails", {
@@ -357,20 +360,14 @@ const handler = async (req: Request): Promise<Response> => {
               body: JSON.stringify({
                 from: "UPlaybook.AI <noreply@uplaybook.ai>",
                 to: [user.email],
-                subject: "We miss you at UPlaybook.AI! 👋",
+                subject,
                 html: getWeMissYouHtml(user.first_name, institutionName, daysSinceLogin),
               }),
             });
 
-            if (response.ok) {
-              // Get tenant_id
-              const { data: profile } = await supabase
-                .from("profiles")
-                .select("tenant_id")
-                .eq("id", user.id)
-                .single();
+            const responseData = await response.json();
 
-              // Record the nudge
+            if (response.ok) {
               const { data: existingNudge } = await supabase
                 .from("email_nudges")
                 .select("id, email_count")
@@ -381,22 +378,35 @@ const handler = async (req: Request): Promise<Response> => {
               if (existingNudge) {
                 await supabase
                   .from("email_nudges")
-                  .update({ email_count: existingNudge.email_count + 1, sent_at: now.toISOString() })
+                  .update({ 
+                    email_count: existingNudge.email_count + 1, 
+                    sent_at: now.toISOString(),
+                    provider: "resend",
+                    provider_message_id: responseData.id,
+                    delivery_status: "sent",
+                  })
                   .eq("id", existingNudge.id);
               } else {
                 await supabase.from("email_nudges").insert({
                   user_id: user.id,
-                  tenant_id: profile?.tenant_id,
+                  tenant_id: user.tenant_id,
                   nudge_type: "we_miss_you",
+                  email_type: "we_miss_you",
                   email_count: 1,
+                  subject: subject,
+                  recipient_name: `${user.first_name} ${user.last_name}`,
+                  recipient_email: user.email,
+                  provider: "resend",
+                  provider_message_id: responseData.id,
+                  delivery_status: "sent",
+                  metadata: { institution_name: institutionName, days_since_login: daysSinceLogin },
                 });
               }
 
               results.weMissYou++;
               console.log(`Sent "we miss you" email to ${user.email}`);
             } else {
-              const errorData = await response.json();
-              results.errors.push(`Failed to send to ${user.email}: ${errorData.message}`);
+              results.errors.push(`Failed to send to ${user.email}: ${responseData.message}`);
             }
           } catch (err: any) {
             results.errors.push(`Error sending to ${user.email}: ${err.message}`);
