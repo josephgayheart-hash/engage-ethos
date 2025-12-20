@@ -29,6 +29,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
+import { WaveBackground } from "@/components/WaveBackground";
 import { 
   ArrowLeft,
   Building2, 
@@ -252,31 +253,39 @@ const SettingsPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-5xl mx-auto">
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-            <Link to="/dashboard" className="hover:text-foreground transition-colors flex items-center gap-1">
-              <ArrowLeft className="w-4 h-4" />
-              Home
-            </Link>
-            <span>/</span>
-            <span className="text-foreground">Institutional Profiles</span>
-          </div>
+      {/* Wave Header */}
+      <div className="relative bg-gradient-to-br from-primary/10 via-primary/5 to-background pb-12">
+        <div className="container mx-auto px-4 pt-10 pb-8">
+          <div className="max-w-5xl mx-auto">
+            {/* Breadcrumb */}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+              <Link to="/dashboard" className="hover:text-foreground transition-colors flex items-center gap-1">
+                <ArrowLeft className="w-4 h-4" />
+                Home
+              </Link>
+              <span>/</span>
+              <span className="text-foreground">Institutional Profiles</span>
+            </div>
 
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-2">
+            {/* Header */}
+            <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                 <Building2 className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h1 className="font-serif text-2xl font-bold">Institutional Profiles</h1>
+                <h1 className="font-serif text-2xl md:text-3xl font-bold">Institutional Profiles</h1>
                 <p className="text-muted-foreground text-sm">
                   Create and manage institution profiles to generate content as different organizations
                 </p>
               </div>
             </div>
           </div>
+        </div>
+        <WaveBackground variant="default" />
+      </div>
+      
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-5xl mx-auto">
 
           {showWizard ? (
             // Profile Setup Wizard (full screen)

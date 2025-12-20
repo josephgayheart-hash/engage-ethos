@@ -20,6 +20,7 @@ import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
 import { evaluateMessage } from "@/lib/evaluateMessage";
 import { extractTextFromFile, getAcceptString } from "@/lib/documentParser";
 import { useAuth } from "@/contexts/AuthContext";
+import { WaveBackground } from "@/components/WaveBackground";
 import { 
   ArrowLeft, 
   ArrowRight, 
@@ -189,30 +190,39 @@ const BYOCPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto space-y-6">
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Link to="/dashboard" className="hover:text-foreground transition-colors flex items-center gap-1">
-              <ArrowLeft className="w-4 h-4" />
-              Home
-            </Link>
-            <span>/</span>
-            <span className="text-foreground">Import & Evaluate</span>
-          </div>
+      {/* Wave Header */}
+      <div className="relative bg-gradient-to-br from-pillar-consensus/10 via-pillar-consensus/5 to-background pb-12">
+        <div className="container mx-auto px-4 pt-10 pb-8">
+          <div className="max-w-4xl mx-auto">
+            {/* Breadcrumb */}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+              <Link to="/dashboard" className="hover:text-foreground transition-colors flex items-center gap-1">
+                <ArrowLeft className="w-4 h-4" />
+                Home
+              </Link>
+              <span>/</span>
+              <span className="text-foreground">Import & Evaluate</span>
+            </div>
 
-          {/* Header */}
-          <div className="flex items-start justify-between">
-            <div>
-            <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
-              <Upload className="w-7 h-7 text-pillar-consensus" />
-              Bring Your Own Comm
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Import your approved communications to add to my library or the university library
-            </p>
+            {/* Header */}
+            <div className="flex items-start justify-between">
+              <div>
+                <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
+                  <Upload className="w-7 h-7 text-pillar-consensus" />
+                  Bring Your Own Comm
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                  Import your approved communications to add to my library or the university library
+                </p>
+              </div>
+            </div>
           </div>
         </div>
+        <WaveBackground variant="teal" />
+      </div>
+      
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto space-y-6">
 
         {/* Purpose Card */}
         <Card className="border-pillar-consensus/30 bg-pillar-consensus/5">

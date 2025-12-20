@@ -23,6 +23,7 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { WaveBackground } from "@/components/WaveBackground";
 import { 
   ArrowLeft, 
   Phone, 
@@ -257,31 +258,40 @@ ${callScript.followUpNotes}`;
     <div className="min-h-screen bg-background">
       <Header />
       
+      {/* Wave Header */}
+      <div className="relative bg-gradient-to-br from-pillar-authority/10 via-pillar-authority/5 to-background pb-12">
+        <div className="container mx-auto px-4 pt-10 pb-8">
+          <div className="max-w-4xl mx-auto">
+            {/* Breadcrumb */}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+              <Link to="/dashboard" className="hover:text-foreground transition-colors flex items-center gap-1">
+                <ArrowLeft className="w-4 h-4" />
+                Home
+              </Link>
+              <span>/</span>
+              <span className="text-foreground">Call Script Generator</span>
+            </div>
+
+            {/* Header */}
+            <div className="flex items-start justify-between">
+              <div>
+                <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
+                  <Phone className="w-7 h-7 text-pillar-authority" />
+                  Call Script Generator
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                  Generate research-informed phone call scripts for student outreach
+                </p>
+              </div>
+              <AIBadge />
+            </div>
+          </div>
+        </div>
+        <WaveBackground variant="amber" />
+      </div>
+      
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto space-y-6">
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Link to="/dashboard" className="hover:text-foreground transition-colors flex items-center gap-1">
-              <ArrowLeft className="w-4 h-4" />
-              Home
-            </Link>
-            <span>/</span>
-            <span className="text-foreground">Call Script Generator</span>
-          </div>
-
-          {/* Header */}
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
-                <Phone className="w-7 h-7 text-pillar-authority" />
-                Call Script Generator
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Generate research-informed phone call scripts for student outreach
-              </p>
-            </div>
-            <AIBadge />
-          </div>
 
           {/* Context Form */}
           <Card>
