@@ -253,9 +253,11 @@ const SettingsPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      {/* Wave Header */}
-      <div className="relative bg-gradient-to-br from-primary/10 via-primary/5 to-background pb-12">
-        <div className="container mx-auto px-4 pt-10 pb-8">
+      {/* Page Header with wave background */}
+      <div className="relative overflow-hidden pb-12">
+        <WaveBackground variant="default" />
+        
+        <div className="relative container mx-auto px-4 pt-10 pb-8">
           <div className="max-w-5xl mx-auto">
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
@@ -281,7 +283,6 @@ const SettingsPage = () => {
             </div>
           </div>
         </div>
-        <WaveBackground variant="default" />
       </div>
       
       <main className="container mx-auto px-4 py-8">
