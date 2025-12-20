@@ -309,22 +309,24 @@ export function SendEmailDialog({
             </Select>
           </div>
 
-          {/* Institution Selector (always shown) */}
-          <div className="space-y-2">
-            <Label>Institution</Label>
-            <Select value={selectedTenant} onValueChange={setSelectedTenant}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select institution..." />
-              </SelectTrigger>
-              <SelectContent>
-                {tenants.map(t => (
-                  <SelectItem key={t.id} value={t.id}>
-                    {t.institution_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Institution Selector (only for invite and resend) */}
+          {(emailType === 'invite' || emailType === 'resend_invite') && (
+            <div className="space-y-2">
+              <Label>Institution</Label>
+              <Select value={selectedTenant} onValueChange={setSelectedTenant}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select institution..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {tenants.map(t => (
+                    <SelectItem key={t.id} value={t.id}>
+                      {t.institution_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* New User Invite Form */}
           {emailType === 'invite' && (
