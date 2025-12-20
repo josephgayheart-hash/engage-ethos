@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { WaveBackground } from "@/components/WaveBackground";
@@ -48,15 +48,73 @@ import {
 import { extractTextFromFile, getAcceptString } from '@/lib/documentParser';
 
 const SAMPLE_TYPES = [
-  { value: 'email', label: 'Email' },
-  { value: 'sms', label: 'SMS/Text' },
-  { value: 'newsletter', label: 'Newsletter' },
-  { value: 'news_story', label: 'News Story' },
-  { value: 'speech', label: 'Speech/Remarks' },
-  { value: 'social', label: 'Social Media' },
-  { value: 'web_copy', label: 'Website Copy' },
-  { value: 'marketing', label: 'Marketing Material' },
-  { value: 'other', label: 'Other' },
+  // Core Communications
+  { value: 'email', label: 'Email', category: 'Core Communications' },
+  { value: 'sms', label: 'SMS/Text Message', category: 'Core Communications' },
+  { value: 'newsletter', label: 'Newsletter', category: 'Core Communications' },
+  { value: 'letter', label: 'Letter/Formal Correspondence', category: 'Core Communications' },
+  { value: 'memo', label: 'Internal Memo', category: 'Core Communications' },
+  
+  // Public Relations & Media
+  { value: 'news_story', label: 'News Story/Article', category: 'Public Relations' },
+  { value: 'press_release', label: 'Press Release', category: 'Public Relations' },
+  { value: 'media_advisory', label: 'Media Advisory', category: 'Public Relations' },
+  { value: 'op_ed', label: 'Op-Ed/Opinion Piece', category: 'Public Relations' },
+  { value: 'crisis_comm', label: 'Crisis Communication', category: 'Public Relations' },
+  
+  // Speeches & Events
+  { value: 'speech', label: 'Speech/Remarks', category: 'Speeches & Events' },
+  { value: 'talking_points', label: 'Talking Points', category: 'Speeches & Events' },
+  { value: 'commencement', label: 'Commencement Address', category: 'Speeches & Events' },
+  { value: 'event_script', label: 'Event Script/Program', category: 'Speeches & Events' },
+  { value: 'presentation', label: 'Presentation Script', category: 'Speeches & Events' },
+  
+  // Outreach & Engagement
+  { value: 'call_script', label: 'Call Script', category: 'Outreach' },
+  { value: 'phonathon', label: 'Phonathon Script', category: 'Outreach' },
+  { value: 'donor_stewardship', label: 'Donor Stewardship', category: 'Outreach' },
+  { value: 'thank_you', label: 'Thank You Message', category: 'Outreach' },
+  { value: 'alumni_outreach', label: 'Alumni Outreach', category: 'Outreach' },
+  
+  // Digital & Social
+  { value: 'social', label: 'Social Media Post', category: 'Digital' },
+  { value: 'web_copy', label: 'Website Copy', category: 'Digital' },
+  { value: 'blog_post', label: 'Blog Post', category: 'Digital' },
+  { value: 'video_script', label: 'Video Script', category: 'Digital' },
+  { value: 'podcast_script', label: 'Podcast Script', category: 'Digital' },
+  
+  // Marketing & Recruitment
+  { value: 'marketing', label: 'Marketing Material', category: 'Marketing' },
+  { value: 'brochure', label: 'Brochure/Flyer', category: 'Marketing' },
+  { value: 'viewbook', label: 'Viewbook Copy', category: 'Marketing' },
+  { value: 'recruitment', label: 'Recruitment Material', category: 'Marketing' },
+  { value: 'campaign', label: 'Campaign Material', category: 'Marketing' },
+  { value: 'ad_copy', label: 'Advertisement Copy', category: 'Marketing' },
+  
+  // Brand & Guidelines
+  { value: 'brand_guidelines', label: 'Brand Guidelines', category: 'Brand' },
+  { value: 'style_guide', label: 'Style Guide', category: 'Brand' },
+  { value: 'messaging_framework', label: 'Messaging Framework', category: 'Brand' },
+  { value: 'brand_narrative', label: 'Brand Narrative', category: 'Brand' },
+  { value: 'value_proposition', label: 'Value Proposition', category: 'Brand' },
+  { value: 'boilerplate', label: 'Boilerplate Copy', category: 'Brand' },
+  
+  // Academic & Administrative
+  { value: 'academic_catalog', label: 'Academic Catalog', category: 'Academic' },
+  { value: 'program_description', label: 'Program Description', category: 'Academic' },
+  { value: 'course_description', label: 'Course Description', category: 'Academic' },
+  { value: 'faculty_bio', label: 'Faculty Biography', category: 'Academic' },
+  { value: 'student_handbook', label: 'Student Handbook', category: 'Academic' },
+  
+  // Reports & Publications
+  { value: 'annual_report', label: 'Annual Report', category: 'Publications' },
+  { value: 'impact_report', label: 'Impact Report', category: 'Publications' },
+  { value: 'research_summary', label: 'Research Summary', category: 'Publications' },
+  { value: 'case_study', label: 'Case Study', category: 'Publications' },
+  { value: 'white_paper', label: 'White Paper', category: 'Publications' },
+  
+  // Other
+  { value: 'other', label: 'Other', category: 'Other' },
 ];
 
 export default function ContentDNAPage() {
@@ -603,12 +661,22 @@ export default function ContentDNAPage() {
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
-                        {SAMPLE_TYPES.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
+                      <SelectContent className="max-h-80">
+                        {/* Group sample types by category */}
+                        {['Core Communications', 'Public Relations', 'Speeches & Events', 'Outreach', 'Digital', 'Marketing', 'Brand', 'Academic', 'Publications', 'Other'].map((category) => {
+                          const categoryTypes = SAMPLE_TYPES.filter(t => t.category === category);
+                          if (categoryTypes.length === 0) return null;
+                          return (
+                            <SelectGroup key={category}>
+                              <SelectLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{category}</SelectLabel>
+                              {categoryTypes.map((type) => (
+                                <SelectItem key={type.value} value={type.value}>
+                                  {type.label}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                   </div>
