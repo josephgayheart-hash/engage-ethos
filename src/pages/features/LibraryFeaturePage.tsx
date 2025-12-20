@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { 
   ArrowLeft, 
   ArrowRight,
@@ -11,71 +12,52 @@ import {
   Search,
   Filter,
   CheckCircle2,
+  CheckCircle,
   Clock,
   Send,
   FileText,
   Building2,
   Copy,
-  RefreshCw,
+  Download,
+  Trash2,
   Lock,
-  Sparkles
+  Sparkles,
+  Eye,
+  XCircle,
+  ChevronRight,
+  Layers,
+  AlertTriangle,
+  Mail,
+  MessageSquare,
+  Calendar,
+  User
 } from "lucide-react";
 import uplaybookLogo from "@/assets/uplaybook-logo.png";
 
-const libraryTypes = [
-  {
-    icon: FileText,
-    title: "Personal Library",
-    description: "Your private workspace for drafts, experiments, and work-in-progress. Save generated content, evaluations, and journey maps.",
-    color: "text-blue-600",
-    bgColor: "bg-blue-500/10"
-  },
-  {
-    icon: BookOpen,
-    title: "University Library",
-    description: "Institution-wide approved content. Vetted playbooks, templates, and journeys that align with brand standards.",
-    color: "text-purple-600",
-    bgColor: "bg-purple-500/10"
-  },
-];
-
 const workflowSteps = [
-  { step: 1, title: "Create & Save", description: "Generate content using Message Builder or Journey Designer and save to your personal library" },
-  { step: 2, title: "Submit for Review", description: "When ready, submit your work to the University Library for approval" },
-  { step: 3, title: "Admin Review", description: "Approvers review content for brand alignment and compliance" },
-  { step: 4, title: "Publish", description: "Approved content becomes available to all team members" },
+  { step: 1, icon: FileText, title: "Save to Personal", description: "Save generated messages or evaluations to your private library", color: "bg-blue-500" },
+  { step: 2, icon: Send, title: "Submit for Review", description: "Submit your best work to the University Library", color: "bg-amber-500" },
+  { step: 3, icon: Eye, title: "Admin Review", description: "Approvers review content, guardrails, and brand alignment", color: "bg-purple-500" },
+  { step: 4, icon: BookOpen, title: "Publish Institution-Wide", description: "Approved content available to all team members", color: "bg-emerald-500" },
 ];
 
-const features = [
-  {
-    icon: ShieldCheck,
-    title: "Approval Workflows",
-    description: "Built-in review process ensures only vetted, on-brand content reaches your team.",
+const filterCategories = [
+  { 
+    label: "10 Channels", 
+    items: ["Email", "SMS", "Portal", "Landing Page", "Social Media", "Direct Mail", "Phone Script", "Talking Points", "Search Ads", "Social Ads"],
   },
-  {
-    icon: Search,
-    title: "Advanced Filtering",
-    description: "Find content by audience, channel, moment, domain, or institutional profile.",
+  { 
+    label: "5 Audiences", 
+    items: ["Prospective", "First-Year", "Continuing", "At-Risk", "Graduate"],
   },
-  {
-    icon: Building2,
-    title: "Profile Hierarchy",
-    description: "Organize content by school, department, or campaign with inherited settings.",
+  { 
+    label: "6 Domains", 
+    items: ["Academic", "Financial", "Wellbeing", "Engagement", "Behavioral", "Seasonal"],
   },
-  {
-    icon: RefreshCw,
-    title: "Remix & Iterate",
-    description: "Start from approved templates and customize for your specific needs.",
+  { 
+    label: "8 Moments", 
+    items: ["Recruitment", "Orientation", "Registration", "Early Term", "Midterm", "Finals", "Re-engagement", "Seasonal"],
   },
-];
-
-const contentTypes = [
-  { label: "Message Kits", description: "Multi-channel content packages" },
-  { label: "Strategy Journeys", description: "Complete campaign timelines" },
-  { label: "Email Templates", description: "Ready-to-customize emails" },
-  { label: "Call Scripts", description: "Phone conversation guides" },
-  { label: "Talking Points", description: "Executive briefing materials" },
-  { label: "Ad Copy", description: "Search and social ad content" },
 ];
 
 export default function LibraryFeaturePage() {
@@ -110,26 +92,26 @@ export default function LibraryFeaturePage() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 md:py-32">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-background to-indigo-500/5" />
-        <div className="absolute top-20 right-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 left-10 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5" />
+        <div className="absolute top-20 right-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-10 left-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
         
         <div className="container mx-auto px-4 relative">
           <div className="max-w-4xl mx-auto text-center">
-            <Badge className="mb-6 bg-purple-500/10 text-purple-600 border-purple-500/20">
+            <Badge className="mb-6 bg-primary/10 text-primary border-primary/20">
               <Library className="w-3 h-3 mr-1" />
-              Enterprise Content Governance
+              The Quiet Killer for CCOs & CMOs
             </Badge>
             <h1 className="font-serif text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
-              Your Institution's
-              <span className="block text-purple-600">Content Command Center</span>
+              Scale Your Brand Voice
+              <span className="block text-primary">With Governance Built In</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Governed content libraries with approval workflows. Personal drafts for experimentation. University-wide playbooks for brand-compliant messaging at scale.
+              Keep every team member on-brand with personal libraries that flow into university-wide governance—complete with submission, approval, and publishing workflows powered by AI.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/request-access">
-                <Button size="lg" className="gap-2 bg-purple-600 hover:bg-purple-700">
+                <Button size="lg" className="gap-2">
                   Request Beta Access
                   <ArrowRight className="w-4 h-4" />
                 </Button>
@@ -139,28 +121,92 @@ export default function LibraryFeaturePage() {
         </div>
       </section>
 
-      {/* Two Library Types */}
-      <section className="py-16 bg-muted/30">
+      {/* Two Library System */}
+      <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="font-serif text-3xl font-bold text-foreground mb-4">
-              Two Libraries, One Workflow
+          <div className="text-center mb-16">
+            <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Two Libraries, One Unified System
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Experiment freely in your personal space. Share your best work with the institution.
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Personal creativity meets institutional governance. Staff build and experiment in their own space, then submit their best work for university-wide approval.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {libraryTypes.map((lib, i) => (
-              <div key={i} className="bg-card rounded-2xl border border-border p-8 shadow-lg hover:shadow-xl transition-shadow">
-                <div className={`w-16 h-16 rounded-2xl ${lib.bgColor} flex items-center justify-center mb-6`}>
-                  <lib.icon className={`w-8 h-8 ${lib.color}`} />
+            {/* Personal Library */}
+            <Card className="border-2 hover:border-primary/50 transition-all">
+              <CardContent className="p-8">
+                <div className="w-14 h-14 rounded-xl bg-blue-500/10 flex items-center justify-center mb-6">
+                  <FileText className="w-7 h-7 text-blue-600" />
                 </div>
-                <h3 className="font-serif text-2xl font-bold mb-3">{lib.title}</h3>
-                <p className="text-muted-foreground">{lib.description}</p>
-              </div>
-            ))}
+                <h3 className="font-serif text-2xl font-bold text-foreground mb-2">
+                  Personal Message Library
+                </h3>
+                <p className="text-muted-foreground mb-6">
+                  Your private workspace for saved messages and evaluations. Build, iterate, and perfect your content before sharing.
+                </p>
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3">
+                    <Search className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
+                    <span className="text-sm">Search and filter by channel, audience, domain, and moment</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Copy className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
+                    <span className="text-sm">Duplicate messages to create variations</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Download className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
+                    <span className="text-sm">Export messages for external use</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Library className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
+                    <span className="text-sm">Submit to University Library for approval</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Trash2 className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
+                    <span className="text-sm">Full CRUD operations on your personal content</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* University Library */}
+            <Card className="border-2 hover:border-primary/50 transition-all">
+              <CardContent className="p-8">
+                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6">
+                  <Building2 className="w-7 h-7 text-primary" />
+                </div>
+                <h3 className="font-serif text-2xl font-bold text-foreground mb-2">
+                  University Library
+                </h3>
+                <p className="text-muted-foreground mb-6">
+                  Brand-governed content with approval workflows. Your institution's playbook of vetted, on-brand messaging.
+                </p>
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3">
+                    <BookOpen className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                    <span className="text-sm">Organize by playbooks (campaigns, initiatives, themes)</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <ShieldCheck className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                    <span className="text-sm">Status tracking: Draft → Submitted → Approved → Published</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Users className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                    <span className="text-sm">Team-wide access to approved templates</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Layers className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                    <span className="text-sm">Profile hierarchy for sub-unit governance</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                    <span className="text-sm">Ethical guardrails review before publishing</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
@@ -169,175 +215,290 @@ export default function LibraryFeaturePage() {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="font-serif text-3xl font-bold text-foreground mb-4">
-                Built-In Approval Workflow
+            <div className="text-center mb-16">
+              <Badge variant="secondary" className="mb-4">
+                <ShieldCheck className="w-3.5 h-3.5 mr-1.5" />
+                Admin Governance
+              </Badge>
+              <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">
+                Approval Workflow for Brand Control
               </h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                From draft to published—a clear path for content governance.
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Admins and approvers review submissions, provide feedback, and control what gets published institution-wide.
               </p>
             </div>
 
-            <div className="bg-card rounded-2xl border border-border p-8 shadow-xl">
-              <div className="grid md:grid-cols-4 gap-6">
-                {workflowSteps.map((step, i) => (
-                  <div key={i} className="relative">
-                    <div className="flex flex-col items-center text-center">
-                      <div className="w-12 h-12 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-lg mb-4">
-                        {step.step}
+            {/* Workflow Steps */}
+            <div className="grid md:grid-cols-4 gap-4 mb-12">
+              {workflowSteps.map((step, index) => (
+                <div key={step.title} className="relative">
+                  <Card className="h-full">
+                    <CardContent className="p-6 text-center">
+                      <div className={`w-12 h-12 rounded-full ${step.color} flex items-center justify-center mx-auto mb-4`}>
+                        <step.icon className="w-6 h-6 text-white" />
                       </div>
-                      <h3 className="font-semibold mb-2">{step.title}</h3>
+                      <h4 className="font-semibold text-foreground mb-2">{step.title}</h4>
                       <p className="text-sm text-muted-foreground">{step.description}</p>
-                    </div>
-                    {i < workflowSteps.length - 1 && (
-                      <ArrowRight className="hidden md:block absolute top-6 -right-3 w-6 h-6 text-muted-foreground" />
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {/* Status Badges Demo */}
-              <div className="mt-8 pt-8 border-t border-border">
-                <div className="flex flex-wrap justify-center gap-3">
-                  <Badge variant="outline" className="flex items-center gap-1">
-                    <FileText className="w-3 h-3" />
-                    Draft
-                  </Badge>
-                  <Badge variant="secondary" className="flex items-center gap-1">
-                    <Send className="w-3 h-3" />
-                    Submitted
-                  </Badge>
-                  <Badge className="flex items-center gap-1 bg-green-600">
-                    <CheckCircle2 className="w-3 h-3" />
-                    Approved
-                  </Badge>
-                  <Badge className="flex items-center gap-1 bg-purple-600">
-                    <BookOpen className="w-3 h-3" />
-                    Published
-                  </Badge>
+                    </CardContent>
+                  </Card>
+                  {index < 3 && (
+                    <ChevronRight className="hidden md:block absolute top-1/2 -right-4 w-8 h-8 text-muted-foreground/30 -translate-y-1/2" />
+                  )}
                 </div>
-              </div>
+              ))}
             </div>
+
+            {/* Mock Approval Panel */}
+            <Card className="border-2 bg-card">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2 mb-6">
+                  <ShieldCheck className="w-5 h-5 text-primary" />
+                  <h3 className="font-semibold">Pending Approvals</h3>
+                  <Badge variant="secondary">3</Badge>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Mock submission */}
+                  <Card className="border-l-4 border-l-amber-500">
+                    <CardContent className="p-4">
+                      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                            <Mail className="w-4 h-4 text-muted-foreground" />
+                            <h4 className="font-medium">Fall Registration Reminder</h4>
+                            <Badge variant="secondary" className="text-xs">
+                              <Send className="w-3 h-3 mr-1" />
+                              Submitted
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-3">
+                            Encourage students to complete their fall semester registration before the deadline.
+                          </p>
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            <Badge variant="outline" className="text-xs">Email</Badge>
+                            <Badge variant="outline" className="text-xs">Continuing Students</Badge>
+                            <Badge variant="outline" className="text-xs">Registration</Badge>
+                            <Badge className="text-xs bg-primary/10 text-primary border-primary/20 flex items-center gap-1">
+                              <Building2 className="w-3 h-3" />
+                              Registrar's Office
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
+                            <span className="flex items-center gap-1">
+                              <User className="w-3 h-3" />
+                              Sarah Chen
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              2 hours ago
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 shrink-0 flex-wrap">
+                          <Button size="sm" className="flex items-center gap-1">
+                            <CheckCircle className="w-4 h-4" />
+                            Approve
+                          </Button>
+                          <Button variant="secondary" size="sm" className="flex items-center gap-1">
+                            <Eye className="w-4 h-4" />
+                            Review
+                          </Button>
+                          <Button variant="outline" size="sm" className="flex items-center gap-1">
+                            <XCircle className="w-4 h-4" />
+                            Return
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Ethical Guardrails */}
+                  <div className="p-4 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                    <p className="text-sm font-medium flex items-center gap-2 mb-2">
+                      <AlertTriangle className="w-4 h-4 text-amber-500" />
+                      Ethical Guardrails Review
+                    </p>
+                    <ul className="text-xs space-y-1 text-muted-foreground ml-6">
+                      <li>• Avoid urgency language that creates undue stress</li>
+                      <li>• Do not imply financial consequences without context</li>
+                      <li>• Maintain supportive, student-centered tone</li>
+                    </ul>
+                  </div>
+
+                  {/* Ready to publish */}
+                  <div className="pt-4 border-t">
+                    <div className="flex items-center gap-2 mb-4">
+                      <CheckCircle className="w-5 h-5 text-emerald-500" />
+                      <h4 className="font-semibold text-sm">Ready to Publish</h4>
+                      <Badge variant="outline">2</Badge>
+                    </div>
+                    <Card className="border-l-4 border-l-emerald-500">
+                      <CardContent className="py-3 px-4">
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                          <div>
+                            <p className="font-medium text-sm">Welcome Week Schedule</p>
+                            <p className="text-xs text-muted-foreground">Approved by Admin • Ready for institution-wide access</p>
+                          </div>
+                          <Button size="sm">
+                            <BookOpen className="w-4 h-4 mr-2" />
+                            Publish
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
 
-      {/* Library Interface Mock */}
-      <section className="py-16 bg-muted/30">
+      {/* Brand Layer Integration */}
+      <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="bg-card rounded-2xl border border-border overflow-hidden shadow-xl">
-              {/* Header */}
-              <div className="p-6 border-b border-border">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <BookOpen className="w-6 h-6 text-purple-600" />
-                    <h3 className="font-serif text-xl font-bold">University Library</h3>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="destructive" className="flex items-center gap-1">
-                      <ShieldCheck className="w-3 h-3" />
-                      3 Pending Review
-                    </Badge>
-                  </div>
-                </div>
+          <div className="max-w-5xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div>
+                <Badge variant="secondary" className="mb-4">
+                  <Layers className="w-3.5 h-3.5 mr-1.5" />
+                  Content DNA Integration
+                </Badge>
+                <h2 className="font-serif text-3xl font-bold text-foreground mb-4">
+                  Connected to Your Brand Layer
+                </h2>
+                <p className="text-lg text-muted-foreground mb-6">
+                  Every message is tagged with the institutional profile it was created for—from university-wide to specific colleges and departments. This ensures Content DNA evaluation stays accurate at every level.
+                </p>
+                <ul className="space-y-4">
+                  <li className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <Building2 className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">Profile Hierarchy Display</p>
+                      <p className="text-sm text-muted-foreground">See the full Brand Layer path for each message</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">AI-Powered Evaluation</p>
+                      <p className="text-sm text-muted-foreground">Content DNA scores ensure brand voice adherence</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <ShieldCheck className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">Ethical Guardrails</p>
+                      <p className="text-sm text-muted-foreground">Review guardrails before approving content</p>
+                    </div>
+                  </li>
+                </ul>
               </div>
 
-              {/* Search & Filters */}
-              <div className="p-4 border-b border-border bg-muted/30">
-                <div className="flex flex-wrap gap-3">
-                  <div className="relative flex-1 min-w-[200px]">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <div className="pl-10 pr-4 py-2 bg-background rounded-lg border border-border text-sm text-muted-foreground">
-                      Search playbooks...
+              {/* Mock Profile Badge */}
+              <Card className="bg-card">
+                <CardContent className="p-6">
+                  <h4 className="font-medium mb-4 text-sm text-muted-foreground">Message with Profile Hierarchy</h4>
+                  <div className="p-4 bg-muted/50 rounded-lg mb-4">
+                    <div className="flex items-center gap-2 mb-3 flex-wrap">
+                      <Mail className="w-4 h-4 text-muted-foreground" />
+                      <span className="font-medium">Scholarship Deadline Reminder</span>
+                      <Badge className="bg-green-600 text-xs">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Approved
+                      </Badge>
+                      <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-600 border-blue-200">
+                        <Library className="w-3 h-3 mr-1" />
+                        In University Library
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Don't miss out on financial aid opportunities for the upcoming semester...
+                    </p>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <Badge variant="secondary" className="text-xs">Prospective Students</Badge>
+                      <Badge variant="outline" className="text-xs">Financial Aid</Badge>
+                      <Badge variant="outline" className="text-xs">Recruitment</Badge>
+                    </div>
+                    {/* Profile hierarchy badge */}
+                    <div className="flex items-center gap-1 text-xs flex-wrap">
+                      <Badge className="bg-primary/10 text-primary border-primary/20 flex items-center gap-1">
+                        <Building2 className="w-3 h-3" />
+                        University
+                        <ChevronRight className="w-3 h-3" />
+                        College of Arts
+                        <ChevronRight className="w-3 h-3" />
+                        Financial Aid Office
+                      </Badge>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" className="flex items-center gap-1">
-                    <Filter className="w-4 h-4" />
-                    Filters
-                  </Button>
-                </div>
-              </div>
-
-              {/* Content Grid */}
-              <div className="p-6">
-                <div className="grid md:grid-cols-2 gap-4">
-                  {[
-                    { title: "First-Year Welcome Journey", type: "Strategy Journey", status: "Published", profile: "Undergraduate" },
-                    { title: "Registration Deadline Kit", type: "Message Kit", status: "Approved", profile: "All Students" },
-                    { title: "Financial Aid Reminder", type: "Email Template", status: "Published", profile: "Financial Services" },
-                    { title: "Re-enrollment Campaign", type: "Strategy Journey", status: "Submitted", profile: "Graduate School" },
-                  ].map((item, i) => (
-                    <div key={i} className="p-4 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
-                      <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-semibold">{item.title}</h4>
-                        <Badge variant={item.status === 'Published' ? 'default' : item.status === 'Approved' ? 'secondary' : 'outline'} className={item.status === 'Published' ? 'bg-purple-600' : ''}>
-                          {item.status}
-                        </Badge>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        <Badge variant="secondary" className="text-xs">{item.type}</Badge>
-                        <Badge variant="outline" className="text-xs flex items-center gap-1">
-                          <Building2 className="w-3 h-3" />
-                          {item.profile}
-                        </Badge>
-                      </div>
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
+                    <div className="flex items-center gap-1">
+                      <User className="w-3 h-3" />
+                      Created by: Michael Torres
                     </div>
-                  ))}
-                </div>
-              </div>
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      Dec 15, 2024
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Grid */}
+      {/* Filter Capabilities */}
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="font-serif text-3xl font-bold text-foreground mb-4">
-              Enterprise-Grade Features
+              Find Any Message Instantly
             </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Powerful filtering across channels, audiences, domains, and student journey moments.
+            </p>
           </div>
 
           <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
-            {features.map((feature, i) => (
-              <div key={i} className="text-center">
-                <div className="w-14 h-14 rounded-xl bg-purple-500/10 flex items-center justify-center mx-auto mb-4">
-                  <feature.icon className="w-7 h-7 text-purple-600" />
-                </div>
-                <h3 className="font-semibold mb-2">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground">{feature.description}</p>
-              </div>
+            {filterCategories.map((filter) => (
+              <Card key={filter.label} className="h-full">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Filter className="w-4 h-4 text-primary" />
+                    <h4 className="font-semibold text-sm">{filter.label}</h4>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {filter.items.slice(0, 4).map((item) => (
+                      <Badge key={item} variant="outline" className="text-xs">
+                        {item}
+                      </Badge>
+                    ))}
+                    {filter.items.length > 4 && (
+                      <Badge variant="secondary" className="text-xs">
+                        +{filter.items.length - 4} more
+                      </Badge>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Content Types */}
-      <section className="py-16 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-8">
-              Store Any Content Type
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {contentTypes.map((type, i) => (
-                <div key={i} className="bg-card rounded-xl border border-border p-4 text-left">
-                  <h3 className="font-semibold text-sm mb-1">{type.label}</h3>
-                  <p className="text-xs text-muted-foreground">{type.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Why CCOs Love It */}
-      <section className="py-20">
+      <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="bg-gradient-to-br from-purple-600 to-indigo-600 rounded-2xl p-8 md:p-12 text-white">
+            <div className="bg-gradient-to-br from-primary to-primary/80 rounded-2xl p-8 md:p-12 text-primary-foreground">
               <h2 className="font-serif text-3xl font-bold mb-6 text-center">
                 Why Communications Leaders Love This
               </h2>
@@ -347,8 +508,8 @@ export default function LibraryFeaturePage() {
                   { icon: Users, text: "New hires get up to speed instantly with approved templates" },
                   { icon: Sparkles, text: "AI-generated content still goes through human review" },
                   { icon: Building2, text: "Different standards for different schools/departments" },
-                  { icon: RefreshCw, text: "Iterate on approved content without starting from scratch" },
                   { icon: ShieldCheck, text: "Full audit trail of who created and approved what" },
+                  { icon: Library, text: "Systematic scaling of your brand layer and strategy" },
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <item.icon className="w-5 h-5 mt-0.5 flex-shrink-0" />
@@ -362,13 +523,13 @@ export default function LibraryFeaturePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-purple-600 text-white">
+      <section className="py-20 bg-primary text-primary-foreground">
         <div className="container mx-auto px-4 text-center">
           <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
-            Ready for Content Governance?
+            Ready to Scale Brand Governance?
           </h2>
           <p className="text-lg opacity-90 mb-8 max-w-xl mx-auto">
-            Join the beta to bring enterprise-grade content management to your institution.
+            Join the beta and see how institutions are keeping hundreds of communicators on-brand with AI-powered governance.
           </p>
           <Link to="/request-access">
             <Button size="lg" variant="secondary" className="gap-2">
