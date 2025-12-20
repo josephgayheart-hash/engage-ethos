@@ -15,6 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { WaveBackground } from "@/components/WaveBackground";
 import { 
   Home, 
   Upload, 
@@ -243,65 +244,55 @@ export default function ContentDNAPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[hsl(210,20%,98%)]">
-      {/* Header */}
-      <div className="border-b border-[hsl(220,13%,88%)] bg-white">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-2 text-sm text-[hsl(220,14%,46%)] mb-2">
-            <Link to="/dashboard" className="hover:text-[hsl(222,47%,11%)]">
+    <div className="min-h-screen bg-background">
+      {/* Wave Header */}
+      <div className="relative bg-gradient-to-br from-secondary/10 via-secondary/5 to-background pb-12">
+        <div className="container mx-auto px-4 pt-10 pb-8">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+            <Link to="/dashboard" className="hover:text-foreground">
               <Home className="w-4 h-4" />
             </Link>
             <ChevronRight className="w-4 h-4" />
             {selectedProfile ? (
               <>
-                <Link to="/settings" className="hover:text-[hsl(222,47%,11%)]">
+                <Link to="/settings" className="hover:text-foreground">
                   Profiles
                 </Link>
                 <ChevronRight className="w-4 h-4" />
-                <span className="text-[hsl(222,47%,11%)]">{selectedProfile.name}</span>
+                <span className="text-foreground">{selectedProfile.name}</span>
                 <ChevronRight className="w-4 h-4" />
               </>
             ) : isAdminRoute ? (
               <>
-                <Link to="/admin/console" className="hover:text-[hsl(222,47%,11%)]">
+                <Link to="/admin/console" className="hover:text-foreground">
                   Admin
                 </Link>
                 <ChevronRight className="w-4 h-4" />
               </>
             ) : null}
-            <span className="text-[hsl(222,47%,11%)]">Content DNA</span>
+            <span className="text-foreground">Content DNA</span>
           </div>
           
           {/* Back button when viewing specific profile */}
           {selectedProfile && (
             <Link 
               to="/settings" 
-              className="inline-flex items-center gap-1 text-sm text-[hsl(220,14%,46%)] hover:text-[hsl(222,47%,11%)] mb-4"
+              className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to {selectedProfile.name}
             </Link>
           )}
           
-          {/* Profile Context Banner */}
-          {selectedProfile && (
-            <Alert className="mb-4 border-primary/30 bg-primary/5">
-              <Building2 className="h-4 w-4" />
-              <AlertDescription className="ml-2">
-                Configuring Content DNA for <strong>{selectedProfile.name}</strong>. 
-                Samples and analysis will be specific to this institutional profile.
-              </AlertDescription>
-            </Alert>
-          )}
-          
           {/* Institution Branding Header */}
-          <div className="flex items-center gap-4 mb-4">
+          <div className="flex items-center gap-4">
             {/* Use profile logo if available, otherwise fall back to tenant logo */}
             {(selectedProfile?.config?.logoUrl || tenant?.logo_url) ? (
               <img 
                 src={selectedProfile?.config?.logoUrl || tenant?.logo_url || ''}
                 alt={`${selectedProfile?.name || tenant?.institution_name} logo`}
-                className="w-16 h-16 object-contain rounded-lg border border-[hsl(220,13%,88%)] bg-white p-1"
+                className="w-16 h-16 object-contain rounded-lg border border-border bg-background p-1"
               />
             ) : (
               <div 
@@ -312,10 +303,10 @@ export default function ContentDNAPage() {
               </div>
             )}
             <div className="flex-1">
-              <h1 className="font-serif text-2xl font-bold text-[hsl(222,47%,11%)] flex items-center gap-2">
+              <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
                 {selectedProfile?.name || tenant?.institution_name || 'Content DNA Center'}
               </h1>
-              <p className="text-[hsl(220,14%,46%)]">
+              <p className="text-muted-foreground">
                 Content DNA {selectedProfile ? `for ${selectedProfile.name}` : 'Center'}
               </p>
             </div>
@@ -325,7 +316,7 @@ export default function ContentDNAPage() {
                 <Tooltip>
                   <TooltipTrigger>
                     <div 
-                      className="w-6 h-6 rounded-full border border-[hsl(220,13%,88%)]"
+                      className="w-6 h-6 rounded-full border border-border"
                       style={{ backgroundColor: tenant?.primary_color || 'hsl(222,47%,14%)' }}
                     />
                   </TooltipTrigger>
@@ -334,7 +325,7 @@ export default function ContentDNAPage() {
                 <Tooltip>
                   <TooltipTrigger>
                     <div 
-                      className="w-6 h-6 rounded-full border border-[hsl(220,13%,88%)]"
+                      className="w-6 h-6 rounded-full border border-border"
                       style={{ backgroundColor: tenant?.accent_color || 'hsl(173,58%,39%)' }}
                     />
                   </TooltipTrigger>
@@ -346,7 +337,7 @@ export default function ContentDNAPage() {
                 {samples.length} samples
               </Badge>
               {analysis && (
-                <Badge className="bg-[hsl(173,58%,39%)]">
+                <Badge className="bg-secondary text-secondary-foreground">
                   <Sparkles className="w-3 h-3 mr-1" />
                   DNA Analyzed
                 </Badge>
@@ -354,7 +345,21 @@ export default function ContentDNAPage() {
             </div>
           </div>
         </div>
+        <WaveBackground variant="teal" />
       </div>
+
+      {/* Profile Context Banner - outside wave */}
+      {selectedProfile && (
+        <div className="container mx-auto px-4 pt-6">
+          <Alert className="border-primary/30 bg-primary/5">
+            <Building2 className="h-4 w-4" />
+            <AlertDescription className="ml-2">
+              Configuring Content DNA for <strong>{selectedProfile.name}</strong>. 
+              Samples and analysis will be specific to this institutional profile.
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
 
       <div className="container mx-auto px-4 py-8">
         {/* PROMINENT: Ready to Analyze Banner - Shows when samples exist but no analysis yet, or samples added since last analysis */}

@@ -2,10 +2,12 @@
  * WaveBackground - A solid colored header with wave divider at bottom
  * Matches the landing page style with blurred sprite accents
  */
-export function WaveBackground({ variant = 'teal' }: { variant?: 'teal' | 'amber' }) {
+export function WaveBackground({ variant = 'teal' }: { variant?: 'teal' | 'amber' | 'default' }) {
   const bgColor = variant === 'teal' 
     ? 'bg-[hsl(173_40%_92%)]' 
-    : 'bg-[hsl(48_100%_92%)]';
+    : variant === 'amber'
+    ? 'bg-[hsl(48_100%_92%)]'
+    : 'bg-[hsl(222_47%_95%)]';
 
   return (
     <div className={`absolute inset-0 ${bgColor}`}>
