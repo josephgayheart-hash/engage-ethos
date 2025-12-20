@@ -90,8 +90,8 @@ const StrategyPage = () => {
   const [selectedProfileName, setSelectedProfileName] = useState<string | undefined>(undefined);
   const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfig | null>(null);
   const [context, setContext] = useState<MessageContext>({
-    audience: 'first-year',
-    moment: 'early-term',
+    audience: undefined,
+    moment: undefined,
     channel: 'email',
   });
   const [selectedChannels, setSelectedChannels] = useState<Channel[]>(['email', 'sms']);
