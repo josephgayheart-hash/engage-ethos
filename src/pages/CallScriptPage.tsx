@@ -3,12 +3,15 @@ import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { Header } from "@/components/Header";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
+import { BrandLayerSelector, BrandLayerSelection } from "@/components/BrandLayerSelector";
+import { ContentDNAIndicator, ContentDNAActiveBadge } from "@/components/ContentDNAIndicator";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -101,10 +104,20 @@ const CallScriptPage = () => {
   const { toast } = useToast();
   const { profile } = useAuth();
   const { addMessage } = useMessageLibrary();
-  const { contentDNA } = useContentDNAForGeneration();
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [selectedProfileName, setSelectedProfileName] = useState<string | undefined>(undefined);
   const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfig | null>(null);
+  
+  // Content DNA and Brand Layer state
+  const [useContentDNA, setUseContentDNA] = useState(true);
+  const [brandSelection, setBrandSelection] = useState<BrandLayerSelection>({
+    pillars: [],
+    proofPoints: [],
+    commitments: [],
+    pathways: [],
+    includePromise: true,
+  });
+  const { contentDNA, isLoading: isContentDNALoading } = useContentDNAForGeneration({ profileId: selectedProfileId });
   
   const [audience, setAudience] = useState<AudienceType>('first-year');
   const [moment, setMoment] = useState<CommunicationMoment>('early-term');
@@ -121,10 +134,30 @@ const CallScriptPage = () => {
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
 
   const handleGenerate = async () => {
+    if (useContentDNA && isContentDNALoading) {
+      toast({
+        title: "Loading Content DNA",
+        description: "Please try again in a moment.",
+      });
+      return;
+    }
+
     setIsGenerating(true);
     setCallScript(null);
 
     try {
+      // Build config with Content DNA and brand selection
+      const configForGeneration = institutionalConfig
+        ? {
+            ...institutionalConfig,
+            voiceAnalysis: useContentDNA
+              ? ((contentDNA?.voiceAnalysis ?? undefined) as any)
+              : undefined,
+            brandPlatform: useContentDNA ? contentDNA?.brandPlatform : undefined,
+            brandSelection: useContentDNA ? brandSelection : undefined,
+          }
+        : undefined;
+
       const { data, error } = await supabase.functions.invoke('generate-message', {
         body: {
           type: 'call-script',
@@ -139,8 +172,8 @@ const CallScriptPage = () => {
             dueDate: dueDate?.toISOString(),
             urgencyLabel,
           },
-          institutionalConfig,
-          contentDNA: contentDNA || undefined,
+          institutionalConfig: configForGeneration,
+          contentDNA: useContentDNA ? contentDNA : undefined,
         }
       });
 
@@ -268,6 +301,39 @@ ${callScript.followUpNotes}`;
                   setSelectedProfileName(name);
                 }}
               />
+
+              {/* Content DNA Toggle */}
+              <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/30">
+                <div className="flex items-center gap-3">
+                  <Checkbox
+                    id="use-content-dna"
+                    checked={useContentDNA}
+                    onCheckedChange={(checked) => setUseContentDNA(checked === true)}
+                  />
+                  <div className="space-y-0.5">
+                    <Label htmlFor="use-content-dna" className="text-sm font-medium cursor-pointer">
+                      Apply Content DNA
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Use your institution's voice analysis and brand platform
+                    </p>
+                  </div>
+                </div>
+                {useContentDNA && contentDNA && (
+                  <ContentDNAActiveBadge profileId={selectedProfileId ?? undefined} institutionName={selectedProfileName} />
+                )}
+              </div>
+
+              {/* Brand Layer Selector - only show when Content DNA is enabled and brand platform exists */}
+              {useContentDNA && contentDNA?.brandPlatform && (
+                <BrandLayerSelector
+                  brandPlatform={contentDNA.brandPlatform}
+                  selection={brandSelection}
+                  onSelectionChange={setBrandSelection}
+                  isLoading={isContentDNALoading}
+                  compact
+                />
+              )}
 
               {/* Caller Info */}
               <div className="space-y-2">
