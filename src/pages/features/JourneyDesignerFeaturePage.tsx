@@ -197,24 +197,32 @@ export default function JourneyDesignerFeaturePage() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 md:py-32">
+        {/* Gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 via-background to-emerald-500/5" />
-        <div className="absolute top-20 right-10 w-72 h-72 bg-teal-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 left-10 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(173_58%_85%_/_0.3),_transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_hsl(160_60%_85%_/_0.25),_transparent_50%)]" />
         
-        <div className="container mx-auto px-4 relative">
+        {/* Lens flares */}
+        <div className="absolute top-20 right-[12%] w-32 h-32 bg-[hsl(173_58%_50%_/_0.18)] rounded-full blur-2xl" />
+        <div className="absolute bottom-36 left-[8%] w-40 h-40 bg-[hsl(160_60%_55%_/_0.15)] rounded-full blur-3xl" />
+        <div className="absolute top-44 left-[22%] w-24 h-24 bg-[hsl(200_100%_50%_/_0.12)] rounded-full blur-2xl" />
+        <div className="absolute bottom-48 right-[25%] w-20 h-20 bg-[hsl(270_70%_60%_/_0.1)] rounded-full blur-2xl" />
+        <div className="absolute top-32 right-[35%] w-16 h-16 bg-[hsl(82_85%_55%_/_0.15)] rounded-full blur-xl" />
+        
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <Badge className="mb-6 bg-teal-500/10 text-teal-600 border-teal-500/20">
+            <Badge className="mb-6 bg-teal-500/10 text-teal-600 border-teal-500/20 animate-fade-in">
               <Map className="w-3 h-3 mr-1" />
               AI Journey Mapping
             </Badge>
-            <h1 className="font-serif text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
+            <h1 className="font-serif text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
               Design Complete
               <span className="block text-teal-600">Communication Journeys</span>
             </h1>
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.2s' }}>
               Map multi-week campaigns with cadence controls, escalation patterns, and channel orchestration—then export polished PDFs for your team.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
               <Link to="/request-access">
                 <Button size="lg" className="gap-2 bg-teal-600 hover:bg-teal-700">
                   Request Beta Access
@@ -224,10 +232,21 @@ export default function JourneyDesignerFeaturePage() {
             </div>
           </div>
         </div>
+
+        {/* Wave Divider */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto" preserveAspectRatio="none">
+            <path d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="hsl(var(--muted) / 0.3)"/>
+          </svg>
+        </div>
       </section>
 
       {/* Journey Timeline Demo */}
-      <section className="py-16 bg-muted/30">
+      <section className="py-16 bg-[hsl(173_40%_92%)] relative overflow-hidden">
+        {/* Lens flares */}
+        <div className="absolute top-12 right-[10%] w-28 h-28 bg-[hsl(270_70%_60%_/_0.15)] rounded-full blur-2xl" />
+        <div className="absolute bottom-28 left-[6%] w-36 h-36 bg-[hsl(82_85%_55%_/_0.12)] rounded-full blur-3xl" />
+        <div className="absolute top-1/3 left-[40%] w-20 h-20 bg-[hsl(200_100%_50%_/_0.1)] rounded-full blur-2xl" />
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
             <div className="bg-card rounded-2xl border border-border p-8 shadow-xl">
@@ -290,10 +309,19 @@ export default function JourneyDesignerFeaturePage() {
             </div>
           </div>
         </div>
+        {/* Wave Divider */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto" preserveAspectRatio="none">
+            <path d="M0 80L48 70C96 60 192 40 288 35C384 30 480 40 576 45C672 50 768 50 864 45C960 40 1056 30 1152 30C1248 30 1344 40 1392 45L1440 50V80H1392C1344 80 1248 80 1152 80C1056 80 960 80 864 80C768 80 672 80 576 80C480 80 384 80 288 80C192 80 96 80 48 80H0Z" fill="hsl(var(--background))"/>
+          </svg>
+        </div>
       </section>
 
       {/* Controls Demo */}
-      <section className="py-20">
+      <section className="py-20 relative overflow-hidden">
+        {/* Lens flares */}
+        <div className="absolute top-16 left-[18%] w-32 h-32 bg-[hsl(200_100%_50%_/_0.1)] rounded-full blur-2xl" />
+        <div className="absolute bottom-20 right-[15%] w-44 h-44 bg-[hsl(270_70%_60%_/_0.08)] rounded-full blur-3xl" />
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
@@ -349,8 +377,12 @@ export default function JourneyDesignerFeaturePage() {
       </section>
 
       {/* Features Grid */}
-      <section className="py-16 bg-muted/30">
-        <div className="container mx-auto px-4">
+      <section className="py-16 bg-[hsl(48_100%_92%)] relative overflow-hidden">
+        {/* Lens flares */}
+        <div className="absolute top-12 right-[10%] w-28 h-28 bg-[hsl(173_58%_50%_/_0.15)] rounded-full blur-2xl" />
+        <div className="absolute bottom-16 left-[8%] w-32 h-32 bg-[hsl(270_70%_60%_/_0.12)] rounded-full blur-3xl" />
+
+        <div className="container mx-auto px-4 relative z-10">
           <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
             {features.map((feature, i) => (
               <div key={i} className="text-center">
@@ -363,10 +395,20 @@ export default function JourneyDesignerFeaturePage() {
             ))}
           </div>
         </div>
+
+        {/* Wave Divider */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto" preserveAspectRatio="none">
+            <path d="M0 80L60 65C120 50 240 20 360 15C480 10 600 30 720 40C840 50 960 50 1080 45C1200 40 1320 30 1380 25L1440 20V80H1380C1320 80 1200 80 1080 80C960 80 840 80 720 80C600 80 480 80 360 80C240 80 120 80 60 80H0Z" fill="hsl(var(--background))"/>
+          </svg>
+        </div>
       </section>
 
       {/* Interactive Flow Diagram Demo */}
-      <section className="py-20">
+      <section className="py-20 relative overflow-hidden">
+        {/* Lens flares */}
+        <div className="absolute top-1/4 right-[8%] w-36 h-36 bg-[hsl(82_85%_55%_/_0.1)] rounded-full blur-3xl" />
+        <div className="absolute bottom-1/3 left-[12%] w-28 h-28 bg-[hsl(200_100%_50%_/_0.1)] rounded-full blur-2xl" />
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-8">
