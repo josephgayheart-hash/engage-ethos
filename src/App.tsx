@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { FeedbackButton } from "@/components/FeedbackButton";
 import { ImpersonationBanner } from "@/components/ImpersonationBanner";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import Index from "./pages/Index";
 import LandingPage from "./pages/LandingPage";
 import OnboardingPage from "./pages/OnboardingPage";
@@ -240,6 +241,7 @@ const App = () => (
     <TooltipProvider>
       <BrowserRouter>
         <AuthProvider>
+          <ScrollToTop />
           <ImpersonationWrapper />
           <Toaster />
           <Sonner />
