@@ -76,6 +76,11 @@ export default {
           consensus: "hsl(var(--pillar-consensus))",
           ethics: "hsl(var(--pillar-ethics))",
         },
+        cyber: {
+          lime: "hsl(var(--cyber-lime))",
+          purple: "hsl(var(--cyber-purple))",
+          blue: "hsl(var(--cyber-blue))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

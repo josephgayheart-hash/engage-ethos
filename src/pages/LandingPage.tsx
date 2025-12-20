@@ -82,7 +82,7 @@ export default function LandingPage() {
             <div className="animate-fade-in">
               <Badge 
                 variant="secondary" 
-                className="bg-gradient-to-r from-accent/20 to-primary/10 text-accent border-accent/30 px-4 py-1.5 text-sm font-medium shadow-sm"
+                className="bg-[hsl(270_70%_60%_/_0.15)] text-[hsl(82_85%_55%)] border-[hsl(270_70%_60%_/_0.4)] px-4 py-1.5 text-sm font-semibold shadow-[0_0_20px_hsl(82_85%_55%_/_0.2)]"
               >
                 <Sparkles className="w-3.5 h-3.5 mr-1.5" />
                 Beta Access
@@ -103,8 +103,8 @@ export default function LandingPage() {
               className="font-serif text-3xl sm:text-4xl lg:text-5xl text-foreground tracking-tight animate-fade-in max-w-4xl mx-auto leading-tight"
               style={{ animationDelay: '0.2s' }}
             >
-              Plan. Strategize. Execute.
-              <span className="block text-primary text-2xl sm:text-3xl lg:text-4xl mt-2">Your Digital Playbook for Higher Ed Communications</span>
+              <span className="text-[hsl(82_85%_55%)]">Plan.</span> <span className="text-[hsl(270_70%_60%)]">Strategize.</span> <span className="text-[hsl(200_100%_50%)]">Execute.</span>
+              <span className="block text-foreground text-2xl sm:text-3xl lg:text-4xl mt-2">Your Digital Playbook for Higher Ed Communications</span>
             </h1>
 
             {/* Secondary Tagline */}
@@ -123,7 +123,7 @@ export default function LandingPage() {
               <Button 
                 asChild
                 size="lg"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 text-base px-8 py-6 font-semibold"
+                className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] shadow-[0_0_30px_hsl(82_85%_55%_/_0.3)] hover:shadow-[0_0_40px_hsl(82_85%_55%_/_0.5)] transition-all duration-300 text-base px-8 py-6 font-bold border-0"
               >
                 <Link to="/request-access">
                   Join the Beta
@@ -147,15 +147,22 @@ export default function LandingPage() {
               className="flex flex-wrap justify-center gap-6 pt-6 animate-fade-in"
               style={{ animationDelay: '0.5s' }}
             >
-              {trustIndicators.map((indicator) => (
-                <div 
-                  key={indicator.label}
-                  className="flex items-center gap-2 text-muted-foreground text-sm"
-                >
-                  <indicator.icon className="w-4 h-4" />
-                  <span>{indicator.label}</span>
-                </div>
-              ))}
+              {trustIndicators.map((indicator, index) => {
+                const colors = [
+                  'text-[hsl(82_85%_55%)]',
+                  'text-[hsl(270_70%_60%)]', 
+                  'text-[hsl(200_100%_50%)]'
+                ];
+                return (
+                  <div 
+                    key={indicator.label}
+                    className="flex items-center gap-2 text-sm"
+                  >
+                    <indicator.icon className={`w-4 h-4 ${colors[index % 3]}`} />
+                    <span className="text-muted-foreground">{indicator.label}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -261,7 +268,7 @@ export default function LandingPage() {
             <Button 
               asChild
               size="lg"
-              className="bg-white text-primary hover:bg-white/90 px-8 font-semibold shadow-lg"
+              className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] shadow-[0_0_30px_hsl(82_85%_55%_/_0.4)] hover:shadow-[0_0_40px_hsl(82_85%_55%_/_0.6)] px-8 font-bold transition-all duration-300"
             >
               <Link to="/request-access">
                 Request Beta Access
