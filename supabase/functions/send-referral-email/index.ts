@@ -1,7 +1,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,9 +16,10 @@ interface ReferralEmailRequest {
   refereeEmail: string;
   referrerName: string;
   referrerEmail: string;
-  institutionName: string; // For same: referrer's institution. For other: referee's new institution
-  referrerInstitution: string; // Always the referrer's institution
-  tenantId?: string; // For same_institution, the tenant they'll join
+  institutionName: string;
+  referrerInstitution: string;
+  tenantId?: string;
+  referrerUserId?: string;
   personalMessage?: string;
 }
 
@@ -220,6 +223,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
     const data: ReferralEmailRequest = await req.json();
     console.log("Processing referral email:", data.referralType, "for", data.refereeEmail);
 
@@ -227,7 +231,6 @@ const handler = async (req: Request): Promise<Response> => {
     let subject: string;
 
     if (data.referralType === "same_institution") {
-      // Direct invite to join the same institution/tenant
       subject = `${data.referrerName} invited you to join ${data.institutionName} on UPlaybook.AI`;
       emailHtml = getSameInstitutionHtml(
         data.refereeName,
@@ -237,13 +240,12 @@ const handler = async (req: Request): Promise<Response> => {
         data.personalMessage
       );
     } else {
-      // Invite to request access for a different institution
       subject = `${data.referrerName} thinks you'd love UPlaybook.AI!`;
       emailHtml = getOtherInstitutionHtml(
         data.refereeName,
         data.referrerName,
         data.referrerInstitution,
-        data.institutionName, // This is the referee's institution for other_institution type
+        data.institutionName,
         data.personalMessage
       );
     }
@@ -270,6 +272,34 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     console.log("Referral email sent successfully:", responseData);
+
+    // Log to email_nudges for tracking
+    if (data.tenantId && data.referrerUserId) {
+      const { error: nudgeError } = await supabase.from("email_nudges").insert({
+        user_id: data.referrerUserId,
+        tenant_id: data.tenantId,
+        nudge_type: "referral",
+        email_type: "referral",
+        email_count: 1,
+        subject: subject,
+        recipient_name: data.refereeName,
+        recipient_email: data.refereeEmail,
+        provider: "resend",
+        provider_message_id: responseData.id,
+        delivery_status: "sent",
+        metadata: {
+          referral_type: data.referralType,
+          referrer_name: data.referrerName,
+          institution: data.institutionName,
+        },
+      });
+
+      if (nudgeError) {
+        console.error("Error logging email nudge:", nudgeError);
+      } else {
+        console.log("Email nudge logged successfully");
+      }
+    }
 
     return new Response(JSON.stringify({ success: true, result: responseData }), {
       status: 200,

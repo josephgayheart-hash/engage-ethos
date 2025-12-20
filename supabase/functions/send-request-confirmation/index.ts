@@ -1,6 +1,10 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
 if (!RESEND_API_KEY) {
   console.error("Missing RESEND_API_KEY secret");
 }
@@ -15,18 +19,21 @@ interface RequestConfirmationEmailRequest {
   firstName: string;
   lastName: string;
   institutionName: string;
+  requestId?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { email, firstName, lastName, institutionName }: RequestConfirmationEmailRequest = await req.json();
+    const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
+    const { email, firstName, lastName, institutionName, requestId }: RequestConfirmationEmailRequest = await req.json();
 
     console.log(`Sending request confirmation email to ${email}`);
+
+    const subject = "UPlaybook.AI - Access Request Received";
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -158,7 +165,7 @@ const handler = async (req: Request): Promise<Response> => {
       body: JSON.stringify({
         from: "UPlaybook.AI <noreply@uplaybook.ai>",
         to: [email],
-        subject: "UPlaybook.AI - Access Request Received",
+        subject,
         html: htmlContent,
       }),
     });
@@ -171,6 +178,35 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     console.log("Request confirmation email sent successfully:", responseData);
+
+    // Log to email_nudges for tracking - use system tenant since this is a pre-signup email
+    const systemTenantId = "00000000-0000-0000-0000-000000000000";
+    
+    // We need a user_id but the user doesn't exist yet, so we create a placeholder
+    // Use the requestId if provided, or generate a deterministic UUID from email
+    const { error: nudgeError } = await supabase.from("email_nudges").insert({
+      user_id: requestId || "00000000-0000-0000-0000-000000000001", // Placeholder for pre-signup emails
+      tenant_id: systemTenantId,
+      nudge_type: "request_confirmation",
+      email_type: "request_confirmation",
+      email_count: 1,
+      subject: subject,
+      recipient_name: `${firstName} ${lastName}`,
+      recipient_email: email,
+      provider: "resend",
+      provider_message_id: responseData.id,
+      delivery_status: "sent",
+      metadata: {
+        institution_name: institutionName,
+        request_id: requestId,
+      },
+    });
+
+    if (nudgeError) {
+      console.error("Error logging email nudge:", nudgeError);
+    } else {
+      console.log("Email nudge logged successfully");
+    }
 
     return new Response(JSON.stringify({ success: true, ...responseData }), {
       status: 200,
