@@ -1331,19 +1331,19 @@ export default function ContentDNAPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     {/* View Toggle */}
-                    <div className="flex items-center border border-border rounded-lg p-1 bg-muted/30">
+                    <div className="flex items-center border border-border rounded-lg p-0.5 bg-muted/50">
                       <Button
-                        variant={libraryViewMode === 'card' ? 'default' : 'ghost'}
+                        variant="ghost"
                         size="sm"
-                        className={`h-7 px-2 ${libraryViewMode === 'card' ? 'bg-background shadow-sm' : ''}`}
+                        className={`h-7 px-2 ${libraryViewMode === 'card' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
                         onClick={() => toggleLibraryViewMode('card')}
                       >
                         <LayoutGrid className="w-4 h-4" />
                       </Button>
                       <Button
-                        variant={libraryViewMode === 'list' ? 'default' : 'ghost'}
+                        variant="ghost"
                         size="sm"
-                        className={`h-7 px-2 ${libraryViewMode === 'list' ? 'bg-background shadow-sm' : ''}`}
+                        className={`h-7 px-2 ${libraryViewMode === 'list' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
                         onClick={() => toggleLibraryViewMode('list')}
                       >
                         <List className="w-4 h-4" />
