@@ -344,7 +344,7 @@ function BrandPlatformTabs({
       {availableTabs.length > 0 && (
         <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
           <TabsList 
-            className="grid w-full h-auto p-1.5 bg-muted border-2 border-border rounded-xl shadow-inner" 
+            className="grid w-full h-auto p-1 bg-muted/50 border border-border/60 rounded-lg" 
             style={{ gridTemplateColumns: `repeat(${availableTabs.length}, 1fr)` }}
           >
             {availableTabs.map((tab) => {
@@ -353,20 +353,17 @@ function BrandPlatformTabs({
                 <TabsTrigger 
                   key={tab.id} 
                   value={tab.id}
-                  className="flex flex-col gap-1 py-2.5 px-3 text-xs rounded-lg font-medium transition-all duration-200
-                    data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:scale-[1.02]
-                    data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-accent data-[state=inactive]:hover:text-accent-foreground data-[state=inactive]:hover:scale-[1.01]
-                    [&[data-state=active]_span]:text-primary-foreground"
+                  className="flex flex-col gap-0.5 py-2 px-2 text-xs rounded-md font-medium transition-all duration-200
+                    data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/60
+                    data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground data-[state=inactive]:hover:bg-muted"
                 >
                   <div className="flex items-center gap-1.5">
-                    <Icon className="w-4 h-4" />
-                    <span className="hidden sm:inline font-semibold">{tab.label}</span>
+                    <Icon className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">{tab.label}</span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-background/30 text-inherit inline-flex items-center font-medium">
-                      {tab.selected}/{tab.count}
-                    </span>
-                  </div>
+                  <span className="text-[10px] text-muted-foreground data-[state=active]:text-accent font-medium">
+                    {tab.selected}/{tab.count}
+                  </span>
                 </TabsTrigger>
               );
             })}
