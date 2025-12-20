@@ -122,6 +122,17 @@ export default function ContentDNAPage() {
     localStorage.setItem('contentDnaTipsVisible', 'false');
   };
 
+  // What is Content DNA box dismissal state (persisted in localStorage)
+  const [whatIsBoxVisible, setWhatIsBoxVisible] = useState(() => {
+    const stored = localStorage.getItem('contentDnaWhatIsBoxVisible');
+    return stored !== 'false';
+  });
+  
+  const dismissWhatIsBox = () => {
+    setWhatIsBoxVisible(false);
+    localStorage.setItem('contentDnaWhatIsBoxVisible', 'false');
+  };
+
   // Instructions state
   const [customInstructions, setCustomInstructions] = useState(analysis?.custom_instructions || '');
 
@@ -312,35 +323,45 @@ export default function ContentDNAPage() {
 
       <div className="container mx-auto px-4 py-8">
         {/* What is Content DNA - First */}
-        <Card className="mb-6 border-border bg-gradient-to-r from-primary to-primary/80 text-primary-foreground">
-          <CardContent className="py-5">
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-white/10 rounded-lg shrink-0">
-                <Dna className="w-8 h-8" />
-              </div>
-              <div>
-                <h2 className="font-serif text-xl font-bold mb-2">What is Content DNA?</h2>
-                <p className="text-primary-foreground/80 text-sm leading-relaxed">
-                  Content DNA captures your institution's unique voice and communication style. By uploading examples of your best communications—emails, newsletters, news stories, and more—our AI analyzes the patterns, tone, and vocabulary that make your messaging distinctly yours. This analysis then guides all AI-generated content to match your established brand voice.
-                </p>
-                <div className="flex items-center gap-4 mt-3 text-sm text-primary-foreground/60">
-                  <span className="flex items-center gap-1">
-                    <Upload className="w-4 h-4" />
-                    Upload content samples
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Sparkles className="w-4 h-4" />
-                    Analyze your voice
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Target className="w-4 h-4" />
-                    Generate on-brand content
-                  </span>
+        {whatIsBoxVisible && (
+          <Card className="mb-6 border-border bg-gradient-to-r from-primary to-primary/80 text-primary-foreground relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 h-6 w-6 text-primary-foreground/60 hover:text-primary-foreground hover:bg-white/10"
+              onClick={dismissWhatIsBox}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+            <CardContent className="py-5 pr-10">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-white/10 rounded-lg shrink-0">
+                  <Dna className="w-8 h-8" />
+                </div>
+                <div>
+                  <h2 className="font-serif text-xl font-bold mb-2">What is Content DNA?</h2>
+                  <p className="text-primary-foreground/80 text-sm leading-relaxed">
+                    Content DNA captures your institution's unique voice and communication style. By uploading examples of your best communications—emails, newsletters, news stories, and more—our AI analyzes the patterns, tone, and vocabulary that make your messaging distinctly yours. This analysis then guides all AI-generated content to match your established brand voice.
+                  </p>
+                  <div className="flex items-center gap-4 mt-3 text-sm text-primary-foreground/60">
+                    <span className="flex items-center gap-1">
+                      <Upload className="w-4 h-4" />
+                      Upload content samples
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Sparkles className="w-4 h-4" />
+                      Analyze your voice
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Target className="w-4 h-4" />
+                      Generate on-brand content
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Institution Branding Card - Second */}
         <Card className="mb-6 border-border">
