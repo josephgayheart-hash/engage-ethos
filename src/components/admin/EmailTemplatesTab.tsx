@@ -371,7 +371,7 @@ export function EmailTemplatesTab({ tenants = [], users = [], onEmailSent }: Ema
       };
 
       // Special handling for known templates
-      if (quickSendTemplate.template_key === "beta_feedback") {
+      if (quickSendTemplate.template_key === "beta_thank_you") {
         functionName = "send-beta-feedback-email";
         body = {
           userId: userData.id,
@@ -380,7 +380,7 @@ export function EmailTemplatesTab({ tenants = [], users = [], onEmailSent }: Ema
           lastName: userData.last_name,
           institutionName: userData.institution_name,
         };
-      } else if (quickSendTemplate.template_key === "reengagement") {
+      } else if (quickSendTemplate.template_key === "where_have_you_been" || quickSendTemplate.template_key === "reengagement") {
         functionName = "send-reengagement-email";
         body = {
           userId: userData.id,
@@ -397,6 +397,38 @@ export function EmailTemplatesTab({ tenants = [], users = [], onEmailSent }: Ema
       const { error } = await supabase.functions.invoke(functionName, { body });
 
       if (error) throw error;
+
+      // Log to email_nudges for activity tracking
+      const { error: nudgeError } = await supabase.from("email_nudges").insert({
+        tenant_id: userData.tenant_id,
+        user_id: userData.id,
+        nudge_type: `quick_send_${quickSendTemplate.template_key}`,
+        email_count: 1,
+        recipient_email: userData.email,
+        recipient_name: `${userData.first_name} ${userData.last_name}`,
+        subject: quickSendTemplate.subject,
+        email_type: quickSendTemplate.template_key,
+        status: "sent",
+        metadata: { 
+          manual: true, 
+          template_id: quickSendTemplate.id,
+          template_name: quickSendTemplate.name,
+          sent_from: "templates_quick_send"
+        },
+      });
+
+      if (nudgeError) {
+        console.error("Failed to log email nudge:", nudgeError);
+      }
+
+      // Update template send count
+      await supabase
+        .from("email_templates")
+        .update({
+          send_count: (quickSendTemplate.send_count || 0) + 1,
+          last_sent_at: new Date().toISOString(),
+        })
+        .eq("id", quickSendTemplate.id);
 
       toast({
         title: "Email Sent",
