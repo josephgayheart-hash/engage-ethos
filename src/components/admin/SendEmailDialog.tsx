@@ -342,7 +342,10 @@ export function SendEmailDialog({
   // Email Template Previews
   const getTemplatePreview = () => {
     const firstName = selectedUserData?.first_name || inviteFirstName || '[First Name]';
+    const lastName = selectedUserData?.last_name || inviteLastName || '[Last Name]';
     const institution = selectedUserData?.institution_name || selectedTenantName || '[Institution]';
+    const email = selectedUserData?.email || inviteEmail || '[email@example.com]';
+    const appUrl = 'https://uplaybook.ai';
     
     switch (emailType) {
       case 'invite':
@@ -358,12 +361,18 @@ export function SendEmailDialog({
             <div className="border-t pt-3 space-y-2 text-muted-foreground">
               <p>Welcome, <strong>{firstName}</strong>!</p>
               <p>You've been invited to join UPlaybook.AI as a <strong>{inviteRole}</strong> for <strong>{institution}</strong>.</p>
-              <div className="bg-background p-2 rounded text-xs">
-                <p className="font-medium mb-1">Your Login Credentials:</p>
-                <p>Email: {inviteEmail || '[email]'}</p>
-                <p>Temporary Password: [auto-generated]</p>
+              <div className="bg-background p-3 rounded text-xs space-y-1 border">
+                <p className="font-medium mb-2">Your Login Credentials:</p>
+                <p><strong>Email:</strong> {email}</p>
+                <p><strong>Temporary Password:</strong> [auto-generated 12-char]</p>
               </div>
-              <p className="text-xs italic">User will be prompted to change password on first login.</p>
+              <div className="bg-primary/10 p-3 rounded text-center">
+                <a href={appUrl} className="text-primary font-medium underline hover:no-underline">
+                  🔗 Login to UPlaybook.AI →
+                </a>
+                <p className="text-xs mt-1 text-muted-foreground">{appUrl}/login</p>
+              </div>
+              <p className="text-xs italic text-amber-600">⚠️ You will be prompted to change your password on first login.</p>
             </div>
           </div>
         );
@@ -381,14 +390,21 @@ export function SendEmailDialog({
             <div className="border-t pt-3 space-y-2 text-muted-foreground">
               <p>Hi <strong>{firstName}</strong>,</p>
               <p>Your UPlaybook.AI account was created recently, but we haven't seen you log in yet! <strong>{institution}</strong> has given you access to powerful AI-powered communication tools.</p>
-              <div className="bg-green-50 dark:bg-green-950 p-2 rounded text-xs border-l-2 border-green-500">
+              <div className="bg-green-50 dark:bg-green-950 p-3 rounded text-xs border-l-2 border-green-500">
                 <p className="font-medium text-green-700 dark:text-green-300 mb-1">Here's what you can do:</p>
-                <ul className="list-disc pl-4 text-green-600 dark:text-green-400">
+                <ul className="list-disc pl-4 text-green-600 dark:text-green-400 space-y-1">
                   <li>Build AI-powered messages in seconds</li>
                   <li>Score your content for effectiveness</li>
                   <li>Access your institution's template library</li>
                 </ul>
               </div>
+              <div className="bg-primary/10 p-3 rounded text-center">
+                <a href={appUrl} className="text-primary font-medium underline hover:no-underline">
+                  🔗 Get Started Now →
+                </a>
+                <p className="text-xs mt-1 text-muted-foreground">{appUrl}/login</p>
+              </div>
+              <p className="text-xs text-muted-foreground">If you need your login credentials, please contact your administrator.</p>
             </div>
           </div>
         );
@@ -419,13 +435,19 @@ export function SendEmailDialog({
                 }
               </p>
               <p>We miss having you around and wanted to check in!</p>
-              <div className="bg-amber-50 dark:bg-amber-950 p-2 rounded text-xs border-l-2 border-amber-500">
+              <div className="bg-amber-50 dark:bg-amber-950 p-3 rounded text-xs border-l-2 border-amber-500">
                 <p className="font-medium text-amber-700 dark:text-amber-300 mb-1">A few things you might have missed:</p>
-                <ul className="list-disc pl-4 text-amber-600 dark:text-amber-400">
+                <ul className="list-disc pl-4 text-amber-600 dark:text-amber-400 space-y-1">
                   <li>New features and improvements</li>
                   <li>Updated templates from your team</li>
                   <li>AI improvements for better content</li>
                 </ul>
+              </div>
+              <div className="bg-amber-100 dark:bg-amber-900/50 p-3 rounded text-center">
+                <a href={appUrl} className="text-amber-700 dark:text-amber-300 font-medium underline hover:no-underline">
+                  🔗 Come Back and Explore →
+                </a>
+                <p className="text-xs mt-1 text-amber-600 dark:text-amber-400">{appUrl}/login</p>
               </div>
               <p className="text-xs">We'd love to help you create great content for <strong>{institution}</strong>!</p>
             </div>
@@ -440,12 +462,20 @@ export function SendEmailDialog({
               <span>Custom Message</span>
             </div>
             <p className="text-muted-foreground">
+              <strong>To:</strong> {firstName} {lastName} ({email})
+            </p>
+            <p className="text-muted-foreground">
               <strong>Subject:</strong> {customSubject || '[Your subject line]'}
             </p>
             <div className="border-t pt-3 space-y-2 text-muted-foreground">
               <p>Hi <strong>{firstName}</strong>,</p>
               <p className="whitespace-pre-wrap">{customBody || '[Your message will appear here...]'}</p>
-              <p className="text-xs italic">Sent from UPlaybook.AI</p>
+              <div className="border-t pt-3 mt-3">
+                <p className="text-xs text-muted-foreground">— The UPlaybook.AI Team</p>
+                <p className="text-xs text-primary mt-1">
+                  <a href={appUrl} className="underline">{appUrl}</a>
+                </p>
+              </div>
             </div>
           </div>
         );
