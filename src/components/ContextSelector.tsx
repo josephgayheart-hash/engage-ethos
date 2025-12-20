@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Select,
   SelectContent,
@@ -6,8 +7,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Users, Clock, Mail, Briefcase, Target, MessageSquare, Building2 } from "lucide-react";
+import { Users, Clock, Briefcase, ChevronDown, ChevronUp } from "lucide-react";
 import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown";
+import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { 
   MessageContext, 
   AudienceType, 
@@ -27,19 +30,7 @@ interface ContextSelectorProps {
   mode?: OperationMode;
 }
 
-const departmentOptions: { value: Department; label: string }[] = [
-  { value: 'central-marketing', label: 'Central Marketing' },
-  { value: 'executive-comms', label: 'Executive Communications' },
-  { value: 'enrollment-management', label: 'Enrollment Management' },
-  { value: 'registrar', label: 'Registrar' },
-  { value: 'college-communications', label: 'College Communications' },
-  { value: 'student-success', label: 'Student Success' },
-  { value: 'recruitment', label: 'Recruitment' },
-  { value: 'health-wellbeing', label: 'Health & Well-being' },
-  { value: 'advancement-alumni', label: 'Advancement & Alumni' },
-  { value: 'human-resources', label: 'Human Resources (HR)' },
-];
-
+// ============= AUDIENCE OPTIONS =============
 const audienceOptions: { value: AudienceType; label: string }[] = [
   { value: 'prospective', label: 'Prospective Student' },
   { value: 'first-year', label: 'First-Year Student' },
@@ -56,6 +47,7 @@ const audienceOptions: { value: AudienceType; label: string }[] = [
   { value: 'higher-ed-leaders', label: 'Higher Education Leaders' },
 ];
 
+// ============= COHORT OPTIONS BY AUDIENCE =============
 const studentCohortOptions: { value: CohortContext; label: string }[] = [
   { value: 'none', label: 'No specific cohort' },
   { value: 'first-gen', label: 'First-Generation' },
@@ -83,6 +75,41 @@ const employeeCohortOptions: { value: CohortContext; label: string }[] = [
   { value: 'remote-employee', label: 'Remote Employee' },
 ];
 
+const alumniCohortOptions: { value: CohortContext; label: string }[] = [
+  { value: 'none', label: 'No specific cohort' },
+  { value: 'young-alumni', label: 'Young Alumni (0-10 years)' },
+  { value: 'established-alumni', label: 'Established Alumni (10+ years)' },
+  { value: 'lapsed-alumni', label: 'Lapsed/Disengaged Alumni' },
+  { value: 'engaged-alumni', label: 'Highly Engaged Alumni' },
+  { value: 'legacy-family', label: 'Legacy Family' },
+];
+
+const parentCohortOptions: { value: CohortContext; label: string }[] = [
+  { value: 'none', label: 'No specific cohort' },
+  { value: 'prospective-parent', label: 'Prospective Parent' },
+  { value: 'current-parent', label: 'Current Parent' },
+  { value: 'new-family', label: 'New Family (First-Year)' },
+  { value: 'graduating-family', label: 'Graduating Family' },
+];
+
+const donorCohortOptions: { value: CohortContext; label: string }[] = [
+  { value: 'none', label: 'No specific cohort' },
+  { value: 'first-time-donor', label: 'First-Time Donor' },
+  { value: 'recurring-donor', label: 'Recurring Donor' },
+  { value: 'major-gift-prospect', label: 'Major Gift Prospect' },
+  { value: 'lapsed-donor', label: 'Lapsed Donor' },
+  { value: 'planned-giving', label: 'Planned Giving Prospect' },
+];
+
+const externalCohortOptions: { value: CohortContext; label: string }[] = [
+  { value: 'none', label: 'No specific cohort' },
+  { value: 'government-official', label: 'Government Official' },
+  { value: 'business-leader', label: 'Business Leader' },
+  { value: 'nonprofit-leader', label: 'Nonprofit Leader' },
+  { value: 'peer-institution', label: 'Peer Institution Leader' },
+];
+
+// ============= MOMENT OPTIONS BY AUDIENCE =============
 const studentMomentOptions: { value: CommunicationMoment; label: string }[] = [
   { value: 'recruitment', label: 'Recruitment' },
   { value: 'yield', label: 'Yield Campaign' },
@@ -112,6 +139,38 @@ const employeeMomentOptions: { value: CommunicationMoment; label: string }[] = [
   { value: 'seasonal', label: 'Seasonal' },
 ];
 
+const alumniMomentOptions: { value: CommunicationMoment; label: string }[] = [
+  { value: 'reunion-campaign', label: 'Reunion Campaign' },
+  { value: 'homecoming', label: 'Homecoming' },
+  { value: 'alumni-giving-day', label: 'Alumni Giving Day' },
+  { value: 'career-networking', label: 'Career Networking Event' },
+  { value: 'chapter-event', label: 'Chapter/Regional Event' },
+  { value: 'alumni-recognition', label: 'Alumni Recognition' },
+  { value: 'alumni-newsletter', label: 'Newsletter/Update' },
+  { value: 'campus-event', label: 'Campus Event' },
+];
+
+const parentMomentOptions: { value: CommunicationMoment; label: string }[] = [
+  { value: 'family-orientation', label: 'Family Orientation' },
+  { value: 'family-weekend', label: 'Family Weekend' },
+  { value: 'parent-giving', label: 'Parent Giving Campaign' },
+  { value: 'parent-newsletter', label: 'Parent Newsletter' },
+  { value: 'tuition-notification', label: 'Tuition/Financial Notification' },
+  { value: 'graduation', label: 'Graduation' },
+  { value: 'seasonal', label: 'Seasonal' },
+];
+
+const donorMomentOptions: { value: CommunicationMoment; label: string }[] = [
+  { value: 'annual-fund', label: 'Annual Fund Campaign' },
+  { value: 'capital-campaign', label: 'Capital Campaign' },
+  { value: 'giving-day', label: 'Giving Day' },
+  { value: 'stewardship', label: 'Stewardship/Thank You' },
+  { value: 'impact-report', label: 'Impact Report' },
+  { value: 'planned-giving-outreach', label: 'Planned Giving Outreach' },
+  { value: 'donor-recognition', label: 'Donor Recognition Event' },
+  { value: 'campus-event', label: 'Campus Event' },
+];
+
 const policyMakerMomentOptions: { value: CommunicationMoment; label: string }[] = [
   { value: 'advocacy-support', label: 'Support University Priorities' },
   { value: 'funding-advocacy', label: 'Advocate for Increased Funding' },
@@ -136,18 +195,8 @@ const higherEdLeaderMomentOptions: { value: CommunicationMoment; label: string }
   { value: 'campus-event', label: 'Campus Visit/Event' },
 ];
 
-const channelOptions: { value: Channel; label: string }[] = [
-  { value: 'email', label: 'Email' },
-  { value: 'sms', label: 'SMS/Text' },
-  { value: 'portal', label: 'Student Portal' },
-  { value: 'landing-page', label: 'Landing Page' },
-  { value: 'social-media', label: 'Social Media' },
-  { value: 'direct-mail', label: 'Direct Mail' },
-  { value: 'phone-call', label: 'Phone Call' },
-  { value: 'talking-points', label: 'Executive Talking Points' },
-];
-
-const domainOptions: { value: MessageDomain; label: string }[] = [
+// ============= DOMAIN OPTIONS BY AUDIENCE CATEGORY =============
+const studentDomainOptions: { value: MessageDomain; label: string }[] = [
   { value: 'admissions', label: 'Admissions' },
   { value: 'recruitment', label: 'Recruitment' },
   { value: 'academic', label: 'Academic' },
@@ -159,17 +208,28 @@ const domainOptions: { value: MessageDomain; label: string }[] = [
   { value: 'athletics', label: 'Athletics' },
   { value: 'compliance', label: 'Compliance' },
   { value: 'scholastic', label: 'Scholastic' },
-  { value: 'giving', label: 'Giving/Fundraising' },
-  { value: 'alumni-relations', label: 'Alumni Relations' },
-  // Employee domains
+];
+
+const employeeDomainOptions: { value: MessageDomain; label: string }[] = [
   { value: 'hr-benefits', label: 'HR & Benefits' },
   { value: 'professional-growth', label: 'Professional Growth' },
   { value: 'workplace-culture', label: 'Workplace Culture' },
   { value: 'operations', label: 'Operations' },
   { value: 'safety-security', label: 'Safety & Security' },
+  { value: 'compliance', label: 'Compliance' },
 ];
 
-const goalOptions: { value: PrimaryGoal; label: string }[] = [
+const externalDomainOptions: { value: MessageDomain; label: string }[] = [
+  { value: 'giving', label: 'Giving/Fundraising' },
+  { value: 'alumni-relations', label: 'Alumni Relations' },
+  { value: 'stewardship', label: 'Stewardship' },
+  { value: 'engagement', label: 'Engagement' },
+  { value: 'advocacy', label: 'Advocacy' },
+  { value: 'partnership', label: 'Partnership' },
+];
+
+// ============= GOAL OPTIONS BY AUDIENCE CATEGORY =============
+const studentGoalOptions: { value: PrimaryGoal; label: string }[] = [
   { value: 'inquiry', label: 'Inquiry (lead generation)' },
   { value: 'apply', label: 'Apply (application push)' },
   { value: 'yield', label: 'Yield (deposit/commit)' },
@@ -180,14 +240,54 @@ const goalOptions: { value: PrimaryGoal; label: string }[] = [
   { value: 'submit', label: 'Submit (form/document)' },
   { value: 'respond', label: 'Respond (reply/contact)' },
   { value: 'check-in', label: 'Check-in (welfare)' },
-  { value: 'donate', label: 'Donate (giving)' },
   { value: 'register', label: 'Register (course/event)' },
-  // Employee goals
+];
+
+const employeeGoalOptions: { value: PrimaryGoal; label: string }[] = [
   { value: 'enroll-benefits', label: 'Enroll in Benefits' },
   { value: 'complete-training', label: 'Complete Training' },
   { value: 'acknowledge', label: 'Acknowledge (policy/info)' },
   { value: 'participate', label: 'Participate (event/initiative)' },
   { value: 'review-update', label: 'Review & Update (info/profile)' },
+  { value: 'attend', label: 'Attend (event/meeting)' },
+  { value: 'respond', label: 'Respond (reply/contact)' },
+];
+
+const externalGoalOptions: { value: PrimaryGoal; label: string }[] = [
+  { value: 'donate', label: 'Donate (make a gift)' },
+  { value: 'renew-giving', label: 'Renew Giving' },
+  { value: 'upgrade-giving', label: 'Upgrade Giving Level' },
+  { value: 'engage', label: 'Engage (participate/connect)' },
+  { value: 'attend-event', label: 'Attend Event' },
+  { value: 'register-event', label: 'Register for Event' },
+  { value: 'advocate', label: 'Advocate (support cause)' },
+  { value: 'connect', label: 'Connect (network/mentor)' },
+  { value: 'respond', label: 'Respond (reply/contact)' },
+];
+
+// ============= CHANNEL & DEPARTMENT & TONE OPTIONS =============
+const channelOptions: { value: Channel; label: string }[] = [
+  { value: 'email', label: 'Email' },
+  { value: 'sms', label: 'SMS/Text' },
+  { value: 'portal', label: 'Student Portal' },
+  { value: 'landing-page', label: 'Landing Page' },
+  { value: 'social-media', label: 'Social Media' },
+  { value: 'direct-mail', label: 'Direct Mail' },
+  { value: 'phone-call', label: 'Phone Call' },
+  { value: 'talking-points', label: 'Executive Talking Points' },
+];
+
+const departmentOptions: { value: Department; label: string }[] = [
+  { value: 'central-marketing', label: 'Central Marketing' },
+  { value: 'executive-comms', label: 'Executive Communications' },
+  { value: 'enrollment-management', label: 'Enrollment Management' },
+  { value: 'registrar', label: 'Registrar' },
+  { value: 'college-communications', label: 'College Communications' },
+  { value: 'student-success', label: 'Student Success' },
+  { value: 'recruitment', label: 'Recruitment' },
+  { value: 'health-wellbeing', label: 'Health & Well-being' },
+  { value: 'advancement-alumni', label: 'Advancement & Alumni' },
+  { value: 'human-resources', label: 'Human Resources (HR)' },
 ];
 
 const toneOptions: { value: TonePreference; label: string }[] = [
@@ -199,32 +299,92 @@ const toneOptions: { value: TonePreference; label: string }[] = [
   { value: 'urgent', label: 'Urgent' },
 ];
 
-export function ContextSelector({ context, onChange, mode = 'evaluator' }: ContextSelectorProps) {
-  const showExtendedOptions = mode === 'builder' || mode === 'mapper';
-  const hideChannel = mode === 'mapper' || mode === 'builder'; // Builder/Strategy pages have their own multi-channel selection
+// ============= HELPER FUNCTIONS =============
+function getAudienceCategory(audience?: AudienceType): 'student' | 'employee' | 'alumni' | 'parent' | 'donor' | 'external' {
+  if (!audience) return 'student';
   
-  // Dynamic options based on audience type
-  const isEmployee = context.audience === 'employee';
-  const isPolicyMaker = context.audience === 'policy-makers';
-  const isCommunityPartner = context.audience === 'community-partners';
-  const isHigherEdLeader = context.audience === 'higher-ed-leaders';
+  const studentAudiences: AudienceType[] = ['prospective', 'first-year', 'continuing', 'at-risk', 'graduate', 'online-learner'];
+  const employeeAudiences: AudienceType[] = ['employee'];
+  const alumniAudiences: AudienceType[] = ['alumni'];
+  const parentAudiences: AudienceType[] = ['parents'];
+  const donorAudiences: AudienceType[] = ['donors'];
   
-  const cohortOptions = isEmployee ? employeeCohortOptions : studentCohortOptions;
-  
-  // Select the appropriate moment options based on audience
-  let momentOptions = studentMomentOptions;
-  if (isEmployee) {
-    momentOptions = employeeMomentOptions;
-  } else if (isPolicyMaker) {
-    momentOptions = policyMakerMomentOptions;
-  } else if (isCommunityPartner) {
-    momentOptions = communityPartnerMomentOptions;
-  } else if (isHigherEdLeader) {
-    momentOptions = higherEdLeaderMomentOptions;
+  if (studentAudiences.includes(audience)) return 'student';
+  if (employeeAudiences.includes(audience)) return 'employee';
+  if (alumniAudiences.includes(audience)) return 'alumni';
+  if (parentAudiences.includes(audience)) return 'parent';
+  if (donorAudiences.includes(audience)) return 'donor';
+  return 'external';
+}
+
+function getCohortOptions(audience?: AudienceType) {
+  const category = getAudienceCategory(audience);
+  switch (category) {
+    case 'employee': return employeeCohortOptions;
+    case 'alumni': return alumniCohortOptions;
+    case 'parent': return parentCohortOptions;
+    case 'donor': return donorCohortOptions;
+    case 'external': return externalCohortOptions;
+    default: return studentCohortOptions;
   }
+}
+
+function getMomentOptions(audience?: AudienceType) {
+  const category = getAudienceCategory(audience);
+  switch (category) {
+    case 'employee': return employeeMomentOptions;
+    case 'alumni': return alumniMomentOptions;
+    case 'parent': return parentMomentOptions;
+    case 'donor': return donorMomentOptions;
+    case 'external':
+      if (audience === 'policy-makers') return policyMakerMomentOptions;
+      if (audience === 'community-partners') return communityPartnerMomentOptions;
+      if (audience === 'higher-ed-leaders') return higherEdLeaderMomentOptions;
+      return communityPartnerMomentOptions;
+    default: return studentMomentOptions;
+  }
+}
+
+function getDomainOptions(audience?: AudienceType) {
+  const category = getAudienceCategory(audience);
+  switch (category) {
+    case 'employee': return employeeDomainOptions;
+    case 'alumni':
+    case 'parent':
+    case 'donor':
+    case 'external': return externalDomainOptions;
+    default: return studentDomainOptions;
+  }
+}
+
+function getGoalOptions(audience?: AudienceType) {
+  const category = getAudienceCategory(audience);
+  switch (category) {
+    case 'employee': return employeeGoalOptions;
+    case 'alumni':
+    case 'parent':
+    case 'donor':
+    case 'external': return externalGoalOptions;
+    default: return studentGoalOptions;
+  }
+}
+
+// ============= MAIN COMPONENT =============
+export function ContextSelector({ context, onChange, mode = 'evaluator' }: ContextSelectorProps) {
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  
+  const showExtendedOptions = mode === 'builder' || mode === 'mapper';
+  const hideChannel = mode === 'mapper' || mode === 'builder';
+  
+  // Get conditional options based on audience
+  const cohortOptions = getCohortOptions(context.audience);
+  const momentOptions = getMomentOptions(context.audience);
+  const domainOptions = getDomainOptions(context.audience);
+  const goalOptions = getGoalOptions(context.audience);
 
   return (
     <div className="space-y-4">
+      {/* Essential Filters - Always Visible */}
       <div className={`grid grid-cols-1 md:grid-cols-2 ${hideChannel ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-4`}>
         <div className="space-y-2">
           <Label htmlFor="audience" className="flex items-center gap-2 text-sm font-medium">
@@ -234,7 +394,17 @@ export function ContextSelector({ context, onChange, mode = 'evaluator' }: Conte
           <Select
             value={context.audience ?? ""}
             onValueChange={(value) =>
-              onChange({ ...context, audience: value === "none" || value === "" ? undefined : value as AudienceType })
+              onChange({ 
+                ...context, 
+                audience: value === "none" || value === "" ? undefined : value as AudienceType,
+                // Reset cohort, moment, domain, goal when audience changes
+                cohort: undefined,
+                moment: undefined,
+                moments: undefined,
+                domain: undefined,
+                goal: undefined,
+                goals: undefined,
+              })
             }
           >
             <SelectTrigger id="audience" className="w-full bg-background">
@@ -297,7 +467,6 @@ export function ContextSelector({ context, onChange, mode = 'evaluator' }: Conte
         {!hideChannel && (
           <div className="space-y-2">
             <Label htmlFor="channel" className="flex items-center gap-2 text-sm font-medium">
-              <Mail className="w-4 h-4 text-pillar-consensus" />
               Channel
             </Label>
             <Select
@@ -322,101 +491,122 @@ export function ContextSelector({ context, onChange, mode = 'evaluator' }: Conte
         )}
       </div>
 
+      {/* Advanced Options - Collapsible (only in builder/mapper mode) */}
       {showExtendedOptions && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-2 border-t border-border">
-          <div className="space-y-2">
-            <Label htmlFor="department" className="flex items-center gap-2 text-sm font-medium">
-              <Building2 className="w-4 h-4 text-primary" />
-              Department
-            </Label>
-            <Select
-              value={context.department ?? ""}
-              onValueChange={(value) =>
-                onChange({ ...context, department: value === "none" || value === "" ? undefined : value as Department })
-              }
+        <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
+          <CollapsibleTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="w-full flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground border border-dashed border-border hover:border-primary/50"
             >
-              <SelectTrigger id="department" className="w-full bg-background">
-                <SelectValue placeholder="Select department..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">— None —</SelectItem>
-                {departmentOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+              {advancedOpen ? (
+                <>
+                  <ChevronUp className="w-4 h-4" />
+                  Hide Advanced Options
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="w-4 h-4" />
+                  Show Advanced Options (Department, Domain, Goal, Tone)
+                </>
+              )}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 border border-border rounded-lg bg-muted/30">
+              <div className="space-y-2">
+                <Label htmlFor="department" className="text-sm font-medium">
+                  Department
+                </Label>
+                <Select
+                  value={context.department ?? ""}
+                  onValueChange={(value) =>
+                    onChange({ ...context, department: value === "none" || value === "" ? undefined : value as Department })
+                  }
+                >
+                  <SelectTrigger id="department" className="w-full bg-background">
+                    <SelectValue placeholder="Select department..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">— None —</SelectItem>
+                    {departmentOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="domain" className="flex items-center gap-2 text-sm font-medium">
-              <MessageSquare className="w-4 h-4 text-secondary" />
-              Message Domain
-            </Label>
-            <Select
-              value={context.domain ?? ""}
-              onValueChange={(value) =>
-                onChange({ ...context, domain: value === "none" || value === "" ? undefined : value as MessageDomain })
-              }
-            >
-              <SelectTrigger id="domain" className="w-full bg-background">
-                <SelectValue placeholder="Select domain..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">— None —</SelectItem>
-                {domainOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="domain" className="text-sm font-medium">
+                  Message Domain
+                </Label>
+                <Select
+                  value={context.domain ?? ""}
+                  onValueChange={(value) =>
+                    onChange({ ...context, domain: value === "none" || value === "" ? undefined : value as MessageDomain })
+                  }
+                >
+                  <SelectTrigger id="domain" className="w-full bg-background">
+                    <SelectValue placeholder="Select domain..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">— None —</SelectItem>
+                    {domainOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="goal" className="flex items-center gap-2 text-sm font-medium">
-              <Target className="w-4 h-4 text-pillar-ethics" />
-              Primary Goal
-            </Label>
-            <MultiSelectDropdown
-              options={goalOptions}
-              value={context.goals || (context.goal ? [context.goal] : [])}
-              onChange={(values) =>
-                onChange({ 
-                  ...context, 
-                  goals: values.length > 0 ? values as PrimaryGoal[] : undefined,
-                  goal: values.length > 0 ? values[0] as PrimaryGoal : undefined
-                })
-              }
-              placeholder="Select goals..."
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="goal" className="text-sm font-medium">
+                  Primary Goal
+                </Label>
+                <MultiSelectDropdown
+                  options={goalOptions}
+                  value={context.goals || (context.goal ? [context.goal] : [])}
+                  onChange={(values) =>
+                    onChange({ 
+                      ...context, 
+                      goals: values.length > 0 ? values as PrimaryGoal[] : undefined,
+                      goal: values.length > 0 ? values[0] as PrimaryGoal : undefined
+                    })
+                  }
+                  placeholder="Select goals..."
+                />
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="tone" className="text-sm font-medium">
-              Tone Preference
-            </Label>
-            <Select
-              value={context.tone ?? ""}
-              onValueChange={(value) =>
-                onChange({ ...context, tone: value === "none" || value === "" ? undefined : value as TonePreference })
-              }
-            >
-              <SelectTrigger id="tone" className="w-full bg-background">
-                <SelectValue placeholder="Select tone..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">— None —</SelectItem>
-                {toneOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+              <div className="space-y-2">
+                <Label htmlFor="tone" className="text-sm font-medium">
+                  Tone Preference
+                </Label>
+                <Select
+                  value={context.tone ?? ""}
+                  onValueChange={(value) =>
+                    onChange({ ...context, tone: value === "none" || value === "" ? undefined : value as TonePreference })
+                  }
+                >
+                  <SelectTrigger id="tone" className="w-full bg-background">
+                    <SelectValue placeholder="Select tone..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">— None —</SelectItem>
+                    {toneOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       )}
     </div>
   );
