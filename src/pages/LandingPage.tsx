@@ -77,12 +77,14 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-40" />
         
         {/* Decorative sprites and lens flares */}
-        <div className="absolute top-16 left-[15%] w-3 h-3 bg-[hsl(82_85%_55%)] rounded-full opacity-70 animate-pulse" />
-        <div className="absolute top-24 right-[20%] w-4 h-4 bg-[hsl(270_70%_60%)] rounded-full opacity-60" />
-        <div className="absolute top-32 left-[10%] w-2 h-2 bg-[hsl(200_100%_50%)] rounded-full opacity-80" />
-        <div className="absolute bottom-40 right-[12%] w-3 h-3 bg-[hsl(340_75%_55%)] rounded-full opacity-50" />
-        <div className="absolute top-20 right-[8%] w-20 h-20 bg-[hsl(82_85%_55%_/_0.15)] rounded-full blur-xl" />
-        <div className="absolute bottom-32 left-[8%] w-24 h-24 bg-[hsl(270_70%_60%_/_0.12)] rounded-full blur-xl" />
+        <div className="absolute top-16 left-[15%] w-4 h-4 bg-[hsl(82_85%_55%)] rounded-full opacity-50 blur-[2px]" />
+        <div className="absolute top-24 right-[20%] w-6 h-6 bg-[hsl(270_70%_60%)] rounded-full opacity-40 blur-sm" />
+        <div className="absolute top-32 left-[10%] w-3 h-3 bg-[hsl(200_100%_50%)] rounded-full opacity-60 blur-[1px]" />
+        <div className="absolute bottom-40 right-[12%] w-5 h-5 bg-[hsl(340_75%_55%)] rounded-full opacity-40 blur-sm" />
+        <div className="absolute top-20 right-[8%] w-24 h-24 bg-[hsl(82_85%_55%_/_0.2)] rounded-full blur-2xl" />
+        <div className="absolute bottom-32 left-[8%] w-28 h-28 bg-[hsl(270_70%_60%_/_0.15)] rounded-full blur-2xl" />
+        <div className="absolute top-40 left-[25%] w-16 h-16 bg-[hsl(200_100%_50%_/_0.12)] rounded-full blur-xl" />
+        <div className="absolute bottom-48 right-[25%] w-20 h-20 bg-[hsl(340_75%_55%_/_0.1)] rounded-full blur-xl" />
         
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-28">
           <div className="text-center space-y-6">
