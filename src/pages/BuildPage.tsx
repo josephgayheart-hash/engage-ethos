@@ -7,6 +7,7 @@ import { LibraryNav } from "@/components/LibraryNav";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
 import { ChannelPreview } from "@/components/ChannelPreview";
 import { ContentDNAIndicator, ContentDNAActiveBadge } from "@/components/ContentDNAIndicator";
+import { BuilderStepSection, BuilderStepDivider } from "@/components/BuilderStepSection";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,7 +43,11 @@ import {
   FolderPlus,
   Library,
   GitBranch,
-  X
+  X,
+  Building2,
+  Dna,
+  MessageSquare,
+  Target
 } from "lucide-react";
 import { buildMessage } from "@/lib/evaluateMessage";
 import { useAuth } from "@/contexts/AuthContext";
@@ -527,79 +532,108 @@ const BuildPage = () => {
 
           <Card className="border-border/60 shadow-sm">
             <CardHeader>
-              <CardTitle className="font-serif text-lg">Message Context</CardTitle>
+              <CardTitle className="font-serif text-lg">Build Your Message</CardTitle>
               <CardDescription>
-                Define your audience, timing, and channel to generate tailored messages
+                Follow the steps below to configure your audience, context, and channels
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Institutional Profile Selector */}
-              <InstitutionalProfileSelector
-                selectedProfileId={selectedProfileId}
-                onProfileChange={(id, config, name) => {
-                  setSelectedProfileId(id);
-                  setInstitutionalConfig(config);
-                  setSelectedProfileName(name);
-                }}
-              />
+            <CardContent className="space-y-8">
+              
+              {/* Step 1: Brand & Profile */}
+              <BuilderStepSection
+                stepNumber={1}
+                title="Select Your Brand Context"
+                description="Choose the institutional profile and voice settings for your message"
+                helpText="Select which college, department, or unit this message represents. The institutional profile determines branding, tone, and available resources."
+                icon={<Building2 className="w-4 h-4" />}
+              >
+                <div className="space-y-4">
+                  <InstitutionalProfileSelector
+                    selectedProfileId={selectedProfileId}
+                    onProfileChange={(id, config, name) => {
+                      setSelectedProfileId(id);
+                      setInstitutionalConfig(config);
+                      setSelectedProfileName(name);
+                    }}
+                  />
 
-              {/* Content DNA Indicator */}
-              <ContentDNAIndicator
-                enabled={useContentDNA}
-                onToggle={setUseContentDNA}
-                selectedProfileId={selectedProfileId}
-                selectedProfileName={selectedProfileName}
-              />
+                  {/* Content DNA Indicator */}
+                  <ContentDNAIndicator
+                    enabled={useContentDNA}
+                    onToggle={setUseContentDNA}
+                    selectedProfileId={selectedProfileId}
+                    selectedProfileName={selectedProfileName}
+                  />
 
-              {/* Brand Layer Selector - only show when Content DNA is enabled and brand platform exists */}
-              {useContentDNA && contentDNA?.brandPlatform && (
-                <BrandLayerSelector
-                  brandPlatform={contentDNA.brandPlatform}
-                  selection={brandSelection}
-                  onSelectionChange={setBrandSelection}
-                  isLoading={isContentDNALoading}
-                  compact
-                />
-              )}
-
-              <ContextSelector context={context} onChange={setContext} mode="builder" />
-
-              {/* Channel Selection */}
-              <div className="space-y-3 pt-2 border-t border-border">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium flex items-center gap-2">
-                    <Mail className="w-4 h-4 text-pillar-consensus" />
-                    Channel Modalities
-                  </Label>
-                  <Button variant="ghost" size="sm" onClick={selectAllChannels}>
-                    Select All
-                  </Button>
+                  {/* Brand Layer Selector - only show when Content DNA is enabled and brand platform exists */}
+                  {useContentDNA && contentDNA?.brandPlatform && (
+                    <BrandLayerSelector
+                      brandPlatform={contentDNA.brandPlatform}
+                      selection={brandSelection}
+                      onSelectionChange={setBrandSelection}
+                      isLoading={isContentDNALoading}
+                      compact
+                    />
+                  )}
                 </div>
-                <div className="flex flex-wrap gap-3">
-                  {channelOptions.map(channel => (
-                    <div key={channel.value} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`channel-${channel.value}`}
-                        checked={selectedChannels.includes(channel.value)}
-                        onCheckedChange={() => toggleChannel(channel.value)}
-                      />
-                      <label
-                        htmlFor={`channel-${channel.value}`}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                      >
-                        {channel.label}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              </BuilderStepSection>
 
-              {/* Urgency & Deadline Section */}
-              <div className="space-y-3 pt-2 border-t border-border">
-                <Label className="text-sm font-medium flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-destructive" />
-                  Urgency & Deadline (Optional)
-                </Label>
+              {/* Step 2: Audience & Context */}
+              <BuilderStepSection
+                stepNumber={2}
+                title="Define Your Audience"
+                description="Who are you communicating with and what's the situation?"
+                helpText="Select the primary audience type, their specific cohort characteristics, and the communication moment. These selections help the AI generate contextually appropriate messaging."
+                icon={<Users className="w-4 h-4" />}
+              >
+                <ContextSelector context={context} onChange={setContext} mode="builder" />
+              </BuilderStepSection>
+
+              {/* Step 3: Channel Selection */}
+              <BuilderStepSection
+                stepNumber={3}
+                title="Choose Your Channels"
+                description="Select which communication channels to generate content for"
+                helpText="You can select multiple channels to generate a coordinated multi-channel message kit. Each channel will receive appropriately formatted content."
+                icon={<Mail className="w-4 h-4" />}
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-end">
+                    <Button variant="ghost" size="sm" onClick={selectAllChannels}>
+                      Select All
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                    {channelOptions.map(channel => (
+                      <div key={channel.value} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`channel-${channel.value}`}
+                          checked={selectedChannels.includes(channel.value)}
+                          onCheckedChange={() => toggleChannel(channel.value)}
+                        />
+                        <label
+                          htmlFor={`channel-${channel.value}`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                        >
+                          {channel.label}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </BuilderStepSection>
+
+              <BuilderStepDivider label="Optional Enhancements" />
+
+              {/* Step 4: Urgency & Deadline */}
+              <BuilderStepSection
+                stepNumber={4}
+                title="Urgency & Deadline"
+                description="Add time-sensitive elements to create urgency"
+                helpText="When you specify a deadline, the AI will incorporate countdown language and urgency cues into your messaging to motivate action."
+                icon={<Clock className="w-4 h-4" />}
+                optional
+              >
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="urgency-label" className="text-xs text-muted-foreground">Deadline Label</Label>
@@ -651,28 +685,28 @@ const BuildPage = () => {
                   )}
                 </div>
                 {context.dueDate && (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground mt-2">
                     Messages will include countdown language referencing this deadline.
                   </p>
                 )}
-              </div>
+              </BuilderStepSection>
 
-              {/* Additional Context */}
-              <div className="space-y-2 pt-2 border-t border-border">
-                <Label className="text-sm font-medium flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-primary" />
-                  Additional Context (Optional)
-                </Label>
+              {/* Step 5: Additional Context */}
+              <BuilderStepSection
+                stepNumber={5}
+                title="Additional Context"
+                description="Provide campaign-specific details for more targeted messaging"
+                helpText="Add specific instructions, campaign themes, or refinement notes. Examples: 'Emphasize career outcomes' or 'Focus on FAFSA deadline' or 'Highlight peer success stories'."
+                icon={<FileText className="w-4 h-4" />}
+                optional
+              >
                 <textarea
                   value={context.additionalContext || ''}
                   onChange={(e) => setContext({ ...context, additionalContext: e.target.value })}
-                  placeholder="Add campaign context or refinement notes. Examples: 'Emphasize career outcomes and ROI for this cohort' or 'Focus on FAFSA deadline urgency' or 'Highlight peer success stories from this program'"
+                  placeholder="Add campaign context or refinement notes..."
                   className="w-full min-h-[80px] px-3 py-2 text-sm rounded-md border border-input bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-y"
                 />
-                <p className="text-xs text-muted-foreground">
-                  Provide campaign-specific details to make your messaging more relevant and targeted.
-                </p>
-              </div>
+              </BuilderStepSection>
 
               <div className="flex items-center justify-between">
                 <Button
