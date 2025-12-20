@@ -135,7 +135,7 @@ const BuildPage = () => {
   const [saveToLibraryOpen, setSaveToLibraryOpen] = useState(false);
   const [saveToLibraryChannel, setSaveToLibraryChannel] = useState<Channel | null>(null);
   const [saveToLibraryType, setSaveToLibraryType] = useState<'personal' | 'shared'>('personal');
-  const [useContentDNA, setUseContentDNA] = useState(true);
+  const [useContentDNA, setUseContentDNA] = useState(false);
   const [brandSelection, setBrandSelection] = useState<BrandLayerSelection>({
     pillars: [],
     proofPoints: [],

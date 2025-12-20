@@ -101,7 +101,7 @@ const StrategyPage = () => {
   const [cadence, setCadence] = useState<CadenceFrequency>('weekly');
   const [escalation, setEscalation] = useState<EscalationPattern>('none');
   const [estimatedTouchpoints, setEstimatedTouchpoints] = useState<number>(12);
-  const [useContentDNA, setUseContentDNA] = useState(true);
+  const [useContentDNA, setUseContentDNA] = useState(false);
   const [brandSelection, setBrandSelection] = useState<BrandLayerSelection>({
     pillars: [],
     proofPoints: [],
