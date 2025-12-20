@@ -24,14 +24,16 @@ import {
   CheckCircle,
   Clock,
   Send,
-  Plus,
   Filter,
   X,
   ShieldCheck,
   ChevronRight,
   Calendar,
   Building2,
-  Dna
+  Dna,
+  Route,
+  Pencil,
+  ClipboardCheck
 } from "lucide-react";
 
 const statusConfig: Record<LibraryEntryStatus, { label: string; icon: typeof CheckCircle; variant: 'default' | 'secondary' | 'outline' }> = {
@@ -111,7 +113,7 @@ const SharedLibrary = () => {
                 Brand-governed content with approval workflows. Your institution's playbook of vetted, on-brand messaging.
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               {pendingCount > 0 && (
                 <Button 
                   variant={viewMode === 'admin' ? 'default' : 'outline'}
@@ -123,9 +125,17 @@ const SharedLibrary = () => {
                   <Badge variant="destructive" className="ml-1">{pendingCount}</Badge>
                 </Button>
               )}
-              <Button onClick={() => setCreateOpen(true)} className="flex items-center gap-2">
-                <Plus className="w-4 h-4" />
-                <span className="hidden sm:inline">Create Playbook</span>
+              <Button variant="outline" onClick={() => navigate('/strategy')} className="flex items-center gap-2">
+                <Route className="w-4 h-4" />
+                <span className="hidden sm:inline">Design Journey</span>
+              </Button>
+              <Button variant="outline" onClick={() => navigate('/build')} className="flex items-center gap-2">
+                <Pencil className="w-4 h-4" />
+                <span className="hidden sm:inline">Build Message</span>
+              </Button>
+              <Button variant="outline" onClick={() => navigate('/evaluate')} className="flex items-center gap-2">
+                <ClipboardCheck className="w-4 h-4" />
+                <span className="hidden sm:inline">Evaluate</span>
               </Button>
             </div>
           </div>
