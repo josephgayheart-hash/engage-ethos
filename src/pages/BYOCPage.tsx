@@ -204,35 +204,35 @@ const BYOCPage = () => {
           {/* Header */}
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
-                <Upload className="w-7 h-7 text-pillar-consensus" />
-                Bring Your Own Comm
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Import, evaluate, and add your existing communications to the library
-              </p>
-            </div>
-            <AIBadge />
+            <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
+              <Upload className="w-7 h-7 text-pillar-consensus" />
+              Bring Your Own Comm
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Import your approved communications to share with the university library
+            </p>
           </div>
+        </div>
 
-          {/* Quick Add Option */}
-          <Card className="border-primary/20 bg-primary/5">
-            <CardContent className="pt-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Plus className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-foreground">Have a great communication to share?</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Add your external comms directly to your library or submit to the university library for others to use.
-                    </p>
-                  </div>
+        {/* Purpose Card */}
+        <Card className="border-pillar-consensus/30 bg-pillar-consensus/5">
+          <CardContent className="pt-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-pillar-consensus/10">
+                  <Share2 className="w-5 h-5 text-pillar-consensus" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-foreground">Import Pre-Approved Communications</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Upload Word docs, PDFs, or paste emails that are already approved by your team. 
+                    Your Content DNA and brand layer will be applied when others remix these for their use.
+                  </p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </CardContent>
+        </Card>
 
           {/* Library Navigation */}
           <LibraryNav mode="messages" />
@@ -404,78 +404,89 @@ const BYOCPage = () => {
 
               <Separator />
 
-              {/* Action Buttons - Clear Options */}
-              <div className="space-y-4">
-                <Label className="text-base font-medium">What would you like to do?</Label>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {/* Evaluate First */}
-                  <Button 
-                    onClick={handleEvaluate}
-                    disabled={!canProcess || isProcessing}
-                    className="flex items-center justify-center gap-2 h-auto py-4"
-                    variant={evaluationResult ? "outline" : "default"}
-                  >
-                    {isProcessing ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                        Analyzing...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4" />
-                        <div className="text-left">
-                          <div className="font-medium">Evaluate First</div>
-                          <div className="text-xs opacity-80">Get AI feedback</div>
-                        </div>
-                      </>
-                    )}
-                  </Button>
-                  
-                  {/* Save to My Library */}
-                  <Button
-                    variant="outline"
-                    onClick={handleSaveToLibrary}
-                    disabled={!canProcess}
-                    className="flex items-center justify-center gap-2 h-auto py-4"
-                  >
-                    <Save className="w-4 h-4" />
-                    <div className="text-left">
-                      <div className="font-medium">Add to My Library</div>
-                      <div className="text-xs text-muted-foreground">Save for personal use</div>
-                    </div>
-                  </Button>
+            {/* Primary Action - Submit to Library */}
+            <div className="space-y-4">
+              <Label className="text-base font-medium">Add to University Library</Label>
+              <p className="text-sm text-muted-foreground -mt-2">
+                These communications are assumed to be pre-approved and ready to share with your institution.
+              </p>
+              
+              {/* Submit to University Library - Primary Action */}
+              <Button
+                onClick={() => setShowShareDialog(true)}
+                disabled={!canProcess}
+                className="w-full flex items-center justify-center gap-2 h-auto py-4 bg-pillar-consensus hover:bg-pillar-consensus/90"
+              >
+                <Share2 className="w-4 h-4" />
+                <div className="text-left">
+                  <div className="font-medium">Submit to University Library</div>
+                  <div className="text-xs opacity-80">Share with your institution for others to use & remix</div>
                 </div>
+              </Button>
 
-                {/* Submit to University Library - Full Width */}
+              <div className="relative py-2">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-border" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">or</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Save to My Library */}
                 <Button
-                  variant="secondary"
-                  onClick={() => setShowShareDialog(true)}
+                  variant="outline"
+                  onClick={handleSaveToLibrary}
                   disabled={!canProcess}
-                  className="w-full flex items-center justify-center gap-2 h-auto py-4"
+                  className="flex items-center justify-center gap-2 h-auto py-4"
                 >
-                  <Share2 className="w-4 h-4" />
+                  <Save className="w-4 h-4" />
                   <div className="text-left">
-                    <div className="font-medium">Submit to University Library</div>
-                    <div className="text-xs text-muted-foreground">Share with your institution (requires approval)</div>
+                    <div className="font-medium">Add to My Library</div>
+                    <div className="text-xs text-muted-foreground">Save for personal use only</div>
                   </div>
                 </Button>
 
-                {!canProcess && messageContent.length > 0 && (
-                  <p className="text-sm text-destructive">
-                    Please enter at least 20 characters to continue.
-                  </p>
-                )}
-
-                {(messageContent || evaluationResult) && (
-                  <div className="flex justify-end">
-                    <Button variant="ghost" size="sm" onClick={handleReset}>
-                      <RefreshCw className="w-4 h-4 mr-2" />
-                      Start Over
-                    </Button>
-                  </div>
-                )}
+                {/* Evaluate First - Optional */}
+                <Button 
+                  onClick={handleEvaluate}
+                  disabled={!canProcess || isProcessing}
+                  variant="outline"
+                  className="flex items-center justify-center gap-2 h-auto py-4"
+                >
+                  {isProcessing ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-foreground/30 border-t-foreground rounded-full animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4" />
+                      <div className="text-left">
+                        <div className="font-medium">Evaluate First</div>
+                        <div className="text-xs text-muted-foreground">Optional: Get AI feedback</div>
+                      </div>
+                    </>
+                  )}
+                </Button>
               </div>
+
+              {!canProcess && messageContent.length > 0 && (
+                <p className="text-sm text-destructive">
+                  Please enter at least 20 characters to continue.
+                </p>
+              )}
+
+              {(messageContent || evaluationResult) && (
+                <div className="flex justify-end">
+                  <Button variant="ghost" size="sm" onClick={handleReset}>
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Start Over
+                  </Button>
+                </div>
+              )}
+            </div>
             </CardContent>
           </Card>
 
