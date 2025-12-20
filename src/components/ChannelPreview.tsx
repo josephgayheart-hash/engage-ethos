@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import { useToast } from "@/hooks/use-toast";
 import { SalesforceCredentialsDialog } from "@/components/SalesforceCredentialsDialog";
+import { openInGoogleDocs, formatForGoogleDocs } from "@/lib/googleDocsExport";
 import { 
   Copy, 
   Check, 
@@ -24,7 +25,8 @@ import {
   Megaphone,
   Mic,
   Target,
-  Cloud
+  Cloud,
+  ExternalLink
 } from "lucide-react";
 import type { 
   ChannelDrafts, 
@@ -87,6 +89,22 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     onCopy(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleOpenInGoogleDocs = async () => {
+    const fullContent = getFullContent(editedContent);
+    const formattedContent = formatForGoogleDocs(fullContent, {
+      title: channelLabels[channel],
+      channel: channel,
+      generatedAt: new Date(),
+    });
+    const success = await openInGoogleDocs(formattedContent);
+    if (success) {
+      toast({
+        title: "Opening Google Docs",
+        description: "Content copied! Paste (Ctrl/Cmd+V) in the new document.",
+      });
+    }
   };
 
   // Get SFMC content type based on channel
@@ -1011,7 +1029,16 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
                 <Button
                   variant="ghost"
                   size="sm"
+                  onClick={handleOpenInGoogleDocs}
+                  title="Open in Google Docs"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => handleCopy(getFullContent(editedContent))}
+                  title="Copy to clipboard"
                 >
                   {copied ? (
                     <Check className="w-4 h-4 text-green-600" />
