@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 if (!RESEND_API_KEY) {
@@ -17,6 +18,8 @@ interface InviteEmailRequest {
   temporaryPassword: string;
   institutionName: string;
   role: string;
+  tenantId?: string;
+  userId?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -26,7 +29,11 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, firstName, lastName, temporaryPassword, institutionName, role }: InviteEmailRequest = await req.json();
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    const { email, firstName, lastName, temporaryPassword, institutionName, role, tenantId, userId }: InviteEmailRequest = await req.json();
 
     console.log(`Sending invite email to ${email} for ${institutionName}`);
 
@@ -179,6 +186,27 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     console.log("Invite email sent successfully:", responseData);
+
+    // Log to email_nudges (server-side with service role)
+    if (tenantId && userId) {
+      const { error: nudgeError } = await supabase.from("email_nudges").insert({
+        tenant_id: tenantId,
+        user_id: userId,
+        nudge_type: "admin_invite",
+        email_count: 1,
+        recipient_email: email,
+        recipient_name: `${firstName} ${lastName}`,
+        subject: `Welcome to UPlaybook.AI - ${institutionName}`,
+        email_type: "invite",
+        status: "sent",
+        metadata: { role, institution: institutionName },
+      });
+      if (nudgeError) {
+        console.error("Failed to log email nudge:", nudgeError);
+      } else {
+        console.log("Email nudge logged successfully");
+      }
+    }
 
     return new Response(JSON.stringify({ success: true, ...responseData }), {
       status: 200,

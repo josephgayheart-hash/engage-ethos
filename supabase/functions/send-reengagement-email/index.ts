@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 if (!RESEND_API_KEY) {
@@ -154,11 +155,16 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
     const { userId, email, firstName, lastName, institutionName, lastLoginAt }: ReengagementEmailRequest = await req.json();
 
     console.log(`Sending re-engagement email to ${email} (${firstName} ${lastName})`);
 
     const htmlContent = getWhereHaveYouBeenHtml(firstName, institutionName || 'your institution', lastLoginAt);
+    const subject = `We haven't seen you in a while, ${firstName}! 🤔`;
 
     // Send email via Resend API
     const response = await fetch("https://api.resend.com/emails", {
@@ -170,7 +176,7 @@ const handler = async (req: Request): Promise<Response> => {
       body: JSON.stringify({
         from: "UPlaybook.AI <noreply@uplaybook.ai>",
         to: [email],
-        subject: `We haven't seen you in a while, ${firstName}! 🤔`,
+        subject,
         html: htmlContent,
       }),
     });
@@ -183,6 +189,38 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     console.log("Re-engagement email sent successfully:", responseData);
+
+    // Get user's tenant_id
+    let tenantId = null;
+    if (userId) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("tenant_id")
+        .eq("id", userId)
+        .maybeSingle();
+      tenantId = profile?.tenant_id;
+    }
+
+    // Log to email_nudges (server-side with service role)
+    if (tenantId && userId) {
+      const { error: nudgeError } = await supabase.from("email_nudges").insert({
+        tenant_id: tenantId,
+        user_id: userId,
+        nudge_type: "where_have_you_been",
+        email_count: 1,
+        recipient_email: email,
+        recipient_name: `${firstName} ${lastName || ""}`.trim(),
+        subject,
+        email_type: "reengagement",
+        status: "sent",
+        metadata: { manual: true, institution: institutionName, last_login: lastLoginAt },
+      });
+      if (nudgeError) {
+        console.error("Failed to log email nudge:", nudgeError);
+      } else {
+        console.log("Email nudge logged successfully");
+      }
+    }
 
     return new Response(JSON.stringify({ success: true, ...responseData }), {
       status: 200,

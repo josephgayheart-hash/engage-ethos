@@ -189,25 +189,15 @@ export function SendEmailDialog({
           lastName: inviteLastName,
           temporaryPassword,
           institutionName: selectedTenantName,
-          role: inviteRole
+          role: inviteRole,
+          tenantId: selectedTenant,
+          userId: profile?.id || ''
         }
       });
 
       if (error) throw error;
 
-      // Log the email in email_nudges with full details
-      await supabase.from('email_nudges').insert({
-        tenant_id: selectedTenant,
-        user_id: profile?.id || '',
-        nudge_type: 'admin_invite',
-        email_count: 1,
-        recipient_email: inviteEmail,
-        recipient_name: `${inviteFirstName} ${inviteLastName}`,
-        subject: `Welcome to UPlaybook.AI - ${selectedTenantName}`,
-        email_type: 'invite',
-        status: 'sent',
-        metadata: { role: inviteRole, institution: selectedTenantName }
-      });
+      // Logging is now done server-side
 
       toast({
         title: "Invite Email Sent",
@@ -300,19 +290,7 @@ export function SendEmailDialog({
 
         if (!error) {
           successCount++;
-          // Log the email with full details
-          await supabase.from('email_nudges').insert({
-            tenant_id: userData.tenant_id || '',
-            user_id: userId,
-            nudge_type: 'where_have_you_been',
-            email_count: 1,
-            recipient_email: userData.email,
-            recipient_name: `${userData.first_name} ${userData.last_name}`,
-            subject: `We haven't seen you in a while, ${userData.first_name}! 🤔`,
-            email_type: 'reengagement',
-            status: 'sent',
-            metadata: { institution: userData.institution_name, last_login: userData.last_login_at }
-          });
+          // Logging is now done server-side
         }
       }
 
@@ -434,19 +412,7 @@ export function SendEmailDialog({
 
         if (!error) {
           successCount++;
-          // Log the email
-          await supabase.from('email_nudges').insert({
-            tenant_id: userData.tenant_id || '',
-            user_id: userId,
-            nudge_type: 'beta_thank_you',
-            email_count: 1,
-            recipient_email: userData.email,
-            recipient_name: `${userData.first_name} ${userData.last_name}`,
-            subject: '🎉 Thank You for Joining UPlaybook.AI Beta!',
-            email_type: 'beta_feedback',
-            status: 'sent',
-            metadata: { manual: true, institution: userData.institution_name }
-          });
+          // Logging is now done server-side
         }
       }
 

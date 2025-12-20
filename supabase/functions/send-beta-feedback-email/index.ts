@@ -172,7 +172,7 @@ const handler = async (req: Request): Promise<Response> => {
       .from("email_templates")
       .select("*")
       .eq("template_key", "beta_thank_you")
-      .single();
+      .maybeSingle();
 
     const htmlContent = template
       ? template.html_content
@@ -200,6 +200,49 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     console.log("Beta feedback email sent:", emailResponse);
+
+    // Get user's tenant_id if userId provided
+    let tenantId = null;
+    if (userId) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("tenant_id")
+        .eq("id", userId)
+        .maybeSingle();
+      tenantId = profile?.tenant_id;
+    }
+
+    // Log to email_nudges (server-side with service role)
+    if (tenantId && userId) {
+      const { error: nudgeError } = await supabase.from("email_nudges").insert({
+        tenant_id: tenantId,
+        user_id: userId,
+        nudge_type: "beta_thank_you",
+        email_count: 1,
+        recipient_email: email,
+        recipient_name: `${firstName} ${lastName || ""}`.trim(),
+        subject: template?.subject?.replace(/\{\{first_name\}\}/g, firstName) || `🎉 Thank You for Joining UPlaybook.AI Beta!`,
+        email_type: "beta_feedback",
+        status: "sent",
+        metadata: { manual: true, template_id: template?.id },
+      });
+      if (nudgeError) {
+        console.error("Failed to log email nudge:", nudgeError);
+      } else {
+        console.log("Email nudge logged successfully");
+      }
+
+      // Update template send count
+      if (template) {
+        await supabase
+          .from("email_templates")
+          .update({
+            send_count: (template.send_count || 0) + 1,
+            last_sent_at: new Date().toISOString(),
+          })
+          .eq("id", template.id);
+      }
+    }
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,

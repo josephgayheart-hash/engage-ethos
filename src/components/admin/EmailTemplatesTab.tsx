@@ -398,30 +398,8 @@ export function EmailTemplatesTab({ tenants = [], users = [], onEmailSent }: Ema
 
       if (error) throw error;
 
-      // Log to email_nudges for activity tracking
-      const { error: nudgeError } = await supabase.from("email_nudges").insert({
-        tenant_id: userData.tenant_id,
-        user_id: userData.id,
-        nudge_type: `quick_send_${quickSendTemplate.template_key}`,
-        email_count: 1,
-        recipient_email: userData.email,
-        recipient_name: `${userData.first_name} ${userData.last_name}`,
-        subject: quickSendTemplate.subject,
-        email_type: quickSendTemplate.template_key,
-        status: "sent",
-        metadata: { 
-          manual: true, 
-          template_id: quickSendTemplate.id,
-          template_name: quickSendTemplate.name,
-          sent_from: "templates_quick_send"
-        },
-      });
-
-      if (nudgeError) {
-        console.error("Failed to log email nudge:", nudgeError);
-      }
-
-      // Update template send count
+      // Logging is now done server-side in the edge functions
+      // Just update template send count locally for immediate UI feedback
       await supabase
         .from("email_templates")
         .update({
