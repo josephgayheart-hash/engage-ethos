@@ -122,22 +122,51 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      {/* Hero Section */}
-      <section className="gradient-hero py-10 md:py-12">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="mb-3 animate-fade-in">
-              <Badge className="bg-amber-100/20 text-amber-100 border-amber-200/30 hover:bg-amber-100/30">
-                Beta Release — We welcome your feedback
-              </Badge>
+      {/* Hero Section - Matching Landing Page Aesthetic */}
+      <section className="relative overflow-hidden">
+        {/* Soft gradient background like landing page */}
+        <div className="absolute inset-0 bg-zone-hero" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(200_70%_90%_/_0.3),_transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_hsl(173_58%_85%_/_0.2),_transparent_50%)]" />
+        
+        {/* Subtle lens flares */}
+        <div className="absolute top-12 right-[15%] w-24 h-24 bg-[hsl(270_70%_60%_/_0.1)] rounded-full blur-2xl" />
+        <div className="absolute bottom-8 left-[10%] w-32 h-32 bg-[hsl(82_85%_55%_/_0.08)] rounded-full blur-3xl" />
+        
+        <div className="relative py-10 md:py-12">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto text-center">
+              <div className="mb-3 animate-fade-in">
+                <Badge className="bg-[hsl(200_100%_50%_/_0.15)] text-[hsl(200_100%_40%)] border-[hsl(200_100%_50%_/_0.3)] hover:bg-[hsl(200_100%_50%_/_0.2)]">
+                  Beta Release — We welcome your feedback
+                </Badge>
+              </div>
+              <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-2 animate-fade-in">
+                <span className="text-[hsl(82_85%_45%)]">Plan.</span>{' '}
+                <span className="text-[hsl(270_70%_55%)]">Strategize.</span>{' '}
+                <span className="text-[hsl(200_100%_45%)]">Execute.</span>
+              </h1>
+              <p className="text-base text-muted-foreground animate-fade-in" style={{ animationDelay: '100ms' }}>
+                Your digital playbook for higher ed. Craft meaningful, research-driven, brand-informed messaging at scale.
+              </p>
             </div>
-            <h1 className="font-serif text-2xl md:text-3xl font-bold text-primary-foreground mb-2 animate-fade-in">
-              Plan. Strategize. Execute.
-            </h1>
-            <p className="text-base text-primary-foreground/80 animate-fade-in" style={{ animationDelay: '100ms' }}>
-              Your digital playbook for higher ed. Craft meaningful, research-driven, brand-informed messaging at scale.
-            </p>
           </div>
+        </div>
+        
+        {/* Subtle wave divider */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg 
+            viewBox="0 0 1440 60" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full h-auto"
+            preserveAspectRatio="none"
+          >
+            <path 
+              d="M0 60L60 52C120 44 240 28 360 24C480 20 600 28 720 32C840 36 960 36 1080 32C1200 28 1320 20 1380 16L1440 12V60H1380C1320 60 1200 60 1080 60C960 60 840 60 720 60C600 60 480 60 360 60C240 60 120 60 60 60H0Z" 
+              fill="hsl(var(--background))"
+            />
+          </svg>
         </div>
       </section>
 
@@ -145,17 +174,19 @@ const Index = () => {
         <div className="max-w-6xl mx-auto space-y-10">
           
           {/* Getting Started Workflow */}
-          <section>
-            <div className="mb-6">
-              <h2 className="font-serif text-xl font-semibold mb-1">How It Works</h2>
-              <p className="text-sm text-muted-foreground">Follow these steps to get the most out of UPlaybook</p>
+          <section className="relative">
+            {/* Subtle background zone */}
+            <div className="absolute inset-0 -mx-4 px-4 bg-zone-warm rounded-2xl -z-10 opacity-50" />
+            
+            <div className="mb-6 pt-4">
+              <h2 className="section-header mb-1">How It Works</h2>
+              <p className="section-subheader">Follow these steps to get the most out of UPlaybook</p>
             </div>
             
-            <div className="grid md:grid-cols-4 gap-4">
+            <div className="grid md:grid-cols-4 gap-4 pb-4">
               {/* Step 1: Setup Institution */}
               <Link to="/settings">
-                <Card className="h-full cursor-pointer transition-all hover:shadow-lg hover:border-primary/50 group relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-primary/20 group-hover:bg-primary/40 transition-colors" />
+                <Card className="h-full cursor-pointer card-workflow card-workflow-primary group">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
@@ -163,7 +194,7 @@ const Index = () => {
                       </div>
                       <Badge variant="outline" className="text-xs">Configure</Badge>
                     </div>
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <div className="icon-container icon-container-lg bg-primary/10 mb-4">
                       <Settings className="w-6 h-6 text-primary" />
                     </div>
                     <h3 className="font-serif font-semibold text-lg mb-2">Setup Your Institution</h3>
@@ -181,8 +212,7 @@ const Index = () => {
               {/* Step 2: Create */}
               <div className="grid grid-rows-2 gap-4 h-full">
                 <Link to="/build" className="block">
-                  <Card className="h-full cursor-pointer transition-all hover:shadow-lg hover:border-pillar-cognitive/50 group relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-pillar-cognitive/20 group-hover:bg-pillar-cognitive/40 transition-colors" />
+                  <Card className="h-full cursor-pointer card-workflow card-workflow-cognitive group">
                     <CardContent className="p-5 h-full flex flex-col justify-center">
                       <div className="flex items-center gap-3 mb-3">
                         <div className="w-8 h-8 rounded-full bg-pillar-cognitive/10 flex items-center justify-center text-sm font-bold text-pillar-cognitive">
@@ -191,7 +221,7 @@ const Index = () => {
                         <Badge variant="outline" className="text-xs bg-pillar-cognitive/5">Create</Badge>
                       </div>
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-pillar-cognitive/10 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
+                        <div className="icon-container icon-container-lg bg-pillar-cognitive/10 shrink-0">
                           <PenTool className="w-6 h-6 text-pillar-cognitive" />
                         </div>
                         <div>
@@ -203,8 +233,7 @@ const Index = () => {
                   </Card>
                 </Link>
                 <Link to="/evaluate" className="block">
-                  <Card className="h-full cursor-pointer transition-all hover:shadow-lg hover:border-pillar-authority/50 group relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-pillar-authority/20 group-hover:bg-pillar-authority/40 transition-colors" />
+                  <Card className="h-full cursor-pointer card-workflow card-workflow-authority group">
                     <CardContent className="p-5 h-full flex flex-col justify-center">
                       <div className="flex items-center gap-3 mb-3">
                         <div className="w-8 h-8 rounded-full bg-pillar-authority/10 flex items-center justify-center text-sm font-bold text-pillar-authority">
@@ -213,7 +242,7 @@ const Index = () => {
                         <Badge variant="outline" className="text-xs bg-pillar-authority/5">Evaluate</Badge>
                       </div>
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-pillar-authority/10 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
+                        <div className="icon-container icon-container-lg bg-pillar-authority/10 shrink-0">
                           <FileText className="w-6 h-6 text-pillar-authority" />
                         </div>
                         <div>
@@ -228,8 +257,7 @@ const Index = () => {
 
               {/* Step 3: Strategize */}
               <Link to="/strategy">
-                <Card className="h-full cursor-pointer transition-all hover:shadow-lg hover:border-pillar-consensus/50 group relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-pillar-consensus/20 group-hover:bg-pillar-consensus/40 transition-colors" />
+                <Card className="h-full cursor-pointer card-workflow card-workflow-consensus group">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="w-8 h-8 rounded-full bg-pillar-consensus/10 flex items-center justify-center text-sm font-bold text-pillar-consensus">
@@ -237,7 +265,7 @@ const Index = () => {
                       </div>
                       <Badge variant="outline" className="text-xs bg-pillar-consensus/5">Strategize</Badge>
                     </div>
-                    <div className="w-12 h-12 rounded-xl bg-pillar-consensus/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <div className="icon-container icon-container-lg bg-pillar-consensus/10 mb-4">
                       <Map className="w-6 h-6 text-pillar-consensus" />
                     </div>
                     <h3 className="font-serif font-semibold text-lg mb-2">Design Journeys</h3>
@@ -254,8 +282,8 @@ const Index = () => {
 
               {/* Step 4: Refine Content DNA */}
               <Link to="/content-dna">
-                <Card className="h-full cursor-pointer transition-all hover:shadow-lg hover:border-amber-500/50 group relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-amber-500/20 group-hover:bg-amber-500/40 transition-colors" />
+                <Card className="h-full cursor-pointer card-workflow group relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-amber-500/40 group-hover:bg-amber-500/70 transition-colors" />
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center text-sm font-bold text-amber-600">
@@ -263,7 +291,7 @@ const Index = () => {
                       </div>
                       <Badge variant="outline" className="text-xs bg-amber-500/5 text-amber-600 border-amber-200">Refine</Badge>
                     </div>
-                    <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <div className="icon-container icon-container-lg bg-amber-500/10 mb-4">
                       <Sparkles className="w-6 h-6 text-amber-600" />
                     </div>
                     <h3 className="font-serif font-semibold text-lg mb-2">Refine Content DNA</h3>
@@ -281,19 +309,21 @@ const Index = () => {
           </section>
 
           {/* More Tools Section */}
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-serif text-xl font-semibold">More Tools</h2>
-              <Badge variant="outline" className="flex items-center gap-1">
+          <section className="relative">
+            <div className="absolute inset-0 -mx-4 px-4 bg-zone-mint rounded-2xl -z-10 opacity-40" />
+            
+            <div className="flex items-center justify-between mb-4 pt-4">
+              <h2 className="section-header">More Tools</h2>
+              <Badge variant="outline" className="flex items-center gap-1 bg-[hsl(82_85%_55%_/_0.1)] text-[hsl(82_70%_35%)] border-[hsl(82_85%_55%_/_0.3)]">
                 <Sparkles className="w-3 h-3" />
                 AI-Powered
               </Badge>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pb-4">
               <Link to="/call-script">
-                <Card className="h-full cursor-pointer transition-all hover:shadow-md hover:border-pillar-ethics/50 group">
+                <Card className="h-full cursor-pointer card-workflow group">
                   <CardContent className="p-4">
-                    <div className="w-10 h-10 rounded-lg bg-pillar-ethics/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <div className="icon-container icon-container-md bg-pillar-ethics/10 mb-3">
                       <Phone className="w-5 h-5 text-pillar-ethics" />
                     </div>
                     <h3 className="font-medium text-sm mb-1">Call Scripts</h3>
@@ -302,9 +332,9 @@ const Index = () => {
                 </Card>
               </Link>
               <Link to="/playground">
-                <Card className="h-full cursor-pointer transition-all hover:shadow-md hover:border-pillar-susceptibility/50 group">
+                <Card className="h-full cursor-pointer card-workflow group">
                   <CardContent className="p-4">
-                    <div className="w-10 h-10 rounded-lg bg-pillar-susceptibility/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <div className="icon-container icon-container-md bg-pillar-susceptibility/10 mb-3">
                       <PenTool className="w-5 h-5 text-pillar-susceptibility" />
                     </div>
                     <h3 className="font-medium text-sm mb-1">Copywriter</h3>
@@ -313,9 +343,9 @@ const Index = () => {
                 </Card>
               </Link>
               <Link to="/byoc">
-                <Card className="h-full cursor-pointer transition-all hover:shadow-md hover:border-secondary/50 group">
+                <Card className="h-full cursor-pointer card-workflow group">
                   <CardContent className="p-4">
-                    <div className="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <div className="icon-container icon-container-md bg-secondary/10 mb-3">
                       <Upload className="w-5 h-5 text-secondary" />
                     </div>
                     <h3 className="font-medium text-sm mb-1">Import & Evaluate</h3>
@@ -325,9 +355,9 @@ const Index = () => {
               </Link>
               {isAdmin && (
                 <Link to={isSuperAdmin ? "/admin/panel" : "/admin/console"}>
-                  <Card className="h-full cursor-pointer transition-all hover:shadow-md hover:border-muted-foreground/30 group">
+                  <Card className="h-full cursor-pointer card-workflow group">
                     <CardContent className="p-4">
-                      <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                      <div className="icon-container icon-container-md bg-muted mb-3">
                         <Settings className="w-5 h-5 text-muted-foreground" />
                       </div>
                       <h3 className="font-medium text-sm mb-1">{isSuperAdmin ? 'System Admin' : 'Admin Console'}</h3>
@@ -342,7 +372,7 @@ const Index = () => {
           {/* Libraries Section */}
           <section className="grid md:grid-cols-2 gap-6">
             {/* My Library */}
-            <Card>
+            <Card className="border-border/60 hover:shadow-md transition-shadow">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -399,7 +429,7 @@ const Index = () => {
             </Card>
 
             {/* University Library */}
-            <Card>
+            <Card className="border-border/60 hover:shadow-md transition-shadow">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -459,7 +489,7 @@ const Index = () => {
           {/* Utility Tools Section */}
           <section>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-serif text-xl font-semibold">Utility Tools</h2>
+              <h2 className="section-header">Utility Tools</h2>
               <Badge variant="outline" className="flex items-center gap-1">
                 <Wrench className="w-3 h-3" />
                 Optimize & Analyze
@@ -470,9 +500,9 @@ const Index = () => {
                 const Icon = tool.icon;
                 return (
                   <Link key={tool.id} to={tool.href}>
-                    <Card className="h-full cursor-pointer transition-all hover:shadow-md hover:border-primary/50 group">
+                    <Card className="h-full cursor-pointer card-workflow group">
                       <CardContent className="p-4">
-                        <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center mb-3 group-hover:bg-primary/10 transition-colors">
+                        <div className="icon-container icon-container-md bg-muted mb-3 group-hover:bg-primary/10 transition-colors">
                           <Icon className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
                         </div>
                         <h3 className="font-medium text-sm mb-1">{tool.title}</h3>

@@ -102,37 +102,50 @@ const EvaluatePage = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
+      {/* Page Header with subtle background */}
+      <div className="relative overflow-hidden border-b border-border/50">
+        <div className="absolute inset-0 bg-zone-hero opacity-70" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_hsl(222_47%_14%_/_0.06),_transparent_50%)]" />
+        
+        <div className="relative container mx-auto px-4 py-6">
+          <div className="max-w-4xl mx-auto">
+            {/* Breadcrumb */}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+              <Link to="/dashboard" className="hover:text-foreground transition-colors flex items-center gap-1">
+                <ArrowLeft className="w-4 h-4" />
+                Home
+              </Link>
+              <span>/</span>
+              <span className="text-foreground">Message Evaluator</span>
+            </div>
+
+            {/* Header */}
+            <div className="flex items-start justify-between">
+              <div>
+                <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
+                  <div className="icon-container icon-container-lg bg-pillar-authority/10">
+                    <FileText className="w-6 h-6 text-pillar-authority" />
+                  </div>
+                  Message Evaluator
+                </h1>
+                <p className="text-muted-foreground mt-1 ml-14">
+                  Analyze existing messages using the five-pillar persuasion framework
+                </p>
+              </div>
+              <AIBadge />
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto space-y-6">
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Link to="/dashboard" className="hover:text-foreground transition-colors flex items-center gap-1">
-              <ArrowLeft className="w-4 h-4" />
-              Home
-            </Link>
-            <span>/</span>
-            <span className="text-foreground">Message Evaluator</span>
-          </div>
-
-          {/* Header */}
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
-                <FileText className="w-7 h-7 text-pillar-authority" />
-                Message Evaluator
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Analyze existing messages using the five-pillar persuasion framework
-              </p>
-            </div>
-            <AIBadge />
-          </div>
 
           {/* Library Navigation */}
           <LibraryNav mode="messages" />
 
           {/* Input Card */}
-          <Card>
+          <Card className="border-border/60 shadow-sm">
             <CardHeader>
               <CardTitle className="font-serif text-lg">Message Context</CardTitle>
               <CardDescription>
