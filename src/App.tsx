@@ -45,6 +45,10 @@ import InitialSetupPage from "./pages/InitialSetupPage";
 import MessageDetailPage from "./pages/MessageDetailPage";
 import TemplateDetailPage from "./pages/TemplateDetailPage";
 import BetaFeedbackPage from "./pages/BetaFeedbackPage";
+import ContentDNAFeaturePage from "./pages/features/ContentDNAFeaturePage";
+import MessageBuilderFeaturePage from "./pages/features/MessageBuilderFeaturePage";
+import JourneyDesignerFeaturePage from "./pages/features/JourneyDesignerFeaturePage";
+import EvaluateFeaturePage from "./pages/features/EvaluateFeaturePage";
 
 const queryClient = new QueryClient();
 
@@ -162,6 +166,12 @@ const AppRoutes = () => (
     <Route path="/feedback" element={<RequireAuth><BetaFeedbackPage /></RequireAuth>} />
     <Route path="/change-password" element={<ChangePasswordPage />} />
     <Route path="/setup" element={<InitialSetupPage />} />
+    
+    {/* Feature marketing pages */}
+    <Route path="/features/content-dna" element={<ContentDNAFeaturePage />} />
+    <Route path="/features/message-builder" element={<MessageBuilderFeaturePage />} />
+    <Route path="/features/journey-designer" element={<JourneyDesignerFeaturePage />} />
+    <Route path="/features/evaluate" element={<EvaluateFeaturePage />} />
     
     {/* Protected routes */}
     <Route path="/dashboard" element={<RequireAuth><Index /></RequireAuth>} />

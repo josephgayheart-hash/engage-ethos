@@ -22,21 +22,25 @@ const features = [
     icon: MessageSquare,
     title: 'Brand-Aligned Messaging',
     description: 'Generate content grounded in your brand promise, pillars, and positioning. Not just voice.',
+    link: '/features/message-builder',
   },
   {
     icon: BarChart3,
     title: 'Content DNA Scoring',
     description: 'Score messages against your institutional brand platform, not just generic persuasion principles.',
+    link: '/features/content-dna',
   },
   {
     icon: Target,
     title: 'Journey Flow Builder',
     description: 'Map multi-channel strategies with duration, intensity, and ramp-up controls. The differentiator for comms leaders.',
+    link: '/features/journey-designer',
   },
   {
     icon: BookOpen,
     title: 'University Library',
     description: 'Governed content with approval workflows. Personal drafts for experimentation. Shared libraries for approved, on-brand plays.',
+    link: '/features/evaluate',
   },
 ];
 
@@ -281,9 +285,10 @@ export default function LandingPage() {
               ];
               const colors = cardColors[index % 4];
               return (
-                <div 
+                <Link 
+                  to={feature.link}
                   key={feature.title}
-                  className={`group ${colors.bg} ${colors.border} border-2 rounded-2xl p-6 ${colors.hoverBorder} hover:shadow-xl hover:-translate-y-1 transition-all duration-300`}
+                  className={`group ${colors.bg} ${colors.border} border-2 rounded-2xl p-6 ${colors.hoverBorder} hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer block`}
                 >
                   <div className={`p-3 rounded-xl ${colors.iconBg} w-fit mb-4 group-hover:scale-110 transition-transform`}>
                     <feature.icon className={`w-6 h-6 ${colors.iconColor}`} />
@@ -294,7 +299,11 @@ export default function LandingPage() {
                   <p className="text-muted-foreground text-sm leading-relaxed">
                     {feature.description}
                   </p>
-                </div>
+                  <div className="mt-4 flex items-center gap-1 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: colors.iconColor.replace('text-[', '').replace(']', '') }}>
+                    <span className={colors.iconColor}>Learn more</span>
+                    <ArrowRight className={`w-4 h-4 ${colors.iconColor}`} />
+                  </div>
+                </Link>
               );
             })}
           </div>
