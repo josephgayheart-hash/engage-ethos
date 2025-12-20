@@ -36,6 +36,7 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { SendEmailDialog } from "@/components/admin/SendEmailDialog";
 import { 
   ArrowLeft,
   Users, 
@@ -199,6 +200,7 @@ const AdminPanel = () => {
   const [clearSharedOpen, setClearSharedOpen] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [sendEmailOpen, setSendEmailOpen] = useState(false);
 
   // Fetch all data
   const fetchData = async () => {
@@ -375,8 +377,7 @@ const AdminPanel = () => {
   useEffect(() => {
     if (isSuperAdmin) {
       fetchData();
-      const interval = setInterval(fetchData, 60000); // Refresh every minute
-      return () => clearInterval(interval);
+      // Auto-refresh disabled - use manual refresh button instead
     }
   }, [isSuperAdmin]);
 
@@ -1126,13 +1127,17 @@ const AdminPanel = () => {
                   ) : (
                     <div className="space-y-6">
                       {tenants.map(inst => {
+                        // Get all analyses for this tenant - both at tenant level and profile level
+                        const tenantProfiles = institutionalProfiles.filter(p => p.tenant_id === inst.id);
+                        const tenantProfileIds = tenantProfiles.map(p => p.id);
+                        
                         const instAnalyses = contentDNAAnalyses.filter(a => 
-                          institutionalProfiles.find(p => p.id === a.profile_id)?.tenant_id === inst.id ||
-                          a.tenant_id === inst.id
+                          a.tenant_id === inst.id || tenantProfileIds.includes(a.profile_id || '')
                         );
                         const hasBrandLayer = instAnalyses.some(a => a.brand_platform);
                         
-                        if (!hasBrandLayer && instAnalyses.length === 0) return null;
+                        // Show tenant if it has ANY analyses (voice or brand), not just brand
+                        if (instAnalyses.length === 0) return null;
                         
                         return (
                           <Card key={inst.id} className="border-l-4 border-l-primary">
@@ -1268,15 +1273,21 @@ const AdminPanel = () => {
                         {emailNudges.length} system emails sent
                       </CardDescription>
                     </div>
-                    <div className="w-64">
-                      <div className="relative">
-                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          placeholder="Search emails..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          className="pl-8"
-                        />
+                    <div className="flex items-center gap-3">
+                      <Button onClick={() => setSendEmailOpen(true)} size="sm">
+                        <Send className="w-4 h-4 mr-2" />
+                        Send Email
+                      </Button>
+                      <div className="w-64">
+                        <div className="relative">
+                          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            placeholder="Search emails..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-8"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1687,6 +1698,15 @@ const AdminPanel = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Send Email Dialog */}
+      <SendEmailDialog
+        open={sendEmailOpen}
+        onOpenChange={setSendEmailOpen}
+        tenants={tenants.map(t => ({ id: t.id, institution_name: t.institution_name }))}
+        users={users}
+        onEmailSent={fetchData}
+      />
     </div>
   );
 };
