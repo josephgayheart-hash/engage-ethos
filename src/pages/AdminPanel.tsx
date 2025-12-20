@@ -8,22 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -33,9 +17,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Input } from "@/components/ui/input";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
-import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,188 +42,44 @@ import {
   UserPlus,
   Building2,
   ChevronRight,
-  Trash2,
+  ChevronDown,
   RefreshCw,
   Activity,
   BarChart3,
   Library,
   FolderOpen,
-  Clock,
   TrendingUp,
   AlertTriangle,
   Loader2,
   FileText,
   MessageSquare,
-  Compass,
-  Phone,
   Sparkles,
   Upload,
   Settings,
   Shield,
-  Cpu,
-  AlertCircle,
-  CheckCircle2,
-  XCircle,
-  Zap,
   Database,
   Mic,
-  ArrowRight,
   GraduationCap,
-  MessageSquarePlus,
-  Star,
   Eye,
   FolderTree,
-  Dna
+  Dna,
+  Mail,
+  Send,
+  Share2,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  ExternalLink,
+  Search,
+  Target,
+  Layers,
+  BookOpen,
+  Heart,
+  Zap,
+  ArrowRight
 } from "lucide-react";
 
-// Mock Ivy League user data
-const mockIvyLeagueUsers = [
-  { id: '1', first_name: 'Sarah', last_name: 'Mitchell', email: 'smitchell@harvard.edu', institution: 'Harvard University', status: 'active', last_login_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(), created_at: '2024-09-15' },
-  { id: '2', first_name: 'James', last_name: 'Chen', email: 'jchen@yale.edu', institution: 'Yale University', status: 'active', last_login_at: new Date(Date.now() - 1000 * 60 * 45).toISOString(), created_at: '2024-08-22' },
-  { id: '3', first_name: 'Emily', last_name: 'Rodriguez', email: 'erodriguez@princeton.edu', institution: 'Princeton University', status: 'active', last_login_at: new Date(Date.now() - 1000 * 60 * 120).toISOString(), created_at: '2024-10-01' },
-  { id: '4', first_name: 'Michael', last_name: 'Thompson', email: 'mthompson@columbia.edu', institution: 'Columbia University', status: 'active', last_login_at: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), created_at: '2024-07-18' },
-  { id: '5', first_name: 'Jessica', last_name: 'Kim', email: 'jkim@upenn.edu', institution: 'University of Pennsylvania', status: 'active', last_login_at: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(), created_at: '2024-11-02' },
-  { id: '6', first_name: 'David', last_name: 'Brown', email: 'dbrown@brown.edu', institution: 'Brown University', status: 'active', last_login_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), created_at: '2024-06-30' },
-  { id: '7', first_name: 'Amanda', last_name: 'Wilson', email: 'awilson@dartmouth.edu', institution: 'Dartmouth College', status: 'active', last_login_at: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), created_at: '2024-09-08' },
-  { id: '8', first_name: 'Robert', last_name: 'Garcia', email: 'rgarcia@cornell.edu', institution: 'Cornell University', status: 'active', last_login_at: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(), created_at: '2024-10-15' },
-  { id: '9', first_name: 'Jennifer', last_name: 'Lee', email: 'jlee@harvard.edu', institution: 'Harvard University', status: 'pending', last_login_at: null, created_at: '2024-12-01' },
-  { id: '10', first_name: 'William', last_name: 'Davis', email: 'wdavis@yale.edu', institution: 'Yale University', status: 'active', last_login_at: new Date(Date.now() - 1000 * 60 * 60 * 96).toISOString(), created_at: '2024-08-05' },
-  { id: '11', first_name: 'Maria', last_name: 'Martinez', email: 'mmartinez@columbia.edu', institution: 'Columbia University', status: 'active', last_login_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(), created_at: '2024-11-20' },
-  { id: '12', first_name: 'Christopher', last_name: 'Anderson', email: 'canderson@princeton.edu', institution: 'Princeton University', status: 'locked', last_login_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString(), created_at: '2024-05-12' },
-];
-
-// Mock institution breakdown data
-const mockInstitutionData = [
-  { 
-    name: 'Harvard University', 
-    users: 2, 
-    sharedTemplates: 45,
-    personalMessages: 234,
-    journeys: 12,
-    contentDNAProfiles: 3,
-    filesUploaded: 28,
-    topTools: ['Message Builder', 'Journey Designer', 'Evaluator'],
-    recentActivity: '15 min ago'
-  },
-  { 
-    name: 'Yale University', 
-    users: 2, 
-    sharedTemplates: 38,
-    personalMessages: 189,
-    journeys: 8,
-    contentDNAProfiles: 2,
-    filesUploaded: 15,
-    topTools: ['Evaluator', 'Message Builder', 'Call Script'],
-    recentActivity: '45 min ago'
-  },
-  { 
-    name: 'Princeton University', 
-    users: 2, 
-    sharedTemplates: 52,
-    personalMessages: 312,
-    journeys: 15,
-    contentDNAProfiles: 4,
-    filesUploaded: 42,
-    topTools: ['Journey Designer', 'Message Builder', 'BYOC'],
-    recentActivity: '2 hours ago'
-  },
-  { 
-    name: 'Columbia University', 
-    users: 2, 
-    sharedTemplates: 29,
-    personalMessages: 156,
-    journeys: 6,
-    contentDNAProfiles: 2,
-    filesUploaded: 19,
-    topTools: ['Message Builder', 'Evaluator', 'Playground'],
-    recentActivity: '30 min ago'
-  },
-  { 
-    name: 'University of Pennsylvania', 
-    users: 1, 
-    sharedTemplates: 33,
-    personalMessages: 98,
-    journeys: 4,
-    contentDNAProfiles: 1,
-    filesUploaded: 11,
-    topTools: ['Evaluator', 'Call Script', 'Message Builder'],
-    recentActivity: '8 hours ago'
-  },
-  { 
-    name: 'Brown University', 
-    users: 1, 
-    sharedTemplates: 21,
-    personalMessages: 67,
-    journeys: 3,
-    contentDNAProfiles: 1,
-    filesUploaded: 8,
-    topTools: ['Message Builder', 'Journey Designer'],
-    recentActivity: '1 day ago'
-  },
-  { 
-    name: 'Dartmouth College', 
-    users: 1, 
-    sharedTemplates: 18,
-    personalMessages: 45,
-    journeys: 2,
-    contentDNAProfiles: 1,
-    filesUploaded: 5,
-    topTools: ['Evaluator', 'Message Builder'],
-    recentActivity: '2 days ago'
-  },
-  { 
-    name: 'Cornell University', 
-    users: 1, 
-    sharedTemplates: 27,
-    personalMessages: 112,
-    journeys: 5,
-    contentDNAProfiles: 2,
-    filesUploaded: 14,
-    topTools: ['Journey Designer', 'BYOC', 'Evaluator'],
-    recentActivity: '3 days ago'
-  },
-];
-
-// Shared Library breakdown by type
-const mockSharedLibraryBreakdown = {
-  byType: [
-    { type: 'Email Templates', count: 89, institutions: 8 },
-    { type: 'SMS Templates', count: 54, institutions: 7 },
-    { type: 'Journey Playbooks', count: 45, institutions: 6 },
-    { type: 'Call Scripts', count: 32, institutions: 5 },
-    { type: 'Social Media', count: 28, institutions: 4 },
-    { type: 'Landing Pages', count: 15, institutions: 3 },
-  ],
-  byAudience: [
-    { audience: 'Prospective Students', count: 78 },
-    { audience: 'First-Year Students', count: 65 },
-    { audience: 'At-Risk Students', count: 52 },
-    { audience: 'Continuing Students', count: 41 },
-    { audience: 'Graduate Students', count: 27 },
-  ],
-  byStatus: { published: 156, draft: 67, submitted: 23, approved: 17 }
-};
-
-// Personal Library aggregate stats
-const mockPersonalLibraryStats = {
-  totalMessages: 1213,
-  totalUsers: 12,
-  avgPerUser: 101,
-  byChannel: [
-    { channel: 'Email', count: 534 },
-    { channel: 'SMS', count: 298 },
-    { channel: 'Phone Script', count: 187 },
-    { channel: 'Social Media', count: 112 },
-    { channel: 'Portal', count: 82 },
-  ],
-  topContributors: [
-    { name: 'Emily Rodriguez', institution: 'Princeton', count: 312 },
-    { name: 'Sarah Mitchell', institution: 'Harvard', count: 234 },
-    { name: 'James Chen', institution: 'Yale', count: 189 },
-    { name: 'Michael Thompson', institution: 'Columbia', count: 156 },
-  ]
-};
-
+// Types
 interface RealUser {
   id: string;
   first_name: string;
@@ -244,11 +97,14 @@ interface InstitutionalProfile {
   id: string;
   tenant_id: string;
   name: string;
+  profile_type: string;
+  parent_profile_id: string | null;
   config: Record<string, any> | null;
   created_at: string;
   updated_at: string;
   created_by_user_id: string | null;
   institution_name?: string;
+  children?: InstitutionalProfile[];
 }
 
 interface TenantWithStats {
@@ -256,24 +112,12 @@ interface TenantWithStats {
   institution_name: string;
   status: string;
   userCount: number;
-  toolUsageCount: number;
   contentDNACount: number;
-  byocCount: number;
   personalMessagesCount: number;
   sharedTemplatesCount: number;
   institutionalProfilesCount: number;
-  profileCompletionPct: number;
   recentActivity: string | null;
   users: RealUser[];
-}
-
-interface ToolUsageEvent {
-  id: string;
-  tenant_id: string;
-  user_id: string;
-  tool_name: string;
-  action: string;
-  created_at: string;
 }
 
 interface ContentDNASample {
@@ -286,195 +130,135 @@ interface ContentDNASample {
   file_size: number | null;
   content_text: string | null;
   source_type: string;
+  sample_type: string | null;
+  title: string | null;
   created_at: string;
+  institution_name?: string;
+  profile_name?: string;
 }
 
-interface BYOCUpload {
+interface ContentDNAAnalysis {
   id: string;
   tenant_id: string;
-  file_name: string;
-  file_type: string | null;
-  file_size: number | null;
-  tags: string[];
+  profile_id: string | null;
+  voice_analysis: Record<string, any>;
+  brand_platform: Record<string, any> | null;
+  custom_instructions: string | null;
+  sample_count: number;
+  last_analyzed_at: string | null;
   created_at: string;
-  user_id: string;
+  institution_name?: string;
+  profile_name?: string;
 }
 
-interface BetaFeedback {
+interface EmailNudge {
   id: string;
   tenant_id: string;
   user_id: string;
-  feature_area: string;
-  page_path: string | null;
-  feedback_type: string;
-  feedback_text: string;
-  rating: number | null;
-  status: string;
-  admin_notes: string | null;
+  nudge_type: string;
+  email_count: number;
+  sent_at: string;
   created_at: string;
-  reviewed_at: string | null;
   user_name?: string;
+  user_email?: string;
   institution_name?: string;
 }
 
-// Comprehensive list of all institutional config fields
-const allConfigFields = [
-  // Branding & Identity
-  'institutionName', 'institutionAbbreviation', 'mascot', 'slogans',
-  // Digital Platforms & Systems
-  'portalName', 'lmsName', 'emailDomain', 'advisingSystemName', 'schedulingSystemName',
-  'degreeAuditSystem', 'financialAidPortal', 'registrationSystem',
-  // Locations & Facilities
-  'buildingNames', 'programNames', 'supportCenters', 'libraryName', 'tutorCenter',
-  'writingCenter', 'mathCenter', 'careerCenter', 'counselingCenter', 'healthCenter',
-  'fitnessCenter', 'diningHall',
-  // Campus Geography
-  'campusTerms', 'defaultMeetingLocation', 'virtualMeetingPlatform',
-  // Offices & Departments
-  'registrarOffice', 'financialAidOffice', 'admissionsOffice', 'bursarOffice',
-  'itHelpDesk', 'housingOffice', 'studentAffairsOffice', 'internationalOffice',
-  'disabilityServices', 'veteransServices',
-  // People & Roles
-  'leaderNames', 'advisorTitles', 'staffTitles', 'defaultAdvisorName',
-  // Naming Conventions
-  'studentAddressing', 'staffAddressing', 'pronounPreference', 'studentIdTerm',
-  // Call to Actions
-  'primaryCTAs', 'secondaryCTAs', 'urgentCTAs',
-  // Contact & Resources
-  'primaryContactEmail', 'primaryContactPhone', 'advisingEmail', 'generalHelpEmail',
-  'emergencyPhone', 'textAlertNumber', 'websiteLinks', 'socialMediaHandles', 'appointmentLink',
-  // Academic Terms
-  'academicTerms', 'gradingTerms', 'enrollmentTerms', 'currentTermName', 'nextTermName',
-  // Time & Scheduling
-  'officeHoursFormat', 'timeZone',
-  // Signature Blocks
-  'signatureTemplates',
-  // Tone & Style
-  'toneRules', 'wordsToAvoid', 'preferredPhrases',
-  // Deadlines & Dates
-  'importantDates',
-  // Brand Voice
-  'brandVoiceSamples', 'voiceAnalysis'
-];
+interface Referral {
+  id: string;
+  referrer_user_id: string;
+  referrer_tenant_id: string;
+  referee_name: string | null;
+  referee_email: string;
+  referral_type: string;
+  personal_message: string | null;
+  status: string;
+  created_at: string;
+  joined_at: string | null;
+  referrer_name?: string;
+  referrer_institution?: string;
+}
 
 const AdminPanel = () => {
   const { toast } = useToast();
-  const { tenant, isSuperAdmin } = useAuth();
+  const { isSuperAdmin } = useAuth();
   const { templates, clearAllTemplates, resetToDefaults } = useSharedLibrary();
   const { messages, clearAllMessages } = useMessageLibrary();
-  const { profiles } = useInstitutionalProfiles();
   
   const [activeTab, setActiveTab] = useState("overview");
   const [users, setUsers] = useState<RealUser[]>([]);
   const [tenants, setTenants] = useState<TenantWithStats[]>([]);
-  const [toolUsage, setToolUsage] = useState<ToolUsageEvent[]>([]);
-  const [contentDNASamples, setContentDNASamples] = useState<ContentDNASample[]>([]);
-  const [byocUploads, setBYOCUploads] = useState<BYOCUpload[]>([]);
-  const [betaFeedback, setBetaFeedback] = useState<BetaFeedback[]>([]);
   const [institutionalProfiles, setInstitutionalProfiles] = useState<InstitutionalProfile[]>([]);
-  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
-  const [expandedTenant, setExpandedTenant] = useState<string | null>(null);
+  const [contentDNASamples, setContentDNASamples] = useState<ContentDNASample[]>([]);
+  const [contentDNAAnalyses, setContentDNAAnalyses] = useState<ContentDNAAnalysis[]>([]);
+  const [emailNudges, setEmailNudges] = useState<EmailNudge[]>([]);
+  const [referrals, setReferrals] = useState<Referral[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [expandedTenants, setExpandedTenants] = useState<Set<string>>(new Set());
   const [clearPersonalOpen, setClearPersonalOpen] = useState(false);
   const [clearSharedOpen, setClearSharedOpen] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch real users, tenants, and activity data
+  // Fetch all data
   const fetchData = async () => {
-    setIsLoadingUsers(true);
+    setIsLoading(true);
     try {
-      // Fetch all tenants
+      // Fetch all tenants (excluding system tenant)
       const { data: tenantsData, error: tenantsError } = await supabase
         .from('tenants')
         .select('*')
-        .neq('id', '00000000-0000-0000-0000-000000000000') // Exclude UPlaybook System tenant
+        .neq('id', '00000000-0000-0000-0000-000000000000')
         .order('institution_name');
-
       if (tenantsError) throw tenantsError;
 
-      // Fetch all users with their roles
+      // Fetch all users
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
-        .neq('tenant_id', '00000000-0000-0000-0000-000000000000') // Exclude UPlaybook system users
+        .neq('tenant_id', '00000000-0000-0000-0000-000000000000')
         .order('last_login_at', { ascending: false, nullsFirst: false });
-
       if (profilesError) throw profilesError;
 
-      // Fetch tool usage events
-      const { data: toolUsageData } = await supabase
-        .from('tool_usage_events')
+      // Fetch institutional profiles with hierarchy
+      const { data: instProfilesData } = await supabase
+        .from('institutional_profiles')
         .select('*')
-        .order('created_at', { ascending: false });
-      
-      setToolUsage(toolUsageData || []);
+        .order('created_at', { ascending: true });
 
       // Fetch Content DNA samples
-      const { data: contentDNAData } = await supabase
+      const { data: dnaSamplesData } = await supabase
         .from('content_dna_samples')
         .select('*')
         .order('created_at', { ascending: false });
-      
-      setContentDNASamples(contentDNAData || []);
 
-      // Fetch BYOC uploads
-      const { data: byocData } = await supabase
-        .from('byoc_uploads')
+      // Fetch Content DNA analyses
+      const { data: dnaAnalysesData } = await supabase
+        .from('content_dna_analysis')
         .select('*')
         .order('created_at', { ascending: false });
-      
-      setBYOCUploads(byocData || []);
 
-      // Fetch personal messages
+      // Fetch email nudges
+      const { data: nudgesData } = await supabase
+        .from('email_nudges')
+        .select('*')
+        .order('sent_at', { ascending: false });
+
+      // Fetch referrals
+      const { data: referralsData } = await supabase
+        .from('referrals')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      // Fetch personal messages count per tenant
       const { data: personalMessagesData } = await supabase
         .from('personal_messages')
-        .select('id, tenant_id, user_id, channel, created_at')
-        .order('created_at', { ascending: false });
+        .select('id, tenant_id');
 
-      // Fetch shared templates
+      // Fetch shared templates count per tenant
       const { data: sharedTemplatesData } = await supabase
         .from('shared_templates')
-        .select('id, tenant_id, status, playbook, created_at')
-        .order('created_at', { ascending: false });
-
-      // Fetch beta feedback
-      const { data: feedbackData } = await supabase
-        .from('beta_feedback')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      // Fetch institutional profiles
-      const { data: institutionalProfilesData } = await supabase
-        .from('institutional_profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      const profilesWithInstitution: InstitutionalProfile[] = (institutionalProfilesData || []).map(ip => {
-        const ipTenant = tenantsData?.find(t => t.id === ip.tenant_id);
-        return {
-          ...ip,
-          config: ip.config as Record<string, any> | null,
-          institution_name: ipTenant?.institution_name || 'Unknown'
-        };
-      });
-      setInstitutionalProfiles(profilesWithInstitution);
-      
-      // Enrich feedback with user and institution names
-      const enrichedFeedback = (feedbackData || []).map(fb => {
-        const user = profilesData?.find(p => p.id === fb.user_id);
-        const feedbackTenant = tenantsData?.find(t => t.id === fb.tenant_id);
-        return {
-          ...fb,
-          user_name: user ? `${user.first_name} ${user.last_name}` : 'Unknown User',
-          institution_name: feedbackTenant?.institution_name || 'Unknown Institution'
-        };
-      });
-      setBetaFeedback(enrichedFeedback);
-
-      // Fetch audit log for recent activity
-      const { data: auditData } = await supabase
-        .from('audit_log')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('id, tenant_id');
 
       // Map users with institution names
       const usersWithInstitution = (profilesData || []).map(profile => {
@@ -484,37 +268,78 @@ const AdminPanel = () => {
           institution_name: userTenant?.institution_name || 'Unknown'
         };
       });
-
       setUsers(usersWithInstitution);
 
-      // Helper function to calculate profile completion percentage
-      const calculateProfileCompletion = (config: Record<string, any>): number => {
-        if (!config || typeof config !== 'object') return 0;
-        const filledCount = allConfigFields.filter(field => {
-          const value = config[field];
-          if (Array.isArray(value)) return value.length > 0;
-          if (typeof value === 'object' && value !== null) return Object.keys(value).length > 0;
-          return value && value.toString().trim() !== '';
-        }).length;
-        return Math.round((filledCount / allConfigFields.length) * 100);
-      };
+      // Map institutional profiles with institution names
+      const profilesWithInstitution: InstitutionalProfile[] = (instProfilesData || []).map(ip => {
+        const ipTenant = tenantsData?.find(t => t.id === ip.tenant_id);
+        return {
+          ...ip,
+          config: ip.config as Record<string, any> | null,
+          institution_name: ipTenant?.institution_name || 'Unknown'
+        };
+      });
+      setInstitutionalProfiles(profilesWithInstitution);
+
+      // Map Content DNA samples with names
+      const samplesWithNames: ContentDNASample[] = (dnaSamplesData || []).map(s => {
+        const sTenant = tenantsData?.find(t => t.id === s.tenant_id);
+        const sProfile = profilesWithInstitution.find(p => p.id === s.profile_id);
+        return {
+          ...s,
+          institution_name: sTenant?.institution_name || 'Unknown',
+          profile_name: sProfile?.name || null
+        };
+      });
+      setContentDNASamples(samplesWithNames);
+
+      // Map Content DNA analyses with names
+      const analysesWithNames: ContentDNAAnalysis[] = (dnaAnalysesData || []).map(a => {
+        const aTenant = tenantsData?.find(t => t.id === a.tenant_id);
+        const aProfile = profilesWithInstitution.find(p => p.id === a.profile_id);
+        return {
+          ...a,
+          voice_analysis: a.voice_analysis as Record<string, any>,
+          brand_platform: a.brand_platform as Record<string, any> | null,
+          institution_name: aTenant?.institution_name || 'Unknown',
+          profile_name: aProfile?.name || null
+        };
+      });
+      setContentDNAAnalyses(analysesWithNames);
+
+      // Map email nudges with user info
+      const nudgesWithNames: EmailNudge[] = (nudgesData || []).map(n => {
+        const nUser = usersWithInstitution.find(u => u.id === n.user_id);
+        const nTenant = tenantsData?.find(t => t.id === n.tenant_id);
+        return {
+          ...n,
+          user_name: nUser ? `${nUser.first_name} ${nUser.last_name}` : 'Unknown',
+          user_email: nUser?.email || 'Unknown',
+          institution_name: nTenant?.institution_name || 'Unknown'
+        };
+      });
+      setEmailNudges(nudgesWithNames);
+
+      // Map referrals with referrer info
+      const referralsWithNames: Referral[] = (referralsData || []).map(r => {
+        const rUser = usersWithInstitution.find(u => u.id === r.referrer_user_id);
+        const rTenant = tenantsData?.find(t => t.id === r.referrer_tenant_id);
+        return {
+          ...r,
+          referrer_name: rUser ? `${rUser.first_name} ${rUser.last_name}` : 'Unknown',
+          referrer_institution: rTenant?.institution_name || 'Unknown'
+        };
+      });
+      setReferrals(referralsWithNames);
 
       // Calculate comprehensive stats per tenant
       const tenantsWithStats: TenantWithStats[] = (tenantsData || []).map(t => {
-        const tenantUsers = (profilesData || []).filter(p => p.tenant_id === t.id);
-        const tenantToolUsage = (toolUsageData || []).filter(tu => tu.tenant_id === t.id);
-        const tenantContentDNA = (contentDNAData || []).filter(cd => cd.tenant_id === t.id);
-        const tenantBYOC = (byocData || []).filter(b => b.tenant_id === t.id);
+        const tenantUsers = usersWithInstitution.filter(p => p.tenant_id === t.id);
+        const tenantContentDNA = (dnaSamplesData || []).filter(cd => cd.tenant_id === t.id);
         const tenantPersonalMessages = (personalMessagesData || []).filter(pm => pm.tenant_id === t.id);
         const tenantSharedTemplates = (sharedTemplatesData || []).filter(st => st.tenant_id === t.id);
-        const tenantInstitutionalProfiles = (institutionalProfilesData || []).filter(ip => ip.tenant_id === t.id);
-        
-        // Calculate avg profile completion
-        const avgCompletion = tenantInstitutionalProfiles.length > 0
-          ? Math.round(tenantInstitutionalProfiles.reduce((sum, ip) => sum + calculateProfileCompletion(ip.config as Record<string, any>), 0) / tenantInstitutionalProfiles.length)
-          : 0;
+        const tenantInstProfiles = (instProfilesData || []).filter(ip => ip.tenant_id === t.id);
 
-        // Get most recent activity
         const recentActivityDate = tenantUsers
           .filter(u => u.last_login_at)
           .sort((a, b) => new Date(b.last_login_at!).getTime() - new Date(a.last_login_at!).getTime())[0]?.last_login_at || null;
@@ -524,40 +349,33 @@ const AdminPanel = () => {
           institution_name: t.institution_name,
           status: t.status,
           userCount: tenantUsers.length,
-          toolUsageCount: tenantToolUsage.length,
           contentDNACount: tenantContentDNA.length,
-          byocCount: tenantBYOC.length,
           personalMessagesCount: tenantPersonalMessages.length,
           sharedTemplatesCount: tenantSharedTemplates.length,
-          institutionalProfilesCount: tenantInstitutionalProfiles.length,
-          profileCompletionPct: avgCompletion,
+          institutionalProfilesCount: tenantInstProfiles.length,
           recentActivity: recentActivityDate,
-          users: tenantUsers.map(u => ({
-            ...u,
-            institution_name: t.institution_name
-          }))
+          users: tenantUsers
         };
       });
-
       setTenants(tenantsWithStats);
       setLastRefresh(new Date());
+
     } catch (error) {
       console.error('Error fetching data:', error);
       toast({
         title: 'Error',
-        description: 'Failed to load users and institutions',
+        description: 'Failed to load admin data',
         variant: 'destructive',
       });
     } finally {
-      setIsLoadingUsers(false);
+      setIsLoading(false);
     }
   };
 
-  // Initial fetch and auto-refresh every 30 seconds
   useEffect(() => {
     if (isSuperAdmin) {
       fetchData();
-      const interval = setInterval(fetchData, 30000);
+      const interval = setInterval(fetchData, 60000); // Refresh every minute
       return () => clearInterval(interval);
     }
   }, [isSuperAdmin]);
@@ -565,30 +383,16 @@ const AdminPanel = () => {
   const handleClearPersonalLibrary = () => {
     clearAllMessages();
     setClearPersonalOpen(false);
-    toast({ title: "Personal Library cleared", description: "All personal messages have been removed." });
+    toast({ title: "Personal Library cleared" });
   };
 
   const handleClearSharedLibrary = () => {
     clearAllTemplates();
     setClearSharedOpen(false);
-    toast({ title: "Shared Library cleared", description: "All shared templates have been removed." });
+    toast({ title: "Shared Library cleared" });
   };
 
-  const handleResetSharedToDefaults = () => {
-    resetToDefaults();
-    toast({ title: "Shared Library reset", description: "Default templates have been restored." });
-  };
-
-  const activeUsers = users.filter(u => u.status === 'active').length;
-  const recentLogins = users.filter(u => {
-    if (!u.last_login_at) return false;
-    const lastLogin = new Date(u.last_login_at);
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    return lastLogin > weekAgo;
-  }).length;
-
-  const formatLastLogin = (date: string | null) => {
+  const formatTime = (date: string | null) => {
     if (!date) return 'Never';
     const d = new Date(date);
     const now = new Date();
@@ -604,25 +408,128 @@ const AdminPanel = () => {
     return d.toLocaleDateString();
   };
 
-  // Tool usage stats
-  const toolUsageStats = [
-    { name: 'Message Builder', icon: MessageSquare, usage: 456, trend: '+12%' },
-    { name: 'Message Evaluator', icon: FileText, usage: 389, trend: '+8%' },
-    { name: 'Journey Designer', icon: Compass, usage: 234, trend: '+23%' },
-    { name: 'Call Script Generator', icon: Phone, usage: 156, trend: '+5%' },
-    { name: 'AI Playground', icon: Sparkles, usage: 98, trend: '+34%' },
-    { name: 'BYOC', icon: Upload, usage: 67, trend: '+18%' },
-  ];
+  const toggleTenantExpand = (tenantId: string) => {
+    setExpandedTenants(prev => {
+      const next = new Set(prev);
+      if (next.has(tenantId)) {
+        next.delete(tenantId);
+      } else {
+        next.add(tenantId);
+      }
+      return next;
+    });
+  };
 
-  // AI function stats - showing the data flow
-  const aiFunctionStats = [
-    { name: 'evaluate-message', description: 'Message evaluation & refinement', calls: 423, success: 418, errors: 5, avgTime: '1.2s', contentDNAUsed: 312 },
-    { name: 'generate-message', description: 'Multi-channel message generation', calls: 512, success: 506, errors: 6, avgTime: '2.1s', contentDNAUsed: 489 },
-    { name: 'playground-chat', description: 'Interactive strategy chat', calls: 156, success: 154, errors: 2, avgTime: '1.8s', contentDNAUsed: 78 },
-    { name: 'analyze-voice', description: 'Content DNA extraction', calls: 45, success: 43, errors: 2, avgTime: '3.2s', contentDNAUsed: 0 },
-  ];
+  // Build hierarchical profile structure for a tenant
+  const buildProfileHierarchy = (tenantId: string): InstitutionalProfile[] => {
+    const tenantProfiles = institutionalProfiles.filter(p => p.tenant_id === tenantId);
+    const rootProfiles = tenantProfiles.filter(p => !p.parent_profile_id);
+    
+    const attachChildren = (profile: InstitutionalProfile): InstitutionalProfile => {
+      const children = tenantProfiles.filter(p => p.parent_profile_id === profile.id);
+      return {
+        ...profile,
+        children: children.map(attachChildren)
+      };
+    };
 
-  const totalContentDNAInjections = aiFunctionStats.reduce((sum, fn) => sum + fn.contentDNAUsed, 0);
+    return rootProfiles.map(attachChildren);
+  };
+
+  // Get configuration status
+  const getConfigStatus = (profile: InstitutionalProfile): 'configured' | 'partial' | 'inactive' => {
+    const config = profile.config || {};
+    const importantFields = ['institutionName', 'portalName', 'primaryCTAs', 'leaderNames'];
+    const filledCount = importantFields.filter(f => {
+      const val = config[f];
+      if (Array.isArray(val)) return val.length > 0;
+      return val && val.toString().trim() !== '';
+    }).length;
+    
+    if (filledCount >= 3) return 'configured';
+    if (filledCount >= 1) return 'partial';
+    return 'inactive';
+  };
+
+  // Render profile hierarchy recursively
+  const renderProfileHierarchy = (profiles: InstitutionalProfile[], depth = 0) => {
+    return profiles.map(profile => {
+      const status = getConfigStatus(profile);
+      const hasDNA = contentDNASamples.some(s => s.profile_id === profile.id);
+      const dnaAnalysis = contentDNAAnalyses.find(a => a.profile_id === profile.id);
+      
+      return (
+        <div key={profile.id} style={{ marginLeft: depth * 24 }}>
+          <div className="flex items-center justify-between p-3 border rounded-lg mb-2 bg-card hover:bg-muted/50 transition-colors">
+            <div className="flex items-center gap-3">
+              {depth === 0 ? (
+                <GraduationCap className="w-5 h-5 text-primary" />
+              ) : (
+                <FolderTree className="w-4 h-4 text-muted-foreground" />
+              )}
+              <div>
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-sm">{profile.name}</p>
+                  <Badge variant="outline" className="text-[10px]">{profile.profile_type}</Badge>
+                </div>
+                {depth === 0 && (
+                  <p className="text-[10px] text-muted-foreground">{profile.institution_name}</p>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {hasDNA && (
+                <Badge className="text-[10px] bg-orange-100 text-orange-700 border-orange-200">
+                  <Dna className="w-3 h-3 mr-1" />
+                  DNA
+                </Badge>
+              )}
+              {dnaAnalysis?.brand_platform && (
+                <Badge className="text-[10px] bg-purple-100 text-purple-700 border-purple-200">
+                  <Target className="w-3 h-3 mr-1" />
+                  Brand
+                </Badge>
+              )}
+              <Badge 
+                variant={status === 'configured' ? 'default' : status === 'partial' ? 'secondary' : 'outline'}
+                className="text-[10px]"
+              >
+                {status === 'configured' ? 'Configured' : status === 'partial' ? 'Partial' : 'Not Set'}
+              </Badge>
+            </div>
+          </div>
+          {profile.children && profile.children.length > 0 && (
+            <div className="border-l-2 border-muted ml-3">
+              {renderProfileHierarchy(profile.children, depth + 1)}
+            </div>
+          )}
+        </div>
+      );
+    });
+  };
+
+  const activeUsers = users.filter(u => u.status === 'active').length;
+  const totalDNASamples = contentDNASamples.length;
+  const totalAnalyses = contentDNAAnalyses.length;
+  const totalEmails = emailNudges.length;
+  const totalReferrals = referrals.length;
+
+  // Filter data based on search
+  const filteredNudges = emailNudges.filter(n => 
+    !searchTerm || 
+    n.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    n.user_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    n.institution_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    n.nudge_type.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredReferrals = referrals.filter(r =>
+    !searchTerm ||
+    r.referrer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    r.referee_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    r.referee_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    r.referrer_institution?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -647,35 +554,23 @@ const AdminPanel = () => {
                 UPlaybook Super Admin
               </h1>
               <p className="text-muted-foreground mt-1">
-                Cross-institution analytics and system administration
+                Platform governance, brand integrity & content lineage
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button 
                 variant="outline" 
                 onClick={fetchData}
-                disabled={isLoadingUsers}
+                disabled={isLoading}
                 className="gap-2"
               >
-                <RefreshCw className={`w-4 h-4 ${isLoadingUsers ? 'animate-spin' : ''}`} />
-                {lastRefresh ? `Updated ${formatLastLogin(lastRefresh.toISOString())}` : 'Refresh'}
+                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                {lastRefresh ? `Updated ${formatTime(lastRefresh.toISOString())}` : 'Refresh'}
               </Button>
               <Button variant="outline" asChild>
                 <Link to="/admin/qa">
                   <Shield className="w-4 h-4 mr-2" />
-                  QA Diagnostics
-                </Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link to="/admin/seed">
-                  <Database className="w-4 h-4 mr-2" />
-                  Seed Data
-                </Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link to="/admin/onboarding">
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Onboarding
+                  QA
                 </Link>
               </Button>
               <Button variant="outline" asChild>
@@ -684,11 +579,17 @@ const AdminPanel = () => {
                   Users
                 </Link>
               </Button>
+              <Button variant="outline" asChild>
+                <Link to="/admin/onboarding">
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Requests
+                </Link>
+              </Button>
             </div>
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
             <Card>
               <CardContent className="p-3">
                 <div className="flex items-center gap-2">
@@ -696,7 +597,7 @@ const AdminPanel = () => {
                     <GraduationCap className="w-4 h-4 text-primary" />
                   </div>
                   <div>
-                    <p className="text-xl font-bold">{isLoadingUsers ? '...' : tenants.length}</p>
+                    <p className="text-xl font-bold">{isLoading ? '...' : tenants.length}</p>
                     <p className="text-[10px] text-muted-foreground">Institutions</p>
                   </div>
                 </div>
@@ -710,7 +611,7 @@ const AdminPanel = () => {
                   </div>
                   <div>
                     <p className="text-xl font-bold">{users.length}</p>
-                    <p className="text-[10px] text-muted-foreground">Total Users</p>
+                    <p className="text-[10px] text-muted-foreground">Users</p>
                   </div>
                 </div>
               </CardContent>
@@ -731,63 +632,11 @@ const AdminPanel = () => {
             <Card>
               <CardContent className="p-3">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded bg-blue-500/10">
-                    <FileText className="w-4 h-4 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-xl font-bold">{isLoadingUsers ? '...' : tenants.reduce((sum, t) => sum + t.personalMessagesCount, 0)}</p>
-                    <p className="text-[10px] text-muted-foreground">Personal Msgs</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-3">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded bg-purple-500/10">
-                    <Library className="w-4 h-4 text-purple-600" />
-                  </div>
-                  <div>
-                    <p className="text-xl font-bold">{isLoadingUsers ? '...' : tenants.reduce((sum, t) => sum + t.sharedTemplatesCount, 0)}</p>
-                    <p className="text-[10px] text-muted-foreground">Shared Templates</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-3">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded bg-orange-500/10">
-                    <Mic className="w-4 h-4 text-orange-600" />
-                  </div>
-                  <div>
-                    <p className="text-xl font-bold">{isLoadingUsers ? '...' : contentDNASamples.length}</p>
-                    <p className="text-[10px] text-muted-foreground">Content DNA</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-3">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded bg-cyan-500/10">
-                    <Cpu className="w-4 h-4 text-cyan-600" />
-                  </div>
-                  <div>
-                    <p className="text-xl font-bold">{isLoadingUsers ? '...' : toolUsage.length}</p>
-                    <p className="text-[10px] text-muted-foreground">Tool Events</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-3">
-                <div className="flex items-center gap-2">
                   <div className="p-1.5 rounded bg-indigo-500/10">
                     <FolderTree className="w-4 h-4 text-indigo-600" />
                   </div>
                   <div>
-                    <p className="text-xl font-bold">{isLoadingUsers ? '...' : institutionalProfiles.length}</p>
+                    <p className="text-xl font-bold">{institutionalProfiles.length}</p>
                     <p className="text-[10px] text-muted-foreground">Profiles</p>
                   </div>
                 </div>
@@ -796,12 +645,51 @@ const AdminPanel = () => {
             <Card>
               <CardContent className="p-3">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded bg-teal-500/10">
-                    <Upload className="w-4 h-4 text-teal-600" />
+                  <div className="p-1.5 rounded bg-orange-500/10">
+                    <Dna className="w-4 h-4 text-orange-600" />
                   </div>
                   <div>
-                    <p className="text-xl font-bold">{isLoadingUsers ? '...' : byocUploads.length}</p>
-                    <p className="text-[10px] text-muted-foreground">BYOC Uploads</p>
+                    <p className="text-xl font-bold">{totalDNASamples}</p>
+                    <p className="text-[10px] text-muted-foreground">DNA Files</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded bg-purple-500/10">
+                    <Target className="w-4 h-4 text-purple-600" />
+                  </div>
+                  <div>
+                    <p className="text-xl font-bold">{totalAnalyses}</p>
+                    <p className="text-[10px] text-muted-foreground">DNA Analyses</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded bg-cyan-500/10">
+                    <Mail className="w-4 h-4 text-cyan-600" />
+                  </div>
+                  <div>
+                    <p className="text-xl font-bold">{totalEmails}</p>
+                    <p className="text-[10px] text-muted-foreground">Emails Sent</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded bg-pink-500/10">
+                    <Share2 className="w-4 h-4 text-pink-600" />
+                  </div>
+                  <div>
+                    <p className="text-xl font-bold">{totalReferrals}</p>
+                    <p className="text-[10px] text-muted-foreground">Referrals</p>
                   </div>
                 </div>
               </CardContent>
@@ -810,19 +698,20 @@ const AdminPanel = () => {
 
           {/* Main Content Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid grid-cols-7 w-full">
+            <TabsList className="grid grid-cols-4 md:grid-cols-8 w-full">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="institutions">Institutions</TabsTrigger>
-              <TabsTrigger value="profiles">Profiles</TabsTrigger>
+              <TabsTrigger value="content-dna">Content DNA</TabsTrigger>
+              <TabsTrigger value="brand">Brand Layer</TabsTrigger>
+              <TabsTrigger value="emails">Email Activity</TabsTrigger>
+              <TabsTrigger value="sharing">Sharing</TabsTrigger>
               <TabsTrigger value="libraries">Libraries</TabsTrigger>
-              <TabsTrigger value="ai">AI</TabsTrigger>
-              <TabsTrigger value="users">Users</TabsTrigger>
               <TabsTrigger value="admin">Admin</TabsTrigger>
             </TabsList>
 
             {/* Overview Tab */}
             <TabsContent value="overview" className="space-y-4 mt-4">
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Recent User Activity */}
                 <Card>
                   <CardHeader className="pb-3">
@@ -832,293 +721,215 @@ const AdminPanel = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-2">
-                      {users.slice(0, 6).map(user => (
-                        <div key={user.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50">
-                          <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">
-                              {user.first_name[0]}{user.last_name[0]}
+                    <ScrollArea className="h-[280px]">
+                      <div className="space-y-2">
+                        {users.slice(0, 10).map(user => (
+                          <div key={user.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50">
+                            <div className="flex items-center gap-2">
+                              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">
+                                {user.first_name[0]}{user.last_name[0]}
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium">{user.first_name} {user.last_name}</p>
+                                <p className="text-[10px] text-muted-foreground">{user.institution_name}</p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="text-sm font-medium">{user.first_name} {user.last_name}</p>
-                              <p className="text-[10px] text-muted-foreground">{user.institution_name}</p>
-                            </div>
+                            <span className="text-xs text-muted-foreground">{formatTime(user.last_login_at)}</span>
                           </div>
-                          <span className="text-xs text-muted-foreground">{formatLastLogin(user.last_login_at)}</span>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
                   </CardContent>
                 </Card>
 
-                {/* Tool Usage */}
+                {/* Institution Summary */}
                 <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base flex items-center gap-2">
-                      <BarChart3 className="w-4 h-4" />
-                      Tool Usage (30 days)
+                      <Building2 className="w-4 h-4" />
+                      Institution Summary
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[280px]">
+                      <div className="space-y-2">
+                        {tenants.map(inst => (
+                          <div key={inst.id} className="p-2 rounded-lg border">
+                            <div className="flex items-center justify-between">
+                              <p className="text-sm font-medium">{inst.institution_name}</p>
+                              <Badge variant={inst.status === 'active' ? 'default' : 'secondary'} className="text-[10px]">
+                                {inst.status}
+                              </Badge>
+                            </div>
+                            <div className="flex gap-3 mt-2 text-xs text-muted-foreground">
+                              <span>{inst.userCount} users</span>
+                              <span>{inst.institutionalProfilesCount} profiles</span>
+                              <span>{inst.contentDNACount} DNA</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+
+                {/* Quick Actions */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Zap className="w-4 h-4" />
+                      Quick Links
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    {toolUsageStats.map((tool, index) => (
-                      <div key={tool.name} className="flex items-center gap-3">
-                        <div className="w-5 text-center text-muted-foreground text-xs">
-                          #{index + 1}
-                        </div>
-                        <div className="p-1 rounded bg-muted">
-                          <tool.icon className="w-3.5 h-3.5 text-muted-foreground" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-1">
-                            <p className="text-xs font-medium">{tool.name}</p>
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-xs font-bold">{tool.usage}</span>
-                              <Badge variant="outline" className="text-[10px] h-4 px-1">
-                                {tool.trend}
-                              </Badge>
-                            </div>
-                          </div>
-                          <Progress value={(tool.usage / toolUsageStats[0].usage) * 100} className="h-1" />
-                        </div>
-                      </div>
-                    ))}
+                    <Button variant="outline" className="w-full justify-start" size="sm" asChild>
+                      <Link to="/admin/content-dna">
+                        <Dna className="w-4 h-4 mr-2" />
+                        Content DNA Center
+                        <ChevronRight className="w-4 h-4 ml-auto" />
+                      </Link>
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start" size="sm" asChild>
+                      <Link to="/settings">
+                        <FolderTree className="w-4 h-4 mr-2" />
+                        Institutional Profiles
+                        <ChevronRight className="w-4 h-4 ml-auto" />
+                      </Link>
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start" size="sm" asChild>
+                      <Link to="/approvals">
+                        <FileText className="w-4 h-4 mr-2" />
+                        Library Approvals
+                        <ChevronRight className="w-4 h-4 ml-auto" />
+                      </Link>
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start" size="sm" asChild>
+                      <Link to="/admin/users">
+                        <Users className="w-4 h-4 mr-2" />
+                        User Management
+                        <ChevronRight className="w-4 h-4 ml-auto" />
+                      </Link>
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start" size="sm" asChild>
+                      <Link to="/admin/seed">
+                        <Database className="w-4 h-4 mr-2" />
+                        Seed Data
+                        <ChevronRight className="w-4 h-4 ml-auto" />
+                      </Link>
+                    </Button>
                   </CardContent>
                 </Card>
               </div>
             </TabsContent>
 
-            {/* Institutions Tab */}
+            {/* Institutions Tab - University & Subunit Hierarchy */}
             <TabsContent value="institutions" className="mt-4 space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="font-serif">Institution Breakdown</CardTitle>
-                  <CardDescription>Detailed analytics per institution including users, activity, and file uploads</CardDescription>
+                  <CardTitle className="flex items-center gap-2">
+                    <Building2 className="w-5 h-5" />
+                    University & Subunit Management
+                  </CardTitle>
+                  <CardDescription>
+                    Hierarchical view of institutions with their colleges, divisions, and subunits
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {isLoadingUsers ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                  {isLoading ? (
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
                     </div>
                   ) : tenants.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Building2 className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                      <p className="text-sm">No institutions found</p>
+                    <div className="text-center py-12 text-muted-foreground">
+                      <Building2 className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                      <p>No institutions found</p>
                     </div>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       {tenants.map(inst => {
-                        const isExpanded = expandedTenant === inst.id;
-                        const tenantToolUsage = toolUsage.filter(tu => tu.tenant_id === inst.id);
-                        const tenantContentDNA = contentDNASamples.filter(cd => cd.tenant_id === inst.id);
-                        const tenantBYOC = byocUploads.filter(b => b.tenant_id === inst.id);
-                        
-                        // Aggregate tool usage by tool name
-                        const toolUsageByName = tenantToolUsage.reduce((acc, tu) => {
-                          acc[tu.tool_name] = (acc[tu.tool_name] || 0) + 1;
-                          return acc;
-                        }, {} as Record<string, number>);
+                        const hierarchy = buildProfileHierarchy(inst.id);
+                        const isExpanded = expandedTenants.has(inst.id);
                         
                         return (
-                          <Card key={inst.id} className={`border ${isExpanded ? 'border-primary/50' : ''}`}>
-                            <div 
-                              className="p-4 cursor-pointer hover:bg-muted/30 transition-colors"
-                              onClick={() => setExpandedTenant(isExpanded ? null : inst.id)}
-                            >
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                  <div className="p-2 rounded-lg bg-primary/10">
-                                    <GraduationCap className="w-5 h-5 text-primary" />
-                                  </div>
-                                  <div>
-                                    <h3 className="font-semibold">{inst.institution_name}</h3>
-                                    <p className="text-xs text-muted-foreground">
-                                      {inst.recentActivity ? `Last active ${formatLastLogin(inst.recentActivity)}` : 'No recent activity'}
-                                    </p>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                  <div className="flex gap-2 flex-wrap">
-                                    <Badge variant="secondary" className="text-xs">
-                                      <Users className="w-3 h-3 mr-1" />
-                                      {inst.userCount}
-                                    </Badge>
-                                    <Badge variant="outline" className="text-xs">
-                                      <Activity className="w-3 h-3 mr-1" />
-                                      {inst.toolUsageCount}
-                                    </Badge>
-                                    <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
-                                      <FileText className="w-3 h-3 mr-1" />
-                                      {inst.personalMessagesCount}
-                                    </Badge>
-                                    <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700">
-                                      <Library className="w-3 h-3 mr-1" />
-                                      {inst.sharedTemplatesCount}
-                                    </Badge>
-                                    <Badge variant="outline" className="text-xs">
-                                      <Mic className="w-3 h-3 mr-1" />
-                                      {inst.contentDNACount}
-                                    </Badge>
-                                    <Badge variant="outline" className="text-xs">
-                                      <Upload className="w-3 h-3 mr-1" />
-                                      {inst.byocCount}
-                                    </Badge>
-                                    <Badge variant="outline" className="text-xs">
-                                      <Settings className="w-3 h-3 mr-1" />
-                                      {inst.institutionalProfilesCount}
-                                    </Badge>
-                                    {inst.institutionalProfilesCount > 0 && (
-                                      <Badge 
-                                        variant="outline" 
-                                        className={`text-xs ${inst.profileCompletionPct >= 70 ? 'bg-green-50 text-green-700' : inst.profileCompletionPct >= 40 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}
-                                      >
-                                        {inst.profileCompletionPct}%
+                          <Collapsible key={inst.id} open={isExpanded} onOpenChange={() => toggleTenantExpand(inst.id)}>
+                            <Card className="border-2">
+                              <CollapsibleTrigger asChild>
+                                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                      <GraduationCap className="w-6 h-6 text-primary" />
+                                      <div>
+                                        <CardTitle className="text-lg">{inst.institution_name}</CardTitle>
+                                        <CardDescription className="flex items-center gap-4 mt-1">
+                                          <span>{inst.userCount} users</span>
+                                          <span>{inst.institutionalProfilesCount} profiles</span>
+                                          <span>{inst.contentDNACount} DNA samples</span>
+                                        </CardDescription>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <Badge variant={inst.status === 'active' ? 'default' : 'secondary'}>
+                                        {inst.status}
                                       </Badge>
-                                    )}
+                                      {isExpanded ? (
+                                        <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                                      ) : (
+                                        <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                                      )}
+                                    </div>
                                   </div>
-                                  <div className="flex items-center gap-2">
-                                    <Button 
-                                      variant="outline" 
-                                      size="sm" 
-                                      className="gap-1"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        window.location.href = `/admin/institution/${inst.id}`;
-                                      }}
-                                    >
-                                      <Eye className="w-3 h-3" />
-                                      View
-                                    </Button>
-                                    <ChevronRight className={`w-5 h-5 text-muted-foreground transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            {isExpanded && (
-                              <div className="px-4 pb-4 border-t">
-                                <div className="pt-4 grid md:grid-cols-3 gap-4">
+                                </CardHeader>
+                              </CollapsibleTrigger>
+                              <CollapsibleContent>
+                                <CardContent className="border-t pt-4">
+                                  {hierarchy.length === 0 ? (
+                                    <p className="text-sm text-muted-foreground text-center py-4">
+                                      No profiles configured yet
+                                    </p>
+                                  ) : (
+                                    <div className="space-y-2">
+                                      {renderProfileHierarchy(hierarchy)}
+                                    </div>
+                                  )}
+                                  
                                   {/* Users Section */}
-                                  <div className="space-y-3">
-                                    <h4 className="font-medium text-sm flex items-center gap-2">
+                                  <div className="mt-4 pt-4 border-t">
+                                    <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
                                       <Users className="w-4 h-4" />
                                       Users ({inst.users.length})
                                     </h4>
-                                    <ScrollArea className="h-48">
-                                      <div className="space-y-2">
-                                        {inst.users.length === 0 ? (
-                                          <p className="text-xs text-muted-foreground">No users</p>
-                                        ) : inst.users.map(user => (
-                                          <Link 
-                                            key={user.id} 
-                                            to={`/admin/user/${user.id}`}
-                                            className="flex items-center justify-between p-2 rounded bg-muted/30 hover:bg-muted/50 transition-colors"
-                                          >
-                                            <div>
-                                              <p className="text-sm font-medium">{user.first_name} {user.last_name}</p>
-                                              <p className="text-xs text-muted-foreground">{user.email}</p>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                              <div className="text-right">
-                                                <Badge variant={user.status === 'active' ? 'default' : 'secondary'} className="text-[10px]">
-                                                  {user.status}
-                                                </Badge>
-                                                <p className="text-[10px] text-muted-foreground mt-1">
-                                                  {formatLastLogin(user.last_login_at)}
-                                                </p>
-                                              </div>
-                                              <Eye className="w-3 h-3 text-muted-foreground" />
-                                            </div>
-                                          </Link>
-                                        ))}
-                                      </div>
-                                    </ScrollArea>
-                                  </div>
-                                  
-                                  {/* Tool Activity Section */}
-                                  <div className="space-y-3">
-                                    <h4 className="font-medium text-sm flex items-center gap-2">
-                                      <Activity className="w-4 h-4" />
-                                      Tool Activity
-                                    </h4>
-                                    {Object.keys(toolUsageByName).length === 0 ? (
-                                      <div className="h-48 flex items-center justify-center">
-                                        <p className="text-xs text-muted-foreground">No tool usage recorded yet</p>
-                                      </div>
-                                    ) : (
-                                      <ScrollArea className="h-48">
-                                        <div className="space-y-2">
-                                          {Object.entries(toolUsageByName)
-                                            .sort(([,a], [,b]) => b - a)
-                                            .map(([tool, count]) => (
-                                              <div key={tool} className="flex items-center justify-between p-2 rounded bg-muted/30">
-                                                <span className="text-sm">{tool}</span>
-                                                <Badge variant="secondary">{count}</Badge>
-                                              </div>
-                                            ))}
-                                        </div>
-                                      </ScrollArea>
+                                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                      {inst.users.slice(0, 6).map(user => (
+                                        <Link 
+                                          key={user.id}
+                                          to={`/admin/user/${user.id}`}
+                                          className="flex items-center gap-2 p-2 rounded border hover:bg-muted/50 transition-colors"
+                                        >
+                                          <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-medium text-primary">
+                                            {user.first_name[0]}{user.last_name[0]}
+                                          </div>
+                                          <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium truncate">{user.first_name} {user.last_name}</p>
+                                            <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
+                                          </div>
+                                          <Badge variant={user.status === 'active' ? 'default' : 'secondary'} className="text-[10px]">
+                                            {user.status}
+                                          </Badge>
+                                        </Link>
+                                      ))}
+                                    </div>
+                                    {inst.users.length > 6 && (
+                                      <Button variant="link" size="sm" asChild className="mt-2">
+                                        <Link to={`/admin/users?tenant=${inst.id}`}>
+                                          View all {inst.users.length} users →
+                                        </Link>
+                                      </Button>
                                     )}
                                   </div>
-                                  
-                                  {/* Files Section */}
-                                  <div className="space-y-3">
-                                    <h4 className="font-medium text-sm flex items-center gap-2">
-                                      <FolderOpen className="w-4 h-4" />
-                                      Uploaded Files
-                                    </h4>
-                                    <ScrollArea className="h-48">
-                                      <div className="space-y-2">
-                                        {tenantContentDNA.length === 0 && tenantBYOC.length === 0 ? (
-                                          <p className="text-xs text-muted-foreground">No files uploaded</p>
-                                        ) : (
-                                          <>
-                                            {tenantContentDNA.map(file => (
-                                              <div key={file.id} className="flex items-center justify-between p-2 rounded bg-orange-500/10">
-                                                <div className="flex items-center gap-2">
-                                                  <Mic className="w-3 h-3 text-orange-600" />
-                                                  <div>
-                                                    <p className="text-xs font-medium truncate max-w-[120px]">{file.file_name}</p>
-                                                    <p className="text-[10px] text-muted-foreground">Content DNA</p>
-                                                  </div>
-                                                </div>
-                                                <span className="text-[10px] text-muted-foreground">
-                                                  {new Date(file.created_at).toLocaleDateString()}
-                                                </span>
-                                              </div>
-                                            ))}
-                                            {tenantBYOC.map(file => (
-                                              <div key={file.id} className="flex items-center justify-between p-2 rounded bg-blue-500/10">
-                                                <div className="flex items-center gap-2">
-                                                  <Upload className="w-3 h-3 text-blue-600" />
-                                                  <div>
-                                                    <p className="text-xs font-medium truncate max-w-[120px]">{file.file_name}</p>
-                                                    <p className="text-[10px] text-muted-foreground">BYOC</p>
-                                                  </div>
-                                                </div>
-                                                <span className="text-[10px] text-muted-foreground">
-                                                  {new Date(file.created_at).toLocaleDateString()}
-                                                </span>
-                                              </div>
-                                            ))}
-                                          </>
-                                        )}
-                                      </div>
-                                    </ScrollArea>
-                                  </div>
-                                </div>
-                                
-                                {/* Action Buttons */}
-                                <div className="flex gap-2 mt-4 pt-4 border-t">
-                                  <Button variant="outline" size="sm" asChild>
-                                    <Link to={`/admin/users?tenant=${inst.id}`}>
-                                      <Users className="w-4 h-4 mr-2" />
-                                      Manage Users
-                                    </Link>
-                                  </Button>
-                                </div>
-                              </div>
-                            )}
-                          </Card>
+                                </CardContent>
+                              </CollapsibleContent>
+                            </Card>
+                          </Collapsible>
                         );
                       })}
                     </div>
@@ -1127,123 +938,134 @@ const AdminPanel = () => {
               </Card>
             </TabsContent>
 
-            {/* Libraries Tab */}
-            <TabsContent value="libraries" className="mt-4 space-y-4">
+            {/* Content DNA Tab */}
+            <TabsContent value="content-dna" className="mt-4 space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
-                {/* Shared Library Breakdown */}
+                {/* DNA Samples */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Library className="w-4 h-4" />
-                      Shared Library Breakdown
+                    <CardTitle className="flex items-center gap-2">
+                      <Upload className="w-5 h-5" />
+                      Uploaded Files & Samples
                     </CardTitle>
-                    <CardDescription>263 total items across 8 institutions</CardDescription>
+                    <CardDescription>
+                      {contentDNASamples.length} files uploaded across all institutions
+                    </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <h5 className="text-xs font-medium text-muted-foreground uppercase mb-2">By Content Type</h5>
-                      <div className="space-y-2">
-                        {mockSharedLibraryBreakdown.byType.map(item => (
-                          <div key={item.type} className="flex items-center justify-between">
-                            <span className="text-sm">{item.type}</span>
-                            <div className="flex items-center gap-2">
-                              <Badge variant="secondary">{item.count}</Badge>
-                              <span className="text-xs text-muted-foreground">{item.institutions} inst.</span>
+                  <CardContent>
+                    <ScrollArea className="h-[400px]">
+                      {contentDNASamples.length === 0 ? (
+                        <div className="text-center py-12 text-muted-foreground">
+                          <Upload className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                          <p>No Content DNA samples uploaded</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {contentDNASamples.map(sample => (
+                            <div key={sample.id} className="p-3 border rounded-lg">
+                              <div className="flex items-start justify-between">
+                                <div className="flex items-start gap-2">
+                                  <FileText className="w-4 h-4 text-orange-600 mt-0.5" />
+                                  <div>
+                                    <p className="text-sm font-medium">{sample.title || sample.file_name}</p>
+                                    <p className="text-[10px] text-muted-foreground">
+                                      {sample.institution_name}
+                                      {sample.profile_name && ` → ${sample.profile_name}`}
+                                    </p>
+                                    <div className="flex gap-2 mt-1">
+                                      <Badge variant="outline" className="text-[10px]">{sample.sample_type || 'other'}</Badge>
+                                      <Badge variant="outline" className="text-[10px]">{sample.source_type || 'upload'}</Badge>
+                                      {sample.file_type && (
+                                        <Badge variant="outline" className="text-[10px]">{sample.file_type}</Badge>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                                <span className="text-[10px] text-muted-foreground">
+                                  {formatTime(sample.created_at)}
+                                </span>
+                              </div>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="border-t pt-4">
-                      <h5 className="text-xs font-medium text-muted-foreground uppercase mb-2">By Audience</h5>
-                      <div className="flex flex-wrap gap-1.5">
-                        {mockSharedLibraryBreakdown.byAudience.map(item => (
-                          <Badge key={item.audience} variant="outline" className="text-xs">
-                            {item.audience}: {item.count}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="border-t pt-4">
-                      <h5 className="text-xs font-medium text-muted-foreground uppercase mb-2">By Status</h5>
-                      <div className="grid grid-cols-4 gap-2">
-                        <div className="text-center p-2 bg-green-500/10 rounded">
-                          <p className="text-lg font-bold text-green-600">{mockSharedLibraryBreakdown.byStatus.published}</p>
-                          <p className="text-[10px] text-muted-foreground">Published</p>
+                          ))}
                         </div>
-                        <div className="text-center p-2 bg-yellow-500/10 rounded">
-                          <p className="text-lg font-bold text-yellow-600">{mockSharedLibraryBreakdown.byStatus.submitted}</p>
-                          <p className="text-[10px] text-muted-foreground">Pending</p>
-                        </div>
-                        <div className="text-center p-2 bg-blue-500/10 rounded">
-                          <p className="text-lg font-bold text-blue-600">{mockSharedLibraryBreakdown.byStatus.approved}</p>
-                          <p className="text-[10px] text-muted-foreground">Approved</p>
-                        </div>
-                        <div className="text-center p-2 bg-muted rounded">
-                          <p className="text-lg font-bold">{mockSharedLibraryBreakdown.byStatus.draft}</p>
-                          <p className="text-[10px] text-muted-foreground">Draft</p>
-                        </div>
-                      </div>
-                    </div>
+                      )}
+                    </ScrollArea>
                   </CardContent>
                 </Card>
 
-                {/* Personal Library Stats */}
+                {/* DNA Analyses */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <FolderOpen className="w-4 h-4" />
-                      Personal Libraries (Aggregate)
+                    <CardTitle className="flex items-center gap-2">
+                      <Sparkles className="w-5 h-5" />
+                      Generated DNA Elements
                     </CardTitle>
-                    <CardDescription>{mockPersonalLibraryStats.totalMessages} messages from {mockPersonalLibraryStats.totalUsers} users</CardDescription>
+                    <CardDescription>
+                      {contentDNAAnalyses.length} voice analyses created
+                    </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <h5 className="text-xs font-medium text-muted-foreground uppercase mb-2">By Channel</h5>
-                      <div className="space-y-2">
-                        {mockPersonalLibraryStats.byChannel.map(item => (
-                          <div key={item.channel} className="flex items-center gap-2">
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="text-sm">{item.channel}</span>
-                                <span className="text-sm font-medium">{item.count}</span>
+                  <CardContent>
+                    <ScrollArea className="h-[400px]">
+                      {contentDNAAnalyses.length === 0 ? (
+                        <div className="text-center py-12 text-muted-foreground">
+                          <Dna className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                          <p>No DNA analyses generated</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {contentDNAAnalyses.map(analysis => {
+                            const voice = analysis.voice_analysis || {};
+                            const hasBrand = !!analysis.brand_platform;
+                            
+                            return (
+                              <div key={analysis.id} className="p-3 border rounded-lg">
+                                <div className="flex items-start justify-between mb-2">
+                                  <div>
+                                    <p className="text-sm font-medium">{analysis.profile_name || 'Institution Level'}</p>
+                                    <p className="text-[10px] text-muted-foreground">{analysis.institution_name}</p>
+                                  </div>
+                                  <div className="flex gap-1">
+                                    <Badge className="text-[10px] bg-orange-100 text-orange-700">
+                                      {analysis.sample_count} samples
+                                    </Badge>
+                                    {hasBrand && (
+                                      <Badge className="text-[10px] bg-purple-100 text-purple-700">
+                                        Brand Layer
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                                {voice.voiceAttributes && (
+                                  <div className="flex flex-wrap gap-1 mt-2">
+                                    {voice.voiceAttributes.slice(0, 4).map((attr: string, i: number) => (
+                                      <Badge key={i} variant="secondary" className="text-[10px]">{attr}</Badge>
+                                    ))}
+                                    {voice.voiceAttributes.length > 4 && (
+                                      <Badge variant="outline" className="text-[10px]">
+                                        +{voice.voiceAttributes.length - 4} more
+                                      </Badge>
+                                    )}
+                                  </div>
+                                )}
+                                <p className="text-[10px] text-muted-foreground mt-2">
+                                  Analyzed: {analysis.last_analyzed_at ? formatTime(analysis.last_analyzed_at) : 'Never'}
+                                </p>
                               </div>
-                              <Progress value={(item.count / mockPersonalLibraryStats.byChannel[0].count) * 100} className="h-1.5" />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="border-t pt-4">
-                      <h5 className="text-xs font-medium text-muted-foreground uppercase mb-2">Top Contributors</h5>
-                      <div className="space-y-2">
-                        {mockPersonalLibraryStats.topContributors.map((user, i) => (
-                          <div key={user.name} className="flex items-center justify-between p-2 bg-muted/30 rounded">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs text-muted-foreground w-4">#{i + 1}</span>
-                              <div>
-                                <p className="text-sm font-medium">{user.name}</p>
-                                <p className="text-[10px] text-muted-foreground">{user.institution}</p>
-                              </div>
-                            </div>
-                            <Badge variant="secondary">{user.count} msgs</Badge>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </ScrollArea>
                   </CardContent>
                 </Card>
               </div>
-            </TabsContent>
 
-            {/* AI & Content DNA Tab */}
-            <TabsContent value="ai" className="mt-4 space-y-4">
-              {/* Content DNA → AI Flow Explanation */}
+              {/* Content Lineage Flow */}
               <Card className="border-primary/30 bg-gradient-to-r from-primary/5 to-transparent">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
                     <Zap className="w-4 h-4 text-primary" />
-                    How Content DNA Flows Into Message Generation
+                    Content Lineage: How DNA Flows Into Outputs
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -1251,120 +1073,400 @@ const AdminPanel = () => {
                     <div className="flex-shrink-0 p-3 bg-background rounded-lg border text-center min-w-[120px]">
                       <Upload className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
                       <p className="text-xs font-medium">User Uploads</p>
-                      <p className="text-[10px] text-muted-foreground">Files & Samples</p>
+                      <p className="text-[10px] text-muted-foreground">{contentDNASamples.length} files</p>
                     </div>
                     <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                     <div className="flex-shrink-0 p-3 bg-background rounded-lg border text-center min-w-[120px]">
                       <Sparkles className="w-5 h-5 mx-auto mb-1 text-orange-500" />
-                      <p className="text-xs font-medium">analyze-voice</p>
-                      <p className="text-[10px] text-muted-foreground">Extracts Content DNA</p>
+                      <p className="text-xs font-medium">Voice Analysis</p>
+                      <p className="text-[10px] text-muted-foreground">Extracts DNA</p>
                     </div>
                     <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                     <div className="flex-shrink-0 p-3 bg-background rounded-lg border text-center min-w-[120px]">
                       <Database className="w-5 h-5 mx-auto mb-1 text-blue-500" />
                       <p className="text-xs font-medium">Stored in Profile</p>
-                      <p className="text-[10px] text-muted-foreground">contentDNA object</p>
+                      <p className="text-[10px] text-muted-foreground">{contentDNAAnalyses.length} analyses</p>
                     </div>
                     <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                     <div className="flex-shrink-0 p-3 bg-background rounded-lg border text-center min-w-[120px]">
                       <MessageSquare className="w-5 h-5 mx-auto mb-1 text-green-500" />
                       <p className="text-xs font-medium">Injected into AI</p>
-                      <p className="text-[10px] text-muted-foreground">Every generation call</p>
+                      <p className="text-[10px] text-muted-foreground">Every generation</p>
                     </div>
                     <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                     <div className="flex-shrink-0 p-3 bg-primary/10 rounded-lg border border-primary/30 text-center min-w-[120px]">
                       <CheckCircle2 className="w-5 h-5 mx-auto mb-1 text-primary" />
-                      <p className="text-xs font-medium">DNA-Matched</p>
+                      <p className="text-xs font-medium">Brand-Aligned</p>
                       <p className="text-[10px] text-muted-foreground">Output Messages</p>
                     </div>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-3">
-                    <strong>{totalContentDNAInjections} messages</strong> have been generated with Content DNA injection in the last 30 days.
-                  </p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Brand Layer Tab */}
+            <TabsContent value="brand" className="mt-4 space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="w-5 h-5" />
+                    Brand Layer Governance
+                  </CardTitle>
+                  <CardDescription>
+                    Brand promise, pillars, and proof points across institutions
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {isLoading ? (
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {tenants.map(inst => {
+                        const instAnalyses = contentDNAAnalyses.filter(a => 
+                          institutionalProfiles.find(p => p.id === a.profile_id)?.tenant_id === inst.id ||
+                          a.tenant_id === inst.id
+                        );
+                        const hasBrandLayer = instAnalyses.some(a => a.brand_platform);
+                        
+                        if (!hasBrandLayer && instAnalyses.length === 0) return null;
+                        
+                        return (
+                          <Card key={inst.id} className="border-l-4 border-l-primary">
+                            <CardHeader className="pb-2">
+                              <div className="flex items-center justify-between">
+                                <CardTitle className="text-base flex items-center gap-2">
+                                  <GraduationCap className="w-4 h-4" />
+                                  {inst.institution_name}
+                                </CardTitle>
+                                <Badge variant={hasBrandLayer ? 'default' : 'outline'}>
+                                  {hasBrandLayer ? 'Brand Layer Active' : 'Voice Only'}
+                                </Badge>
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="space-y-4">
+                                {instAnalyses.map(analysis => {
+                                  const brand = analysis.brand_platform;
+                                  const voice = analysis.voice_analysis;
+                                  
+                                  return (
+                                    <div key={analysis.id} className="p-4 border rounded-lg bg-muted/30">
+                                      <div className="flex items-center justify-between mb-3">
+                                        <p className="font-medium text-sm">
+                                          {analysis.profile_name || 'Institution Level'}
+                                        </p>
+                                        <div className="flex gap-1">
+                                          {brand && <Badge className="text-[10px] bg-purple-100 text-purple-700">Brand Platform</Badge>}
+                                          {voice && <Badge className="text-[10px] bg-orange-100 text-orange-700">Voice DNA</Badge>}
+                                        </div>
+                                      </div>
+                                      
+                                      {brand && (
+                                        <div className="grid md:grid-cols-3 gap-4 mb-4">
+                                          {/* Brand Promise */}
+                                          <div className="p-3 bg-background rounded border">
+                                            <div className="flex items-center gap-2 mb-2">
+                                              <Heart className="w-4 h-4 text-pink-600" />
+                                              <p className="text-xs font-medium text-muted-foreground">Brand Promise</p>
+                                            </div>
+                                            <p className="text-sm">
+                                              {brand.promise || brand.brandPromise || 'Not defined'}
+                                            </p>
+                                          </div>
+                                          
+                                          {/* Pillars */}
+                                          <div className="p-3 bg-background rounded border">
+                                            <div className="flex items-center gap-2 mb-2">
+                                              <Layers className="w-4 h-4 text-blue-600" />
+                                              <p className="text-xs font-medium text-muted-foreground">Brand Pillars</p>
+                                            </div>
+                                            {brand.pillars || brand.brandPillars ? (
+                                              <div className="flex flex-wrap gap-1">
+                                                {(brand.pillars || brand.brandPillars || []).map((pillar: string, i: number) => (
+                                                  <Badge key={i} variant="secondary" className="text-[10px]">{pillar}</Badge>
+                                                ))}
+                                              </div>
+                                            ) : (
+                                              <p className="text-sm text-muted-foreground">Not defined</p>
+                                            )}
+                                          </div>
+                                          
+                                          {/* Proof Points */}
+                                          <div className="p-3 bg-background rounded border">
+                                            <div className="flex items-center gap-2 mb-2">
+                                              <BookOpen className="w-4 h-4 text-green-600" />
+                                              <p className="text-xs font-medium text-muted-foreground">Proof Points</p>
+                                            </div>
+                                            {brand.proofPoints || brand.foundations ? (
+                                              <div className="flex flex-wrap gap-1">
+                                                {(brand.proofPoints || brand.foundations || []).slice(0, 3).map((point: string, i: number) => (
+                                                  <Badge key={i} variant="outline" className="text-[10px]">{point}</Badge>
+                                                ))}
+                                              </div>
+                                            ) : (
+                                              <p className="text-sm text-muted-foreground">Not defined</p>
+                                            )}
+                                          </div>
+                                        </div>
+                                      )}
+                                      
+                                      {voice?.voiceAttributes && (
+                                        <div>
+                                          <p className="text-xs font-medium text-muted-foreground mb-2">Voice Attributes</p>
+                                          <div className="flex flex-wrap gap-1">
+                                            {voice.voiceAttributes.map((attr: string, i: number) => (
+                                              <Badge key={i} variant="secondary" className="text-[10px]">{attr}</Badge>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                      
+                      {contentDNAAnalyses.length === 0 && (
+                        <div className="text-center py-12 text-muted-foreground">
+                          <Target className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                          <p>No brand layers configured yet</p>
+                          <p className="text-sm mt-1">Upload content samples to generate brand DNA</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Email Activity Tab */}
+            <TabsContent value="emails" className="mt-4 space-y-4">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <Mail className="w-5 h-5" />
+                        Email Activity Log
+                      </CardTitle>
+                      <CardDescription>
+                        {emailNudges.length} system emails sent
+                      </CardDescription>
+                    </div>
+                    <div className="w-64">
+                      <div className="relative">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Search emails..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="pl-8"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {emailNudges.length === 0 ? (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <Mail className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                      <p>No emails sent yet</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Type</TableHead>
+                            <TableHead>Recipient</TableHead>
+                            <TableHead>Institution</TableHead>
+                            <TableHead>Sent</TableHead>
+                            <TableHead>Count</TableHead>
+                            <TableHead>Status</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {filteredNudges.slice(0, 50).map(nudge => (
+                            <TableRow key={nudge.id}>
+                              <TableCell>
+                                <Badge variant="outline" className="capitalize">
+                                  {nudge.nudge_type.replace(/_/g, ' ')}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <div>
+                                  <p className="font-medium text-sm">{nudge.user_name}</p>
+                                  <p className="text-[10px] text-muted-foreground">{nudge.user_email}</p>
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-sm">{nudge.institution_name}</TableCell>
+                              <TableCell className="text-sm">{formatTime(nudge.sent_at)}</TableCell>
+                              <TableCell>
+                                <Badge variant="secondary">{nudge.email_count}</Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge className="bg-green-100 text-green-700">
+                                  <CheckCircle2 className="w-3 h-3 mr-1" />
+                                  Sent
+                                </Badge>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                      {filteredNudges.length > 50 && (
+                        <p className="text-sm text-muted-foreground text-center mt-4">
+                          Showing 50 of {filteredNudges.length} emails
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Sharing & Collaboration Tab */}
+            <TabsContent value="sharing" className="mt-4 space-y-4">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <Share2 className="w-5 h-5" />
+                        Sharing & Collaboration Tracking
+                      </CardTitle>
+                      <CardDescription>
+                        {referrals.length} "Share with a colleague" invitations
+                      </CardDescription>
+                    </div>
+                    <div className="w-64">
+                      <div className="relative">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Search referrals..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="pl-8"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {referrals.length === 0 ? (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <Share2 className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                      <p>No referrals yet</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Sender</TableHead>
+                            <TableHead>Sender Institution</TableHead>
+                            <TableHead>Recipient</TableHead>
+                            <TableHead>Type</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Sent</TableHead>
+                            <TableHead>Joined</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {filteredReferrals.slice(0, 50).map(ref => (
+                            <TableRow key={ref.id}>
+                              <TableCell className="font-medium text-sm">{ref.referrer_name}</TableCell>
+                              <TableCell className="text-sm">{ref.referrer_institution}</TableCell>
+                              <TableCell>
+                                <div>
+                                  <p className="font-medium text-sm">{ref.referee_name || 'Unknown'}</p>
+                                  <p className="text-[10px] text-muted-foreground">{ref.referee_email}</p>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="capitalize">
+                                  {ref.referral_type.replace(/_/g, ' ')}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge 
+                                  className={
+                                    ref.status === 'joined' 
+                                      ? 'bg-green-100 text-green-700' 
+                                      : ref.status === 'pending'
+                                      ? 'bg-yellow-100 text-yellow-700'
+                                      : 'bg-gray-100 text-gray-700'
+                                  }
+                                >
+                                  {ref.status === 'joined' && <CheckCircle2 className="w-3 h-3 mr-1" />}
+                                  {ref.status === 'pending' && <Clock className="w-3 h-3 mr-1" />}
+                                  {ref.status}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-sm">{formatTime(ref.created_at)}</TableCell>
+                              <TableCell className="text-sm">
+                                {ref.joined_at ? formatTime(ref.joined_at) : '—'}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                      {filteredReferrals.length > 50 && (
+                        <p className="text-sm text-muted-foreground text-center mt-4">
+                          Showing 50 of {filteredReferrals.length} referrals
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
-              <div className="grid md:grid-cols-2 gap-4">
-                {/* AI Function Stats */}
+              {/* Sharing Stats */}
+              <div className="grid md:grid-cols-3 gap-4">
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Cpu className="w-4 h-4" />
-                      Edge Function Performance
-                    </CardTitle>
-                    <CardDescription>Last 30 days</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Function</TableHead>
-                          <TableHead className="text-right">Calls</TableHead>
-                          <TableHead className="text-right">Success</TableHead>
-                          <TableHead className="text-right">DNA Used</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {aiFunctionStats.map(fn => (
-                          <TableRow key={fn.name}>
-                            <TableCell>
-                              <div>
-                                <p className="font-mono text-xs">{fn.name}</p>
-                                <p className="text-[10px] text-muted-foreground">{fn.description}</p>
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-right font-medium">{fn.calls}</TableCell>
-                            <TableCell className="text-right">
-                              <span className="text-green-600">{Math.round((fn.success / fn.calls) * 100)}%</span>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              {fn.contentDNAUsed > 0 ? (
-                                <Badge className="bg-orange-500/20 text-orange-700 text-[10px]">
-                                  {fn.contentDNAUsed}
-                                </Badge>
-                              ) : '-'}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-green-100">
+                        <CheckCircle2 className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">{referrals.filter(r => r.status === 'joined').length}</p>
+                        <p className="text-sm text-muted-foreground">Joined from referral</p>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
-
-                {/* Voice Profiles by Institution */}
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Mic className="w-4 h-4" />
-                      Content DNA Profiles by Institution
-                    </CardTitle>
-                    <CardDescription>16 active Content DNA profiles</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {mockInstitutionData.filter(i => i.contentDNAProfiles > 0).map(inst => (
-                        <div key={inst.name} className="flex items-center justify-between p-2 border rounded-lg">
-                          <div className="flex items-center gap-2">
-                            <GraduationCap className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-sm font-medium">{inst.name}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-xs">
-                              {inst.contentDNAProfiles} profile{inst.contentDNAProfiles > 1 ? 's' : ''}
-                            </Badge>
-                            <Badge variant="secondary" className="text-xs">
-                              {inst.filesUploaded} files
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-yellow-100">
+                        <Clock className="w-5 h-5 text-yellow-600" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">{referrals.filter(r => r.status === 'pending').length}</p>
+                        <p className="text-sm text-muted-foreground">Pending invites</p>
+                      </div>
                     </div>
-                    <div className="mt-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-green-600" />
-                        <p className="text-xs text-green-700 dark:text-green-400">
-                          All Content DNA profiles are being injected into AI prompts for institution-specific message generation.
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-blue-100">
+                        <TrendingUp className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">
+                          {referrals.length > 0 
+                            ? Math.round((referrals.filter(r => r.status === 'joined').length / referrals.length) * 100)
+                            : 0}%
                         </p>
+                        <p className="text-sm text-muted-foreground">Conversion rate</p>
                       </div>
                     </div>
                   </CardContent>
@@ -1372,125 +1474,115 @@ const AdminPanel = () => {
               </div>
             </TabsContent>
 
-            {/* Users Tab */}
-            <TabsContent value="users" className="mt-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle className="font-serif">All Users</CardTitle>
-                    <CardDescription>{users.length} users across {tenants.length} institutions</CardDescription>
-                  </div>
-                  <Button asChild>
-                    <Link to="/admin/users">
-                      <Users className="w-4 h-4 mr-2" />
-                      Full Management
-                    </Link>
-                  </Button>
-                </CardHeader>
-                <CardContent>
-                  {isLoadingUsers ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-                    </div>
-                  ) : users.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Users className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                      <p className="text-sm">No users found</p>
-                    </div>
-                  ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>User</TableHead>
-                          <TableHead>Institution</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Last Login</TableHead>
-                          <TableHead>Member Since</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {users.map(user => (
-                          <TableRow key={user.id}>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">
-                                  {user.first_name[0]}{user.last_name[0]}
-                                </div>
-                                <div>
-                                  <p className="font-medium text-sm">{user.first_name} {user.last_name}</p>
-                                  <p className="text-[10px] text-muted-foreground">{user.email}</p>
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-sm">{user.institution_name}</TableCell>
-                            <TableCell>
-                              <Badge 
-                                variant={user.status === 'active' ? 'default' : 'secondary'}
-                                className={user.status === 'active' ? 'bg-green-500' : user.status === 'locked' ? 'bg-red-500' : ''}
-                              >
-                                {user.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-sm text-muted-foreground">
-                              {formatLastLogin(user.last_login_at)}
-                            </TableCell>
-                            <TableCell className="text-sm text-muted-foreground">
-                              {new Date(user.created_at).toLocaleDateString()}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Admin Functions Tab */}
-            <TabsContent value="admin" className="mt-4">
+            {/* Libraries Tab */}
+            <TabsContent value="libraries" className="mt-4 space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Database className="w-4 h-4" />
-                      Data Management
+                    <CardTitle className="flex items-center gap-2">
+                      <Library className="w-5 h-5" />
+                      Shared Library
                     </CardTitle>
-                    <CardDescription>Purge and reset library content</CardDescription>
+                    <CardDescription>
+                      {tenants.reduce((sum, t) => sum + t.sharedTemplatesCount, 0)} templates across all institutions
+                    </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="p-3 border rounded-lg flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-sm">Shared Library</p>
-                        <p className="text-xs text-muted-foreground">{templates.length} local templates</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={handleResetSharedToDefaults}>
-                          <RefreshCw className="w-3 h-3 mr-1" />
-                          Reset
-                        </Button>
-                        <Button variant="destructive" size="sm" onClick={() => setClearSharedOpen(true)}>
-                          <Trash2 className="w-3 h-3 mr-1" />
-                          Purge
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="p-3 border rounded-lg flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-sm">Personal Library</p>
-                        <p className="text-xs text-muted-foreground">{messages.length} your messages</p>
-                      </div>
-                      <Button variant="destructive" size="sm" onClick={() => setClearPersonalOpen(true)}>
-                        <Trash2 className="w-3 h-3 mr-1" />
-                        Purge
-                      </Button>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {tenants.filter(t => t.sharedTemplatesCount > 0).map(inst => (
+                        <div key={inst.id} className="flex items-center justify-between p-2 border rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <GraduationCap className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm">{inst.institution_name}</span>
+                          </div>
+                          <Badge variant="secondary">{inst.sharedTemplatesCount}</Badge>
+                        </div>
+                      ))}
+                      {tenants.filter(t => t.sharedTemplatesCount > 0).length === 0 && (
+                        <p className="text-sm text-muted-foreground text-center py-4">No shared templates</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Shield className="w-4 h-4" />
+                    <CardTitle className="flex items-center gap-2">
+                      <FolderOpen className="w-5 h-5" />
+                      Personal Libraries
+                    </CardTitle>
+                    <CardDescription>
+                      {tenants.reduce((sum, t) => sum + t.personalMessagesCount, 0)} messages across all users
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {tenants.filter(t => t.personalMessagesCount > 0).map(inst => (
+                        <div key={inst.id} className="flex items-center justify-between p-2 border rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <GraduationCap className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm">{inst.institution_name}</span>
+                          </div>
+                          <Badge variant="secondary">{inst.personalMessagesCount}</Badge>
+                        </div>
+                      ))}
+                      {tenants.filter(t => t.personalMessagesCount > 0).length === 0 && (
+                        <p className="text-sm text-muted-foreground text-center py-4">No personal messages</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            {/* Admin Tab */}
+            <TabsContent value="admin" className="mt-4 space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-destructive">
+                      <AlertTriangle className="w-5 h-5" />
+                      Danger Zone
+                    </CardTitle>
+                    <CardDescription>
+                      Destructive actions that cannot be undone
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Button 
+                      variant="destructive" 
+                      className="w-full justify-start"
+                      onClick={() => setClearPersonalOpen(true)}
+                    >
+                      <FolderOpen className="w-4 h-4 mr-2" />
+                      Purge Personal Library ({messages.length} items)
+                    </Button>
+                    <Button 
+                      variant="destructive" 
+                      className="w-full justify-start"
+                      onClick={() => setClearSharedOpen(true)}
+                    >
+                      <Library className="w-4 h-4 mr-2" />
+                      Purge Shared Library ({templates.length} items)
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={() => {
+                        resetToDefaults();
+                        toast({ title: "Shared Library reset to defaults" });
+                      }}
+                    >
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Reset Shared Library to Defaults
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Settings className="w-5 h-5" />
                       Quick Links
                     </CardTitle>
                   </CardHeader>
@@ -1517,13 +1609,6 @@ const AdminPanel = () => {
                       </Link>
                     </Button>
                     <Button variant="outline" className="w-full justify-start" size="sm" asChild>
-                      <Link to="/settings">
-                        <FolderTree className="w-4 h-4 mr-2" />
-                        Institutional Profiles & Sub-Units
-                        <ChevronRight className="w-4 h-4 ml-auto" />
-                      </Link>
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start" size="sm" asChild>
                       <Link to="/admin/content-dna">
                         <Dna className="w-4 h-4 mr-2" />
                         Content DNA Center
@@ -1531,9 +1616,16 @@ const AdminPanel = () => {
                       </Link>
                     </Button>
                     <Button variant="outline" className="w-full justify-start" size="sm" asChild>
-                      <Link to="/byoc">
-                        <Upload className="w-4 h-4 mr-2" />
-                        Bring Your Own Content
+                      <Link to="/admin/qa">
+                        <Shield className="w-4 h-4 mr-2" />
+                        QA Diagnostics
+                        <ChevronRight className="w-4 h-4 ml-auto" />
+                      </Link>
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start" size="sm" asChild>
+                      <Link to="/admin/seed">
+                        <Database className="w-4 h-4 mr-2" />
+                        Seed Data
                         <ChevronRight className="w-4 h-4 ml-auto" />
                       </Link>
                     </Button>
@@ -1541,241 +1633,6 @@ const AdminPanel = () => {
                 </Card>
               </div>
             </TabsContent>
-
-            {/* Profiles Tab */}
-            <TabsContent value="profiles" className="mt-4 space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                {/* Profiles Overview */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="font-serif flex items-center gap-2">
-                      <Settings className="w-5 h-5" />
-                      Institutional Profiles
-                    </CardTitle>
-                    <CardDescription>
-                      {institutionalProfiles.length} profiles across {new Set(institutionalProfiles.map(p => p.tenant_id)).size} institutions
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {isLoadingUsers ? (
-                      <div className="flex items-center justify-center py-8">
-                        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-                      </div>
-                    ) : institutionalProfiles.length === 0 ? (
-                      <div className="text-center py-8 text-muted-foreground">
-                        <Settings className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                        <p className="text-sm">No institutional profiles found</p>
-                      </div>
-                    ) : (
-                      <ScrollArea className="h-[400px]">
-                        <div className="space-y-2">
-                          {institutionalProfiles.map(profile => {
-                            const config = profile.config || {};
-                            const filledCount = allConfigFields.filter(field => {
-                              const value = config[field];
-                              if (Array.isArray(value)) return value.length > 0;
-                              if (typeof value === 'object' && value !== null) return Object.keys(value).length > 0;
-                              return value && value.toString().trim() !== '';
-                            }).length;
-                            const completionPct = Math.round((filledCount / allConfigFields.length) * 100);
-                            const hasDNA = config.voiceAnalysis || (config.brandVoiceSamples && config.brandVoiceSamples.length > 0);
-                            const dnaSampleCount = contentDNASamples.filter(s => {
-                              // Match by tenant
-                              const profileTenant = institutionalProfiles.find(p => p.id === profile.id)?.tenant_id;
-                              return s.tenant_id === profileTenant && s.profile_id === profile.id;
-                            }).length;
-                            
-                            return (
-                              <div key={profile.id} className="p-3 border rounded-lg">
-                                <div className="flex items-center justify-between mb-2">
-                                  <div>
-                                    <p className="font-medium text-sm">{profile.name}</p>
-                                    <p className="text-[10px] text-muted-foreground">{profile.institution_name}</p>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    {hasDNA && (
-                                      <Badge variant="outline" className="text-[10px] bg-orange-50 text-orange-700">
-                                        <Mic className="w-3 h-3 mr-1" />
-                                        DNA
-                                      </Badge>
-                                    )}
-                                    <Badge 
-                                      variant="outline"
-                                      className={`text-xs ${completionPct >= 70 ? 'bg-green-50 text-green-700' : completionPct >= 40 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}
-                                    >
-                                      {filledCount}/{allConfigFields.length} ({completionPct}%)
-                                    </Badge>
-                                  </div>
-                                </div>
-                                <Progress value={completionPct} className="h-1.5" />
-                                <div className="mt-2 flex flex-wrap gap-1">
-                                  {config.institutionName && <Badge variant="secondary" className="text-[10px]">Name</Badge>}
-                                  {config.mascot && <Badge variant="secondary" className="text-[10px]">Mascot</Badge>}
-                                  {config.primaryCTAs?.length > 0 && <Badge variant="secondary" className="text-[10px]">CTAs</Badge>}
-                                  {config.leaderNames?.length > 0 && <Badge variant="secondary" className="text-[10px]">Leaders</Badge>}
-                                  {config.portalName && <Badge variant="secondary" className="text-[10px]">Portal</Badge>}
-                                  {config.lmsName && <Badge variant="secondary" className="text-[10px]">LMS</Badge>}
-                                  {config.toneRules?.length > 0 && <Badge variant="secondary" className="text-[10px]">Tone</Badge>}
-                                  {config.supportCenters?.length > 0 && <Badge variant="secondary" className="text-[10px]">Centers</Badge>}
-                                  {dnaSampleCount > 0 && (
-                                    <Badge variant="secondary" className="text-[10px] bg-orange-100">
-                                      {dnaSampleCount} DNA sample{dnaSampleCount !== 1 ? 's' : ''}
-                                    </Badge>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </ScrollArea>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* Profile Completion by Institution */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <BarChart3 className="w-4 h-4" />
-                      Completion by Institution
-                    </CardTitle>
-                    <CardDescription>Average profile completion percentage</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {isLoadingUsers ? (
-                      <div className="flex items-center justify-center py-8">
-                        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {tenants.filter(t => t.institutionalProfilesCount > 0).map(inst => (
-                          <div key={inst.id} className="space-y-1">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <GraduationCap className="w-4 h-4 text-muted-foreground" />
-                                <span className="text-sm font-medium">{inst.institution_name}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline" className="text-xs">
-                                  {inst.institutionalProfilesCount} profile{inst.institutionalProfilesCount !== 1 ? 's' : ''}
-                                </Badge>
-                                <span className={`text-sm font-bold ${inst.profileCompletionPct >= 70 ? 'text-green-600' : inst.profileCompletionPct >= 40 ? 'text-yellow-600' : 'text-red-600'}`}>
-                                  {inst.profileCompletionPct}%
-                                </span>
-                              </div>
-                            </div>
-                            <Progress value={inst.profileCompletionPct} className="h-2" />
-                          </div>
-                        ))}
-                        {tenants.filter(t => t.institutionalProfilesCount > 0).length === 0 && (
-                          <div className="text-center py-8 text-muted-foreground">
-                            <Settings className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                            <p className="text-sm">No profiles created yet</p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Field Completion Stats */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <FileText className="w-4 h-4" />
-                    Field Completion Overview
-                  </CardTitle>
-                  <CardDescription>Completion by category across all {institutionalProfiles.length} profiles ({allConfigFields.length} total fields)</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {(() => {
-                    const fieldCategories = [
-                      { name: 'Branding & Identity', fields: ['institutionName', 'institutionAbbreviation', 'mascot', 'slogans'] },
-                      { name: 'Digital Systems', fields: ['portalName', 'lmsName', 'emailDomain', 'advisingSystemName', 'schedulingSystemName', 'degreeAuditSystem', 'financialAidPortal', 'registrationSystem'] },
-                      { name: 'Facilities', fields: ['buildingNames', 'programNames', 'supportCenters', 'libraryName', 'tutorCenter', 'writingCenter', 'mathCenter', 'careerCenter', 'counselingCenter', 'healthCenter', 'fitnessCenter', 'diningHall'] },
-                      { name: 'Campus', fields: ['campusTerms', 'defaultMeetingLocation', 'virtualMeetingPlatform'] },
-                      { name: 'Offices', fields: ['registrarOffice', 'financialAidOffice', 'admissionsOffice', 'bursarOffice', 'itHelpDesk', 'housingOffice', 'studentAffairsOffice', 'internationalOffice', 'disabilityServices', 'veteransServices'] },
-                      { name: 'People & Roles', fields: ['leaderNames', 'advisorTitles', 'staffTitles', 'defaultAdvisorName'] },
-                      { name: 'Naming', fields: ['studentAddressing', 'staffAddressing', 'pronounPreference', 'studentIdTerm'] },
-                      { name: 'CTAs', fields: ['primaryCTAs', 'secondaryCTAs', 'urgentCTAs'] },
-                      { name: 'Contact Info', fields: ['primaryContactEmail', 'primaryContactPhone', 'advisingEmail', 'generalHelpEmail', 'emergencyPhone', 'textAlertNumber', 'websiteLinks', 'socialMediaHandles', 'appointmentLink'] },
-                      { name: 'Academic Terms', fields: ['academicTerms', 'gradingTerms', 'enrollmentTerms', 'currentTermName', 'nextTermName'] },
-                      { name: 'Scheduling', fields: ['officeHoursFormat', 'timeZone'] },
-                      { name: 'Signatures', fields: ['signatureTemplates'] },
-                      { name: 'Tone & Style', fields: ['toneRules', 'wordsToAvoid', 'preferredPhrases'] },
-                      { name: 'Dates', fields: ['importantDates'] },
-                      { name: 'Content DNA', fields: ['brandVoiceSamples', 'voiceAnalysis'] },
-                    ].map(cat => {
-                      let totalFilled = 0;
-                      let totalFields = cat.fields.length * institutionalProfiles.length;
-                      institutionalProfiles.forEach(p => {
-                        const config = p.config || {};
-                        cat.fields.forEach(field => {
-                          const value = config[field];
-                          if (Array.isArray(value) && value.length > 0) totalFilled++;
-                          else if (typeof value === 'object' && value !== null && Object.keys(value).length > 0) totalFilled++;
-                          else if (value && value.toString().trim() !== '') totalFilled++;
-                        });
-                      });
-                      const pct = totalFields > 0 ? Math.round((totalFilled / totalFields) * 100) : 0;
-                      return { ...cat, totalFilled, totalFields, pct };
-                    });
-
-                    return (
-                      <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-3">
-                        {fieldCategories.map(cat => (
-                          <div key={cat.name} className="p-2 border rounded-lg">
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-[10px] font-medium truncate">{cat.name}</span>
-                              <span className={`text-[10px] font-bold ${cat.pct >= 70 ? 'text-green-600' : cat.pct >= 40 ? 'text-yellow-600' : 'text-muted-foreground'}`}>
-                                {cat.pct}%
-                              </span>
-                            </div>
-                            <Progress value={cat.pct} className="h-1" />
-                            <p className="text-[9px] text-muted-foreground mt-1">{cat.fields.length} fields</p>
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  })()}
-                </CardContent>
-              </Card>
-
-              {/* Content DNA Samples */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Mic className="w-4 h-4" />
-                    Content DNA Samples
-                  </CardTitle>
-                  <CardDescription>{contentDNASamples.length} samples uploaded across all institutions</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {contentDNASamples.length === 0 ? (
-                    <div className="text-center py-6 text-muted-foreground">
-                      <Mic className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                      <p className="text-sm">No Content DNA samples uploaded yet</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {tenants.filter(t => t.contentDNACount > 0).map(inst => (
-                        <div key={inst.id} className="flex items-center justify-between p-2 border rounded-lg">
-                          <div className="flex items-center gap-2">
-                            <GraduationCap className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-sm font-medium">{inst.institution_name}</span>
-                          </div>
-                          <Badge variant="outline" className="bg-orange-50 text-orange-700">
-                            {inst.contentDNACount} sample{inst.contentDNACount !== 1 ? 's' : ''}
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
           </Tabs>
         </div>
       </main>
@@ -1794,8 +1651,8 @@ const AdminPanel = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleClearPersonalLibrary} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Purge
+            <AlertDialogAction onClick={handleClearPersonalLibrary} className="bg-destructive text-destructive-foreground">
+              Purge All
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1814,8 +1671,8 @@ const AdminPanel = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleClearSharedLibrary} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Purge
+            <AlertDialogAction onClick={handleClearSharedLibrary} className="bg-destructive text-destructive-foreground">
+              Purge All
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
