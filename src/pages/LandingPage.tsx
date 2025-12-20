@@ -40,7 +40,7 @@ const features = [
     icon: BookOpen,
     title: 'University Library',
     description: 'Governed content with approval workflows. Personal drafts for experimentation. Shared libraries for approved, on-brand plays.',
-    link: '/features/evaluate',
+    link: '/features/library',
   },
 ];
 
