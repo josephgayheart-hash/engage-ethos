@@ -14,6 +14,7 @@ import { ContentDNAIndicator, ContentDNAActiveBadge } from "@/components/Content
 import { BrandLayerSelector, BrandLayerActiveBadge, BrandLayerSelection } from "@/components/BrandLayerSelector";
 import { CadenceSelector, CadenceFrequency, EscalationPattern } from "@/components/CadenceSelector";
 import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
+import { BuilderStepSection, BuilderStepDivider } from "@/components/BuilderStepSection";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,7 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target, Users, UserCheck, Mail, FileDown, MessageSquare, Globe, Phone, FileText, Search, Megaphone } from "lucide-react";
+import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target, Users, UserCheck, Mail, FileDown, MessageSquare, Globe, Phone, FileText, Search, Megaphone, Building2 } from "lucide-react";
 import { mapMessages } from "@/lib/evaluateMessage";
 import { useAuth } from "@/contexts/AuthContext";
 import type { MessageContext, MapperResult, Channel, InstitutionalConfig } from "@/types/uplaybook";
@@ -692,213 +693,258 @@ const StrategyPage = () => {
           {/* Context Card */}
           <Card>
             <CardHeader>
-              <CardTitle className="font-serif text-lg">Journey Configuration</CardTitle>
+              <CardTitle className="font-serif text-lg">Design Your Journey</CardTitle>
               <CardDescription>
-                Define your audience, goals, and timeline to generate a comprehensive messaging strategy
+                Follow the steps below to configure your audience, timeline, and channels
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Institutional Profile Selector */}
-              <InstitutionalProfileSelector
-                selectedProfileId={selectedProfileId}
-                onProfileChange={(id, config, name) => {
-                  setSelectedProfileId(id);
-                  setInstitutionalConfig(config);
-                  setSelectedProfileName(name);
-                }}
-              />
+            <CardContent className="space-y-8">
+              
+              {/* Step 1: Brand & Profile */}
+              <BuilderStepSection
+                stepNumber={1}
+                title="Select Your Brand Context"
+                description="Choose the institutional profile and voice settings for your journey"
+                helpText="Select which college, department, or unit this journey represents. Content DNA captures your institution's unique voice and tone."
+                icon={<Building2 className="w-4 h-4" />}
+              >
+                <div className="space-y-4">
+                  <InstitutionalProfileSelector
+                    selectedProfileId={selectedProfileId}
+                    onProfileChange={(id, config, name) => {
+                      setSelectedProfileId(id);
+                      setInstitutionalConfig(config);
+                      setSelectedProfileName(name);
+                    }}
+                  />
 
-              {/* Content DNA Indicator */}
-              <ContentDNAIndicator
-                enabled={useContentDNA}
-                onToggle={setUseContentDNA}
-                selectedProfileId={selectedProfileId}
-                selectedProfileName={selectedProfileName}
-              />
+                  {/* Content DNA Indicator */}
+                  <ContentDNAIndicator
+                    enabled={useContentDNA}
+                    onToggle={setUseContentDNA}
+                    selectedProfileId={selectedProfileId}
+                    selectedProfileName={selectedProfileName}
+                  />
 
-              {/* Brand Layer Selector - only show when Content DNA is enabled and brand platform exists */}
-              {useContentDNA && contentDNA?.brandPlatform && (
-                <BrandLayerSelector
-                  brandPlatform={contentDNA.brandPlatform}
-                  selection={brandSelection}
-                  onSelectionChange={setBrandSelection}
-                  isLoading={isContentDNALoading}
-                  compact
-                />
-              )}
-
-              <ContextSelector context={context} onChange={setContext} mode="mapper" />
-
-              {/* Channel Selection */}
-              <div className="space-y-3 pt-2 border-t border-border">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium">Channel Modalities</Label>
-                  <Button variant="ghost" size="sm" onClick={selectAllChannels}>
-                    Select All
-                  </Button>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  {channelOptions.map(channel => (
-                    <div key={channel.value} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`channel-${channel.value}`}
-                        checked={selectedChannels.includes(channel.value)}
-                        onCheckedChange={() => toggleChannel(channel.value)}
-                      />
-                      <label
-                        htmlFor={`channel-${channel.value}`}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                      >
-                        {channel.label}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Journey Timeline */}
-              <div className="space-y-4 pt-2 border-t border-border">
-                <Label className="text-sm font-medium flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-primary" />
-                  Journey Timeline
-                </Label>
-                
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Start Date</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !startDate && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {startDate ? format(startDate, "MMM d, yyyy") : "Start date"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={startDate}
-                          onSelect={handleStartDateChange}
-                          initialFocus
-                          className="p-3 pointer-events-auto"
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">End Date (Due)</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !endDate && "text-muted-foreground"
-                          )}
-                        >
-                          <Target className="mr-2 h-4 w-4 text-destructive" />
-                          {endDate ? format(endDate, "MMM d, yyyy") : "Due date"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={endDate}
-                          onSelect={handleEndDateChange}
-                          disabled={(date) => startDate ? date < startDate : false}
-                          initialFocus
-                          className="p-3 pointer-events-auto"
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="journey-weeks" className="text-xs text-muted-foreground">Duration (weeks)</Label>
-                    <Input
-                      id="journey-weeks"
-                      type="number"
-                      min={4}
-                      max={52}
-                      value={journeyWeeks}
-                      onChange={(e) => handleWeeksChange(Number(e.target.value))}
-                      className="w-full"
+                  {/* Brand Layer Selector - only show when Content DNA is enabled and brand platform exists */}
+                  {useContentDNA && contentDNA?.brandPlatform && (
+                    <BrandLayerSelector
+                      brandPlatform={contentDNA.brandPlatform}
+                      selection={brandSelection}
+                      onSelectionChange={setBrandSelection}
+                      isLoading={isContentDNALoading}
+                      compact
                     />
-                  </div>
-
-                  {(startDate || endDate) && (
-                    <div className="flex items-end">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => { setStartDate(undefined); setEndDate(undefined); }}
-                        className="text-muted-foreground"
-                      >
-                        Clear dates
-                      </Button>
-                    </div>
                   )}
                 </div>
+              </BuilderStepSection>
 
-                <p className="text-xs text-muted-foreground">
-                  {startDate && endDate 
-                    ? `Journey runs from ${format(startDate, "MMM d")} to ${format(endDate, "MMM d, yyyy")} (${journeyWeeks} weeks)`
-                    : "Typical journeys: 8-12 weeks (enrollment), 16 weeks (semester), 32+ weeks (year-long)"
-                  }
-                </p>
-              </div>
+              {/* Step 2: Audience & Context */}
+              <BuilderStepSection
+                stepNumber={2}
+                title="Define Your Audience"
+                description="Who are you communicating with and what's the situation?"
+                helpText="Select the primary audience type, their specific cohort characteristics, and the communication moment. These selections help the AI generate contextually appropriate touchpoints throughout the journey."
+                icon={<Users className="w-4 h-4" />}
+              >
+                <ContextSelector context={context} onChange={setContext} mode="mapper" />
+              </BuilderStepSection>
 
-              {/* Cadence & Escalation */}
-              <CadenceSelector
-                journeyWeeks={journeyWeeks}
-                onCadenceChange={setCadence}
-                onEscalationChange={setEscalation}
-                onEstimatedTouchpointsChange={setEstimatedTouchpoints}
-                initialCadence={cadence}
-                initialEscalation={escalation}
-              />
+              {/* Step 3: Channel Selection */}
+              <BuilderStepSection
+                stepNumber={3}
+                title="Choose Your Channels"
+                description="Select which channels to use throughout the journey"
+                helpText="The AI will strategically distribute touchpoints across your selected channels based on effectiveness and audience preferences."
+                icon={<Mail className="w-4 h-4" />}
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-end">
+                    <Button variant="ghost" size="sm" onClick={selectAllChannels}>
+                      Select All
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                    {channelOptions.map(channel => (
+                      <div key={channel.value} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`channel-${channel.value}`}
+                          checked={selectedChannels.includes(channel.value)}
+                          onCheckedChange={() => toggleChannel(channel.value)}
+                        />
+                        <label
+                          htmlFor={`channel-${channel.value}`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                        >
+                          {channel.label}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </BuilderStepSection>
 
-              {/* Build Diagram Toggle */}
-              <div className="flex items-center space-x-3 pt-2 border-t border-border">
-                <Checkbox
-                  id="build-diagram"
-                  checked={buildDiagram}
-                  onCheckedChange={(checked) => setBuildDiagram(checked as boolean)}
+              {/* Step 4: Journey Timeline */}
+              <BuilderStepSection
+                stepNumber={4}
+                title="Set Your Timeline"
+                description="Define the start date, end date, and duration of your journey"
+                helpText="Typical journeys are 8-12 weeks for enrollment campaigns, 16 weeks for semester-long, or 32+ weeks for year-long initiatives. The AI will distribute touchpoints appropriately."
+                icon={<Clock className="w-4 h-4" />}
+              >
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Start Date</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !startDate && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {startDate ? format(startDate, "MMM d, yyyy") : "Start date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={startDate}
+                            onSelect={handleStartDateChange}
+                            initialFocus
+                            className="p-3 pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">End Date (Due)</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !endDate && "text-muted-foreground"
+                            )}
+                          >
+                            <Target className="mr-2 h-4 w-4 text-destructive" />
+                            {endDate ? format(endDate, "MMM d, yyyy") : "Due date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={endDate}
+                            onSelect={handleEndDateChange}
+                            disabled={(date) => startDate ? date < startDate : false}
+                            initialFocus
+                            className="p-3 pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="journey-weeks" className="text-xs text-muted-foreground">Duration (weeks)</Label>
+                      <Input
+                        id="journey-weeks"
+                        type="number"
+                        min={4}
+                        max={52}
+                        value={journeyWeeks}
+                        onChange={(e) => handleWeeksChange(Number(e.target.value))}
+                        className="w-full"
+                      />
+                    </div>
+
+                    {(startDate || endDate) && (
+                      <div className="flex items-end">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => { setStartDate(undefined); setEndDate(undefined); }}
+                          className="text-muted-foreground"
+                        >
+                          Clear dates
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-muted-foreground">
+                    {startDate && endDate 
+                      ? `Journey runs from ${format(startDate, "MMM d")} to ${format(endDate, "MMM d, yyyy")} (${journeyWeeks} weeks)`
+                      : "Typical journeys: 8-12 weeks (enrollment), 16 weeks (semester), 32+ weeks (year-long)"
+                    }
+                  </p>
+                </div>
+              </BuilderStepSection>
+
+              {/* Step 5: Cadence & Escalation */}
+              <BuilderStepSection
+                stepNumber={5}
+                title="Configure Cadence & Escalation"
+                description="Set the frequency and intensity pattern of your touchpoints"
+                helpText="Cadence controls how often touchpoints occur. Escalation patterns adjust intensity over time - e.g., 'gradual increase' starts gently and builds urgency as deadlines approach."
+                icon={<Target className="w-4 h-4" />}
+              >
+                <CadenceSelector
+                  journeyWeeks={journeyWeeks}
+                  onCadenceChange={setCadence}
+                  onEscalationChange={setEscalation}
+                  onEstimatedTouchpointsChange={setEstimatedTouchpoints}
+                  initialCadence={cadence}
+                  initialEscalation={escalation}
                 />
-                <label
-                  htmlFor="build-diagram"
-                  className="text-sm font-medium leading-none cursor-pointer flex items-center gap-2"
-                >
-                  <Map className="w-4 h-4 text-pillar-consensus" />
-                  Build Interactive Diagram
-                </label>
-                <span className="text-xs text-muted-foreground">
-                  Generate a visual flow diagram of the journey
-                </span>
-              </div>
+              </BuilderStepSection>
 
-              {/* Additional Context */}
-              <div className="space-y-2 pt-2 border-t border-border">
-                <Label className="text-sm font-medium flex items-center gap-2">
-                  <BookMarked className="w-4 h-4 text-primary" />
-                  Additional Context (Optional)
-                </Label>
+              <BuilderStepDivider label="Optional Enhancements" />
+
+              {/* Step 6: Diagram Toggle */}
+              <BuilderStepSection
+                stepNumber={6}
+                title="Visual Journey Diagram"
+                description="Generate an interactive flow diagram of the journey"
+                helpText="The diagram provides a visual overview of your journey, showing how touchpoints connect and flow over time. Great for presentations and stakeholder reviews."
+                icon={<Map className="w-4 h-4" />}
+                optional
+              >
+                <div className="flex items-center space-x-3">
+                  <Checkbox
+                    id="build-diagram"
+                    checked={buildDiagram}
+                    onCheckedChange={(checked) => setBuildDiagram(checked as boolean)}
+                  />
+                  <label
+                    htmlFor="build-diagram"
+                    className="text-sm font-medium leading-none cursor-pointer"
+                  >
+                    Build Interactive Diagram
+                  </label>
+                </div>
+              </BuilderStepSection>
+
+              {/* Step 7: Additional Context */}
+              <BuilderStepSection
+                stepNumber={7}
+                title="Additional Context"
+                description="Provide campaign-specific details for more targeted messaging"
+                helpText="Add specific instructions, campaign themes, or refinement notes. Examples: 'Target late-registering students' or 'Emphasize career outcomes and ROI'."
+                icon={<FileText className="w-4 h-4" />}
+                optional
+              >
                 <textarea
                   value={context.additionalContext || ''}
                   onChange={(e) => setContext({ ...context, additionalContext: e.target.value })}
-                  placeholder="Add campaign context to tailor your journey. Examples: 'Target late-registering students' or 'Emphasize career outcomes and ROI' or 'Address common objections about program cost'"
+                  placeholder="Add campaign context to tailor your journey..."
                   className="w-full min-h-[80px] px-3 py-2 text-sm rounded-md border border-input bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-y"
                 />
-                <p className="text-xs text-muted-foreground">
-                  Provide campaign-specific details to make your journey more relevant and targeted.
-                </p>
-              </div>
+              </BuilderStepSection>
 
               <div className="flex justify-end gap-2">
                 {mapperResult && (
