@@ -15,6 +15,8 @@ import { BrandLayerSelector, BrandLayerActiveBadge, BrandLayerSelection } from "
 import { CadenceSelector, CadenceFrequency, EscalationPattern } from "@/components/CadenceSelector";
 import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
 import { BuilderStepSection, BuilderStepDivider } from "@/components/BuilderStepSection";
+import { WaveBackground } from "@/components/WaveBackground";
+import { SelectionSummary } from "@/components/SelectionSummary";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -651,10 +653,15 @@ const StrategyPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-5xl mx-auto space-y-6">
+      {/* Page Header with wave background */}
+      <div className="relative overflow-hidden border-b border-border/50">
+        <WaveBackground />
+        <div className="absolute inset-0 bg-zone-hero opacity-50" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_hsl(45_93%_47%_/_0.06),_transparent_50%)]" />
+        
+        <div className="relative container mx-auto px-4 py-6 max-w-5xl">
           {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
             <Link to="/dashboard" className="hover:text-foreground transition-colors flex items-center gap-1">
               <ArrowLeft className="w-4 h-4" />
               Home
@@ -667,7 +674,9 @@ const StrategyPage = () => {
           <div className="flex items-start justify-between">
             <div>
               <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
-                <Map className="w-7 h-7 text-pillar-consensus" />
+                <div className="icon-container icon-container-lg bg-pillar-consensus/10">
+                  <Map className="w-6 h-6 text-pillar-consensus" />
+                </div>
                 Journey Designer
                 {editMode !== 'new' && (
                   <Badge variant={editMode === 'edit' ? 'default' : 'secondary'} className="ml-2 text-xs">
@@ -675,18 +684,22 @@ const StrategyPage = () => {
                   </Badge>
                 )}
               </h1>
-              <p className="text-muted-foreground mt-1">
+              <p className="text-muted-foreground mt-1 ml-14">
                 {editMode === 'edit' 
                   ? "Make changes to your journey and save to update the original"
                   : editMode === 'remix'
                     ? "Customize this journey and save as a new copy"
-                    : "Design detailed week-by-week communication journeys with behavioral nudges and channel recommendations"
+                    : "Design detailed week-by-week communication journeys"
                 }
               </p>
             </div>
             <AIBadge />
           </div>
-
+        </div>
+      </div>
+      
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-5xl mx-auto space-y-6">
           {/* Library Navigation */}
           <LibraryNav mode="journeys" />
 
@@ -946,30 +959,45 @@ const StrategyPage = () => {
                 />
               </BuilderStepSection>
 
-              <div className="flex justify-end gap-2">
-                {mapperResult && (
-                  <Button variant="outline" onClick={handleReset}>
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    New Strategy
-                  </Button>
-                )}
-                <Button 
-                  onClick={handleGenerateStrategy}
-                  disabled={!canProcess || isProcessing}
-                  size="lg"
-                >
-                  {isProcessing ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2" />
-                      Generating Journey...
-                    </>
-                  ) : (
-                    <>
-                      Create Strategy Journey
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </>
+              {/* Selection Summary + Actions */}
+              <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-end">
+                <div className="flex-1">
+                  <SelectionSummary
+                    selectedProfileName={selectedProfileName}
+                    audience={context.audience}
+                    cohort={context.cohort}
+                    moment={context.moment}
+                    channels={selectedChannels}
+                    useContentDNA={useContentDNA}
+                    journeyWeeks={journeyWeeks}
+                  />
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  {mapperResult && (
+                    <Button variant="outline" onClick={handleReset}>
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      New Strategy
+                    </Button>
                   )}
-                </Button>
+                  <Button 
+                    onClick={handleGenerateStrategy}
+                    disabled={!canProcess || isProcessing}
+                    size="lg"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2" />
+                        Generating Journey...
+                      </>
+                    ) : (
+                      <>
+                        Create Strategy Journey
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
