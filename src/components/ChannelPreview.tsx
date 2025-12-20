@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SmsCharCounter } from "@/components/ui/sms-char-counter";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Copy, 
   Check, 
@@ -21,7 +22,8 @@ import {
   Search,
   Megaphone,
   Mic,
-  Target
+  Target,
+  Cloud
 } from "lucide-react";
 import type { 
   ChannelDrafts, 
@@ -72,6 +74,7 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState<ChannelDrafts[keyof ChannelDrafts]>(content);
+  const { toast } = useToast();
 
   // Sync editedContent with parent content when it changes
   useEffect(() => {
@@ -82,6 +85,150 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     onCopy(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Get SFMC content type based on channel
+  const getSfmcContentType = (): string => {
+    switch (channel) {
+      case 'email': return 'email';
+      case 'sms': return 'sms';
+      case 'landing-page': return 'landingPage';
+      case 'phone-call': return 'script';
+      case 'digital-ad-search': return 'searchAd';
+      case 'digital-ad-social': return 'socialAd';
+      case 'talking-points': return 'talkingPoints';
+      default: return 'content';
+    }
+  };
+
+  // Build channel-specific SFMC content structure
+  const buildSfmcContent = () => {
+    const baseContent = {
+      name: `${channelLabels[channel]} - ${new Date().toLocaleDateString()}`,
+      channel: channel,
+      contentType: getSfmcContentType(),
+      createdAt: new Date().toISOString(),
+      mergeFields: ["%%FirstName%%", "%%StudentType%%", "%%DeadlineDate%%", "%%InstitutionName%%"],
+    };
+
+    if (channel === 'email') {
+      const email = editedContent as EmailDraft;
+      return {
+        ...baseContent,
+        subject: email.subject,
+        preheader: email.subject.substring(0, 100),
+        body: email.body,
+        ampscriptReady: true,
+      };
+    }
+
+    if (channel === 'sms') {
+      const text = editedContent as string;
+      return {
+        ...baseContent,
+        message: text,
+        characterCount: text.length,
+        segmentCount: Math.ceil(text.length / 160),
+        complianceNote: "Ensure opt-out language is included",
+      };
+    }
+
+    if (channel === 'landing-page') {
+      const lp = editedContent as LandingPageDraft;
+      return {
+        ...baseContent,
+        headline: lp.headline,
+        subheadline: lp.subheadline,
+        body: lp.body,
+        cta: lp.cta,
+      };
+    }
+
+    if (channel === 'phone-call') {
+      const script = editedContent as CallScriptDraft;
+      return {
+        ...baseContent,
+        opening: script.opening,
+        purpose: script.purpose,
+        talkingPoints: script.talkingPoints,
+        objectionHandlers: script.objectionHandlers,
+        closing: script.closing,
+        voicemail: script.voicemail,
+      };
+    }
+
+    if (channel === 'digital-ad-search') {
+      const ad = editedContent as SearchAdDraft;
+      return {
+        ...baseContent,
+        headlines: ad.headlines,
+        descriptions: ad.descriptions,
+        displayUrl: ad.displayUrl,
+        headlineCharLimits: ad.headlines?.map(h => ({ text: h, length: h.length, maxLength: 30 })),
+        descriptionCharLimits: ad.descriptions?.map(d => ({ text: d, length: d.length, maxLength: 90 })),
+      };
+    }
+
+    if (channel === 'digital-ad-social') {
+      const ad = editedContent as SocialAdDraft;
+      return {
+        ...baseContent,
+        primaryText: ad.primaryText,
+        headline: ad.headline,
+        description: ad.description,
+        ctaButton: ad.ctaButton,
+      };
+    }
+
+    if (channel === 'talking-points') {
+      const tp = editedContent as TalkingPointsDraft;
+      return {
+        ...baseContent,
+        context: tp.context,
+        audience: tp.audience,
+        openingHook: tp.openingHook,
+        keyMessages: tp.keyMessages,
+        supportingData: tp.supportingData,
+        anticipatedQuestions: tp.anticipatedQuestions,
+        suggestedResponses: tp.suggestedResponses,
+        transitionPhrases: tp.transitionPhrases,
+        closingStatement: tp.closingStatement,
+      };
+    }
+
+    // Default for simple text channels
+    return {
+      ...baseContent,
+      content: editedContent as string,
+    };
+  };
+
+  const handleExportToSalesforce = () => {
+    const sfmcContent = {
+      contentBlock: buildSfmcContent(),
+      exportedFrom: "uPlaybook",
+      exportedAt: new Date().toISOString(),
+      importInstructions: {
+        platform: "Salesforce Marketing Cloud",
+        destination: "Content Builder",
+        notes: "Import as HTML content block or paste into CloudPages/Email template",
+      },
+    };
+
+    const blob = new Blob([JSON.stringify(sfmcContent, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${channel}-sfmc-export-${Date.now()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Exported for Salesforce",
+      description: "Content exported for Marketing Cloud import",
+    });
   };
 
   const handleStartEdit = () => {
@@ -873,6 +1020,14 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
                     <FolderPlus className="w-4 h-4" />
                   </Button>
                 )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleExportToSalesforce}
+                  title="Export for Salesforce Marketing Cloud"
+                >
+                  <Cloud className="w-4 h-4 text-blue-500" />
+                </Button>
                 <Button
                   variant="ghost"
                   size="sm"
