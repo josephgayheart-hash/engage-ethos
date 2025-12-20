@@ -8,6 +8,8 @@ import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileS
 import { ChannelPreview } from "@/components/ChannelPreview";
 import { ContentDNAIndicator, ContentDNAActiveBadge } from "@/components/ContentDNAIndicator";
 import { BuilderStepSection, BuilderStepDivider } from "@/components/BuilderStepSection";
+import { WaveBackground } from "@/components/WaveBackground";
+import { SelectionSummary } from "@/components/SelectionSummary";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -457,9 +459,10 @@ const BuildPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      {/* Page Header with subtle background */}
+      {/* Page Header with wave background */}
       <div className="relative overflow-hidden border-b border-border/50">
-        <div className="absolute inset-0 bg-zone-hero opacity-70" />
+        <WaveBackground />
+        <div className="absolute inset-0 bg-zone-hero opacity-50" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(173_58%_39%_/_0.08),_transparent_50%)]" />
         
         <div className="relative container mx-auto px-4 py-6 max-w-7xl">
@@ -708,18 +711,30 @@ const BuildPage = () => {
                 />
               </BuilderStepSection>
 
-              <div className="flex items-center justify-between">
-                <Button
-                  variant={autoSave ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setAutoSave(!autoSave)}
-                  className="flex items-center gap-2"
-                >
-                  <Save className="w-4 h-4" />
-                  Auto-save {autoSave ? 'On' : 'Off'}
-                </Button>
+              {/* Selection Summary + Actions */}
+              <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-end">
+                <div className="flex-1">
+                  <SelectionSummary
+                    selectedProfileName={selectedProfileName}
+                    audience={context.audience}
+                    cohort={context.cohort}
+                    moment={context.moment}
+                    channels={selectedChannels}
+                    useContentDNA={useContentDNA}
+                  />
+                </div>
                 
-                <div className="flex gap-2">
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant={autoSave ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setAutoSave(!autoSave)}
+                    className="flex items-center gap-2"
+                  >
+                    <Save className="w-4 h-4" />
+                    Auto-save {autoSave ? 'On' : 'Off'}
+                  </Button>
+                  
                   {builderResult && (
                     <Button variant="outline" onClick={handleReset}>
                       <RefreshCw className="w-4 h-4 mr-2" />
