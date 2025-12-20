@@ -187,7 +187,7 @@ const handler = async (req: Request): Promise<Response> => {
           <p>We're thrilled to have you as part of our beta community! Your feedback is incredibly valuable to us.</p>
           <p>Please share your thoughts and help us build the best product possible.</p>
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${appUrl}" style="background: #4F46E5; color: white; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: 600;">Share Your Feedback</a>
+            <a href="${appUrl}/feedback" style="background: #4F46E5; color: white; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: 600;">Share Your Feedback</a>
           </div>
           <p>Thank you,<br>The UPlaybook.AI Team</p>
         </div>`;

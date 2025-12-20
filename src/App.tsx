@@ -44,6 +44,7 @@ import ApprovalsPage from "./pages/ApprovalsPage";
 import InitialSetupPage from "./pages/InitialSetupPage";
 import MessageDetailPage from "./pages/MessageDetailPage";
 import TemplateDetailPage from "./pages/TemplateDetailPage";
+import BetaFeedbackPage from "./pages/BetaFeedbackPage";
 
 const queryClient = new QueryClient();
 
@@ -158,6 +159,7 @@ const AppRoutes = () => (
     <Route path="/" element={<LandingPage />} />
     <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
     <Route path="/request-access" element={<RequestAccessPage />} />
+    <Route path="/feedback" element={<RequireAuth><BetaFeedbackPage /></RequireAuth>} />
     <Route path="/change-password" element={<ChangePasswordPage />} />
     <Route path="/setup" element={<InitialSetupPage />} />
     
