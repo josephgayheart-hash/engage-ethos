@@ -209,7 +209,7 @@ const BYOCPage = () => {
               Bring Your Own Comm
             </h1>
             <p className="text-muted-foreground mt-1">
-              Import your approved communications to share with the university library
+              Import your approved communications to add to my library or the university library
             </p>
           </div>
         </div>
