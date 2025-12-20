@@ -82,7 +82,7 @@ export default function LandingPage() {
             <div className="animate-fade-in">
               <Badge 
                 variant="secondary" 
-                className="bg-[hsl(270_70%_60%_/_0.15)] text-[hsl(82_85%_55%)] border-[hsl(270_70%_60%_/_0.4)] px-4 py-1.5 text-sm font-semibold shadow-[0_0_20px_hsl(82_85%_55%_/_0.2)]"
+                className="bg-[hsl(200_100%_50%_/_0.15)] text-[hsl(200_100%_50%)] border-[hsl(200_100%_50%_/_0.3)] px-4 py-1.5 text-sm font-semibold"
               >
                 <Sparkles className="w-3.5 h-3.5 mr-1.5" />
                 Beta Access
@@ -184,12 +184,16 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* Value Proposition Section */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-background">
-        <div className="max-w-5xl mx-auto">
+      {/* Value Proposition Section - Fun Yellow Background */}
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(48_100%_90%)] relative overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute top-10 right-10 w-20 h-20 bg-[hsl(270_70%_60%_/_0.2)] rounded-full blur-xl" />
+        <div className="absolute bottom-10 left-20 w-32 h-32 bg-[hsl(82_85%_55%_/_0.15)] rounded-full blur-xl" />
+        
+        <div className="max-w-5xl mx-auto relative z-10">
           <div className="text-center mb-12">
             <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-3">
-              Stop Reacting. Start Planning.
+              <span className="text-[hsl(270_70%_55%)]">Stop Reacting.</span> Start Planning.
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Most institutional communications are written on instinct. UPlaybook gives you 
@@ -198,29 +202,42 @@ export default function LandingPage() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {valueProps.map((prop, index) => (
-              <div key={prop.title} className="text-center">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle2 className="w-5 h-5 text-primary" />
+            {valueProps.map((prop, index) => {
+              const colors = [
+                { bg: 'bg-[hsl(82_85%_55%_/_0.2)]', icon: 'text-[hsl(82_70%_40%)]' },
+                { bg: 'bg-[hsl(270_70%_60%_/_0.2)]', icon: 'text-[hsl(270_70%_55%)]' },
+                { bg: 'bg-[hsl(200_100%_50%_/_0.2)]', icon: 'text-[hsl(200_100%_45%)]' },
+                { bg: 'bg-[hsl(340_75%_55%_/_0.2)]', icon: 'text-[hsl(340_75%_50%)]' },
+              ];
+              const color = colors[index % 4];
+              return (
+                <div key={prop.title} className="text-center">
+                  <div className={`w-12 h-12 rounded-2xl ${color.bg} flex items-center justify-center mx-auto mb-4 rotate-3 hover:rotate-0 transition-transform`}>
+                    <CheckCircle2 className={`w-6 h-6 ${color.icon}`} />
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2">{prop.title}</h3>
+                  <p className="text-sm text-muted-foreground">{prop.description}</p>
                 </div>
-                <h3 className="font-semibold text-foreground mb-2">{prop.title}</h3>
-                <p className="text-sm text-muted-foreground">{prop.description}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
-        <div className="max-w-6xl mx-auto">
+      {/* Features Section - Fresh Mint Background */}
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(173_40%_92%)] relative overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute top-0 left-1/4 w-40 h-40 bg-[hsl(200_100%_50%_/_0.1)] rounded-full blur-2xl" />
+        <div className="absolute bottom-0 right-1/4 w-60 h-60 bg-[hsl(270_70%_60%_/_0.1)] rounded-full blur-2xl" />
+        
+        <div className="max-w-6xl mx-auto relative z-10">
           <div className="text-center mb-12">
-            <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
+            <Badge className="mb-4 bg-[hsl(82_85%_55%_/_0.2)] text-[hsl(82_70%_35%)] border-[hsl(82_85%_55%_/_0.4)]">
               <Zap className="w-3 h-3 mr-1" />
               Core Capabilities
             </Badge>
             <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-3">
-              Powered by Persuasion Science
+              Powered by <span className="text-[hsl(200_100%_45%)]">Persuasion Science</span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Every feature is designed around how people actually make decisions.
@@ -228,47 +245,60 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, index) => (
-              <div 
-                key={feature.title}
-                className="group bg-card border rounded-xl p-6 hover:border-primary/50 hover:shadow-lg transition-all duration-300"
-              >
-                <div className="p-3 rounded-lg bg-primary/10 w-fit mb-4 group-hover:bg-primary/20 transition-colors">
-                  <feature.icon className="w-6 h-6 text-primary" />
+            {features.map((feature, index) => {
+              const cardColors = [
+                { bg: 'bg-white', border: 'border-[hsl(82_85%_55%_/_0.4)]', iconBg: 'bg-[hsl(82_85%_55%_/_0.2)]', iconColor: 'text-[hsl(82_70%_35%)]', hoverBorder: 'hover:border-[hsl(82_85%_55%)]' },
+                { bg: 'bg-white', border: 'border-[hsl(270_70%_60%_/_0.4)]', iconBg: 'bg-[hsl(270_70%_60%_/_0.2)]', iconColor: 'text-[hsl(270_70%_50%)]', hoverBorder: 'hover:border-[hsl(270_70%_60%)]' },
+                { bg: 'bg-white', border: 'border-[hsl(200_100%_50%_/_0.4)]', iconBg: 'bg-[hsl(200_100%_50%_/_0.2)]', iconColor: 'text-[hsl(200_100%_40%)]', hoverBorder: 'hover:border-[hsl(200_100%_50%)]' },
+                { bg: 'bg-white', border: 'border-[hsl(340_75%_55%_/_0.4)]', iconBg: 'bg-[hsl(340_75%_55%_/_0.2)]', iconColor: 'text-[hsl(340_75%_45%)]', hoverBorder: 'hover:border-[hsl(340_75%_55%)]' },
+              ];
+              const colors = cardColors[index % 4];
+              return (
+                <div 
+                  key={feature.title}
+                  className={`group ${colors.bg} ${colors.border} border-2 rounded-2xl p-6 ${colors.hoverBorder} hover:shadow-xl hover:-translate-y-1 transition-all duration-300`}
+                >
+                  <div className={`p-3 rounded-xl ${colors.iconBg} w-fit mb-4 group-hover:scale-110 transition-transform`}>
+                    <feature.icon className={`w-6 h-6 ${colors.iconColor}`} />
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    {feature.description}
+                  </p>
                 </div>
-                <h3 className="font-semibold text-foreground mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* Secondary CTA Section - Navy Blue */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary via-[hsl(222_47%_18%)] to-[hsl(200_50%_20%)] relative overflow-hidden">
-        {/* AI-inspired decorative elements */}
+      {/* Secondary CTA Section - Vibrant Purple */}
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(270_60%_50%)] relative overflow-hidden">
+        {/* Fun decorative elements */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-[hsl(200_60%_50%_/_0.1)] rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[hsl(220_50%_40%_/_0.1)] rounded-full blur-3xl" />
+          <div className="absolute top-10 right-20 w-32 h-32 bg-[hsl(82_85%_55%_/_0.3)] rounded-full blur-2xl" />
+          <div className="absolute bottom-10 left-10 w-40 h-40 bg-[hsl(200_100%_50%_/_0.2)] rounded-full blur-2xl" />
+          <div className="absolute top-1/2 right-1/4 w-24 h-24 bg-[hsl(340_75%_55%_/_0.2)] rounded-full blur-xl" />
+          {/* Decorative shapes */}
+          <div className="absolute top-20 left-20 w-4 h-4 bg-[hsl(82_85%_55%)] rounded-full opacity-60" />
+          <div className="absolute bottom-32 right-32 w-3 h-3 bg-[hsl(200_100%_60%)] rounded-full opacity-60" />
+          <div className="absolute top-1/3 right-10 w-5 h-5 bg-white/30 rounded-full" />
         </div>
         
         <div className="max-w-3xl mx-auto text-center relative z-10">
           <h2 className="font-serif text-2xl sm:text-3xl text-white mb-4">
-            Ready to become your institution's digital brand enforcer?
+            Ready to become your institution's <span className="text-[hsl(82_85%_65%)]">digital brand enforcer</span>?
           </h2>
-          <p className="text-white/70 mb-8 text-lg">
+          <p className="text-white/80 mb-8 text-lg">
             Small comms teams. Big brand protection. AI that keeps everyone on-brand while still allowing human edits.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               asChild
               size="lg"
-              className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] shadow-[0_0_30px_hsl(82_85%_55%_/_0.4)] hover:shadow-[0_0_40px_hsl(82_85%_55%_/_0.6)] px-8 font-bold transition-all duration-300"
+              className="bg-[hsl(82_85%_55%)] text-primary hover:bg-[hsl(82_85%_50%)] shadow-xl hover:shadow-2xl hover:scale-105 px-8 font-bold transition-all duration-300 rounded-full"
             >
               <Link to="/request-access">
                 Request Beta Access
@@ -278,7 +308,7 @@ export default function LandingPage() {
               asChild
               variant="ghost"
               size="lg"
-              className="text-white/80 hover:text-white hover:bg-white/10"
+              className="text-white hover:text-white hover:bg-white/20 rounded-full border-2 border-white/30"
             >
               <Link to="/login">
                 Already have an account? Sign in
@@ -288,20 +318,20 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-8 px-4 sm:px-6 lg:px-8 border-t border-border">
+      {/* Footer - Playful but professional */}
+      <footer className="py-10 px-4 sm:px-6 lg:px-8 bg-primary">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <img 
               src={uplaybookLogo} 
               alt="UPlaybook.AI" 
-              className="h-6 w-auto max-w-[140px] opacity-70"
+              className="h-7 w-auto max-w-[140px] brightness-0 invert opacity-90"
             />
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-primary-foreground/70">
               © 2025 UPlaybook.AI
             </span>
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-primary-foreground/60">
             Research-grounded messaging intelligence for higher education.
           </p>
         </div>
