@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -22,9 +22,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Mail, Send, UserPlus, HelpCircle, Clock } from "lucide-react";
+import { Loader2, Mail, Send, UserPlus, HelpCircle, Clock, Filter, Users, CheckSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Tenant {
   id: string;
@@ -51,6 +51,7 @@ interface SendEmailDialogProps {
 }
 
 type EmailType = 'invite' | 'resend_invite' | 'where_have_you_been' | 'custom';
+type RetentionFilter = 'all' | 'never_logged_in' | 'inactive_30_days' | 'inactive_90_days' | 'referred_never_logged';
 
 export function SendEmailDialog({
   open,
@@ -64,8 +65,9 @@ export function SendEmailDialog({
   
   const [emailType, setEmailType] = useState<EmailType>('invite');
   const [selectedTenant, setSelectedTenant] = useState<string>('');
-  const [selectedUser, setSelectedUser] = useState<string>('');
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [isSending, setIsSending] = useState(false);
+  const [retentionFilter, setRetentionFilter] = useState<RetentionFilter>('all');
   
   // For invite emails
   const [inviteEmail, setInviteEmail] = useState('');
@@ -77,12 +79,42 @@ export function SendEmailDialog({
   const [customSubject, setCustomSubject] = useState('');
   const [customBody, setCustomBody] = useState('');
 
-  const filteredUsers = selectedTenant 
-    ? users.filter(u => u.tenant_id === selectedTenant)
-    : users;
+  // Apply retention filters
+  const filteredUsers = useMemo(() => {
+    let filtered = selectedTenant 
+      ? users.filter(u => u.tenant_id === selectedTenant)
+      : users;
+    
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+    
+    switch (retentionFilter) {
+      case 'never_logged_in':
+        filtered = filtered.filter(u => !u.last_login_at);
+        break;
+      case 'inactive_30_days':
+        filtered = filtered.filter(u => {
+          if (!u.last_login_at) return true;
+          return new Date(u.last_login_at) < thirtyDaysAgo;
+        });
+        break;
+      case 'inactive_90_days':
+        filtered = filtered.filter(u => {
+          if (!u.last_login_at) return true;
+          return new Date(u.last_login_at) < ninetyDaysAgo;
+        });
+        break;
+      case 'referred_never_logged':
+        filtered = filtered.filter(u => !u.last_login_at && u.status === 'invited');
+        break;
+    }
+    
+    return filtered;
+  }, [users, selectedTenant, retentionFilter]);
 
   const selectedTenantName = tenants.find(t => t.id === selectedTenant)?.institution_name || '';
-  const selectedUserData = users.find(u => u.id === selectedUser);
+  const selectedUserData = selectedUsers.length === 1 ? users.find(u => u.id === selectedUsers[0]) : null;
 
   const formatLastLogin = (date: string | null | undefined) => {
     if (!date) return 'Never logged in';
@@ -98,10 +130,27 @@ export function SendEmailDialog({
     return d.toLocaleDateString();
   };
 
+  const handleSelectAll = () => {
+    if (selectedUsers.length === filteredUsers.length) {
+      setSelectedUsers([]);
+    } else {
+      setSelectedUsers(filteredUsers.map(u => u.id));
+    }
+  };
+
+  const toggleUserSelection = (userId: string) => {
+    setSelectedUsers(prev => 
+      prev.includes(userId) 
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
   const resetForm = () => {
     setEmailType('invite');
     setSelectedTenant('');
-    setSelectedUser('');
+    setSelectedUsers([]);
+    setRetentionFilter('all');
     setInviteEmail('');
     setInviteFirstName('');
     setInviteLastName('');
@@ -181,10 +230,10 @@ export function SendEmailDialog({
   };
 
   const handleResendInvite = async () => {
-    if (!selectedUser) {
+    if (selectedUsers.length === 0) {
       toast({
-        title: "Select a User",
-        description: "Please select a user to resend the invite to",
+        title: "Select Users",
+        description: "Please select at least one user to resend the invite to",
         variant: "destructive"
       });
       return;
@@ -192,15 +241,18 @@ export function SendEmailDialog({
 
     setIsSending(true);
     try {
-      const { error } = await supabase.functions.invoke('resend-invite', {
-        body: { userId: selectedUser }
-      });
-
-      if (error) throw error;
+      let successCount = 0;
+      for (const userId of selectedUsers) {
+        const userData = users.find(u => u.id === userId);
+        const { error } = await supabase.functions.invoke('resend-invite', {
+          body: { userId }
+        });
+        if (!error) successCount++;
+      }
 
       toast({
-        title: "Invite Resent",
-        description: `Invitation resent to ${selectedUserData?.email}`
+        title: "Invites Resent",
+        description: `Successfully resent ${successCount} of ${selectedUsers.length} invitations`
       });
       
       resetForm();
@@ -219,10 +271,10 @@ export function SendEmailDialog({
   };
 
   const handleSendWhereHaveYouBeen = async () => {
-    if (!selectedUser) {
+    if (selectedUsers.length === 0) {
       toast({
-        title: "Select a User",
-        description: "Please select a user to send the re-engagement email to",
+        title: "Select Users",
+        description: "Please select at least one user to send the re-engagement email to",
         variant: "destructive"
       });
       return;
@@ -230,36 +282,43 @@ export function SendEmailDialog({
 
     setIsSending(true);
     try {
-      const { error } = await supabase.functions.invoke('send-reengagement-email', {
-        body: {
-          userId: selectedUser,
-          email: selectedUserData?.email,
-          firstName: selectedUserData?.first_name,
-          lastName: selectedUserData?.last_name,
-          institutionName: selectedUserData?.institution_name,
-          lastLoginAt: selectedUserData?.last_login_at
+      let successCount = 0;
+      for (const userId of selectedUsers) {
+        const userData = users.find(u => u.id === userId);
+        if (!userData) continue;
+
+        const { error } = await supabase.functions.invoke('send-reengagement-email', {
+          body: {
+            userId,
+            email: userData.email,
+            firstName: userData.first_name,
+            lastName: userData.last_name,
+            institutionName: userData.institution_name,
+            lastLoginAt: userData.last_login_at
+          }
+        });
+
+        if (!error) {
+          successCount++;
+          // Log the email with full details
+          await supabase.from('email_nudges').insert({
+            tenant_id: userData.tenant_id || '',
+            user_id: userId,
+            nudge_type: 'where_have_you_been',
+            email_count: 1,
+            recipient_email: userData.email,
+            recipient_name: `${userData.first_name} ${userData.last_name}`,
+            subject: `We haven't seen you in a while, ${userData.first_name}! 🤔`,
+            email_type: 'reengagement',
+            status: 'sent',
+            metadata: { institution: userData.institution_name, last_login: userData.last_login_at }
+          });
         }
-      });
-
-      if (error) throw error;
-
-      // Log the email with full details
-      await supabase.from('email_nudges').insert({
-        tenant_id: selectedUserData?.tenant_id || '',
-        user_id: selectedUser,
-        nudge_type: 'where_have_you_been',
-        email_count: 1,
-        recipient_email: selectedUserData?.email,
-        recipient_name: `${selectedUserData?.first_name} ${selectedUserData?.last_name}`,
-        subject: `We haven't seen you in a while, ${selectedUserData?.first_name}! 🤔`,
-        email_type: 'reengagement',
-        status: 'sent',
-        metadata: { institution: selectedUserData?.institution_name, last_login: selectedUserData?.last_login_at }
-      });
+      }
 
       toast({
-        title: "Re-engagement Email Sent",
-        description: `Email sent to ${selectedUserData?.email}`
+        title: "Re-engagement Emails Sent",
+        description: `Successfully sent ${successCount} of ${selectedUsers.length} emails`
       });
       
       resetForm();
@@ -278,10 +337,10 @@ export function SendEmailDialog({
   };
 
   const handleSendCustomEmail = async () => {
-    if (!selectedUser || !customSubject || !customBody) {
+    if (selectedUsers.length === 0 || !customSubject || !customBody) {
       toast({
         title: "Missing Information",
-        description: "Please fill in all required fields",
+        description: "Please select users and fill in all required fields",
         variant: "destructive"
       });
       return;
@@ -289,40 +348,46 @@ export function SendEmailDialog({
 
     setIsSending(true);
     try {
-      // Call the engagement email function for custom emails
-      const { error } = await supabase.functions.invoke('send-engagement-emails', {
-        body: {
-          singleUser: {
-            id: selectedUser,
-            email: selectedUserData?.email,
-            firstName: selectedUserData?.first_name,
-            lastName: selectedUserData?.last_name,
-            institutionName: selectedUserData?.institution_name
-          },
-          customSubject,
-          customBody
+      let successCount = 0;
+      for (const userId of selectedUsers) {
+        const userData = users.find(u => u.id === userId);
+        if (!userData) continue;
+
+        const { error } = await supabase.functions.invoke('send-engagement-emails', {
+          body: {
+            singleUser: {
+              id: userId,
+              email: userData.email,
+              firstName: userData.first_name,
+              lastName: userData.last_name,
+              institutionName: userData.institution_name
+            },
+            customSubject,
+            customBody
+          }
+        });
+
+        if (!error) {
+          successCount++;
+          // Log the email with full details
+          await supabase.from('email_nudges').insert({
+            tenant_id: userData.tenant_id || '',
+            user_id: userId,
+            nudge_type: 'admin_custom',
+            email_count: 1,
+            recipient_email: userData.email,
+            recipient_name: `${userData.first_name} ${userData.last_name}`,
+            subject: customSubject,
+            email_type: 'custom',
+            status: 'sent',
+            metadata: { body_preview: customBody.substring(0, 100), institution: userData.institution_name }
+          });
         }
-      });
-
-      if (error) throw error;
-
-      // Log the email with full details
-      await supabase.from('email_nudges').insert({
-        tenant_id: selectedUserData?.tenant_id || '',
-        user_id: selectedUser,
-        nudge_type: 'admin_custom',
-        email_count: 1,
-        recipient_email: selectedUserData?.email,
-        recipient_name: `${selectedUserData?.first_name} ${selectedUserData?.last_name}`,
-        subject: customSubject,
-        email_type: 'custom',
-        status: 'sent',
-        metadata: { body_preview: customBody.substring(0, 100), institution: selectedUserData?.institution_name }
-      });
+      }
 
       toast({
-        title: "Email Sent",
-        description: `Custom email sent to ${selectedUserData?.email}`
+        title: "Emails Sent",
+        description: `Successfully sent ${successCount} of ${selectedUsers.length} custom emails`
       });
       
       resetForm();
@@ -621,37 +686,96 @@ export function SendEmailDialog({
                 </>
               )}
 
-              {/* User Selector for Resend/Where Have You Been/Custom */}
+              {/* User Selector with Filters for Resend/Where Have You Been/Custom */}
               {(emailType === 'resend_invite' || emailType === 'where_have_you_been' || emailType === 'custom') && (
-                <div className="space-y-2">
-                  <Label>Select User</Label>
-                  <Select value={selectedUser} onValueChange={setSelectedUser}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select user..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(emailType === 'custom' ? users : filteredUsers).map(u => (
-                        <SelectItem key={u.id} value={u.id}>
-                          <div className="flex items-center gap-2">
-                            <span>{u.first_name} {u.last_name}</span>
-                            <span className="text-muted-foreground text-xs">({u.email})</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {selectedUserData && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      <Badge variant="outline">{selectedUserData.email}</Badge>
-                      <Badge variant="secondary">{selectedUserData.institution_name}</Badge>
-                      <Badge variant="outline" className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {formatLastLogin(selectedUserData.last_login_at)}
-                      </Badge>
-                      {selectedUserData.status && (
-                        <Badge variant={selectedUserData.status === 'active' ? 'default' : 'secondary'}>
-                          {selectedUserData.status}
-                        </Badge>
+                <div className="space-y-3">
+                  {/* Retention Filter */}
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <Filter className="w-4 h-4" />
+                      Filter Users (Retention)
+                    </Label>
+                    <Select value={retentionFilter} onValueChange={(v) => { setRetentionFilter(v as RetentionFilter); setSelectedUsers([]); }}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Users</SelectItem>
+                        <SelectItem value="never_logged_in">Never Logged In</SelectItem>
+                        <SelectItem value="inactive_30_days">Inactive 30+ Days</SelectItem>
+                        <SelectItem value="inactive_90_days">Inactive 90+ Days</SelectItem>
+                        <SelectItem value="referred_never_logged">Invited but Never Logged In</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* User List with Checkboxes */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label className="flex items-center gap-2">
+                        <Users className="w-4 h-4" />
+                        Select Users ({selectedUsers.length} of {filteredUsers.length})
+                      </Label>
+                      {filteredUsers.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleSelectAll}
+                          className="text-xs h-7"
+                        >
+                          <CheckSquare className="w-3 h-3 mr-1" />
+                          {selectedUsers.length === filteredUsers.length ? 'Deselect All' : 'Select All'}
+                        </Button>
+                      )}
+                    </div>
+                    
+                    <ScrollArea className="h-[180px] border rounded-md p-2">
+                      {filteredUsers.length === 0 ? (
+                        <p className="text-sm text-muted-foreground text-center py-4">
+                          No users match this filter
+                        </p>
+                      ) : (
+                        <div className="space-y-1">
+                          {filteredUsers.map(u => (
+                            <div
+                              key={u.id}
+                              className={`flex items-center gap-2 p-2 rounded-md hover:bg-muted cursor-pointer ${
+                                selectedUsers.includes(u.id) ? 'bg-muted' : ''
+                              }`}
+                              onClick={() => toggleUserSelection(u.id)}
+                            >
+                              <Checkbox
+                                checked={selectedUsers.includes(u.id)}
+                                onCheckedChange={() => toggleUserSelection(u.id)}
+                              />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">
+                                  {u.first_name} {u.last_name}
+                                </p>
+                                <p className="text-xs text-muted-foreground truncate">{u.email}</p>
+                              </div>
+                              <Badge variant="outline" className="text-[10px] shrink-0">
+                                {formatLastLogin(u.last_login_at)}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </ScrollArea>
+                  </div>
+
+                  {/* Selected Users Summary */}
+                  {selectedUsers.length > 0 && (
+                    <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+                      {selectedUsers.length === 1 && selectedUserData ? (
+                        <span>
+                          Sending to: <strong>{selectedUserData.first_name} {selectedUserData.last_name}</strong> ({selectedUserData.email})
+                        </span>
+                      ) : (
+                        <span>
+                          Sending to <strong>{selectedUsers.length} users</strong> from the filtered list
+                        </span>
                       )}
                     </div>
                   )}
