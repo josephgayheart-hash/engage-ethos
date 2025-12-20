@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.send-referral-email]
 verify_jwt = false
+
+[functions.send-reengagement-email]
+verify_jwt = false
