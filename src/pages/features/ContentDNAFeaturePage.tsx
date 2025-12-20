@@ -221,9 +221,20 @@ export default function ContentDNAFeaturePage() {
         </div>
       </section>
 
+      {/* Wave Divider */}
+      <div className="relative">
+        <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto" preserveAspectRatio="none">
+          <path d="M0 80L48 70C96 60 192 40 288 35C384 30 480 40 576 45C672 50 768 50 864 45C960 40 1056 30 1152 30C1248 30 1344 40 1392 45L1440 50V80H1392C1344 80 1248 80 1152 80C1056 80 960 80 864 80C768 80 672 80 576 80C480 80 384 80 288 80C192 80 96 80 48 80H0Z" fill="hsl(var(--background))"/>
+        </svg>
+      </div>
+
       {/* How It Works */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
+      <section className="py-20 relative overflow-hidden">
+        {/* Lens flares */}
+        <div className="absolute top-16 left-[18%] w-32 h-32 bg-[hsl(270_70%_60%_/_0.08)] rounded-full blur-2xl" />
+        <div className="absolute bottom-20 right-[15%] w-44 h-44 bg-[hsl(330_60%_55%_/_0.08)] rounded-full blur-3xl" />
+        
+        <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-16">
             <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">
               How Content DNA Works
@@ -248,8 +259,12 @@ export default function ContentDNAFeaturePage() {
       </section>
 
       {/* Sample Types */}
-      <section className="py-16 bg-muted/30">
-        <div className="container mx-auto px-4">
+      <section className="py-16 bg-[hsl(330_50%_95%)] relative overflow-hidden">
+        {/* Lens flares */}
+        <div className="absolute top-12 right-[10%] w-28 h-28 bg-[hsl(270_70%_60%_/_0.12)] rounded-full blur-2xl" />
+        <div className="absolute bottom-16 left-[8%] w-32 h-32 bg-[hsl(82_85%_55%_/_0.1)] rounded-full blur-3xl" />
+        
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-8">
               Supported Content Types
@@ -265,9 +280,20 @@ export default function ContentDNAFeaturePage() {
         </div>
       </section>
 
+      {/* Wave Divider */}
+      <div className="relative bg-[hsl(330_50%_95%)]">
+        <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto" preserveAspectRatio="none">
+          <path d="M0 80L60 65C120 50 240 20 360 15C480 10 600 30 720 40C840 50 960 50 1080 45C1200 40 1320 30 1380 25L1440 20V80H1380C1320 80 1200 80 1080 80C960 80 840 80 720 80C600 80 480 80 360 80C240 80 120 80 60 80H0Z" fill="hsl(var(--background))"/>
+        </svg>
+      </div>
+
       {/* Benefits */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
+      <section className="py-20 relative overflow-hidden">
+        {/* Lens flares */}
+        <div className="absolute top-1/4 right-[8%] w-36 h-36 bg-[hsl(270_70%_60%_/_0.08)] rounded-full blur-3xl" />
+        <div className="absolute bottom-1/3 left-[12%] w-28 h-28 bg-[hsl(330_60%_55%_/_0.08)] rounded-full blur-2xl" />
+        
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto">
             <div className="grid md:grid-cols-2 gap-8">
               <div className="space-y-6">
