@@ -146,12 +146,18 @@ export function SendEmailDialog({
 
       if (error) throw error;
 
-      // Log the email in email_nudges
+      // Log the email in email_nudges with full details
       await supabase.from('email_nudges').insert({
         tenant_id: selectedTenant,
         user_id: profile?.id || '',
         nudge_type: 'admin_invite',
-        email_count: 1
+        email_count: 1,
+        recipient_email: inviteEmail,
+        recipient_name: `${inviteFirstName} ${inviteLastName}`,
+        subject: `Welcome to UPlaybook.AI - ${selectedTenantName}`,
+        email_type: 'invite',
+        status: 'sent',
+        metadata: { role: inviteRole, institution: selectedTenantName }
       });
 
       toast({
@@ -237,12 +243,18 @@ export function SendEmailDialog({
 
       if (error) throw error;
 
-      // Log the email
+      // Log the email with full details
       await supabase.from('email_nudges').insert({
         tenant_id: selectedUserData?.tenant_id || '',
         user_id: selectedUser,
         nudge_type: 'where_have_you_been',
-        email_count: 1
+        email_count: 1,
+        recipient_email: selectedUserData?.email,
+        recipient_name: `${selectedUserData?.first_name} ${selectedUserData?.last_name}`,
+        subject: `We haven't seen you in a while, ${selectedUserData?.first_name}! 🤔`,
+        email_type: 'reengagement',
+        status: 'sent',
+        metadata: { institution: selectedUserData?.institution_name, last_login: selectedUserData?.last_login_at }
       });
 
       toast({
@@ -294,12 +306,18 @@ export function SendEmailDialog({
 
       if (error) throw error;
 
-      // Log the email
+      // Log the email with full details
       await supabase.from('email_nudges').insert({
         tenant_id: selectedUserData?.tenant_id || '',
         user_id: selectedUser,
         nudge_type: 'admin_custom',
-        email_count: 1
+        email_count: 1,
+        recipient_email: selectedUserData?.email,
+        recipient_name: `${selectedUserData?.first_name} ${selectedUserData?.last_name}`,
+        subject: customSubject,
+        email_type: 'custom',
+        status: 'sent',
+        metadata: { body_preview: customBody.substring(0, 100), institution: selectedUserData?.institution_name }
       });
 
       toast({
@@ -487,7 +505,7 @@ export function SendEmailDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) resetForm(); onOpenChange(o); }}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh]">
+      <DialogContent className="sm:max-w-[900px] max-h-[95vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Mail className="w-5 h-5" />
@@ -498,8 +516,8 @@ export function SendEmailDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[60vh]">
-          <div className="grid md:grid-cols-2 gap-6 py-4 pr-4">
+        <ScrollArea className="max-h-[75vh]">
+          <div className="grid md:grid-cols-2 gap-8 py-4 pr-4">
             {/* Left Column: Form */}
             <div className="space-y-4">
               {/* Email Type Selector */}

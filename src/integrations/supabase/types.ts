@@ -279,27 +279,45 @@ export type Database = {
         Row: {
           created_at: string
           email_count: number
+          email_type: string | null
           id: string
+          metadata: Json | null
           nudge_type: string
+          recipient_email: string | null
+          recipient_name: string | null
           sent_at: string
+          status: string | null
+          subject: string | null
           tenant_id: string
           user_id: string
         }
         Insert: {
           created_at?: string
           email_count?: number
+          email_type?: string | null
           id?: string
+          metadata?: Json | null
           nudge_type: string
+          recipient_email?: string | null
+          recipient_name?: string | null
           sent_at?: string
+          status?: string | null
+          subject?: string | null
           tenant_id: string
           user_id: string
         }
         Update: {
           created_at?: string
           email_count?: number
+          email_type?: string | null
           id?: string
+          metadata?: Json | null
           nudge_type?: string
+          recipient_email?: string | null
+          recipient_name?: string | null
           sent_at?: string
+          status?: string | null
+          subject?: string | null
           tenant_id?: string
           user_id?: string
         }
