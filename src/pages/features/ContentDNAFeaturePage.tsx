@@ -95,24 +95,32 @@ export default function ContentDNAFeaturePage() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 md:py-32">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5" />
-        <div className="absolute top-20 right-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 left-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
+        {/* Gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-background to-pink-500/5" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(270_60%_90%_/_0.3),_transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_hsl(330_60%_85%_/_0.25),_transparent_50%)]" />
         
-        <div className="container mx-auto px-4 relative">
+        {/* Lens flares */}
+        <div className="absolute top-20 right-[12%] w-32 h-32 bg-[hsl(270_70%_60%_/_0.18)] rounded-full blur-2xl" />
+        <div className="absolute bottom-36 left-[8%] w-40 h-40 bg-[hsl(330_60%_55%_/_0.15)] rounded-full blur-3xl" />
+        <div className="absolute top-44 left-[22%] w-24 h-24 bg-[hsl(82_85%_55%_/_0.12)] rounded-full blur-2xl" />
+        <div className="absolute bottom-48 right-[25%] w-20 h-20 bg-[hsl(200_100%_50%_/_0.1)] rounded-full blur-2xl" />
+        <div className="absolute top-32 right-[35%] w-16 h-16 bg-[hsl(270_70%_60%_/_0.15)] rounded-full blur-xl" />
+        
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <Badge className="mb-6 bg-primary/10 text-primary border-primary/20">
+            <Badge className="mb-6 bg-primary/10 text-primary border-primary/20 animate-fade-in">
               <Dna className="w-3 h-3 mr-1" />
               AI-Powered Voice Analysis
             </Badge>
-            <h1 className="font-serif text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
+            <h1 className="font-serif text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
               Your Institution's
               <span className="block text-primary">Content DNA</span>
             </h1>
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.2s' }}>
               Upload your best communications and let AI learn your unique voice. Every message generated will sound authentically yours—not generic AI.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
               <Link to="/request-access">
                 <Button size="lg" className="gap-2">
                   Request Beta Access
@@ -122,11 +130,23 @@ export default function ContentDNAFeaturePage() {
             </div>
           </div>
         </div>
+
+        {/* Wave Divider */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto" preserveAspectRatio="none">
+            <path d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="hsl(270 60% 95%)"/>
+          </svg>
+        </div>
       </section>
 
       {/* Voice Analysis Demo */}
-      <section className="py-16 bg-muted/30">
-        <div className="container mx-auto px-4">
+      <section className="py-16 bg-[hsl(270_60%_95%)] relative overflow-hidden">
+        {/* Lens flares */}
+        <div className="absolute top-12 right-[10%] w-28 h-28 bg-[hsl(82_85%_55%_/_0.15)] rounded-full blur-2xl" />
+        <div className="absolute bottom-28 left-[6%] w-36 h-36 bg-[hsl(200_100%_50%_/_0.12)] rounded-full blur-3xl" />
+        <div className="absolute top-1/3 left-[40%] w-20 h-20 bg-[hsl(330_60%_55%_/_0.1)] rounded-full blur-2xl" />
+
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-6xl mx-auto">
             <div className="grid md:grid-cols-2 gap-12 items-center">
               {/* Upload Interface Mock */}
