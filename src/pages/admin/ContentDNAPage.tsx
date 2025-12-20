@@ -43,7 +43,9 @@ import {
   RefreshCw,
   Target,
   Award,
-  Compass
+  Compass,
+  LayoutGrid,
+  List
 } from 'lucide-react';
 import { extractTextFromFile, getAcceptString } from '@/lib/documentParser';
 
@@ -189,6 +191,17 @@ export default function ContentDNAPage() {
   const dismissWhatIsBox = () => {
     setWhatIsBoxVisible(false);
     localStorage.setItem('contentDnaWhatIsBoxVisible', 'false');
+  };
+
+  // Library view mode state (persisted in localStorage)
+  const [libraryViewMode, setLibraryViewMode] = useState<'card' | 'list'>(() => {
+    const stored = localStorage.getItem('contentDnaLibraryViewMode');
+    return (stored === 'list' ? 'list' : 'card') as 'card' | 'list';
+  });
+  
+  const toggleLibraryViewMode = (mode: 'card' | 'list') => {
+    setLibraryViewMode(mode);
+    localStorage.setItem('contentDnaLibraryViewMode', mode);
   };
 
   // Instructions state
@@ -1316,7 +1329,26 @@ export default function ContentDNAPage() {
                       Your collection of brand communications used for voice analysis
                     </CardDescription>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
+                    {/* View Toggle */}
+                    <div className="flex items-center border border-border rounded-lg p-1 bg-muted/30">
+                      <Button
+                        variant={libraryViewMode === 'card' ? 'default' : 'ghost'}
+                        size="sm"
+                        className={`h-7 px-2 ${libraryViewMode === 'card' ? 'bg-background shadow-sm' : ''}`}
+                        onClick={() => toggleLibraryViewMode('card')}
+                      >
+                        <LayoutGrid className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant={libraryViewMode === 'list' ? 'default' : 'ghost'}
+                        size="sm"
+                        className={`h-7 px-2 ${libraryViewMode === 'list' ? 'bg-background shadow-sm' : ''}`}
+                        onClick={() => toggleLibraryViewMode('list')}
+                      >
+                        <List className="w-4 h-4" />
+                      </Button>
+                    </div>
                     <Badge variant="outline" className="flex items-center gap-1">
                       <FileText className="w-3 h-3" />
                       {samples.length} samples
@@ -1350,7 +1382,8 @@ export default function ContentDNAPage() {
                     <p className="font-medium">No content samples yet</p>
                     <p className="text-sm">Upload content using the Upload Content tab to start building your Content DNA profile</p>
                   </div>
-                ) : (
+                ) : libraryViewMode === 'card' ? (
+                  /* Card View */
                   <ScrollArea className="h-[500px]">
                     <div className="space-y-3">
                       {samples.map((sample) => {
@@ -1415,6 +1448,80 @@ export default function ContentDNAPage() {
                         );
                       })}
                     </div>
+                  </ScrollArea>
+                ) : (
+                  /* List View - Compact table format */
+                  <ScrollArea className="h-[500px]">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[300px]">Title</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Owner</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead className="w-[80px]">Size</TableHead>
+                          <TableHead className="w-[60px]"></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {samples.map((sample) => {
+                          const isOwnSample = sample.user_id === profile?.id;
+                          const canDelete = isOwnSample || isAdmin;
+                          
+                          return (
+                            <TableRow key={sample.id} className="hover:bg-muted/50">
+                              <TableCell>
+                                <div className="flex flex-col">
+                                  <span className="font-medium text-foreground truncate max-w-[280px]">
+                                    {sample.title || sample.file_name}
+                                  </span>
+                                  {sample.source_description && (
+                                    <span className="text-xs text-muted-foreground truncate max-w-[280px]">
+                                      {sample.source_description}
+                                    </span>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="text-xs whitespace-nowrap">
+                                  {SAMPLE_TYPES.find(t => t.value === sample.sample_type)?.label || sample.sample_type}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant={isOwnSample ? 'default' : 'secondary'} className="text-xs">
+                                  {isOwnSample ? 'You' : 'Team'}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                                {formatDate(sample.created_at)}
+                              </TableCell>
+                              <TableCell className="text-sm text-muted-foreground">
+                                {sample.file_size ? `${Math.round(sample.file_size / 1024)} KB` : '-'}
+                              </TableCell>
+                              <TableCell>
+                                {canDelete && (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                        onClick={() => deleteSample(sample.id)}
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>{isOwnSample ? 'Delete your sample' : 'Delete (admin)'}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
                   </ScrollArea>
                 )}
               </CardContent>
