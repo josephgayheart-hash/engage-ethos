@@ -390,6 +390,13 @@ export default function ContentDNAPage() {
                   {selectedProfile ? `Content DNA for ${selectedProfile.name}` : 'Institution-wide Content DNA'}
                 </p>
               </div>
+              {/* DNA Last Updated */}
+              {analysis?.last_analyzed_at && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground border-r border-border pr-4 mr-2">
+                  <Clock className="w-4 h-4" />
+                  <span>DNA updated {new Date(analysis.last_analyzed_at).toLocaleDateString()}</span>
+                </div>
+              )}
               {/* Color Swatches */}
               <div className="flex items-center gap-2">
                 <Tooltip>
