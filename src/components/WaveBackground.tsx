@@ -10,7 +10,7 @@ export function WaveBackground({ variant = 'teal' }: { variant?: 'teal' | 'amber
     : 'bg-[hsl(222_47%_95%)]';
 
   return (
-    <div className={`absolute inset-0 ${bgColor}`}>
+    <div className={`absolute inset-0 -z-10 ${bgColor}`}>
       {/* Gradient overlay for depth */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-white/20" />
       
