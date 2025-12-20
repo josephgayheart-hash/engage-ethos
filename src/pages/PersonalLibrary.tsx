@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
+import { useAuth } from "@/contexts/AuthContext";
 import { CreateTemplateDialog } from "@/components/library/CreateTemplateDialog";
 import type { SavedMessage, LibraryFilters, SortOption } from "@/types/library";
 import { 
@@ -44,6 +45,7 @@ const channelIcons = {
 const PersonalLibrary = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { isAdmin, isApprover } = useAuth();
   const { messages, deleteMessage, duplicateMessage, exportMessage, filterMessages, updateMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
   const { getProfileHierarchy } = useInstitutionalProfiles();
@@ -80,7 +82,12 @@ const PersonalLibrary = () => {
   };
 
   const handleCreateTemplate = (template: any) => {
-    addTemplate(template);
+    // Auto-publish for admins and approvers
+    const templateWithStatus = {
+      ...template,
+      status: (isAdmin || isApprover) ? 'published' : template.status || 'submitted',
+    };
+    addTemplate(templateWithStatus);
     // Mark the original message as submitted to University Library
     if (messageToSubmit) {
       updateMessage(messageToSubmit.id, {
@@ -89,8 +96,10 @@ const PersonalLibrary = () => {
       });
     }
     toast({
-      title: "Template submitted",
-      description: "Your message has been submitted to the University Library for review.",
+      title: (isAdmin || isApprover) ? "Template published" : "Template submitted",
+      description: (isAdmin || isApprover) 
+        ? "Your message has been published to the University Library."
+        : "Your message has been submitted to the University Library for review.",
     });
     setMessageToSubmit(null);
   };

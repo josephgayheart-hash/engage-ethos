@@ -92,7 +92,7 @@ const cohortLabels: Record<string, string> = {
 
 const BuildPage = () => {
   const { toast } = useToast();
-  const { profile } = useAuth();
+  const { profile, isAdmin, isApprover } = useAuth();
   const location = useLocation();
   const { addMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
@@ -375,7 +375,8 @@ const BuildPage = () => {
       playbook: 'Message Kits',
       owner: 'Current User',
       maintainer: 'Current User',
-      status: 'submitted' as const,
+      // Auto-publish for admins and approvers
+      status: (isAdmin || isApprover) ? 'published' as const : 'submitted' as const,
       version: '1.0',
       requiredFields: {
         audience: context.audience ? [context.audience] : [],
