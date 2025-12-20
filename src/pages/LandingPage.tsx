@@ -76,6 +76,14 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_hsl(173_58%_85%_/_0.3),_transparent_50%)]" />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-40" />
         
+        {/* Decorative sprites and lens flares */}
+        <div className="absolute top-16 left-[15%] w-3 h-3 bg-[hsl(82_85%_55%)] rounded-full opacity-70 animate-pulse" />
+        <div className="absolute top-24 right-[20%] w-4 h-4 bg-[hsl(270_70%_60%)] rounded-full opacity-60" />
+        <div className="absolute top-32 left-[10%] w-2 h-2 bg-[hsl(200_100%_50%)] rounded-full opacity-80" />
+        <div className="absolute bottom-40 right-[12%] w-3 h-3 bg-[hsl(340_75%_55%)] rounded-full opacity-50" />
+        <div className="absolute top-20 right-[8%] w-20 h-20 bg-[hsl(82_85%_55%_/_0.15)] rounded-full blur-xl" />
+        <div className="absolute bottom-32 left-[8%] w-24 h-24 bg-[hsl(270_70%_60%_/_0.12)] rounded-full blur-xl" />
+        
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-28">
           <div className="text-center space-y-6">
             {/* Beta Badge */}
@@ -167,7 +175,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Wave Divider */}
+        {/* Wave Divider to Yellow */}
         <div className="absolute bottom-0 left-0 right-0">
           <svg 
             viewBox="0 0 1440 120" 
@@ -178,7 +186,7 @@ export default function LandingPage() {
           >
             <path 
               d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" 
-              fill="hsl(210 20% 98%)"
+              fill="hsl(48 100% 90%)"
             />
           </svg>
         </div>
@@ -189,6 +197,24 @@ export default function LandingPage() {
         {/* Decorative elements */}
         <div className="absolute top-10 right-10 w-20 h-20 bg-[hsl(270_70%_60%_/_0.2)] rounded-full blur-xl" />
         <div className="absolute bottom-10 left-20 w-32 h-32 bg-[hsl(82_85%_55%_/_0.15)] rounded-full blur-xl" />
+        <div className="absolute top-20 left-[5%] w-3 h-3 bg-[hsl(200_100%_50%)] rounded-full opacity-50" />
+        <div className="absolute bottom-24 right-[8%] w-2 h-2 bg-[hsl(270_70%_60%)] rounded-full opacity-60" />
+        
+        {/* Wave transition at bottom to mint section */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg 
+            viewBox="0 0 1440 80" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full h-auto"
+            preserveAspectRatio="none"
+          >
+            <path 
+              d="M0 80L48 70C96 60 192 40 288 35C384 30 480 40 576 45C672 50 768 50 864 45C960 40 1056 30 1152 30C1248 30 1344 40 1392 45L1440 50V80H1392C1344 80 1248 80 1152 80C1056 80 960 80 864 80C768 80 672 80 576 80C480 80 384 80 288 80C192 80 96 80 48 80H0Z" 
+              fill="hsl(173 40% 92%)"
+            />
+          </svg>
+        </div>
         
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="text-center mb-12">
@@ -271,6 +297,22 @@ export default function LandingPage() {
               );
             })}
           </div>
+        </div>
+        
+        {/* Wave transition to purple section */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg 
+            viewBox="0 0 1440 80" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full h-auto"
+            preserveAspectRatio="none"
+          >
+            <path 
+              d="M0 80L60 65C120 50 240 20 360 15C480 10 600 30 720 40C840 50 960 50 1080 45C1200 40 1320 30 1380 25L1440 20V80H1380C1320 80 1200 80 1080 80C960 80 840 80 720 80C600 80 480 80 360 80C240 80 120 80 60 80H0Z" 
+              fill="hsl(270 60% 50%)"
+            />
+          </svg>
         </div>
       </section>
 
