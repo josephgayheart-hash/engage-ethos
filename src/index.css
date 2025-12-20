@@ -29,6 +29,11 @@
     --accent: 173 58% 39%;
     --accent-foreground: 0 0% 100%;
 
+    /* Cyberpunk Accents */
+    --cyber-lime: 82 85% 55%;
+    --cyber-purple: 270 70% 60%;
+    --cyber-blue: 200 100% 50%;
+
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
