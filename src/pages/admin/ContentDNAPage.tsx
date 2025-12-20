@@ -822,6 +822,35 @@ export default function ContentDNAPage() {
           <TabsContent value="analysis">
             {analysis?.voice_analysis ? (
               <div className="space-y-6">
+                {/* Header with Re-analyze Button */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold text-foreground">Voice Analysis</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Based on {analysis.sample_count} samples • Analyzed {analysis.last_analyzed_at ? formatDate(analysis.last_analyzed_at) : 'recently'}
+                    </p>
+                  </div>
+                  {isAdmin && (
+                    <Button
+                      onClick={analyzeVoice}
+                      disabled={isAnalyzing || samples.length === 0}
+                      className="bg-secondary hover:bg-secondary/90"
+                    >
+                      {isAnalyzing ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Re-analyzing...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Re-analyze Voice
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
+
                 {/* Analysis Summary */}
                 <Card className="border-[hsl(220,13%,88%)] bg-gradient-to-r from-[hsl(222,47%,14%)] to-[hsl(222,47%,20%)] text-white">
                   <CardContent className="py-6">
@@ -832,18 +861,6 @@ export default function ContentDNAPage() {
                       <div>
                         <h3 className="font-serif text-xl font-bold mb-2">Your Content DNA Profile</h3>
                         <p className="text-white/80">{analysis.voice_analysis.summary}</p>
-                        <div className="flex items-center gap-4 mt-4 text-sm text-white/60">
-                          <span className="flex items-center gap-1">
-                            <FileText className="w-4 h-4" />
-                            Based on {analysis.sample_count} samples
-                          </span>
-                          {analysis.last_analyzed_at && (
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-4 h-4" />
-                              Analyzed {formatDate(analysis.last_analyzed_at)}
-                            </span>
-                          )}
-                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -930,28 +947,6 @@ export default function ContentDNAPage() {
                     </CardContent>
                   </Card>
                 </div>
-
-                {/* Re-analyze Button */}
-                <div className="text-center">
-                  <Button
-                    onClick={analyzeVoice}
-                    disabled={isAnalyzing || samples.length === 0}
-                    variant="outline"
-                    className="border-[hsl(222,47%,14%)] text-[hsl(222,47%,14%)]"
-                  >
-                    {isAnalyzing ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Re-analyzing...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4 mr-2" />
-                        Re-analyze with Current Samples
-                      </>
-                    )}
-                  </Button>
-                </div>
               </div>
             ) : (
               <Card className="border-[hsl(220,13%,88%)]">
@@ -989,6 +984,35 @@ export default function ContentDNAPage() {
           <TabsContent value="brand-platform">
             {analysis?.brand_platform ? (
               <div className="space-y-6">
+                {/* Header with Re-analyze Button */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold text-foreground">Brand Platform</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Brand pillars, promise, and proof points extracted from your content
+                    </p>
+                  </div>
+                  {isAdmin && (
+                    <Button
+                      onClick={analyzeVoice}
+                      disabled={isAnalyzing || samples.length === 0}
+                      className="bg-secondary hover:bg-secondary/90"
+                    >
+                      {isAnalyzing ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Re-analyzing...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Re-extract Platform
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
+
                 {/* Brand Promise */}
                 {analysis.brand_platform.brandPromise && (
                   <Card className="border-[hsl(220,13%,88%)] bg-gradient-to-r from-[hsl(222,47%,14%)] to-[hsl(222,47%,20%)] text-white">
@@ -1121,28 +1145,6 @@ export default function ContentDNAPage() {
                     </CardContent>
                   </Card>
                 )}
-
-                {/* Re-analyze Button */}
-                <div className="text-center">
-                  <Button
-                    onClick={analyzeVoice}
-                    disabled={isAnalyzing || samples.length === 0}
-                    variant="outline"
-                    className="border-[hsl(222,47%,14%)] text-[hsl(222,47%,14%)]"
-                  >
-                    {isAnalyzing ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Re-analyzing...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4 mr-2" />
-                        Re-extract Brand Platform
-                      </>
-                    )}
-                  </Button>
-                </div>
               </div>
             ) : (
               <Card className="border-[hsl(220,13%,88%)]">
