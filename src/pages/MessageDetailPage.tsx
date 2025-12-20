@@ -158,29 +158,57 @@ const MessageDetailPage = () => {
     // Add to shared library - auto-publish for admins and approvers
     const journeyWithMetadata = journeyData as (typeof journeyData & { _metadata?: any });
     
-    addTemplate({
-      title: message.title,
-      intentStatement: `Strategy journey for ${message.audience || 'students'}`,
-      content: message.content,
-      // Auto-publish for admins and approvers
-      status: (isAdmin || isApprover) ? 'published' : 'submitted',
-      version: '1.0',
-      owner: 'Current User',
-      maintainer: 'Current User',
-      placeholders: [],
-      requiredFields: {
-        audience: message.audience ? [message.audience] : [],
-        moment: message.moment ? [message.moment] : [],
-        channel: message.channels || (message.channel ? [message.channel] : []),
-      },
-      useCases: {
-        whenToUse: journeyWithMetadata?._metadata?.phases?.map((p: any) => p.focus) || [],
-        whenNotToUse: [],
-      },
-      ethicalGuardrails: ['Review all touchpoints before publishing'],
-      institutionalProfileId: message.institutionalProfileId,
-      institutionalProfileName: message.institutionalProfileName,
-    });
+    if (isJourney) {
+      // Journey-specific template creation
+      addTemplate({
+        title: message.title,
+        intentStatement: `Strategy journey for ${message.audience || 'students'}`,
+        content: message.content,
+        // Auto-publish for admins and approvers
+        status: (isAdmin || isApprover) ? 'published' : 'submitted',
+        version: '1.0',
+        owner: 'Current User',
+        maintainer: 'Current User',
+        placeholders: [],
+        requiredFields: {
+          audience: message.audience ? [message.audience] : [],
+          moment: message.moment ? [message.moment] : [],
+          channel: message.channels || (message.channel ? [message.channel] : []),
+        },
+        useCases: {
+          whenToUse: journeyWithMetadata?._metadata?.phases?.map((p: any) => p.focus) || [],
+          whenNotToUse: [],
+        },
+        ethicalGuardrails: ['Review all touchpoints before publishing'],
+        institutionalProfileId: message.institutionalProfileId,
+        institutionalProfileName: message.institutionalProfileName,
+      });
+    } else {
+      // Regular message template creation
+      addTemplate({
+        title: message.title,
+        intentStatement: `${message.channel || 'Message'} for ${message.audience || 'students'} - ${message.moment || 'general'}`,
+        content: message.content,
+        // Auto-publish for admins and approvers
+        status: (isAdmin || isApprover) ? 'published' : 'submitted',
+        version: '1.0',
+        owner: 'Current User',
+        maintainer: 'Current User',
+        placeholders: [],
+        requiredFields: {
+          audience: message.audience ? [message.audience] : [],
+          moment: message.moment ? [message.moment] : [],
+          channel: message.channel ? [message.channel] : [],
+        },
+        useCases: {
+          whenToUse: [`${message.audience || 'Student'} communications via ${message.channel || 'various channels'}`],
+          whenNotToUse: [],
+        },
+        ethicalGuardrails: ['Review content before publishing', 'Ensure messaging aligns with institutional voice'],
+        institutionalProfileId: message.institutionalProfileId,
+        institutionalProfileName: message.institutionalProfileName,
+      });
+    }
 
     // Mark as submitted in personal library
     updateMessage(message.id, { 
@@ -190,8 +218,10 @@ const MessageDetailPage = () => {
 
     setShowSubmitDialog(false);
     toast({ 
-      title: "Submitted to University Library",
-      description: "Your journey has been sent for approval.",
+      title: (isAdmin || isApprover) ? "Published to University Library" : "Submitted to University Library",
+      description: (isAdmin || isApprover) 
+        ? "Your content has been published immediately."
+        : "Your content has been sent for approval.",
     });
   };
 
@@ -323,8 +353,8 @@ const MessageDetailPage = () => {
 
               {/* Action buttons row */}
               <div className="flex items-center gap-2 pl-10 flex-wrap">
-                {/* Primary action */}
-                {!message.submittedToLibrary && isJourney && (
+                {/* Primary action - Send to University Library for any message not already submitted */}
+                {!message.submittedToLibrary && (
                   <Button onClick={() => setShowSubmitDialog(true)} size="sm">
                     <Send className="w-4 h-4 mr-2" />
                     Send to University Library
@@ -384,12 +414,18 @@ const MessageDetailPage = () => {
               <DialogHeader>
                 <DialogTitle>Send to University Library</DialogTitle>
                 <DialogDescription>
-                  This will submit your journey "{message.title}" for approval. Once approved, it will be available to all users in the University Library.
+                  {(isAdmin || isApprover) 
+                    ? `This will publish "${message.title}" directly to the University Library, making it available to all users immediately.`
+                    : `This will submit "${message.title}" for approval. Once approved, it will be available to all users in the University Library.`
+                  }
                 </DialogDescription>
               </DialogHeader>
               <div className="py-4">
                 <p className="text-sm text-muted-foreground">
-                  The journey will be reviewed by library administrators before being published.
+                  {(isAdmin || isApprover)
+                    ? "As an admin/approver, your content will be published immediately without requiring review."
+                    : "The content will be reviewed by library administrators before being published."
+                  }
                 </p>
               </div>
               <DialogFooter>
@@ -398,7 +434,7 @@ const MessageDetailPage = () => {
                 </Button>
                 <Button onClick={handleSubmitToLibrary} className="flex items-center gap-2">
                   <Send className="w-4 h-4" />
-                  Submit for Approval
+                  {(isAdmin || isApprover) ? "Publish Now" : "Submit for Approval"}
                 </Button>
               </DialogFooter>
             </DialogContent>
