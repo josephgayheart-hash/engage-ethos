@@ -35,7 +35,7 @@ export function BuilderStepSection({
       {/* Step Header */}
       <div className="flex items-start gap-4">
         {/* Step Number Badge - Soft UPlaybook Brand Style */}
-        <div className="flex-shrink-0 w-9 h-9 rounded-2xl bg-gradient-to-br from-secondary/20 via-accent/15 to-secondary/10 border border-secondary/30 text-secondary-foreground flex items-center justify-center text-sm font-semibold shadow-sm backdrop-blur-sm">
+        <div className="flex-shrink-0 w-9 h-9 rounded-2xl bg-gradient-to-br from-accent/15 via-primary/10 to-accent/5 border border-accent/25 text-accent flex items-center justify-center text-sm font-semibold shadow-sm">
           {stepNumber}
         </div>
         
@@ -75,7 +75,7 @@ export function BuilderStepSection({
       </div>
       
       {/* Step Content */}
-      <div className="ml-[52px] pl-0.5 border-l-2 border-secondary/20">
+      <div className="ml-[52px] pl-0.5 border-l-2 border-accent/20">
         <div className="pl-4">
           {children}
         </div>
