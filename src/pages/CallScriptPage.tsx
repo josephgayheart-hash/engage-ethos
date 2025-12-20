@@ -258,9 +258,11 @@ ${callScript.followUpNotes}`;
     <div className="min-h-screen bg-background">
       <Header />
       
-      {/* Wave Header */}
-      <div className="relative bg-gradient-to-br from-pillar-authority/10 via-pillar-authority/5 to-background pb-12">
-        <div className="container mx-auto px-4 pt-10 pb-8">
+      {/* Page Header with wave background */}
+      <div className="relative overflow-hidden pb-12">
+        <WaveBackground variant="amber" />
+        
+        <div className="relative container mx-auto px-4 pt-10 pb-8">
           <div className="max-w-4xl mx-auto">
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
@@ -287,7 +289,6 @@ ${callScript.followUpNotes}`;
             </div>
           </div>
         </div>
-        <WaveBackground variant="amber" />
       </div>
       
       <main className="container mx-auto px-4 py-8">
