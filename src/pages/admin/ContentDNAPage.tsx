@@ -250,67 +250,121 @@ export default function ContentDNAPage() {
         <div className="container mx-auto px-4 pt-10 pb-8">
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-            <Link to="/dashboard" className="hover:text-foreground">
-              <Home className="w-4 h-4" />
+            <Link to="/dashboard" className="hover:text-foreground flex items-center gap-1">
+              <ArrowLeft className="w-4 h-4" />
+              Home
             </Link>
-            <ChevronRight className="w-4 h-4" />
+            <span>/</span>
             {selectedProfile ? (
               <>
                 <Link to="/settings" className="hover:text-foreground">
                   Profiles
                 </Link>
-                <ChevronRight className="w-4 h-4" />
+                <span>/</span>
                 <span className="text-foreground">{selectedProfile.name}</span>
-                <ChevronRight className="w-4 h-4" />
+                <span>/</span>
+                <span className="text-foreground">Content DNA</span>
               </>
             ) : isAdminRoute ? (
               <>
                 <Link to="/admin/console" className="hover:text-foreground">
                   Admin
                 </Link>
-                <ChevronRight className="w-4 h-4" />
+                <span>/</span>
+                <span className="text-foreground">Content DNA</span>
               </>
-            ) : null}
-            <span className="text-foreground">Content DNA</span>
+            ) : (
+              <span className="text-foreground">Content DNA</span>
+            )}
           </div>
           
-          {/* Back button when viewing specific profile */}
-          {selectedProfile && (
-            <Link 
-              to="/settings" 
-              className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to {selectedProfile.name}
-            </Link>
-          )}
-          
-          {/* Institution Branding Header */}
-          <div className="flex items-center gap-4">
-            {/* Use profile logo if available, otherwise fall back to tenant logo */}
-            {(selectedProfile?.config?.logoUrl || tenant?.logo_url) ? (
-              <img 
-                src={selectedProfile?.config?.logoUrl || tenant?.logo_url || ''}
-                alt={`${selectedProfile?.name || tenant?.institution_name} logo`}
-                className="w-16 h-16 object-contain rounded-lg border border-border bg-background p-1"
-              />
-            ) : (
-              <div 
-                className="w-16 h-16 rounded-lg flex items-center justify-center text-white font-bold text-xl"
-                style={{ backgroundColor: selectedProfile?.config?.primaryColor || tenant?.primary_color || 'hsl(222,47%,14%)' }}
-              >
-                {(selectedProfile?.name || tenant?.institution_name)?.charAt(0) || 'U'}
-              </div>
-            )}
-            <div className="flex-1">
-              <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
-                {selectedProfile?.name || tenant?.institution_name || 'Content DNA Center'}
+          {/* Header */}
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
+                <Dna className="w-7 h-7 text-secondary" />
+                Content DNA
               </h1>
-              <p className="text-muted-foreground">
-                Content DNA {selectedProfile ? `for ${selectedProfile.name}` : 'Center'}
+              <p className="text-muted-foreground mt-1">
+                Train AI to match your institution's unique voice and communication style
               </p>
             </div>
             <div className="flex items-center gap-3">
+              <Badge variant="outline" className="flex items-center gap-1">
+                <FileText className="w-3 h-3" />
+                {samples.length} samples
+              </Badge>
+              {analysis && (
+                <Badge className="bg-secondary text-secondary-foreground">
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  DNA Analyzed
+                </Badge>
+              )}
+            </div>
+          </div>
+        </div>
+        <WaveBackground variant="teal" />
+      </div>
+
+      <div className="container mx-auto px-4 py-8">
+        {/* What is Content DNA - First */}
+        <Card className="mb-6 border-border bg-gradient-to-r from-primary to-primary/80 text-primary-foreground">
+          <CardContent className="py-5">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-white/10 rounded-lg shrink-0">
+                <Dna className="w-8 h-8" />
+              </div>
+              <div>
+                <h2 className="font-serif text-xl font-bold mb-2">What is Content DNA?</h2>
+                <p className="text-primary-foreground/80 text-sm leading-relaxed">
+                  Content DNA captures your institution's unique voice and communication style. By uploading examples of your best communications—emails, newsletters, news stories, and more—our AI analyzes the patterns, tone, and vocabulary that make your messaging distinctly yours. This analysis then guides all AI-generated content to match your established brand voice.
+                </p>
+                <div className="flex items-center gap-4 mt-3 text-sm text-primary-foreground/60">
+                  <span className="flex items-center gap-1">
+                    <Upload className="w-4 h-4" />
+                    Upload content samples
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Sparkles className="w-4 h-4" />
+                    Analyze your voice
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Target className="w-4 h-4" />
+                    Generate on-brand content
+                  </span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Institution Branding Card - Second */}
+        <Card className="mb-6 border-border">
+          <CardContent className="py-5">
+            <div className="flex items-center gap-4">
+              {/* Use profile logo if available, otherwise fall back to tenant logo */}
+              {(selectedProfile?.config?.logoUrl || tenant?.logo_url) ? (
+                <img 
+                  src={selectedProfile?.config?.logoUrl || tenant?.logo_url || ''}
+                  alt={`${selectedProfile?.name || tenant?.institution_name} logo`}
+                  className="w-14 h-14 object-contain rounded-lg border border-border bg-background p-1"
+                />
+              ) : (
+                <div 
+                  className="w-14 h-14 rounded-lg flex items-center justify-center text-white font-bold text-xl"
+                  style={{ backgroundColor: selectedProfile?.config?.primaryColor || tenant?.primary_color || 'hsl(222,47%,14%)' }}
+                >
+                  {(selectedProfile?.name || tenant?.institution_name)?.charAt(0) || 'U'}
+                </div>
+              )}
+              <div className="flex-1">
+                <h3 className="font-medium text-foreground">
+                  {selectedProfile?.name || tenant?.institution_name || 'Your Institution'}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {selectedProfile ? `Content DNA for ${selectedProfile.name}` : 'Institution-wide Content DNA'}
+                </p>
+              </div>
               {/* Color Swatches */}
               <div className="flex items-center gap-2">
                 <Tooltip>
@@ -332,39 +386,24 @@ export default function ContentDNAPage() {
                   <TooltipContent>Accent Color</TooltipContent>
                 </Tooltip>
               </div>
-              <Badge variant="outline" className="flex items-center gap-1">
-                <FileText className="w-3 h-3" />
-                {samples.length} samples
-              </Badge>
-              {analysis && (
-                <Badge className="bg-secondary text-secondary-foreground">
-                  <Sparkles className="w-3 h-3 mr-1" />
-                  DNA Analyzed
-                </Badge>
-              )}
             </div>
-          </div>
-        </div>
-        <WaveBackground variant="teal" />
-      </div>
+          </CardContent>
+        </Card>
 
-      {/* Profile Context Banner - outside wave */}
-      {selectedProfile && (
-        <div className="container mx-auto px-4 pt-6">
-          <Alert className="border-primary/30 bg-primary/5">
+        {/* Profile Context Banner */}
+        {selectedProfile && (
+          <Alert className="mb-6 border-primary/30 bg-primary/5">
             <Building2 className="h-4 w-4" />
             <AlertDescription className="ml-2">
               Configuring Content DNA for <strong>{selectedProfile.name}</strong>. 
               Samples and analysis will be specific to this institutional profile.
             </AlertDescription>
           </Alert>
-        </div>
-      )}
+        )}
 
-      <div className="container mx-auto px-4 py-8">
-        {/* PROMINENT: Ready to Analyze Banner - Shows when samples exist but no analysis yet, or samples added since last analysis */}
+        {/* PROMINENT: Ready to Analyze Banner - Shows when samples exist but no analysis yet */}
         {samples.length > 0 && isAdmin && !analysis?.voice_analysis && (
-          <Card className="mb-6 border-2 border-[hsl(173,58%,39%)] bg-gradient-to-r from-[hsl(173,58%,39%)] to-[hsl(173,58%,30%)] text-white shadow-lg animate-in fade-in slide-in-from-top-2 duration-500">
+          <Card className="mb-6 border-2 border-secondary bg-gradient-to-r from-secondary to-secondary/80 text-secondary-foreground shadow-lg animate-in fade-in slide-in-from-top-2 duration-500">
             <CardContent className="py-6">
               <div className="flex items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
@@ -373,7 +412,7 @@ export default function ContentDNAPage() {
                   </div>
                   <div>
                     <h2 className="font-serif text-2xl font-bold mb-1">Ready to Analyze!</h2>
-                    <p className="text-white/90">
+                    <p className="text-secondary-foreground/90">
                       You have {samples.length} content sample{samples.length !== 1 ? 's' : ''} ready for voice analysis. 
                       Click the button to generate your institution's Content DNA profile.
                     </p>
@@ -383,7 +422,7 @@ export default function ContentDNAPage() {
                   onClick={analyzeVoice}
                   disabled={isAnalyzing}
                   size="lg"
-                  className="bg-white text-[hsl(173,58%,30%)] hover:bg-white/90 font-bold px-8 py-6 text-lg shadow-lg"
+                  className="bg-white text-secondary hover:bg-white/90 font-bold px-8 py-6 text-lg shadow-lg"
                 >
                   {isAnalyzing ? (
                     <>
@@ -405,7 +444,7 @@ export default function ContentDNAPage() {
         {/* Re-analyze Banner - Shows when samples were added after last analysis */}
         {samples.length > 0 && isAdmin && analysis?.voice_analysis && analysis.last_analyzed_at && 
           samples.some(s => new Date(s.created_at) > new Date(analysis.last_analyzed_at!)) && (
-          <Card className="mb-6 border-2 border-[hsl(45,93%,47%)] bg-gradient-to-r from-[hsl(45,93%,47%)] to-[hsl(35,93%,40%)] text-white shadow-lg">
+          <Card className="mb-6 border-2 border-amber-500 bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg">
             <CardContent className="py-5">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
@@ -422,7 +461,7 @@ export default function ContentDNAPage() {
                 <Button
                   onClick={analyzeVoice}
                   disabled={isAnalyzing}
-                  className="bg-white text-[hsl(35,93%,35%)] hover:bg-white/90 font-bold"
+                  className="bg-white text-amber-600 hover:bg-white/90 font-bold"
                 >
                   {isAnalyzing ? (
                     <>
@@ -478,36 +517,6 @@ export default function ContentDNAPage() {
             </CardContent>
           </Card>
         )}
-
-        <Card className="mb-6 border-[hsl(220,13%,88%)] bg-gradient-to-r from-[hsl(222,47%,14%)] to-[hsl(222,47%,20%)] text-white">
-          <CardContent className="py-5">
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-white/10 rounded-lg shrink-0">
-                <Dna className="w-8 h-8" />
-              </div>
-              <div>
-                <h2 className="font-serif text-xl font-bold mb-2">What is Content DNA?</h2>
-                <p className="text-white/80 text-sm leading-relaxed">
-                  Content DNA captures your institution's unique voice and communication style. By uploading examples of your best communications—emails, newsletters, news stories, and more—our AI analyzes the patterns, tone, and vocabulary that make your messaging distinctly yours. This analysis then guides all AI-generated content to match your established brand voice.
-                </p>
-                <div className="flex items-center gap-4 mt-3 text-sm text-white/60">
-                  <span className="flex items-center gap-1">
-                    <Upload className="w-4 h-4" />
-                    Upload content samples
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Sparkles className="w-4 h-4" />
-                    Analyze your voice
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <CheckCircle2 className="w-4 h-4" />
-                    Generate on-brand content
-                  </span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         <Tabs defaultValue="upload" className="space-y-6">
           <TabsList className="bg-white border border-[hsl(220,13%,88%)]">
