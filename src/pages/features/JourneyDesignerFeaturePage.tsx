@@ -36,6 +36,7 @@ import {
   ZoomIn
 } from "lucide-react";
 import uplaybookLogo from "@/assets/uplaybook-logo.png";
+import { FeatureNavigation } from "@/components/FeatureNavigation";
 
 const journeyPhases = [
   { week: "Week 1-2", label: "Awareness", intensity: "Low", channels: ["Email", "Social"] },
@@ -442,6 +443,9 @@ export default function JourneyDesignerFeaturePage() {
           </div>
         </div>
       </section>
+
+      {/* Explore More Features */}
+      <FeatureNavigation currentFeatureId="journey-designer" />
 
       {/* CTA Section */}
       <section className="py-20 bg-teal-600 text-white">

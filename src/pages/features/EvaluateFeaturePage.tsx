@@ -17,6 +17,7 @@ import {
   ThumbsUp
 } from "lucide-react";
 import uplaybookLogo from "@/assets/uplaybook-logo.png";
+import { FeatureNavigation } from "@/components/FeatureNavigation";
 
 const pillars = [
   { 
@@ -320,6 +321,9 @@ export default function EvaluateFeaturePage() {
           </div>
         </div>
       </section>
+
+      {/* Explore More Features */}
+      <FeatureNavigation currentFeatureId="evaluate" />
 
       {/* CTA Section */}
       <section className="py-20 bg-orange-600 text-white">

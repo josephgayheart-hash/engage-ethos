@@ -19,6 +19,7 @@ import {
   ArrowRight
 } from "lucide-react";
 import uplaybookLogo from "@/assets/uplaybook-logo.png";
+import { FeatureNavigation } from "@/components/FeatureNavigation";
 
 const capabilities = [
   {
@@ -279,6 +280,9 @@ export default function ContentDNAFeaturePage() {
           </div>
         </div>
       </section>
+
+      {/* Explore More Features */}
+      <FeatureNavigation currentFeatureId="content-dna" />
 
       {/* CTA Section */}
       <section className="py-20 bg-primary text-primary-foreground">
