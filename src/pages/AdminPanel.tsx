@@ -1370,7 +1370,11 @@ const AdminPanel = () => {
 
             {/* Email Templates Tab */}
             <TabsContent value="templates" className="mt-4 space-y-4">
-              <EmailTemplatesTab />
+              <EmailTemplatesTab 
+                tenants={tenants.map(t => ({ id: t.id, institution_name: t.institution_name }))}
+                users={users}
+                onEmailSent={fetchData}
+              />
             </TabsContent>
 
             {/* Sharing & Collaboration Tab */}
