@@ -210,23 +210,45 @@ const Index = () => {
               </Link>
 
               {/* Step 2: Create */}
-              <div className="grid grid-rows-2 gap-4 h-full">
+              <div className="grid grid-rows-3 gap-3 h-full">
                 <Link to="/build" className="block">
                   <Card className="h-full cursor-pointer card-workflow card-workflow-cognitive group">
-                    <CardContent className="p-5 h-full flex flex-col justify-center">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-8 h-8 rounded-full bg-pillar-cognitive/10 flex items-center justify-center text-sm font-bold text-pillar-cognitive">
+                    <CardContent className="p-4 h-full flex flex-col justify-center">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-7 h-7 rounded-full bg-pillar-cognitive/10 flex items-center justify-center text-xs font-bold text-pillar-cognitive">
                           2a
                         </div>
                         <Badge variant="outline" className="text-xs bg-pillar-cognitive/5">Create</Badge>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="icon-container icon-container-lg bg-pillar-cognitive/10 shrink-0">
-                          <PenTool className="w-6 h-6 text-pillar-cognitive" />
+                      <div className="flex items-center gap-3">
+                        <div className="icon-container icon-container-md bg-pillar-cognitive/10 shrink-0">
+                          <PenTool className="w-5 h-5 text-pillar-cognitive" />
                         </div>
                         <div>
-                          <h3 className="font-serif font-semibold text-base mb-1">Message Builder</h3>
-                          <p className="text-sm text-muted-foreground">Generate AI-powered messages tailored to your audience</p>
+                          <h3 className="font-serif font-semibold text-sm mb-0.5">Message Builder</h3>
+                          <p className="text-xs text-muted-foreground">Generate AI-powered messages</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+                <Link to="/byoc" className="block">
+                  <Card className="h-full cursor-pointer card-workflow group relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-secondary/40 group-hover:bg-secondary/70 transition-colors" />
+                    <CardContent className="p-4 h-full flex flex-col justify-center">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-7 h-7 rounded-full bg-secondary/10 flex items-center justify-center text-xs font-bold text-secondary">
+                          2b
+                        </div>
+                        <Badge variant="outline" className="text-xs bg-secondary/5">Import</Badge>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="icon-container icon-container-md bg-secondary/10 shrink-0">
+                          <Upload className="w-5 h-5 text-secondary" />
+                        </div>
+                        <div>
+                          <h3 className="font-serif font-semibold text-sm mb-0.5">Bring Your Own Comm</h3>
+                          <p className="text-xs text-muted-foreground">Import docs, PDFs & emails</p>
                         </div>
                       </div>
                     </CardContent>
@@ -234,20 +256,20 @@ const Index = () => {
                 </Link>
                 <Link to="/evaluate" className="block">
                   <Card className="h-full cursor-pointer card-workflow card-workflow-authority group">
-                    <CardContent className="p-5 h-full flex flex-col justify-center">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-8 h-8 rounded-full bg-pillar-authority/10 flex items-center justify-center text-sm font-bold text-pillar-authority">
-                          2b
+                    <CardContent className="p-4 h-full flex flex-col justify-center">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-7 h-7 rounded-full bg-pillar-authority/10 flex items-center justify-center text-xs font-bold text-pillar-authority">
+                          2c
                         </div>
                         <Badge variant="outline" className="text-xs bg-pillar-authority/5">Evaluate</Badge>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="icon-container icon-container-lg bg-pillar-authority/10 shrink-0">
-                          <FileText className="w-6 h-6 text-pillar-authority" />
+                      <div className="flex items-center gap-3">
+                        <div className="icon-container icon-container-md bg-pillar-authority/10 shrink-0">
+                          <FileText className="w-5 h-5 text-pillar-authority" />
                         </div>
                         <div>
-                          <h3 className="font-serif font-semibold text-base mb-1">Evaluate Message</h3>
-                          <p className="text-sm text-muted-foreground">Score existing content against persuasion framework</p>
+                          <h3 className="font-serif font-semibold text-sm mb-0.5">Evaluate Message</h3>
+                          <p className="text-xs text-muted-foreground">Score against persuasion framework</p>
                         </div>
                       </div>
                     </CardContent>
@@ -348,8 +370,8 @@ const Index = () => {
                     <div className="icon-container icon-container-md bg-secondary/10 mb-3">
                       <Upload className="w-5 h-5 text-secondary" />
                     </div>
-                    <h3 className="font-medium text-sm mb-1">Import & Evaluate</h3>
-                    <p className="text-xs text-muted-foreground">Upload existing content</p>
+                    <h3 className="font-medium text-sm mb-1">BYOC</h3>
+                    <p className="text-xs text-muted-foreground">Import your own comms</p>
                   </CardContent>
                 </Card>
               </Link>
