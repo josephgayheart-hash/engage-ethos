@@ -17,6 +17,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { CreateTemplateDialog } from "@/components/library/CreateTemplateDialog";
 import { AdminApprovalPanel } from "@/components/library/AdminApprovalPanel";
 import type { SharedTemplate, LibraryFilters, LibraryEntryStatus } from "@/types/library";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Search, 
   ArrowLeft,
@@ -35,7 +37,9 @@ import {
   Dna,
   Route,
   Pencil,
-  ClipboardCheck
+  ClipboardCheck,
+  LayoutGrid,
+  List
 } from "lucide-react";
 
 const statusConfig: Record<LibraryEntryStatus, { label: string; icon: typeof CheckCircle; variant: 'default' | 'secondary' | 'outline' }> = {
@@ -56,7 +60,18 @@ const SharedLibrary = () => {
   const [createOpen, setCreateOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
-  const [viewMode, setViewMode] = useState<'browse' | 'admin'>('browse');
+  const [adminViewMode, setAdminViewMode] = useState<'browse' | 'admin'>('browse');
+  
+  // View mode state (persisted in localStorage)
+  const [viewMode, setViewMode] = useState<'card' | 'list'>(() => {
+    const stored = localStorage.getItem('sharedLibraryViewMode');
+    return (stored === 'list' ? 'list' : 'card') as 'card' | 'list';
+  });
+  
+  const toggleViewMode = (mode: 'card' | 'list') => {
+    setViewMode(mode);
+    localStorage.setItem('sharedLibraryViewMode', mode);
+  };
 
   const playbooks = getPlaybooks();
   const pendingCount = templates.filter(t => t.status === 'submitted').length;
@@ -138,8 +153,8 @@ const SharedLibrary = () => {
               <div className="flex gap-2 flex-wrap">
                 {pendingCount > 0 && (
                   <Button 
-                    variant={viewMode === 'admin' ? 'default' : 'outline'}
-                    onClick={() => setViewMode(viewMode === 'admin' ? 'browse' : 'admin')}
+                    variant={adminViewMode === 'admin' ? 'default' : 'outline'}
+                    onClick={() => setAdminViewMode(adminViewMode === 'admin' ? 'browse' : 'admin')}
                     className="flex items-center gap-2"
                   >
                     <ShieldCheck className="w-4 h-4" />
@@ -167,7 +182,7 @@ const SharedLibrary = () => {
       
       <main className="container mx-auto px-4 pb-8">
         <div className="max-w-6xl mx-auto">
-          {viewMode === 'admin' ? (
+          {adminViewMode === 'admin' ? (
             /* Admin Approval View */
             <AdminApprovalPanel 
               templates={templates} 
@@ -287,6 +302,31 @@ const SharedLibrary = () => {
                 </TabsList>
               </Tabs>
 
+              {/* View Toggle & Results Count */}
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-sm text-muted-foreground">
+                  {filteredTemplates.length} playbook{filteredTemplates.length !== 1 ? 's' : ''}
+                </p>
+                <div className="flex items-center border border-border rounded-lg p-0.5 bg-muted/50">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`h-7 px-2 ${viewMode === 'card' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                    onClick={() => toggleViewMode('card')}
+                  >
+                    <LayoutGrid className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`h-7 px-2 ${viewMode === 'list' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                    onClick={() => toggleViewMode('list')}
+                  >
+                    <List className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
               {/* Playbooks Grid */}
               {filteredTemplates.length === 0 ? (
                 <Card className="text-center py-12">
@@ -299,8 +339,47 @@ const SharedLibrary = () => {
                     <Button onClick={() => setCreateOpen(true)}>Create Playbook</Button>
                   </CardContent>
                 </Card>
+              ) : viewMode === 'list' ? (
+                /* List View */
+                <Card>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Title</TableHead>
+                        <TableHead>Playbook</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Owner</TableHead>
+                        <TableHead>Updated</TableHead>
+                        <TableHead>Version</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredTemplates.map((template) => (
+                        <TableRow 
+                          key={template.id} 
+                          className="cursor-pointer hover:bg-muted/50"
+                          onClick={() => handleCardClick(template.id)}
+                        >
+                          <TableCell>
+                            <span className="font-medium truncate max-w-[200px] block">{template.title}</span>
+                          </TableCell>
+                          <TableCell>{template.playbook || '-'}</TableCell>
+                          <TableCell>
+                            <StatusBadge status={template.status} />
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">{template.owner}</TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {new Date(template.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">v{template.version}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Card>
               ) : (
-              <div className="grid md:grid-cols-2 gap-4">
+                /* Card View */
+                <div className="grid md:grid-cols-2 gap-4">
                   {filteredTemplates.map((template) => (
                     <Card 
                       key={template.id} 

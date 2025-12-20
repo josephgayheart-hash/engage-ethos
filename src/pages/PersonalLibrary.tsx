@@ -15,6 +15,7 @@ import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { useAuth } from "@/contexts/AuthContext";
 import { CreateTemplateDialog } from "@/components/library/CreateTemplateDialog";
 import type { SavedMessage, LibraryFilters, SortOption } from "@/types/library";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { 
   Search, 
   ArrowLeft,
@@ -33,7 +34,9 @@ import {
   Calendar,
   User,
   ChevronRight,
-  Building2
+  Building2,
+  LayoutGrid,
+  List
 } from "lucide-react";
 
 const channelIcons = {
@@ -55,6 +58,17 @@ const PersonalLibrary = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [submitToSharedOpen, setSubmitToSharedOpen] = useState(false);
   const [messageToSubmit, setMessageToSubmit] = useState<SavedMessage | null>(null);
+  
+  // View mode state (persisted in localStorage)
+  const [viewMode, setViewMode] = useState<'card' | 'list'>(() => {
+    const stored = localStorage.getItem('personalLibraryViewMode');
+    return (stored === 'list' ? 'list' : 'card') as 'card' | 'list';
+  });
+  
+  const toggleViewMode = (mode: 'card' | 'list') => {
+    setViewMode(mode);
+    localStorage.setItem('personalLibraryViewMode', mode);
+  };
 
   const filteredMessages = filterMessages(filters, sort);
 
@@ -264,6 +278,31 @@ const PersonalLibrary = () => {
             </CardContent>
           </Card>
 
+          {/* View Toggle & Results Count */}
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm text-muted-foreground">
+              {filteredMessages.length} message{filteredMessages.length !== 1 ? 's' : ''}
+            </p>
+            <div className="flex items-center border border-border rounded-lg p-0.5 bg-muted/50">
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`h-7 px-2 ${viewMode === 'card' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                onClick={() => toggleViewMode('card')}
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`h-7 px-2 ${viewMode === 'list' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                onClick={() => toggleViewMode('list')}
+              >
+                <List className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
           {/* Messages List */}
           {filteredMessages.length === 0 ? (
             <Card className="text-center py-12">
@@ -278,7 +317,63 @@ const PersonalLibrary = () => {
                 </Link>
               </CardContent>
             </Card>
+          ) : viewMode === 'list' ? (
+            /* List View */
+            <Card>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Channel</TableHead>
+                    <TableHead>Audience</TableHead>
+                    <TableHead>Moment</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredMessages.map((message) => (
+                    <TableRow 
+                      key={message.id} 
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => handleCardClick(message.id)}
+                    >
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium truncate max-w-[200px]">{message.title}</span>
+                          {message.approved && (
+                            <Badge variant="default" className="shrink-0 bg-green-600 text-xs">
+                              <CheckCircle className="w-3 h-3" />
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="capitalize">{message.channel}</TableCell>
+                      <TableCell>{message.audience}</TableCell>
+                      <TableCell>{message.moment}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {new Date(message.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => handleSubmitToShared(message, e)} title="Submit to University Library">
+                            <Library className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => handleDuplicate(message.id, e)} title="Duplicate">
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => handleDelete(message.id, e)} title="Delete">
+                            <Trash2 className="w-4 h-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
           ) : (
+            /* Card View */
             <div className="space-y-4">
               {filteredMessages.map((message) => (
                 <Card 
