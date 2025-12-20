@@ -460,10 +460,10 @@ const BuildPage = () => {
       <Header />
       
       {/* Page Header with solid colored wave background */}
-      <div className="relative overflow-hidden pb-8">
+      <div className="relative overflow-hidden pb-12">
         <WaveBackground variant="teal" />
         
-        <div className="relative container mx-auto px-4 pt-6 pb-4 max-w-7xl">
+        <div className="relative container mx-auto px-4 pt-10 pb-8 max-w-7xl">
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
             <Link to="/dashboard" className="hover:text-foreground transition-colors flex items-center gap-1">
