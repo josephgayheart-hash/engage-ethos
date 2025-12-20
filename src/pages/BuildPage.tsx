@@ -129,8 +129,8 @@ const BuildPage = () => {
   );
   const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfig | null>(null);
   const [context, setContext] = useState<MessageContext>({
-    audience: (remixState?.remixContext?.audience as any) || 'first-year',
-    moment: (remixState?.remixContext?.moment as any) || 'early-term',
+    audience: (remixState?.remixContext?.audience as any) || undefined,
+    moment: (remixState?.remixContext?.moment as any) || undefined,
     channel: (remixState?.remixContext?.channel as any) || 'email',
   });
   const [selectedChannels, setSelectedChannels] = useState<Channel[]>(
