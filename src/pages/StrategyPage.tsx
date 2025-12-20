@@ -653,11 +653,9 @@ const StrategyPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      {/* Page Header with wave background */}
-      <div className="relative overflow-hidden border-b border-border/50">
-        <WaveBackground />
-        <div className="absolute inset-0 bg-zone-hero opacity-50" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_hsl(45_93%_47%_/_0.06),_transparent_50%)]" />
+      {/* Page Header with solid colored wave background */}
+      <div className="relative overflow-hidden border-b border-border/30">
+        <WaveBackground variant="amber" />
         
         <div className="relative container mx-auto px-4 py-6 max-w-5xl">
           {/* Breadcrumb */}
