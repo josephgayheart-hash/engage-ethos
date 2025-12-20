@@ -1,224 +1,271 @@
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { 
+  ArrowLeft, 
   ArrowRight,
-  Sparkles,
-  ClipboardCheck,
-  BarChart3,
-  Shield,
-  CheckCircle2,
-  AlertTriangle,
+  FileText, 
   Target,
-  Brain,
-  ArrowLeft,
-  Zap,
-  TrendingUp
-} from 'lucide-react';
-import uplaybookLogo from '@/assets/uplaybook-logo.png';
+  Shield,
+  Heart,
+  Lightbulb,
+  Users,
+  CheckCircle2,
+  BarChart3,
+  Sparkles,
+  AlertTriangle,
+  ThumbsUp
+} from "lucide-react";
+import uplaybookLogo from "@/assets/uplaybook-logo.png";
 
-const scoringCriteria = [
-  { name: 'Brand Alignment', score: 92, color: 'hsl(82_85%_55%)' },
-  { name: 'Voice Consistency', score: 87, color: 'hsl(270_70%_60%)' },
-  { name: 'Persuasion Principles', score: 78, color: 'hsl(200_100%_50%)' },
-  { name: 'Accessibility', score: 94, color: 'hsl(173_58%_39%)' },
-  { name: 'Emotional Resonance', score: 85, color: 'hsl(340_75%_55%)' },
+const pillars = [
+  { 
+    icon: Shield, 
+    name: "Authority", 
+    description: "Does your message establish credibility and institutional expertise?",
+    color: "text-blue-600",
+    bgColor: "bg-blue-500/10"
+  },
+  { 
+    icon: Target, 
+    name: "Relevance", 
+    description: "Is the content tailored to your audience's specific needs and stage?",
+    color: "text-green-600",
+    bgColor: "bg-green-500/10"
+  },
+  { 
+    icon: Heart, 
+    name: "Emotional Appeal", 
+    description: "Does it connect on a human level and inspire action?",
+    color: "text-red-600",
+    bgColor: "bg-red-500/10"
+  },
+  { 
+    icon: Lightbulb, 
+    name: "Clarity", 
+    description: "Is the message clear, concise, and easy to understand?",
+    color: "text-amber-600",
+    bgColor: "bg-amber-500/10"
+  },
+  { 
+    icon: Users, 
+    name: "Social Proof", 
+    description: "Are there elements that build trust through community validation?",
+    color: "text-purple-600",
+    bgColor: "bg-purple-500/10"
+  },
+];
+
+const scoreExamples = [
+  { pillar: "Authority", score: 85, feedback: "Strong use of institutional voice and credentials" },
+  { pillar: "Relevance", score: 72, feedback: "Could better address first-gen student concerns" },
+  { pillar: "Emotional Appeal", score: 90, feedback: "Excellent warmth and connection" },
+  { pillar: "Clarity", score: 65, feedback: "Some jargon may confuse recipients" },
+  { pillar: "Social Proof", score: 78, feedback: "Good peer testimonials included" },
 ];
 
 const features = [
   {
     icon: BarChart3,
-    title: 'Multi-Dimensional Scoring',
-    description: 'Evaluate across brand alignment, voice, persuasion science, and accessibility—all in one analysis.',
-  },
-  {
-    icon: Shield,
-    title: 'Brand Platform Matching',
-    description: 'See exactly how your message maps to your brand pillars, promise, and positioning.',
-  },
-  {
-    icon: Brain,
-    title: 'AI-Powered Suggestions',
-    description: 'Get specific, actionable recommendations to improve each area of your message.',
+    title: "Pillar-by-Pillar Scoring",
+    description: "Get detailed scores for each of the five persuasion pillars with specific feedback.",
   },
   {
     icon: Target,
-    title: 'Before & After Comparison',
-    description: 'Track improvements as you refine. See your score climb in real-time.',
+    title: "Audience-Aware Analysis",
+    description: "Evaluation considers your specific audience type and journey moment for relevance.",
+  },
+  {
+    icon: Sparkles,
+    title: "AI-Powered Suggestions",
+    description: "Receive concrete recommendations to strengthen weak areas in your messaging.",
+  },
+  {
+    icon: CheckCircle2,
+    title: "Brand Alignment Check",
+    description: "See how well your message aligns with your institutional brand platform.",
   },
 ];
 
 export default function EvaluateFeaturePage() {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <ArrowLeft className="w-4 h-4 text-muted-foreground" />
-            <img src={uplaybookLogo} alt="UPlaybook.AI" className="h-8 w-auto" />
-          </Link>
-          <div className="flex gap-3">
-            <Button asChild variant="outline" size="sm">
-              <Link to="/login">Sign In</Link>
-            </Button>
-            <Button asChild size="sm" className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)]">
-              <Link to="/request-access">Join Beta</Link>
-            </Button>
+      <nav className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link to="/" className="flex items-center gap-2">
+              <img src={uplaybookLogo} alt="µPlaybook" className="h-8" />
+            </Link>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link to="/">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
+            </Link>
+            <Link to="/login">
+              <Button variant="outline" size="sm">Sign In</Button>
+            </Link>
+            <Link to="/request-access">
+              <Button size="sm" className="bg-primary hover:bg-primary/90">
+                Join Beta
+              </Button>
+            </Link>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <header className="relative overflow-hidden">
-        <div className="absolute inset-0 gradient-hero-landing" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(340_75%_90%_/_0.4),_transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_hsl(173_58%_85%_/_0.3),_transparent_50%)]" />
+      <section className="relative overflow-hidden py-20 md:py-32">
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-background to-amber-500/5" />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-orange-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl" />
         
-        {/* Lens flares */}
-        <div className="absolute top-24 right-[16%] w-44 h-44 bg-[hsl(340_75%_55%_/_0.2)] rounded-full blur-3xl animate-pulse-subtle" />
-        <div className="absolute bottom-28 left-[12%] w-52 h-52 bg-[hsl(82_85%_55%_/_0.15)] rounded-full blur-3xl" />
-        <div className="absolute top-1/2 right-[40%] w-36 h-36 bg-[hsl(200_100%_50%_/_0.18)] rounded-full blur-2xl" />
-        
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-36">
-          <div className="text-center space-y-8">
-            <Badge 
-              variant="secondary" 
-              className="bg-[hsl(340_75%_55%_/_0.15)] text-[hsl(340_75%_45%)] border-[hsl(340_75%_55%_/_0.3)] px-4 py-1.5 text-sm font-semibold animate-fade-in"
-            >
-              <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-              AI Evaluation Engine
+        <div className="container mx-auto px-4 relative">
+          <div className="max-w-4xl mx-auto text-center">
+            <Badge className="mb-6 bg-orange-500/10 text-orange-600 border-orange-500/20">
+              <FileText className="w-3 h-3 mr-1" />
+              AI Message Analysis
             </Badge>
-
-            <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-[hsl(340_75%_55%)] to-[hsl(340_75%_40%)] mb-6 shadow-2xl">
-                <ClipboardCheck className="w-10 h-10 text-white" />
-              </div>
-            </div>
-
-            <h1 
-              className="font-serif text-4xl sm:text-5xl lg:text-6xl text-foreground tracking-tight animate-fade-in max-w-4xl mx-auto"
-              style={{ animationDelay: '0.2s' }}
-            >
-              <span className="text-[hsl(340_75%_50%)]">Evaluate.</span>
-              <span className="block text-2xl sm:text-3xl lg:text-4xl mt-3 text-muted-foreground font-sans font-normal">
-                Score messages against your brand.
-              </span>
+            <h1 className="font-serif text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
+              Score Your Messages
+              <span className="block text-orange-600">Against Five Pillars</span>
             </h1>
-
-            <p 
-              className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed animate-fade-in"
-              style={{ animationDelay: '0.3s' }}
-            >
-              Paste any message—existing content or new drafts. Get instant scoring across brand alignment, voice consistency, and persuasion effectiveness.
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Paste any message and get detailed feedback based on the five-pillar persuasion framework—Authority, Relevance, Emotional Appeal, Clarity, and Social Proof.
             </p>
-
-            <div 
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4 animate-fade-in"
-              style={{ animationDelay: '0.4s' }}
-            >
-              <Button 
-                asChild
-                size="lg"
-                className="bg-gradient-to-r from-[hsl(340_75%_55%)] to-[hsl(340_75%_40%)] text-white hover:from-[hsl(340_75%_50%)] hover:to-[hsl(340_75%_35%)] shadow-[0_0_30px_hsl(340_75%_55%_/_0.3)] hover:shadow-[0_0_40px_hsl(340_75%_55%_/_0.5)] transition-all duration-300 text-base px-8 py-6 font-bold border-0"
-              >
-                <Link to="/request-access">
-                  Start Evaluating Content
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/request-access">
+                <Button size="lg" className="gap-2 bg-orange-600 hover:bg-orange-700">
+                  Request Beta Access
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Wave Divider */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto" preserveAspectRatio="none">
-            <path d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="hsl(340 40% 96%)" />
-          </svg>
+      {/* Five Pillars */}
+      <section className="py-16 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="font-serif text-3xl font-bold text-foreground mb-4">
+              The Five-Pillar Framework
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Every message is evaluated against five research-backed dimensions of effective communication.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-5 gap-4 max-w-5xl mx-auto">
+            {pillars.map((pillar, i) => (
+              <div key={i} className="bg-card rounded-xl border border-border p-5 text-center hover:shadow-lg transition-shadow">
+                <div className={`w-12 h-12 rounded-xl ${pillar.bgColor} flex items-center justify-center mx-auto mb-3`}>
+                  <pillar.icon className={`w-6 h-6 ${pillar.color}`} />
+                </div>
+                <h3 className="font-semibold mb-2">{pillar.name}</h3>
+                <p className="text-xs text-muted-foreground">{pillar.description}</p>
+              </div>
+            ))}
+          </div>
         </div>
-      </header>
+      </section>
 
-      {/* Mock Scoring Interface */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(340_40%_96%)] relative overflow-hidden">
-        <div className="absolute top-12 right-[10%] w-40 h-40 bg-[hsl(340_75%_55%_/_0.12)] rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-[8%] w-48 h-48 bg-[hsl(82_85%_55%_/_0.1)] rounded-full blur-3xl" />
-        
-        <div className="max-w-5xl mx-auto relative z-10">
-          <div className="bg-white rounded-3xl shadow-2xl border border-[hsl(340_75%_55%_/_0.2)] overflow-hidden">
-            {/* Mock Header */}
-            <div className="bg-gradient-to-r from-[hsl(340_75%_55%)] to-[hsl(340_75%_40%)] px-6 py-4 flex items-center gap-3">
-              <div className="flex gap-2">
-                <div className="w-3 h-3 rounded-full bg-white/30" />
-                <div className="w-3 h-3 rounded-full bg-white/30" />
-                <div className="w-3 h-3 rounded-full bg-white/30" />
-              </div>
-              <span className="text-white/80 text-sm font-medium ml-4">Message Evaluator</span>
-            </div>
-            
-            <div className="p-8 grid lg:grid-cols-2 gap-8">
-              {/* Left: Message Input */}
-              <div>
-                <div className="flex items-center gap-2 mb-4">
-                  <ClipboardCheck className="w-5 h-5 text-[hsl(340_75%_50%)]" />
-                  <span className="font-semibold text-foreground">Your Message</span>
-                </div>
-                <div className="bg-muted/30 rounded-xl p-4 border border-border/50 min-h-[200px]">
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    Dear Prospective Student,
-                    <br /><br />
-                    We are pleased to inform you that your application has been received. Our admissions committee will carefully review your materials...
-                  </p>
-                </div>
-                
-                {/* Quick Feedback */}
-                <div className="mt-4 p-4 bg-[hsl(45_93%_95%)] rounded-xl border border-[hsl(45_93%_80%)]">
-                  <div className="flex items-start gap-2">
-                    <AlertTriangle className="w-4 h-4 text-[hsl(45_93%_35%)] flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-muted-foreground">
-                      <span className="font-semibold text-foreground">Suggestion:</span> Opening feels formal and distant. Consider a warmer, more personal approach.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Right: Scoring Results */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-[hsl(340_75%_50%)]" />
-                    <span className="font-semibold text-foreground">Brand Score</span>
-                  </div>
-                  <div className="text-3xl font-bold text-[hsl(340_75%_50%)]">87<span className="text-lg text-muted-foreground">/100</span></div>
-                </div>
+      {/* Evaluation Demo */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-12 items-start">
+              {/* Input Mock */}
+              <div className="bg-card rounded-2xl border border-border p-6 shadow-xl">
+                <h3 className="font-semibold mb-4 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-orange-500" />
+                  Message Input
+                </h3>
                 
                 <div className="space-y-4">
-                  {scoringCriteria.map((criteria) => (
-                    <div key={criteria.name}>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="text-muted-foreground">{criteria.name}</span>
-                        <span className="font-semibold" style={{ color: criteria.color }}>{criteria.score}%</span>
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Audience Context</label>
+                    <div className="p-3 bg-orange-50 dark:bg-orange-950/30 rounded-lg border border-orange-200 dark:border-orange-800">
+                      <span className="text-sm">First-Year Students</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Journey Moment</label>
+                    <div className="p-3 bg-muted rounded-lg border border-border">
+                      <span className="text-sm">Early Term</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Your Message</label>
+                    <div className="p-4 bg-muted/50 rounded-lg border border-border min-h-[120px]">
+                      <p className="text-sm text-muted-foreground italic">
+                        "Dear Student, We hope you're settling in well. Remember that advising appointments are available through the student portal. Best regards, Student Services"
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <Button className="w-full mt-6 gap-2 bg-orange-600 hover:bg-orange-700">
+                  <Sparkles className="w-4 h-4" />
+                  Evaluate Message
+                </Button>
+              </div>
+
+              {/* Results Mock */}
+              <div className="bg-card rounded-2xl border border-border p-6 shadow-xl">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5 text-orange-500" />
+                    Evaluation Results
+                  </h3>
+                  <Badge className="bg-amber-100 text-amber-800 border-amber-300">
+                    Overall: 78/100
+                  </Badge>
+                </div>
+
+                <div className="space-y-3">
+                  {scoreExamples.map((item, i) => (
+                    <div key={i} className="p-3 bg-muted/50 rounded-lg border border-border">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium text-sm">{item.pillar}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full rounded-full ${
+                                item.score >= 80 ? 'bg-green-500' :
+                                item.score >= 70 ? 'bg-amber-500' : 'bg-orange-500'
+                              }`}
+                              style={{ width: `${item.score}%` }}
+                            />
+                          </div>
+                          <span className="text-sm font-medium w-8">{item.score}</span>
+                        </div>
                       </div>
-                      <div className="h-2 bg-muted rounded-full overflow-hidden">
-                        <div 
-                          className="h-full rounded-full transition-all duration-1000"
-                          style={{ 
-                            width: `${criteria.score}%`,
-                            backgroundColor: criteria.color
-                          }}
-                        />
-                      </div>
+                      <p className="text-xs text-muted-foreground flex items-start gap-1">
+                        {item.score >= 80 ? (
+                          <ThumbsUp className="w-3 h-3 text-green-500 mt-0.5 flex-shrink-0" />
+                        ) : (
+                          <AlertTriangle className="w-3 h-3 text-amber-500 mt-0.5 flex-shrink-0" />
+                        )}
+                        {item.feedback}
+                      </p>
                     </div>
                   ))}
                 </div>
-                
-                <div className="mt-6 p-4 bg-[hsl(82_85%_55%_/_0.1)] rounded-xl border border-[hsl(82_85%_55%_/_0.2)]">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[hsl(82_85%_45%)]" />
-                    <span className="text-sm font-semibold text-foreground">Strongest: Accessibility</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Reading level and structure are well-optimized for broad audiences.
+
+                <div className="mt-6 p-4 bg-orange-50 dark:bg-orange-950/20 rounded-xl border border-orange-200 dark:border-orange-800">
+                  <h4 className="font-medium text-sm mb-2 flex items-center gap-2">
+                    <Lightbulb className="w-4 h-4 text-orange-600" />
+                    Top Suggestion
+                  </h4>
+                  <p className="text-sm text-muted-foreground">
+                    Consider adding a personal touch by using the student's first name and referencing specific resources available to first-generation students.
                   </p>
                 </div>
               </div>
@@ -228,115 +275,76 @@ export default function EvaluateFeaturePage() {
       </section>
 
       {/* Features Grid */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background relative overflow-hidden">
-        <div className="absolute top-16 left-[18%] w-44 h-44 bg-[hsl(340_75%_55%_/_0.1)] rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-[15%] w-52 h-52 bg-[hsl(82_85%_55%_/_0.1)] rounded-full blur-3xl" />
-        
-        <div className="max-w-6xl mx-auto relative z-10">
-          <div className="text-center mb-16">
-            <Badge className="mb-4 bg-[hsl(340_75%_55%_/_0.2)] text-[hsl(340_75%_45%)] border-[hsl(340_75%_55%_/_0.4)]">
-              <Zap className="w-3 h-3 mr-1" />
-              Deep Analysis
-            </Badge>
-            <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-4">
-              More than a <span className="text-[hsl(340_75%_50%)]">spell checker</span>
+      <section className="py-16 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="font-serif text-3xl font-bold text-foreground mb-4">
+              Intelligent Analysis Features
             </h2>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-8">
-            {features.map((feature) => (
-              <div 
-                key={feature.title}
-                className="group bg-card border-2 border-[hsl(340_75%_55%_/_0.2)] rounded-2xl p-8 hover:border-[hsl(340_75%_55%)] hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-              >
-                <div className="p-4 rounded-2xl bg-[hsl(340_75%_55%_/_0.12)] w-fit mb-6 group-hover:scale-110 transition-transform">
-                  <feature.icon className="w-8 h-8 text-[hsl(340_75%_45%)]" />
+          <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+            {features.map((feature, i) => (
+              <div key={i} className="text-center">
+                <div className="w-14 h-14 rounded-xl bg-orange-500/10 flex items-center justify-center mx-auto mb-4">
+                  <feature.icon className="w-7 h-7 text-orange-600" />
                 </div>
-                <h3 className="font-semibold text-xl text-foreground mb-3">{feature.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
+                <h3 className="font-semibold mb-2">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground">{feature.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Before/After Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(173_40%_95%)] relative overflow-hidden">
-        <div className="absolute top-12 right-[10%] w-40 h-40 bg-[hsl(173_58%_39%_/_0.15)] rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-[8%] w-48 h-48 bg-[hsl(340_75%_55%_/_0.1)] rounded-full blur-3xl" />
-        
-        <div className="max-w-4xl mx-auto relative z-10">
-          <div className="text-center mb-12">
-            <Badge className="mb-4 bg-[hsl(173_58%_39%_/_0.2)] text-[hsl(173_58%_30%)] border-[hsl(173_58%_39%_/_0.4)]">
-              <TrendingUp className="w-3 h-3 mr-1" />
-              Track Improvement
-            </Badge>
-            <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-4">
-              Watch your <span className="text-[hsl(173_58%_35%)]">score climb</span>
+      {/* Use Cases */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="font-serif text-3xl font-bold text-foreground mb-8 text-center">
+              Perfect For
             </h2>
-          </div>
-          
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Before */}
-            <div className="bg-white rounded-2xl p-6 border-2 border-[hsl(340_75%_55%_/_0.3)] shadow-lg">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-semibold text-muted-foreground">BEFORE</span>
-                <span className="text-2xl font-bold text-[hsl(340_75%_55%)]">67</span>
-              </div>
-              <p className="text-sm text-muted-foreground italic">
-                "Dear Sir/Madam, We wish to inform you regarding your inquiry about admissions procedures..."
-              </p>
-            </div>
-            
-            {/* After */}
-            <div className="bg-white rounded-2xl p-6 border-2 border-[hsl(82_85%_55%_/_0.4)] shadow-lg">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-semibold text-muted-foreground">AFTER</span>
-                <span className="text-2xl font-bold text-[hsl(82_85%_45%)]">94</span>
-              </div>
-              <p className="text-sm text-muted-foreground italic">
-                "Hi Sarah! Great question about our application process—let me walk you through what to expect..."
-              </p>
+            <div className="grid md:grid-cols-3 gap-6">
+              {[
+                { title: "Reviewing Drafts", description: "Get feedback before sending that important email" },
+                { title: "Training New Staff", description: "Show team members what makes messages effective" },
+                { title: "A/B Testing Ideas", description: "Compare message variations before deployment" },
+              ].map((item, i) => (
+                <div key={i} className="bg-card rounded-xl border border-border p-6 text-center">
+                  <CheckCircle2 className="w-8 h-8 text-orange-500 mx-auto mb-3" />
+                  <h3 className="font-semibold mb-2">{item.title}</h3>
+                  <p className="text-sm text-muted-foreground">{item.description}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(340_65%_50%)] relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-12 right-[12%] w-48 h-48 bg-[hsl(82_85%_55%_/_0.2)] rounded-full blur-3xl" />
-          <div className="absolute bottom-20 left-[8%] w-56 h-56 bg-[hsl(200_100%_50%_/_0.15)] rounded-full blur-3xl" />
-        </div>
-        
-        <div className="max-w-3xl mx-auto text-center relative z-10">
-          <h2 className="font-serif text-3xl sm:text-4xl text-white mb-4">
-            Stop guessing. Start <span className="text-[hsl(82_85%_65%)]">measuring.</span>
+      <section className="py-20 bg-orange-600 text-white">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
+            Ready to Improve Your Messages?
           </h2>
-          <p className="text-white/80 mb-8 text-lg">
-            Every message is an opportunity to strengthen your brand. Know exactly where you stand.
+          <p className="text-lg opacity-90 mb-8 max-w-xl mx-auto">
+            Join the beta to start evaluating and improving your communications.
           </p>
-          <Button 
-            asChild
-            size="lg"
-            className="bg-[hsl(82_85%_55%)] text-primary hover:bg-[hsl(82_85%_50%)] shadow-xl hover:shadow-2xl hover:scale-105 px-8 font-bold transition-all duration-300 rounded-full"
-          >
-            <Link to="/request-access">
+          <Link to="/request-access">
+            <Button size="lg" variant="secondary" className="gap-2">
               Request Beta Access
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
-          </Button>
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </Link>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-10 px-4 sm:px-6 lg:px-8 bg-primary">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <img src={uplaybookLogo} alt="UPlaybook.AI" className="h-7 w-auto max-w-[140px] brightness-0 invert opacity-90" />
-          </div>
-          <p className="text-primary-foreground/60 text-sm">
-            © 2025 UPlaybook.AI. Built for Higher Education.
+      <footer className="py-8 border-t border-border">
+        <div className="container mx-auto px-4 text-center">
+          <img src={uplaybookLogo} alt="µPlaybook" className="h-6 mx-auto mb-4 opacity-60" />
+          <p className="text-sm text-muted-foreground">
+            © {new Date().getFullYear()} µPlaybook. All rights reserved.
           </p>
         </div>
       </footer>

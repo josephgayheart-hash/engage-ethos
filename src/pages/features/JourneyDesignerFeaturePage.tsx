@@ -1,220 +1,247 @@
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { 
+  ArrowLeft, 
   ArrowRight,
-  Sparkles,
-  Route,
+  Map, 
   Calendar,
-  Zap,
-  CheckCircle2,
+  Clock,
+  TrendingUp,
+  FileDown,
+  Layers,
   Mail,
   MessageSquare,
   Phone,
-  Clock,
-  TrendingUp,
-  ArrowLeft,
-  Layers,
-  Target
-} from 'lucide-react';
-import uplaybookLogo from '@/assets/uplaybook-logo.png';
+  Target,
+  Sparkles,
+  CheckCircle2,
+  GitBranch,
+  Zap
+} from "lucide-react";
+import uplaybookLogo from "@/assets/uplaybook-logo.png";
 
-const journeySteps = [
-  { day: 'Day 1', type: 'Email', title: 'Welcome & Introduction', intensity: 'high' },
-  { day: 'Day 3', type: 'SMS', title: 'Quick check-in', intensity: 'low' },
-  { day: 'Day 7', type: 'Email', title: 'Resource overview', intensity: 'medium' },
-  { day: 'Day 10', type: 'Call', title: 'Personal outreach', intensity: 'high' },
-  { day: 'Day 14', type: 'Email', title: 'Event invitation', intensity: 'medium' },
+const journeyPhases = [
+  { week: "Week 1-2", label: "Awareness", intensity: "Low", channels: ["Email", "Social"] },
+  { week: "Week 3-4", label: "Engagement", intensity: "Medium", channels: ["Email", "SMS", "Portal"] },
+  { week: "Week 5-8", label: "Nurturing", intensity: "High", channels: ["Email", "SMS", "Phone"] },
+  { week: "Week 9-12", label: "Conversion", intensity: "Peak", channels: ["All Channels"] },
+];
+
+const cadenceOptions = [
+  { label: "Daily", description: "High-intensity campaigns" },
+  { label: "Twice Weekly", description: "Active engagement" },
+  { label: "Weekly", description: "Steady touchpoints" },
+  { label: "Bi-Weekly", description: "Light touch" },
+  { label: "Monthly", description: "Check-ins only" },
+];
+
+const escalationPatterns = [
+  { label: "Linear", description: "Steady pace throughout" },
+  { label: "Front-Loaded", description: "Heavy start, taper off" },
+  { label: "Back-Loaded", description: "Build momentum toward deadline" },
+  { label: "Bell Curve", description: "Ramp up, peak, wind down" },
 ];
 
 const features = [
   {
     icon: Calendar,
-    title: 'Visual Timeline Builder',
-    description: 'Drag and drop to create communication flows. See your entire journey at a glance.',
+    title: "Date-Aware Planning",
+    description: "Set start and end dates, and the AI maps touchpoints to real calendar dates with deadline awareness.",
   },
   {
     icon: TrendingUp,
-    title: 'Intensity Controls',
-    description: 'Set ramp-up patterns that feel natural. Start soft, build engagement, avoid fatigue.',
-  },
-  {
-    icon: Target,
-    title: 'Goal-Based Planning',
-    description: 'Define the outcome first. The AI suggests optimal timing and channel mix.',
+    title: "Escalation Patterns",
+    description: "Choose how intensity builds—front-loaded, back-loaded, linear, or bell curve progression.",
   },
   {
     icon: Layers,
-    title: 'Template Integration',
-    description: 'Connect journey touchpoints to your approved message templates instantly.',
+    title: "Multi-Channel Orchestration",
+    description: "Coordinate email, SMS, phone, social, and more across a unified timeline.",
   },
-];
-
-const benefits = [
-  'Replace spreadsheet chaos with visual planning',
-  'Coordinate across email, SMS, and phone channels',
-  'Set automatic intensity ramp-ups and cool-downs',
-  'Export to your CRM or marketing platform',
-  'Never lose track of where contacts are in their journey',
+  {
+    icon: FileDown,
+    title: "PDF Export",
+    description: "Download polished journey maps for stakeholder presentations and team alignment.",
+  },
 ];
 
 export default function JourneyDesignerFeaturePage() {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <ArrowLeft className="w-4 h-4 text-muted-foreground" />
-            <img src={uplaybookLogo} alt="UPlaybook.AI" className="h-8 w-auto" />
-          </Link>
-          <div className="flex gap-3">
-            <Button asChild variant="outline" size="sm">
-              <Link to="/login">Sign In</Link>
-            </Button>
-            <Button asChild size="sm" className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)]">
-              <Link to="/request-access">Join Beta</Link>
-            </Button>
+      <nav className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link to="/" className="flex items-center gap-2">
+              <img src={uplaybookLogo} alt="µPlaybook" className="h-8" />
+            </Link>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link to="/">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
+            </Link>
+            <Link to="/login">
+              <Button variant="outline" size="sm">Sign In</Button>
+            </Link>
+            <Link to="/request-access">
+              <Button size="sm" className="bg-primary hover:bg-primary/90">
+                Join Beta
+              </Button>
+            </Link>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <header className="relative overflow-hidden">
-        <div className="absolute inset-0 gradient-hero-landing" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(200_100%_90%_/_0.4),_transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_hsl(82_85%_85%_/_0.3),_transparent_50%)]" />
+      <section className="relative overflow-hidden py-20 md:py-32">
+        <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 via-background to-emerald-500/5" />
+        <div className="absolute top-20 right-10 w-72 h-72 bg-teal-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-10 left-10 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
         
-        {/* Lens flares */}
-        <div className="absolute top-20 right-[20%] w-44 h-44 bg-[hsl(200_100%_50%_/_0.2)] rounded-full blur-3xl animate-pulse-subtle" />
-        <div className="absolute bottom-32 left-[15%] w-52 h-52 bg-[hsl(82_85%_55%_/_0.15)] rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-[40%] w-36 h-36 bg-[hsl(270_70%_60%_/_0.18)] rounded-full blur-2xl" />
-        
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-36">
-          <div className="text-center space-y-8">
-            <Badge 
-              variant="secondary" 
-              className="bg-[hsl(200_100%_50%_/_0.15)] text-[hsl(200_100%_40%)] border-[hsl(200_100%_50%_/_0.3)] px-4 py-1.5 text-sm font-semibold animate-fade-in"
-            >
-              <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-              Visual Journey Planning
+        <div className="container mx-auto px-4 relative">
+          <div className="max-w-4xl mx-auto text-center">
+            <Badge className="mb-6 bg-teal-500/10 text-teal-600 border-teal-500/20">
+              <Map className="w-3 h-3 mr-1" />
+              AI Journey Mapping
             </Badge>
-
-            <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-[hsl(200_100%_50%)] to-[hsl(200_100%_40%)] mb-6 shadow-2xl">
-                <Route className="w-10 h-10 text-white" />
-              </div>
-            </div>
-
-            <h1 
-              className="font-serif text-4xl sm:text-5xl lg:text-6xl text-foreground tracking-tight animate-fade-in max-w-4xl mx-auto"
-              style={{ animationDelay: '0.2s' }}
-            >
-              <span className="text-[hsl(200_100%_45%)]">Journey Designer.</span>
-              <span className="block text-2xl sm:text-3xl lg:text-4xl mt-3 text-muted-foreground font-sans font-normal">
-                Multi-week campaigns, visualized.
-              </span>
+            <h1 className="font-serif text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
+              Design Complete
+              <span className="block text-teal-600">Communication Journeys</span>
             </h1>
-
-            <p 
-              className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed animate-fade-in"
-              style={{ animationDelay: '0.3s' }}
-            >
-              Map communication journeys that actually get used. Visual timelines, intensity controls, and seamless message integration.
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Map multi-week campaigns with cadence controls, escalation patterns, and channel orchestration—then export polished PDFs for your team.
             </p>
-
-            <div 
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4 animate-fade-in"
-              style={{ animationDelay: '0.4s' }}
-            >
-              <Button 
-                asChild
-                size="lg"
-                className="bg-gradient-to-r from-[hsl(200_100%_50%)] to-[hsl(200_100%_40%)] text-white hover:from-[hsl(200_100%_45%)] hover:to-[hsl(200_100%_35%)] shadow-[0_0_30px_hsl(200_100%_50%_/_0.3)] hover:shadow-[0_0_40px_hsl(200_100%_50%_/_0.5)] transition-all duration-300 text-base px-8 py-6 font-bold border-0"
-              >
-                <Link to="/request-access">
-                  Start Designing Journeys
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/request-access">
+                <Button size="lg" className="gap-2 bg-teal-600 hover:bg-teal-700">
+                  Request Beta Access
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Wave Divider */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto" preserveAspectRatio="none">
-            <path d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="hsl(200 40% 96%)" />
-          </svg>
-        </div>
-      </header>
-
-      {/* Visual Journey Demo */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(200_40%_96%)] relative overflow-hidden">
-        <div className="absolute top-12 right-[10%] w-40 h-40 bg-[hsl(200_100%_50%_/_0.15)] rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-[8%] w-48 h-48 bg-[hsl(82_85%_55%_/_0.1)] rounded-full blur-3xl" />
-        
-        <div className="max-w-5xl mx-auto relative z-10">
-          <div className="text-center mb-12">
-            <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-4">
-              See your <span className="text-[hsl(200_100%_45%)]">entire journey</span> at a glance
-            </h2>
-          </div>
-          
-          {/* Mock Timeline */}
-          <div className="bg-white rounded-3xl shadow-2xl border border-[hsl(200_100%_50%_/_0.2)] overflow-hidden">
-            <div className="bg-gradient-to-r from-[hsl(200_100%_50%)] to-[hsl(200_100%_40%)] px-6 py-4 flex items-center gap-3">
-              <div className="flex gap-2">
-                <div className="w-3 h-3 rounded-full bg-white/30" />
-                <div className="w-3 h-3 rounded-full bg-white/30" />
-                <div className="w-3 h-3 rounded-full bg-white/30" />
+      {/* Journey Timeline Demo */}
+      <section className="py-16 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="bg-card rounded-2xl border border-border p-8 shadow-xl">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h3 className="font-semibold text-lg">First-Year Enrollment Journey</h3>
+                  <p className="text-sm text-muted-foreground">12 weeks • 24 touchpoints • 4 channels</p>
+                </div>
+                <div className="flex gap-2">
+                  <Badge variant="outline" className="border-teal-300">
+                    <Calendar className="w-3 h-3 mr-1" />
+                    Aug 1 - Oct 24
+                  </Badge>
+                  <Badge className="bg-teal-600">
+                    <Sparkles className="w-3 h-3 mr-1" />
+                    AI Generated
+                  </Badge>
+                </div>
               </div>
-              <span className="text-white/80 text-sm font-medium ml-4">Fall Welcome Journey</span>
-            </div>
-            
-            <div className="p-8">
-              {/* Timeline Container */}
+
+              {/* Timeline visualization */}
               <div className="relative">
-                {/* Timeline Line */}
-                <div className="absolute top-8 left-0 right-0 h-1 bg-gradient-to-r from-[hsl(200_100%_50%_/_0.3)] via-[hsl(82_85%_55%_/_0.5)] to-[hsl(270_70%_60%_/_0.3)] rounded-full" />
+                <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-teal-500 via-emerald-500 to-green-500" />
                 
-                {/* Timeline Steps */}
-                <div className="relative flex justify-between">
-                  {journeySteps.map((step, i) => {
-                    const icons = { 'Email': Mail, 'SMS': MessageSquare, 'Call': Phone };
-                    const Icon = icons[step.type as keyof typeof icons] || Mail;
-                    const intensityColors = {
-                      'high': 'bg-[hsl(340_75%_55%)] shadow-[0_0_10px_hsl(340_75%_55%_/_0.4)]',
-                      'medium': 'bg-[hsl(82_85%_55%)] shadow-[0_0_10px_hsl(82_85%_55%_/_0.4)]',
-                      'low': 'bg-[hsl(200_100%_50%)] shadow-[0_0_10px_hsl(200_100%_50%_/_0.4)]',
-                    };
-                    
-                    return (
-                      <div key={i} className="flex flex-col items-center group">
-                        <div className={`w-16 h-16 rounded-2xl ${intensityColors[step.intensity as keyof typeof intensityColors]} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
-                          <Icon className="w-7 h-7 text-white" />
+                <div className="space-y-6">
+                  {journeyPhases.map((phase, i) => (
+                    <div key={i} className="relative pl-12">
+                      <div className={`absolute left-2 w-5 h-5 rounded-full border-2 border-background ${
+                        i === 0 ? 'bg-teal-500' : 
+                        i === 1 ? 'bg-teal-400' : 
+                        i === 2 ? 'bg-emerald-500' : 'bg-green-500'
+                      }`} />
+                      
+                      <div className="bg-muted/50 rounded-xl p-4 border border-border hover:border-teal-300 transition-colors">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm font-medium text-muted-foreground">{phase.week}</span>
+                            <span className="font-semibold">{phase.label}</span>
+                          </div>
+                          <Badge variant={
+                            phase.intensity === 'Low' ? 'secondary' :
+                            phase.intensity === 'Medium' ? 'outline' :
+                            phase.intensity === 'High' ? 'default' : 'default'
+                          } className={phase.intensity === 'Peak' ? 'bg-teal-600' : ''}>
+                            {phase.intensity} Intensity
+                          </Badge>
                         </div>
-                        <span className="text-xs font-bold text-[hsl(200_100%_45%)]">{step.day}</span>
-                        <span className="text-xs text-muted-foreground mt-1 text-center max-w-20">{step.title}</span>
+                        <div className="flex gap-2">
+                          {phase.channels.map((ch, j) => (
+                            <Badge key={j} variant="secondary" className="text-xs">
+                              {ch}
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
-                    );
-                  })}
+                    </div>
+                  ))}
                 </div>
               </div>
-              
-              {/* Intensity Legend */}
-              <div className="flex justify-center gap-6 mt-8 pt-6 border-t border-border/50">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-[hsl(340_75%_55%)]" />
-                  <span className="text-xs text-muted-foreground">High Intensity</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Controls Demo */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="font-serif text-3xl font-bold text-foreground mb-4">
+                Precise Cadence Controls
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Fine-tune how often you reach out and how intensity builds over time.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* Cadence Options */}
+              <div className="bg-card rounded-2xl border border-border p-6">
+                <div className="flex items-center gap-2 mb-6">
+                  <Clock className="w-5 h-5 text-teal-600" />
+                  <h3 className="font-semibold">Cadence Frequency</h3>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-[hsl(82_85%_55%)]" />
-                  <span className="text-xs text-muted-foreground">Medium</span>
+                <div className="space-y-3">
+                  {cadenceOptions.map((option, i) => (
+                    <div key={i} className={`p-3 rounded-lg border ${i === 2 ? 'border-teal-300 bg-teal-50 dark:bg-teal-950/20' : 'border-border bg-muted/30'}`}>
+                      <div className="flex items-center gap-2">
+                        {i === 2 && <CheckCircle2 className="w-4 h-4 text-teal-600" />}
+                        <span className="font-medium text-sm">{option.label}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">{option.description}</p>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-[hsl(200_100%_50%)]" />
-                  <span className="text-xs text-muted-foreground">Low</span>
+              </div>
+
+              {/* Escalation Patterns */}
+              <div className="bg-card rounded-2xl border border-border p-6">
+                <div className="flex items-center gap-2 mb-6">
+                  <TrendingUp className="w-5 h-5 text-teal-600" />
+                  <h3 className="font-semibold">Escalation Pattern</h3>
+                </div>
+                <div className="space-y-3">
+                  {escalationPatterns.map((pattern, i) => (
+                    <div key={i} className={`p-3 rounded-lg border ${i === 2 ? 'border-teal-300 bg-teal-50 dark:bg-teal-950/20' : 'border-border bg-muted/30'}`}>
+                      <div className="flex items-center gap-2">
+                        {i === 2 && <CheckCircle2 className="w-4 h-4 text-teal-600" />}
+                        <span className="font-medium text-sm">{pattern.label}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">{pattern.description}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -223,86 +250,97 @@ export default function JourneyDesignerFeaturePage() {
       </section>
 
       {/* Features Grid */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background relative overflow-hidden">
-        <div className="absolute top-16 left-[18%] w-44 h-44 bg-[hsl(200_100%_50%_/_0.1)] rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-[15%] w-52 h-52 bg-[hsl(270_70%_60%_/_0.1)] rounded-full blur-3xl" />
-        
-        <div className="max-w-6xl mx-auto relative z-10">
-          <div className="text-center mb-16">
-            <Badge className="mb-4 bg-[hsl(200_100%_50%_/_0.2)] text-[hsl(200_100%_40%)] border-[hsl(200_100%_50%_/_0.4)]">
-              <Zap className="w-3 h-3 mr-1" />
-              Powerful Features
-            </Badge>
-            <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-4">
-              Planning that <span className="text-[hsl(200_100%_45%)]">makes sense</span>
-            </h2>
-          </div>
-
-          <div className="grid sm:grid-cols-2 gap-8">
-            {features.map((feature) => (
-              <div 
-                key={feature.title}
-                className="group bg-card border-2 border-[hsl(200_100%_50%_/_0.2)] rounded-2xl p-8 hover:border-[hsl(200_100%_50%)] hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-              >
-                <div className="p-4 rounded-2xl bg-[hsl(200_100%_50%_/_0.12)] w-fit mb-6 group-hover:scale-110 transition-transform">
-                  <feature.icon className="w-8 h-8 text-[hsl(200_100%_40%)]" />
+      <section className="py-16 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+            {features.map((feature, i) => (
+              <div key={i} className="text-center">
+                <div className="w-14 h-14 rounded-xl bg-teal-500/10 flex items-center justify-center mx-auto mb-4">
+                  <feature.icon className="w-7 h-7 text-teal-600" />
                 </div>
-                <h3 className="font-semibold text-xl text-foreground mb-3">{feature.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
+                <h3 className="font-semibold mb-2">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground">{feature.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Benefits Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(200_90%_45%)] relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-12 right-[12%] w-48 h-48 bg-[hsl(82_85%_55%_/_0.2)] rounded-full blur-3xl" />
-          <div className="absolute bottom-20 left-[8%] w-56 h-56 bg-[hsl(270_70%_60%_/_0.15)] rounded-full blur-3xl" />
-        </div>
-        
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <Badge className="mb-6 bg-white/20 text-white border-white/30">
-            <Clock className="w-3 h-3 mr-1" />
-            Save Hours Every Week
-          </Badge>
-          <h2 className="font-serif text-3xl sm:text-4xl text-white mb-8">
-            Why comms teams <span className="text-[hsl(82_85%_65%)]">love it</span>
-          </h2>
-          
-          <div className="grid sm:grid-cols-2 gap-4 text-left max-w-2xl mx-auto">
-            {benefits.map((benefit, i) => (
-              <div key={i} className="flex items-start gap-3 bg-white/10 backdrop-blur-sm rounded-xl p-4">
-                <CheckCircle2 className="w-5 h-5 text-[hsl(82_85%_55%)] flex-shrink-0 mt-0.5" />
-                <span className="text-white/90 text-sm">{benefit}</span>
+      {/* Flow Diagram Preview */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="font-serif text-3xl font-bold text-foreground mb-4">
+              Visual Flow Diagrams
+            </h2>
+            <p className="text-muted-foreground mb-8">
+              See your entire journey as an interactive flow diagram with channel-coded touchpoints.
+            </p>
+            
+            <div className="bg-card rounded-2xl border border-border p-8 shadow-xl">
+              <div className="flex items-center justify-center gap-4 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                    <Mail className="w-4 h-4 text-white" />
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+                    <MessageSquare className="w-4 h-4 text-white" />
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                    <Mail className="w-4 h-4 text-white" />
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center">
+                    <Phone className="w-4 h-4 text-white" />
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center">
+                    <Target className="w-4 h-4 text-white" />
+                  </div>
+                </div>
               </div>
-            ))}
+              <p className="text-sm text-muted-foreground mt-6">
+                Interactive ReactFlow diagrams show channel types, timing, and message summaries
+              </p>
+            </div>
           </div>
+        </div>
+      </section>
 
-          <div className="mt-12">
-            <Button 
-              asChild
-              size="lg"
-              className="bg-[hsl(82_85%_55%)] text-primary hover:bg-[hsl(82_85%_50%)] shadow-xl hover:shadow-2xl hover:scale-105 px-8 font-bold transition-all duration-300 rounded-full"
-            >
-              <Link to="/request-access">
-                Request Beta Access
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
+      {/* CTA Section */}
+      <section className="py-20 bg-teal-600 text-white">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
+            Ready to Map Your Journeys?
+          </h2>
+          <p className="text-lg opacity-90 mb-8 max-w-xl mx-auto">
+            Join the beta to start designing complete communication campaigns.
+          </p>
+          <Link to="/request-access">
+            <Button size="lg" variant="secondary" className="gap-2">
+              Request Beta Access
+              <ArrowRight className="w-4 h-4" />
             </Button>
-          </div>
+          </Link>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-10 px-4 sm:px-6 lg:px-8 bg-primary">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <img src={uplaybookLogo} alt="UPlaybook.AI" className="h-7 w-auto max-w-[140px] brightness-0 invert opacity-90" />
-          </div>
-          <p className="text-primary-foreground/60 text-sm">
-            © 2025 UPlaybook.AI. Built for Higher Education.
+      <footer className="py-8 border-t border-border">
+        <div className="container mx-auto px-4 text-center">
+          <img src={uplaybookLogo} alt="µPlaybook" className="h-6 mx-auto mb-4 opacity-60" />
+          <p className="text-sm text-muted-foreground">
+            © {new Date().getFullYear()} µPlaybook. All rights reserved.
           </p>
         </div>
       </footer>

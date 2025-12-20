@@ -50,6 +50,7 @@ import ContentDNAFeaturePage from "./pages/features/ContentDNAFeaturePage";
 import MessageBuilderFeaturePage from "./pages/features/MessageBuilderFeaturePage";
 import JourneyDesignerFeaturePage from "./pages/features/JourneyDesignerFeaturePage";
 import EvaluateFeaturePage from "./pages/features/EvaluateFeaturePage";
+import LibraryFeaturePage from "./pages/features/LibraryFeaturePage";
 
 const queryClient = new QueryClient();
 
@@ -173,6 +174,7 @@ const AppRoutes = () => (
     <Route path="/features/message-builder" element={<MessageBuilderFeaturePage />} />
     <Route path="/features/journey-designer" element={<JourneyDesignerFeaturePage />} />
     <Route path="/features/evaluate" element={<EvaluateFeaturePage />} />
+    <Route path="/features/library" element={<LibraryFeaturePage />} />
     
     {/* Protected routes */}
     <Route path="/dashboard" element={<RequireAuth><Index /></RequireAuth>} />
