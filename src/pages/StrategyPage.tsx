@@ -654,10 +654,10 @@ const StrategyPage = () => {
       <Header />
       
       {/* Page Header with solid colored wave background */}
-      <div className="relative overflow-hidden border-b border-border/30">
+      <div className="relative overflow-hidden pb-8">
         <WaveBackground variant="amber" />
         
-        <div className="relative container mx-auto px-4 py-6 max-w-5xl">
+        <div className="relative container mx-auto px-4 pt-6 pb-4 max-w-5xl">
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
             <Link to="/dashboard" className="hover:text-foreground transition-colors flex items-center gap-1">
