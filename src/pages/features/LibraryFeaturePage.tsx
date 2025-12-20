@@ -33,6 +33,7 @@ import {
   User
 } from "lucide-react";
 import uplaybookLogo from "@/assets/uplaybook-logo.png";
+import { FeatureNavigation } from "@/components/FeatureNavigation";
 
 const workflowSteps = [
   { step: 1, icon: FileText, title: "Save to Personal", description: "Save generated messages or evaluations to your private library", color: "bg-blue-500" },
@@ -521,6 +522,9 @@ export default function LibraryFeaturePage() {
           </div>
         </div>
       </section>
+
+      {/* Explore More Features */}
+      <FeatureNavigation currentFeatureId="library" />
 
       {/* CTA Section */}
       <section className="py-20 bg-primary text-primary-foreground">

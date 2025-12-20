@@ -20,6 +20,7 @@ import {
   Dna
 } from "lucide-react";
 import uplaybookLogo from "@/assets/uplaybook-logo.png";
+import { FeatureNavigation } from "@/components/FeatureNavigation";
 
 const channels = [
   { icon: Mail, label: "Email", color: "text-blue-500", description: "Subject lines, body copy, CTAs" },
@@ -296,6 +297,9 @@ export default function MessageBuilderFeaturePage() {
           </div>
         </div>
       </section>
+
+      {/* Explore More Features */}
+      <FeatureNavigation currentFeatureId="message-builder" />
 
       {/* CTA Section */}
       <section className="py-20 bg-blue-600 text-white">
