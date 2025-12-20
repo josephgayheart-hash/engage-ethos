@@ -70,9 +70,11 @@ export default function LandingPage() {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Hero Section */}
       <header className="relative overflow-hidden">
-        {/* Gradient Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-stone-100 to-slate-100" />
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
+        {/* AI-Inspired Gradient Background */}
+        <div className="absolute inset-0 gradient-hero-landing" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(200_70%_90%_/_0.4),_transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_hsl(173_58%_85%_/_0.3),_transparent_50%)]" />
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-40" />
         
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-28">
           <div className="text-center space-y-6">
@@ -80,7 +82,7 @@ export default function LandingPage() {
             <div className="animate-fade-in">
               <Badge 
                 variant="secondary" 
-                className="bg-primary/10 text-primary border-primary/20 px-4 py-1.5 text-sm font-medium"
+                className="bg-gradient-to-r from-accent/20 to-primary/10 text-accent border-accent/30 px-4 py-1.5 text-sm font-medium shadow-sm"
               >
                 <Sparkles className="w-3.5 h-3.5 mr-1.5" />
                 Beta Access
@@ -240,11 +242,12 @@ export default function LandingPage() {
       </section>
 
       {/* Secondary CTA Section - Navy Blue */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[#1e3a5f] relative overflow-hidden">
-        {/* Decorative elements */}
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary via-[hsl(222_47%_18%)] to-[hsl(200_50%_20%)] relative overflow-hidden">
+        {/* AI-inspired decorative elements */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-[hsl(200_60%_50%_/_0.1)] rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[hsl(220_50%_40%_/_0.1)] rounded-full blur-3xl" />
         </div>
         
         <div className="max-w-3xl mx-auto text-center relative z-10">
@@ -258,7 +261,7 @@ export default function LandingPage() {
             <Button 
               asChild
               size="lg"
-              className="bg-white text-[#1e3a5f] hover:bg-white/90 px-8 font-semibold"
+              className="bg-white text-primary hover:bg-white/90 px-8 font-semibold shadow-lg"
             >
               <Link to="/request-access">
                 Request Beta Access
