@@ -390,13 +390,21 @@ export default function ContentDNAPage() {
                   {selectedProfile ? `Content DNA for ${selectedProfile.name}` : 'Institution-wide Content DNA'}
                 </p>
               </div>
-              {/* DNA Last Updated */}
-              {analysis?.last_analyzed_at && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground border-r border-border pr-4 mr-2">
-                  <Clock className="w-4 h-4" />
-                  <span>DNA updated {new Date(analysis.last_analyzed_at).toLocaleDateString()}</span>
-                </div>
-              )}
+              {/* DNA & Brand Platform Last Updated */}
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                {analysis?.voice_analysis && analysis?.last_analyzed_at && (
+                  <div className="flex items-center gap-2 border-r border-border pr-4">
+                    <Dna className="w-4 h-4" />
+                    <span>Voice DNA {new Date(analysis.last_analyzed_at).toLocaleDateString()}</span>
+                  </div>
+                )}
+                {analysis?.brand_platform && analysis?.last_analyzed_at && (
+                  <div className="flex items-center gap-2 border-r border-border pr-4">
+                    <Target className="w-4 h-4" />
+                    <span>Brand Platform {new Date(analysis.last_analyzed_at).toLocaleDateString()}</span>
+                  </div>
+                )}
+              </div>
               {/* Color Swatches */}
               <div className="flex items-center gap-2">
                 <Tooltip>
@@ -990,6 +998,9 @@ export default function ContentDNAPage() {
                     <h2 className="text-xl font-bold text-foreground">Brand Platform</h2>
                     <p className="text-sm text-muted-foreground">
                       Brand pillars, promise, and proof points extracted from your content
+                      {analysis.last_analyzed_at && (
+                        <span className="ml-2">• Updated {new Date(analysis.last_analyzed_at).toLocaleDateString()}</span>
+                      )}
                     </p>
                   </div>
                   {isAdmin && (
