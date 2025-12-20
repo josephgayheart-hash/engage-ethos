@@ -11,7 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Cloud, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Cloud, Loader2, CheckCircle, AlertCircle, HelpCircle, ChevronDown, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -44,6 +49,7 @@ export function SalesforceCredentialsDialog({
   const [rememberCredentials, setRememberCredentials] = useState(true);
   const [isPushing, setIsPushing] = useState(false);
   const [pushResult, setPushResult] = useState<{ success: boolean; message: string; assetId?: string } | null>(null);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   // Load saved credentials on mount
   useEffect(() => {
@@ -134,12 +140,13 @@ export function SalesforceCredentialsDialog({
     // Reset after close animation
     setTimeout(() => {
       setPushResult(null);
+      setHelpOpen(false);
     }, 200);
   };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Cloud className="w-5 h-5 text-blue-500" />
@@ -169,6 +176,57 @@ export function SalesforceCredentialsDialog({
           </div>
         ) : (
           <div className="space-y-4 py-4">
+            {/* Help Section */}
+            <Collapsible open={helpOpen} onOpenChange={setHelpOpen}>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm" className="w-full justify-between text-muted-foreground hover:text-foreground">
+                  <span className="flex items-center gap-2">
+                    <HelpCircle className="w-4 h-4" />
+                    How do I get API credentials?
+                  </span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${helpOpen ? 'rotate-180' : ''}`} />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-2">
+                <div className="bg-muted/50 rounded-lg p-4 space-y-3 text-sm border">
+                  <p className="font-medium text-foreground">Create an Installed Package in SFMC:</p>
+                  <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
+                    <li>Log into Marketing Cloud and go to <strong>Setup</strong></li>
+                    <li>Navigate to <strong>Platform Tools → Apps → Installed Packages</strong></li>
+                    <li>Click <strong>"New"</strong> to create a new package</li>
+                    <li>Name it (e.g., "uPlaybook Integration")</li>
+                    <li>Click <strong>"Add Component"</strong> → Select <strong>"API Integration"</strong></li>
+                    <li>Choose <strong>"Server-to-Server"</strong> integration type</li>
+                    <li>
+                      Enable these permissions:
+                      <ul className="list-disc list-inside ml-4 mt-1">
+                        <li>Content Builder: Read, Write</li>
+                        <li>Saved Content: Read, Write, Publish</li>
+                      </ul>
+                    </li>
+                    <li>Save and copy your <strong>Client ID</strong>, <strong>Client Secret</strong>, and <strong>Subdomain</strong></li>
+                  </ol>
+                  <div className="pt-2 border-t">
+                    <p className="text-xs text-muted-foreground mb-2">
+                      <strong>Finding your Subdomain:</strong> Look at your SFMC login URL. It follows this pattern:
+                    </p>
+                    <code className="text-xs bg-background px-2 py-1 rounded block">
+                      https://<span className="text-primary font-bold">[subdomain]</span>.auth.marketingcloudapis.com
+                    </code>
+                  </div>
+                  <a 
+                    href="https://developer.salesforce.com/docs/marketing/marketing-cloud/guide/create-integration-enhanced.html" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-2"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    View official Salesforce documentation
+                  </a>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+
             <div className="space-y-2">
               <Label htmlFor="subdomain">SFMC Subdomain</Label>
               <Input
