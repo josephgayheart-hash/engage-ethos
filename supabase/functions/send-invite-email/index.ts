@@ -199,6 +199,9 @@ const handler = async (req: Request): Promise<Response> => {
         subject: `Welcome to UPlaybook.AI - ${institutionName}`,
         email_type: "invite",
         status: "sent",
+        provider: "resend",
+        provider_message_id: responseData?.id || null,
+        delivery_status: "sent",
         metadata: { role, institution: institutionName },
       });
       if (nudgeError) {

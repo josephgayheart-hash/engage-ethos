@@ -213,6 +213,9 @@ const handler = async (req: Request): Promise<Response> => {
         subject,
         email_type: "reengagement",
         status: "sent",
+        provider: "resend",
+        provider_message_id: responseData?.id || null,
+        delivery_status: "sent",
         metadata: { manual: true, institution: institutionName, last_login: lastLoginAt },
       });
       if (nudgeError) {

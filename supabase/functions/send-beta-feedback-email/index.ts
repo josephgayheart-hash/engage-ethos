@@ -224,6 +224,9 @@ const handler = async (req: Request): Promise<Response> => {
         subject: template?.subject?.replace(/\{\{first_name\}\}/g, firstName) || `🎉 Thank You for Joining UPlaybook.AI Beta!`,
         email_type: "beta_feedback",
         status: "sent",
+        provider: "resend",
+        provider_message_id: emailResponse?.data?.id || null,
+        delivery_status: "sent",
         metadata: { manual: true, template_id: template?.id },
       });
       if (nudgeError) {
