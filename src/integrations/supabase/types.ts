@@ -277,12 +277,21 @@ export type Database = {
       }
       email_nudges: {
         Row: {
+          bounced_at: string | null
+          clicked_at: string | null
           created_at: string
+          delivered_at: string | null
+          delivery_status: string | null
           email_count: number
           email_type: string | null
+          events: Json
           id: string
+          last_event_at: string | null
           metadata: Json | null
           nudge_type: string
+          opened_at: string | null
+          provider: string | null
+          provider_message_id: string | null
           recipient_email: string | null
           recipient_name: string | null
           sent_at: string
@@ -292,12 +301,21 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          bounced_at?: string | null
+          clicked_at?: string | null
           created_at?: string
+          delivered_at?: string | null
+          delivery_status?: string | null
           email_count?: number
           email_type?: string | null
+          events?: Json
           id?: string
+          last_event_at?: string | null
           metadata?: Json | null
           nudge_type: string
+          opened_at?: string | null
+          provider?: string | null
+          provider_message_id?: string | null
           recipient_email?: string | null
           recipient_name?: string | null
           sent_at?: string
@@ -307,12 +325,21 @@ export type Database = {
           user_id: string
         }
         Update: {
+          bounced_at?: string | null
+          clicked_at?: string | null
           created_at?: string
+          delivered_at?: string | null
+          delivery_status?: string | null
           email_count?: number
           email_type?: string | null
+          events?: Json
           id?: string
+          last_event_at?: string | null
           metadata?: Json | null
           nudge_type?: string
+          opened_at?: string | null
+          provider?: string | null
+          provider_message_id?: string | null
           recipient_email?: string | null
           recipient_name?: string | null
           sent_at?: string
