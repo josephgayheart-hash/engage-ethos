@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
+import { WaveBackground } from "@/components/WaveBackground";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -123,24 +124,40 @@ const PersonalLibrary = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="flex items-center gap-4 mb-8">
-            <Link to="/dashboard">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            </Link>
+      {/* Page Header with wave background */}
+      <div className="relative overflow-hidden pb-12">
+        <WaveBackground variant="teal" />
+        
+        <div className="relative container mx-auto px-4 pt-10 pb-8">
+          <div className="max-w-6xl mx-auto">
+            {/* Breadcrumb */}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+              <Link to="/dashboard" className="hover:text-foreground transition-colors flex items-center gap-1">
+                <ArrowLeft className="w-4 h-4" />
+                Home
+              </Link>
+              <span>/</span>
+              <span className="text-foreground">Personal Library</span>
+            </div>
+
+            {/* Header */}
             <div>
-              <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground">
+              <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
+                <div className="icon-container icon-container-lg bg-accent/10">
+                  <Library className="w-6 h-6 text-accent" />
+                </div>
                 Personal Message Library
               </h1>
-              <p className="text-muted-foreground mt-1">
+              <p className="text-muted-foreground mt-1 ml-14">
                 Your saved messages and evaluations
               </p>
             </div>
           </div>
+        </div>
+      </div>
+      
+      <main className="container mx-auto px-4 pb-8">
+        <div className="max-w-6xl mx-auto">
 
           {/* Filters */}
           <Card className="mb-6">

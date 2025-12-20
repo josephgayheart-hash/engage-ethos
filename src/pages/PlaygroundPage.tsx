@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
+import { WaveBackground } from "@/components/WaveBackground";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AIBadge } from "@/components/ui/ai-indicator";
@@ -297,10 +298,13 @@ const PlaygroundPage = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
       
-      <main className="flex-1 container mx-auto px-4 py-6 flex flex-col">
-        {/* Breadcrumb & Header */}
-        <div className="space-y-4 mb-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      {/* Page Header with wave background */}
+      <div className="relative overflow-hidden pb-12">
+        <WaveBackground variant="amber" />
+        
+        <div className="relative container mx-auto px-4 pt-10 pb-8">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
             <Link to="/dashboard" className="hover:text-foreground transition-colors flex items-center gap-1">
               <ArrowLeft className="w-4 h-4" />
               Home
@@ -309,32 +313,35 @@ const PlaygroundPage = () => {
             <span className="text-foreground">Copywriter</span>
           </div>
 
+          {/* Header */}
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
               <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
-                <PenTool className="w-7 h-7 text-pillar-susceptibility" />
+                <div className="icon-container icon-container-lg bg-pillar-susceptibility/10">
+                  <PenTool className="w-6 h-6 text-pillar-susceptibility" />
+                </div>
                 Copywriter
               </h1>
-              <p className="text-muted-foreground mt-1">
+              <p className="text-muted-foreground mt-1 ml-14">
                 Create, review, and strategize communications with your institutional voice
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              <AIBadge />
-            </div>
+            <AIBadge />
           </div>
-
-          {/* Context Selector */}
-          <div className="flex items-center justify-between gap-2 sm:gap-4">
-            <div className="flex-1 min-w-0 overflow-x-auto">
-              <ContextSelector
-                selectedProfileId={selectedProfileId}
-                selectedDNAId={selectedDNAId}
-                onProfileChange={handleProfileChange}
-                onDNAChange={handleDNAChange}
-                disabled={isSending}
-              />
-            </div>
+        </div>
+      </div>
+      
+      <main className="flex-1 container mx-auto px-4 pb-6 flex flex-col">
+        {/* Context Selector */}
+        <div className="flex items-center justify-between gap-2 sm:gap-4 mb-4">
+          <div className="flex-1 min-w-0 overflow-x-auto">
+            <ContextSelector
+              selectedProfileId={selectedProfileId}
+              selectedDNAId={selectedDNAId}
+              onProfileChange={handleProfileChange}
+              onDNAChange={handleDNAChange}
+              disabled={isSending}
+            />
           </div>
         </div>
 
