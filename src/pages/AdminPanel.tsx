@@ -160,6 +160,12 @@ interface EmailNudge {
   email_count: number;
   sent_at: string;
   created_at: string;
+  recipient_email?: string;
+  recipient_name?: string;
+  subject?: string;
+  email_type?: string;
+  status?: string;
+  metadata?: Record<string, any>;
   user_name?: string;
   user_email?: string;
   institution_name?: string;
@@ -315,6 +321,7 @@ const AdminPanel = () => {
         const nTenant = tenantsData?.find(t => t.id === n.tenant_id);
         return {
           ...n,
+          metadata: n.metadata as Record<string, any> | undefined,
           user_name: nUser ? `${nUser.first_name} ${nUser.last_name}` : 'Unknown',
           user_email: nUser?.email || 'Unknown',
           institution_name: nTenant?.institution_name || 'Unknown'
@@ -1305,9 +1312,9 @@ const AdminPanel = () => {
                           <TableRow>
                             <TableHead>Type</TableHead>
                             <TableHead>Recipient</TableHead>
+                            <TableHead>Subject</TableHead>
                             <TableHead>Institution</TableHead>
                             <TableHead>Sent</TableHead>
-                            <TableHead>Count</TableHead>
                             <TableHead>Status</TableHead>
                           </TableRow>
                         </TableHeader>
@@ -1316,24 +1323,32 @@ const AdminPanel = () => {
                             <TableRow key={nudge.id}>
                               <TableCell>
                                 <Badge variant="outline" className="capitalize">
-                                  {nudge.nudge_type.replace(/_/g, ' ')}
+                                  {nudge.email_type || nudge.nudge_type.replace(/_/g, ' ')}
                                 </Badge>
                               </TableCell>
                               <TableCell>
                                 <div>
-                                  <p className="font-medium text-sm">{nudge.user_name}</p>
-                                  <p className="text-[10px] text-muted-foreground">{nudge.user_email}</p>
+                                  <p className="font-medium text-sm">{nudge.recipient_name || nudge.user_name}</p>
+                                  <p className="text-[10px] text-muted-foreground">{nudge.recipient_email || nudge.user_email}</p>
                                 </div>
+                              </TableCell>
+                              <TableCell className="max-w-[200px]">
+                                <p className="text-sm truncate" title={nudge.subject || '-'}>
+                                  {nudge.subject || '-'}
+                                </p>
                               </TableCell>
                               <TableCell className="text-sm">{nudge.institution_name}</TableCell>
                               <TableCell className="text-sm">{formatTime(nudge.sent_at)}</TableCell>
                               <TableCell>
-                                <Badge variant="secondary">{nudge.email_count}</Badge>
-                              </TableCell>
-                              <TableCell>
-                                <Badge className="bg-green-100 text-green-700">
-                                  <CheckCircle2 className="w-3 h-3 mr-1" />
-                                  Sent
+                                <Badge className={nudge.status === 'sent' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}>
+                                  {nudge.status === 'sent' ? (
+                                    <>
+                                      <CheckCircle2 className="w-3 h-3 mr-1" />
+                                      Sent
+                                    </>
+                                  ) : (
+                                    nudge.status || 'Sent'
+                                  )}
                                 </Badge>
                               </TableCell>
                             </TableRow>
