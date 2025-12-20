@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
+import { useAuth } from "@/contexts/AuthContext";
 import { CreateTemplateDialog } from "@/components/library/CreateTemplateDialog";
 import { AdminApprovalPanel } from "@/components/library/AdminApprovalPanel";
 import type { SharedTemplate, LibraryFilters, LibraryEntryStatus } from "@/types/library";
@@ -46,6 +47,7 @@ const statusConfig: Record<LibraryEntryStatus, { label: string; icon: typeof Che
 const SharedLibrary = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { isAdmin, isApprover } = useAuth();
   const { templates, filterTemplates, getPlaybooks, addTemplate, updateTemplateStatus } = useSharedLibrary();
   const { addMessage } = useMessageLibrary();
   const { getProfileHierarchy } = useInstitutionalProfiles();
@@ -67,10 +69,17 @@ const SharedLibrary = () => {
   };
 
   const handleCreateTemplate = (template: Omit<SharedTemplate, 'id' | 'createdAt' | 'updatedAt' | 'changeHistory'>) => {
-    addTemplate(template);
+    // Auto-publish for admins and approvers
+    const templateWithStatus = {
+      ...template,
+      status: (isAdmin || isApprover) ? 'published' as const : template.status,
+    };
+    addTemplate(templateWithStatus);
     toast({
-      title: "Playbook submitted",
-      description: "Your playbook has been saved as a draft for review.",
+      title: (isAdmin || isApprover) ? "Playbook published" : "Playbook submitted",
+      description: (isAdmin || isApprover) 
+        ? "Your playbook has been published to the University Library."
+        : "Your playbook has been saved as a draft for review.",
     });
   };
 

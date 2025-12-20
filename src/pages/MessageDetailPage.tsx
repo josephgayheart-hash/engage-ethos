@@ -13,6 +13,7 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useJourneyExport } from "@/hooks/useJourneyExport";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
+import { useAuth } from "@/contexts/AuthContext";
 import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import { JourneyViewer, isJourneyContent, parseJourneyContent } from "@/components/library/JourneyViewer";
 import type { InstitutionalConfig } from "@/types/uplaybook";
@@ -75,6 +76,7 @@ const MessageDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isAdmin, isApprover } = useAuth();
   const { messages, deleteMessage, updateMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
   const { getProfile } = useInstitutionalProfiles();
@@ -153,14 +155,15 @@ const MessageDetailPage = () => {
   };
 
   const handleSubmitToLibrary = () => {
-    // Add to shared library as submitted
+    // Add to shared library - auto-publish for admins and approvers
     const journeyWithMetadata = journeyData as (typeof journeyData & { _metadata?: any });
     
     addTemplate({
       title: message.title,
       intentStatement: `Strategy journey for ${message.audience || 'students'}`,
       content: message.content,
-      status: 'submitted',
+      // Auto-publish for admins and approvers
+      status: (isAdmin || isApprover) ? 'published' : 'submitted',
       version: '1.0',
       owner: 'Current User',
       maintainer: 'Current User',
