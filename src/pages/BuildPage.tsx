@@ -459,11 +459,9 @@ const BuildPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      {/* Page Header with wave background */}
-      <div className="relative overflow-hidden border-b border-border/50">
-        <WaveBackground />
-        <div className="absolute inset-0 bg-zone-hero opacity-50" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(173_58%_39%_/_0.08),_transparent_50%)]" />
+      {/* Page Header with solid colored wave background */}
+      <div className="relative overflow-hidden border-b border-border/30">
+        <WaveBackground variant="teal" />
         
         <div className="relative container mx-auto px-4 py-6 max-w-7xl">
           {/* Breadcrumb */}
