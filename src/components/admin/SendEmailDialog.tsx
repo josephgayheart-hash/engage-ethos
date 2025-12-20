@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Mail, Send, UserPlus, HelpCircle, Clock, Filter, Users, CheckSquare } from "lucide-react";
+import { Loader2, Mail, Send, UserPlus, HelpCircle, Clock, Filter, Users, CheckSquare, PartyPopper } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -50,7 +50,7 @@ interface SendEmailDialogProps {
   onEmailSent: () => void;
 }
 
-type EmailType = 'invite' | 'resend_invite' | 'where_have_you_been' | 'custom';
+type EmailType = 'invite' | 'resend_invite' | 'where_have_you_been' | 'beta_feedback' | 'custom';
 type RetentionFilter = 'all' | 'never_logged_in' | 'inactive_30_days' | 'inactive_90_days' | 'referred_never_logged';
 
 export function SendEmailDialog({
@@ -405,6 +405,71 @@ export function SendEmailDialog({
     }
   };
 
+  const handleSendBetaFeedback = async () => {
+    if (selectedUsers.length === 0) {
+      toast({
+        title: "Select Users",
+        description: "Please select at least one user to send the beta feedback email to",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSending(true);
+    try {
+      let successCount = 0;
+      for (const userId of selectedUsers) {
+        const userData = users.find(u => u.id === userId);
+        if (!userData) continue;
+
+        const { error } = await supabase.functions.invoke('send-beta-feedback-email', {
+          body: {
+            userId,
+            email: userData.email,
+            firstName: userData.first_name,
+            lastName: userData.last_name,
+            institutionName: userData.institution_name
+          }
+        });
+
+        if (!error) {
+          successCount++;
+          // Log the email
+          await supabase.from('email_nudges').insert({
+            tenant_id: userData.tenant_id || '',
+            user_id: userId,
+            nudge_type: 'beta_thank_you',
+            email_count: 1,
+            recipient_email: userData.email,
+            recipient_name: `${userData.first_name} ${userData.last_name}`,
+            subject: '🎉 Thank You for Joining UPlaybook.AI Beta!',
+            email_type: 'beta_feedback',
+            status: 'sent',
+            metadata: { manual: true, institution: userData.institution_name }
+          });
+        }
+      }
+
+      toast({
+        title: "Beta Feedback Emails Sent",
+        description: `Successfully sent ${successCount} of ${selectedUsers.length} emails`
+      });
+      
+      resetForm();
+      onOpenChange(false);
+      onEmailSent();
+    } catch (error: any) {
+      console.error('Error sending beta feedback email:', error);
+      toast({
+        title: "Failed to Send Email",
+        description: error.message || "An error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   const handleSend = () => {
     switch (emailType) {
       case 'invite':
@@ -415,6 +480,9 @@ export function SendEmailDialog({
         break;
       case 'where_have_you_been':
         handleSendWhereHaveYouBeen();
+        break;
+      case 'beta_feedback':
+        handleSendBetaFeedback();
         break;
       case 'custom':
         handleSendCustomEmail();
@@ -537,6 +605,37 @@ export function SendEmailDialog({
           </div>
         );
       
+      case 'beta_feedback':
+        return (
+          <div className="p-4 bg-muted/50 rounded-lg border text-sm space-y-3">
+            <div className="flex items-center gap-2 font-medium" style={{ color: '#7C3AED' }}>
+              <span className="text-lg">🎉</span>
+              <span>Beta Thank You & Feedback Request</span>
+            </div>
+            <p className="text-muted-foreground">
+              <strong>Subject:</strong> 🎉 Thank You for Joining UPlaybook.AI Beta!
+            </p>
+            <div className="border-t pt-3 space-y-2 text-muted-foreground">
+              <div className="bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 p-3 rounded-lg text-center">
+                <p className="font-semibold text-indigo-700 dark:text-indigo-300">🎉 Thank You!</p>
+                <p className="text-xs text-indigo-600 dark:text-indigo-400">We're thrilled to have you as part of our beta community</p>
+              </div>
+              <p>Hi <strong>{firstName}</strong>,</p>
+              <p>We noticed you've been exploring UPlaybook.AI, and we couldn't be more grateful! As a beta user, <strong>your experience matters deeply to us</strong>.</p>
+              <div className="bg-amber-50 dark:bg-amber-950 p-3 rounded text-xs border-l-4 border-amber-500">
+                <p className="font-semibold text-amber-700 dark:text-amber-300">💡 Your feedback shapes our product</p>
+                <p className="text-amber-600 dark:text-amber-400 mt-1">Every suggestion, bug report, and idea helps us build the best possible tool for higher education communicators like you.</p>
+              </div>
+              <div className="bg-primary/10 p-3 rounded text-center">
+                <a href={appUrl} className="text-primary font-medium underline hover:no-underline">
+                  🔗 Share Your Feedback →
+                </a>
+              </div>
+              <p className="text-xs text-center">It only takes a few minutes, and it means the world to us. 💜</p>
+            </div>
+          </div>
+        );
+      
       case 'custom':
         return (
           <div className="p-4 bg-muted/50 rounded-lg border text-sm space-y-3">
@@ -609,6 +708,12 @@ export function SendEmailDialog({
                       <div className="flex items-center gap-2">
                         <HelpCircle className="w-4 h-4" />
                         Where Have You Been?
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="beta_feedback">
+                      <div className="flex items-center gap-2">
+                        <PartyPopper className="w-4 h-4" />
+                        Beta Thank You & Feedback
                       </div>
                     </SelectItem>
                     <SelectItem value="custom">
@@ -686,8 +791,8 @@ export function SendEmailDialog({
                 </>
               )}
 
-              {/* User Selector with Filters for Resend/Where Have You Been/Custom */}
-              {(emailType === 'resend_invite' || emailType === 'where_have_you_been' || emailType === 'custom') && (
+              {/* User Selector with Filters for Resend/Where Have You Been/Beta Feedback/Custom */}
+              {(emailType === 'resend_invite' || emailType === 'where_have_you_been' || emailType === 'beta_feedback' || emailType === 'custom') && (
                 <div className="space-y-3">
                   {/* Retention Filter */}
                   <div className="space-y-2">

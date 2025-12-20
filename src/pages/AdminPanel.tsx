@@ -37,6 +37,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { SendEmailDialog } from "@/components/admin/SendEmailDialog";
+import { EmailTemplatesTab } from "@/components/admin/EmailTemplatesTab";
 import { 
   ArrowLeft,
   Users, 
@@ -706,12 +707,13 @@ const AdminPanel = () => {
 
           {/* Main Content Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid grid-cols-4 md:grid-cols-8 w-full">
+            <TabsList className="grid grid-cols-4 md:grid-cols-9 w-full">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="institutions">Institutions</TabsTrigger>
               <TabsTrigger value="content-dna">Content DNA</TabsTrigger>
               <TabsTrigger value="brand">Brand Layer</TabsTrigger>
               <TabsTrigger value="emails">Email Activity</TabsTrigger>
+              <TabsTrigger value="templates">Templates</TabsTrigger>
               <TabsTrigger value="sharing">Sharing</TabsTrigger>
               <TabsTrigger value="libraries">Libraries</TabsTrigger>
               <TabsTrigger value="admin">Admin</TabsTrigger>
@@ -1364,6 +1366,11 @@ const AdminPanel = () => {
                   )}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            {/* Email Templates Tab */}
+            <TabsContent value="templates" className="mt-4 space-y-4">
+              <EmailTemplatesTab />
             </TabsContent>
 
             {/* Sharing & Collaboration Tab */}
