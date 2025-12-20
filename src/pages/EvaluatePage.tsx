@@ -7,6 +7,7 @@ import { MessageInput } from "@/components/MessageInput";
 import { EvaluationResults } from "@/components/EvaluationResults";
 import { LibraryNav } from "@/components/LibraryNav";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
+import { WaveBackground } from "@/components/WaveBackground";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -102,12 +103,11 @@ const EvaluatePage = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      {/* Page Header with subtle background */}
-      <div className="relative overflow-hidden border-b border-border/50">
-        <div className="absolute inset-0 bg-zone-hero opacity-70" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_hsl(222_47%_14%_/_0.06),_transparent_50%)]" />
+      {/* Page Header with wave background */}
+      <div className="relative overflow-hidden pb-12">
+        <WaveBackground variant="teal" />
         
-        <div className="relative container mx-auto px-4 py-6">
+        <div className="relative container mx-auto px-4 pt-10 pb-8">
           <div className="max-w-4xl mx-auto">
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
