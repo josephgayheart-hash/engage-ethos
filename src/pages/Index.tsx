@@ -321,7 +321,7 @@ const Index = () => {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pb-4">
               <Link to="/call-script">
-                <Card className="h-full cursor-pointer card-workflow group">
+                <Card className="h-full cursor-pointer card-interactive group">
                   <CardContent className="p-4">
                     <div className="icon-container icon-container-md bg-pillar-ethics/10 mb-3">
                       <Phone className="w-5 h-5 text-pillar-ethics" />
@@ -332,7 +332,7 @@ const Index = () => {
                 </Card>
               </Link>
               <Link to="/playground">
-                <Card className="h-full cursor-pointer card-workflow group">
+                <Card className="h-full cursor-pointer card-interactive group">
                   <CardContent className="p-4">
                     <div className="icon-container icon-container-md bg-pillar-susceptibility/10 mb-3">
                       <PenTool className="w-5 h-5 text-pillar-susceptibility" />
@@ -343,7 +343,7 @@ const Index = () => {
                 </Card>
               </Link>
               <Link to="/byoc">
-                <Card className="h-full cursor-pointer card-workflow group">
+                <Card className="h-full cursor-pointer card-interactive group">
                   <CardContent className="p-4">
                     <div className="icon-container icon-container-md bg-secondary/10 mb-3">
                       <Upload className="w-5 h-5 text-secondary" />
@@ -355,7 +355,7 @@ const Index = () => {
               </Link>
               {isAdmin && (
                 <Link to={isSuperAdmin ? "/admin/panel" : "/admin/console"}>
-                  <Card className="h-full cursor-pointer card-workflow group">
+                  <Card className="h-full cursor-pointer card-interactive group">
                     <CardContent className="p-4">
                       <div className="icon-container icon-container-md bg-muted mb-3">
                         <Settings className="w-5 h-5 text-muted-foreground" />
@@ -500,7 +500,7 @@ const Index = () => {
                 const Icon = tool.icon;
                 return (
                   <Link key={tool.id} to={tool.href}>
-                    <Card className="h-full cursor-pointer card-workflow group">
+                    <Card className="h-full cursor-pointer card-interactive group">
                       <CardContent className="p-4">
                         <div className="icon-container icon-container-md bg-muted mb-3 group-hover:bg-primary/10 transition-colors">
                           <Icon className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />

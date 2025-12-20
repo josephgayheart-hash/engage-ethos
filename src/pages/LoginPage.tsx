@@ -7,12 +7,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Lock, Mail, AlertCircle, Loader2, MailCheck } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Lock, Mail, AlertCircle, Loader2, MailCheck, Sparkles, Shield, Brain, GraduationCap } from 'lucide-react';
 import { BetaBanner } from '@/components/BetaBanner';
 import uplaybookLogo from '@/assets/uplaybook-logo.png';
 
 // Invite expiration time in hours
 const INVITE_EXPIRATION_HOURS = 72;
+
+const trustIndicators = [
+  { icon: Shield, label: 'Brand Governance' },
+  { icon: Brain, label: 'Research-Driven' },
+  { icon: GraduationCap, label: 'Built for Higher Ed' },
+];
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -134,7 +141,7 @@ export default function LoginPage() {
 
   const handleForgotPassword = async () => {
     if (!email) {
-      setError('Enter your email, then click “Forgot password?”.');
+      setError('Enter your email, then click "Forgot password?".');
       return;
     }
 
@@ -163,121 +170,161 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[hsl(210,20%,98%)] flex flex-col">
+    <div className="min-h-screen flex flex-col">
       {/* Beta Banner at top */}
       <BetaBanner variant="compact" />
       
-      <div className="flex-1 flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
-        <div className="text-center">
-          <img src={uplaybookLogo} alt="UPlaybook.AI" className="h-16 w-auto mx-auto mb-4" />
-          <p className="text-[hsl(220,14%,46%)]">
-            Strategic Messaging Intelligence for Higher Education
-          </p>
-        </div>
-
-        <Card className="border-[hsl(220,13%,88%)]">
-          <CardHeader className="text-center">
-            <div className="mx-auto p-3 rounded-full bg-[hsl(222,47%,14%)]/10 w-fit mb-2">
-              <Lock className="w-6 h-6 text-[hsl(222,47%,14%)]" />
-            </div>
-            <CardTitle className="font-serif text-[hsl(222,47%,11%)]">Sign In</CardTitle>
-            <CardDescription className="text-[hsl(220,14%,46%)]">
-              Enter your credentials to access UPlaybook
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-            {inviteResent ? (
-              <Alert className="bg-emerald-50 border-emerald-200">
-                <MailCheck className="h-4 w-4 text-emerald-600" />
-                <AlertDescription className="text-emerald-800">
-                  <strong>New credentials sent!</strong> Your previous invitation expired for security reasons. 
-                  We've sent a fresh login email to <strong>{email}</strong>. Please check your inbox and use the new temporary password.
-                </AlertDescription>
-              </Alert>
-            ) : error ? (
-              <Alert variant="destructive" className="bg-red-50 border-red-200">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            ) : null}
-
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-[hsl(222,47%,11%)]">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(220,14%,46%)]" />
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@institution.edu"
-                    className="pl-10 border-[hsl(220,13%,88%)]"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-[hsl(222,47%,11%)]">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(220,14%,46%)]" />
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="pl-10 border-[hsl(220,13%,88%)]"
-                    required
-                  />
-                </div>
-                <div className="flex justify-end">
-                  <Button
-                    type="button"
-                    variant="link"
-                    size="sm"
-                    onClick={handleForgotPassword}
-                    disabled={isLoading || isResetting}
-                    className="px-0"
-                  >
-                    {isResetting ? 'Sending reset link…' : 'Forgot password?'}
-                  </Button>
-                </div>
-              </div>
-
-              <Button 
-                type="submit" 
-                className="w-full bg-[hsl(222,47%,14%)] hover:bg-[hsl(222,47%,20%)] text-white"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Signing in...
-                  </>
-                ) : (
-                  'Sign In'
-                )}
-              </Button>
-            </form>
-
-            <div className="mt-6 text-center">
-              <p className="text-sm text-[hsl(220,14%,46%)]">
-                Don't have an account?{' '}
-                <Link to="/request-access" className="text-[hsl(173,58%,39%)] hover:underline font-medium">
-                  Request Access
-                </Link>
+      {/* Main Content with Landing Page Style Background */}
+      <div className="flex-1 relative overflow-hidden">
+        {/* Gradient background matching landing page */}
+        <div className="absolute inset-0 bg-zone-hero" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(200_70%_90%_/_0.4),_transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_hsl(173_58%_85%_/_0.3),_transparent_50%)]" />
+        
+        {/* Lens flares */}
+        <div className="absolute top-20 right-[12%] w-32 h-32 bg-[hsl(270_70%_60%_/_0.12)] rounded-full blur-2xl" />
+        <div className="absolute bottom-36 left-[8%] w-40 h-40 bg-[hsl(82_85%_55%_/_0.1)] rounded-full blur-3xl" />
+        <div className="absolute top-44 left-[22%] w-24 h-24 bg-[hsl(200_100%_50%_/_0.1)] rounded-full blur-2xl" />
+        
+        <div className="relative flex items-center justify-center min-h-full p-4 py-12">
+          <div className="w-full max-w-md space-y-6 animate-fade-in">
+            {/* Logo & Tagline */}
+            <div className="text-center">
+              <img src={uplaybookLogo} alt="UPlaybook.AI" className="h-14 w-auto mx-auto mb-4" />
+              <h1 className="font-serif text-xl text-foreground mb-2">
+                <span className="text-[hsl(82_85%_45%)]">Plan.</span>{' '}
+                <span className="text-[hsl(270_70%_55%)]">Strategize.</span>{' '}
+                <span className="text-[hsl(200_100%_45%)]">Execute.</span>
+              </h1>
+              <p className="text-muted-foreground text-sm">
+                Strategic Messaging Intelligence for Higher Education
               </p>
             </div>
-          </CardContent>
-        </Card>
 
-        <p className="text-center text-xs text-[hsl(220,14%,46%)]">
-          © 2025 UPlaybook.AI. Research-grounded messaging intelligence.
-        </p>
-      </div>
+            {/* Login Card */}
+            <Card className="border-border/60 shadow-lg bg-card/95 backdrop-blur-sm">
+              <CardHeader className="text-center pb-4">
+                <div className="mx-auto p-3 rounded-xl bg-primary/10 w-fit mb-2">
+                  <Lock className="w-6 h-6 text-primary" />
+                </div>
+                <CardTitle className="font-serif text-foreground">Sign In</CardTitle>
+                <CardDescription className="text-muted-foreground">
+                  Enter your credentials to access UPlaybook
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleLogin} className="space-y-4">
+                  {inviteResent ? (
+                    <Alert className="bg-status-strong/10 border-status-strong/30">
+                      <MailCheck className="h-4 w-4 text-status-strong" />
+                      <AlertDescription className="text-foreground">
+                        <strong>New credentials sent!</strong> Your previous invitation expired for security reasons. 
+                        We've sent a fresh login email to <strong>{email}</strong>. Please check your inbox and use the new temporary password.
+                      </AlertDescription>
+                    </Alert>
+                  ) : error ? (
+                    <Alert variant="destructive" className="bg-destructive/10 border-destructive/30">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  ) : null}
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-foreground">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="you@institution.edu"
+                        className="pl-10 border-border"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-foreground">Password</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="pl-10 border-border"
+                        required
+                      />
+                    </div>
+                    <div className="flex justify-end">
+                      <Button
+                        type="button"
+                        variant="link"
+                        size="sm"
+                        onClick={handleForgotPassword}
+                        disabled={isLoading || isResetting}
+                        className="px-0 text-muted-foreground hover:text-primary"
+                      >
+                        {isResetting ? 'Sending reset link…' : 'Forgot password?'}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Signing in...
+                      </>
+                    ) : (
+                      'Sign In'
+                    )}
+                  </Button>
+                </form>
+
+                <div className="mt-6 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Don't have an account?{' '}
+                    <Link to="/request-access" className="text-accent hover:underline font-medium">
+                      Request Access
+                    </Link>
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Trust Indicators */}
+            <div className="flex flex-wrap justify-center gap-4 pt-2">
+              {trustIndicators.map((indicator, index) => {
+                const colors = [
+                  'text-[hsl(82_85%_45%)]',
+                  'text-[hsl(270_70%_55%)]', 
+                  'text-[hsl(200_100%_45%)]'
+                ];
+                return (
+                  <div 
+                    key={indicator.label}
+                    className="flex items-center gap-2 text-xs"
+                  >
+                    <indicator.icon className={`w-3.5 h-3.5 ${colors[index % 3]}`} />
+                    <span className="text-muted-foreground">{indicator.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <p className="text-center text-xs text-muted-foreground">
+              © 2025 UPlaybook.AI. Research-grounded messaging intelligence.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
