@@ -451,10 +451,14 @@ const BuildPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="space-y-6">
+      {/* Page Header with subtle background */}
+      <div className="relative overflow-hidden border-b border-border/50">
+        <div className="absolute inset-0 bg-zone-hero opacity-70" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(173_58%_39%_/_0.08),_transparent_50%)]" />
+        
+        <div className="relative container mx-auto px-4 py-6 max-w-7xl">
           {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
             <Link to="/dashboard" className="hover:text-foreground transition-colors flex items-center gap-1">
               <ArrowLeft className="w-4 h-4" />
               Home
@@ -467,15 +471,22 @@ const BuildPage = () => {
           <div className="flex items-start justify-between">
             <div>
               <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
-                <PenTool className="w-7 h-7 text-pillar-cognitive" />
+                <div className="icon-container icon-container-lg bg-pillar-cognitive/10">
+                  <PenTool className="w-6 h-6 text-pillar-cognitive" />
+                </div>
                 Message Builder
               </h1>
-              <p className="text-muted-foreground mt-1">
+              <p className="text-muted-foreground mt-1 ml-14">
                 Generate new messages based on context and audience
               </p>
             </div>
             <AIBadge />
           </div>
+        </div>
+      </div>
+      
+      <main className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="space-y-6">
 
           {/* Remix Banner */}
           {remixState?.remixMode && remixOriginalTitle && (
@@ -513,7 +524,7 @@ const BuildPage = () => {
           {/* Library Navigation */}
           <LibraryNav mode="messages" />
 
-          <Card>
+          <Card className="border-border/60 shadow-sm">
             <CardHeader>
               <CardTitle className="font-serif text-lg">Message Context</CardTitle>
               <CardDescription>
