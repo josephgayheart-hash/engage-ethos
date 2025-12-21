@@ -96,9 +96,13 @@ export function OGImagePreview({ onExport }: OGImagePreviewProps) {
         
         {/* Tagline */}
         <p 
-          className="text-2xl font-medium tracking-wide text-center"
+          className="text-center"
           style={{ 
-            color: '#374151',
+            color: '#1e293b',
+            fontSize: '36px',
+            fontWeight: 700,
+            fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+            letterSpacing: '-0.02em',
             textShadow: '0 1px 2px rgba(255, 255, 255, 0.8)'
           }}
         >
