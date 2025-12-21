@@ -224,6 +224,9 @@ export default function ContentDNAPage() {
     localStorage.setItem('contentDnaLibraryViewMode', mode);
   };
 
+  // Active tab state
+  const [activeTab, setActiveTab] = useState('upload');
+
   // Search state for Content Library
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -800,7 +803,7 @@ export default function ContentDNAPage() {
           </Card>
         )}
 
-        <Tabs defaultValue="upload" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-white border border-[hsl(220,13%,88%)]">
             <TabsTrigger value="upload" className="flex items-center gap-2">
               <Upload className="w-4 h-4" />
@@ -1059,9 +1062,12 @@ export default function ContentDNAPage() {
                       <p className="font-medium text-[hsl(222,47%,11%)]">
                         {samples.length} content sample{samples.length !== 1 ? 's' : ''} uploaded
                       </p>
-                      <p className="text-sm text-[hsl(220,14%,46%)]">
-                        View all samples in the Content Library tab
-                      </p>
+                      <button 
+                        onClick={() => setActiveTab('library')}
+                        className="text-sm text-[hsl(173,58%,39%)] hover:underline cursor-pointer text-left"
+                      >
+                        View all samples in the Content Library tab →
+                      </button>
                     </div>
                   </div>
                 </CardContent>
