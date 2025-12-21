@@ -225,6 +225,7 @@ export default function ContentDNAPage() {
   // Refine DNA state
   const [isRefining, setIsRefining] = useState(false);
   const [selectedRefinement, setSelectedRefinement] = useState<string | null>(null);
+  const [customRefinementPrompt, setCustomRefinementPrompt] = useState('');
   const [refinementResult, setRefinementResult] = useState<string | null>(null);
 
   // Instructions state
@@ -1839,9 +1840,71 @@ export default function ContentDNAPage() {
                   </div>
                 ) : (
                   <div className="space-y-6">
+                    {/* Custom Prompt Section */}
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-medium flex items-center gap-2">
+                        <PenLine className="w-4 h-4" />
+                        Custom Refinement Prompt
+                      </h4>
+                      <Textarea
+                        placeholder="Describe how you'd like to refine your Content DNA... (e.g., 'Make the voice more approachable while maintaining professionalism' or 'Emphasize student success stories and outcomes')"
+                        value={customRefinementPrompt}
+                        onChange={(e) => {
+                          setCustomRefinementPrompt(e.target.value);
+                          if (e.target.value.trim()) {
+                            setSelectedRefinement(null); // Clear template selection when using custom
+                          }
+                        }}
+                        className="min-h-[100px] resize-none"
+                      />
+                      {customRefinementPrompt.trim() && (
+                        <div className="flex justify-end">
+                          <Button
+                            onClick={async () => {
+                              setIsRefining(true);
+                              setRefinementResult(null);
+                              try {
+                                const contextSamples = await searchSamples('', undefined, 5);
+                                setTimeout(() => {
+                                  setRefinementResult(`Custom refinement would be applied using your prompt: "${customRefinementPrompt.slice(0, 100)}${customRefinementPrompt.length > 100 ? '...' : ''}" with ${contextSamples.length} indexed samples as context.`);
+                                  setIsRefining(false);
+                                }, 1500);
+                              } catch (error) {
+                                console.error('Refinement error:', error);
+                                setIsRefining(false);
+                              }
+                            }}
+                            disabled={isRefining}
+                            className="bg-secondary hover:bg-secondary/90"
+                          >
+                            {isRefining ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Refining...
+                              </>
+                            ) : (
+                              <>
+                                <Wand2 className="w-4 h-4 mr-2" />
+                                Apply Custom Refinement
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">or use a template</span>
+                      </div>
+                    </div>
+
                     {/* Refinement Templates */}
                     <div>
-                      <h4 className="text-sm font-medium mb-3">Quick Refinements</h4>
+                      <h4 className="text-sm font-medium mb-3">Quick Refinement Templates</h4>
                       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                         {[
                           { id: 'formal', label: 'Make More Formal', icon: Type, description: 'Elevate the tone for executive communications' },
@@ -1853,7 +1916,10 @@ export default function ContentDNAPage() {
                         ].map((template) => (
                           <button
                             key={template.id}
-                            onClick={() => setSelectedRefinement(template.id)}
+                            onClick={() => {
+                              setSelectedRefinement(template.id);
+                              setCustomRefinementPrompt(''); // Clear custom prompt when selecting template
+                            }}
                             disabled={isRefining}
                             className={`p-4 border rounded-lg text-left transition-all hover:shadow-md ${
                               selectedRefinement === template.id 
@@ -1877,7 +1943,7 @@ export default function ContentDNAPage() {
                       </div>
                     </div>
 
-                    {/* Apply Button */}
+                    {/* Apply Button for Templates */}
                     {selectedRefinement && (
                       <div className="flex justify-center pt-4 border-t">
                         <Button
@@ -1885,11 +1951,7 @@ export default function ContentDNAPage() {
                             setIsRefining(true);
                             setRefinementResult(null);
                             try {
-                              // Get relevant samples for context
                               const contextSamples = await searchSamples('', undefined, 5);
-                              
-                              // This would call an edge function to refine the DNA
-                              // For now, show a placeholder result
                               setTimeout(() => {
                                 setRefinementResult(`Refinement "${selectedRefinement}" would be applied using ${contextSamples.length} indexed samples as context. This feature will generate refined voice guidelines based on your actual content.`);
                                 setIsRefining(false);
