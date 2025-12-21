@@ -18,10 +18,9 @@ import {
   Layers,
   Sliders,
   Library,
-  Search,
-  Upload,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import DNATuningDiagram from './DNATuningDiagram';
 
 interface ContentDNAExplainerProps {
   context: 'content-dna-page' | 'message-builder' | 'journey-designer';
@@ -100,30 +99,36 @@ export function ContentDNAExplainer({
           
           <div className="grid gap-3">
             {/* DNA Tuning Controls */}
-            <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-50/80 border border-amber-200/60">
-              <div className="p-2 rounded-lg bg-amber-100 shrink-0">
-                <Sliders className="w-4 h-4 text-amber-600" />
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-50/80 border border-amber-200/60 dark:bg-amber-950/30 dark:border-amber-800/40">
+              <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/50 shrink-0">
+                <Sliders className="w-4 h-4 text-amber-600 dark:text-amber-400" />
               </div>
               <div>
-                <h4 className="text-sm font-medium text-amber-800">DNA Tuning Controls</h4>
-                <p className="text-xs text-amber-700/80 mt-1 leading-relaxed">
+                <h4 className="text-sm font-medium text-amber-800 dark:text-amber-300">DNA Tuning Controls</h4>
+                <p className="text-xs text-amber-700/80 dark:text-amber-400/80 mt-1 leading-relaxed">
                   Adjust dimension sliders (tone formality, warmth, CTA strength), provide section-specific feedback, and create override rules to fine-tune how AI applies your DNA.
                 </p>
               </div>
             </div>
 
             {/* Content Library */}
-            <div className="flex items-start gap-3 p-3 rounded-lg bg-sky-50/80 border border-sky-200/60">
-              <div className="p-2 rounded-lg bg-sky-100 shrink-0">
-                <Library className="w-4 h-4 text-sky-600" />
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-sky-50/80 border border-sky-200/60 dark:bg-sky-950/30 dark:border-sky-800/40">
+              <div className="p-2 rounded-lg bg-sky-100 dark:bg-sky-900/50 shrink-0">
+                <Library className="w-4 h-4 text-sky-600 dark:text-sky-400" />
               </div>
               <div>
-                <h4 className="text-sm font-medium text-sky-800">Content Library</h4>
-                <p className="text-xs text-sky-700/80 mt-1 leading-relaxed">
+                <h4 className="text-sm font-medium text-sky-800 dark:text-sky-300">Content Library</h4>
+                <p className="text-xs text-sky-700/80 dark:text-sky-400/80 mt-1 leading-relaxed">
                   Upload content directly in the library, search indexed samples by theme or keyword, and manage your collection of brand communications.
                 </p>
               </div>
             </div>
+          </div>
+
+          {/* DNA Tuning Diagram */}
+          <div className="mt-4 p-4 rounded-lg bg-muted/30 border border-border">
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">How Tuning Affects Output</h4>
+            <DNATuningDiagram />
           </div>
         </div>
       )}
