@@ -18,7 +18,7 @@ type LibraryType = "personal" | "shared";
 interface SaveToLibraryDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (name: string) => string | undefined; // Returns the saved item's ID
+  onSave: (name: string) => string | undefined | Promise<string | undefined>; // Returns the saved item's ID
   libraryType: LibraryType;
   defaultName?: string;
   contentType?: string; // e.g., "message", "journey", "template"
@@ -36,10 +36,12 @@ export function SaveToLibraryDialog({
   const [savedId, setSavedId] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!name.trim()) return;
     
-    const id = onSave(name.trim());
+    const result = onSave(name.trim());
+    const id = result instanceof Promise ? await result : result;
+    
     if (id) {
       setSavedId(id);
       setIsSaved(true);

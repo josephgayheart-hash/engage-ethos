@@ -1,18 +1,26 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { ThumbsUp, ThumbsDown, Copy, Check } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { ThumbsUp, ThumbsDown, Copy, Check, BookmarkPlus } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface MessageActionsProps {
   content: string;
   messageId: string;
 }
 
+type LibraryType = "personal" | "shared";
+
 export function MessageActions({ content, messageId }: MessageActionsProps) {
   const { toast } = useToast();
+  const { user, tenant } = useAuth();
   const [copied, setCopied] = useState(false);
-  const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
+  const [feedback, setFeedback] = useState<"up" | "down" | null>(null);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [saveLibraryType, setSaveLibraryType] = useState<LibraryType>("personal");
 
   const handleCopy = async () => {
     try {
@@ -32,59 +40,175 @@ export function MessageActions({ content, messageId }: MessageActionsProps) {
     }
   };
 
-  const handleFeedback = (type: 'up' | 'down') => {
+  const handleFeedback = (type: "up" | "down") => {
     if (feedback === type) {
       setFeedback(null);
     } else {
       setFeedback(type);
       toast({
-        title: type === 'up' ? "Thanks for the feedback!" : "Feedback noted",
-        description: type === 'up' 
-          ? "Glad this was helpful" 
-          : "We'll work on improving responses",
+        title: type === "up" ? "Thanks for the feedback!" : "Feedback noted",
+        description:
+          type === "up"
+            ? "Glad this was helpful"
+            : "We'll work on improving responses",
       });
     }
   };
 
+  const handleSaveClick = (libraryType: LibraryType) => {
+    setSaveLibraryType(libraryType);
+    setSaveDialogOpen(true);
+  };
+
+  const handleSave = async (name: string): Promise<string | undefined> => {
+    if (!user || !tenant) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "You must be logged in to save messages",
+      });
+      return undefined;
+    }
+
+    try {
+      if (saveLibraryType === "personal") {
+        const { data, error } = await supabase
+          .from("personal_messages")
+          .insert({
+            title: name,
+            content: content,
+            channel: "email",
+            user_id: user.id,
+            tenant_id: tenant.id,
+            mode: "generated",
+            approved: false,
+            metadata: {
+              source: "copywriter",
+              savedAt: new Date().toISOString(),
+            },
+          })
+          .select("id")
+          .single();
+
+        if (error) throw error;
+
+        toast({
+          title: "Saved!",
+          description: "Message saved to Personal Library",
+        });
+
+        return data?.id;
+      } else {
+        // Save to shared library (shared_templates table)
+        const { data, error } = await supabase
+          .from("shared_templates")
+          .insert({
+            title: name,
+            content: content,
+            tenant_id: tenant.id,
+            created_by_user_id: user.id,
+            status: "draft",
+            metadata: {
+              source: "copywriter",
+              savedAt: new Date().toISOString(),
+            },
+          })
+          .select("id")
+          .single();
+
+        if (error) throw error;
+
+        toast({
+          title: "Saved!",
+          description: "Message saved to Shared Library",
+        });
+
+        return data?.id;
+      }
+    } catch (error) {
+      console.error("Error saving message:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to save message to library",
+      });
+      return undefined;
+    }
+  };
+
   return (
-    <div className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-      <Button
-        variant="ghost"
-        size="sm"
-        className={cn(
-          "h-7 w-7 p-0",
-          feedback === 'up' && "text-green-600 bg-green-100 hover:bg-green-100"
-        )}
-        onClick={() => handleFeedback('up')}
-        title="Good response"
-      >
-        <ThumbsUp className="h-3.5 w-3.5" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        className={cn(
-          "h-7 w-7 p-0",
-          feedback === 'down' && "text-red-600 bg-red-100 hover:bg-red-100"
-        )}
-        onClick={() => handleFeedback('down')}
-        title="Poor response"
-      >
-        <ThumbsDown className="h-3.5 w-3.5" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="h-7 w-7 p-0"
-        onClick={handleCopy}
-        title="Copy to clipboard"
-      >
-        {copied ? (
-          <Check className="h-3.5 w-3.5 text-green-600" />
-        ) : (
-          <Copy className="h-3.5 w-3.5" />
-        )}
-      </Button>
-    </div>
+    <>
+      <div className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <Button
+          variant="ghost"
+          size="sm"
+          className={cn(
+            "h-7 w-7 p-0",
+            feedback === "up" && "text-green-600 bg-green-100 hover:bg-green-100"
+          )}
+          onClick={() => handleFeedback("up")}
+          title="Good response"
+        >
+          <ThumbsUp className="h-3.5 w-3.5" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className={cn(
+            "h-7 w-7 p-0",
+            feedback === "down" && "text-red-600 bg-red-100 hover:bg-red-100"
+          )}
+          onClick={() => handleFeedback("down")}
+          title="Poor response"
+        >
+          <ThumbsDown className="h-3.5 w-3.5" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 w-7 p-0"
+          onClick={handleCopy}
+          title="Copy to clipboard"
+        >
+          {copied ? (
+            <Check className="h-3.5 w-3.5 text-green-600" />
+          ) : (
+            <Copy className="h-3.5 w-3.5" />
+          )}
+        </Button>
+
+        <div className="w-px h-4 bg-border mx-1" />
+
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+          onClick={() => handleSaveClick("personal")}
+          title="Save to Personal Library"
+        >
+          <BookmarkPlus className="h-3.5 w-3.5 mr-1" />
+          <span className="hidden sm:inline">My Library</span>
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+          onClick={() => handleSaveClick("shared")}
+          title="Save to Shared Library"
+        >
+          <BookmarkPlus className="h-3.5 w-3.5 mr-1" />
+          <span className="hidden sm:inline">Shared</span>
+        </Button>
+      </div>
+
+      <SaveToLibraryDialog
+        open={saveDialogOpen}
+        onOpenChange={setSaveDialogOpen}
+        onSave={handleSave}
+        libraryType={saveLibraryType}
+        contentType="message"
+      />
+    </>
   );
 }
