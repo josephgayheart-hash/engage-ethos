@@ -232,8 +232,8 @@ export default function HowItWorksSection() {
 
           {/* Left Cards - Positioned absolutely */}
           <div
-            className="absolute left-0 top-0 bottom-0 grid grid-rows-3 items-center"
-            style={{ width: "170px" }}
+            className="absolute top-0 bottom-0 grid grid-rows-3 items-center"
+            style={{ width: "170px", left: "calc(50% - 280px)" }}
           >
             {leftSteps.map((step, index) => (
               <div key={index} className="flex flex-col items-center justify-center">
@@ -280,8 +280,8 @@ export default function HowItWorksSection() {
 
           {/* Right Card - Positioned absolutely */}
           <div
-            className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col items-center"
-            style={{ width: "170px" }}
+            className="absolute top-1/2 -translate-y-1/2 flex flex-col items-center"
+            style={{ width: "170px", left: "calc(50% + 110px)" }}
           >
             <div
               ref={libraryBoxRef}
