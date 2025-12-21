@@ -38,50 +38,22 @@ export default function HowItWorksSection() {
           >
             <defs>
               <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="hsl(270 70% 60%)" stopOpacity="0.6" />
-                <stop offset="100%" stopColor="hsl(200 100% 60%)" stopOpacity="0.8" />
+                <stop offset="0%" stopColor="hsl(270 70% 60%)" stopOpacity="0.55" />
+                <stop offset="100%" stopColor="hsl(200 100% 60%)" stopOpacity="0.85" />
               </linearGradient>
             </defs>
-            
-            {/* Line 1: Top card to Hub */}
-            <path 
-              d="M 18 15 Q 35 15, 50 50" 
-              stroke="url(#lineGrad)" 
-              strokeWidth="0.4" 
-              fill="none"
-              strokeLinecap="round"
-              className="animate-pulse-line"
-            />
-            
-            {/* Line 2: Middle card to Hub */}
-            <path 
-              d="M 18 50 Q 35 50, 50 50" 
-              stroke="url(#lineGrad)" 
-              strokeWidth="0.4" 
-              fill="none"
-              strokeLinecap="round"
-              className="animate-pulse-line delay-1"
-            />
-            
-            {/* Line 3: Bottom card to Hub */}
-            <path 
-              d="M 18 85 Q 35 85, 50 50" 
-              stroke="url(#lineGrad)" 
-              strokeWidth="0.4" 
-              fill="none"
-              strokeLinecap="round"
-              className="animate-pulse-line delay-2"
-            />
-            
-            {/* Line 4: Hub to University Library */}
-            <path 
-              d="M 50 50 Q 65 50, 82 50" 
-              stroke="url(#lineGrad)" 
-              strokeWidth="0.4" 
-              fill="none"
-              strokeLinecap="round"
-              className="animate-pulse-line delay-3"
-            />
+
+            {/* Base lines */}
+            <path d="M 20 18 C 33 18, 41 35, 45 50" stroke="url(#lineGrad)" strokeWidth="0.35" fill="none" strokeLinecap="round" opacity="0.35" />
+            <path d="M 20 50 L 45 50" stroke="url(#lineGrad)" strokeWidth="0.35" fill="none" strokeLinecap="round" opacity="0.35" />
+            <path d="M 20 82 C 33 82, 41 65, 45 50" stroke="url(#lineGrad)" strokeWidth="0.35" fill="none" strokeLinecap="round" opacity="0.35" />
+            <path d="M 55 50 C 68 50, 76 50, 83 50" stroke="url(#lineGrad)" strokeWidth="0.35" fill="none" strokeLinecap="round" opacity="0.35" />
+
+            {/* Pulse overlays (throb + flow) */}
+            <path d="M 20 18 C 33 18, 41 35, 45 50" stroke="url(#lineGrad)" strokeWidth="0.55" fill="none" strokeLinecap="round" className="animate-pulse-line animate-flow" style={{ filter: 'blur(0.4px)' }} />
+            <path d="M 20 50 L 45 50" stroke="url(#lineGrad)" strokeWidth="0.55" fill="none" strokeLinecap="round" className="animate-pulse-line animate-flow delay-1" style={{ filter: 'blur(0.4px)' }} />
+            <path d="M 20 82 C 33 82, 41 65, 45 50" stroke="url(#lineGrad)" strokeWidth="0.55" fill="none" strokeLinecap="round" className="animate-pulse-line animate-flow delay-2" style={{ filter: 'blur(0.4px)' }} />
+            <path d="M 55 50 C 68 50, 76 50, 83 50" stroke="url(#lineGrad)" strokeWidth="0.55" fill="none" strokeLinecap="round" className="animate-pulse-line animate-flow delay-3" style={{ filter: 'blur(0.4px)' }} />
           </svg>
 
           {/* Left Cards - Positioned absolutely */}
@@ -180,33 +152,38 @@ export default function HowItWorksSection() {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
-        
+
         @keyframes pulse-line {
-          0%, 100% { 
-            opacity: 0.4;
-            stroke-width: 0.3;
+          0%, 100% {
+            opacity: 0.25;
           }
-          50% { 
-            opacity: 1;
-            stroke-width: 0.5;
+          50% {
+            opacity: 0.95;
           }
         }
-        
+
+        @keyframes flow {
+          0% {
+            stroke-dasharray: 1 10;
+            stroke-dashoffset: 40;
+          }
+          100% {
+            stroke-dasharray: 1 10;
+            stroke-dashoffset: 0;
+          }
+        }
+
         .animate-pulse-line {
-          animation: pulse-line 2.5s ease-in-out infinite;
+          animation: pulse-line 2.2s ease-in-out infinite;
         }
-        
-        .delay-1 {
-          animation-delay: 0.4s;
+
+        .animate-flow {
+          animation: flow 1.8s linear infinite;
         }
-        
-        .delay-2 {
-          animation-delay: 0.8s;
-        }
-        
-        .delay-3 {
-          animation-delay: 1.2s;
-        }
+
+        .delay-1 { animation-delay: 0.35s; }
+        .delay-2 { animation-delay: 0.7s; }
+        .delay-3 { animation-delay: 1.05s; }
       `}</style>
     </section>
   );
