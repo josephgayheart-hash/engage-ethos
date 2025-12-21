@@ -90,7 +90,7 @@ export default function BetaFeedbackPage() {
       setIsSubmitted(true);
       toast({
         title: 'Feedback submitted',
-        description: 'Thank you for helping us improve UPlaybook!',
+        description: 'Thank you for helping us improve CampusVoice.AI!',
       });
     } catch (error: any) {
       console.error('Feedback submission error:', error);

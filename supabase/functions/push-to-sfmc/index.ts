@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Map uPlaybook channels to SFMC asset type IDs
+// Map CampusVoice channels to SFMC asset type IDs
 const SFMC_ASSET_TYPES: Record<string, { id: number; name: string }> = {
   'email': { id: 208, name: 'htmlemail' },
   'sms': { id: 230, name: 'smsMessage' },
@@ -96,7 +96,7 @@ serve(async (req) => {
       // Add AMPscript merge field hints
       meta: {
         options: {
-          generateFrom: 'uPlaybook',
+          generateFrom: 'CampusVoice',
           mergeFields: ['%%FirstName%%', '%%StudentType%%', '%%DeadlineDate%%', '%%InstitutionName%%'],
         },
       },

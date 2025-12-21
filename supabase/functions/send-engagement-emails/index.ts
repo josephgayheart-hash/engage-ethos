@@ -36,7 +36,7 @@ const getInviteReminderHtml = (firstName: string, institutionName: string, daysA
               <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                 <tr>
                   <td style="background-color: #ffffff; padding: 12px 16px; border-radius: 8px;">
-                    <img src="https://uplaybook.ai/uplaybook-logo.png" alt="CampusVoice.AI" style="height: 40px; width: auto;" />
+                    <img src="https://campusvoice.ai/campusvoice-logo.png" alt="CampusVoice.AI" style="height: 40px; width: auto;" />
                   </td>
                 </tr>
               </table>
@@ -71,7 +71,7 @@ const getInviteReminderHtml = (firstName: string, institutionName: string, daysA
               
               <!-- CTA Button -->
               <div style="text-align: center; margin: 32px 0;">
-                <a href="https://uplaybook.ai/login" style="display: inline-block; background-color: #1e293b; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600;">
+                <a href="https://campusvoice.ai/login" style="display: inline-block; background-color: #1e293b; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600;">
                   Login Now →
                 </a>
               </div>
@@ -117,7 +117,7 @@ const getWeMissYouHtml = (firstName: string, institutionName: string, daysSinceL
               <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                 <tr>
                   <td style="background-color: #ffffff; padding: 12px 16px; border-radius: 8px;">
-                    <img src="https://uplaybook.ai/uplaybook-logo.png" alt="CampusVoice.AI" style="height: 40px; width: auto;" />
+                    <img src="https://campusvoice.ai/campusvoice-logo.png" alt="CampusVoice.AI" style="height: 40px; width: auto;" />
                   </td>
                 </tr>
               </table>
@@ -167,7 +167,7 @@ const getWeMissYouHtml = (firstName: string, institutionName: string, daysSinceL
               
               <!-- CTA Button -->
               <div style="text-align: center; margin: 32px 0;">
-                <a href="https://uplaybook.ai/login" style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600;">
+                <a href="https://campusvoice.ai/login" style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600;">
                   Jump Back In →
                 </a>
               </div>
@@ -260,7 +260,7 @@ const handler = async (req: Request): Promise<Response> => {
                 "Authorization": `Bearer ${RESEND_API_KEY}`,
               },
               body: JSON.stringify({
-                from: "CampusVoice.AI <noreply@uplaybook.ai>",
+                from: "CampusVoice.AI <noreply@campusvoice.ai>",
                 to: [user.email],
                 subject,
                 html: getInviteReminderHtml(user.first_name, institutionName, daysAgo),
@@ -358,7 +358,7 @@ const handler = async (req: Request): Promise<Response> => {
                 "Authorization": `Bearer ${RESEND_API_KEY}`,
               },
               body: JSON.stringify({
-                from: "CampusVoice.AI <noreply@uplaybook.ai>",
+                from: "CampusVoice.AI <noreply@campusvoice.ai>",
                 to: [user.email],
                 subject,
                 html: getWeMissYouHtml(user.first_name, institutionName, daysSinceLogin),

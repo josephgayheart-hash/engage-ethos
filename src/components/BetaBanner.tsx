@@ -26,7 +26,7 @@ export function BetaBanner({ variant = 'full', className = '' }: BetaBannerProps
         </TooltipTrigger>
         <TooltipContent side="bottom" className="max-w-xs">
           <p className="text-sm">
-            UPlaybook is currently in beta. Features and functionality may change as we refine the platform based on feedback.
+            CampusVoice.AI is currently in beta. Features and functionality may change as we refine the platform based on feedback.
           </p>
         </TooltipContent>
       </Tooltip>
@@ -44,7 +44,7 @@ export function BetaBanner({ variant = 'full', className = '' }: BetaBannerProps
           </TooltipTrigger>
           <TooltipContent side="bottom" className="max-w-xs">
             <p className="text-sm">
-              We welcome feedback as we refine UPlaybook for higher education institutions.
+              We welcome feedback as we refine CampusVoice.AI for higher education institutions.
             </p>
           </TooltipContent>
         </Tooltip>
@@ -75,7 +75,7 @@ export function BetaBanner({ variant = 'full', className = '' }: BetaBannerProps
             </Tooltip>
           </div>
           <p className="text-sm text-amber-700">
-            UPlaybook is currently in beta. Features and functionality may change as we refine the platform.
+            CampusVoice.AI is currently in beta. Features and functionality may change as we refine the platform.
           </p>
         </div>
       </div>

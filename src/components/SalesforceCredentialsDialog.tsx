@@ -194,7 +194,7 @@ export function SalesforceCredentialsDialog({
                     <li>Log into Marketing Cloud and go to <strong>Setup</strong></li>
                     <li>Navigate to <strong>Platform Tools → Apps → Installed Packages</strong></li>
                     <li>Click <strong>"New"</strong> to create a new package</li>
-                    <li>Name it (e.g., "uPlaybook Integration")</li>
+                    <li>Name it (e.g., "CampusVoice Integration")</li>
                     <li>Click <strong>"Add Component"</strong> → Select <strong>"API Integration"</strong></li>
                     <li>Choose <strong>"Server-to-Server"</strong> integration type</li>
                     <li>

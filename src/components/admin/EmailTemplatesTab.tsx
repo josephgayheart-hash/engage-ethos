@@ -191,7 +191,7 @@ export function EmailTemplatesTab({ tenants = [], users = [], onEmailSent }: Ema
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
   <div style="text-align: center; margin-bottom: 30px;">
-    <img src="https://uplaybook.ai/uplaybook-logo.png" alt="UPlaybook.AI" style="height: 50px;">
+    <img src="https://campusvoice.ai/campusvoice-logo.png" alt="CampusVoice.AI" style="height: 50px;">
   </div>
   
   <h1 style="color: #1F2A44; font-size: 24px; margin-bottom: 20px;">Hello {{first_name}},</h1>
@@ -202,19 +202,19 @@ export function EmailTemplatesTab({ tenants = [], users = [], onEmailSent }: Ema
   
   <div style="text-align: center; margin: 30px 0;">
     <a href="{{app_url}}" style="background-color: #2C7A7B; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 500;">
-      Visit UPlaybook.AI
+      Visit CampusVoice.AI
     </a>
   </div>
   
   <p style="margin-top: 30px; color: #666; font-size: 14px;">
     Best regards,<br>
-    The UPlaybook.AI Team
+    The CampusVoice.AI Team
   </p>
   
   <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 30px 0;">
   
   <p style="color: #999; font-size: 12px; text-align: center;">
-    © 2024 UPlaybook.AI. All rights reserved.
+    © 2024 CampusVoice.AI. All rights reserved.
   </p>
 </body>
 </html>`;
@@ -478,7 +478,7 @@ export function EmailTemplatesTab({ tenants = [], users = [], onEmailSent }: Ema
       .replace(/\{\{institution\}\}/g, "Sample University")
       .replace(/\{\{role\}\}/g, "user")
       .replace(/\{\{password\}\}/g, "TempPass123")
-      .replace(/\{\{app_url\}\}/g, "https://uplaybook.ai")
+      .replace(/\{\{app_url\}\}/g, "https://campusvoice.ai")
       .replace(/\{\{inactive_message\}\}/g, "It's been 30 days since your last visit.");
   };
 

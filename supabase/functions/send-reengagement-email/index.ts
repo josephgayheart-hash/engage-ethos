@@ -55,7 +55,7 @@ const getWhereHaveYouBeenHtml = (firstName: string, institutionName: string, las
               <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                 <tr>
                   <td style="background-color: #ffffff; padding: 12px 16px; border-radius: 8px;">
-                    <img src="https://uplaybook.ai/uplaybook-logo.png" alt="CampusVoice.AI" style="height: 40px; width: auto;" />
+                    <img src="https://campusvoice.ai/campusvoice-logo.png" alt="CampusVoice.AI" style="height: 40px; width: auto;" />
                   </td>
                 </tr>
               </table>
@@ -109,7 +109,7 @@ const getWhereHaveYouBeenHtml = (firstName: string, institutionName: string, las
               
               <!-- CTA Button -->
               <div style="text-align: center; margin: 32px 0;">
-                <a href="https://uplaybook.ai/login" style="display: inline-block; background-color: #f59e0b; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3);">
+                <a href="https://campusvoice.ai/login" style="display: inline-block; background-color: #f59e0b; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3);">
                   Come Back & Explore →
                 </a>
               </div>
@@ -174,7 +174,7 @@ const handler = async (req: Request): Promise<Response> => {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "CampusVoice.AI <noreply@uplaybook.ai>",
+        from: "CampusVoice.AI <noreply@campusvoice.ai>",
         to: [email],
         subject,
         html: htmlContent,

@@ -15,7 +15,7 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground",
-        // Status variants for UPlaybook
+        // Status variants for CampusVoice
         strong:
           "border-transparent bg-status-strong text-status-strong-foreground",
         moderate:
