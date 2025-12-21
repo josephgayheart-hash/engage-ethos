@@ -391,6 +391,7 @@ const StrategyPage = () => {
       tone: context.tone,
       approved: false,
       mode: 'generated',
+      source: 'journey',
       // Persist institutional profile info for library generation
       institutionalProfileId: selectedProfileId || undefined,
       institutionalProfileName: selectedProfileName || undefined,
@@ -464,6 +465,7 @@ const StrategyPage = () => {
       },
       ethicalGuardrails: ['Review all touchpoints before publishing', 'Ensure messaging aligns with institutional voice'],
       placeholders: [],
+      source: 'journey',
       // Persist institutional profile info for library generation
       institutionalProfileId: selectedProfileId || undefined,
       institutionalProfileName: selectedProfileName || undefined,

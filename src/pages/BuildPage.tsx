@@ -328,6 +328,7 @@ const BuildPage = () => {
       senderRecommendation: builderResult.recommendedSender,
       approved: false,
       mode: 'kit',
+      source: 'builder',
       institutionalProfileId: selectedProfileId || undefined,
       institutionalProfileName: selectedProfileName,
       // Creator information
@@ -397,6 +398,7 @@ const BuildPage = () => {
       },
       ethicalGuardrails: ['Review all content before publishing', 'Ensure messaging aligns with institutional voice'],
       placeholders: [],
+      source: 'builder',
       // Persist institutional profile info for library generation
       institutionalProfileId: selectedProfileId || undefined,
       institutionalProfileName: selectedProfileName,
@@ -447,6 +449,7 @@ const BuildPage = () => {
       senderRecommendation: builderResult?.recommendedSender,
       approved: false,
       mode: 'generated',
+      source: 'builder',
       institutionalProfileId: selectedProfileId || undefined,
       institutionalProfileName: selectedProfileName,
       createdByUserId: profile?.id,

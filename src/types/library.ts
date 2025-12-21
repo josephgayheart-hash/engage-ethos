@@ -2,6 +2,9 @@ import type { Channel, AudienceType, MessageDomain, CommunicationMoment, Primary
 
 export type LibraryEntryStatus = 'draft' | 'submitted' | 'approved' | 'published';
 
+// Source of where the message/template was created
+export type LibrarySource = 'builder' | 'journey' | 'copywriter' | 'byoc' | 'evaluate' | 'import' | 'other';
+
 export interface SavedMessage {
   id: string;
   title: string;
@@ -24,6 +27,8 @@ export interface SavedMessage {
   mode: 'evaluated' | 'generated' | 'kit';
   institutionalProfileId?: string;
   institutionalProfileName?: string;
+  // Source of where the message was created
+  source?: LibrarySource;
   // Track if this was remixed from another journey
   remixedFrom?: {
     title: string;
@@ -75,6 +80,8 @@ export interface SharedTemplate {
   playbook?: string;
   institutionalProfileId?: string;
   institutionalProfileName?: string;
+  // Source of where the template was created
+  source?: LibrarySource;
 }
 
 export interface TemplatePlaceholder {

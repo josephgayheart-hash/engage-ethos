@@ -242,6 +242,7 @@ ${callScript.followUpNotes}`;
       tone,
       approved: false,
       mode: 'generated',
+      source: 'builder',
       institutionalProfileId: selectedProfileId || undefined,
       institutionalProfileName: selectedProfileName,
       createdByUserId: profile?.id,

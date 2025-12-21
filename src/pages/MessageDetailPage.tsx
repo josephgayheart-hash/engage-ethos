@@ -180,6 +180,7 @@ const MessageDetailPage = () => {
           whenNotToUse: [],
         },
         ethicalGuardrails: ['Review all touchpoints before publishing'],
+        source: message.source || 'other',
         institutionalProfileId: message.institutionalProfileId,
         institutionalProfileName: message.institutionalProfileName,
       });
@@ -205,6 +206,7 @@ const MessageDetailPage = () => {
           whenNotToUse: [],
         },
         ethicalGuardrails: ['Review content before publishing', 'Ensure messaging aligns with institutional voice'],
+        source: message.source || 'other',
         institutionalProfileId: message.institutionalProfileId,
         institutionalProfileName: message.institutionalProfileName,
       });
