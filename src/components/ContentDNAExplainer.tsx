@@ -45,8 +45,8 @@ interface ContentDNAExplainerProps {
 /**
  * ContentDNAExplainer - Educational component explaining how Content DNA works
  * 
- * Shows users how Voice Analysis, Brand Platform, and Custom Instructions
- * are synthesized into AI-generated messages.
+ * Shows users how Content DNA Analysis extracts voice profile AND brand platform
+ * together in a single unified analysis, plus how Custom Instructions are layered on top.
  */
 export function ContentDNAExplainer({
   context,
@@ -63,44 +63,46 @@ export function ContentDNAExplainer({
     <div className="space-y-4">
       {/* How It Works Flow */}
       <div className="grid gap-3">
-        {/* Step 1: Voice Analysis */}
-        <div className="flex items-start gap-3 p-3 rounded-lg bg-emerald-50 border border-emerald-200">
-          <div className="p-2 rounded-lg bg-emerald-100 shrink-0">
+        {/* Step 1: Content DNA Analysis (Unified) */}
+        <div className="flex items-start gap-3 p-3 rounded-lg bg-gradient-to-r from-emerald-50 to-blue-50 border border-emerald-200">
+          <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-100 to-blue-100 shrink-0">
             <Sparkles className="w-4 h-4 text-emerald-600" />
           </div>
           <div>
-            <h4 className="text-sm font-medium text-emerald-800">Voice Analysis</h4>
+            <div className="flex items-center gap-2 mb-1">
+              <h4 className="text-sm font-medium text-emerald-800">Content DNA Analysis</h4>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 font-medium">Single Analysis</span>
+            </div>
             <p className="text-xs text-emerald-700 mt-0.5">
-              AI analyzes your content samples to capture your tone, sentence patterns, vocabulary choices, and rhetorical style. 
-              This creates a fingerprint of how your institution communicates.
+              When you analyze your content samples, <strong>both</strong> are extracted together in one unified analysis:
             </p>
+            <div className="mt-2 grid gap-2">
+              <div className="flex items-start gap-2 text-xs text-emerald-700 bg-white/60 p-2 rounded">
+                <Sparkles className="w-3 h-3 mt-0.5 shrink-0" />
+                <div>
+                  <strong>Voice Profile:</strong> Tone, sentence patterns, vocabulary choices, and rhetorical style—the fingerprint of how your institution communicates.
+                </div>
+              </div>
+              <div className="flex items-start gap-2 text-xs text-blue-700 bg-white/60 p-2 rounded">
+                <Target className="w-3 h-3 mt-0.5 shrink-0" />
+                <div>
+                  <strong>Brand Platform:</strong> Brand promise, pillars, pathways, proof points, and commitments—extracted to keep messaging aligned with your strategic positioning.
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Step 2: Brand Platform */}
-        <div className="flex items-start gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
-          <div className="p-2 rounded-lg bg-blue-100 shrink-0">
-            <Target className="w-4 h-4 text-blue-600" />
-          </div>
-          <div>
-            <h4 className="text-sm font-medium text-blue-800">Brand Platform</h4>
-            <p className="text-xs text-blue-700 mt-0.5">
-              Your brand promise, pillars, proof points, and commitments are extracted to ensure messaging 
-              stays aligned with your strategic positioning and value propositions.
-            </p>
-          </div>
-        </div>
-
-        {/* Step 3: Custom Instructions */}
+        {/* Step 2: Custom Instructions */}
         <div className="flex items-start gap-3 p-3 rounded-lg bg-purple-50 border border-purple-200">
           <div className="p-2 rounded-lg bg-purple-100 shrink-0">
             <Quote className="w-4 h-4 text-purple-600" />
           </div>
           <div>
-            <h4 className="text-sm font-medium text-purple-800">Custom Instructions</h4>
+            <h4 className="text-sm font-medium text-purple-800">Custom Instructions (Optional)</h4>
             <p className="text-xs text-purple-700 mt-0.5">
               Any specific guidelines you add (terminology preferences, phrases to avoid, formatting rules) 
-              are layered on top to fine-tune the output.
+              are layered on top to fine-tune the AI output.
             </p>
           </div>
         </div>
