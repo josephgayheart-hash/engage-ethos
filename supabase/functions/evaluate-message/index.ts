@@ -432,6 +432,29 @@ Voice Summary: ${institutionalConfig.voiceAnalysis.summary || 'Not specified'}
 
 IMPORTANT: Emulate ONLY this voice profile. Do NOT borrow language, phrases, or characteristics from other institutions in your training data.
 ` : ''}
+${institutionalConfig.dnaAdjustments ? `
+DNA TUNING ADJUSTMENTS (Apply these modifications to the base voice):
+These adjustments fine-tune the voice without changing the core DNA. Apply them when generating content:
+
+${institutionalConfig.dnaAdjustments.dimensions?.filter((d: { value: number }) => d.value !== 50).length > 0 ? `
+VOICE DIMENSION ADJUSTMENTS:
+${institutionalConfig.dnaAdjustments.dimensions
+  .filter((d: { value: number }) => d.value !== 50)
+  .map((d: { label: string; leftLabel: string; rightLabel: string; value: number }) => {
+    const direction = d.value < 50 ? d.leftLabel : d.rightLabel;
+    const intensity = Math.abs(d.value - 50) > 30 ? 'strongly' : 'slightly';
+    return `- ${d.label}: Adjust ${intensity} toward "${direction}"`;
+  }).join('\n')}
+` : ''}
+${institutionalConfig.dnaAdjustments.sectionFeedback?.length > 0 ? `
+SECTION-SPECIFIC FEEDBACK (Apply these corrections):
+${institutionalConfig.dnaAdjustments.sectionFeedback.map((f: { section: string; feedback: string }) => `- ${f.section}: ${f.feedback}`).join('\n')}
+` : ''}
+${institutionalConfig.dnaAdjustments.overrideRules?.length > 0 ? `
+OVERRIDE RULES (These take priority):
+${institutionalConfig.dnaAdjustments.overrideRules.map((r: { type: string; rule: string }) => `- ${r.type.toUpperCase()}: ${r.rule}`).join('\n')}
+` : ''}
+` : ''}
 ${institutionalConfig.brandPlatform ? `
 BRAND PLATFORM (Use these elements to guide messaging):
 - Brand Promise: ${institutionalConfig.brandPlatform.brandPromise || 'Not specified'}

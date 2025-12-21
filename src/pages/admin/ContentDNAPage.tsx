@@ -150,10 +150,12 @@ export default function ContentDNAPage() {
   const {
     samples,
     analysis,
+    adjustments,
     isLoading,
     isAnalyzing,
     isSaving,
     isExtracting,
+    isSavingAdjustments,
     extractionStats,
     addSample,
     deleteSample,
@@ -162,6 +164,7 @@ export default function ContentDNAPage() {
     resetContentDNA,
     extractSemantics,
     searchSamples,
+    saveAdjustments,
   } = useContentDNA({ profileId: profileIdFromUrl });
   
   const [isResetting, setIsResetting] = useState(false);
@@ -224,22 +227,9 @@ export default function ContentDNAPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
-  // Refine DNA state
-  const [isSavingAdjustments, setIsSavingAdjustments] = useState(false);
-
-  // Handle saving DNA adjustments
-  const handleSaveAdjustments = async (adjustments: DNAAdjustments) => {
-    setIsSavingAdjustments(true);
-    try {
-      // For now, log the adjustments - this would save to a database table
-      console.log('Saving DNA adjustments:', adjustments);
-      // TODO: Call edge function or save to database
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate save
-    } catch (error) {
-      console.error('Error saving adjustments:', error);
-    } finally {
-      setIsSavingAdjustments(false);
-    }
+  // Handle saving DNA adjustments (uses hook's saveAdjustments)
+  const handleSaveAdjustments = async (newAdjustments: DNAAdjustments) => {
+    await saveAdjustments(newAdjustments);
   };
 
   // Instructions state
@@ -1849,6 +1839,7 @@ export default function ContentDNAPage() {
                 ) : (
                   <DNATuningControls
                     voiceAnalysis={analysis.voice_analysis}
+                    existingAdjustments={adjustments}
                     onSave={handleSaveAdjustments}
                     isLoading={isSavingAdjustments}
                   />
