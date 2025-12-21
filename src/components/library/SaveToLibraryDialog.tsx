@@ -11,17 +11,40 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Check, ExternalLink, FolderPlus, Library } from "lucide-react";
+import type { Channel } from "@/types/uplaybook";
 
 type LibraryType = "personal" | "shared";
+
+const CHANNEL_OPTIONS: { value: Channel | "none"; label: string }[] = [
+  { value: "none", label: "No specific channel" },
+  { value: "email", label: "Email" },
+  { value: "sms", label: "SMS/Text" },
+  { value: "social-media", label: "Social Media" },
+  { value: "portal", label: "Portal" },
+  { value: "landing-page", label: "Landing Page" },
+  { value: "direct-mail", label: "Direct Mail" },
+  { value: "phone-call", label: "Phone/Call Script" },
+  { value: "digital-ad-search", label: "Search Ad" },
+  { value: "digital-ad-social", label: "Social Ad" },
+  { value: "talking-points", label: "Talking Points" },
+];
 
 interface SaveToLibraryDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (name: string) => string | undefined | Promise<string | undefined>; // Returns the saved item's ID
+  onSave: (name: string, channel?: Channel) => string | undefined | Promise<string | undefined>;
   libraryType: LibraryType;
   defaultName?: string;
-  contentType?: string; // e.g., "message", "journey", "template"
+  contentType?: string;
+  showChannelSelector?: boolean; // Enable channel selection
 }
 
 export function SaveToLibraryDialog({
@@ -31,22 +54,24 @@ export function SaveToLibraryDialog({
   libraryType,
   defaultName = "",
   contentType = "item",
+  showChannelSelector = false,
 }: SaveToLibraryDialogProps) {
   const [name, setName] = useState("");
+  const [channel, setChannel] = useState<Channel | "none">("none");
   const [savedId, setSavedId] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
 
   const handleSave = async () => {
     if (!name.trim()) return;
     
-    const result = onSave(name.trim());
+    const selectedChannel = channel === "none" ? undefined : channel;
+    const result = onSave(name.trim(), selectedChannel);
     const id = result instanceof Promise ? await result : result;
     
     if (id) {
       setSavedId(id);
       setIsSaved(true);
     } else {
-      // If no ID returned, still mark as saved but close dialog
       setIsSaved(true);
       setTimeout(() => {
         handleClose();
@@ -56,6 +81,7 @@ export function SaveToLibraryDialog({
 
   const handleClose = () => {
     setName("");
+    setChannel("none");
     setSavedId(null);
     setIsSaved(false);
     onOpenChange(false);
@@ -104,6 +130,27 @@ export function SaveToLibraryDialog({
                   autoFocus
                 />
               </div>
+              
+              {showChannelSelector && (
+                <div className="space-y-2">
+                  <Label htmlFor="channel-select">Channel (optional)</Label>
+                  <Select value={channel} onValueChange={(val) => setChannel(val as Channel | "none")}>
+                    <SelectTrigger id="channel-select">
+                      <SelectValue placeholder="Select a channel..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CHANNEL_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Tag this copy with a channel for easier filtering later
+                  </p>
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={handleClose}>

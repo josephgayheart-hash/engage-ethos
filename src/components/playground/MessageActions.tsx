@@ -7,6 +7,7 @@ import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useAuth } from "@/contexts/AuthContext";
+import type { Channel } from "@/types/uplaybook";
 
 interface MessageActionsProps {
   content: string;
@@ -63,13 +64,13 @@ export function MessageActions({ content, messageId }: MessageActionsProps) {
     setSaveDialogOpen(true);
   };
 
-  const handleSave = (name: string): string | undefined => {
+  const handleSave = (name: string, channel?: Channel): string | undefined => {
     try {
       if (saveLibraryType === "personal") {
         const savedMessage = addMessage({
           title: name,
           content: content,
-          // No channel for copywriter - it's general copy that can be used anywhere
+          channel: channel, // User-selected channel (or undefined)
           approved: false,
           mode: "generated",
           source: "copywriter",
@@ -97,7 +98,7 @@ export function MessageActions({ content, messageId }: MessageActionsProps) {
           requiredFields: {
             audience: [],
             moment: [],
-            channel: [], // No specific channel - copywriter is general copy
+            channel: channel ? [channel] : [], // User-selected channel
           },
           useCases: {
             whenToUse: ["General communications"],
@@ -198,6 +199,7 @@ export function MessageActions({ content, messageId }: MessageActionsProps) {
         onSave={handleSave}
         libraryType={saveLibraryType}
         contentType="message"
+        showChannelSelector={true}
       />
     </>
   );
