@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -55,6 +56,8 @@ import {
   Type,
   Megaphone,
   Save,
+  Plus,
+  ChevronDown,
 } from 'lucide-react';
 import { extractTextFromFile, getAcceptString } from '@/lib/documentParser';
 import { DNATuningControls, DNAAdjustments } from '@/components/DNATuningControls';
@@ -227,6 +230,19 @@ export default function ContentDNAPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
+  // Library inline upload state
+  const [libraryUploadOpen, setLibraryUploadOpen] = useState(false);
+  const libraryFileInputRef = useRef<HTMLInputElement>(null);
+  const [libraryTextInput, setLibraryTextInput] = useState('');
+  const [librarySampleTitle, setLibrarySampleTitle] = useState('');
+  const [librarySampleType, setLibrarySampleType] = useState('email');
+  const [librarySourceDescription, setLibrarySourceDescription] = useState('');
+  const [libraryStagedFile, setLibraryStagedFile] = useState<File | null>(null);
+  const [libraryStagedFileText, setLibraryStagedFileText] = useState<string | null>(null);
+  const [libraryStagedFileError, setLibraryStagedFileError] = useState<string | null>(null);
+  const [libraryIsExtractingFile, setLibraryIsExtractingFile] = useState(false);
+  const [libraryIsUploading, setLibraryIsUploading] = useState(false);
+
   // Handle saving DNA adjustments (uses hook's saveAdjustments)
   const handleSaveAdjustments = async (newAdjustments: DNAAdjustments) => {
     await saveAdjustments(newAdjustments);
@@ -267,6 +283,97 @@ export default function ContentDNAPage() {
     setSearchQuery('');
     setSearchResults([]);
     setHasSearched(false);
+  };
+
+  // Library inline upload handlers
+  const handleLibraryFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setLibraryIsExtractingFile(true);
+    setLibraryStagedFile(file);
+    setLibraryStagedFileText(null);
+    setLibraryStagedFileError(null);
+    
+    try {
+      const { text, success, message } = await extractTextFromFile(file);
+      
+      if (!success || !text) {
+        console.error('Could not extract text:', message);
+        setLibraryStagedFileError(message || 'Could not extract text from this file.');
+        setLibraryStagedFileText(null);
+        return;
+      }
+
+      setLibraryStagedFileText(text);
+      setLibraryStagedFileError(null);
+      if (!librarySampleTitle) {
+        setLibrarySampleTitle(file.name.replace(/\.[^/.]+$/, ''));
+      }
+    } catch (error) {
+      console.error('Extract error:', error);
+      setLibraryStagedFileError('Error reading file. Please try a different file.');
+      setLibraryStagedFileText(null);
+    } finally {
+      setLibraryIsExtractingFile(false);
+    }
+  };
+
+  const handleLibraryAddStagedFile = async () => {
+    if (!libraryStagedFile || !libraryStagedFileText) return;
+
+    setLibraryIsUploading(true);
+    try {
+      await addSample(libraryStagedFileText, libraryStagedFile.name, {
+        sampleType: librarySampleType,
+        title: librarySampleTitle || libraryStagedFile.name.replace(/\.[^/.]+$/, ''),
+        sourceDescription: librarySourceDescription || undefined,
+        fileType: libraryStagedFile.type,
+        fileSize: libraryStagedFile.size,
+      });
+      
+      // Reset form
+      setLibrarySampleTitle('');
+      setLibrarySourceDescription('');
+      setLibraryStagedFile(null);
+      setLibraryStagedFileText(null);
+      setLibraryUploadOpen(false);
+      if (libraryFileInputRef.current) libraryFileInputRef.current.value = '';
+    } catch (error) {
+      console.error('Upload error:', error);
+    } finally {
+      setLibraryIsUploading(false);
+    }
+  };
+
+  const handleLibraryClearStagedFile = () => {
+    setLibraryStagedFile(null);
+    setLibraryStagedFileText(null);
+    setLibraryStagedFileError(null);
+    if (libraryFileInputRef.current) libraryFileInputRef.current.value = '';
+  };
+
+  const handleLibraryTextSubmit = async () => {
+    if (!libraryTextInput.trim()) return;
+
+    setLibraryIsUploading(true);
+    try {
+      await addSample(libraryTextInput, `Pasted content - ${new Date().toLocaleDateString()}`, {
+        sampleType: librarySampleType,
+        title: librarySampleTitle || `${SAMPLE_TYPES.find(t => t.value === librarySampleType)?.label || 'Content'} Sample`,
+        sourceDescription: librarySourceDescription || undefined,
+      });
+      
+      // Reset form
+      setLibraryTextInput('');
+      setLibrarySampleTitle('');
+      setLibrarySourceDescription('');
+      setLibraryUploadOpen(false);
+    } catch (error) {
+      console.error('Submit error:', error);
+    } finally {
+      setLibraryIsUploading(false);
+    }
   };
 
   // Stage file - extract text but don't save yet
@@ -1522,6 +1629,247 @@ export default function ContentDNAPage() {
                 </div>
               </CardHeader>
               <CardContent>
+                {/* Inline Upload Panel */}
+                <Collapsible open={libraryUploadOpen} onOpenChange={setLibraryUploadOpen} className="mb-4">
+                  <CollapsibleTrigger asChild>
+                    <Button variant="outline" className="w-full justify-between">
+                      <span className="flex items-center gap-2">
+                        <Plus className="w-4 h-4" />
+                        Add New Content
+                      </span>
+                      <ChevronDown className={`w-4 h-4 transition-transform ${libraryUploadOpen ? 'rotate-180' : ''}`} />
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-4">
+                    <div className="p-4 border border-border rounded-lg bg-muted/30 space-y-4">
+                      {/* Upload tabs - File or Text */}
+                      <Tabs defaultValue="file" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2 mb-4">
+                          <TabsTrigger value="file" className="text-sm">
+                            <Upload className="w-4 h-4 mr-2" />
+                            Upload File
+                          </TabsTrigger>
+                          <TabsTrigger value="text" className="text-sm">
+                            <FileText className="w-4 h-4 mr-2" />
+                            Paste Text
+                          </TabsTrigger>
+                        </TabsList>
+
+                        <TabsContent value="file" className="space-y-4">
+                          {/* File Upload Area */}
+                          {!libraryStagedFile ? (
+                            <div
+                              className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary/50 transition-colors cursor-pointer"
+                              onClick={() => libraryFileInputRef.current?.click()}
+                            >
+                              <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                              <p className="text-sm font-medium text-foreground">Click to upload or drag and drop</p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                PDF, Word, TXT, Markdown, or Images (max 20MB)
+                              </p>
+                              <input
+                                ref={libraryFileInputRef}
+                                type="file"
+                                accept={getAcceptString()}
+                                onChange={handleLibraryFileSelect}
+                                className="hidden"
+                              />
+                            </div>
+                          ) : (
+                            <div className="border border-border rounded-lg p-4 bg-background">
+                              <div className="flex items-start justify-between gap-4">
+                                <div className="flex items-start gap-3 flex-1 min-w-0">
+                                  <div className="p-2 bg-muted rounded">
+                                    <FileText className="w-5 h-5 text-muted-foreground" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-medium text-foreground truncate">{libraryStagedFile.name}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {(libraryStagedFile.size / 1024).toFixed(1)} KB
+                                    </p>
+                                    {libraryIsExtractingFile && (
+                                      <div className="flex items-center gap-2 mt-1 text-primary">
+                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                        <span className="text-xs">Extracting text...</span>
+                                      </div>
+                                    )}
+                                    {libraryStagedFileError && (
+                                      <p className="text-xs text-destructive mt-1">{libraryStagedFileError}</p>
+                                    )}
+                                    {libraryStagedFileText && (
+                                      <p className="text-xs text-secondary mt-1">
+                                        ✓ {libraryStagedFileText.length.toLocaleString()} characters extracted
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                                <Button variant="ghost" size="icon" onClick={handleLibraryClearStagedFile}>
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Metadata Fields for File */}
+                          {libraryStagedFile && (
+                            <div className="grid gap-3">
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <Label htmlFor="library-sample-title" className="text-xs">Title</Label>
+                                  <Input
+                                    id="library-sample-title"
+                                    value={librarySampleTitle}
+                                    onChange={(e) => setLibrarySampleTitle(e.target.value)}
+                                    placeholder="e.g., Welcome Email 2024"
+                                    className="mt-1"
+                                  />
+                                </div>
+                                <div>
+                                  <Label htmlFor="library-sample-type" className="text-xs">Content Type</Label>
+                                  <Select value={librarySampleType} onValueChange={setLibrarySampleType}>
+                                    <SelectTrigger className="mt-1">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {Object.entries(
+                                        SAMPLE_TYPES.reduce((acc, type) => {
+                                          if (!acc[type.category]) acc[type.category] = [];
+                                          acc[type.category].push(type);
+                                          return acc;
+                                        }, {} as Record<string, typeof SAMPLE_TYPES>)
+                                      ).map(([category, types]) => (
+                                        <SelectGroup key={category}>
+                                          <SelectLabel>{category}</SelectLabel>
+                                          {types.map((type) => (
+                                            <SelectItem key={type.value} value={type.value}>
+                                              {type.label}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectGroup>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+                              <div>
+                                <Label htmlFor="library-source-desc" className="text-xs">Source Description (optional)</Label>
+                                <Input
+                                  id="library-source-desc"
+                                  value={librarySourceDescription}
+                                  onChange={(e) => setLibrarySourceDescription(e.target.value)}
+                                  placeholder="e.g., Sent to admitted students Fall 2024"
+                                  className="mt-1"
+                                />
+                              </div>
+                              <Button
+                                onClick={handleLibraryAddStagedFile}
+                                disabled={!libraryStagedFileText || libraryIsUploading}
+                                className="w-full bg-secondary hover:bg-secondary/90"
+                              >
+                                {libraryIsUploading ? (
+                                  <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    Adding...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Add to Library
+                                  </>
+                                )}
+                              </Button>
+                            </div>
+                          )}
+                        </TabsContent>
+
+                        <TabsContent value="text" className="space-y-4">
+                          <div>
+                            <Textarea
+                              value={libraryTextInput}
+                              onChange={(e) => setLibraryTextInput(e.target.value)}
+                              placeholder="Paste your content here..."
+                              className="min-h-[120px]"
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {libraryTextInput.length} characters
+                            </p>
+                          </div>
+
+                          {libraryTextInput.trim() && (
+                            <div className="grid gap-3">
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <Label htmlFor="library-text-title" className="text-xs">Title</Label>
+                                  <Input
+                                    id="library-text-title"
+                                    value={librarySampleTitle}
+                                    onChange={(e) => setLibrarySampleTitle(e.target.value)}
+                                    placeholder="e.g., Welcome Email 2024"
+                                    className="mt-1"
+                                  />
+                                </div>
+                                <div>
+                                  <Label htmlFor="library-text-type" className="text-xs">Content Type</Label>
+                                  <Select value={librarySampleType} onValueChange={setLibrarySampleType}>
+                                    <SelectTrigger className="mt-1">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {Object.entries(
+                                        SAMPLE_TYPES.reduce((acc, type) => {
+                                          if (!acc[type.category]) acc[type.category] = [];
+                                          acc[type.category].push(type);
+                                          return acc;
+                                        }, {} as Record<string, typeof SAMPLE_TYPES>)
+                                      ).map(([category, types]) => (
+                                        <SelectGroup key={category}>
+                                          <SelectLabel>{category}</SelectLabel>
+                                          {types.map((type) => (
+                                            <SelectItem key={type.value} value={type.value}>
+                                              {type.label}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectGroup>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+                              <div>
+                                <Label htmlFor="library-text-source" className="text-xs">Source Description (optional)</Label>
+                                <Input
+                                  id="library-text-source"
+                                  value={librarySourceDescription}
+                                  onChange={(e) => setLibrarySourceDescription(e.target.value)}
+                                  placeholder="e.g., President's welcome message"
+                                  className="mt-1"
+                                />
+                              </div>
+                              <Button
+                                onClick={handleLibraryTextSubmit}
+                                disabled={libraryTextInput.length < 20 || libraryIsUploading}
+                                className="w-full bg-secondary hover:bg-secondary/90"
+                              >
+                                {libraryIsUploading ? (
+                                  <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    Adding...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Add to Library
+                                  </>
+                                )}
+                              </Button>
+                            </div>
+                          )}
+                        </TabsContent>
+                      </Tabs>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+
                 {/* Search Bar */}
                 {extractionStats.completed > 0 && (
                   <div className="mb-4">
