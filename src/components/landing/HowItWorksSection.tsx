@@ -11,7 +11,7 @@ const steps = [
   {
     icon: Wand2,
     title: 'AI Learns Your DNA',
-    description: 'Our AI analyzes patterns, tone, and messaging pillars unique to your institution.',
+    description: 'Our AI learns your data and develops a unique and tailored Content DNA and Brand Layer for your institution.',
     color: 'purple',
   },
   {
