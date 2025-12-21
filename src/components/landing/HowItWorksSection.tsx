@@ -132,8 +132,8 @@ export default function HowItWorksSection() {
               Works
             </span>
           </h2>
-          <p className="text-white/60 text-lg max-w-xl mx-auto">
-            Transform your brand guidelines into on-brand content in four simple steps
+          <p className="text-white/60 text-lg max-w-2xl mx-auto">
+            Feed your brand assets and content samples into CampusVoice—our AI engine extracts your unique voice, then crafts on-brand messages ready for review and distribution across your campus communications.
           </p>
         </div>
 
