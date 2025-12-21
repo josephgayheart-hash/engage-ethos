@@ -293,31 +293,76 @@ export default function HowItWorksSection() {
           </div>
         </div>
 
-        {/* Mobile Layout - Vertical */}
-        <div className="md:hidden space-y-3">
-          {leftSteps.map((step, index) => (
-            <div key={index} className="flex flex-col items-center">
-              <div className="w-52 h-14 rounded-xl bg-[hsl(222_40%_16%)] border border-white/10 flex items-center justify-center">
-                <step.icon className="w-5 h-5 text-white/70" />
-              </div>
-              <span className="mt-2 text-white/50 text-xs text-center">{step.label}</span>
-              {/* Animated vertical connector */}
-              <svg className="w-2 h-6 mt-2" viewBox="0 0 8 24" fill="none">
-                <defs>
-                  <linearGradient id={`mobileLineGrad${index}`} x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="hsl(270 70% 60%)" stopOpacity="0.55" />
-                    <stop offset="100%" stopColor="hsl(200 100% 60%)" stopOpacity="0.85" />
-                  </linearGradient>
-                </defs>
-                <line x1="4" y1="0" x2="4" y2="24" stroke={`url(#mobileLineGrad${index})`} strokeWidth="2" strokeLinecap="round" opacity="0.55" />
-                <line x1="4" y1="0" x2="4" y2="24" stroke={`url(#mobileLineGrad${index})`} strokeWidth="3" strokeLinecap="round" className="animate-pulse-flow-vertical" style={{ animationDelay: `${index * 0.35}s` }} />
-              </svg>
-            </div>
-          ))}
+        {/* Mobile Layout - Vertical with SVG connecting lines */}
+        <div className="md:hidden relative" style={{ minHeight: "580px" }}>
+          {/* SVG overlay for connecting lines */}
+          <svg
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            viewBox="0 0 200 580"
+            preserveAspectRatio="xMidYMid meet"
+            style={{ overflow: "visible" }}
+          >
+            <defs>
+              <linearGradient id="mobileLineGradV" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="hsl(270 70% 60%)" stopOpacity="0.55" />
+                <stop offset="100%" stopColor="hsl(200 100% 60%)" stopOpacity="0.85" />
+              </linearGradient>
+            </defs>
 
-          {/* Hub with animated glow */}
-          <div className="flex justify-center py-2">
-            <div className="w-24 h-24 rounded-full bg-[hsl(222_40%_14%)] border border-white/15 flex items-center justify-center relative overflow-hidden shadow-[0_0_30px_hsl(270_70%_50%_/_0.2)]">
+            {/* Line from Box 1 to Box 2 */}
+            <line x1="100" y1="70" x2="100" y2="105" stroke="url(#mobileLineGradV)" strokeWidth="1.5" strokeLinecap="round" opacity="0.55" />
+            <line x1="100" y1="70" x2="100" y2="105" stroke="url(#mobileLineGradV)" strokeWidth="2.5" strokeLinecap="round" className="animate-pulse-flow-vertical" style={{ filter: "blur(0.5px)" }} />
+
+            {/* Line from Box 2 to Box 3 */}
+            <line x1="100" y1="175" x2="100" y2="210" stroke="url(#mobileLineGradV)" strokeWidth="1.5" strokeLinecap="round" opacity="0.55" />
+            <line x1="100" y1="175" x2="100" y2="210" stroke="url(#mobileLineGradV)" strokeWidth="2.5" strokeLinecap="round" className="animate-pulse-flow-vertical" style={{ animationDelay: "0.35s", filter: "blur(0.5px)" }} />
+
+            {/* Line from Box 3 to Hub */}
+            <line x1="100" y1="280" x2="100" y2="320" stroke="url(#mobileLineGradV)" strokeWidth="1.5" strokeLinecap="round" opacity="0.55" />
+            <line x1="100" y1="280" x2="100" y2="320" stroke="url(#mobileLineGradV)" strokeWidth="2.5" strokeLinecap="round" className="animate-pulse-flow-vertical" style={{ animationDelay: "0.7s", filter: "blur(0.5px)" }} />
+
+            {/* Line from Hub to Output */}
+            <line x1="100" y1="430" x2="100" y2="470" stroke="url(#mobileLineGradV)" strokeWidth="1.5" strokeLinecap="round" opacity="0.55" />
+            <line x1="100" y1="430" x2="100" y2="470" stroke="url(#mobileLineGradV)" strokeWidth="2.5" strokeLinecap="round" className="animate-pulse-flow-vertical" style={{ animationDelay: "1.05s", filter: "blur(0.5px)" }} />
+          </svg>
+
+          {/* Content positioned over SVG */}
+          <div className="relative z-10 flex flex-col items-center">
+            {/* Box 1 - Upload */}
+            <div className="flex flex-col items-center">
+              <div className="w-52 h-14 rounded-xl bg-[hsl(222_40%_16%)] border border-white/10 flex items-center justify-center">
+                <Upload className="w-5 h-5 text-white/70" />
+              </div>
+              <span className="mt-2 text-white/50 text-xs text-center">Upload Your Content</span>
+            </div>
+
+            {/* Spacer for line */}
+            <div className="h-9" />
+
+            {/* Box 2 - Import */}
+            <div className="flex flex-col items-center">
+              <div className="w-52 h-14 rounded-xl bg-[hsl(222_40%_16%)] border border-white/10 flex items-center justify-center">
+                <Database className="w-5 h-5 text-white/70" />
+              </div>
+              <span className="mt-2 text-white/50 text-xs text-center">Import Brand Assets</span>
+            </div>
+
+            {/* Spacer for line */}
+            <div className="h-9" />
+
+            {/* Box 3 - Voice */}
+            <div className="flex flex-col items-center">
+              <div className="w-52 h-14 rounded-xl bg-[hsl(222_40%_16%)] border border-white/10 flex items-center justify-center">
+                <Zap className="w-5 h-5 text-white/70" />
+              </div>
+              <span className="mt-2 text-white/50 text-xs text-center">Define Your Voice</span>
+            </div>
+
+            {/* Spacer for line to hub */}
+            <div className="h-10" />
+
+            {/* Hub with animated glow */}
+            <div className="w-28 h-28 rounded-full bg-[hsl(222_40%_14%)] border border-white/15 flex items-center justify-center relative overflow-hidden shadow-[0_0_30px_hsl(270_70%_50%_/_0.2)]">
               {/* Animated glow ring */}
               <div
                 className="absolute inset-0 rounded-full opacity-70"
@@ -329,31 +374,22 @@ export default function HowItWorksSection() {
               />
               <div className="absolute inset-[3px] rounded-full bg-[hsl(222_40%_14%)] flex items-center justify-center">
                 <div className="text-center">
-                  <span className="text-white font-semibold text-[10px] leading-tight block">CampusVoice</span>
-                  <span className="text-white/50 text-[8px]">AI Engine</span>
+                  <span className="text-white font-semibold text-[11px] leading-tight block">CampusVoice</span>
+                  <span className="text-white/50 text-[9px]">AI Engine</span>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Animated vertical connector after hub */}
-          <svg className="w-2 h-6 mx-auto" viewBox="0 0 8 24" fill="none">
-            <defs>
-              <linearGradient id="mobileLineGradHub" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="hsl(270 70% 60%)" stopOpacity="0.55" />
-                <stop offset="100%" stopColor="hsl(200 100% 60%)" stopOpacity="0.85" />
-              </linearGradient>
-            </defs>
-            <line x1="4" y1="0" x2="4" y2="24" stroke="url(#mobileLineGradHub)" strokeWidth="2" strokeLinecap="round" opacity="0.55" />
-            <line x1="4" y1="0" x2="4" y2="24" stroke="url(#mobileLineGradHub)" strokeWidth="3" strokeLinecap="round" className="animate-pulse-flow-vertical" style={{ animationDelay: "1.05s" }} />
-          </svg>
+            {/* Spacer for line from hub */}
+            <div className="h-10" />
 
-          {/* Output */}
-          <div className="flex flex-col items-center">
-            <div className="w-52 h-14 rounded-xl bg-[hsl(222_40%_16%)] border border-white/10 flex items-center justify-center">
-              <rightStep.icon className="w-5 h-5 text-white/70" />
+            {/* Output */}
+            <div className="flex flex-col items-center">
+              <div className="w-52 h-14 rounded-xl bg-[hsl(222_40%_16%)] border border-white/10 flex items-center justify-center">
+                <Library className="w-5 h-5 text-white/70" />
+              </div>
+              <span className="mt-2 text-white/50 text-xs text-center">{rightStep.label}</span>
             </div>
-            <span className="mt-2 text-white/50 text-xs text-center">{rightStep.label}</span>
           </div>
         </div>
       </div>
