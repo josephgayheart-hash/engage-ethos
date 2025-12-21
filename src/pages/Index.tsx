@@ -305,22 +305,22 @@ const Index = () => {
               {/* Step 4: Content DNA Studio */}
               <Link to="/content-dna">
                 <Card className="h-full cursor-pointer card-workflow group relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-amber-500/40 group-hover:bg-amber-500/70 transition-colors" />
+                  <div className="absolute top-0 left-0 w-full h-1 bg-[hsl(270_70%_60%_/_0.4)] group-hover:bg-[hsl(270_70%_60%_/_0.7)] transition-colors" />
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center text-sm font-bold text-amber-600">
+                      <div className="w-8 h-8 rounded-full bg-[hsl(270_70%_60%_/_0.1)] flex items-center justify-center text-sm font-bold text-[hsl(270_70%_55%)]">
                         4
                       </div>
-                      <Badge variant="outline" className="text-xs bg-amber-500/5 text-amber-600 border-amber-200">Studio</Badge>
+                      <Badge variant="outline" className="text-xs bg-[hsl(270_70%_60%_/_0.05)] text-[hsl(270_70%_55%)] border-[hsl(270_70%_60%_/_0.3)]">Studio</Badge>
                     </div>
-                    <div className="icon-container icon-container-lg bg-amber-500/10 mb-4">
-                      <Sparkles className="w-6 h-6 text-amber-600" />
+                    <div className="icon-container icon-container-lg bg-[hsl(270_70%_60%_/_0.1)] mb-4">
+                      <Sparkles className="w-6 h-6 text-[hsl(270_70%_55%)]" />
                     </div>
                     <h3 className="font-serif font-semibold text-lg mb-2">Content DNA Studio</h3>
                     <p className="text-sm text-muted-foreground mb-4">
                       Upload samples, tune voice dimensions, and manage your content library. Build the AI foundation for on-brand messaging.
                     </p>
-                    <div className="flex items-center text-sm text-amber-600 font-medium group-hover:gap-2 transition-all">
+                    <div className="flex items-center text-sm text-[hsl(270_70%_55%)] font-medium group-hover:gap-2 transition-all">
                       Open Studio
                       <ArrowRight className="w-4 h-4 ml-1" />
                     </div>
