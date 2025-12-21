@@ -115,10 +115,10 @@ export default function ContentDNAFeaturePage() {
             </Badge>
             <h1 className="font-serif text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
               Your Institution's
-              <span className="block text-primary">Content DNA</span>
+              <span className="block text-primary">Content DNA Studio</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              Upload your best communications and let AI learn your unique voice. Every message generated will sound authentically yours—not generic AI.
+              Upload content samples, tune voice dimensions, and manage your content library. Build the complete AI foundation for on-brand messaging.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
               <Link to="/request-access">

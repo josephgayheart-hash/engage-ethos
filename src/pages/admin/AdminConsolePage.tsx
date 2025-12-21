@@ -443,8 +443,8 @@ export default function AdminConsolePage() {
       stat: contentStats.institutionalProfiles > 0 ? `${contentStats.institutionalProfiles} profiles` : 'Configure'
     },
     {
-      title: 'Content DNA',
-      description: 'Refine your brand voice and messaging patterns',
+      title: 'Content DNA Studio',
+      description: 'Upload samples, tune voice dimensions, and manage your content library',
       icon: Dna,
       href: '/admin/content-dna',
       color: 'bg-[hsl(173,58%,39%)]',

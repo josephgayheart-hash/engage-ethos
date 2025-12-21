@@ -302,7 +302,7 @@ const Index = () => {
                 </Card>
               </Link>
 
-              {/* Step 4: Refine Content DNA */}
+              {/* Step 4: Content DNA Studio */}
               <Link to="/content-dna">
                 <Card className="h-full cursor-pointer card-workflow group relative overflow-hidden">
                   <div className="absolute top-0 left-0 w-full h-1 bg-amber-500/40 group-hover:bg-amber-500/70 transition-colors" />
@@ -311,17 +311,17 @@ const Index = () => {
                       <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center text-sm font-bold text-amber-600">
                         4
                       </div>
-                      <Badge variant="outline" className="text-xs bg-amber-500/5 text-amber-600 border-amber-200">Refine</Badge>
+                      <Badge variant="outline" className="text-xs bg-amber-500/5 text-amber-600 border-amber-200">Studio</Badge>
                     </div>
                     <div className="icon-container icon-container-lg bg-amber-500/10 mb-4">
                       <Sparkles className="w-6 h-6 text-amber-600" />
                     </div>
-                    <h3 className="font-serif font-semibold text-lg mb-2">Refine Content DNA</h3>
+                    <h3 className="font-serif font-semibold text-lg mb-2">Content DNA Studio</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Ground your AI in brand promise, pillars, and positioning. Upload samples to perfect your institutional voice.
+                      Upload samples, tune voice dimensions, and manage your content library. Build the AI foundation for on-brand messaging.
                     </p>
                     <div className="flex items-center text-sm text-amber-600 font-medium group-hover:gap-2 transition-all">
-                      Refine Voice
+                      Open Studio
                       <ArrowRight className="w-4 h-4 ml-1" />
                     </div>
                   </CardContent>
