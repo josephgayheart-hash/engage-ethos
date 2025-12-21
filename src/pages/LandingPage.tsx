@@ -16,6 +16,10 @@ import {
   GraduationCap
 } from 'lucide-react';
 import campusvoiceLogo from '@/assets/campusvoice-logo.png';
+import SpotlightBeams from '@/components/landing/SpotlightBeams';
+import GlowOrbs from '@/components/landing/GlowOrbs';
+import HowItWorksSection from '@/components/landing/HowItWorksSection';
+import AnimatedGradientText from '@/components/landing/AnimatedGradientText';
 
 const features = [
   {
@@ -73,29 +77,28 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Hero Section */}
-      <header className="relative overflow-hidden">
+      <header className="relative overflow-hidden min-h-[90vh] flex flex-col">
         {/* AI-Inspired Gradient Background */}
         <div className="absolute inset-0 gradient-hero-landing" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(200_70%_90%_/_0.4),_transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_hsl(173_58%_85%_/_0.3),_transparent_50%)]" />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-40" />
         
-        {/* Lens flares - blurred and varied */}
-        <div className="absolute top-20 right-[12%] w-32 h-32 bg-[hsl(270_70%_60%_/_0.18)] rounded-full blur-2xl" />
-        <div className="absolute bottom-36 left-[8%] w-40 h-40 bg-[hsl(82_85%_55%_/_0.15)] rounded-full blur-3xl" />
-        <div className="absolute top-44 left-[22%] w-24 h-24 bg-[hsl(200_100%_50%_/_0.15)] rounded-full blur-2xl" />
-        <div className="absolute bottom-48 right-[25%] w-20 h-20 bg-[hsl(340_75%_55%_/_0.12)] rounded-full blur-2xl" />
-        <div className="absolute top-32 right-[35%] w-16 h-16 bg-[hsl(82_85%_55%_/_0.2)] rounded-full blur-xl" />
+        {/* Animated spotlight beams */}
+        <SpotlightBeams />
         
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-28">
-          <div className="text-center space-y-6">
+        {/* Floating glow orbs */}
+        <GlowOrbs variant="hero" />
+        
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-36 flex-1 flex items-center">
+          <div className="text-center space-y-8 w-full">
             {/* Beta Badge */}
             <div className="animate-fade-in">
               <Badge 
                 variant="secondary" 
-                className="bg-[hsl(200_100%_50%_/_0.15)] text-[hsl(200_100%_50%)] border-[hsl(200_100%_50%_/_0.3)] px-4 py-1.5 text-sm font-semibold"
+                className="bg-[hsl(200_100%_50%_/_0.15)] text-[hsl(200_100%_50%)] border-[hsl(200_100%_50%_/_0.3)] px-4 py-1.5 text-sm font-semibold backdrop-blur-sm"
               >
-                <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+                <Sparkles className="w-3.5 h-3.5 mr-1.5 animate-pulse" />
                 Beta Access
               </Badge>
             </div>
@@ -105,17 +108,19 @@ export default function LandingPage() {
               <img 
                 src={campusvoiceLogo} 
                 alt="CampusVoice.AI" 
-                className="h-14 sm:h-16 lg:h-20 w-auto max-w-[280px] sm:max-w-[340px] lg:max-w-[400px] mx-auto"
+                className="h-16 sm:h-20 lg:h-24 w-auto max-w-[300px] sm:max-w-[380px] lg:max-w-[450px] mx-auto drop-shadow-lg"
               />
             </div>
 
-            {/* Primary Slogan */}
+            {/* Primary Slogan with Animated Gradient */}
             <h1 
-              className="font-serif text-3xl sm:text-4xl lg:text-5xl text-foreground tracking-tight animate-fade-in max-w-4xl mx-auto leading-tight"
+              className="font-serif text-4xl sm:text-5xl lg:text-6xl text-foreground tracking-tight animate-fade-in max-w-4xl mx-auto leading-tight"
               style={{ animationDelay: '0.2s' }}
             >
-              <span className="text-[hsl(82_85%_55%)]">Plan.</span> <span className="text-[hsl(270_70%_60%)]">Strategize.</span> <span className="text-[hsl(200_100%_50%)]">Execute.</span>
-              <span className="block text-foreground text-2xl sm:text-3xl lg:text-4xl mt-2">Your Digital Playbook for Higher Ed Communications</span>
+              <AnimatedGradientText>Plan. Strategize. Execute.</AnimatedGradientText>
+              <span className="block text-foreground text-2xl sm:text-3xl lg:text-4xl mt-4 font-sans font-light">
+                Your Digital Playbook for Higher Ed Communications
+              </span>
             </h1>
 
             {/* Secondary Tagline */}
@@ -134,18 +139,20 @@ export default function LandingPage() {
               <Button 
                 asChild
                 size="lg"
-                className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] shadow-[0_0_30px_hsl(82_85%_55%_/_0.3)] hover:shadow-[0_0_40px_hsl(82_85%_55%_/_0.5)] transition-all duration-300 text-base px-8 py-6 font-bold border-0"
+                className="relative overflow-hidden bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] shadow-[0_0_30px_hsl(82_85%_55%_/_0.4)] hover:shadow-[0_0_50px_hsl(82_85%_55%_/_0.6)] transition-all duration-500 text-base px-10 py-7 font-bold border-0 rounded-full group"
               >
                 <Link to="/request-access">
-                  Join the Beta
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <span className="relative z-10 flex items-center">
+                    Join the Beta
+                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  </span>
                 </Link>
               </Button>
               <Button 
                 asChild
                 variant="outline"
                 size="lg"
-                className="border-2 border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/50 text-base px-8 py-6"
+                className="border-2 border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/50 text-base px-10 py-7 rounded-full backdrop-blur-sm"
               >
                 <Link to="/login">
                   Sign In
@@ -155,7 +162,7 @@ export default function LandingPage() {
 
             {/* Trust Indicators */}
             <div 
-              className="flex flex-wrap justify-center gap-6 pt-6 animate-fade-in"
+              className="flex flex-wrap justify-center gap-8 pt-8 animate-fade-in"
               style={{ animationDelay: '0.5s' }}
             >
               {trustIndicators.map((indicator, index) => {
@@ -309,7 +316,7 @@ export default function LandingPage() {
           </div>
         </div>
         
-        {/* Wave transition to purple section */}
+        {/* Wave transition to How It Works section */}
         <div className="absolute bottom-0 left-0 right-0">
           <svg 
             viewBox="0 0 1440 80" 
@@ -320,11 +327,14 @@ export default function LandingPage() {
           >
             <path 
               d="M0 80L60 65C120 50 240 20 360 15C480 10 600 30 720 40C840 50 960 50 1080 45C1200 40 1320 30 1380 25L1440 20V80H1380C1320 80 1200 80 1080 80C960 80 840 80 720 80C600 80 480 80 360 80C240 80 120 80 60 80H0Z" 
-              fill="hsl(270 60% 50%)"
+              fill="hsl(222 47% 11%)"
             />
           </svg>
         </div>
       </section>
+
+      {/* How It Works Section - Animated Dark Section */}
+      <HowItWorksSection />
 
       {/* Secondary CTA Section - Vibrant Purple */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(270_60%_50%)] relative overflow-hidden">

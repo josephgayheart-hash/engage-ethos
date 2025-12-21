@@ -390,6 +390,34 @@
   .animate-pulse-subtle {
     animation: pulseSoft 2s ease-in-out infinite;
   }
+
+  .animate-spotlight-slow {
+    animation: spotlightRotate 20s linear infinite;
+  }
+
+  .animate-spotlight-reverse {
+    animation: spotlightRotate 25s linear infinite reverse;
+  }
+
+  .animate-float-slow {
+    animation: floatOrb 8s ease-in-out infinite;
+  }
+
+  .animate-float-medium {
+    animation: floatOrb 6s ease-in-out infinite;
+  }
+
+  .animate-float-fast {
+    animation: floatOrb 4s ease-in-out infinite;
+  }
+
+  .animate-gradient-shift {
+    animation: gradientShift 3s ease-in-out infinite;
+  }
+
+  .animate-beam-flow {
+    animation: beamFlow 4s linear infinite;
+  }
 }
 
 @keyframes fadeIn {
@@ -418,5 +446,64 @@
   }
   50% {
     opacity: 0.7;
+  }
+}
+
+@keyframes spotlightRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes floatOrb {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px);
+  }
+  50% {
+    transform: translateY(-10px) translateX(-10px);
+  }
+  75% {
+    transform: translateY(-25px) translateX(5px);
+  }
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes beamFlow {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(1200%);
+    opacity: 0;
+  }
+}
+
+@keyframes border-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
   }
 }
