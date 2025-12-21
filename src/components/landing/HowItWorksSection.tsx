@@ -259,7 +259,7 @@ export default function HowItWorksSection() {
             ref={hubRef}
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
           >
-            <div className="w-28 h-28 rounded-full bg-[hsl(222_40%_14%)] border border-white/15 flex items-center justify-center relative overflow-hidden shadow-[0_0_40px_hsl(270_70%_50%_/_0.2)]">
+            <div className="w-36 h-36 rounded-full bg-[hsl(222_40%_14%)] border border-white/15 flex items-center justify-center relative overflow-hidden shadow-[0_0_40px_hsl(270_70%_50%_/_0.2)]">
               {/* Animated glow ring */}
               <div
                 className="absolute inset-0 rounded-full opacity-70"
