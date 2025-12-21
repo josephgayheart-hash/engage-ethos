@@ -133,7 +133,7 @@ export default function HowItWorksSection() {
             </span>
           </h2>
           <p className="text-white/60 text-lg max-w-2xl mx-auto">
-            Feed your brand assets and content samples into CampusVoice—our AI engine extracts your unique voice, then crafts on-brand messages ready for review and distribution across your campus communications.
+            Feed your brand assets and content samples into CampusVoice—our AI extracts your Content DNA and brand layer, then crafts on-brand messages ready for review and distribution across your campus communications.
           </p>
         </div>
 
