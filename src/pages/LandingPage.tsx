@@ -179,7 +179,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Wave Divider to Yellow */}
+        {/* Wave Divider to How It Works (light blue-grey) */}
         <div className="absolute bottom-0 left-0 right-0">
           <svg 
             viewBox="0 0 1440 120" 
@@ -190,11 +190,14 @@ export default function LandingPage() {
           >
             <path 
               d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" 
-              fill="hsl(48 100% 90%)"
+              fill="hsl(220 35% 92%)"
             />
           </svg>
         </div>
       </header>
+
+      {/* How It Works Section - Position #2 */}
+      <HowItWorksSection />
 
       {/* Value Proposition Section - Fun Yellow Background */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(48_100%_90%)] relative overflow-hidden">
@@ -310,7 +313,7 @@ export default function LandingPage() {
           </div>
         </div>
         
-        {/* Wave transition to How It Works section */}
+        {/* Wave transition to CTA section */}
         <div className="absolute bottom-0 left-0 right-0">
           <svg 
             viewBox="0 0 1440 80" 
@@ -321,14 +324,11 @@ export default function LandingPage() {
           >
             <path 
               d="M0 80L60 65C120 50 240 20 360 15C480 10 600 30 720 40C840 50 960 50 1080 45C1200 40 1320 30 1380 25L1440 20V80H1380C1320 80 1200 80 1080 80C960 80 840 80 720 80C600 80 480 80 360 80C240 80 120 80 60 80H0Z" 
-              fill="hsl(220 40% 88%)"
+              fill="hsl(270 60% 50%)"
             />
           </svg>
         </div>
       </section>
-
-      {/* How It Works Section - Animated Dark Section */}
-      <HowItWorksSection />
 
       {/* Secondary CTA Section - Vibrant Purple */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(270_60%_50%)] relative overflow-hidden">

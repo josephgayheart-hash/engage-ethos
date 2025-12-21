@@ -524,3 +524,37 @@
     opacity: 0;
   }
 }
+
+@keyframes beam-travel-vertical {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(300%);
+    opacity: 0;
+  }
+}
+
+@keyframes path-flow {
+  0% {
+    stroke-dashoffset: 40;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-path-flow {
+  animation: path-flow 2s linear infinite;
+}
+
+.animate-pulse-subtle {
+  animation: pulseSoft 3s ease-in-out infinite;
+}
