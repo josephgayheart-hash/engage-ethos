@@ -38,14 +38,14 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Map role to display name
     const roleDisplayName = role === 'super_admin' 
-      ? 'UPlaybook Super Admin' 
+      ? 'CampusVoice Super Admin' 
       : role === 'admin' 
         ? 'University Admin'
         : role === 'approver' || role === 'user_approver'
           ? 'University User + Approver'
           : 'University User';
 
-    const subject = `🎉 You're In! Welcome to UPlaybook.AI - ${institutionName}`;
+    const subject = `🎉 You're In! Welcome to CampusVoice.AI - ${institutionName}`;
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -83,7 +83,7 @@ const handler = async (req: Request): Promise<Response> => {
         </style>
       </head>
       <body class="body" style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f0fdf4 !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
-        <div style="display: none; max-height: 0; overflow: hidden;">Your UPlaybook.AI account has been approved - login credentials inside</div>
+        <div style="display: none; max-height: 0; overflow: hidden;">Your CampusVoice.AI account has been approved - login credentials inside</div>
         <table class="body-wrapper" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f0fdf4 !important; padding: 40px 20px;" bgcolor="#f0fdf4">
           <tr>
             <td align="center">
@@ -94,7 +94,7 @@ const handler = async (req: Request): Promise<Response> => {
                     <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;" bgcolor="#1a2036">
                       <tr>
                         <td style="background-color: #ffffff !important; padding: 16px 20px; border-radius: 10px;" bgcolor="#ffffff">
-                          <img class="logo-img" src="https://uplaybook.ai/uplaybook-logo.png" alt="UPlaybook.AI" style="height: 50px; width: auto; display: block; background-color: #ffffff !important;" />
+                          <img class="logo-img" src="https://uplaybook.ai/uplaybook-logo.png" alt="CampusVoice.AI" style="height: 50px; width: auto; display: block; background-color: #ffffff !important;" />
                         </td>
                       </tr>
                     </table>
@@ -106,7 +106,7 @@ const handler = async (req: Request): Promise<Response> => {
                   <td style="background-color: #059669 !important; padding: 32px 40px; text-align: center;" bgcolor="#059669">
                     <div style="font-size: 48px; margin-bottom: 12px; background-color: #059669 !important;" bgcolor="#059669">🎉</div>
                     <h1 style="margin: 0; color: #ffffff !important; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; background-color: #059669 !important; -webkit-text-fill-color: #ffffff !important;" bgcolor="#059669">You're In!</h1>
-                    <p style="margin: 8px 0 0 0; color: #d1fae5 !important; font-size: 16px; font-weight: 700; background-color: #059669 !important; -webkit-text-fill-color: #d1fae5 !important;" bgcolor="#059669">Welcome to the UPlaybook.AI community</p>
+                    <p style="margin: 8px 0 0 0; color: #d1fae5 !important; font-size: 16px; font-weight: 700; background-color: #059669 !important; -webkit-text-fill-color: #d1fae5 !important;" bgcolor="#059669">Welcome to the CampusVoice.AI community</p>
                   </td>
                 </tr>
                 
@@ -115,7 +115,7 @@ const handler = async (req: Request): Promise<Response> => {
                   <td style="padding: 40px; background-color: #ffffff !important;" bgcolor="#ffffff">
                     <h2 style="margin: 0 0 16px 0; color: #1e293b !important; font-size: 24px; font-weight: 600; background-color: #ffffff !important;" bgcolor="#ffffff">Great news, ${firstName}!</h2>
                     <p style="margin: 0 0 24px 0; color: #475569 !important; font-size: 16px; line-height: 1.7; background-color: #ffffff !important;" bgcolor="#ffffff">
-                      Your request to join <strong style="color: #059669 !important;">${institutionName}</strong> on UPlaybook.AI has been <strong style="color: #059669 !important;">approved</strong>! 
+                      Your request to join <strong style="color: #059669 !important;">${institutionName}</strong> on CampusVoice.AI has been <strong style="color: #059669 !important;">approved</strong>! 
                       We're thrilled to have you as part of our growing community of communication professionals.
                     </p>
                     
@@ -143,7 +143,7 @@ const handler = async (req: Request): Promise<Response> => {
                     <!-- CTA Button -->
                     <div style="text-align: center; margin: 36px 0; background-color: #ffffff !important;" bgcolor="#ffffff">
                       <a href="https://uplaybook.ai/login" style="display: inline-block; background-color: #059669 !important; color: #ffffff !important; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-size: 18px; font-weight: 700; box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.4);" bgcolor="#059669">
-                        🚀 Start Using UPlaybook.AI
+                        🚀 Start Using CampusVoice.AI
                       </a>
                     </div>
                     
@@ -174,7 +174,7 @@ const handler = async (req: Request): Promise<Response> => {
                       🌟 We're excited to have you on board!
                     </p>
                     <p style="margin: 0; color: #94a3b8 !important; font-size: 12px; text-align: center; background-color: #f8fafc !important;" bgcolor="#f8fafc">
-                      — The UPlaybook.AI Team 💙
+                      — The CampusVoice.AI Team 💙
                     </p>
                   </td>
                 </tr>
@@ -182,7 +182,7 @@ const handler = async (req: Request): Promise<Response> => {
               
               <!-- Sub-footer -->
               <p style="margin: 24px 0 0 0; color: #64748b !important; font-size: 12px; text-align: center; background-color: #f0fdf4 !important;" bgcolor="#f0fdf4">
-                This is an automated message from UPlaybook.AI confirming your account approval.
+                This is an automated message from CampusVoice.AI confirming your account approval.
               </p>
             </td>
           </tr>
@@ -199,7 +199,7 @@ const handler = async (req: Request): Promise<Response> => {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "UPlaybook.AI <noreply@uplaybook.ai>",
+        from: "CampusVoice.AI <noreply@uplaybook.ai>",
         to: [email],
         subject,
         html: htmlContent,

@@ -180,7 +180,7 @@ const Index = () => {
             
             <div className="mb-6 pt-4">
               <h2 className="section-header mb-1">How It Works</h2>
-              <p className="section-subheader">Follow these steps to get the most out of UPlaybook</p>
+              <p className="section-subheader">Follow these steps to get the most out of CampusVoice</p>
             </div>
             
             <div className="grid md:grid-cols-4 gap-4 pb-4">

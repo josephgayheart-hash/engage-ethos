@@ -28,9 +28,9 @@ const getWhereHaveYouBeenHtml = (firstName: string, institutionName: string, las
   if (lastLoginAt) {
     const lastLogin = new Date(lastLoginAt);
     daysSince = Math.floor((now.getTime() - lastLogin.getTime()) / (1000 * 60 * 60 * 24));
-    timeMessage = `It's been ${daysSince} days since you last visited UPlaybook.AI.`;
+    timeMessage = `It's been ${daysSince} days since you last visited CampusVoice.AI.`;
   } else {
-    timeMessage = "You were invited to UPlaybook.AI but haven't logged in yet.";
+    timeMessage = "You were invited to CampusVoice.AI but haven't logged in yet.";
   }
 
   return `
@@ -55,7 +55,7 @@ const getWhereHaveYouBeenHtml = (firstName: string, institutionName: string, las
               <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                 <tr>
                   <td style="background-color: #ffffff; padding: 12px 16px; border-radius: 8px;">
-                    <img src="https://uplaybook.ai/uplaybook-logo.png" alt="UPlaybook.AI" style="height: 40px; width: auto;" />
+                    <img src="https://uplaybook.ai/uplaybook-logo.png" alt="CampusVoice.AI" style="height: 40px; width: auto;" />
                   </td>
                 </tr>
               </table>
@@ -73,7 +73,7 @@ const getWhereHaveYouBeenHtml = (firstName: string, institutionName: string, las
               </p>
               
               <p style="margin: 0 0 24px 0; color: #475569; font-size: 16px; line-height: 1.6;">
-                Your colleagues at <strong style="color: #1e293b;">${institutionName}</strong> have been using UPlaybook.AI to create amazing content, and we'd love to help you do the same.
+                Your colleagues at <strong style="color: #1e293b;">${institutionName}</strong> have been using CampusVoice.AI to create amazing content, and we'd love to help you do the same.
               </p>
               
               <!-- What's new box with amber/orange theme -->
@@ -130,7 +130,7 @@ const getWhereHaveYouBeenHtml = (firstName: string, institutionName: string, las
                 We're here whenever you're ready!
               </p>
               <p style="margin: 0; color: #94a3b8; font-size: 12px; text-align: center;">
-                — The UPlaybook.AI Team
+                — The CampusVoice.AI Team
               </p>
             </td>
           </tr>
@@ -138,7 +138,7 @@ const getWhereHaveYouBeenHtml = (firstName: string, institutionName: string, las
         
         <!-- Sub-footer -->
         <p style="margin: 24px 0 0 0; color: #94a3b8; font-size: 12px; text-align: center;">
-          This email was sent by UPlaybook.AI because we noticed you haven't visited in a while.
+          This email was sent by CampusVoice.AI because we noticed you haven't visited in a while.
         </p>
       </td>
     </tr>
@@ -174,7 +174,7 @@ const handler = async (req: Request): Promise<Response> => {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "UPlaybook.AI <noreply@uplaybook.ai>",
+        from: "CampusVoice.AI <noreply@uplaybook.ai>",
         to: [email],
         subject,
         html: htmlContent,

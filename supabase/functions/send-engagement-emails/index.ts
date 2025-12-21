@@ -36,7 +36,7 @@ const getInviteReminderHtml = (firstName: string, institutionName: string, daysA
               <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                 <tr>
                   <td style="background-color: #ffffff; padding: 12px 16px; border-radius: 8px;">
-                    <img src="https://uplaybook.ai/uplaybook-logo.png" alt="UPlaybook.AI" style="height: 40px; width: auto;" />
+                    <img src="https://uplaybook.ai/uplaybook-logo.png" alt="CampusVoice.AI" style="height: 40px; width: auto;" />
                   </td>
                 </tr>
               </table>
@@ -49,7 +49,7 @@ const getInviteReminderHtml = (firstName: string, institutionName: string, daysA
             <td style="padding: 40px; background-color: #ffffff;">
               <p style="margin: 0 0 20px 0; color: #1e293b; font-size: 18px; font-weight: 600;">Hi ${firstName},</p>
               <p style="margin: 0 0 24px 0; color: #475569; font-size: 16px; line-height: 1.6;">
-                Your <strong style="color: #1e293b;">UPlaybook.AI</strong> account was created ${daysAgo === 2 ? '2 days' : '5 days'} ago, but we haven't seen you log in yet! 
+                Your <strong style="color: #1e293b;">CampusVoice.AI</strong> account was created ${daysAgo === 2 ? '2 days' : '5 days'} ago, but we haven't seen you log in yet! 
                 <strong style="color: #1e293b;">${institutionName}</strong> has given you access to powerful AI-powered communication tools.
               </p>
               
@@ -85,7 +85,7 @@ const getInviteReminderHtml = (firstName: string, institutionName: string, daysA
           <!-- Footer -->
           <tr>
             <td style="background-color: #f8fafc; padding: 24px 40px; border-top: 1px solid #e2e8f0; text-align: center;">
-              <p style="margin: 0; color: #94a3b8; font-size: 12px;">— The UPlaybook.AI Team</p>
+              <p style="margin: 0; color: #94a3b8; font-size: 12px;">— The CampusVoice.AI Team</p>
             </td>
           </tr>
         </table>
@@ -117,7 +117,7 @@ const getWeMissYouHtml = (firstName: string, institutionName: string, daysSinceL
               <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                 <tr>
                   <td style="background-color: #ffffff; padding: 12px 16px; border-radius: 8px;">
-                    <img src="https://uplaybook.ai/uplaybook-logo.png" alt="UPlaybook.AI" style="height: 40px; width: auto;" />
+                    <img src="https://uplaybook.ai/uplaybook-logo.png" alt="CampusVoice.AI" style="height: 40px; width: auto;" />
                   </td>
                 </tr>
               </table>
@@ -130,7 +130,7 @@ const getWeMissYouHtml = (firstName: string, institutionName: string, daysSinceL
             <td style="padding: 40px; background-color: #ffffff;">
               <p style="margin: 0 0 20px 0; color: #1e293b; font-size: 18px; font-weight: 600;">Hi ${firstName},</p>
               <p style="margin: 0 0 24px 0; color: #475569; font-size: 16px; line-height: 1.6;">
-                It's been ${daysSinceLogin} days since you last visited <strong style="color: #1e293b;">UPlaybook.AI</strong>. 
+                It's been ${daysSinceLogin} days since you last visited <strong style="color: #1e293b;">CampusVoice.AI</strong>. 
                 We'd love to help you create some great content for <strong style="color: #1e293b;">${institutionName}</strong>!
               </p>
               
@@ -181,7 +181,7 @@ const getWeMissYouHtml = (firstName: string, institutionName: string, daysSinceL
           <!-- Footer -->
           <tr>
             <td style="background-color: #f8fafc; padding: 24px 40px; border-top: 1px solid #e2e8f0; text-align: center;">
-              <p style="margin: 0; color: #94a3b8; font-size: 12px;">— The UPlaybook.AI Team</p>
+              <p style="margin: 0; color: #94a3b8; font-size: 12px;">— The CampusVoice.AI Team</p>
             </td>
           </tr>
         </table>
@@ -250,7 +250,7 @@ const handler = async (req: Request): Promise<Response> => {
         if (shouldSend) {
           const daysAgo = reminderNumber === 1 ? 2 : 5;
           const institutionName = (user.tenants as any)?.institution_name || "your institution";
-          const subject = "Your UPlaybook.AI account is waiting!";
+          const subject = "Your CampusVoice.AI account is waiting!";
           
           try {
             const response = await fetch("https://api.resend.com/emails", {
@@ -260,7 +260,7 @@ const handler = async (req: Request): Promise<Response> => {
                 "Authorization": `Bearer ${RESEND_API_KEY}`,
               },
               body: JSON.stringify({
-                from: "UPlaybook.AI <noreply@uplaybook.ai>",
+                from: "CampusVoice.AI <noreply@uplaybook.ai>",
                 to: [user.email],
                 subject,
                 html: getInviteReminderHtml(user.first_name, institutionName, daysAgo),
@@ -348,7 +348,7 @@ const handler = async (req: Request): Promise<Response> => {
 
         if (!recentNudge) {
           const institutionName = (user.tenants as any)?.institution_name || "your institution";
-          const subject = "We miss you at UPlaybook.AI! 👋";
+          const subject = "We miss you at CampusVoice.AI! 👋";
           
           try {
             const response = await fetch("https://api.resend.com/emails", {
@@ -358,7 +358,7 @@ const handler = async (req: Request): Promise<Response> => {
                 "Authorization": `Bearer ${RESEND_API_KEY}`,
               },
               body: JSON.stringify({
-                from: "UPlaybook.AI <noreply@uplaybook.ai>",
+                from: "CampusVoice.AI <noreply@uplaybook.ai>",
                 to: [user.email],
                 subject,
                 html: getWeMissYouHtml(user.first_name, institutionName, daysSinceLogin),

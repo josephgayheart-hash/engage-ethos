@@ -104,7 +104,7 @@ export default function LandingPage() {
             <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
               <img 
                 src={uplaybookLogo} 
-                alt="UPlaybook.AI" 
+                alt="CampusVoice.AI" 
                 className="h-10 sm:h-12 w-auto max-w-[200px] sm:max-w-[260px] mx-auto"
               />
             </div>
@@ -225,7 +225,7 @@ export default function LandingPage() {
               <span className="text-[hsl(270_70%_55%)]">Stop Reacting.</span> Start Planning.
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Most institutional communications are written on instinct. UPlaybook gives you 
+              Most institutional communications are written on instinct. CampusVoice gives you 
               the research-backed playbook to plan, organize, and execute with confidence.
             </p>
           </div>
@@ -373,11 +373,11 @@ export default function LandingPage() {
           <div className="flex items-center gap-3">
             <img 
               src={uplaybookLogo} 
-              alt="UPlaybook.AI" 
+              alt="CampusVoice.AI" 
               className="h-7 w-auto max-w-[140px] brightness-0 invert opacity-90"
             />
             <span className="text-sm text-primary-foreground/70">
-              © 2025 UPlaybook.AI
+              © 2025 CampusVoice.AI
             </span>
           </div>
           <p className="text-sm text-primary-foreground/60">
