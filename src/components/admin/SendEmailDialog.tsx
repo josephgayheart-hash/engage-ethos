@@ -462,38 +462,50 @@ export function SendEmailDialog({
     const lastName = selectedUserData?.last_name || inviteLastName || '[Last Name]';
     const institution = selectedUserData?.institution_name || selectedTenantName || '[Institution]';
     const email = selectedUserData?.email || inviteEmail || '[email@example.com]';
-    const appUrl = 'https://uplaybook.ai';
-    
+    const brandName = 'CampusVoice.AI';
+    const appUrl = 'https://campusvoice.ai';
+
     switch (emailType) {
       case 'invite':
         return (
           <div className="p-4 bg-muted/50 rounded-lg border text-sm space-y-3">
             <div className="flex items-center gap-2 text-primary font-medium">
               <span className="text-lg">🎉</span>
-              <span>Welcome to UPlaybook.AI</span>
+              <span>Welcome to {brandName}</span>
             </div>
             <p className="text-muted-foreground">
-              <strong>Subject:</strong> Welcome to UPlaybook.AI - {institution}
+              <strong>Subject:</strong> Welcome to {brandName} - {institution}
             </p>
             <div className="border-t pt-3 space-y-2 text-muted-foreground">
-              <p>Welcome, <strong>{firstName}</strong>!</p>
-              <p>You've been invited to join UPlaybook.AI as a <strong>{inviteRole}</strong> for <strong>{institution}</strong>.</p>
+              <p>
+                Welcome, <strong>{firstName}</strong>!
+              </p>
+              <p>
+                You've been invited to join {brandName} as a <strong>{inviteRole}</strong> for{' '}
+                <strong>{institution}</strong>.
+              </p>
               <div className="bg-background p-3 rounded text-xs space-y-1 border">
                 <p className="font-medium mb-2">Your Login Credentials:</p>
-                <p><strong>Email:</strong> {email}</p>
-                <p><strong>Temporary Password:</strong> [auto-generated 12-char]</p>
+                <p>
+                  <strong>Email:</strong> {email}
+                </p>
+                <p>
+                  <strong>Temporary Password:</strong> [auto-generated 12-char]
+                </p>
               </div>
               <div className="bg-primary/10 p-3 rounded text-center">
                 <a href={appUrl} className="text-primary font-medium underline hover:no-underline">
-                  🔗 Login to UPlaybook.AI →
+                  🔗 Login to {brandName} →
                 </a>
                 <p className="text-xs mt-1 text-muted-foreground">{appUrl}/login</p>
               </div>
-              <p className="text-xs italic text-amber-600">⚠️ You will be prompted to change your password on first login.</p>
+              <p className="text-xs italic text-amber-600">
+                ⚠️ You will be prompted to change your password on first login.
+              </p>
             </div>
           </div>
         );
-      
+
       case 'resend_invite':
         return (
           <div className="p-4 bg-muted/50 rounded-lg border text-sm space-y-3">
@@ -502,11 +514,16 @@ export function SendEmailDialog({
               <span>Your Account is Waiting!</span>
             </div>
             <p className="text-muted-foreground">
-              <strong>Subject:</strong> Your UPlaybook.AI account is waiting!
+              <strong>Subject:</strong> Your {brandName} account is waiting!
             </p>
             <div className="border-t pt-3 space-y-2 text-muted-foreground">
-              <p>Hi <strong>{firstName}</strong>,</p>
-              <p>Your UPlaybook.AI account was created recently, but we haven't seen you log in yet! <strong>{institution}</strong> has given you access to powerful AI-powered communication tools.</p>
+              <p>
+                Hi <strong>{firstName}</strong>,
+              </p>
+              <p>
+                Your {brandName} account was created recently, but we haven't seen you log in yet!{' '}
+                <strong>{institution}</strong> has given you access to powerful AI-powered communication tools.
+              </p>
               <div className="bg-green-50 dark:bg-green-950 p-3 rounded text-xs border-l-2 border-green-500">
                 <p className="font-medium text-green-700 dark:text-green-300 mb-1">Here's what you can do:</p>
                 <ul className="list-disc pl-4 text-green-600 dark:text-green-400 space-y-1">
@@ -525,13 +542,13 @@ export function SendEmailDialog({
             </div>
           </div>
         );
-      
-      case 'where_have_you_been':
+
+      case 'where_have_you_been': {
         const lastLogin = selectedUserData?.last_login_at;
-        const daysSince = lastLogin 
+        const daysSince = lastLogin
           ? Math.floor((new Date().getTime() - new Date(lastLogin).getTime()) / 86400000)
           : null;
-        
+
         return (
           <div className="p-4 bg-muted/50 rounded-lg border text-sm space-y-3">
             <div className="flex items-center gap-2 text-amber-600 font-medium">
@@ -542,14 +559,15 @@ export function SendEmailDialog({
               <strong>Subject:</strong> We haven't seen you in a while, {firstName}! 🤔
             </p>
             <div className="border-t pt-3 space-y-2 text-muted-foreground">
-              <p>Hi <strong>{firstName}</strong>,</p>
               <p>
-                {daysSince && daysSince > 0 
-                  ? `It's been ${daysSince} days since you last visited UPlaybook.AI.`
+                Hi <strong>{firstName}</strong>,
+              </p>
+              <p>
+                {daysSince && daysSince > 0
+                  ? `It's been ${daysSince} days since you last visited ${brandName}.`
                   : lastLogin === null
-                    ? `You were invited to UPlaybook.AI but haven't logged in yet.`
-                    : `It's been a while since you last visited UPlaybook.AI.`
-                }
+                    ? `You were invited to ${brandName} but haven't logged in yet.`
+                    : `It's been a while since you last visited ${brandName}.`}
               </p>
               <p>We miss having you around and wanted to check in!</p>
               <div className="bg-amber-50 dark:bg-amber-950 p-3 rounded text-xs border-l-2 border-amber-500">
@@ -566,11 +584,14 @@ export function SendEmailDialog({
                 </a>
                 <p className="text-xs mt-1 text-amber-600 dark:text-amber-400">{appUrl}/login</p>
               </div>
-              <p className="text-xs">We'd love to help you create great content for <strong>{institution}</strong>!</p>
+              <p className="text-xs">
+                We'd love to help you create great content for <strong>{institution}</strong>!
+              </p>
             </div>
           </div>
         );
-      
+      }
+
       case 'beta_feedback':
         return (
           <div className="p-4 bg-muted/50 rounded-lg border text-sm space-y-3">
@@ -579,18 +600,25 @@ export function SendEmailDialog({
               <span>Beta Thank You & Feedback Request</span>
             </div>
             <p className="text-muted-foreground">
-              <strong>Subject:</strong> 🎉 Thank You for Joining UPlaybook.AI Beta!
+              <strong>Subject:</strong> 🎉 Thank You for Joining {brandName} Beta!
             </p>
             <div className="border-t pt-3 space-y-2 text-muted-foreground">
               <div className="bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 p-3 rounded-lg text-center">
                 <p className="font-semibold text-indigo-700 dark:text-indigo-300">🎉 Thank You!</p>
                 <p className="text-xs text-indigo-600 dark:text-indigo-400">We're thrilled to have you as part of our beta community</p>
               </div>
-              <p>Hi <strong>{firstName}</strong>,</p>
-              <p>We noticed you've been exploring UPlaybook.AI, and we couldn't be more grateful! As a beta user, <strong>your experience matters deeply to us</strong>.</p>
+              <p>
+                Hi <strong>{firstName}</strong>,
+              </p>
+              <p>
+                We noticed you've been exploring {brandName}, and we couldn't be more grateful! As a beta user,{' '}
+                <strong>your experience matters deeply to us</strong>.
+              </p>
               <div className="bg-amber-50 dark:bg-amber-950 p-3 rounded text-xs border-l-4 border-amber-500">
                 <p className="font-semibold text-amber-700 dark:text-amber-300">💡 Your feedback shapes our product</p>
-                <p className="text-amber-600 dark:text-amber-400 mt-1">Every suggestion, bug report, and idea helps us build the best possible tool for higher education communicators like you.</p>
+                <p className="text-amber-600 dark:text-amber-400 mt-1">
+                  Every suggestion, bug report, and idea helps us build the best possible tool for higher education communicators like you.
+                </p>
               </div>
               <div className="bg-primary/10 p-3 rounded text-center">
                 <a href={appUrl} className="text-primary font-medium underline hover:no-underline">
@@ -601,7 +629,7 @@ export function SendEmailDialog({
             </div>
           </div>
         );
-      
+
       case 'custom':
         return (
           <div className="p-4 bg-muted/50 rounded-lg border text-sm space-y-3">
@@ -616,18 +644,22 @@ export function SendEmailDialog({
               <strong>Subject:</strong> {customSubject || '[Your subject line]'}
             </p>
             <div className="border-t pt-3 space-y-2 text-muted-foreground">
-              <p>Hi <strong>{firstName}</strong>,</p>
+              <p>
+                Hi <strong>{firstName}</strong>,
+              </p>
               <p className="whitespace-pre-wrap">{customBody || '[Your message will appear here...]'}</p>
               <div className="border-t pt-3 mt-3">
-                <p className="text-xs text-muted-foreground">— The UPlaybook.AI Team</p>
+                <p className="text-xs text-muted-foreground">— The {brandName} Team</p>
                 <p className="text-xs text-primary mt-1">
-                  <a href={appUrl} className="underline">{appUrl}</a>
+                  <a href={appUrl} className="underline">
+                    {appUrl}
+                  </a>
                 </p>
               </div>
             </div>
           </div>
         );
-      
+
       default:
         return null;
     }
