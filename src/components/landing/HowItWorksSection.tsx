@@ -301,21 +301,52 @@ export default function HowItWorksSection() {
                 <step.icon className="w-5 h-5 text-white/70" />
               </div>
               <span className="mt-2 text-white/50 text-xs text-center">{step.label}</span>
-              <div className="w-0.5 h-3 bg-gradient-to-b from-[hsl(270_70%_60%_/_0.5)] to-[hsl(200_100%_60%_/_0.5)] mt-2" />
+              {/* Animated vertical connector */}
+              <svg className="w-2 h-6 mt-2" viewBox="0 0 8 24" fill="none">
+                <defs>
+                  <linearGradient id={`mobileLineGrad${index}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="hsl(270 70% 60%)" stopOpacity="0.55" />
+                    <stop offset="100%" stopColor="hsl(200 100% 60%)" stopOpacity="0.85" />
+                  </linearGradient>
+                </defs>
+                <line x1="4" y1="0" x2="4" y2="24" stroke={`url(#mobileLineGrad${index})`} strokeWidth="2" strokeLinecap="round" opacity="0.55" />
+                <line x1="4" y1="0" x2="4" y2="24" stroke={`url(#mobileLineGrad${index})`} strokeWidth="3" strokeLinecap="round" className="animate-pulse-flow-vertical" style={{ animationDelay: `${index * 0.35}s` }} />
+              </svg>
             </div>
           ))}
 
-          {/* Hub */}
+          {/* Hub with animated glow */}
           <div className="flex justify-center py-2">
-            <div className="w-20 h-20 rounded-full bg-[hsl(222_40%_16%)] border border-white/15 flex items-center justify-center">
-              <div className="text-center">
-                <span className="text-white font-semibold text-[10px] leading-tight block">CampusVoice</span>
-                <span className="text-white/50 text-[8px]">AI Engine</span>
+            <div className="w-24 h-24 rounded-full bg-[hsl(222_40%_14%)] border border-white/15 flex items-center justify-center relative overflow-hidden shadow-[0_0_30px_hsl(270_70%_50%_/_0.2)]">
+              {/* Animated glow ring */}
+              <div
+                className="absolute inset-0 rounded-full opacity-70"
+                style={{
+                  background:
+                    "conic-gradient(from 0deg, transparent 0%, hsl(270 70% 60% / 0.5) 20%, hsl(200 100% 60% / 0.5) 40%, transparent 60%)",
+                  animation: "spin 5s linear infinite",
+                }}
+              />
+              <div className="absolute inset-[3px] rounded-full bg-[hsl(222_40%_14%)] flex items-center justify-center">
+                <div className="text-center">
+                  <span className="text-white font-semibold text-[10px] leading-tight block">CampusVoice</span>
+                  <span className="text-white/50 text-[8px]">AI Engine</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="w-0.5 h-3 bg-gradient-to-b from-[hsl(270_70%_60%_/_0.5)] to-[hsl(200_100%_60%_/_0.5)] mx-auto" />
+          {/* Animated vertical connector after hub */}
+          <svg className="w-2 h-6 mx-auto" viewBox="0 0 8 24" fill="none">
+            <defs>
+              <linearGradient id="mobileLineGradHub" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="hsl(270 70% 60%)" stopOpacity="0.55" />
+                <stop offset="100%" stopColor="hsl(200 100% 60%)" stopOpacity="0.85" />
+              </linearGradient>
+            </defs>
+            <line x1="4" y1="0" x2="4" y2="24" stroke="url(#mobileLineGradHub)" strokeWidth="2" strokeLinecap="round" opacity="0.55" />
+            <line x1="4" y1="0" x2="4" y2="24" stroke="url(#mobileLineGradHub)" strokeWidth="3" strokeLinecap="round" className="animate-pulse-flow-vertical" style={{ animationDelay: "1.05s" }} />
+          </svg>
 
           {/* Output */}
           <div className="flex flex-col items-center">
@@ -369,8 +400,23 @@ export default function HowItWorksSection() {
           }
         }
 
+        @keyframes flow-vertical {
+          0% {
+            stroke-dasharray: 4 12;
+            stroke-dashoffset: 24;
+          }
+          100% {
+            stroke-dasharray: 4 12;
+            stroke-dashoffset: 0;
+          }
+        }
+
         .animate-pulse-flow {
           animation: pulse-line 2.2s ease-in-out infinite, flow 1.8s linear infinite;
+        }
+
+        .animate-pulse-flow-vertical {
+          animation: pulse-line 2.2s ease-in-out infinite, flow-vertical 1.8s linear infinite;
         }
 
         .delay-1 { animation-delay: 0.35s, 0.35s; }
