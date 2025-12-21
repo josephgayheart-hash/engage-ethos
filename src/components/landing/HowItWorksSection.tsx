@@ -69,11 +69,11 @@ export default function HowItWorksSection() {
         {/* Flow diagram layout - grid on desktop, scroll on mobile */}
         <div className="relative py-6">
           {/* Desktop: centered grid */}
-          <div className="hidden lg:grid lg:grid-cols-5 lg:gap-3 lg:items-start">
+          <div className="hidden lg:grid lg:grid-cols-5 lg:gap-3 lg:items-stretch">
             {steps.map((step, index) => (
-              <div key={step.title} className="relative">
+              <div key={step.title} className="relative flex">
                 {/* Card */}
-                <div className="relative group">
+                <div className="relative group flex-1 flex">
                   {/* Animated border on hover */}
                   <div 
                     className="absolute -inset-[1px] rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
@@ -91,7 +91,7 @@ export default function HowItWorksSection() {
                   />
                   
                   {/* Card content */}
-                  <div className="relative bg-white/80 backdrop-blur-sm border border-black/5 rounded-xl p-4 transition-all duration-300 group-hover:border-transparent group-hover:-translate-y-1 shadow-sm">
+                  <div className="relative flex-1 bg-white/80 backdrop-blur-sm border border-black/5 rounded-xl p-4 transition-all duration-300 group-hover:border-transparent group-hover:-translate-y-1 shadow-sm flex flex-col">
                     {/* Step number badge */}
                     <div 
                       className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold leading-none text-white"
