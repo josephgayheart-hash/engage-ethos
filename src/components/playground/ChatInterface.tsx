@@ -94,7 +94,7 @@ export function ChatInterface({
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 h-full overflow-hidden">
+    <div className="flex-1 flex flex-col min-h-0">
       {/* Context indicator */}
       <div className="px-4 py-2 border-b bg-muted/30 flex items-center justify-between text-sm">
         <div className="flex items-center gap-2">
