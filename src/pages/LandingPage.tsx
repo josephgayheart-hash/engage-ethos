@@ -15,7 +15,7 @@ import {
   CheckCircle2,
   GraduationCap
 } from 'lucide-react';
-import campusvoiceLogo from '@/assets/campusvoice-logo.png';
+import campusvoiceLogo from '@/assets/campusvoice-logo-new.png';
 import HowItWorksSection from '@/components/landing/HowItWorksSection';
 
 const features = [

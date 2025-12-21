@@ -13,7 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { BetaBanner } from "@/components/BetaBanner";
 import { ReferColleagueDialog } from "@/components/ReferColleagueDialog";
-import campusvoiceLogo from "@/assets/campusvoice-logo.png";
+import campusvoiceLogo from "@/assets/campusvoice-logo-new.png";
 
 const MAX_LOGO_HEIGHT = 32;
 const MAX_LOGO_WIDTH = 120;
