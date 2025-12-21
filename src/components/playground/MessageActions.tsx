@@ -4,7 +4,8 @@ import { ThumbsUp, ThumbsDown, Copy, Check, BookmarkPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
-import { supabase } from "@/integrations/supabase/client";
+import { useMessageLibrary } from "@/hooks/useMessageLibrary";
+import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface MessageActionsProps {
@@ -16,7 +17,9 @@ type LibraryType = "personal" | "shared";
 
 export function MessageActions({ content, messageId }: MessageActionsProps) {
   const { toast } = useToast();
-  const { user, tenant } = useAuth();
+  const { profile, isAdmin, isApprover } = useAuth();
+  const { addMessage } = useMessageLibrary();
+  const { addTemplate } = useSharedLibrary();
   const [copied, setCopied] = useState(false);
   const [feedback, setFeedback] = useState<"up" | "down" | null>(null);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
@@ -60,70 +63,57 @@ export function MessageActions({ content, messageId }: MessageActionsProps) {
     setSaveDialogOpen(true);
   };
 
-  const handleSave = async (name: string): Promise<string | undefined> => {
-    if (!user || !tenant) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "You must be logged in to save messages",
-      });
-      return undefined;
-    }
-
+  const handleSave = (name: string): string | undefined => {
     try {
       if (saveLibraryType === "personal") {
-        const { data, error } = await supabase
-          .from("personal_messages")
-          .insert({
-            title: name,
-            content: content,
-            channel: "email",
-            user_id: user.id,
-            tenant_id: tenant.id,
-            mode: "generated",
-            approved: false,
-            metadata: {
-              source: "copywriter",
-              savedAt: new Date().toISOString(),
-            },
-          })
-          .select("id")
-          .single();
-
-        if (error) throw error;
+        const savedMessage = addMessage({
+          title: name,
+          content: content,
+          channel: "email",
+          approved: false,
+          mode: "generated",
+          source: "copywriter",
+          createdByUserId: profile?.id,
+          createdByName: profile ? `${profile.first_name} ${profile.last_name}` : undefined,
+        });
 
         toast({
           title: "Saved!",
           description: "Message saved to Personal Library",
         });
 
-        return data?.id;
+        return savedMessage.id;
       } else {
-        // Save to shared library (shared_templates table)
-        const { data, error } = await supabase
-          .from("shared_templates")
-          .insert({
-            title: name,
-            content: content,
-            tenant_id: tenant.id,
-            created_by_user_id: user.id,
-            status: "draft",
-            metadata: {
-              source: "copywriter",
-              savedAt: new Date().toISOString(),
-            },
-          })
-          .select("id")
-          .single();
-
-        if (error) throw error;
+        // Save to shared library
+        const savedTemplate = addTemplate({
+          title: name,
+          intentStatement: "Generated from Copywriter",
+          content: content,
+          playbook: "Copywriter",
+          owner: profile ? `${profile.first_name} ${profile.last_name}` : "Current User",
+          maintainer: profile ? `${profile.first_name} ${profile.last_name}` : "Current User",
+          status: (isAdmin || isApprover) ? "published" : "submitted",
+          version: "1.0",
+          requiredFields: {
+            audience: [],
+            moment: [],
+            channel: ["email"],
+          },
+          useCases: {
+            whenToUse: ["General communications"],
+            whenNotToUse: [],
+          },
+          ethicalGuardrails: ["Review content before publishing"],
+          placeholders: [],
+          source: "copywriter",
+        });
 
         toast({
           title: "Saved!",
-          description: "Message saved to Shared Library",
+          description: `Message ${(isAdmin || isApprover) ? "published to" : "submitted to"} Shared Library`,
         });
 
-        return data?.id;
+        return savedTemplate.id;
       }
     } catch (error) {
       console.error("Error saving message:", error);
