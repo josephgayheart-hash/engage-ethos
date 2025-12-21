@@ -512,7 +512,7 @@ export default function ContentDNAPage() {
                 <span>/</span>
                 <span className="text-foreground">{selectedProfile.name}</span>
                 <span>/</span>
-                <span className="text-foreground">Content DNA</span>
+                <span className="text-foreground">Content DNA Studio</span>
               </>
             ) : isAdminRoute ? (
               <>
@@ -520,10 +520,10 @@ export default function ContentDNAPage() {
                   Admin
                 </Link>
                 <span>/</span>
-                <span className="text-foreground">Content DNA</span>
+                <span className="text-foreground">Content DNA Studio</span>
               </>
             ) : (
-              <span className="text-foreground">Content DNA</span>
+              <span className="text-foreground">Content DNA Studio</span>
             )}
           </div>
           
@@ -532,10 +532,10 @@ export default function ContentDNAPage() {
             <div>
               <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
                 <Dna className="w-7 h-7 text-secondary" />
-                Content DNA
+                Content DNA Studio
               </h1>
               <p className="text-muted-foreground mt-1">
-                Train AI to match your institution's unique voice and communication style
+                Upload samples, tune voice dimensions, and manage your content library for on-brand AI messaging
               </p>
             </div>
             <div className="flex items-center gap-3">
