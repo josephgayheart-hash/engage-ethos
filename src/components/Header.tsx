@@ -13,7 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { BetaBanner } from "@/components/BetaBanner";
 import { ReferColleagueDialog } from "@/components/ReferColleagueDialog";
-import uplaybookLogo from "@/assets/uplaybook-logo.png";
+import campusvoiceLogo from "@/assets/campusvoice-logo.png";
 
 const MAX_LOGO_HEIGHT = 32;
 const MAX_LOGO_WIDTH = 120;
@@ -36,7 +36,7 @@ export function Header() {
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link to="/dashboard" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
-            <img src={uplaybookLogo} alt="CampusVoice.AI" className="h-7 sm:h-8 w-auto max-w-[160px] sm:max-w-[200px] object-contain" />
+            <img src={campusvoiceLogo} alt="CampusVoice.AI" className="h-7 sm:h-8 w-auto max-w-[160px] sm:max-w-[200px] object-contain" />
             <BetaBanner variant="badge" />
           </Link>
           {tenant && (

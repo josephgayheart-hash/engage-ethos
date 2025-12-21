@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UserPlus, CheckCircle2, Loader2, ArrowLeft, Users, Sparkles, Shield, Brain, GraduationCap, ArrowRight } from 'lucide-react';
-import uplaybookLogo from '@/assets/uplaybook-logo.png';
+import campusvoiceLogo from '@/assets/campusvoice-logo.png';
 
 const REFERRAL_OPTIONS = [
   { value: 'colleague', label: 'Colleague or peer recommendation' },
@@ -137,7 +137,7 @@ export default function RequestAccessPage() {
         <div className="relative flex items-center justify-center min-h-screen p-4">
           <div className="w-full max-w-md space-y-6 animate-fade-in">
             <div className="text-center">
-              <img src={uplaybookLogo} alt="UPlaybook.AI" className="h-14 w-auto mx-auto mb-4" />
+              <img src={campusvoiceLogo} alt="CampusVoice.AI" className="h-14 w-auto mx-auto mb-4" />
             </div>
 
             <Card className="border-border/60 shadow-lg bg-card/95 backdrop-blur-sm">
@@ -149,7 +149,7 @@ export default function RequestAccessPage() {
                   Request Submitted
                 </h2>
                 <p className="text-muted-foreground">
-                  Thank you for your interest in UPlaybook. An administrator will review your request and activate your account.
+                  Thank you for your interest in CampusVoice. An administrator will review your request and activate your account.
                 </p>
                 <p className="text-sm text-muted-foreground">
                   You will receive your login credentials once approved.
@@ -192,7 +192,7 @@ export default function RequestAccessPage() {
               <Sparkles className="w-3 h-3 mr-1.5" />
               Beta Access
             </Badge>
-            <img src={uplaybookLogo} alt="UPlaybook.AI" className="h-12 w-auto mx-auto mb-4" />
+            <img src={campusvoiceLogo} alt="CampusVoice.AI" className="h-12 w-auto mx-auto mb-4" />
             <h1 className="font-serif text-xl text-foreground mb-2">
               <span className="text-[hsl(82_85%_45%)]">Plan.</span>{' '}
               <span className="text-[hsl(270_70%_55%)]">Strategize.</span>{' '}
@@ -216,8 +216,8 @@ export default function RequestAccessPage() {
                   </CardTitle>
                   <CardDescription className="text-muted-foreground">
                     {isSameInstitution 
-                      ? "A colleague invited you to join their team on UPlaybook"
-                      : "A colleague recommended UPlaybook for your institution"
+                      ? "A colleague invited you to join their team on CampusVoice"
+                      : "A colleague recommended CampusVoice for your institution"
                     }
                   </CardDescription>
                 </>
@@ -228,7 +228,7 @@ export default function RequestAccessPage() {
                   </div>
                   <CardTitle className="font-serif text-foreground">Request Access</CardTitle>
                   <CardDescription className="text-muted-foreground">
-                    Fill out the form below to request access to UPlaybook
+                    Fill out the form below to request access to CampusVoice
                   </CardDescription>
                 </>
               )}

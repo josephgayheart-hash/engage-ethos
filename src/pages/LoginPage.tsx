@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Lock, Mail, AlertCircle, Loader2, MailCheck, Sparkles, Shield, Brain, GraduationCap } from 'lucide-react';
 import { BetaBanner } from '@/components/BetaBanner';
-import uplaybookLogo from '@/assets/uplaybook-logo.png';
+import campusvoiceLogo from '@/assets/campusvoice-logo.png';
 
 // Invite expiration time in hours
 const INVITE_EXPIRATION_HOURS = 72;
@@ -190,7 +190,7 @@ export default function LoginPage() {
           <div className="w-full max-w-md space-y-6 animate-fade-in">
             {/* Logo & Tagline */}
             <div className="text-center">
-              <img src={uplaybookLogo} alt="CampusVoice.AI" className="h-14 w-auto mx-auto mb-4" />
+              <img src={campusvoiceLogo} alt="CampusVoice.AI" className="h-14 w-auto mx-auto mb-4" />
               <h1 className="font-serif text-xl text-foreground mb-2">
                 <span className="text-[hsl(82_85%_45%)]">Plan.</span>{' '}
                 <span className="text-[hsl(270_70%_55%)]">Strategize.</span>{' '}
