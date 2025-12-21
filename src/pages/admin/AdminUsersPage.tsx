@@ -565,7 +565,7 @@ export default function AdminUsersPage() {
                       <TableCell>
                         <div className="flex gap-1 flex-wrap">
                           {user.roles.includes('super_admin') ? (
-                            <Badge className="bg-[hsl(280,60%,45%)] text-white">UPlaybook Super Admin</Badge>
+                            <Badge className="bg-[hsl(280,60%,45%)] text-white">CampusVoice Super Admin</Badge>
                           ) : user.roles.includes('admin') ? (
                             <Badge className="bg-[hsl(222,47%,14%)] text-white">University Admin</Badge>
                           ) : user.roles.includes('approver') ? (
@@ -772,7 +772,7 @@ export default function AdminUsersPage() {
                   <SelectItem value="user_approver">University User + Approver</SelectItem>
                   <SelectItem value="admin">University Admin</SelectItem>
                   {isSuperAdmin && (
-                    <SelectItem value="super_admin">UPlaybook Super Admin</SelectItem>
+                    <SelectItem value="super_admin">CampusVoice Super Admin</SelectItem>
                   )}
                 </SelectContent>
               </Select>

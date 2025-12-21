@@ -92,7 +92,7 @@ export function ReferColleagueDialog({ open, onOpenChange }: ReferColleagueDialo
             Invite a Colleague
           </DialogTitle>
           <DialogDescription>
-            Know someone who'd benefit from UPlaybook.AI? Send them an invite!
+            Know someone who'd benefit from CampusVoice.AI? Send them an invite!
           </DialogDescription>
         </DialogHeader>
 
