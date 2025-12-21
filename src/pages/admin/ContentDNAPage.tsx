@@ -536,8 +536,8 @@ export default function ContentDNAPage() {
                   <div>
                     <h2 className="font-serif text-2xl font-bold mb-1">Ready to Analyze!</h2>
                     <p className="text-secondary-foreground/90">
-                      You have {samples.length} content sample{samples.length !== 1 ? 's' : ''} ready for voice analysis. 
-                      Click the button to generate your institution's Content DNA profile.
+                      You have {samples.length} content sample{samples.length !== 1 ? 's' : ''} ready. 
+                      Click to analyze and extract your <strong>voice profile</strong> and <strong>brand platform</strong> together.
                     </p>
                   </div>
                 </div>
@@ -555,7 +555,7 @@ export default function ContentDNAPage() {
                   ) : (
                     <>
                       <Sparkles className="w-5 h-5 mr-2" />
-                      Analyze Voice Now
+                      Analyze Content DNA
                     </>
                   )}
                 </Button>
@@ -577,7 +577,7 @@ export default function ContentDNAPage() {
                   <div>
                     <h3 className="font-bold text-lg">New Content Added</h3>
                     <p className="text-white/90 text-sm">
-                      You've added new samples since your last analysis. Re-analyze to update your Content DNA.
+                      You've added new samples since your last analysis. Re-analyze to update both voice profile and brand platform.
                     </p>
                   </div>
                 </div>
@@ -594,7 +594,7 @@ export default function ContentDNAPage() {
                   ) : (
                     <>
                       <Sparkles className="w-4 h-4 mr-2" />
-                      Re-Analyze
+                      Re-Analyze DNA
                     </>
                   )}
                 </Button>
@@ -649,7 +649,7 @@ export default function ContentDNAPage() {
             </TabsTrigger>
             <TabsTrigger value="analysis" className="flex items-center gap-2">
               <Sparkles className="w-4 h-4" />
-              Voice Analysis
+              Voice Profile
             </TabsTrigger>
             <TabsTrigger value="brand-platform" className="flex items-center gap-2">
               <Target className="w-4 h-4" />
@@ -657,7 +657,7 @@ export default function ContentDNAPage() {
             </TabsTrigger>
             <TabsTrigger value="instructions" className="flex items-center gap-2">
               <Settings className="w-4 h-4" />
-              Brand Guidelines
+              Custom Instructions
             </TabsTrigger>
             <TabsTrigger value="library" className="flex items-center gap-2">
               <BookOpen className="w-4 h-4" />
@@ -668,6 +668,16 @@ export default function ContentDNAPage() {
               History
             </TabsTrigger>
           </TabsList>
+          
+          {/* Info banner explaining unified analysis */}
+          <Alert className="border-primary/20 bg-primary/5">
+            <Dna className="h-4 w-4" />
+            <AlertDescription className="ml-2 text-sm">
+              <strong>One analysis, two outputs:</strong> When you analyze your content samples, the AI extracts both your 
+              <span className="text-emerald-700 font-medium"> Voice Profile</span> and 
+              <span className="text-blue-700 font-medium"> Brand Platform</span> together in a single pass.
+            </AlertDescription>
+          </Alert>
 
           {/* Upload Content Tab */}
           <TabsContent value="upload">
