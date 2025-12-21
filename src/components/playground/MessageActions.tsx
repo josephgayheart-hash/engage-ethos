@@ -69,7 +69,7 @@ export function MessageActions({ content, messageId }: MessageActionsProps) {
         const savedMessage = addMessage({
           title: name,
           content: content,
-          channel: "email",
+          // No channel for copywriter - it's general copy that can be used anywhere
           approved: false,
           mode: "generated",
           source: "copywriter",
@@ -97,7 +97,7 @@ export function MessageActions({ content, messageId }: MessageActionsProps) {
           requiredFields: {
             audience: [],
             moment: [],
-            channel: ["email"],
+            channel: [], // No specific channel - copywriter is general copy
           },
           useCases: {
             whenToUse: ["General communications"],

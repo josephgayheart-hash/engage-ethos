@@ -352,7 +352,7 @@ const PersonalLibrary = () => {
                       <TableCell>
                         <SourceBadge source={message.source} />
                       </TableCell>
-                      <TableCell className="capitalize">{message.channel}</TableCell>
+                      <TableCell className="capitalize text-muted-foreground">{message.channel || '—'}</TableCell>
                       <TableCell>{message.audience}</TableCell>
                       <TableCell className="text-muted-foreground">
                         {new Date(message.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -388,7 +388,7 @@ const PersonalLibrary = () => {
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
-                          {ChannelIcon(message.channel)}
+                          {message.channel && ChannelIcon(message.channel)}
                           <h3 className="font-semibold text-foreground truncate">{message.title}</h3>
                           {message.approved && (
                             <Badge variant="default" className="shrink-0 bg-green-600">
