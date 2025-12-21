@@ -15,7 +15,7 @@ import {
   CheckCircle2,
   GraduationCap
 } from 'lucide-react';
-import uplaybookLogo from '@/assets/uplaybook-logo.png';
+import campusvoiceLogo from '@/assets/campusvoice-logo.png';
 
 const features = [
   {
@@ -103,7 +103,7 @@ export default function LandingPage() {
             {/* Logo */}
             <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
               <img 
-                src={uplaybookLogo} 
+                src={campusvoiceLogo} 
                 alt="CampusVoice.AI" 
                 className="h-10 sm:h-12 w-auto max-w-[200px] sm:max-w-[260px] mx-auto"
               />
@@ -372,7 +372,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <img 
-              src={uplaybookLogo} 
+              src={campusvoiceLogo} 
               alt="CampusVoice.AI" 
               className="h-7 w-auto max-w-[140px] brightness-0 invert opacity-90"
             />

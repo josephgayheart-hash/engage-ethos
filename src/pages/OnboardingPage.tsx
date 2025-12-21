@@ -17,7 +17,7 @@ import {
   ArrowRight,
   CheckCircle2
 } from "lucide-react";
-import uplaybookLogo from "@/assets/uplaybook-logo.png";
+import campusvoiceLogo from "@/assets/campusvoice-logo.png";
 import type { Department, DepartmentInfo } from "@/types/uplaybook";
 
 const departments: DepartmentInfo[] = [
@@ -136,9 +136,9 @@ const OnboardingPage = () => {
         <div className="max-w-4xl mx-auto space-y-8">
           {/* Logo and Header */}
           <div className="text-center space-y-4">
-            <img src={uplaybookLogo} alt="UPlaybook.AI" className="h-16 mx-auto" />
+            <img src={campusvoiceLogo} alt="CampusVoice.AI" className="h-16 mx-auto" />
             <h1 className="font-serif text-3xl md:text-4xl font-bold text-foreground">
-              Welcome to UPlaybook
+              Welcome to CampusVoice
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Let's personalize your experience. Select your department to get tools and recommendations tailored to your communication needs.
