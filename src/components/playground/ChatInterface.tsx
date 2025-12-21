@@ -163,7 +163,7 @@ export function ChatInterface({
             </div>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -173,27 +173,37 @@ export function ChatInterface({
                 )}
               >
                 {message.role === 'assistant' && (
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <Bot className="w-4 h-4 text-primary" />
+                  <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-1">
+                    <Bot className="w-5 h-5 text-primary" />
                   </div>
                 )}
-                <div className="flex flex-col max-w-[80%]">
+                <div className="flex flex-col max-w-[85%]">
                   <div
                     className={cn(
-                      "rounded-2xl px-4 py-3",
+                      "rounded-2xl px-5 py-4",
                       message.role === 'user'
                         ? "bg-primary text-primary-foreground"
                         : "bg-muted"
                     )}
                   >
                     <div className={cn(
-                      "text-sm prose prose-sm max-w-none",
+                      "font-chat text-base leading-relaxed prose prose-base max-w-none",
                       message.role === 'assistant' ? "dark:prose-invert" : "prose-invert",
-                      message.role === 'assistant' && "[&_p]:my-2 [&_ul]:my-2 [&_ol]:my-2 [&_li]:my-1 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm [&_h1]:font-semibold [&_h2]:font-semibold [&_h3]:font-medium [&_code]:bg-background/20 [&_code]:px-1 [&_code]:rounded [&_pre]:bg-background/20 [&_pre]:p-2 [&_pre]:rounded-lg [&_blockquote]:border-l-2 [&_blockquote]:border-primary/50 [&_blockquote]:pl-3 [&_blockquote]:italic"
+                      message.role === 'assistant' && [
+                        "[&_p]:my-3 [&_p]:leading-relaxed",
+                        "[&_ul]:my-3 [&_ol]:my-3 [&_li]:my-1.5 [&_li]:leading-relaxed",
+                        "[&_h1]:text-lg [&_h1]:font-semibold [&_h1]:mt-4 [&_h1]:mb-2",
+                        "[&_h2]:text-base [&_h2]:font-semibold [&_h2]:mt-3 [&_h2]:mb-2",
+                        "[&_h3]:text-base [&_h3]:font-medium [&_h3]:mt-3 [&_h3]:mb-1",
+                        "[&_strong]:font-semibold",
+                        "[&_code]:bg-background/20 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm",
+                        "[&_pre]:bg-background/20 [&_pre]:p-3 [&_pre]:rounded-lg [&_pre]:my-3",
+                        "[&_blockquote]:border-l-3 [&_blockquote]:border-primary/50 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-3"
+                      ].join(' ')
                     )}>
                       <ReactMarkdown>{message.content}</ReactMarkdown>
                     </div>
-                    <span className="text-xs opacity-60 mt-1 block">
+                    <span className="text-xs opacity-50 mt-2 block">
                       {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
@@ -202,8 +212,8 @@ export function ChatInterface({
                   )}
                 </div>
                 {message.role === 'user' && (
-                  <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shrink-0">
-                    <User className="w-4 h-4 text-secondary-foreground" />
+                  <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center shrink-0 mt-1">
+                    <User className="w-5 h-5 text-secondary-foreground" />
                   </div>
                 )}
               </div>
@@ -212,13 +222,17 @@ export function ChatInterface({
             {/* Streaming response */}
             {streamingContent && (
               <div className="flex gap-3 justify-start">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <Bot className="w-4 h-4 text-primary" />
+                <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-1">
+                  <Bot className="w-5 h-5 text-primary" />
                 </div>
-                <div className="max-w-[80%] bg-muted rounded-2xl px-4 py-3">
-                  <div className="text-sm prose prose-sm dark:prose-invert max-w-none [&_p]:my-2 [&_ul]:my-2 [&_ol]:my-2 [&_li]:my-1">
+                <div className="max-w-[85%] bg-muted rounded-2xl px-5 py-4">
+                  <div className={cn(
+                    "font-chat text-base leading-relaxed prose prose-base dark:prose-invert max-w-none",
+                    "[&_p]:my-3 [&_p]:leading-relaxed",
+                    "[&_ul]:my-3 [&_ol]:my-3 [&_li]:my-1.5"
+                  )}>
                     <ReactMarkdown>{streamingContent}</ReactMarkdown>
-                    <span className="inline-block w-2 h-4 bg-primary/60 animate-pulse ml-1" />
+                    <span className="inline-block w-2 h-5 bg-primary/60 animate-pulse ml-1" />
                   </div>
                 </div>
               </div>
