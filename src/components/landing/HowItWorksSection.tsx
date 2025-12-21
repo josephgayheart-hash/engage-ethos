@@ -4,8 +4,8 @@ import { FileText, Wand2, CheckCircle, Library, Send } from 'lucide-react';
 const steps = [
   {
     icon: FileText,
-    title: 'Upload Your Brand',
-    description: 'Add your brand guidelines, sample content, and institutional voice documents.',
+    title: 'Set Up & Upload',
+    description: 'Configure your institution profile and upload brand guidelines, sample content, and voice documents.',
     color: 'lime',
   },
   {
@@ -86,7 +86,7 @@ export default function HowItWorksSection() {
                   
                   {/* Glow effect on hover */}
                   <div 
-                    className="absolute -inset-4 rounded-xl opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-500 pointer-events-none"
+                    className="absolute -inset-4 rounded-xl opacity-0 group-hover:opacity-15 blur-2xl transition-opacity duration-500 pointer-events-none"
                     style={{ background: getColor(step.color) }}
                   />
                   
@@ -160,7 +160,7 @@ export default function HowItWorksSection() {
                     
                     {/* Glow effect on hover */}
                     <div 
-                      className="absolute -inset-4 rounded-xl opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-500 pointer-events-none"
+                      className="absolute -inset-4 rounded-xl opacity-0 group-hover:opacity-15 blur-2xl transition-opacity duration-500 pointer-events-none"
                       style={{ background: getColor(step.color) }}
                     />
                     
