@@ -40,10 +40,10 @@ const getColor = (color: string) => {
 
 export default function HowItWorksSection() {
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(222_47%_11%)] relative overflow-hidden">
+    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(230_25%_18%)] relative overflow-visible">
       {/* Background glow effects */}
-      <div className="absolute top-1/4 left-0 w-96 h-96 bg-[hsl(270_70%_60%_/_0.1)] rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-[hsl(200_100%_50%_/_0.1)] rounded-full blur-3xl" />
+      <div className="absolute top-1/4 left-0 w-96 h-96 bg-[hsl(270_70%_60%_/_0.08)] rounded-full blur-3xl" />
+      <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-[hsl(200_100%_50%_/_0.08)] rounded-full blur-3xl" />
 
       <div className="max-w-6xl mx-auto relative z-10">
         <div className="text-center mb-16">
@@ -60,7 +60,7 @@ export default function HowItWorksSection() {
         </div>
 
         {/* Flow diagram layout */}
-        <div className="relative flex items-center justify-start gap-4 overflow-x-auto pb-2 snap-x snap-mandatory">
+        <div className="relative flex items-center justify-start gap-4 overflow-x-auto py-6 snap-x snap-mandatory">
           {/* Steps */}
           {steps.map((step, index) => (
             <div key={step.title} className="flex items-center gap-4 shrink-0 snap-start">
@@ -83,7 +83,7 @@ export default function HowItWorksSection() {
                 />
                 
                 {/* Card content */}
-                <div className="relative bg-[hsl(222_47%_14%)] border border-white/10 rounded-xl p-5 w-56 shrink-0 transition-all duration-300 group-hover:border-transparent group-hover:-translate-y-1">
+                <div className="relative bg-[hsl(230_25%_22%)] border border-white/10 rounded-xl p-5 w-56 shrink-0 transition-all duration-300 group-hover:border-transparent group-hover:-translate-y-1">
                   {/* Step number badge - positioned inside the card */}
                   <div 
                     className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold leading-none text-[hsl(222_47%_11%)]"
