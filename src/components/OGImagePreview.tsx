@@ -12,48 +12,75 @@ export function OGImagePreview({ onExport }: OGImagePreviewProps) {
       style={{ 
         width: '1200px', 
         height: '630px',
-        background: 'linear-gradient(135deg, hsl(222 47% 8%) 0%, hsl(222 47% 4%) 50%, hsl(222 47% 6%) 100%)'
+        background: 'linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 25%, #fef3f0 50%, #f0f7ff 75%, #f5f0ff 100%)'
       }}
     >
-      {/* Background grid pattern */}
+      {/* Subtle grid pattern */}
       <div 
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0 opacity-[0.15]"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+            linear-gradient(rgba(100,120,180,0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(100,120,180,0.1) 1px, transparent 1px)
           `,
-          backgroundSize: '40px 40px'
+          backgroundSize: '50px 50px'
         }}
       />
       
-      {/* Glow orbs */}
+      {/* Pastel sprite orbs - blurred */}
       <div 
-        className="absolute w-[600px] h-[600px] rounded-full opacity-20"
+        className="absolute rounded-full"
         style={{
-          background: 'radial-gradient(circle, hsl(var(--cyber-lime)) 0%, transparent 70%)',
-          top: '-200px',
-          left: '-100px',
-          filter: 'blur(80px)'
-        }}
-      />
-      <div 
-        className="absolute w-[500px] h-[500px] rounded-full opacity-15"
-        style={{
-          background: 'radial-gradient(circle, hsl(var(--cyber-purple)) 0%, transparent 70%)',
-          bottom: '-150px',
-          right: '-50px',
-          filter: 'blur(80px)'
-        }}
-      />
-      <div 
-        className="absolute w-[400px] h-[400px] rounded-full opacity-10"
-        style={{
-          background: 'radial-gradient(circle, hsl(var(--cyber-blue)) 0%, transparent 70%)',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
+          width: '400px',
+          height: '400px',
+          background: 'radial-gradient(circle, rgba(167, 139, 250, 0.4) 0%, rgba(167, 139, 250, 0) 70%)',
+          top: '-100px',
+          left: '-50px',
           filter: 'blur(60px)'
+        }}
+      />
+      <div 
+        className="absolute rounded-full"
+        style={{
+          width: '350px',
+          height: '350px',
+          background: 'radial-gradient(circle, rgba(251, 146, 60, 0.35) 0%, rgba(251, 146, 60, 0) 70%)',
+          top: '60%',
+          left: '15%',
+          filter: 'blur(50px)'
+        }}
+      />
+      <div 
+        className="absolute rounded-full"
+        style={{
+          width: '450px',
+          height: '450px',
+          background: 'radial-gradient(circle, rgba(56, 189, 248, 0.35) 0%, rgba(56, 189, 248, 0) 70%)',
+          top: '-80px',
+          right: '10%',
+          filter: 'blur(70px)'
+        }}
+      />
+      <div 
+        className="absolute rounded-full"
+        style={{
+          width: '300px',
+          height: '300px',
+          background: 'radial-gradient(circle, rgba(52, 211, 153, 0.3) 0%, rgba(52, 211, 153, 0) 70%)',
+          bottom: '-50px',
+          right: '-30px',
+          filter: 'blur(55px)'
+        }}
+      />
+      <div 
+        className="absolute rounded-full"
+        style={{
+          width: '280px',
+          height: '280px',
+          background: 'radial-gradient(circle, rgba(244, 114, 182, 0.3) 0%, rgba(244, 114, 182, 0) 70%)',
+          bottom: '20%',
+          left: '40%',
+          filter: 'blur(45px)'
         }}
       />
 
@@ -63,16 +90,16 @@ export function OGImagePreview({ onExport }: OGImagePreviewProps) {
         <img 
           src={campusvoiceLogo} 
           alt="CampusVoice.AI" 
-          className="h-24 w-auto mb-8"
-          style={{ filter: 'drop-shadow(0 4px 20px rgba(0, 0, 0, 0.3))' }}
+          className="h-28 w-auto mb-8"
+          style={{ filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.1))' }}
         />
         
         {/* Tagline */}
         <p 
           className="text-2xl font-medium tracking-wide text-center"
           style={{ 
-            color: 'rgba(255, 255, 255, 0.85)',
-            textShadow: '0 2px 10px rgba(0, 0, 0, 0.3)'
+            color: '#374151',
+            textShadow: '0 1px 2px rgba(255, 255, 255, 0.8)'
           }}
         >
           Strategic Messaging Intelligence for Higher Education
@@ -82,7 +109,7 @@ export function OGImagePreview({ onExport }: OGImagePreviewProps) {
         <div 
           className="mt-8 h-1 w-32 rounded-full"
           style={{
-            background: 'linear-gradient(90deg, hsl(var(--cyber-lime)), hsl(var(--cyber-purple)), hsl(var(--cyber-blue)))'
+            background: 'linear-gradient(90deg, #a78bfa, #f472b6, #38bdf8)'
           }}
         />
         
@@ -90,33 +117,15 @@ export function OGImagePreview({ onExport }: OGImagePreviewProps) {
         <div 
           className="mt-6 px-4 py-1.5 rounded-full text-sm font-medium"
           style={{
-            background: 'rgba(255, 255, 255, 0.1)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            color: 'rgba(255, 255, 255, 0.7)'
+            background: 'rgba(255, 255, 255, 0.7)',
+            border: '1px solid rgba(0, 0, 0, 0.08)',
+            color: '#6b7280',
+            backdropFilter: 'blur(8px)'
           }}
         >
           Private Beta
         </div>
       </div>
-
-      {/* Bottom wave accent */}
-      <svg 
-        className="absolute bottom-0 left-0 w-full h-20 opacity-30"
-        viewBox="0 0 1200 80" 
-        preserveAspectRatio="none"
-      >
-        <defs>
-          <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="hsl(var(--cyber-lime))" />
-            <stop offset="50%" stopColor="hsl(var(--cyber-purple))" />
-            <stop offset="100%" stopColor="hsl(var(--cyber-blue))" />
-          </linearGradient>
-        </defs>
-        <path 
-          d="M0,40 C200,80 400,0 600,40 C800,80 1000,0 1200,40 L1200,80 L0,80 Z" 
-          fill="url(#waveGradient)"
-        />
-      </svg>
     </div>
   );
 }
