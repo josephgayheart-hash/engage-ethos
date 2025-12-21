@@ -1419,25 +1419,32 @@ export default function ContentDNAPage() {
                       </Badge>
                     )}
                     {isAdmin && samples.length > 0 && extractionStats.pending > 0 && (
-                      <Button
-                        onClick={() => extractSemantics()}
-                        disabled={isExtracting}
-                        variant="outline"
-                        size="sm"
-                        className="border-amber-300 text-amber-700 hover:bg-amber-50"
-                      >
-                        {isExtracting ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Indexing...
-                          </>
-                        ) : (
-                          <>
-                            <Zap className="w-4 h-4 mr-2" />
-                            Index for Search
-                          </>
-                        )}
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={() => extractSemantics()}
+                            disabled={isExtracting}
+                            variant="outline"
+                            size="sm"
+                            className="border-amber-300 text-amber-700 hover:bg-amber-50"
+                          >
+                            {isExtracting ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Indexing...
+                              </>
+                            ) : (
+                              <>
+                                <Zap className="w-4 h-4 mr-2" />
+                                Index for Search
+                              </>
+                            )}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="max-w-xs">
+                          <p>Extracts key themes and summaries from your content samples to enable intelligent search and context-aware DNA refinement.</p>
+                        </TooltipContent>
+                      </Tooltip>
                     )}
                     {isAdmin && samples.length > 0 && (
                       <Button
