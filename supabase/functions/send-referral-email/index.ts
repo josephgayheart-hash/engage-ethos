@@ -51,7 +51,7 @@ const getSameInstitutionHtml = (
               <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                 <tr>
                   <td style="background-color: #ffffff; padding: 12px 16px; border-radius: 8px;">
-                    <img src="https://uplaybook.ai/uplaybook-logo.png" alt="CampusVoice.AI" style="height: 40px; width: auto;" />
+                    <img src="https://campusvoice.ai/campusvoice-logo.png" alt="CampusVoice.AI" style="height: 40px; width: auto;" />
                   </td>
                 </tr>
               </table>
@@ -95,7 +95,7 @@ const getSameInstitutionHtml = (
               
               <!-- CTA Button -->
               <div style="text-align: center; margin: 32px 0;">
-                <a href="https://uplaybook.ai/request-access?ref=colleague&tenant=${tenantId}&institution=${encodeURIComponent(institutionName)}" style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600;">
+                <a href="https://campusvoice.ai/request-access?ref=colleague&tenant=${tenantId}&institution=${encodeURIComponent(institutionName)}" style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600;">
                   Complete Your Profile →
                 </a>
               </div>
@@ -148,7 +148,7 @@ const getOtherInstitutionHtml = (
               <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                 <tr>
                   <td style="background-color: #ffffff; padding: 12px 16px; border-radius: 8px;">
-                    <img src="https://uplaybook.ai/uplaybook-logo.png" alt="CampusVoice.AI" style="height: 40px; width: auto;" />
+                    <img src="https://campusvoice.ai/campusvoice-logo.png" alt="CampusVoice.AI" style="height: 40px; width: auto;" />
                   </td>
                 </tr>
               </table>
@@ -192,7 +192,7 @@ const getOtherInstitutionHtml = (
               
               <!-- CTA Button -->
               <div style="text-align: center; margin: 32px 0;">
-                <a href="https://uplaybook.ai/request-access?ref=colleague&institution=${encodeURIComponent(refereeInstitution)}" style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600;">
+                <a href="https://campusvoice.ai/request-access?ref=colleague&institution=${encodeURIComponent(refereeInstitution)}" style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600;">
                   Request Access for ${refereeInstitution} →
                 </a>
               </div>
@@ -257,7 +257,7 @@ const handler = async (req: Request): Promise<Response> => {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "CampusVoice.AI <noreply@uplaybook.ai>",
+        from: "CampusVoice.AI <noreply@campusvoice.ai>",
         to: [data.refereeEmail],
         subject,
         html: emailHtml,

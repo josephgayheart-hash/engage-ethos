@@ -29,7 +29,7 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const body: EmailRequest = await req.json();
-    const appUrl = "https://uplaybook.ai";
+    const appUrl = "https://campusvoice.ai";
 
     // If runAutomated is true, find eligible users (24hrs since last login, never received this email)
     if (body.runAutomated) {
@@ -106,7 +106,7 @@ const handler = async (req: Request): Promise<Response> => {
 
         try {
           await resend.emails.send({
-            from: "UPlaybook.AI <hello@uplaybook.ai>",
+            from: "CampusVoice.AI <hello@campusvoice.ai>",
             to: [user.email],
             subject: template.subject.replace(/\{\{first_name\}\}/g, user.first_name),
             html: htmlContent,
@@ -182,20 +182,20 @@ const handler = async (req: Request): Promise<Response> => {
           .replace(/\{\{institution\}\}/g, institutionName || "")
           .replace(/\{\{app_url\}\}/g, appUrl)
       : `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h1 style="color: #4F46E5;">🎉 Thank You for Joining UPlaybook.AI Beta!</h1>
+          <h1 style="color: #4F46E5;">🎉 Thank You for Joining CampusVoice.AI Beta!</h1>
           <p>Hi ${firstName},</p>
           <p>We're thrilled to have you as part of our beta community! Your feedback is incredibly valuable to us.</p>
           <p>Please share your thoughts and help us build the best product possible.</p>
           <div style="text-align: center; margin: 30px 0;">
             <a href="${appUrl}/feedback" style="background: #4F46E5; color: white; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: 600;">Share Your Feedback</a>
           </div>
-          <p>Thank you,<br>The UPlaybook.AI Team</p>
+          <p>Thank you,<br>The CampusVoice.AI Team</p>
         </div>`;
 
     const emailResponse = await resend.emails.send({
-      from: "UPlaybook.AI <hello@uplaybook.ai>",
+      from: "CampusVoice.AI <hello@campusvoice.ai>",
       to: [email],
-      subject: template?.subject?.replace(/\{\{first_name\}\}/g, firstName) || `🎉 Thank You for Joining UPlaybook.AI Beta!`,
+      subject: template?.subject?.replace(/\{\{first_name\}\}/g, firstName) || `🎉 Thank You for Joining CampusVoice.AI Beta!`,
       html: htmlContent,
     });
 
@@ -221,7 +221,7 @@ const handler = async (req: Request): Promise<Response> => {
         email_count: 1,
         recipient_email: email,
         recipient_name: `${firstName} ${lastName || ""}`.trim(),
-        subject: template?.subject?.replace(/\{\{first_name\}\}/g, firstName) || `🎉 Thank You for Joining UPlaybook.AI Beta!`,
+        subject: template?.subject?.replace(/\{\{first_name\}\}/g, firstName) || `🎉 Thank You for Joining CampusVoice.AI Beta!`,
         email_type: "beta_feedback",
         status: "sent",
         provider: "resend",

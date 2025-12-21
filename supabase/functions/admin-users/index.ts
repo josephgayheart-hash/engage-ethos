@@ -153,7 +153,7 @@ serve(async (req) => {
         if (rolesToCreate.includes('super_admin') && !isSuperAdmin) {
           console.error(`Security violation: Non-super admin ${requestingUser.id} attempted to create super_admin account`);
           return new Response(
-            JSON.stringify({ error: "Only UPlaybook Super Admins can create other Super Admin accounts" }),
+            JSON.stringify({ error: "Only CampusVoice Super Admins can create other Super Admin accounts" }),
             { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
@@ -260,7 +260,7 @@ serve(async (req) => {
         if (newRoles.includes('super_admin') && !isSuperAdmin) {
           console.error(`Security violation: Non-super admin ${requestingUser.id} attempted to assign super_admin role`);
           return new Response(
-            JSON.stringify({ error: "Only UPlaybook Super Admins can assign Super Admin roles" }),
+            JSON.stringify({ error: "Only CampusVoice Super Admins can assign Super Admin roles" }),
             { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
@@ -531,9 +531,9 @@ serve(async (req) => {
           );
         }
 
-        // Determine tenant for super_admin role - they go to UPlaybook System tenant
+        // Determine tenant for super_admin role - they go to CampusVoice System tenant
         const profileTenantId = assignedRole === 'super_admin' 
-          ? '00000000-0000-0000-0000-000000000000' // UPlaybook System tenant
+          ? '00000000-0000-0000-0000-000000000000' // CampusVoice System tenant
           : effectiveApprovalTenantId;
 
         // Create profile
@@ -568,7 +568,7 @@ serve(async (req) => {
           console.error(`Security violation: Non-super admin ${requestingUser.id} attempted to create super_admin via onboarding`);
           await adminClient.auth.admin.deleteUser(authData.user.id);
           return new Response(
-            JSON.stringify({ error: "Only UPlaybook Super Admins can create other Super Admin accounts" }),
+            JSON.stringify({ error: "Only CampusVoice Super Admins can create other Super Admin accounts" }),
             { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
@@ -601,7 +601,7 @@ serve(async (req) => {
         });
 
         // Get institution name for the welcome email
-        let institutionName = newTenantName || "UPlaybook.AI";
+        let institutionName = newTenantName || "CampusVoice.AI";
         if (!shouldCreateTenant && effectiveApprovalTenantId) {
           const { data: tenantData } = await adminClient
             .from("tenants")
@@ -672,7 +672,7 @@ serve(async (req) => {
           })
           .eq("id", requestId);
 
-        // Use request's tenant_id for audit, or UPlaybook System tenant for super admin
+        // Use request's tenant_id for audit, or CampusVoice System tenant for super admin
         const auditTenantId = request?.tenant_id || (isSuperAdmin ? '00000000-0000-0000-0000-000000000000' : adminTenantId);
 
         await adminClient.from("audit_log").insert({

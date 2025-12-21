@@ -80,7 +80,7 @@ const handler = async (req: Request): Promise<Response> => {
                     <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;" bgcolor="#1a2036">
                       <tr>
                         <td style="background-color: #ffffff !important; padding: 16px 20px; border-radius: 10px;" bgcolor="#ffffff">
-                          <img class="logo-img" src="https://uplaybook.ai/uplaybook-logo.png" alt="CampusVoice.AI" style="height: 50px; width: auto; display: block; background-color: #ffffff !important;" />
+                          <img class="logo-img" src="https://campusvoice.ai/campusvoice-logo.png" alt="CampusVoice.AI" style="height: 50px; width: auto; display: block; background-color: #ffffff !important;" />
                         </td>
                       </tr>
                     </table>
@@ -163,7 +163,7 @@ const handler = async (req: Request): Promise<Response> => {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "CampusVoice.AI <noreply@uplaybook.ai>",
+        from: "CampusVoice.AI <noreply@campusvoice.ai>",
         to: [email],
         subject,
         html: htmlContent,

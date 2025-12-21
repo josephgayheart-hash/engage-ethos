@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const SYSTEM_PROMPT = `You are UPlaybook, an AI-powered strategic messaging intelligence platform designed specifically for higher education.
+const SYSTEM_PROMPT = `You are CampusVoice.AI, an AI-powered strategic messaging intelligence platform designed specifically for higher education.
 
 Your purpose is to help higher education administrators, marketers, enrollment leaders, and student success professionals DESIGN, EVALUATE, and PLAN student-facing communication that supports persistence, retention, and engagement.
 

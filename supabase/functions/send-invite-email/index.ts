@@ -91,7 +91,7 @@ const handler = async (req: Request): Promise<Response> => {
                     <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;" bgcolor="#1a2036">
                       <tr>
                         <td style="background-color: #ffffff !important; padding: 16px 20px; border-radius: 10px;" bgcolor="#ffffff">
-                          <img class="logo-img" src="https://uplaybook.ai/uplaybook-logo.png" alt="CampusVoice.AI" style="height: 50px; width: auto; display: block; background-color: #ffffff !important;" />
+                          <img class="logo-img" src="https://campusvoice.ai/campusvoice-logo.png" alt="CampusVoice.AI" style="height: 50px; width: auto; display: block; background-color: #ffffff !important;" />
                         </td>
                       </tr>
                     </table>
@@ -125,7 +125,7 @@ const handler = async (req: Request): Promise<Response> => {
                     
                     <!-- CTA Button -->
                     <div style="text-align: center; margin: 32px 0; background-color: #ffffff !important;" bgcolor="#ffffff">
-                      <a href="https://uplaybook.ai/login" style="display: inline-block; background-color: #1e293b !important; color: #ffffff !important; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);" bgcolor="#1e293b">
+                      <a href="https://campusvoice.ai/login" style="display: inline-block; background-color: #1e293b !important; color: #ffffff !important; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);" bgcolor="#1e293b">
                         Login to CampusVoice.AI →
                       </a>
                     </div>
@@ -171,7 +171,7 @@ const handler = async (req: Request): Promise<Response> => {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "CampusVoice.AI <noreply@uplaybook.ai>",
+        from: "CampusVoice.AI <noreply@campusvoice.ai>",
         to: [email],
         subject: `Welcome to CampusVoice.AI - ${institutionName}`,
         html: htmlContent,

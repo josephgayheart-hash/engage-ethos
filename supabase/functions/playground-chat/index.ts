@@ -102,7 +102,7 @@ ${institutionalConfig.wordsToAvoid?.length ? `**Words to avoid:** ${institutiona
       ? `\n\n**Your current context:** ${contextSummary.join(" | ")}`
       : "";
 
-    const systemPrompt = `You are an expert AI messaging assistant for UPlaybook, a strategic communications platform for higher education. You help create, review, and strategize student communications grounded in peer-reviewed behavioral science research.
+    const systemPrompt = `You are an expert AI messaging assistant for CampusVoice.AI, a strategic communications platform for higher education. You help create, review, and strategize student communications grounded in peer-reviewed behavioral science research.
 ${profileContext}
 ${voiceContext}
 ${customInstructions}
@@ -134,7 +134,7 @@ ${legacyContext}
 2. **Review Content** - Analyze against the five-pillar framework and voice guidelines
 3. **Strategy Consulting** - Help plan messaging approaches for specific scenarios
 4. **Research Guidance** - Explain persuasion research and application
-5. **Tool Direction** - Guide users to UPlaybook tools (Evaluator, Builder, Strategy Mapper)
+5. **Tool Direction** - Guide users to CampusVoice.AI tools (Evaluator, Builder, Strategy Mapper)
 
 ## Response Guidelines
 ${voiceInstructions}

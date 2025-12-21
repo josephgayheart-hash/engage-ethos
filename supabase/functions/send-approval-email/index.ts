@@ -94,7 +94,7 @@ const handler = async (req: Request): Promise<Response> => {
                     <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;" bgcolor="#1a2036">
                       <tr>
                         <td style="background-color: #ffffff !important; padding: 16px 20px; border-radius: 10px;" bgcolor="#ffffff">
-                          <img class="logo-img" src="https://uplaybook.ai/uplaybook-logo.png" alt="CampusVoice.AI" style="height: 50px; width: auto; display: block; background-color: #ffffff !important;" />
+                          <img class="logo-img" src="https://campusvoice.ai/campusvoice-logo.png" alt="CampusVoice.AI" style="height: 50px; width: auto; display: block; background-color: #ffffff !important;" />
                         </td>
                       </tr>
                     </table>
@@ -142,7 +142,7 @@ const handler = async (req: Request): Promise<Response> => {
                     
                     <!-- CTA Button -->
                     <div style="text-align: center; margin: 36px 0; background-color: #ffffff !important;" bgcolor="#ffffff">
-                      <a href="https://uplaybook.ai/login" style="display: inline-block; background-color: #059669 !important; color: #ffffff !important; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-size: 18px; font-weight: 700; box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.4);" bgcolor="#059669">
+                      <a href="https://campusvoice.ai/login" style="display: inline-block; background-color: #059669 !important; color: #ffffff !important; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-size: 18px; font-weight: 700; box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.4);" bgcolor="#059669">
                         🚀 Start Using CampusVoice.AI
                       </a>
                     </div>
@@ -199,7 +199,7 @@ const handler = async (req: Request): Promise<Response> => {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "CampusVoice.AI <noreply@uplaybook.ai>",
+        from: "CampusVoice.AI <noreply@campusvoice.ai>",
         to: [email],
         subject,
         html: htmlContent,
