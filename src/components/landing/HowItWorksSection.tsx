@@ -1,151 +1,143 @@
 import { Badge } from '@/components/ui/badge';
 import { FileText, Wand2, CheckCircle, Send } from 'lucide-react';
-import AnimatedBorderCard from './AnimatedBorderCard';
 
 const steps = [
   {
     icon: FileText,
     title: 'Upload Your Brand',
     description: 'Add your brand guidelines, sample content, and institutional voice documents.',
-    color: 'lime' as const,
+    color: 'lime',
   },
   {
     icon: Wand2,
     title: 'AI Learns Your DNA',
     description: 'Our AI analyzes patterns, tone, and messaging pillars unique to your institution.',
-    color: 'purple' as const,
+    color: 'purple',
   },
   {
     icon: CheckCircle,
     title: 'Generate & Score',
     description: 'Create on-brand content and get instant adherence scores with improvement suggestions.',
-    color: 'blue' as const,
+    color: 'blue',
   },
   {
     icon: Send,
     title: 'Deploy Everywhere',
     description: 'Export to your CRM, share with teams, or push directly to marketing channels.',
-    color: 'pink' as const,
+    color: 'pink',
   },
 ];
+
+const getColor = (color: string) => {
+  switch (color) {
+    case 'lime': return 'hsl(82 85% 55%)';
+    case 'purple': return 'hsl(270 70% 60%)';
+    case 'blue': return 'hsl(200 100% 50%)';
+    case 'pink': return 'hsl(340 75% 55%)';
+    default: return 'hsl(82 85% 55%)';
+  }
+};
 
 export default function HowItWorksSection() {
   return (
     <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(222_47%_11%)] relative overflow-hidden">
-      {/* Animated background beams */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div 
-          className="absolute w-[600px] h-[600px] opacity-30 animate-spotlight-slow"
-          style={{
-            background: `conic-gradient(from 0deg at 50% 50%, 
-              transparent 0deg, 
-              hsl(var(--cyber-lime) / 0.3) 20deg, 
-              transparent 60deg,
-              transparent 180deg,
-              hsl(var(--cyber-purple) / 0.2) 200deg,
-              transparent 240deg,
-              transparent 360deg
-            )`,
-            left: '-200px',
-            top: '-100px',
-            filter: 'blur(60px)',
-          }}
-        />
-        <div 
-          className="absolute w-[500px] h-[500px] opacity-20 animate-spotlight-reverse"
-          style={{
-            background: `conic-gradient(from 180deg at 50% 50%, 
-              transparent 0deg, 
-              hsl(var(--cyber-blue) / 0.4) 30deg, 
-              transparent 70deg,
-              transparent 270deg,
-              hsl(var(--cyber-lime) / 0.3) 300deg,
-              transparent 340deg,
-              transparent 360deg
-            )`,
-            right: '-150px',
-            bottom: '-50px',
-            filter: 'blur(80px)',
-          }}
-        />
-      </div>
+      {/* Background glow effects */}
+      <div className="absolute top-1/4 left-0 w-96 h-96 bg-[hsl(270_70%_60%_/_0.1)] rounded-full blur-3xl" />
+      <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-[hsl(200_100%_50%_/_0.1)] rounded-full blur-3xl" />
 
       <div className="max-w-6xl mx-auto relative z-10">
         <div className="text-center mb-16">
-          <Badge className="mb-4 bg-[hsl(var(--cyber-lime)_/_0.2)] text-[hsl(var(--cyber-lime))] border-[hsl(var(--cyber-lime)_/_0.4)]">
+          <Badge className="mb-4 bg-[hsl(82_85%_55%_/_0.2)] text-[hsl(82_85%_55%)] border-[hsl(82_85%_55%_/_0.4)]">
             How It Works
           </Badge>
           <h2 className="font-serif text-3xl sm:text-4xl text-white mb-4">
-            From <span className="text-[hsl(var(--cyber-lime))]">Brand Chaos</span> to{' '}
-            <span className="text-[hsl(var(--cyber-purple))]">Brand Clarity</span>
+            From <span className="text-[hsl(82_85%_55%)]">Brand Chaos</span> to{' '}
+            <span className="text-[hsl(270_70%_60%)]">Brand Clarity</span>
           </h2>
           <p className="text-white/60 max-w-2xl mx-auto text-lg">
             Four simple steps to transform your institutional communications
           </p>
         </div>
 
-        {/* Steps with connecting lines */}
-        <div className="relative">
-          {/* Connecting line - desktop */}
-          <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[hsl(var(--cyber-lime)_/_0.3)] to-transparent" />
-          
-          {/* Animated beam on the line */}
-          <div className="hidden lg:block absolute top-1/2 left-0 w-32 h-px animate-beam-flow">
-            <div className="w-full h-full bg-gradient-to-r from-transparent via-[hsl(var(--cyber-lime))] to-transparent" />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {steps.map((step, index) => (
-              <AnimatedBorderCard 
-                key={step.title} 
-                glowColor={step.color}
-                className="transform hover:-translate-y-2 transition-transform duration-300"
-              >
-                <div className="p-6 relative">
-                  {/* Step number */}
+        {/* Flow diagram layout */}
+        <div className="relative flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-4">
+          {/* Steps */}
+          {steps.map((step, index) => (
+            <div key={step.title} className="flex items-center gap-4">
+              {/* Card */}
+              <div className="relative group">
+                {/* Animated border on hover */}
+                <div 
+                  className="absolute -inset-[1px] rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  style={{
+                    background: `linear-gradient(90deg, ${getColor(step.color)}, transparent, ${getColor(step.color)})`,
+                    backgroundSize: '200% 100%',
+                    animation: 'border-flow 3s linear infinite',
+                  }}
+                />
+                
+                {/* Glow effect on hover */}
+                <div 
+                  className="absolute -inset-2 rounded-xl opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-500"
+                  style={{ background: getColor(step.color) }}
+                />
+                
+                {/* Card content */}
+                <div className="relative bg-[hsl(222_47%_14%)] border border-white/10 rounded-xl p-5 w-56 transition-all duration-300 group-hover:border-transparent group-hover:-translate-y-1">
+                  {/* Step number badge - positioned inside the card */}
                   <div 
-                    className="absolute -top-3 -right-3 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-[hsl(222_47%_11%)]"
-                    style={{ 
-                      background: step.color === 'lime' ? 'hsl(var(--cyber-lime))' :
-                                  step.color === 'purple' ? 'hsl(var(--cyber-purple))' :
-                                  step.color === 'blue' ? 'hsl(var(--cyber-blue))' :
-                                  'hsl(340 75% 55%)'
-                    }}
+                    className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-[hsl(222_47%_11%)]"
+                    style={{ background: getColor(step.color) }}
                   >
                     {index + 1}
                   </div>
 
                   <div 
-                    className="w-14 h-14 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
-                    style={{
-                      background: step.color === 'lime' ? 'hsl(var(--cyber-lime) / 0.15)' :
-                                  step.color === 'purple' ? 'hsl(var(--cyber-purple) / 0.15)' :
-                                  step.color === 'blue' ? 'hsl(var(--cyber-blue) / 0.15)' :
-                                  'hsl(340 75% 55% / 0.15)'
-                    }}
+                    className="w-12 h-12 rounded-lg flex items-center justify-center mb-3 transition-transform group-hover:scale-110"
+                    style={{ background: `${getColor(step.color)}20` }}
                   >
                     <step.icon 
-                      className="w-7 h-7"
-                      style={{
-                        color: step.color === 'lime' ? 'hsl(var(--cyber-lime))' :
-                               step.color === 'purple' ? 'hsl(var(--cyber-purple))' :
-                               step.color === 'blue' ? 'hsl(var(--cyber-blue))' :
-                               'hsl(340 75% 55%)'
-                      }}
+                      className="w-6 h-6"
+                      style={{ color: getColor(step.color) }}
                     />
                   </div>
 
-                  <h3 className="font-semibold text-[hsl(222_47%_11%)] mb-2 text-lg">
+                  <h3 className="font-semibold text-white mb-1.5 text-sm">
                     {step.title}
                   </h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
+                  <p className="text-white/50 text-xs leading-relaxed">
                     {step.description}
                   </p>
                 </div>
-              </AnimatedBorderCard>
-            ))}
-          </div>
+              </div>
+
+              {/* Arrow connector - only show between cards */}
+              {index < steps.length - 1 && (
+                <div className="hidden lg:flex items-center">
+                  <div className="relative w-8 h-px">
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-white/5" />
+                    {/* Animated beam */}
+                    <div 
+                      className="absolute top-0 left-0 w-4 h-px bg-gradient-to-r from-transparent via-[hsl(82_85%_55%)] to-transparent"
+                      style={{
+                        animation: 'beam-travel 2s linear infinite',
+                        animationDelay: `${index * 0.5}s`,
+                      }}
+                    />
+                  </div>
+                  <svg className="w-3 h-3 text-white/30" viewBox="0 0 12 12" fill="currentColor">
+                    <path d="M2 6L9 6M9 6L6 3M9 6L6 9" stroke="currentColor" strokeWidth="1.5" fill="none" />
+                  </svg>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
+
+        {/* Summary line */}
+        <p className="text-center text-white/40 text-sm mt-12">
+          Upload brand docs → AI analyzes your voice → Generate on-brand content → Deploy everywhere
+        </p>
       </div>
     </section>
   );
