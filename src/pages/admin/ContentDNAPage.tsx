@@ -18,6 +18,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { WaveBackground } from "@/components/WaveBackground";
 import { ContentDNAExplainer } from "@/components/ContentDNAExplainer";
+import { ContentDNAVersionHistory } from "@/components/ContentDNAVersionHistory";
 import { 
   Home, 
   Upload, 
@@ -46,7 +47,8 @@ import {
   Award,
   Compass,
   LayoutGrid,
-  List
+  List,
+  History
 } from 'lucide-react';
 import { extractTextFromFile, getAcceptString } from '@/lib/documentParser';
 
@@ -660,6 +662,10 @@ export default function ContentDNAPage() {
             <TabsTrigger value="library" className="flex items-center gap-2">
               <BookOpen className="w-4 h-4" />
               Content Library
+            </TabsTrigger>
+            <TabsTrigger value="history" className="flex items-center gap-2">
+              <History className="w-4 h-4" />
+              History
             </TabsTrigger>
           </TabsList>
 
@@ -1536,6 +1542,18 @@ export default function ContentDNAPage() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* History Tab */}
+          <TabsContent value="history">
+            <ContentDNAVersionHistory 
+              contentDnaId={analysis?.id} 
+              profileId={profileIdFromUrl}
+              onRestore={() => {
+                // Refresh the analysis data after restore
+                window.location.reload();
+              }}
+            />
           </TabsContent>
         </Tabs>
       </div>

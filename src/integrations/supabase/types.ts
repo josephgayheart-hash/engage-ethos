@@ -275,6 +275,59 @@ export type Database = {
           },
         ]
       }
+      content_dna_versions: {
+        Row: {
+          brand_platform: Json | null
+          change_summary: string | null
+          content_dna_id: string
+          created_at: string
+          created_by_user_id: string | null
+          custom_instructions: string | null
+          id: string
+          profile_id: string | null
+          sample_count: number
+          tenant_id: string
+          version_number: number
+          voice_analysis: Json
+        }
+        Insert: {
+          brand_platform?: Json | null
+          change_summary?: string | null
+          content_dna_id: string
+          created_at?: string
+          created_by_user_id?: string | null
+          custom_instructions?: string | null
+          id?: string
+          profile_id?: string | null
+          sample_count?: number
+          tenant_id: string
+          version_number?: number
+          voice_analysis?: Json
+        }
+        Update: {
+          brand_platform?: Json | null
+          change_summary?: string | null
+          content_dna_id?: string
+          created_at?: string
+          created_by_user_id?: string | null
+          custom_instructions?: string | null
+          id?: string
+          profile_id?: string | null
+          sample_count?: number
+          tenant_id?: string
+          version_number?: number
+          voice_analysis?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_dna_versions_content_dna_id_fkey"
+            columns: ["content_dna_id"]
+            isOneToOne: false
+            referencedRelation: "content_dna_analysis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_nudges: {
         Row: {
           bounced_at: string | null
