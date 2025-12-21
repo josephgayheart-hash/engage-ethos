@@ -11,6 +11,7 @@ import { JourneyFlowDiagram } from "@/components/JourneyFlowDiagram";
 import { LibraryNav } from "@/components/LibraryNav";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
 import { ContentDNAIndicator, ContentDNAActiveBadge } from "@/components/ContentDNAIndicator";
+import { ContentDNAExplainer } from "@/components/ContentDNAExplainer";
 import { BrandLayerSelector, BrandLayerActiveBadge, BrandLayerSelection } from "@/components/BrandLayerSelector";
 import { CadenceSelector, CadenceFrequency, EscalationPattern } from "@/components/CadenceSelector";
 import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
@@ -716,7 +717,7 @@ const StrategyPage = () => {
                 stepNumber={1}
                 title="Select Your Brand Context"
                 description="Choose the institutional profile and voice settings for your journey"
-                helpText="Select which college, department, or unit this journey represents. Content DNA captures your institution's unique voice and tone."
+                helpText="Select which college, department, or unit this journey represents. When Content DNA is enabled, the AI combines your Voice Analysis (tone, vocabulary, patterns) with your Brand Platform (pillars, proof points) and Custom Instructions to generate on-brand journey content."
                 icon={<Building2 className="w-4 h-4" />}
               >
                 <div className="space-y-4">
@@ -747,6 +748,14 @@ const StrategyPage = () => {
                       compact
                     />
                   )}
+
+                  {/* How Content DNA Works - Expandable Helper */}
+                  <ContentDNAExplainer
+                    context="journey-designer"
+                    defaultOpen={false}
+                    collapsible={true}
+                    showManageLink={true}
+                  />
                 </div>
               </BuilderStepSection>
 

@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { WaveBackground } from "@/components/WaveBackground";
+import { ContentDNAExplainer } from "@/components/ContentDNAExplainer";
 import { 
   Home, 
   Upload, 
@@ -433,6 +434,15 @@ export default function ContentDNAPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* How Content DNA Works - Educational Section */}
+        <ContentDNAExplainer 
+          context="content-dna-page" 
+          defaultOpen={false}
+          collapsible={true}
+          showManageLink={false}
+          className="mb-6"
+        />
 
         {/* Institution Branding Card - Second */}
         <Card className="mb-6 border-border">

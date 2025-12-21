@@ -207,9 +207,14 @@ export function ContentDNAIndicator({
                         : tenant?.institution_name
                           ? `${tenant.institution_name} brand voice applied`
                           : "Your brand voice is being applied")
-                  : "Toggle to use your brand voice"
+                  : "Generic AI content (no brand voice)"
                 }
               </p>
+              {!enabled && hasContentDNA && (
+                <p className="text-[10px] text-amber-600 truncate">
+                  Toggle ON to match your institutional voice
+                </p>
+              )}
               {enabled && hasContentDNA && isInherited && (
                 <p className="text-[10px] text-amber-600 truncate">
                   Inherited from parent profile
@@ -219,14 +224,28 @@ export function ContentDNAIndicator({
           </div>
           
           <div className="flex items-center gap-2 shrink-0">
-            <Switch
-              checked={enabled && hasContentDNA}
-              onCheckedChange={onToggle}
-              disabled={!hasContentDNA}
-              className={cn(
-                enabled && hasContentDNA && "data-[state=checked]:bg-emerald-500"
-              )}
-            />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <Switch
+                    checked={enabled && hasContentDNA}
+                    onCheckedChange={onToggle}
+                    disabled={!hasContentDNA}
+                    className={cn(
+                      enabled && hasContentDNA && "data-[state=checked]:bg-emerald-500"
+                    )}
+                  />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-xs">
+                <p className="text-xs">
+                  {enabled 
+                    ? "ON: Generated content matches your institutional voice, brand messaging, and custom instructions."
+                    : "OFF: AI generates generic content without your brand voice applied."
+                  }
+                </p>
+              </TooltipContent>
+            </Tooltip>
             <CollapsibleTrigger asChild>
               <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
                 {isExpanded ? (
@@ -319,6 +338,25 @@ export function ContentDNAIndicator({
                 )}
               </div>
             )}
+
+            {/* What happens when ON vs OFF */}
+            <div className="rounded-lg border border-border bg-muted/30 p-2.5 space-y-1.5">
+              <p className="text-[10px] font-medium text-foreground">What this toggle does:</p>
+              <div className="grid gap-1 text-[10px]">
+                <div className="flex items-start gap-1.5">
+                  <span className="text-emerald-600 font-medium shrink-0">ON:</span>
+                  <span className="text-muted-foreground">
+                    AI matches your voice analysis, incorporates brand themes, and follows custom instructions
+                  </span>
+                </div>
+                <div className="flex items-start gap-1.5">
+                  <span className="text-muted-foreground font-medium shrink-0">OFF:</span>
+                  <span className="text-muted-foreground">
+                    AI generates generic content without your institutional brand voice
+                  </span>
+                </div>
+              </div>
+            </div>
 
             {/* Action Link */}
             {isAdmin && (
