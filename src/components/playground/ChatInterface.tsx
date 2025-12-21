@@ -191,14 +191,26 @@ export function ChatInterface({
                       message.role === 'assistant' ? "dark:prose-invert" : "prose-invert",
                       message.role === 'assistant' && [
                         "[&_p]:my-3 [&_p]:leading-relaxed",
-                        "[&_ul]:my-3 [&_ol]:my-3 [&_li]:my-1.5 [&_li]:leading-relaxed",
-                        "[&_h1]:text-lg [&_h1]:font-semibold [&_h1]:mt-4 [&_h1]:mb-2",
-                        "[&_h2]:text-base [&_h2]:font-semibold [&_h2]:mt-3 [&_h2]:mb-2",
-                        "[&_h3]:text-base [&_h3]:font-medium [&_h3]:mt-3 [&_h3]:mb-1",
-                        "[&_strong]:font-semibold",
+                        // Unordered lists - nice bullet styling
+                        "[&_ul]:my-3 [&_ul]:pl-5 [&_ul]:list-disc [&_ul]:space-y-1.5",
+                        "[&_ul_ul]:mt-1.5 [&_ul_ul]:list-[circle]",
+                        // Ordered lists - clear numbering
+                        "[&_ol]:my-3 [&_ol]:pl-5 [&_ol]:list-decimal [&_ol]:space-y-1.5",
+                        "[&_ol_ol]:mt-1.5 [&_ol_ol]:list-[lower-alpha]",
+                        // List items
+                        "[&_li]:leading-relaxed [&_li]:pl-1",
+                        "[&_li_p]:my-1",
+                        // Bold text - make it stand out more
+                        "[&_strong]:font-bold [&_strong]:text-foreground",
+                        // Headings
+                        "[&_h1]:text-lg [&_h1]:font-bold [&_h1]:mt-4 [&_h1]:mb-2",
+                        "[&_h2]:text-base [&_h2]:font-bold [&_h2]:mt-3 [&_h2]:mb-2",
+                        "[&_h3]:text-base [&_h3]:font-semibold [&_h3]:mt-3 [&_h3]:mb-1",
+                        // Code
                         "[&_code]:bg-background/20 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm",
                         "[&_pre]:bg-background/20 [&_pre]:p-3 [&_pre]:rounded-lg [&_pre]:my-3",
-                        "[&_blockquote]:border-l-3 [&_blockquote]:border-primary/50 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-3"
+                        // Blockquotes
+                        "[&_blockquote]:border-l-4 [&_blockquote]:border-primary/50 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-3"
                       ].join(' ')
                     )}>
                       <ReactMarkdown>{message.content}</ReactMarkdown>
@@ -229,7 +241,10 @@ export function ChatInterface({
                   <div className={cn(
                     "font-chat text-base leading-relaxed prose prose-base dark:prose-invert max-w-none",
                     "[&_p]:my-3 [&_p]:leading-relaxed",
-                    "[&_ul]:my-3 [&_ol]:my-3 [&_li]:my-1.5"
+                    "[&_ul]:my-3 [&_ul]:pl-5 [&_ul]:list-disc [&_ul]:space-y-1.5",
+                    "[&_ol]:my-3 [&_ol]:pl-5 [&_ol]:list-decimal [&_ol]:space-y-1.5",
+                    "[&_li]:leading-relaxed [&_li]:pl-1",
+                    "[&_strong]:font-bold [&_strong]:text-foreground"
                   )}>
                     <ReactMarkdown>{streamingContent}</ReactMarkdown>
                     <span className="inline-block w-2 h-5 bg-primary/60 animate-pulse ml-1" />
