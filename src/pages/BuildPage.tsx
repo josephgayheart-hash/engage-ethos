@@ -7,6 +7,7 @@ import { LibraryNav } from "@/components/LibraryNav";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
 import { ChannelPreview } from "@/components/ChannelPreview";
 import { ContentDNAIndicator, ContentDNAActiveBadge } from "@/components/ContentDNAIndicator";
+import { ContentDNAExplainer } from "@/components/ContentDNAExplainer";
 import { BuilderStepSection, BuilderStepDivider } from "@/components/BuilderStepSection";
 import { WaveBackground } from "@/components/WaveBackground";
 import { SelectionSummary } from "@/components/SelectionSummary";
@@ -545,7 +546,7 @@ const BuildPage = () => {
                 stepNumber={1}
                 title="Select Your Brand Context"
                 description="Choose the institutional profile and voice settings for your message"
-                helpText="Select which college, department, or unit this message represents. The institutional profile determines branding, tone, and available resources."
+                helpText="Select which college, department, or unit this message represents. When Content DNA is enabled, the AI combines your Voice Analysis (tone, vocabulary, sentence patterns) with your Brand Platform (pillars, proof points) and Custom Instructions to generate on-brand messaging."
                 icon={<Building2 className="w-4 h-4" />}
               >
                 <div className="space-y-4">
@@ -576,6 +577,14 @@ const BuildPage = () => {
                       compact
                     />
                   )}
+
+                  {/* How Content DNA Works - Expandable Helper */}
+                  <ContentDNAExplainer
+                    context="message-builder"
+                    defaultOpen={false}
+                    collapsible={true}
+                    showManageLink={true}
+                  />
                 </div>
               </BuilderStepSection>
 
