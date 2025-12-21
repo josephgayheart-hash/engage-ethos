@@ -140,7 +140,7 @@ export default function JourneyDesignerFeaturePage() {
   const { demoNodes, demoEdges } = useMemo(() => {
     const nodes: Node[] = demoTouchpoints.map((tp, i) => {
       const row = Math.floor(i / 3);
-      const col = row % 2 === 0 ? i % 3 : 2 - (i % 3);
+      const col = i % 3;
       return {
         id: tp.id,
         type: 'touchpoint',
