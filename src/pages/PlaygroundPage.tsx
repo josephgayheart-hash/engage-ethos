@@ -48,6 +48,7 @@ const PlaygroundPage = () => {
   const [isSending, setIsSending] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
   const [streamingContent, setStreamingContent] = useState('');
+  const [selectedModel, setSelectedModel] = useState<'google/gemini-2.5-flash' | 'google/gemini-2.5-flash-lite' | 'google/gemini-2.5-pro' | 'openai/gpt-5-mini'>('google/gemini-2.5-flash');
   
   // Context selections
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
@@ -147,7 +148,8 @@ const PlaygroundPage = () => {
         history: messages.map(m => ({ role: m.role, content: m.content })),
         institutionalConfig: null,
         contentDNA,
-        profileConfig
+        profileConfig,
+        model: selectedModel
       }),
     });
 
@@ -411,6 +413,8 @@ const PlaygroundPage = () => {
               profileName={selectedProfile?.name}
               hasDNA={!!contentDNA}
               streamingContent={streamingContent}
+              selectedModel={selectedModel}
+              onModelChange={setSelectedModel}
             />
           </div>
         </Card>

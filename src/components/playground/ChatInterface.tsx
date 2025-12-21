@@ -1,4 +1,5 @@
 import { useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,6 +17,8 @@ import {
   Sparkles
 } from 'lucide-react';
 import type { PlaygroundMessage } from '@/hooks/usePlaygroundConversations';
+import { MessageActions } from './MessageActions';
+import { ModelSelector, type AIModel } from './ModelSelector';
 
 interface ChatInterfaceProps {
   messages: PlaygroundMessage[];
@@ -28,6 +31,8 @@ interface ChatInterfaceProps {
   profileName?: string;
   hasDNA?: boolean;
   streamingContent?: string;
+  selectedModel: AIModel;
+  onModelChange: (model: AIModel) => void;
 }
 
 const suggestedPrompts = [
@@ -63,7 +68,9 @@ export function ChatInterface({
   hasContext,
   profileName,
   hasDNA,
-  streamingContent
+  streamingContent,
+  selectedModel,
+  onModelChange
 }: ChatInterfaceProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -86,37 +93,30 @@ export function ChatInterface({
     textareaRef.current?.focus();
   };
 
-  const renderMessageContent = (content: string) => {
-    return content.split('\n').map((line, i) => {
-      const parts = line.split(/(\*\*.*?\*\*)/g);
-      return (
-        <p key={i} className={i > 0 ? "mt-2" : ""}>
-          {parts.map((part, j) => {
-            if (part.startsWith('**') && part.endsWith('**')) {
-              return <strong key={j}>{part.slice(2, -2)}</strong>;
-            }
-            return part;
-          })}
-        </p>
-      );
-    });
-  };
-
   return (
     <div className="flex-1 flex flex-col min-h-0">
       {/* Context indicator */}
-      {hasContext && (
-        <div className="px-4 py-2 border-b bg-muted/30 flex items-center gap-2 text-sm">
-          <Sparkles className="w-4 h-4 text-primary" />
-          <span className="text-muted-foreground">Context:</span>
-          {profileName && (
-            <Badge variant="secondary" className="text-xs">{profileName}</Badge>
-          )}
-          {hasDNA && (
-            <Badge variant="outline" className="text-xs">Content DNA Active</Badge>
+      <div className="px-4 py-2 border-b bg-muted/30 flex items-center justify-between text-sm">
+        <div className="flex items-center gap-2">
+          {hasContext && (
+            <>
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-muted-foreground">Context:</span>
+              {profileName && (
+                <Badge variant="secondary" className="text-xs">{profileName}</Badge>
+              )}
+              {hasDNA && (
+                <Badge variant="outline" className="text-xs">Content DNA Active</Badge>
+              )}
+            </>
           )}
         </div>
-      )}
+        <ModelSelector 
+          value={selectedModel} 
+          onChange={onModelChange} 
+          disabled={isLoading}
+        />
+      </div>
 
       {/* Messages */}
       <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
@@ -168,7 +168,7 @@ export function ChatInterface({
               <div
                 key={message.id}
                 className={cn(
-                  "flex gap-3",
+                  "flex gap-3 group",
                   message.role === 'user' ? "justify-end" : "justify-start"
                 )}
               >
@@ -177,20 +177,29 @@ export function ChatInterface({
                     <Bot className="w-4 h-4 text-primary" />
                   </div>
                 )}
-                <div
-                  className={cn(
-                    "max-w-[80%] rounded-2xl px-4 py-3",
-                    message.role === 'user'
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted"
-                  )}
-                >
-                  <div className="text-sm whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none">
-                    {renderMessageContent(message.content)}
+                <div className="flex flex-col max-w-[80%]">
+                  <div
+                    className={cn(
+                      "rounded-2xl px-4 py-3",
+                      message.role === 'user'
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted"
+                    )}
+                  >
+                    <div className={cn(
+                      "text-sm prose prose-sm max-w-none",
+                      message.role === 'assistant' ? "dark:prose-invert" : "prose-invert",
+                      message.role === 'assistant' && "[&_p]:my-2 [&_ul]:my-2 [&_ol]:my-2 [&_li]:my-1 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm [&_h1]:font-semibold [&_h2]:font-semibold [&_h3]:font-medium [&_code]:bg-background/20 [&_code]:px-1 [&_code]:rounded [&_pre]:bg-background/20 [&_pre]:p-2 [&_pre]:rounded-lg [&_blockquote]:border-l-2 [&_blockquote]:border-primary/50 [&_blockquote]:pl-3 [&_blockquote]:italic"
+                    )}>
+                      <ReactMarkdown>{message.content}</ReactMarkdown>
+                    </div>
+                    <span className="text-xs opacity-60 mt-1 block">
+                      {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
                   </div>
-                  <span className="text-xs opacity-60 mt-1 block">
-                    {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
+                  {message.role === 'assistant' && (
+                    <MessageActions content={message.content} messageId={message.id} />
+                  )}
                 </div>
                 {message.role === 'user' && (
                   <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shrink-0">
@@ -207,8 +216,8 @@ export function ChatInterface({
                   <Bot className="w-4 h-4 text-primary" />
                 </div>
                 <div className="max-w-[80%] bg-muted rounded-2xl px-4 py-3">
-                  <div className="text-sm whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none">
-                    {renderMessageContent(streamingContent)}
+                  <div className="text-sm prose prose-sm dark:prose-invert max-w-none [&_p]:my-2 [&_ul]:my-2 [&_ol]:my-2 [&_li]:my-1">
+                    <ReactMarkdown>{streamingContent}</ReactMarkdown>
                     <span className="inline-block w-2 h-4 bg-primary/60 animate-pulse ml-1" />
                   </div>
                 </div>

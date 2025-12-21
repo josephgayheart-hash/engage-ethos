@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { message, history, institutionalConfig, contentDNA, profileConfig } = await req.json();
+    const { message, history, institutionalConfig, contentDNA, profileConfig, model } = await req.json();
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -157,6 +157,16 @@ ${profileInstructions}
 
     console.log("Calling AI gateway with streaming...");
 
+    // Determine which model to use
+    const validModels = [
+      'google/gemini-2.5-flash',
+      'google/gemini-2.5-flash-lite', 
+      'google/gemini-2.5-pro',
+      'openai/gpt-5-mini'
+    ];
+    const selectedModel = validModels.includes(model) ? model : 'google/gemini-2.5-flash';
+    console.log("Using model:", selectedModel);
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -164,7 +174,7 @@ ${profileInstructions}
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: selectedModel,
         messages: conversationMessages,
         stream: true,
       }),
