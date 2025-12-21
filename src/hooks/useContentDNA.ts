@@ -17,6 +17,11 @@ export interface ContentDNASample {
   title: string | null;
   source_description: string | null;
   created_at: string;
+  // Semantic extraction fields
+  semantic_summary: string | null;
+  key_themes: string[] | null;
+  extraction_status: string | null;
+  extracted_at: string | null;
 }
 
 export interface VoiceAnalysis {
@@ -61,6 +66,7 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
   const [isLoading, setIsLoading] = useState(true);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isExtracting, setIsExtracting] = useState(false);
 
   const fetchSamples = useCallback(async () => {
     if (!tenant?.id) return;
@@ -445,18 +451,92 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
     }
   };
 
+  // Extract semantic summaries from samples
+  const extractSemantics = async (sampleIds?: string[]) => {
+    const idsToExtract = sampleIds || samples
+      .filter(s => s.extraction_status !== 'completed' && s.content_text)
+      .map(s => s.id);
+
+    if (idsToExtract.length === 0) {
+      toast({
+        title: 'No Samples to Process',
+        description: 'All samples already have semantic extraction completed.',
+      });
+      return;
+    }
+
+    setIsExtracting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('extract-semantics', {
+        body: { batchIds: idsToExtract }
+      });
+
+      if (error) throw error;
+
+      await fetchSamples(); // Refresh to get updated extraction status
+
+      const { summary } = data;
+      toast({
+        title: 'Extraction Complete',
+        description: `Processed ${summary.succeeded} of ${summary.total} samples.${summary.failed > 0 ? ` ${summary.failed} failed.` : ''}`,
+      });
+    } catch (error: any) {
+      console.error('Extraction error:', error);
+      toast({
+        title: 'Extraction Failed',
+        description: error.message || 'Failed to extract semantics from samples',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsExtracting(false);
+    }
+  };
+
+  // Search samples by semantic content
+  const searchSamples = async (query: string, themes?: string[], limit: number = 10) => {
+    if (!tenant?.id) return [];
+
+    try {
+      const { data, error } = await supabase.rpc('search_content_samples', {
+        p_tenant_id: tenant.id,
+        p_profile_id: profileId || null,
+        p_search_query: query || null,
+        p_themes: themes || null,
+        p_limit: limit,
+      });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error: any) {
+      console.error('Search error:', error);
+      return [];
+    }
+  };
+
+  // Get extraction stats
+  const extractionStats = {
+    total: samples.length,
+    completed: samples.filter(s => s.extraction_status === 'completed').length,
+    pending: samples.filter(s => s.extraction_status === 'pending' || !s.extraction_status).length,
+    failed: samples.filter(s => s.extraction_status === 'failed').length,
+  };
+
   return {
     samples,
     analysis,
     isLoading,
     isAnalyzing,
     isSaving,
+    isExtracting,
+    extractionStats,
     addSample,
     deleteSample,
     analyzeVoice,
     updateCustomInstructions,
     updateBrandPlatform,
     resetContentDNA,
+    extractSemantics,
+    searchSamples,
     refetch: async () => {
       await Promise.all([fetchSamples(), fetchAnalysis()]);
     }

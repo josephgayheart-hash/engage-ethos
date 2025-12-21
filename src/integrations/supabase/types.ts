@@ -216,12 +216,16 @@ export type Database = {
         Row: {
           content_text: string | null
           created_at: string
+          extracted_at: string | null
+          extraction_status: string | null
           file_name: string
           file_size: number | null
           file_type: string | null
           id: string
+          key_themes: string[] | null
           profile_id: string | null
           sample_type: string | null
+          semantic_summary: string | null
           source_description: string | null
           source_type: string | null
           tenant_id: string
@@ -231,12 +235,16 @@ export type Database = {
         Insert: {
           content_text?: string | null
           created_at?: string
+          extracted_at?: string | null
+          extraction_status?: string | null
           file_name: string
           file_size?: number | null
           file_type?: string | null
           id?: string
+          key_themes?: string[] | null
           profile_id?: string | null
           sample_type?: string | null
+          semantic_summary?: string | null
           source_description?: string | null
           source_type?: string | null
           tenant_id: string
@@ -246,12 +254,16 @@ export type Database = {
         Update: {
           content_text?: string | null
           created_at?: string
+          extracted_at?: string | null
+          extraction_status?: string | null
           file_name?: string
           file_size?: number | null
           file_type?: string | null
           id?: string
+          key_themes?: string[] | null
           profile_id?: string | null
           sample_type?: string | null
+          semantic_summary?: string | null
           source_description?: string | null
           source_type?: string | null
           tenant_id?: string
@@ -1146,6 +1158,24 @@ export type Database = {
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
       is_user_active: { Args: { _user_id: string }; Returns: boolean }
+      search_content_samples: {
+        Args: {
+          p_limit?: number
+          p_profile_id?: string
+          p_search_query?: string
+          p_tenant_id: string
+          p_themes?: string[]
+        }
+        Returns: {
+          content_text: string
+          id: string
+          key_themes: string[]
+          relevance_score: number
+          sample_type: string
+          semantic_summary: string
+          title: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "user" | "approver" | "super_admin"

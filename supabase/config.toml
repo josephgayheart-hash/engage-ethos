@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.push-to-sfmc]
 verify_jwt = false
+
+[functions.extract-semantics]
+verify_jwt = true

@@ -146,11 +146,14 @@ export default function ContentDNAPage() {
     isLoading,
     isAnalyzing,
     isSaving,
+    isExtracting,
+    extractionStats,
     addSample,
     deleteSample,
     analyzeVoice,
     updateCustomInstructions,
     resetContentDNA,
+    extractSemantics,
   } = useContentDNA({ profileId: profileIdFromUrl });
   
   const [isResetting, setIsResetting] = useState(false);
@@ -172,7 +175,7 @@ export default function ContentDNAPage() {
   const [stagedFile, setStagedFile] = useState<File | null>(null);
   const [stagedFileText, setStagedFileText] = useState<string | null>(null);
   const [stagedFileError, setStagedFileError] = useState<string | null>(null);
-  const [isExtracting, setIsExtracting] = useState(false);
+  const [isExtractingFile, setIsExtractingFile] = useState(false);
   
   // Tips dismissal state (persisted in localStorage)
   const [tipsVisible, setTipsVisible] = useState(() => {
@@ -222,7 +225,7 @@ export default function ContentDNAPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setIsExtracting(true);
+    setIsExtractingFile(true);
     setStagedFile(file);
     setStagedFileText(null);
     setStagedFileError(null);
@@ -248,7 +251,7 @@ export default function ContentDNAPage() {
       setStagedFileError('Error reading file. Please try a different file.');
       setStagedFileText(null);
     } finally {
-      setIsExtracting(false);
+      setIsExtractingFile(false);
     }
   };
 
@@ -763,7 +766,7 @@ export default function ContentDNAPage() {
                             </Button>
                           </div>
                           
-                          {isExtracting ? (
+                          {isExtractingFile ? (
                             <div className="flex items-center justify-center gap-2 py-3 text-[hsl(220,14%,46%)]">
                               <Loader2 className="w-4 h-4 animate-spin" />
                               <span className="text-sm">Extracting text...</span>
@@ -828,7 +831,7 @@ export default function ContentDNAPage() {
                               type="file"
                               accept={getAcceptString()}
                               onChange={handleFileSelect}
-                              disabled={isUploading || isExtracting}
+                              disabled={isUploading || isExtractingFile}
                               className="hidden"
                             />
                           </label>
@@ -1402,6 +1405,40 @@ export default function ContentDNAPage() {
                       <FileText className="w-3 h-3" />
                       {samples.length} samples
                     </Badge>
+                    {/* Semantic Extraction Stats */}
+                    {samples.length > 0 && extractionStats.pending > 0 && (
+                      <Badge variant="outline" className="flex items-center gap-1 bg-amber-50 text-amber-700 border-amber-200">
+                        <AlertCircle className="w-3 h-3" />
+                        {extractionStats.pending} pending
+                      </Badge>
+                    )}
+                    {samples.length > 0 && extractionStats.completed > 0 && (
+                      <Badge variant="outline" className="flex items-center gap-1 bg-emerald-50 text-emerald-700 border-emerald-200">
+                        <CheckCircle2 className="w-3 h-3" />
+                        {extractionStats.completed} indexed
+                      </Badge>
+                    )}
+                    {isAdmin && samples.length > 0 && extractionStats.pending > 0 && (
+                      <Button
+                        onClick={() => extractSemantics()}
+                        disabled={isExtracting}
+                        variant="outline"
+                        size="sm"
+                        className="border-amber-300 text-amber-700 hover:bg-amber-50"
+                      >
+                        {isExtracting ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Indexing...
+                          </>
+                        ) : (
+                          <>
+                            <Zap className="w-4 h-4 mr-2" />
+                            Index for Search
+                          </>
+                        )}
+                      </Button>
+                    )}
                     {isAdmin && samples.length > 0 && (
                       <Button
                         onClick={analyzeVoice}
@@ -1416,7 +1453,7 @@ export default function ContentDNAPage() {
                         ) : (
                           <>
                             <Sparkles className="w-4 h-4 mr-2" />
-                            Re-analyze Voice
+                            Re-analyze DNA
                           </>
                         )}
                       </Button>
@@ -1456,6 +1493,30 @@ export default function ContentDNAPage() {
                                   <Badge variant={isOwnSample ? 'default' : 'secondary'} className="text-xs">
                                     {isOwnSample ? 'You' : 'Team'}
                                   </Badge>
+                                  {/* Extraction status */}
+                                  {sample.extraction_status === 'completed' ? (
+                                    <Tooltip>
+                                      <TooltipTrigger>
+                                        <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200">
+                                          <CheckCircle2 className="w-3 h-3 mr-1" />
+                                          Indexed
+                                        </Badge>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p className="max-w-xs text-xs">Searchable for DNA refinement</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  ) : sample.extraction_status === 'failed' ? (
+                                    <Badge variant="outline" className="text-xs bg-red-50 text-red-700 border-red-200">
+                                      <X className="w-3 h-3 mr-1" />
+                                      Failed
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="outline" className="text-xs bg-amber-50 text-amber-600 border-amber-200">
+                                      <Clock className="w-3 h-3 mr-1" />
+                                      Pending
+                                    </Badge>
+                                  )}
                                 </div>
                                 {sample.source_description && (
                                   <p className="text-sm text-[hsl(220,14%,46%)] mb-2">
@@ -1465,6 +1526,21 @@ export default function ContentDNAPage() {
                                 <p className="text-sm text-[hsl(220,14%,46%)] line-clamp-2">
                                   {sample.content_text?.substring(0, 200)}...
                                 </p>
+                                {/* Key themes display for indexed samples */}
+                                {sample.extraction_status === 'completed' && sample.key_themes && sample.key_themes.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 mt-2">
+                                    {sample.key_themes.slice(0, 5).map((theme, idx) => (
+                                      <Badge key={idx} variant="secondary" className="text-[10px] px-1.5 py-0 bg-blue-50 text-blue-700 border-blue-200">
+                                        {theme}
+                                      </Badge>
+                                    ))}
+                                    {sample.key_themes.length > 5 && (
+                                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                                        +{sample.key_themes.length - 5}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                )}
                                 <div className="flex items-center gap-4 mt-2 text-xs text-[hsl(220,14%,46%)]">
                                   <span className="flex items-center gap-1">
                                     <Clock className="w-3 h-3" />
@@ -1506,6 +1582,7 @@ export default function ContentDNAPage() {
                         <TableRow>
                           <TableHead className="w-[300px]">Title</TableHead>
                           <TableHead>Type</TableHead>
+                          <TableHead>Status</TableHead>
                           <TableHead>Owner</TableHead>
                           <TableHead>Date</TableHead>
                           <TableHead className="w-[80px]">Size</TableHead>
@@ -1535,6 +1612,22 @@ export default function ContentDNAPage() {
                                 <Badge variant="outline" className="text-xs whitespace-nowrap">
                                   {SAMPLE_TYPES.find(t => t.value === sample.sample_type)?.label || sample.sample_type}
                                 </Badge>
+                              </TableCell>
+                              <TableCell>
+                                {sample.extraction_status === 'completed' ? (
+                                  <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200">
+                                    <CheckCircle2 className="w-3 h-3 mr-1" />
+                                    Indexed
+                                  </Badge>
+                                ) : sample.extraction_status === 'failed' ? (
+                                  <Badge variant="outline" className="text-xs bg-red-50 text-red-700 border-red-200">
+                                    Failed
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="text-xs bg-amber-50 text-amber-600 border-amber-200">
+                                    Pending
+                                  </Badge>
+                                )}
                               </TableCell>
                               <TableCell>
                                 <Badge variant={isOwnSample ? 'default' : 'secondary'} className="text-xs">
