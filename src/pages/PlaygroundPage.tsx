@@ -333,7 +333,7 @@ const PlaygroundPage = () => {
         </div>
       </div>
       
-      <main className="flex-1 container mx-auto px-4 pb-6 flex flex-col">
+      <main className="flex-1 container mx-auto px-4 pb-6 flex flex-col min-h-0 overflow-hidden">
         {/* Context Selector */}
         <div className="flex items-center justify-between gap-2 sm:gap-4 mb-4">
           <div className="flex-1 min-w-0 overflow-x-auto">
@@ -348,7 +348,7 @@ const PlaygroundPage = () => {
         </div>
 
         {/* Main Chat Area */}
-        <Card className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative">
+        <Card className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative" style={{ maxHeight: 'calc(100vh - 320px)', minHeight: '400px' }}>
           {/* Sidebar toggle tab - visible when collapsed */}
           {!showSidebar && (
             <button
