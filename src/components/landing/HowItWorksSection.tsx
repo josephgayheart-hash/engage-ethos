@@ -7,7 +7,7 @@ const leftSteps = [
   { icon: Zap, label: "Define Your Voice" },
 ];
 
-const rightStep = { icon: Library, label: "University Library" };
+const rightStep = { icon: Library, label: "University Library & Campus Comms" };
 
 type Point = { x: number; y: number };
 
