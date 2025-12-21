@@ -60,10 +60,10 @@ export default function HowItWorksSection() {
         </div>
 
         {/* Flow diagram layout */}
-        <div className="relative flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-4">
+        <div className="relative flex items-center justify-start gap-4 overflow-x-auto pb-2 snap-x snap-mandatory">
           {/* Steps */}
           {steps.map((step, index) => (
-            <div key={step.title} className="flex items-center gap-4">
+            <div key={step.title} className="flex items-center gap-4 shrink-0 snap-start">
               {/* Card */}
               <div className="relative group">
                 {/* Animated border on hover */}
@@ -83,10 +83,10 @@ export default function HowItWorksSection() {
                 />
                 
                 {/* Card content */}
-                <div className="relative bg-[hsl(222_47%_14%)] border border-white/10 rounded-xl p-5 w-56 transition-all duration-300 group-hover:border-transparent group-hover:-translate-y-1">
+                <div className="relative bg-[hsl(222_47%_14%)] border border-white/10 rounded-xl p-5 w-56 shrink-0 transition-all duration-300 group-hover:border-transparent group-hover:-translate-y-1">
                   {/* Step number badge - positioned inside the card */}
                   <div 
-                    className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-[hsl(222_47%_11%)]"
+                    className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold leading-none text-[hsl(222_47%_11%)]"
                     style={{ background: getColor(step.color) }}
                   >
                     {index + 1}
@@ -111,10 +111,10 @@ export default function HowItWorksSection() {
                 </div>
               </div>
 
-              {/* Arrow connector - only show between cards */}
+              {/* Connector - only show between cards */}
               {index < steps.length - 1 && (
-                <div className="hidden lg:flex items-center">
-                  <div className="relative w-8 h-px">
+                <div className="flex items-center shrink-0" aria-hidden="true">
+                  <div className="relative w-10 h-px">
                     <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-white/5" />
                     {/* Animated beam */}
                     <div 
