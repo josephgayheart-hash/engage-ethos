@@ -50,6 +50,48 @@ export interface ContentDNAAnalysis {
   updated_at: string;
 }
 
+// DNA Adjustment types
+export interface VoiceDimension {
+  id: string;
+  label: string;
+  leftLabel: string;
+  rightLabel: string;
+  value: number;
+  description: string;
+}
+
+export interface SectionFeedback {
+  id: string;
+  section: string;
+  feedback: string;
+  timestamp: string;
+}
+
+export interface OverrideRule {
+  id: string;
+  type: 'always' | 'never' | 'prefer';
+  rule: string;
+}
+
+export interface DNAAdjustments {
+  dimensions: VoiceDimension[];
+  sectionFeedback: SectionFeedback[];
+  overrideRules: OverrideRule[];
+}
+
+export interface ContentDNAAdjustmentsRecord {
+  id: string;
+  content_dna_id: string;
+  tenant_id: string;
+  profile_id: string | null;
+  dimensions: VoiceDimension[];
+  section_feedback: SectionFeedback[];
+  override_rules: OverrideRule[];
+  created_at: string;
+  updated_at: string;
+  updated_by_user_id: string | null;
+}
+
 // Re-export brand platform types
 export type { BrandPlatform, BrandPillar, BrandPathway };
 
@@ -63,10 +105,12 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
   const { toast } = useToast();
   const [samples, setSamples] = useState<ContentDNASample[]>([]);
   const [analysis, setAnalysis] = useState<ContentDNAAnalysis | null>(null);
+  const [adjustments, setAdjustments] = useState<ContentDNAAdjustmentsRecord | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isExtracting, setIsExtracting] = useState(false);
+  const [isSavingAdjustments, setIsSavingAdjustments] = useState(false);
 
   const fetchSamples = useCallback(async () => {
     if (!tenant?.id) return;
@@ -130,6 +174,33 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
     }
   }, [tenant?.id, profileId]);
 
+  const fetchAdjustments = useCallback(async () => {
+    if (!tenant?.id || !analysis?.id) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('content_dna_adjustments')
+        .select('*')
+        .eq('content_dna_id', analysis.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      
+      if (data) {
+        setAdjustments({
+          ...data,
+          dimensions: (data.dimensions as unknown as VoiceDimension[]) || [],
+          section_feedback: (data.section_feedback as unknown as SectionFeedback[]) || [],
+          override_rules: (data.override_rules as unknown as OverrideRule[]) || [],
+        } as ContentDNAAdjustmentsRecord);
+      } else {
+        setAdjustments(null);
+      }
+    } catch (error: any) {
+      console.error('Error fetching adjustments:', error);
+    }
+  }, [tenant?.id, analysis?.id]);
+
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true);
@@ -139,6 +210,13 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
     
     loadData();
   }, [fetchSamples, fetchAnalysis]);
+
+  // Fetch adjustments when analysis is loaded
+  useEffect(() => {
+    if (analysis?.id) {
+      fetchAdjustments();
+    }
+  }, [analysis?.id, fetchAdjustments]);
 
   const addSample = async (
     content: string,
@@ -513,6 +591,82 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
     }
   };
 
+  // Save DNA adjustments (sliders, feedback, rules)
+  const saveAdjustments = async (newAdjustments: DNAAdjustments) => {
+    if (!tenant?.id || !analysis?.id || !profile?.id) {
+      toast({
+        title: 'Error',
+        description: 'You must have an analyzed Content DNA to save adjustments',
+        variant: 'destructive',
+      });
+      return null;
+    }
+
+    setIsSavingAdjustments(true);
+    try {
+      const adjustmentData = {
+        content_dna_id: analysis.id,
+        tenant_id: tenant.id,
+        profile_id: profileId || null,
+        dimensions: newAdjustments.dimensions as unknown as any,
+        section_feedback: newAdjustments.sectionFeedback as unknown as any,
+        override_rules: newAdjustments.overrideRules as unknown as any,
+        updated_by_user_id: profile.id,
+      };
+
+      if (adjustments?.id) {
+        // Update existing
+        const { data, error } = await supabase
+          .from('content_dna_adjustments')
+          .update(adjustmentData)
+          .eq('id', adjustments.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        setAdjustments({
+          ...data,
+          dimensions: (data.dimensions as unknown as VoiceDimension[]) || [],
+          section_feedback: (data.section_feedback as unknown as SectionFeedback[]) || [],
+          override_rules: (data.override_rules as unknown as OverrideRule[]) || [],
+        } as ContentDNAAdjustmentsRecord);
+      } else {
+        // Insert new
+        const { data, error } = await supabase
+          .from('content_dna_adjustments')
+          .insert(adjustmentData)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        setAdjustments({
+          ...data,
+          dimensions: (data.dimensions as unknown as VoiceDimension[]) || [],
+          section_feedback: (data.section_feedback as unknown as SectionFeedback[]) || [],
+          override_rules: (data.override_rules as unknown as OverrideRule[]) || [],
+        } as ContentDNAAdjustmentsRecord);
+      }
+
+      toast({
+        title: 'Adjustments Saved',
+        description: 'Your DNA tuning adjustments have been saved and will be applied to future message generation.',
+      });
+      return adjustments;
+    } catch (error: any) {
+      console.error('Error saving adjustments:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to save adjustments',
+        variant: 'destructive',
+      });
+      return null;
+    } finally {
+      setIsSavingAdjustments(false);
+    }
+  };
+
   // Get extraction stats
   const extractionStats = {
     total: samples.length,
@@ -524,10 +678,12 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
   return {
     samples,
     analysis,
+    adjustments,
     isLoading,
     isAnalyzing,
     isSaving,
     isExtracting,
+    isSavingAdjustments,
     extractionStats,
     addSample,
     deleteSample,
@@ -537,6 +693,7 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
     resetContentDNA,
     extractSemantics,
     searchSamples,
+    saveAdjustments,
     refetch: async () => {
       await Promise.all([fetchSamples(), fetchAnalysis()]);
     }

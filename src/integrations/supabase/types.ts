@@ -158,6 +158,67 @@ export type Database = {
           },
         ]
       }
+      content_dna_adjustments: {
+        Row: {
+          content_dna_id: string
+          created_at: string
+          dimensions: Json
+          id: string
+          override_rules: Json
+          profile_id: string | null
+          section_feedback: Json
+          tenant_id: string
+          updated_at: string
+          updated_by_user_id: string | null
+        }
+        Insert: {
+          content_dna_id: string
+          created_at?: string
+          dimensions?: Json
+          id?: string
+          override_rules?: Json
+          profile_id?: string | null
+          section_feedback?: Json
+          tenant_id: string
+          updated_at?: string
+          updated_by_user_id?: string | null
+        }
+        Update: {
+          content_dna_id?: string
+          created_at?: string
+          dimensions?: Json
+          id?: string
+          override_rules?: Json
+          profile_id?: string | null
+          section_feedback?: Json
+          tenant_id?: string
+          updated_at?: string
+          updated_by_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_dna_adjustments_content_dna_id_fkey"
+            columns: ["content_dna_id"]
+            isOneToOne: false
+            referencedRelation: "content_dna_analysis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_dna_adjustments_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "institutional_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_dna_adjustments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_dna_analysis: {
         Row: {
           brand_platform: Json | null

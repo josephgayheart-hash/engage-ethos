@@ -2,6 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import type { BrandPlatform } from '@/types/uplaybook';
+import type { VoiceDimension, SectionFeedback, OverrideRule } from '@/hooks/useContentDNA';
+
+export interface DNAAdjustmentsForGeneration {
+  dimensions: VoiceDimension[];
+  sectionFeedback: SectionFeedback[];
+  overrideRules: OverrideRule[];
+}
 
 export interface ContentDNAForGeneration {
   voiceAnalysis: {
@@ -17,6 +24,7 @@ export interface ContentDNAForGeneration {
   } | null;
   brandPlatform: BrandPlatform | null;
   customInstructions: string | null;
+  dnaAdjustments: DNAAdjustmentsForGeneration | null;
   sourceProfileId?: string | null;
   sourceProfileName?: string | null;
 }
@@ -53,12 +61,30 @@ export function useContentDNAForGeneration(options: UseContentDNAForGenerationOp
     setIsLoading(true);
     
     try {
+      // Helper to fetch adjustments for a given DNA id
+      const fetchAdjustments = async (dnaId: string): Promise<DNAAdjustmentsForGeneration | null> => {
+        const { data } = await supabase
+          .from('content_dna_adjustments')
+          .select('dimensions, section_feedback, override_rules')
+          .eq('content_dna_id', dnaId)
+          .maybeSingle();
+        
+        if (data) {
+          return {
+            dimensions: (data.dimensions as unknown as VoiceDimension[]) || [],
+            sectionFeedback: (data.section_feedback as unknown as SectionFeedback[]) || [],
+            overrideRules: (data.override_rules as unknown as OverrideRule[]) || [],
+          };
+        }
+        return null;
+      };
+
       // If a profileId is specified, look for that specific profile's DNA
       if (profileId) {
         // First, try to get the selected profile's DNA
         const { data, error } = await supabase
           .from('content_dna_analysis')
-          .select('voice_analysis, brand_platform, custom_instructions')
+          .select('id, voice_analysis, brand_platform, custom_instructions')
           .eq('tenant_id', tenant.id)
           .eq('profile_id', profileId)
           .maybeSingle();
@@ -70,10 +96,12 @@ export function useContentDNAForGeneration(options: UseContentDNAForGenerationOp
         }
         
         if (data) {
+          const adjustments = await fetchAdjustments(data.id);
           setContentDNA({
             voiceAnalysis: data.voice_analysis as ContentDNAForGeneration['voiceAnalysis'],
             brandPlatform: data.brand_platform as unknown as BrandPlatform | null,
             customInstructions: data.custom_instructions,
+            dnaAdjustments: adjustments,
             sourceProfileId: profileId,
           });
           return;
@@ -90,7 +118,7 @@ export function useContentDNAForGeneration(options: UseContentDNAForGenerationOp
           // Try to get parent profile's DNA
           const { data: parentDNA } = await supabase
             .from('content_dna_analysis')
-            .select('voice_analysis, brand_platform, custom_instructions')
+            .select('id, voice_analysis, brand_platform, custom_instructions')
             .eq('tenant_id', tenant.id)
             .eq('profile_id', profileData.parent_profile_id)
             .maybeSingle();
@@ -103,10 +131,12 @@ export function useContentDNAForGeneration(options: UseContentDNAForGenerationOp
               .eq('id', profileData.parent_profile_id)
               .single();
 
+            const adjustments = await fetchAdjustments(parentDNA.id);
             setContentDNA({
               voiceAnalysis: parentDNA.voice_analysis as ContentDNAForGeneration['voiceAnalysis'],
               brandPlatform: parentDNA.brand_platform as unknown as BrandPlatform | null,
               customInstructions: parentDNA.custom_instructions,
+              dnaAdjustments: adjustments,
               sourceProfileId: profileData.parent_profile_id,
               sourceProfileName: parentProfile?.name || null,
             });
@@ -121,7 +151,7 @@ export function useContentDNAForGeneration(options: UseContentDNAForGenerationOp
         // No profile selected - get tenant-level DNA
         const { data, error } = await supabase
           .from('content_dna_analysis')
-          .select('voice_analysis, brand_platform, custom_instructions')
+          .select('id, voice_analysis, brand_platform, custom_instructions')
           .eq('tenant_id', tenant.id)
           .is('profile_id', null)
           .maybeSingle();
@@ -130,10 +160,12 @@ export function useContentDNAForGeneration(options: UseContentDNAForGenerationOp
           console.error('Error fetching Content DNA:', error);
           setContentDNA(null);
         } else if (data) {
+          const adjustments = await fetchAdjustments(data.id);
           setContentDNA({
             voiceAnalysis: data.voice_analysis as ContentDNAForGeneration['voiceAnalysis'],
             brandPlatform: data.brand_platform as unknown as BrandPlatform | null,
             customInstructions: data.custom_instructions,
+            dnaAdjustments: adjustments,
             sourceProfileId: null,
           });
         } else {

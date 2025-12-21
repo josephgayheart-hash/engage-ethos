@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -21,40 +21,22 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
-
-interface VoiceDimension {
-  id: string;
-  label: string;
-  leftLabel: string;
-  rightLabel: string;
-  value: number;
-  description: string;
-}
-
-interface SectionFeedback {
-  id: string;
-  section: string;
-  feedback: string;
-  timestamp: string;
-}
-
-interface OverrideRule {
-  id: string;
-  type: 'always' | 'never' | 'prefer';
-  rule: string;
-}
+import type { 
+  VoiceDimension, 
+  SectionFeedback, 
+  OverrideRule, 
+  DNAAdjustments,
+  ContentDNAAdjustmentsRecord 
+} from '@/hooks/useContentDNA';
 
 interface DNATuningControlsProps {
   voiceAnalysis: any;
+  existingAdjustments?: ContentDNAAdjustmentsRecord | null;
   onSave?: (adjustments: DNAAdjustments) => void;
   isLoading?: boolean;
 }
 
-export interface DNAAdjustments {
-  dimensions: VoiceDimension[];
-  sectionFeedback: SectionFeedback[];
-  overrideRules: OverrideRule[];
-}
+export type { DNAAdjustments };
 
 const DEFAULT_DIMENSIONS: VoiceDimension[] = [
   {
@@ -107,7 +89,7 @@ const VOICE_SECTIONS = [
   { id: 'openings', label: 'Openings & Closings', description: 'How messages begin and end' },
 ];
 
-export function DNATuningControls({ voiceAnalysis, onSave, isLoading }: DNATuningControlsProps) {
+export function DNATuningControls({ voiceAnalysis, existingAdjustments, onSave, isLoading }: DNATuningControlsProps) {
   const [activeTab, setActiveTab] = useState('sliders');
   const [dimensions, setDimensions] = useState<VoiceDimension[]>(DEFAULT_DIMENSIONS);
   const [sectionFeedback, setSectionFeedback] = useState<SectionFeedback[]>([]);
@@ -116,6 +98,27 @@ export function DNATuningControls({ voiceAnalysis, onSave, isLoading }: DNATunin
   const [feedbackInput, setFeedbackInput] = useState('');
   const [newRuleInput, setNewRuleInput] = useState('');
   const [newRuleType, setNewRuleType] = useState<'always' | 'never' | 'prefer'>('always');
+
+  // Load existing adjustments when available
+  useEffect(() => {
+    if (existingAdjustments) {
+      // Merge saved dimensions with defaults (in case new dimensions were added)
+      if (existingAdjustments.dimensions?.length > 0) {
+        setDimensions(prev => 
+          prev.map(d => {
+            const saved = existingAdjustments.dimensions.find(sd => sd.id === d.id);
+            return saved ? { ...d, value: saved.value } : d;
+          })
+        );
+      }
+      if (existingAdjustments.section_feedback?.length > 0) {
+        setSectionFeedback(existingAdjustments.section_feedback);
+      }
+      if (existingAdjustments.override_rules?.length > 0) {
+        setOverrideRules(existingAdjustments.override_rules);
+      }
+    }
+  }, [existingAdjustments]);
 
   // Handle slider changes
   const handleDimensionChange = (id: string, value: number[]) => {
