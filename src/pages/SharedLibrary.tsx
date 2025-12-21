@@ -16,6 +16,7 @@ import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { useAuth } from "@/contexts/AuthContext";
 import { CreateTemplateDialog } from "@/components/library/CreateTemplateDialog";
 import { AdminApprovalPanel } from "@/components/library/AdminApprovalPanel";
+import { SourceBadge } from "@/components/library/SourceBadge";
 import type { SharedTemplate, LibraryFilters, LibraryEntryStatus } from "@/types/library";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -346,9 +347,9 @@ const SharedLibrary = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Title</TableHead>
+                        <TableHead>Source</TableHead>
                         <TableHead>Playbook</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Owner</TableHead>
                         <TableHead>Updated</TableHead>
                         <TableHead>Version</TableHead>
                       </TableRow>
@@ -363,11 +364,13 @@ const SharedLibrary = () => {
                           <TableCell>
                             <span className="font-medium truncate max-w-[200px] block">{template.title}</span>
                           </TableCell>
+                          <TableCell>
+                            <SourceBadge source={template.source} />
+                          </TableCell>
                           <TableCell>{template.playbook || '-'}</TableCell>
                           <TableCell>
                             <StatusBadge status={template.status} />
                           </TableCell>
-                          <TableCell className="text-muted-foreground">{template.owner}</TableCell>
                           <TableCell className="text-muted-foreground">
                             {new Date(template.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                           </TableCell>
@@ -400,6 +403,7 @@ const SharedLibrary = () => {
                           {template.intentStatement}
                         </p>
                         <div className="flex flex-wrap gap-2 mb-4">
+                          {template.source && <SourceBadge source={template.source} />}
                           {template.requiredFields.audience.slice(0, 2).map(a => (
                             <Badge key={a} variant="secondary" className="text-xs">{a}</Badge>
                           ))}

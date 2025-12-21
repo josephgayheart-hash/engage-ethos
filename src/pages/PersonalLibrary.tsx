@@ -14,6 +14,7 @@ import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { useAuth } from "@/contexts/AuthContext";
 import { CreateTemplateDialog } from "@/components/library/CreateTemplateDialog";
+import { SourceBadge } from "@/components/library/SourceBadge";
 import type { SavedMessage, LibraryFilters, SortOption } from "@/types/library";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { 
@@ -324,9 +325,9 @@ const PersonalLibrary = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Title</TableHead>
+                    <TableHead>Source</TableHead>
                     <TableHead>Channel</TableHead>
                     <TableHead>Audience</TableHead>
-                    <TableHead>Moment</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -348,9 +349,11 @@ const PersonalLibrary = () => {
                           )}
                         </div>
                       </TableCell>
+                      <TableCell>
+                        <SourceBadge source={message.source} />
+                      </TableCell>
                       <TableCell className="capitalize">{message.channel}</TableCell>
                       <TableCell>{message.audience}</TableCell>
-                      <TableCell>{message.moment}</TableCell>
                       <TableCell className="text-muted-foreground">
                         {new Date(message.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </TableCell>
@@ -404,6 +407,7 @@ const PersonalLibrary = () => {
                           {message.content}
                         </p>
                         <div className="flex flex-wrap gap-2">
+                          {message.source && <SourceBadge source={message.source} />}
                           <Badge variant="secondary">{message.audience}</Badge>
                           <Badge variant="outline">{message.moment}</Badge>
                           {message.domain && <Badge variant="outline">{message.domain}</Badge>}
