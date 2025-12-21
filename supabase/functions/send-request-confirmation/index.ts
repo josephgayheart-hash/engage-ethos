@@ -33,7 +33,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Sending request confirmation email to ${email}`);
 
-    const subject = "UPlaybook.AI - Access Request Received";
+    const subject = "CampusVoice.AI - Access Request Received";
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -69,7 +69,7 @@ const handler = async (req: Request): Promise<Response> => {
         </style>
       </head>
       <body class="body" style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
-        <div style="display: none; max-height: 0; overflow: hidden;">Your UPlaybook.AI access request has been received</div>
+        <div style="display: none; max-height: 0; overflow: hidden;">Your CampusVoice.AI access request has been received</div>
         <table class="body-wrapper" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc !important; padding: 40px 20px;" bgcolor="#f8fafc">
           <tr>
             <td align="center">
@@ -80,7 +80,7 @@ const handler = async (req: Request): Promise<Response> => {
                     <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;" bgcolor="#1a2036">
                       <tr>
                         <td style="background-color: #ffffff !important; padding: 16px 20px; border-radius: 10px;" bgcolor="#ffffff">
-                          <img class="logo-img" src="https://uplaybook.ai/uplaybook-logo.png" alt="UPlaybook.AI" style="height: 50px; width: auto; display: block; background-color: #ffffff !important;" />
+                          <img class="logo-img" src="https://uplaybook.ai/uplaybook-logo.png" alt="CampusVoice.AI" style="height: 50px; width: auto; display: block; background-color: #ffffff !important;" />
                         </td>
                       </tr>
                     </table>
@@ -94,7 +94,7 @@ const handler = async (req: Request): Promise<Response> => {
                   <td style="padding: 40px; background-color: #ffffff !important;" bgcolor="#ffffff">
                     <h2 style="margin: 0 0 16px 0; color: #1e293b !important; font-size: 24px; font-weight: 600; background-color: #ffffff !important;" bgcolor="#ffffff">Hi ${firstName},</h2>
                     <p style="margin: 0 0 24px 0; color: #475569 !important; font-size: 16px; line-height: 1.6; background-color: #ffffff !important;" bgcolor="#ffffff">
-                      Thank you for your interest in <strong style="color: #1e293b !important;">UPlaybook.AI</strong>! We've received your access request for <strong style="color: #1e293b !important;">${institutionName}</strong>.
+                      Thank you for your interest in <strong style="color: #1e293b !important;">CampusVoice.AI</strong>! We've received your access request for <strong style="color: #1e293b !important;">${institutionName}</strong>.
                     </p>
                     
                     <!-- Status Box -->
@@ -138,7 +138,7 @@ const handler = async (req: Request): Promise<Response> => {
                       Thank you for your patience!
                     </p>
                     <p style="margin: 0; color: #94a3b8 !important; font-size: 12px; text-align: center; background-color: #f8fafc !important;" bgcolor="#f8fafc">
-                      — The UPlaybook.AI Team
+                      — The CampusVoice.AI Team
                     </p>
                   </td>
                 </tr>
@@ -146,7 +146,7 @@ const handler = async (req: Request): Promise<Response> => {
               
               <!-- Sub-footer -->
               <p style="margin: 24px 0 0 0; color: #94a3b8 !important; font-size: 12px; text-align: center; background-color: #f8fafc !important;" bgcolor="#f8fafc">
-                This email was sent by UPlaybook.AI. If you didn't submit this request, please disregard this message.
+                This email was sent by CampusVoice.AI. If you didn't submit this request, please disregard this message.
               </p>
             </td>
           </tr>
@@ -163,7 +163,7 @@ const handler = async (req: Request): Promise<Response> => {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "UPlaybook.AI <noreply@uplaybook.ai>",
+        from: "CampusVoice.AI <noreply@uplaybook.ai>",
         to: [email],
         subject,
         html: htmlContent,

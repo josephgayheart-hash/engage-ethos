@@ -96,7 +96,7 @@ export default function EvaluateFeaturePage() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link to="/" className="flex items-center gap-2">
-              <img src={uplaybookLogo} alt="UPlaybook" className="h-8" />
+              <img src={uplaybookLogo} alt="CampusVoice" className="h-8" />
             </Link>
           </div>
           <div className="flex items-center gap-3">
@@ -392,9 +392,9 @@ export default function EvaluateFeaturePage() {
       {/* Footer */}
       <footer className="py-8 border-t border-border">
         <div className="container mx-auto px-4 text-center">
-          <img src={uplaybookLogo} alt="UPlaybook" className="h-6 mx-auto mb-4 opacity-60" />
+          <img src={uplaybookLogo} alt="CampusVoice" className="h-6 mx-auto mb-4 opacity-60" />
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} UPlaybook. All rights reserved.
+            © {new Date().getFullYear()} CampusVoice. All rights reserved.
           </p>
         </div>
       </footer>

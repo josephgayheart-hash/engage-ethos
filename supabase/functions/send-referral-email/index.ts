@@ -51,7 +51,7 @@ const getSameInstitutionHtml = (
               <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                 <tr>
                   <td style="background-color: #ffffff; padding: 12px 16px; border-radius: 8px;">
-                    <img src="https://uplaybook.ai/uplaybook-logo.png" alt="UPlaybook.AI" style="height: 40px; width: auto;" />
+                    <img src="https://uplaybook.ai/uplaybook-logo.png" alt="CampusVoice.AI" style="height: 40px; width: auto;" />
                   </td>
                 </tr>
               </table>
@@ -64,7 +64,7 @@ const getSameInstitutionHtml = (
             <td style="padding: 40px; background-color: #ffffff;">
               <p style="margin: 0 0 20px 0; color: #1e293b; font-size: 18px; font-weight: 600;">Hi ${refereeName},</p>
               <p style="margin: 0 0 24px 0; color: #475569; font-size: 16px; line-height: 1.6;">
-                Great news! <strong style="color: #1e293b;">${referrerName}</strong> has invited you to join the <strong style="color: #1e293b;">${institutionName}</strong> team on <strong style="color: #1e293b;">UPlaybook.AI</strong>.
+                Great news! <strong style="color: #1e293b;">${referrerName}</strong> has invited you to join the <strong style="color: #1e293b;">${institutionName}</strong> team on <strong style="color: #1e293b;">CampusVoice.AI</strong>.
               </p>
               
               ${personalMessage ? `
@@ -76,7 +76,7 @@ const getSameInstitutionHtml = (
               
               <!-- What you can do box -->
               <div style="background-color: #eff6ff; border-radius: 8px; padding: 24px; margin: 24px 0; border-left: 4px solid #3b82f6;">
-                <h3 style="margin: 0 0 16px 0; color: #1e40af; font-size: 16px; font-weight: 600;">What is UPlaybook.AI?</h3>
+                <h3 style="margin: 0 0 16px 0; color: #1e40af; font-size: 16px; font-weight: 600;">What is CampusVoice.AI?</h3>
                 <table cellpadding="0" cellspacing="0" width="100%">
                   <tr>
                     <td style="padding: 8px 0; color: #1e40af; font-size: 15px;">✨ <strong>AI-powered message creation</strong> for emails, texts, and more</td>
@@ -109,7 +109,7 @@ const getSameInstitutionHtml = (
           <!-- Footer -->
           <tr>
             <td style="background-color: #f8fafc; padding: 24px 40px; border-top: 1px solid #e2e8f0; text-align: center;">
-              <p style="margin: 0; color: #94a3b8; font-size: 12px;">— The UPlaybook.AI Team</p>
+              <p style="margin: 0; color: #94a3b8; font-size: 12px;">— The CampusVoice.AI Team</p>
             </td>
           </tr>
         </table>
@@ -148,7 +148,7 @@ const getOtherInstitutionHtml = (
               <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                 <tr>
                   <td style="background-color: #ffffff; padding: 12px 16px; border-radius: 8px;">
-                    <img src="https://uplaybook.ai/uplaybook-logo.png" alt="UPlaybook.AI" style="height: 40px; width: auto;" />
+                    <img src="https://uplaybook.ai/uplaybook-logo.png" alt="CampusVoice.AI" style="height: 40px; width: auto;" />
                   </td>
                 </tr>
               </table>
@@ -161,7 +161,7 @@ const getOtherInstitutionHtml = (
             <td style="padding: 40px; background-color: #ffffff;">
               <p style="margin: 0 0 20px 0; color: #1e293b; font-size: 18px; font-weight: 600;">Hi ${refereeName},</p>
               <p style="margin: 0 0 24px 0; color: #475569; font-size: 16px; line-height: 1.6;">
-                Your colleague <strong style="color: #1e293b;">${referrerName}</strong> from <strong style="color: #1e293b;">${referrerInstitution}</strong> thinks you and <strong style="color: #1e293b;">${refereeInstitution}</strong> would love <strong style="color: #1e293b;">UPlaybook.AI</strong>!
+                Your colleague <strong style="color: #1e293b;">${referrerName}</strong> from <strong style="color: #1e293b;">${referrerInstitution}</strong> thinks you and <strong style="color: #1e293b;">${refereeInstitution}</strong> would love <strong style="color: #1e293b;">CampusVoice.AI</strong>!
               </p>
               
               ${personalMessage ? `
@@ -173,7 +173,7 @@ const getOtherInstitutionHtml = (
               
               <!-- What you can do box -->
               <div style="background-color: #eff6ff; border-radius: 8px; padding: 24px; margin: 24px 0; border-left: 4px solid #3b82f6;">
-                <h3 style="margin: 0 0 16px 0; color: #1e40af; font-size: 16px; font-weight: 600;">What is UPlaybook.AI?</h3>
+                <h3 style="margin: 0 0 16px 0; color: #1e40af; font-size: 16px; font-weight: 600;">What is CampusVoice.AI?</h3>
                 <table cellpadding="0" cellspacing="0" width="100%">
                   <tr>
                     <td style="padding: 8px 0; color: #1e40af; font-size: 15px;">✨ <strong>AI-powered message creation</strong> for emails, texts, and more</td>
@@ -206,7 +206,7 @@ const getOtherInstitutionHtml = (
           <!-- Footer -->
           <tr>
             <td style="background-color: #f8fafc; padding: 24px 40px; border-top: 1px solid #e2e8f0; text-align: center;">
-              <p style="margin: 0; color: #94a3b8; font-size: 12px;">— The UPlaybook.AI Team</p>
+              <p style="margin: 0; color: #94a3b8; font-size: 12px;">— The CampusVoice.AI Team</p>
             </td>
           </tr>
         </table>
@@ -231,7 +231,7 @@ const handler = async (req: Request): Promise<Response> => {
     let subject: string;
 
     if (data.referralType === "same_institution") {
-      subject = `${data.referrerName} invited you to join ${data.institutionName} on UPlaybook.AI`;
+      subject = `${data.referrerName} invited you to join ${data.institutionName} on CampusVoice.AI`;
       emailHtml = getSameInstitutionHtml(
         data.refereeName,
         data.referrerName,
@@ -240,7 +240,7 @@ const handler = async (req: Request): Promise<Response> => {
         data.personalMessage
       );
     } else {
-      subject = `${data.referrerName} thinks you'd love UPlaybook.AI!`;
+      subject = `${data.referrerName} thinks you'd love CampusVoice.AI!`;
       emailHtml = getOtherInstitutionHtml(
         data.refereeName,
         data.referrerName,
@@ -257,7 +257,7 @@ const handler = async (req: Request): Promise<Response> => {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "UPlaybook.AI <noreply@uplaybook.ai>",
+        from: "CampusVoice.AI <noreply@uplaybook.ai>",
         to: [data.refereeEmail],
         subject,
         html: emailHtml,

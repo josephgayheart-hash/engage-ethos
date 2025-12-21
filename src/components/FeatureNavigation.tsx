@@ -77,7 +77,7 @@ export function FeatureNavigation({ currentFeatureId }: FeatureNavigationProps) 
               Explore More Features
             </h2>
             <p className="text-muted-foreground">
-              Discover the complete UPlaybook toolkit for higher ed communications.
+              Discover the complete CampusVoice toolkit for higher ed communications.
             </p>
           </div>
 
