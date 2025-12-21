@@ -114,19 +114,19 @@ export default function HowItWorksSection() {
               {/* Connector - only show between cards */}
               {index < steps.length - 1 && (
                 <div className="flex items-center shrink-0" aria-hidden="true">
-                  <div className="relative w-10 h-px">
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-black/5" />
+                  <div className="relative w-12 h-1 rounded-full overflow-hidden">
+                    <div className="absolute inset-0 bg-[hsl(270_70%_60%_/_0.3)]" />
                     {/* Animated beam */}
                     <div 
-                      className="absolute top-0 left-0 w-4 h-px bg-gradient-to-r from-transparent via-[hsl(82_60%_40%)] to-transparent"
+                      className="absolute top-0 left-0 w-6 h-full bg-gradient-to-r from-[hsl(270_70%_60%)] via-[hsl(82_85%_50%)] to-[hsl(270_70%_60%)]"
                       style={{
-                        animation: 'beam-travel 2s linear infinite',
-                        animationDelay: `${index * 0.5}s`,
+                        animation: 'beam-travel 1.5s ease-in-out infinite',
+                        animationDelay: `${index * 0.4}s`,
                       }}
                     />
                   </div>
-                  <svg className="w-3 h-3 text-black/30" viewBox="0 0 12 12" fill="currentColor">
-                    <path d="M2 6L9 6M9 6L6 3M9 6L6 9" stroke="currentColor" strokeWidth="1.5" fill="none" />
+                  <svg className="w-4 h-4 text-[hsl(82_85%_45%)]" viewBox="0 0 12 12" fill="currentColor">
+                    <path d="M2 6L9 6M9 6L6 3M9 6L6 9" stroke="currentColor" strokeWidth="2" fill="none" />
                   </svg>
                 </div>
               )}
