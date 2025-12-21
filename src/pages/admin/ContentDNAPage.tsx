@@ -933,16 +933,29 @@ export default function ContentDNAPage() {
             )}
           </TabsContent>
 
-          {/* Voice Analysis Tab */}
+          {/* Voice Profile Tab */}
           <TabsContent value="analysis">
             {analysis?.voice_analysis ? (
               <div className="space-y-6">
-                {/* Header with Re-analyze Button */}
+                {/* Header with Unified Analysis Indicator */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-bold text-foreground">Voice Analysis</h2>
-                    <p className="text-sm text-muted-foreground">
-                      Based on {analysis.sample_count} samples • Analyzed {analysis.last_analyzed_at ? formatDate(analysis.last_analyzed_at) : 'recently'}
+                    <div className="flex items-center gap-3 mb-1">
+                      <h2 className="text-xl font-bold text-foreground">Voice Profile</h2>
+                      <Badge variant="outline" className="bg-gradient-to-r from-emerald-50 to-blue-50 border-emerald-200 text-emerald-700 text-xs">
+                        <Sparkles className="w-3 h-3 mr-1" />
+                        Unified Analysis
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground flex items-center gap-2">
+                      <span>Based on {analysis.sample_count} samples</span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {analysis.last_analyzed_at ? formatDate(analysis.last_analyzed_at) : 'recently'}
+                      </span>
+                      <span>•</span>
+                      <span className="text-emerald-600">Analyzed with Brand Platform</span>
                     </p>
                   </div>
                   {isAdmin && (
@@ -959,7 +972,7 @@ export default function ContentDNAPage() {
                       ) : (
                         <>
                           <RefreshCw className="w-4 h-4 mr-2" />
-                          Re-analyze Voice
+                          Re-analyze DNA
                         </>
                       )}
                     </Button>
@@ -1099,15 +1112,25 @@ export default function ContentDNAPage() {
           <TabsContent value="brand-platform">
             {analysis?.brand_platform ? (
               <div className="space-y-6">
-                {/* Header with Re-analyze Button */}
+                {/* Header with Unified Analysis Indicator */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-bold text-foreground">Brand Platform</h2>
-                    <p className="text-sm text-muted-foreground">
-                      Brand pillars, promise, and proof points extracted from your content
-                      {analysis.last_analyzed_at && (
-                        <span className="ml-2">• Updated {new Date(analysis.last_analyzed_at).toLocaleDateString()}</span>
-                      )}
+                    <div className="flex items-center gap-3 mb-1">
+                      <h2 className="text-xl font-bold text-foreground">Brand Platform</h2>
+                      <Badge variant="outline" className="bg-gradient-to-r from-blue-50 to-emerald-50 border-blue-200 text-blue-700 text-xs">
+                        <Sparkles className="w-3 h-3 mr-1" />
+                        Unified Analysis
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground flex items-center gap-2">
+                      <span>Brand pillars, promise, and proof points</span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {analysis.last_analyzed_at ? formatDate(analysis.last_analyzed_at) : 'recently'}
+                      </span>
+                      <span>•</span>
+                      <span className="text-blue-600">Analyzed with Voice Profile</span>
                     </p>
                   </div>
                   {isAdmin && (
@@ -1124,7 +1147,7 @@ export default function ContentDNAPage() {
                       ) : (
                         <>
                           <RefreshCw className="w-4 h-4 mr-2" />
-                          Re-extract Platform
+                          Re-analyze DNA
                         </>
                       )}
                     </Button>
