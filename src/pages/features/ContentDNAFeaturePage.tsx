@@ -16,10 +16,12 @@ import {
   Target,
   BookOpen,
   Zap,
-  ArrowRight
+  ArrowRight,
+  Workflow
 } from "lucide-react";
 import campusvoiceLogo from "@/assets/campusvoice-logo.png";
 import { FeatureNavigation } from "@/components/FeatureNavigation";
+import DNATuningDiagram from "@/components/DNATuningDiagram";
 
 const capabilities = [
   {
@@ -254,6 +256,35 @@ export default function ContentDNAFeaturePage() {
                 <p className="text-sm text-muted-foreground">{cap.description}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Content DNA Workflow */}
+      <section className="py-16 bg-[hsl(270_60%_97%)] relative overflow-hidden">
+        {/* Lens flares */}
+        <div className="absolute top-8 left-[15%] w-32 h-32 bg-[hsl(270_70%_60%_/_0.12)] rounded-full blur-2xl" />
+        <div className="absolute bottom-12 right-[10%] w-40 h-40 bg-[hsl(173_58%_39%_/_0.1)] rounded-full blur-3xl" />
+        <div className="absolute top-1/2 right-[30%] w-24 h-24 bg-[hsl(45_93%_47%_/_0.08)] rounded-full blur-2xl" />
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-8">
+              <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
+                <Workflow className="w-3 h-3 mr-1" />
+                End-to-End Workflow
+              </Badge>
+              <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">
+                From Samples to On-Brand Content
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                See how Content DNA transforms your uploaded samples into perfectly tuned AI-generated messages through our intelligent workflow.
+              </p>
+            </div>
+            
+            <div className="bg-card rounded-2xl border border-border p-6 md:p-8 shadow-xl">
+              <DNATuningDiagram />
+            </div>
           </div>
         </div>
       </section>
