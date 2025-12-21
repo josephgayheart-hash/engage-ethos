@@ -336,6 +336,7 @@ const TemplateDetailPage = () => {
       moment: template.requiredFields.moment[0] as any,
       approved: false,
       mode: 'generated',
+      source: 'import',
       createdByUserId: profile?.id,
       createdByName: profile ? `${profile.first_name} ${profile.last_name}` : undefined,
     });

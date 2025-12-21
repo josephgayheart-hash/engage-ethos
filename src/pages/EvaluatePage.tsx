@@ -67,6 +67,7 @@ const EvaluatePage = () => {
           tone: context.tone,
           approved: false,
           mode: 'evaluated',
+          source: 'evaluate',
           institutionalProfileId: selectedProfileId || undefined,
           institutionalProfileName: selectedProfileName,
           createdByUserId: profile?.id,

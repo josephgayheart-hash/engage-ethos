@@ -148,6 +148,7 @@ const BYOCPage = () => {
       tone: context.tone,
       approved: false,
       mode: 'evaluated',
+      source: 'byoc',
       notes: customTags.length > 0 ? `Tags: ${customTags.join(', ')}` : undefined,
       createdByUserId: profile?.id,
       createdByName: profile ? `${profile.first_name} ${profile.last_name}` : undefined,
