@@ -40,7 +40,7 @@ const getColor = (color: string) => {
 
 export default function HowItWorksSection() {
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(173_40%_92%)] relative overflow-visible">
+    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(220_40%_88%)] relative overflow-visible">
       {/* Background glow effects */}
       <div className="absolute top-1/4 left-0 w-96 h-96 bg-[hsl(270_70%_60%_/_0.08)] rounded-full blur-3xl" />
       <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-[hsl(82_85%_55%_/_0.08)] rounded-full blur-3xl" />
