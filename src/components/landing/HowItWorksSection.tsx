@@ -59,80 +59,154 @@ export default function HowItWorksSection() {
           </p>
         </div>
 
-        {/* Flow diagram layout */}
-        <div className="relative overflow-x-auto overflow-y-visible py-8 -my-8">
-          <div className="flex items-center justify-start gap-4 py-8 px-4 snap-x snap-mandatory">
-          {/* Steps */}
-          {steps.map((step, index) => (
-            <div key={step.title} className="flex items-center gap-4 shrink-0 snap-start">
-              {/* Card */}
-              <div className="relative group">
-                {/* Animated border on hover */}
-                <div 
-                  className="absolute -inset-[1px] rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                  style={{
-                    background: `linear-gradient(90deg, ${getColor(step.color)}, transparent, ${getColor(step.color)})`,
-                    backgroundSize: '200% 100%',
-                    animation: 'border-flow 3s linear infinite',
-                  }}
-                />
-                
-                {/* Glow effect on hover */}
-                <div 
-                  className="absolute -inset-2 rounded-xl opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-500"
-                  style={{ background: getColor(step.color) }}
-                />
-                
-                {/* Card content */}
-                <div className="relative bg-white/80 backdrop-blur-sm border border-black/5 rounded-xl p-5 w-56 shrink-0 transition-all duration-300 group-hover:border-transparent group-hover:-translate-y-1 shadow-sm">
-                  {/* Step number badge - positioned inside the card */}
+        {/* Flow diagram layout - grid on desktop, scroll on mobile */}
+        <div className="relative py-8">
+          {/* Desktop: centered grid */}
+          <div className="hidden lg:grid lg:grid-cols-4 lg:gap-6 lg:items-start">
+            {steps.map((step, index) => (
+              <div key={step.title} className="relative">
+                {/* Card */}
+                <div className="relative group">
+                  {/* Animated border on hover */}
                   <div 
-                    className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold leading-none text-white"
+                    className="absolute -inset-[1px] rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{
+                      background: `linear-gradient(90deg, ${getColor(step.color)}, transparent, ${getColor(step.color)})`,
+                      backgroundSize: '200% 100%',
+                      animation: 'border-flow 3s linear infinite',
+                    }}
+                  />
+                  
+                  {/* Glow effect on hover */}
+                  <div 
+                    className="absolute -inset-4 rounded-xl opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-500 pointer-events-none"
                     style={{ background: getColor(step.color) }}
-                  >
-                    {index + 1}
-                  </div>
-
-                  <div 
-                    className="w-12 h-12 rounded-lg flex items-center justify-center mb-3 transition-transform group-hover:scale-110"
-                    style={{ background: `${getColor(step.color)}20` }}
-                  >
-                    <step.icon 
-                      className="w-6 h-6"
-                      style={{ color: getColor(step.color) }}
-                    />
-                  </div>
-
-                  <h3 className="font-semibold text-foreground mb-1.5 text-sm">
-                    {step.title}
-                  </h3>
-                  <p className="text-muted-foreground text-xs leading-relaxed">
-                    {step.description}
-                  </p>
-                </div>
-              </div>
-
-              {/* Connector - only show between cards */}
-              {index < steps.length - 1 && (
-                <div className="flex items-center shrink-0" aria-hidden="true">
-                  <div className="relative w-12 h-1 rounded-full overflow-hidden">
-                    <div className="absolute inset-0 bg-[hsl(270_70%_60%_/_0.3)]" />
-                    {/* Animated beam */}
+                  />
+                  
+                  {/* Card content */}
+                  <div className="relative bg-white/80 backdrop-blur-sm border border-black/5 rounded-xl p-5 transition-all duration-300 group-hover:border-transparent group-hover:-translate-y-1 shadow-sm">
+                    {/* Step number badge */}
                     <div 
-                      className="absolute top-0 left-0 w-6 h-full bg-gradient-to-r from-[hsl(270_70%_60%)] via-[hsl(82_85%_50%)] to-[hsl(270_70%_60%)]"
+                      className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold leading-none text-white"
+                      style={{ background: getColor(step.color) }}
+                    >
+                      {index + 1}
+                    </div>
+
+                    <div 
+                      className="w-12 h-12 rounded-lg flex items-center justify-center mb-3 transition-transform group-hover:scale-110"
+                      style={{ background: `${getColor(step.color)}20` }}
+                    >
+                      <step.icon 
+                        className="w-6 h-6"
+                        style={{ color: getColor(step.color) }}
+                      />
+                    </div>
+
+                    <h3 className="font-semibold text-foreground mb-1.5 text-sm">
+                      {step.title}
+                    </h3>
+                    <p className="text-muted-foreground text-xs leading-relaxed">
+                      {step.description}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Arrow connector between cards - desktop only */}
+                {index < steps.length - 1 && (
+                  <div className="absolute top-1/2 -right-6 transform -translate-y-1/2 z-10 flex items-center" aria-hidden="true">
+                    <div className="relative w-6 h-1 rounded-full overflow-hidden">
+                      <div className="absolute inset-0 bg-[hsl(270_70%_60%_/_0.3)]" />
+                      <div 
+                        className="absolute top-0 left-0 w-4 h-full bg-gradient-to-r from-[hsl(270_70%_60%)] via-[hsl(82_85%_50%)] to-[hsl(270_70%_60%)]"
+                        style={{
+                          animation: 'beam-travel 1.5s ease-in-out infinite',
+                          animationDelay: `${index * 0.4}s`,
+                        }}
+                      />
+                    </div>
+                    <svg className="w-3 h-3 text-[hsl(82_85%_45%)]" viewBox="0 0 12 12" fill="currentColor">
+                      <path d="M2 6L9 6M9 6L6 3M9 6L6 9" stroke="currentColor" strokeWidth="2" fill="none" />
+                    </svg>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Mobile/Tablet: horizontal scroll */}
+          <div className="lg:hidden overflow-x-auto overflow-y-visible -mx-4 px-4">
+            <div className="flex items-center gap-4 py-4 w-max">
+              {steps.map((step, index) => (
+                <div key={step.title} className="flex items-center gap-4">
+                  {/* Card */}
+                  <div className="relative group">
+                    {/* Animated border on hover */}
+                    <div 
+                      className="absolute -inset-[1px] rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                       style={{
-                        animation: 'beam-travel 1.5s ease-in-out infinite',
-                        animationDelay: `${index * 0.4}s`,
+                        background: `linear-gradient(90deg, ${getColor(step.color)}, transparent, ${getColor(step.color)})`,
+                        backgroundSize: '200% 100%',
+                        animation: 'border-flow 3s linear infinite',
                       }}
                     />
+                    
+                    {/* Glow effect on hover */}
+                    <div 
+                      className="absolute -inset-4 rounded-xl opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-500 pointer-events-none"
+                      style={{ background: getColor(step.color) }}
+                    />
+                    
+                    {/* Card content */}
+                    <div className="relative bg-white/80 backdrop-blur-sm border border-black/5 rounded-xl p-5 w-52 transition-all duration-300 group-hover:border-transparent group-hover:-translate-y-1 shadow-sm">
+                      {/* Step number badge */}
+                      <div 
+                        className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold leading-none text-white"
+                        style={{ background: getColor(step.color) }}
+                      >
+                        {index + 1}
+                      </div>
+
+                      <div 
+                        className="w-12 h-12 rounded-lg flex items-center justify-center mb-3 transition-transform group-hover:scale-110"
+                        style={{ background: `${getColor(step.color)}20` }}
+                      >
+                        <step.icon 
+                          className="w-6 h-6"
+                          style={{ color: getColor(step.color) }}
+                        />
+                      </div>
+
+                      <h3 className="font-semibold text-foreground mb-1.5 text-sm">
+                        {step.title}
+                      </h3>
+                      <p className="text-muted-foreground text-xs leading-relaxed">
+                        {step.description}
+                      </p>
+                    </div>
                   </div>
-                  <svg className="w-4 h-4 text-[hsl(82_85%_45%)]" viewBox="0 0 12 12" fill="currentColor">
-                    <path d="M2 6L9 6M9 6L6 3M9 6L6 9" stroke="currentColor" strokeWidth="2" fill="none" />
-                  </svg>
+
+                  {/* Connector */}
+                  {index < steps.length - 1 && (
+                    <div className="flex items-center shrink-0" aria-hidden="true">
+                      <div className="relative w-8 h-1 rounded-full overflow-hidden">
+                        <div className="absolute inset-0 bg-[hsl(270_70%_60%_/_0.3)]" />
+                        <div 
+                          className="absolute top-0 left-0 w-4 h-full bg-gradient-to-r from-[hsl(270_70%_60%)] via-[hsl(82_85%_50%)] to-[hsl(270_70%_60%)]"
+                          style={{
+                            animation: 'beam-travel 1.5s ease-in-out infinite',
+                            animationDelay: `${index * 0.4}s`,
+                          }}
+                        />
+                      </div>
+                      <svg className="w-3 h-3 text-[hsl(82_85%_45%)]" viewBox="0 0 12 12" fill="currentColor">
+                        <path d="M2 6L9 6M9 6L6 3M9 6L6 9" stroke="currentColor" strokeWidth="2" fill="none" />
+                      </svg>
+                    </div>
+                  )}
                 </div>
-              )}
+              ))}
             </div>
-          ))}
           </div>
         </div>
 
