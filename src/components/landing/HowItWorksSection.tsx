@@ -43,23 +43,24 @@ export default function HowItWorksSection() {
               </linearGradient>
             </defs>
 
-            {/* Base lines */}
-            <path d="M 20 18 C 33 18, 41 35, 45 50" stroke="url(#lineGrad)" strokeWidth="0.35" fill="none" strokeLinecap="round" opacity="0.35" />
-            <path d="M 20 50 L 45 50" stroke="url(#lineGrad)" strokeWidth="0.35" fill="none" strokeLinecap="round" opacity="0.35" />
-            <path d="M 20 82 C 33 82, 41 65, 45 50" stroke="url(#lineGrad)" strokeWidth="0.35" fill="none" strokeLinecap="round" opacity="0.35" />
-            <path d="M 55 50 C 68 50, 76 50, 83 50" stroke="url(#lineGrad)" strokeWidth="0.35" fill="none" strokeLinecap="round" opacity="0.35" />
+
+            {/* Base lines (always visible) */}
+            <path d="M 10 17 C 28 17, 38 34, 50 50" stroke="url(#lineGrad)" strokeWidth="0.45" fill="none" strokeLinecap="round" opacity="0.55" />
+            <path d="M 10 50 L 50 50" stroke="url(#lineGrad)" strokeWidth="0.45" fill="none" strokeLinecap="round" opacity="0.55" />
+            <path d="M 10 83 C 28 83, 38 66, 50 50" stroke="url(#lineGrad)" strokeWidth="0.45" fill="none" strokeLinecap="round" opacity="0.55" />
+            <path d="M 50 50 L 90 50" stroke="url(#lineGrad)" strokeWidth="0.45" fill="none" strokeLinecap="round" opacity="0.55" />
 
             {/* Pulse overlays (throb + flow) */}
-            <path d="M 20 18 C 33 18, 41 35, 45 50" stroke="url(#lineGrad)" strokeWidth="0.55" fill="none" strokeLinecap="round" className="animate-pulse-line animate-flow" style={{ filter: 'blur(0.4px)' }} />
-            <path d="M 20 50 L 45 50" stroke="url(#lineGrad)" strokeWidth="0.55" fill="none" strokeLinecap="round" className="animate-pulse-line animate-flow delay-1" style={{ filter: 'blur(0.4px)' }} />
-            <path d="M 20 82 C 33 82, 41 65, 45 50" stroke="url(#lineGrad)" strokeWidth="0.55" fill="none" strokeLinecap="round" className="animate-pulse-line animate-flow delay-2" style={{ filter: 'blur(0.4px)' }} />
-            <path d="M 55 50 C 68 50, 76 50, 83 50" stroke="url(#lineGrad)" strokeWidth="0.55" fill="none" strokeLinecap="round" className="animate-pulse-line animate-flow delay-3" style={{ filter: 'blur(0.4px)' }} />
+            <path d="M 10 17 C 28 17, 38 34, 50 50" stroke="url(#lineGrad)" strokeWidth="0.75" fill="none" strokeLinecap="round" className="animate-pulse-flow" style={{ filter: 'blur(0.6px)' }} />
+            <path d="M 10 50 L 50 50" stroke="url(#lineGrad)" strokeWidth="0.75" fill="none" strokeLinecap="round" className="animate-pulse-flow delay-1" style={{ filter: 'blur(0.6px)' }} />
+            <path d="M 10 83 C 28 83, 38 66, 50 50" stroke="url(#lineGrad)" strokeWidth="0.75" fill="none" strokeLinecap="round" className="animate-pulse-flow delay-2" style={{ filter: 'blur(0.6px)' }} />
+            <path d="M 50 50 L 90 50" stroke="url(#lineGrad)" strokeWidth="0.75" fill="none" strokeLinecap="round" className="animate-pulse-flow delay-3" style={{ filter: 'blur(0.6px)' }} />
           </svg>
 
           {/* Left Cards - Positioned absolutely */}
-          <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between py-2" style={{ width: '170px' }}>
+          <div className="absolute left-0 top-0 bottom-0 grid grid-rows-3 items-center" style={{ width: '170px' }}>
             {leftSteps.map((step, index) => (
-              <div key={index} className="flex flex-col items-center">
+              <div key={index} className="flex flex-col items-center justify-center">
                 <div className="w-full h-14 rounded-xl bg-[hsl(222_40%_16%)] border border-white/10 flex items-center justify-center transition-all hover:border-[hsl(270_70%_60%_/_0.5)] hover:bg-[hsl(222_40%_18%)]">
                   <step.icon className="w-5 h-5 text-white/70" />
                 </div>
@@ -164,26 +165,22 @@ export default function HowItWorksSection() {
 
         @keyframes flow {
           0% {
-            stroke-dasharray: 1 10;
-            stroke-dashoffset: 40;
+            stroke-dasharray: 6 16;
+            stroke-dashoffset: 60;
           }
           100% {
-            stroke-dasharray: 1 10;
+            stroke-dasharray: 6 16;
             stroke-dashoffset: 0;
           }
         }
 
-        .animate-pulse-line {
-          animation: pulse-line 2.2s ease-in-out infinite;
+        .animate-pulse-flow {
+          animation: pulse-line 2.2s ease-in-out infinite, flow 1.8s linear infinite;
         }
 
-        .animate-flow {
-          animation: flow 1.8s linear infinite;
-        }
-
-        .delay-1 { animation-delay: 0.35s; }
-        .delay-2 { animation-delay: 0.7s; }
-        .delay-3 { animation-delay: 1.05s; }
+        .delay-1 { animation-delay: 0.35s, 0.35s; }
+        .delay-2 { animation-delay: 0.7s, 0.7s; }
+        .delay-3 { animation-delay: 1.05s, 1.05s; }
       `}</style>
     </section>
   );
