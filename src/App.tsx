@@ -51,6 +51,7 @@ import MessageBuilderFeaturePage from "./pages/features/MessageBuilderFeaturePag
 import JourneyDesignerFeaturePage from "./pages/features/JourneyDesignerFeaturePage";
 import EvaluateFeaturePage from "./pages/features/EvaluateFeaturePage";
 import LibraryFeaturePage from "./pages/features/LibraryFeaturePage";
+import OGPreviewPage from "./pages/OGPreviewPage";
 
 const queryClient = new QueryClient();
 
@@ -163,6 +164,7 @@ const AppRoutes = () => (
   <Routes>
     {/* Public routes */}
     <Route path="/" element={<LandingPage />} />
+    <Route path="/og-preview" element={<OGPreviewPage />} />
     <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
     <Route path="/request-access" element={<RequestAccessPage />} />
     <Route path="/feedback" element={<RequireAuth><BetaFeedbackPage /></RequireAuth>} />
