@@ -585,7 +585,7 @@ const Index = () => {
           </div>
           <div className="border-t border-border pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground">
-              UPlaybook — Your Playbook for Student Success
+              CampusVoice — Your Voice for Student Success
             </p>
             <p className="text-xs text-muted-foreground">
               Research-grounded messaging intelligence for higher education

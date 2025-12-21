@@ -190,7 +190,7 @@ export default function LoginPage() {
           <div className="w-full max-w-md space-y-6 animate-fade-in">
             {/* Logo & Tagline */}
             <div className="text-center">
-              <img src={uplaybookLogo} alt="UPlaybook.AI" className="h-14 w-auto mx-auto mb-4" />
+              <img src={uplaybookLogo} alt="CampusVoice.AI" className="h-14 w-auto mx-auto mb-4" />
               <h1 className="font-serif text-xl text-foreground mb-2">
                 <span className="text-[hsl(82_85%_45%)]">Plan.</span>{' '}
                 <span className="text-[hsl(270_70%_55%)]">Strategize.</span>{' '}
@@ -209,7 +209,7 @@ export default function LoginPage() {
                 </div>
                 <CardTitle className="font-serif text-foreground">Sign In</CardTitle>
                 <CardDescription className="text-muted-foreground">
-                  Enter your credentials to access UPlaybook
+                  Enter your credentials to access CampusVoice
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -321,7 +321,7 @@ export default function LoginPage() {
             </div>
 
             <p className="text-center text-xs text-muted-foreground">
-              © 2025 UPlaybook.AI. Research-grounded messaging intelligence.
+              © 2025 CampusVoice.AI. Research-grounded messaging intelligence.
             </p>
           </div>
         </div>
