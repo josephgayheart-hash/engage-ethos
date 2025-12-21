@@ -105,7 +105,7 @@ export default function LandingPage() {
               <img 
                 src={campusvoiceLogo} 
                 alt="CampusVoice.AI" 
-                className="h-10 sm:h-12 w-auto max-w-[200px] sm:max-w-[260px] mx-auto"
+                className="h-14 sm:h-16 lg:h-20 w-auto max-w-[280px] sm:max-w-[340px] lg:max-w-[400px] mx-auto"
               />
             </div>
 
