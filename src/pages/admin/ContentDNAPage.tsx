@@ -48,7 +48,12 @@ import {
   Compass,
   LayoutGrid,
   List,
-  History
+  History,
+  Search,
+  Wand2,
+  PenLine,
+  Type,
+  Megaphone
 } from 'lucide-react';
 import { extractTextFromFile, getAcceptString } from '@/lib/documentParser';
 
@@ -154,6 +159,7 @@ export default function ContentDNAPage() {
     updateCustomInstructions,
     resetContentDNA,
     extractSemantics,
+    searchSamples,
   } = useContentDNA({ profileId: profileIdFromUrl });
   
   const [isResetting, setIsResetting] = useState(false);
@@ -210,6 +216,17 @@ export default function ContentDNAPage() {
     localStorage.setItem('contentDnaLibraryViewMode', mode);
   };
 
+  // Search state for Content Library
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+
+  // Refine DNA state
+  const [isRefining, setIsRefining] = useState(false);
+  const [selectedRefinement, setSelectedRefinement] = useState<string | null>(null);
+  const [refinementResult, setRefinementResult] = useState<string | null>(null);
+
   // Instructions state
   const [customInstructions, setCustomInstructions] = useState(analysis?.custom_instructions || '');
 
@@ -219,6 +236,33 @@ export default function ContentDNAPage() {
       setCustomInstructions(analysis.custom_instructions);
     }
   });
+
+  // Handle search
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      setHasSearched(false);
+      return;
+    }
+    
+    setIsSearching(true);
+    setHasSearched(true);
+    try {
+      const results = await searchSamples(searchQuery, undefined, 20);
+      setSearchResults(results);
+    } catch (error) {
+      console.error('Search error:', error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Clear search
+  const clearSearch = () => {
+    setSearchQuery('');
+    setSearchResults([]);
+    setHasSearched(false);
+  };
 
   // Stage file - extract text but don't save yet
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -665,6 +709,10 @@ export default function ContentDNAPage() {
             <TabsTrigger value="library" className="flex items-center gap-2">
               <BookOpen className="w-4 h-4" />
               Content Library
+            </TabsTrigger>
+            <TabsTrigger value="refine" className="flex items-center gap-2">
+              <Wand2 className="w-4 h-4" />
+              Refine DNA
             </TabsTrigger>
             <TabsTrigger value="history" className="flex items-center gap-2">
               <History className="w-4 h-4" />
@@ -1469,11 +1517,98 @@ export default function ContentDNAPage() {
                 </div>
               </CardHeader>
               <CardContent>
+                {/* Search Bar */}
+                {extractionStats.completed > 0 && (
+                  <div className="mb-4">
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                          placeholder="Search indexed samples by themes, keywords, or content..."
+                          className="pl-9"
+                        />
+                      </div>
+                      <Button
+                        onClick={handleSearch}
+                        disabled={isSearching || !searchQuery.trim()}
+                        variant="outline"
+                      >
+                        {isSearching ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          'Search'
+                        )}
+                      </Button>
+                      {hasSearched && (
+                        <Button variant="ghost" onClick={clearSearch}>
+                          Clear
+                        </Button>
+                      )}
+                    </div>
+                    {hasSearched && (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Found {searchResults.length} matching sample{searchResults.length !== 1 ? 's' : ''}
+                      </p>
+                    )}
+                  </div>
+                )}
+
                 {samples.length === 0 ? (
                   <div className="text-center py-12 text-[hsl(220,14%,46%)]">
                     <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
                     <p className="font-medium">No content samples yet</p>
                     <p className="text-sm">Upload content using the Upload Content tab to start building your Content DNA profile</p>
+                  </div>
+                ) : hasSearched && searchResults.length > 0 ? (
+                  /* Search Results View */
+                  <ScrollArea className="h-[500px]">
+                    <div className="space-y-3">
+                      {searchResults.map((result) => (
+                        <div
+                          key={result.id}
+                          className="p-4 border border-blue-200 rounded-lg bg-blue-50/50 hover:bg-blue-50 transition-colors"
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h4 className="font-medium text-[hsl(222,47%,11%)] truncate">
+                                  {result.title || 'Untitled'}
+                                </h4>
+                                <Badge variant="outline" className="text-xs">
+                                  {SAMPLE_TYPES.find(t => t.value === result.sample_type)?.label || result.sample_type}
+                                </Badge>
+                                <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
+                                  Score: {(result.relevance_score * 100).toFixed(0)}%
+                                </Badge>
+                              </div>
+                              {result.semantic_summary && (
+                                <p className="text-sm text-[hsl(220,14%,46%)] mb-2 line-clamp-2">
+                                  {result.semantic_summary}
+                                </p>
+                              )}
+                              {result.key_themes && result.key_themes.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-2">
+                                  {result.key_themes.slice(0, 5).map((theme: string, idx: number) => (
+                                    <Badge key={idx} variant="secondary" className="text-[10px] px-1.5 py-0 bg-blue-100 text-blue-700">
+                                      {theme}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                ) : hasSearched && searchResults.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p className="font-medium">No matching samples found</p>
+                    <p className="text-sm">Try different keywords or themes</p>
                   </div>
                 ) : libraryViewMode === 'card' ? (
                   /* Card View */
@@ -1672,6 +1807,138 @@ export default function ContentDNAPage() {
                       </TableBody>
                     </Table>
                   </ScrollArea>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Refine DNA Tab */}
+          <TabsContent value="refine">
+            <Card className="border-[hsl(220,13%,88%)]">
+              <CardHeader>
+                <CardTitle className="text-[hsl(222,47%,11%)] flex items-center gap-2">
+                  <Wand2 className="w-5 h-5" />
+                  Refine Your Content DNA
+                </CardTitle>
+                <CardDescription>
+                  Use AI-powered refinement templates to adjust your voice profile based on your indexed content samples
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {!analysis?.voice_analysis ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Dna className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p className="font-medium">No Content DNA analyzed yet</p>
+                    <p className="text-sm">Upload content samples and analyze them first to use refinement features</p>
+                  </div>
+                ) : extractionStats.completed === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Zap className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p className="font-medium">No indexed samples yet</p>
+                    <p className="text-sm">Index your content samples in the Content Library tab to enable context-aware refinement</p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Refinement Templates */}
+                    <div>
+                      <h4 className="text-sm font-medium mb-3">Quick Refinements</h4>
+                      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {[
+                          { id: 'formal', label: 'Make More Formal', icon: Type, description: 'Elevate the tone for executive communications' },
+                          { id: 'casual', label: 'Make More Casual', icon: MessageSquare, description: 'Soften the voice for peer-to-peer messaging' },
+                          { id: 'concise', label: 'Make More Concise', icon: PenLine, description: 'Tighten language and reduce wordiness' },
+                          { id: 'persuasive', label: 'More Persuasive', icon: Megaphone, description: 'Strengthen calls-to-action and urgency' },
+                          { id: 'brand-pillars', label: 'Emphasize Brand Pillars', icon: Target, description: 'Reinforce core brand values and messaging' },
+                          { id: 'storytelling', label: 'More Storytelling', icon: BookOpen, description: 'Add narrative elements and emotional hooks' },
+                        ].map((template) => (
+                          <button
+                            key={template.id}
+                            onClick={() => setSelectedRefinement(template.id)}
+                            disabled={isRefining}
+                            className={`p-4 border rounded-lg text-left transition-all hover:shadow-md ${
+                              selectedRefinement === template.id 
+                                ? 'border-secondary bg-secondary/10 ring-2 ring-secondary/30' 
+                                : 'border-border hover:border-secondary/50'
+                            }`}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className={`p-2 rounded-lg ${
+                                selectedRefinement === template.id ? 'bg-secondary text-white' : 'bg-muted'
+                              }`}>
+                                <template.icon className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-sm">{template.label}</p>
+                                <p className="text-xs text-muted-foreground mt-0.5">{template.description}</p>
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Apply Button */}
+                    {selectedRefinement && (
+                      <div className="flex justify-center pt-4 border-t">
+                        <Button
+                          onClick={async () => {
+                            setIsRefining(true);
+                            setRefinementResult(null);
+                            try {
+                              // Get relevant samples for context
+                              const contextSamples = await searchSamples('', undefined, 5);
+                              
+                              // This would call an edge function to refine the DNA
+                              // For now, show a placeholder result
+                              setTimeout(() => {
+                                setRefinementResult(`Refinement "${selectedRefinement}" would be applied using ${contextSamples.length} indexed samples as context. This feature will generate refined voice guidelines based on your actual content.`);
+                                setIsRefining(false);
+                              }, 1500);
+                            } catch (error) {
+                              console.error('Refinement error:', error);
+                              setIsRefining(false);
+                            }
+                          }}
+                          disabled={isRefining}
+                          className="bg-secondary hover:bg-secondary/90"
+                        >
+                          {isRefining ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Refining...
+                            </>
+                          ) : (
+                            <>
+                              <Wand2 className="w-4 h-4 mr-2" />
+                              Apply Refinement
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Result Display */}
+                    {refinementResult && (
+                      <div className="mt-4 p-4 bg-secondary/10 border border-secondary/30 rounded-lg">
+                        <div className="flex items-start gap-3">
+                          <Sparkles className="w-5 h-5 text-secondary mt-0.5" />
+                          <div>
+                            <p className="font-medium text-sm mb-1">Refinement Preview</p>
+                            <p className="text-sm text-muted-foreground">{refinementResult}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Context Info */}
+                    <Alert className="border-blue-200 bg-blue-50">
+                      <Lightbulb className="h-4 w-4" />
+                      <AlertDescription className="ml-2 text-sm">
+                        Refinements use your <strong>{extractionStats.completed} indexed sample{extractionStats.completed !== 1 ? 's' : ''}</strong> as context 
+                        to ensure adjustments stay true to your established communication patterns.
+                      </AlertDescription>
+                    </Alert>
+                  </div>
                 )}
               </CardContent>
             </Card>
