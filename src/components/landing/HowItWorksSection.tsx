@@ -60,7 +60,8 @@ export default function HowItWorksSection() {
         </div>
 
         {/* Flow diagram layout */}
-        <div className="relative flex items-center justify-start gap-4 overflow-x-auto py-6 snap-x snap-mandatory">
+        <div className="relative overflow-x-auto overflow-y-visible py-8 -my-8">
+          <div className="flex items-center justify-start gap-4 py-8 px-4 snap-x snap-mandatory">
           {/* Steps */}
           {steps.map((step, index) => (
             <div key={step.title} className="flex items-center gap-4 shrink-0 snap-start">
@@ -132,6 +133,7 @@ export default function HowItWorksSection() {
               )}
             </div>
           ))}
+          </div>
         </div>
 
         {/* Summary line */}
