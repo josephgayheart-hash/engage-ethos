@@ -115,9 +115,9 @@ export function ContentDNAExplainer({
         </div>
 
         {/* Synthesis Result */}
-        <div className="flex items-start gap-3 p-3 rounded-lg bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20">
-          <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-secondary shrink-0">
-            <MessageSquare className="w-4 h-4 text-white" />
+        <div className="flex items-start gap-3 p-3 rounded-lg bg-accent/10 border border-accent/30">
+          <div className="p-2 rounded-lg bg-accent shrink-0">
+            <MessageSquare className="w-4 h-4 text-accent-foreground" />
           </div>
           <div>
             <h4 className="text-sm font-medium text-foreground">On-Brand Content Generation</h4>
@@ -193,8 +193,8 @@ export function ContentDNAExplainer({
       <Card className={cn("border-border", className)}>
         <CardContent className="pt-4">
           <div className="flex items-center gap-2 mb-4">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-secondary">
-              <Dna className="w-4 h-4 text-white" />
+            <div className="p-2 rounded-lg bg-accent">
+              <Dna className="w-4 h-4 text-accent-foreground" />
             </div>
             <h3 className="font-medium text-foreground">How Content DNA Works</h3>
           </div>
@@ -211,8 +211,8 @@ export function ContentDNAExplainer({
           <CardContent className="py-3 cursor-pointer hover:bg-muted/30 transition-colors">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-secondary">
-                  <Dna className="w-4 h-4 text-white" />
+                <div className="p-2 rounded-lg bg-accent">
+                  <Dna className="w-4 h-4 text-accent-foreground" />
                 </div>
                 <div>
                   <h3 className="font-medium text-foreground text-sm">How Content DNA Works</h3>
