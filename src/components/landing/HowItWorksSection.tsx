@@ -40,21 +40,21 @@ const getColor = (color: string) => {
 
 export default function HowItWorksSection() {
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(230_25%_18%)] relative overflow-visible">
+    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(173_40%_92%)] relative overflow-visible">
       {/* Background glow effects */}
       <div className="absolute top-1/4 left-0 w-96 h-96 bg-[hsl(270_70%_60%_/_0.08)] rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-[hsl(200_100%_50%_/_0.08)] rounded-full blur-3xl" />
+      <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-[hsl(82_85%_55%_/_0.08)] rounded-full blur-3xl" />
 
       <div className="max-w-6xl mx-auto relative z-10">
         <div className="text-center mb-16">
-          <Badge className="mb-4 bg-[hsl(82_85%_55%_/_0.2)] text-[hsl(82_85%_55%)] border-[hsl(82_85%_55%_/_0.4)]">
+          <Badge className="mb-4 bg-[hsl(82_85%_55%_/_0.2)] text-[hsl(82_60%_35%)] border-[hsl(82_85%_55%_/_0.4)]">
             How It Works
           </Badge>
-          <h2 className="font-serif text-3xl sm:text-4xl text-white mb-4">
-            From <span className="text-[hsl(82_85%_55%)]">Brand Chaos</span> to{' '}
-            <span className="text-[hsl(270_70%_60%)]">Brand Clarity</span>
+          <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-4">
+            From <span className="text-[hsl(82_60%_40%)]">Brand Chaos</span> to{' '}
+            <span className="text-[hsl(270_50%_50%)]">Brand Clarity</span>
           </h2>
-          <p className="text-white/60 max-w-2xl mx-auto text-lg">
+          <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
             Four simple steps to transform your institutional communications
           </p>
         </div>
@@ -83,10 +83,10 @@ export default function HowItWorksSection() {
                 />
                 
                 {/* Card content */}
-                <div className="relative bg-[hsl(230_25%_22%)] border border-white/10 rounded-xl p-5 w-56 shrink-0 transition-all duration-300 group-hover:border-transparent group-hover:-translate-y-1">
+                <div className="relative bg-white/80 backdrop-blur-sm border border-black/5 rounded-xl p-5 w-56 shrink-0 transition-all duration-300 group-hover:border-transparent group-hover:-translate-y-1 shadow-sm">
                   {/* Step number badge - positioned inside the card */}
                   <div 
-                    className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold leading-none text-[hsl(222_47%_11%)]"
+                    className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold leading-none text-white"
                     style={{ background: getColor(step.color) }}
                   >
                     {index + 1}
@@ -102,10 +102,10 @@ export default function HowItWorksSection() {
                     />
                   </div>
 
-                  <h3 className="font-semibold text-white mb-1.5 text-sm">
+                  <h3 className="font-semibold text-foreground mb-1.5 text-sm">
                     {step.title}
                   </h3>
-                  <p className="text-white/50 text-xs leading-relaxed">
+                  <p className="text-muted-foreground text-xs leading-relaxed">
                     {step.description}
                   </p>
                 </div>
@@ -115,17 +115,17 @@ export default function HowItWorksSection() {
               {index < steps.length - 1 && (
                 <div className="flex items-center shrink-0" aria-hidden="true">
                   <div className="relative w-10 h-px">
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-white/5" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-black/5" />
                     {/* Animated beam */}
                     <div 
-                      className="absolute top-0 left-0 w-4 h-px bg-gradient-to-r from-transparent via-[hsl(82_85%_55%)] to-transparent"
+                      className="absolute top-0 left-0 w-4 h-px bg-gradient-to-r from-transparent via-[hsl(82_60%_40%)] to-transparent"
                       style={{
                         animation: 'beam-travel 2s linear infinite',
                         animationDelay: `${index * 0.5}s`,
                       }}
                     />
                   </div>
-                  <svg className="w-3 h-3 text-white/30" viewBox="0 0 12 12" fill="currentColor">
+                  <svg className="w-3 h-3 text-black/30" viewBox="0 0 12 12" fill="currentColor">
                     <path d="M2 6L9 6M9 6L6 3M9 6L6 9" stroke="currentColor" strokeWidth="1.5" fill="none" />
                   </svg>
                 </div>
@@ -135,7 +135,7 @@ export default function HowItWorksSection() {
         </div>
 
         {/* Summary line */}
-        <p className="text-center text-white/40 text-sm mt-12">
+        <p className="text-center text-muted-foreground text-sm mt-12">
           Upload brand docs → AI analyzes your voice → Generate on-brand content → Deploy everywhere
         </p>
       </div>
