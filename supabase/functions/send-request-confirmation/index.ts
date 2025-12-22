@@ -34,128 +34,10 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Sending request confirmation email to ${email}`);
 
     const subject = "CampusVoice.AI - Access Request Received";
+    const logoUrl = "https://yeuwpuzbccqnqdlnjhfm.supabase.co/storage/v1/object/public/brand-assets/campusvoice-email-logo.png";
 
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="color-scheme" content="light dark">
-        <meta name="supported-color-schemes" content="light dark">
-        <style>
-          :root { color-scheme: light dark; }
-          * { -webkit-text-fill-color: inherit !important; }
-          .logo-img { -webkit-filter: invert(0) contrast(1.08) saturate(1.08) !important; filter: invert(0) contrast(1.08) saturate(1.08) !important; }
-          u + .body { background-color: #f8fafc !important; }
-          @media (prefers-color-scheme: dark) {
-            .body-wrapper { background-color: #f8fafc !important; }
-            .main-card { background-color: #ffffff !important; }
-            .logo-area { background-color: #ffffff !important; }
-            .logo-tile { background-color: #ffffff !important; }
-            .logo-img { background-color: #ffffff !important; -webkit-filter: invert(0) contrast(1.22) saturate(1.22) !important; filter: invert(0) contrast(1.22) saturate(1.22) !important; opacity: 1 !important; mix-blend-mode: normal !important; }
-            .status-box { background-color: #f0fdf4 !important; }
-            .details-box { background-color: #f1f5f9 !important; }
-            .content-area { background-color: #ffffff !important; }
-            .footer-area { background-color: #f8fafc !important; }
-            body, table, td, div, p, a, span, h1, h2, h3 { 
-              -webkit-text-fill-color: inherit !important;
-            }
-            .dark-text { color: #1e293b !important; -webkit-text-fill-color: #1e293b !important; }
-            .muted-text { color: #475569 !important; -webkit-text-fill-color: #475569 !important; }
-            .white-text { color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; }
-            .green-text { color: #166534 !important; -webkit-text-fill-color: #166534 !important; }
-          }
-        </style>
-      </head>
-      <body class="body" style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
-        <div style="display: none; max-height: 0; overflow: hidden;">Your CampusVoice.AI access request has been received</div>
-        <table class="body-wrapper" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc !important; padding: 40px 20px;" bgcolor="#f8fafc">
-          <tr>
-            <td align="center">
-              <table class="main-card" width="100%" max-width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff !important; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden;" bgcolor="#ffffff">
-                <!-- Navy Header Banner with Logo -->
-                <tr>
-                  <td class="logo-area" style="background-color: #1a2036 !important; padding: 40px 40px 32px 40px; text-align: center;" bgcolor="#1a2036">
-                    <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;" bgcolor="#1a2036">
-                      <tr>
-                        <td style="background-color: #ffffff !important; padding: 16px 20px; border-radius: 10px;" bgcolor="#ffffff">
-                          <img class="logo-img" src="https://yeuwpuzbccqnqdlnjhfm.supabase.co/storage/v1/object/public/brand-assets/campusvoice-email-logo.png" alt="CampusVoice.AI" style="height: 50px; width: auto; display: block; background-color: #ffffff !important;" />
-                        </td>
-                      </tr>
-                    </table>
-                    <h1 style="margin: 24px 0 0 0; color: #ffffff !important; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; background-color: #1a2036 !important; -webkit-text-fill-color: #ffffff !important;" bgcolor="#1a2036">Request Received</h1>
-                    <p style="margin: 8px 0 0 0; color: #94a3b8 !important; font-size: 14px; font-weight: 600; background-color: #1a2036 !important; -webkit-text-fill-color: #94a3b8 !important;" bgcolor="#1a2036">We're reviewing your access request</p>
-                  </td>
-                </tr>
-                
-                <!-- Body -->
-                <tr>
-                  <td style="padding: 40px; background-color: #ffffff !important;" bgcolor="#ffffff">
-                    <h2 style="margin: 0 0 16px 0; color: #1e293b !important; font-size: 24px; font-weight: 600; background-color: #ffffff !important;" bgcolor="#ffffff">Hi ${firstName},</h2>
-                    <p style="margin: 0 0 24px 0; color: #475569 !important; font-size: 16px; line-height: 1.6; background-color: #ffffff !important;" bgcolor="#ffffff">
-                      Thank you for your interest in <strong style="color: #1e293b !important;">CampusVoice.AI</strong>! We've received your access request for <strong style="color: #1e293b !important;">${institutionName}</strong>.
-                    </p>
-                    
-                    <!-- Status Box -->
-                    <div style="background-color: #f0fdf4 !important; border-left: 4px solid #22c55e; padding: 16px; border-radius: 0 8px 8px 0; margin: 24px 0;" bgcolor="#f0fdf4">
-                      <p style="margin: 0; color: #166534 !important; font-size: 14px; line-height: 1.5; background-color: #f0fdf4 !important;" bgcolor="#f0fdf4">
-                        <strong style="color: #166534 !important;">What happens next?</strong><br />
-                        An administrator will review your request and you'll receive an email with your login credentials once approved.
-                      </p>
-                    </div>
-                    
-                    <!-- Request Details -->
-                    <div style="background-color: #f1f5f9 !important; border-radius: 8px; padding: 24px; margin: 24px 0;" bgcolor="#f1f5f9">
-                      <h3 style="margin: 0 0 16px 0; color: #1e293b !important; font-size: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; background-color: #f1f5f9 !important;" bgcolor="#f1f5f9">Your Request Details</h3>
-                      
-                      <div style="margin-bottom: 12px;">
-                        <p style="margin: 0 0 4px 0; color: #64748b !important; font-size: 12px; font-weight: 500; text-transform: uppercase; background-color: #f1f5f9 !important;" bgcolor="#f1f5f9">Name</p>
-                        <p style="margin: 0; color: #1e293b !important; font-size: 16px; background-color: #f1f5f9 !important;" bgcolor="#f1f5f9">${firstName} ${lastName}</p>
-                      </div>
-                      
-                      <div style="margin-bottom: 12px;">
-                        <p style="margin: 0 0 4px 0; color: #64748b !important; font-size: 12px; font-weight: 500; text-transform: uppercase; background-color: #f1f5f9 !important;" bgcolor="#f1f5f9">Email</p>
-                        <p style="margin: 0; color: #1e293b !important; font-size: 16px; background-color: #f1f5f9 !important;" bgcolor="#f1f5f9">${email}</p>
-                      </div>
-                      
-                      <div>
-                        <p style="margin: 0 0 4px 0; color: #64748b !important; font-size: 12px; font-weight: 500; text-transform: uppercase; background-color: #f1f5f9 !important;" bgcolor="#f1f5f9">Institution</p>
-                        <p style="margin: 0; color: #1e293b !important; font-size: 16px; background-color: #f1f5f9 !important;" bgcolor="#f1f5f9">${institutionName}</p>
-                      </div>
-                    </div>
-                    
-                    <p style="margin: 24px 0 0 0; color: #475569 !important; font-size: 14px; line-height: 1.6; background-color: #ffffff !important;" bgcolor="#ffffff">
-                      If you have any questions, please contact your institution's administrator.
-                    </p>
-                  </td>
-                </tr>
-                
-                <!-- Footer -->
-                <tr>
-                  <td style="background-color: #f8fafc !important; padding: 24px 40px; border-top: 1px solid #e2e8f0;" bgcolor="#f8fafc">
-                    <p style="margin: 0 0 8px 0; color: #64748b !important; font-size: 14px; text-align: center; background-color: #f8fafc !important;" bgcolor="#f8fafc">
-                      Thank you for your patience!
-                    </p>
-                    <p style="margin: 0; color: #94a3b8 !important; font-size: 12px; text-align: center; background-color: #f8fafc !important;" bgcolor="#f8fafc">
-                      — The CampusVoice.AI Team
-                    </p>
-                  </td>
-                </tr>
-              </table>
-              
-              <!-- Sub-footer -->
-              <p style="margin: 24px 0 0 0; color: #94a3b8 !important; font-size: 12px; text-align: center; background-color: #f8fafc !important;" bgcolor="#f8fafc">
-                This email was sent by CampusVoice.AI. If you didn't submit this request, please disregard this message.
-              </p>
-            </td>
-          </tr>
-        </table>
-      </body>
-      </html>
-    `;
+    const htmlContent = `<div style="max-width:600px;margin:0 auto;font-family:Arial,sans-serif"><div style="background:#1a2036;padding:28px;text-align:center;border-radius:8px 8px 0 0"><table cellpadding="0" cellspacing="0" style="margin:0 auto"><tr><td style="background:#fff;padding:12px 16px;border-radius:8px"><img src="${logoUrl}" alt="CampusVoice.AI" style="height:40px"/></td></tr></table><h1 style="margin:18px 0 0;color:#fff;font-size:22px">Request Received</h1><p style="margin:6px 0 0;color:#94a3b8;font-size:13px">We're reviewing your access request</p></div><div style="background:#fff;padding:28px;border:1px solid #e2e8f0;border-top:none"><h2 style="margin:0 0 12px;color:#1e293b;font-size:20px">Hi ${firstName},</h2><p style="margin:0 0 18px;color:#475569;font-size:15px;line-height:1.5">Thank you for your interest in <strong>CampusVoice.AI</strong>! We've received your access request for <strong>${institutionName}</strong>.</p><div style="background:#f0fdf4;border-left:3px solid #22c55e;padding:14px;border-radius:0 6px 6px 0;margin:18px 0"><p style="margin:0;color:#166534;font-size:14px;line-height:1.4"><strong>What happens next?</strong> An administrator will review your request and you'll receive an email with your login credentials once approved.</p></div><div style="background:#f1f5f9;border-radius:8px;padding:18px;margin:18px 0"><p style="margin:0 0 12px;color:#1e293b;font-size:13px;font-weight:600;text-transform:uppercase">Your Request Details</p><p style="margin:0 0 4px;color:#64748b;font-size:11px;text-transform:uppercase">Name</p><p style="margin:0 0 10px;color:#1e293b;font-size:14px">${firstName} ${lastName}</p><p style="margin:0 0 4px;color:#64748b;font-size:11px;text-transform:uppercase">Email</p><p style="margin:0 0 10px;color:#1e293b;font-size:14px">${email}</p><p style="margin:0 0 4px;color:#64748b;font-size:11px;text-transform:uppercase">Institution</p><p style="margin:0;color:#1e293b;font-size:14px">${institutionName}</p></div><p style="margin:18px 0 0;color:#475569;font-size:13px">If you have any questions, please contact your institution's administrator.</p></div><div style="background:#f8fafc;padding:18px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;text-align:center"><p style="margin:0 0 4px;color:#64748b;font-size:13px">Thank you for your patience!</p><p style="margin:0;color:#94a3b8;font-size:11px">— The CampusVoice.AI Team</p></div></div>`;
 
-    // Send email via Resend API directly
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -179,13 +61,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Request confirmation email sent successfully:", responseData);
 
-    // Log to email_nudges for tracking - use system tenant since this is a pre-signup email
     const systemTenantId = "00000000-0000-0000-0000-000000000000";
-    
-    // We need a user_id but the user doesn't exist yet, so we create a placeholder
-    // Use the requestId if provided, or generate a deterministic UUID from email
     const { error: nudgeError } = await supabase.from("email_nudges").insert({
-      user_id: requestId || "00000000-0000-0000-0000-000000000001", // Placeholder for pre-signup emails
+      user_id: requestId || "00000000-0000-0000-0000-000000000001",
       tenant_id: systemTenantId,
       nudge_type: "request_confirmation",
       email_type: "request_confirmation",
@@ -196,100 +74,33 @@ const handler = async (req: Request): Promise<Response> => {
       provider: "resend",
       provider_message_id: responseData.id,
       delivery_status: "sent",
-      metadata: {
-        institution_name: institutionName,
-        request_id: requestId,
-      },
+      metadata: { institution_name: institutionName, request_id: requestId },
     });
-
     if (nudgeError) {
       console.error("Error logging email nudge:", nudgeError);
-    } else {
-      console.log("Email nudge logged successfully");
     }
 
-    // Send notification to all super admins
+    // Send notification to super admins
     try {
-      // Fetch super admin emails
-      const { data: superAdminRoles, error: rolesError } = await supabase
+      const { data: superAdminRoles } = await supabase
         .from("user_roles")
         .select("user_id")
         .eq("role", "super_admin");
 
-      if (rolesError) {
-        console.error("Error fetching super admin roles:", rolesError);
-      } else if (superAdminRoles && superAdminRoles.length > 0) {
+      if (superAdminRoles && superAdminRoles.length > 0) {
         const superAdminUserIds = superAdminRoles.map(r => r.user_id);
-        
-        // Fetch super admin profiles to get emails
-        const { data: superAdminProfiles, error: profilesError } = await supabase
+        const { data: superAdminProfiles } = await supabase
           .from("profiles")
-          .select("email, first_name")
+          .select("email")
           .in("id", superAdminUserIds);
 
-        if (profilesError) {
-          console.error("Error fetching super admin profiles:", profilesError);
-        } else if (superAdminProfiles && superAdminProfiles.length > 0) {
+        if (superAdminProfiles && superAdminProfiles.length > 0) {
           const superAdminEmails = superAdminProfiles.map(p => p.email);
-          console.log(`Sending admin notification to ${superAdminEmails.length} super admins`);
-
-          const adminSubject = `🔔 New Access Request: ${firstName} ${lastName} from ${institutionName}`;
+          const adminSubject = `New Access Request: ${firstName} ${lastName} from ${institutionName}`;
           
-          const adminHtmlContent = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <meta charset="utf-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            </head>
-            <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8fafc;">
-              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; padding: 40px 20px;">
-                <tr>
-                  <td align="center">
-                    <table width="100%" max-width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden;">
-                      <!-- Header -->
-                      <tr>
-                        <td style="background-color: #1a2036; padding: 32px 40px; text-align: center;">
-                          <h1 style="margin: 0; color: #ffffff; font-size: 20px; font-weight: 700;">🔔 New Access Request</h1>
-                        </td>
-                      </tr>
-                      
-                      <!-- Body -->
-                      <tr>
-                        <td style="padding: 32px 40px;">
-                          <p style="margin: 0 0 20px 0; color: #475569; font-size: 16px; line-height: 1.6;">
-                            A new user has requested access to CampusVoice.AI:
-                          </p>
-                          
-                          <!-- Request Details -->
-                          <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; border-radius: 0 8px 8px 0; margin: 20px 0;">
-                            <p style="margin: 0 0 8px 0; color: #1e293b; font-size: 16px;"><strong>Name:</strong> ${firstName} ${lastName}</p>
-                            <p style="margin: 0 0 8px 0; color: #1e293b; font-size: 16px;"><strong>Email:</strong> ${email}</p>
-                            <p style="margin: 0; color: #1e293b; font-size: 16px;"><strong>Institution:</strong> ${institutionName}</p>
-                          </div>
-                          
-                          <!-- CTA Button -->
-                          <div style="text-align: center; margin: 28px 0;">
-                            <a href="https://app.campusvoice.ai/admin/onboarding" style="display: inline-block; background-color: #7c3aed; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">
-                              Review Pending Requests
-                            </a>
-                          </div>
-                          
-                          <p style="margin: 20px 0 0 0; color: #64748b; font-size: 14px; text-align: center;">
-                            You're receiving this because you're a CampusVoice.AI super admin.
-                          </p>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
-            </body>
-            </html>
-          `;
+          const adminHtml = `<div style="max-width:600px;margin:0 auto;font-family:Arial,sans-serif"><div style="background:#1a2036;padding:24px;text-align:center;border-radius:8px 8px 0 0"><h1 style="margin:0;color:#fff;font-size:18px">New Access Request</h1></div><div style="background:#fff;padding:24px;border:1px solid #e2e8f0;border-top:none"><p style="margin:0 0 16px;color:#475569;font-size:15px">A new user has requested access:</p><div style="background:#fef3c7;border-left:3px solid #f59e0b;padding:14px;border-radius:0 6px 6px 0;margin:16px 0"><p style="margin:0 0 6px;color:#1e293b;font-size:14px"><strong>Name:</strong> ${firstName} ${lastName}</p><p style="margin:0 0 6px;color:#1e293b;font-size:14px"><strong>Email:</strong> ${email}</p><p style="margin:0;color:#1e293b;font-size:14px"><strong>Institution:</strong> ${institutionName}</p></div><div style="text-align:center;margin:20px 0"><a href="https://app.campusvoice.ai/admin/onboarding" style="display:inline-block;background:#7c3aed;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600;font-size:14px">Review Requests</a></div><p style="margin:16px 0 0;color:#64748b;font-size:12px;text-align:center">You're receiving this because you're a super admin.</p></div></div>`;
 
-          // Send to all super admins
-          const adminEmailResponse = await fetch("https://api.resend.com/emails", {
+          await fetch("https://api.resend.com/emails", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -299,22 +110,14 @@ const handler = async (req: Request): Promise<Response> => {
               from: "CampusVoice.AI <onboarding@resend.dev>",
               to: superAdminEmails,
               subject: adminSubject,
-              html: adminHtmlContent,
+              html: adminHtml,
             }),
           });
-
-          const adminEmailData = await adminEmailResponse.json();
-          
-          if (!adminEmailResponse.ok) {
-            console.error("Failed to send admin notification:", adminEmailData);
-          } else {
-            console.log(`Admin notification sent successfully to ${superAdminEmails.length} super admins:`, adminEmailData);
-          }
+          console.log(`Admin notification sent to ${superAdminEmails.length} super admins`);
         }
       }
     } catch (adminError) {
       console.error("Error sending admin notification:", adminError);
-      // Don't throw - we don't want to fail the main email if admin notification fails
     }
 
     return new Response(JSON.stringify({ success: true, ...responseData }), {
@@ -325,10 +128,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.error("Error in send-request-confirmation function:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   }
 };

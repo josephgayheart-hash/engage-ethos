@@ -18,6 +18,8 @@ interface EmailRequest {
   runAutomated?: boolean;
 }
 
+const logoUrl = "https://yeuwpuzbccqnqdlnjhfm.supabase.co/storage/v1/object/public/brand-assets/campusvoice-email-logo.png";
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -30,13 +32,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     const body: EmailRequest = await req.json();
     const appUrl = "https://campusvoice.ai";
-    const logoUrl = `${supabaseUrl}/storage/v1/object/public/brand-assets/CampusVoice.AI_logo.png`;
 
-    // If runAutomated is true, find eligible users (24hrs since last login, never received this email)
     if (body.runAutomated) {
       console.log("Running automated beta feedback email check...");
 
-      // Get the beta_thank_you template
       const { data: template, error: templateError } = await supabase
         .from("email_templates")
         .select("*")
@@ -52,15 +51,13 @@ const handler = async (req: Request): Promise<Response> => {
         });
       }
 
-      const triggerConfig = template.trigger_config as { delay_hours?: number; once_per_user?: boolean } || {};
+      const triggerConfig = template.trigger_config as { delay_hours?: number } || {};
       const delayHours = triggerConfig.delay_hours || 24;
 
-      // Find users who logged in exactly 24 hours ago (with 1 hour window)
       const targetTime = new Date(Date.now() - delayHours * 60 * 60 * 1000);
       const windowStart = new Date(targetTime.getTime() - 60 * 60 * 1000);
       const windowEnd = new Date(targetTime.getTime() + 60 * 60 * 1000);
 
-      // Get all users with last_login_at in the window
       const { data: eligibleUsers, error: usersError } = await supabase
         .from("profiles")
         .select("id, email, first_name, last_name, tenant_id, last_login_at")
@@ -77,7 +74,6 @@ const handler = async (req: Request): Promise<Response> => {
 
       let sentCount = 0;
       for (const user of eligibleUsers || []) {
-        // Check if already sent to this user
         const { data: existingSend } = await supabase
           .from("email_sends")
           .select("id")
@@ -90,14 +86,12 @@ const handler = async (req: Request): Promise<Response> => {
           continue;
         }
 
-        // Get tenant name
         const { data: tenant } = await supabase
           .from("tenants")
           .select("institution_name")
           .eq("id", user.tenant_id)
           .single();
 
-        // Send the email
         const htmlContent = template.html_content
           .replace(/\{\{first_name\}\}/g, user.first_name)
           .replace(/\{\{last_name\}\}/g, user.last_name || "")
@@ -114,7 +108,6 @@ const handler = async (req: Request): Promise<Response> => {
             html: htmlContent,
           });
 
-          // Record the send
           await supabase.from("email_sends").insert({
             template_id: template.id,
             user_id: user.id,
@@ -123,7 +116,6 @@ const handler = async (req: Request): Promise<Response> => {
             metadata: { automated: true },
           });
 
-          // Log to email_nudges
           await supabase.from("email_nudges").insert({
             tenant_id: user.tenant_id,
             user_id: user.id,
@@ -137,13 +129,9 @@ const handler = async (req: Request): Promise<Response> => {
             metadata: { automated: true, template_id: template.id },
           });
 
-          // Update template stats
           await supabase
             .from("email_templates")
-            .update({
-              send_count: (template.send_count || 0) + 1,
-              last_sent_at: new Date().toISOString(),
-            })
+            .update({ send_count: (template.send_count || 0) + 1, last_sent_at: new Date().toISOString() })
             .eq("id", template.id);
 
           sentCount++;
@@ -159,7 +147,6 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Manual send to specific user
     const { userId, email, firstName, lastName, institutionName } = body;
 
     if (!email || !firstName) {
@@ -169,7 +156,6 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Get template
     const { data: template } = await supabase
       .from("email_templates")
       .select("*")
@@ -184,27 +170,17 @@ const handler = async (req: Request): Promise<Response> => {
           .replace(/\{\{institution\}\}/g, institutionName || "")
           .replace(/\{\{app_url\}\}/g, appUrl)
           .replace(/\{\{logo_url\}\}/g, logoUrl)
-      : `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h1 style="color: #4F46E5;">🎉 Thank You for Joining CampusVoice.AI Beta!</h1>
-          <p>Hi ${firstName},</p>
-          <p>We're thrilled to have you as part of our beta community! Your feedback is incredibly valuable to us.</p>
-          <p>Please share your thoughts and help us build the best product possible.</p>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${appUrl}/feedback" style="background: #4F46E5; color: white; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: 600;">Share Your Feedback</a>
-          </div>
-          <p>Thank you,<br>The CampusVoice.AI Team</p>
-        </div>`;
+      : `<div style="max-width:600px;margin:0 auto;font-family:Arial,sans-serif"><div style="background:#1a2036;padding:24px;text-align:center;border-radius:8px 8px 0 0"><table cellpadding="0" cellspacing="0" style="margin:0 auto"><tr><td style="background:#fff;padding:10px 14px;border-radius:6px"><img src="${logoUrl}" alt="CampusVoice.AI" style="height:36px"/></td></tr></table><h1 style="margin:16px 0 0;color:#fff;font-size:20px">Thank You!</h1></div><div style="background:#fff;padding:24px;border:1px solid #e2e8f0;border-top:none"><p style="margin:0 0 14px;color:#1e293b;font-size:16px">Hi ${firstName},</p><p style="margin:0 0 16px;color:#475569;font-size:14px;line-height:1.5">Thanks for exploring CampusVoice.AI! Your feedback shapes our product.</p><div style="text-align:center;margin:20px 0"><a href="${appUrl}/feedback" style="display:inline-block;background:#1e293b;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:600">Share Feedback</a></div></div><div style="background:#f8fafc;padding:16px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;text-align:center"><p style="margin:0;color:#94a3b8;font-size:11px">— The CampusVoice.AI Team</p></div></div>`;
 
     const emailResponse = await resend.emails.send({
       from: "CampusVoice.AI <hello@campusvoice.ai>",
       to: [email],
-      subject: template?.subject?.replace(/\{\{first_name\}\}/g, firstName) || `🎉 Thank You for Joining CampusVoice.AI Beta!`,
+      subject: template?.subject?.replace(/\{\{first_name\}\}/g, firstName) || `Thank You for Joining CampusVoice.AI Beta!`,
       html: htmlContent,
     });
 
     console.log("Beta feedback email sent:", emailResponse);
 
-    // Get user's tenant_id if userId provided
     let tenantId = null;
     if (userId) {
       const { data: profile } = await supabase
@@ -215,16 +191,15 @@ const handler = async (req: Request): Promise<Response> => {
       tenantId = profile?.tenant_id;
     }
 
-    // Log to email_nudges (server-side with service role)
     if (tenantId && userId) {
-      const { error: nudgeError } = await supabase.from("email_nudges").insert({
+      await supabase.from("email_nudges").insert({
         tenant_id: tenantId,
         user_id: userId,
         nudge_type: "beta_thank_you",
         email_count: 1,
         recipient_email: email,
         recipient_name: `${firstName} ${lastName || ""}`.trim(),
-        subject: template?.subject?.replace(/\{\{first_name\}\}/g, firstName) || `🎉 Thank You for Joining CampusVoice.AI Beta!`,
+        subject: template?.subject?.replace(/\{\{first_name\}\}/g, firstName) || `Thank You for Joining CampusVoice.AI Beta!`,
         email_type: "beta_feedback",
         status: "sent",
         provider: "resend",
@@ -232,20 +207,11 @@ const handler = async (req: Request): Promise<Response> => {
         delivery_status: "sent",
         metadata: { manual: true, template_id: template?.id },
       });
-      if (nudgeError) {
-        console.error("Failed to log email nudge:", nudgeError);
-      } else {
-        console.log("Email nudge logged successfully");
-      }
 
-      // Update template send count
       if (template) {
         await supabase
           .from("email_templates")
-          .update({
-            send_count: (template.send_count || 0) + 1,
-            last_sent_at: new Date().toISOString(),
-          })
+          .update({ send_count: (template.send_count || 0) + 1, last_sent_at: new Date().toISOString() })
           .eq("id", template.id);
       }
     }

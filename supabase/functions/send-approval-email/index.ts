@@ -36,7 +36,6 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Sending approval email to ${email} for ${institutionName}`);
 
-    // Map role to display name
     const roleDisplayName = role === 'super_admin' 
       ? 'CampusVoice Super Admin' 
       : role === 'admin' 
@@ -45,153 +44,11 @@ const handler = async (req: Request): Promise<Response> => {
           ? 'University User + Approver'
           : 'University User';
 
-    const subject = `🎉 You're In! Welcome to CampusVoice.AI - ${institutionName}`;
+    const subject = `You're In! Welcome to CampusVoice.AI - ${institutionName}`;
+    const logoUrl = "https://yeuwpuzbccqnqdlnjhfm.supabase.co/storage/v1/object/public/brand-assets/campusvoice-email-logo.png";
 
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="color-scheme" content="light dark">
-        <meta name="supported-color-schemes" content="light dark">
-        <style>
-          :root { color-scheme: light dark; }
-          * { -webkit-text-fill-color: inherit !important; }
-          .logo-img { -webkit-filter: invert(0) contrast(1.08) saturate(1.08) !important; filter: invert(0) contrast(1.08) saturate(1.08) !important; }
-          u + .body { background-color: #f0fdf4 !important; }
-          @media (prefers-color-scheme: dark) {
-            .body-wrapper { background-color: #f0fdf4 !important; }
-            .main-card { background-color: #ffffff !important; }
-            .logo-area { background-color: #ffffff !important; }
-            .logo-tile { background-color: #ffffff !important; }
-            .logo-img { background-color: #ffffff !important; -webkit-filter: invert(0) contrast(1.22) saturate(1.22) !important; filter: invert(0) contrast(1.22) saturate(1.22) !important; opacity: 1 !important; mix-blend-mode: normal !important; }
-            .credentials-box { background-color: #ecfdf5 !important; }
-            .credentials-field { background-color: #ffffff !important; color: #065f46 !important; }
-            .content-area { background-color: #ffffff !important; }
-            .whats-next-box { background-color: #f8fafc !important; }
-            .security-box { background-color: #fef3c7 !important; }
-            .footer-area { background-color: #f8fafc !important; }
-            body, table, td, div, p, a, span, h1, h2, h3, li, ul { 
-              -webkit-text-fill-color: inherit !important;
-            }
-            .dark-text { color: #1e293b !important; -webkit-text-fill-color: #1e293b !important; }
-            .green-text { color: #065f46 !important; -webkit-text-fill-color: #065f46 !important; }
-            .muted-text { color: #475569 !important; -webkit-text-fill-color: #475569 !important; }
-            .white-text { color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; }
-          }
-        </style>
-      </head>
-      <body class="body" style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f0fdf4 !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
-        <div style="display: none; max-height: 0; overflow: hidden;">Your CampusVoice.AI account has been approved - login credentials inside</div>
-        <table class="body-wrapper" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f0fdf4 !important; padding: 40px 20px;" bgcolor="#f0fdf4">
-          <tr>
-            <td align="center">
-              <table class="main-card" width="100%" max-width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff !important; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); overflow: hidden;" bgcolor="#ffffff">
-                <!-- Navy Header Banner with Logo -->
-                <tr>
-                  <td class="logo-area" style="background-color: #1a2036 !important; padding: 40px 40px 32px 40px; text-align: center;" bgcolor="#1a2036">
-                    <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;" bgcolor="#1a2036">
-                      <tr>
-                        <td style="background-color: #ffffff !important; padding: 16px 20px; border-radius: 10px;" bgcolor="#ffffff">
-                          <img class="logo-img" src="https://yeuwpuzbccqnqdlnjhfm.supabase.co/storage/v1/object/public/brand-assets/campusvoice-email-logo.png" alt="CampusVoice.AI" style="height: 50px; width: auto; display: block; background-color: #ffffff !important;" />
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-                
-                <!-- Success Banner -->
-                <tr>
-                  <td style="background-color: #059669 !important; padding: 32px 40px; text-align: center;" bgcolor="#059669">
-                    <div style="font-size: 48px; margin-bottom: 12px; background-color: #059669 !important;" bgcolor="#059669">🎉</div>
-                    <h1 style="margin: 0; color: #ffffff !important; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; background-color: #059669 !important; -webkit-text-fill-color: #ffffff !important;" bgcolor="#059669">You're In!</h1>
-                    <p style="margin: 8px 0 0 0; color: #d1fae5 !important; font-size: 16px; font-weight: 700; background-color: #059669 !important; -webkit-text-fill-color: #d1fae5 !important;" bgcolor="#059669">Welcome to the CampusVoice.AI community</p>
-                  </td>
-                </tr>
-                
-                <!-- Body -->
-                <tr>
-                  <td style="padding: 40px; background-color: #ffffff !important;" bgcolor="#ffffff">
-                    <h2 style="margin: 0 0 16px 0; color: #1e293b !important; font-size: 24px; font-weight: 600; background-color: #ffffff !important;" bgcolor="#ffffff">Great news, ${firstName}!</h2>
-                    <p style="margin: 0 0 24px 0; color: #475569 !important; font-size: 16px; line-height: 1.7; background-color: #ffffff !important;" bgcolor="#ffffff">
-                      Your request to join <strong style="color: #059669 !important;">${institutionName}</strong> on CampusVoice.AI has been <strong style="color: #059669 !important;">approved</strong>! 
-                      We're thrilled to have you as part of our growing community of communication professionals.
-                    </p>
-                    
-                    <p style="margin: 0 0 24px 0; color: #475569 !important; font-size: 16px; line-height: 1.7; background-color: #ffffff !important;" bgcolor="#ffffff">
-                      You've been set up as a <strong style="color: #1e293b !important;">${roleDisplayName}</strong>. Below are your login credentials to get started right away.
-                    </p>
-                    
-                    <!-- Credentials Box -->
-                    <div style="background-color: #ecfdf5 !important; border-radius: 12px; padding: 28px; margin: 28px 0; border: 1px solid #a7f3d0;" bgcolor="#ecfdf5">
-                      <h3 style="margin: 0 0 20px 0; color: #065f46 !important; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; background-color: #ecfdf5 !important;" bgcolor="#ecfdf5">
-                        🔐 Your Login Credentials
-                      </h3>
-                      
-                      <div style="margin-bottom: 16px;">
-                        <p style="margin: 0 0 6px 0; color: #047857 !important; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; background-color: #ecfdf5 !important;" bgcolor="#ecfdf5">Email Address</p>
-                        <p style="margin: 0; color: #065f46 !important; font-size: 16px; font-family: 'SF Mono', Monaco, 'Courier New', monospace; background-color: #ffffff !important; padding: 12px 14px; border-radius: 8px; border: 2px solid #10b981;" bgcolor="#ffffff">${email}</p>
-                      </div>
-                      
-                      <div>
-                        <p style="margin: 0 0 6px 0; color: #047857 !important; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; background-color: #ecfdf5 !important;" bgcolor="#ecfdf5">Temporary Password</p>
-                        <p style="margin: 0; color: #065f46 !important; font-size: 16px; font-family: 'SF Mono', Monaco, 'Courier New', monospace; background-color: #ffffff !important; padding: 12px 14px; border-radius: 8px; border: 2px solid #10b981;" bgcolor="#ffffff">${temporaryPassword}</p>
-                      </div>
-                    </div>
-                    
-                    <!-- CTA Button -->
-                    <div style="text-align: center; margin: 36px 0; background-color: #ffffff !important;" bgcolor="#ffffff">
-                      <a href="https://campusvoice.ai/login" style="display: inline-block; background-color: #059669 !important; color: #ffffff !important; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-size: 18px; font-weight: 700; box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.4);" bgcolor="#059669">
-                        🚀 Start Using CampusVoice.AI
-                      </a>
-                    </div>
-                    
-                    <!-- What's Next Section -->
-                    <div style="background-color: #f8fafc !important; border-radius: 12px; padding: 24px; margin-top: 28px;" bgcolor="#f8fafc">
-                      <h3 style="margin: 0 0 16px 0; color: #1e293b !important; font-size: 16px; font-weight: 600; background-color: #f8fafc !important;" bgcolor="#f8fafc">✨ What's next?</h3>
-                      <ul style="margin: 0; padding-left: 20px; color: #475569 !important; font-size: 14px; line-height: 1.8; background-color: #f8fafc !important;" bgcolor="#f8fafc">
-                        <li style="color: #475569 !important;">Log in with your credentials above</li>
-                        <li style="color: #475569 !important;">Set your permanent password when prompted</li>
-                        <li style="color: #475569 !important;">Explore the AI-powered message builder and evaluator</li>
-                        <li style="color: #475569 !important;">Create your first communication campaign!</li>
-                      </ul>
-                    </div>
-                    
-                    <!-- Security Notice -->
-                    <div style="background-color: #fef3c7 !important; border-left: 4px solid #f59e0b; padding: 16px 20px; border-radius: 0 8px 8px 0; margin-top: 24px;" bgcolor="#fef3c7">
-                      <p style="margin: 0; color: #92400e !important; font-size: 14px; line-height: 1.5; background-color: #fef3c7 !important;" bgcolor="#fef3c7">
-                        <strong style="color: #92400e !important;">🔒 Security tip:</strong> You'll be prompted to change your password on first login. Please keep your credentials secure and don't share them with anyone.
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-                
-                <!-- Footer -->
-                <tr>
-                  <td style="background-color: #f8fafc !important; padding: 28px 40px; border-top: 1px solid #e2e8f0;" bgcolor="#f8fafc">
-                    <p style="margin: 0 0 12px 0; color: #475569 !important; font-size: 15px; text-align: center; font-weight: 500; background-color: #f8fafc !important;" bgcolor="#f8fafc">
-                      🌟 We're excited to have you on board!
-                    </p>
-                    <p style="margin: 0; color: #94a3b8 !important; font-size: 12px; text-align: center; background-color: #f8fafc !important;" bgcolor="#f8fafc">
-                      — The CampusVoice.AI Team 💙
-                    </p>
-                  </td>
-                </tr>
-              </table>
-              
-              <!-- Sub-footer -->
-              <p style="margin: 24px 0 0 0; color: #64748b !important; font-size: 12px; text-align: center; background-color: #f0fdf4 !important;" bgcolor="#f0fdf4">
-                This is an automated message from CampusVoice.AI confirming your account approval.
-              </p>
-            </td>
-          </tr>
-        </table>
-      </body>
-      </html>
-    `;
+    const htmlContent = `<div style="max-width:600px;margin:0 auto;font-family:Arial,sans-serif"><div style="background:#1a2036;padding:28px;text-align:center;border-radius:8px 8px 0 0"><table cellpadding="0" cellspacing="0" style="margin:0 auto"><tr><td style="background:#fff;padding:12px 16px;border-radius:8px"><img src="${logoUrl}" alt="CampusVoice.AI" style="height:40px"/></td></tr></table></div><div style="background:#059669;padding:24px;text-align:center"><p style="font-size:36px;margin:0 0 8px">🎉</p><h1 style="margin:0;color:#fff;font-size:24px">You're In!</h1><p style="margin:6px 0 0;color:#d1fae5;font-size:14px">Welcome to the CampusVoice.AI community</p></div><div style="background:#fff;padding:28px;border:1px solid #e2e8f0;border-top:none"><h2 style="margin:0 0 12px;color:#1e293b;font-size:20px">Great news, ${firstName}!</h2><p style="margin:0 0 18px;color:#475569;font-size:15px;line-height:1.5">Your request to join <strong style="color:#059669">${institutionName}</strong> has been <strong style="color:#059669">approved</strong>! You've been set up as a <strong>${roleDisplayName}</strong>.</p><div style="background:#ecfdf5;border-radius:8px;padding:18px;margin:18px 0;border:1px solid #a7f3d0"><p style="margin:0 0 12px;color:#065f46;font-size:13px;font-weight:600;text-transform:uppercase">Your Login Credentials</p><p style="margin:0 0 4px;color:#047857;font-size:11px;text-transform:uppercase">Email</p><p style="margin:0 0 10px;color:#065f46;font-size:14px;font-family:monospace;background:#fff;padding:8px;border-radius:4px;border:2px solid #10b981">${email}</p><p style="margin:0 0 4px;color:#047857;font-size:11px;text-transform:uppercase">Temporary Password</p><p style="margin:0;color:#065f46;font-size:14px;font-family:monospace;background:#fff;padding:8px;border-radius:4px;border:2px solid #10b981">${temporaryPassword}</p></div><div style="text-align:center;margin:24px 0"><a href="https://campusvoice.ai/login" style="display:inline-block;background:#059669;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600">Start Using CampusVoice.AI</a></div><div style="background:#f8fafc;border-radius:8px;padding:16px;margin:18px 0"><p style="margin:0 0 10px;color:#1e293b;font-size:14px;font-weight:600">What's next?</p><p style="margin:0;color:#475569;font-size:13px;line-height:1.6">Log in, set your password, and explore the AI-powered message builder!</p></div><div style="background:#fef3c7;border-left:3px solid #f59e0b;padding:12px;border-radius:0 6px 6px 0"><p style="margin:0;color:#92400e;font-size:13px"><strong>Security tip:</strong> You'll change your password on first login.</p></div></div><div style="background:#f8fafc;padding:18px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;text-align:center"><p style="margin:0 0 6px;color:#475569;font-size:13px">We're excited to have you on board!</p><p style="margin:0;color:#94a3b8;font-size:11px">— The CampusVoice.AI Team</p></div></div>`;
 
-    // Send email via Resend API directly
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -215,7 +72,6 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Approval email sent successfully:", responseData);
 
-    // Log to email_nudges for tracking
     if (userId && tenantId) {
       const { error: nudgeError } = await supabase.from("email_nudges").insert({
         user_id: userId,
@@ -229,16 +85,10 @@ const handler = async (req: Request): Promise<Response> => {
         provider: "resend",
         provider_message_id: responseData.id,
         delivery_status: "sent",
-        metadata: {
-          institution_name: institutionName,
-          role: role,
-        },
+        metadata: { institution_name: institutionName, role: role },
       });
-
       if (nudgeError) {
         console.error("Error logging email nudge:", nudgeError);
-      } else {
-        console.log("Email nudge logged successfully");
       }
     }
 
@@ -250,10 +100,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.error("Error in send-approval-email function:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   }
 };
