@@ -51,7 +51,7 @@ const getSameInstitutionHtml = (
               <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                 <tr>
                   <td style="background-color: #ffffff; padding: 12px 16px; border-radius: 8px;">
-                    <img src="https://campusvoice.ai/campusvoice-email-logo.png" alt="CampusVoice.AI" style="height: 40px; width: auto;" />
+                    <img src="https://yeuwpuzbccqnqdlnjhfm.supabase.co/storage/v1/object/public/institution-logos/c839f165-e8fe-4de5-b32b-aaa29d298e3b/logo-1766116626433.png" alt="CampusVoice.AI" style="height: 40px; width: auto;" />
                   </td>
                 </tr>
               </table>
@@ -148,7 +148,7 @@ const getOtherInstitutionHtml = (
               <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                 <tr>
                   <td style="background-color: #ffffff; padding: 12px 16px; border-radius: 8px;">
-                    <img src="https://campusvoice.ai/campusvoice-email-logo.png" alt="CampusVoice.AI" style="height: 40px; width: auto;" />
+                    <img src="https://yeuwpuzbccqnqdlnjhfm.supabase.co/storage/v1/object/public/institution-logos/c839f165-e8fe-4de5-b32b-aaa29d298e3b/logo-1766116626433.png" alt="CampusVoice.AI" style="height: 40px; width: auto;" />
                   </td>
                 </tr>
               </table>
