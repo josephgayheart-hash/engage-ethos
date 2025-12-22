@@ -80,7 +80,7 @@ const handler = async (req: Request): Promise<Response> => {
                     <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;" bgcolor="#1a2036">
                       <tr>
                         <td style="background-color: #ffffff !important; padding: 16px 20px; border-radius: 10px;" bgcolor="#ffffff">
-                          <img class="logo-img" src="https://yeuwpuzbccqnqdlnjhfm.supabase.co/storage/v1/object/public/brand-assets/campusvoice-email-logo.png" alt="CampusVoice.AI" style="height: 50px; width: auto; display: block; background-color: #ffffff !important;" />
+                          <img class="logo-img" src="https://yeuwpuzbccqnqdlnjhfm.supabase.co/storage/v1/object/public/brand-assets/CampusVoice.AI_logo.png" alt="CampusVoice.AI" style="height: 50px; width: auto; display: block; background-color: #ffffff !important;" />
                         </td>
                       </tr>
                     </table>
