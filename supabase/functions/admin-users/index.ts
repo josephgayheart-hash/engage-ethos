@@ -84,24 +84,114 @@ serve(async (req) => {
           );
         }
         
-        // Create auth user
-        const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
-          email,
-          password,
-          email_confirm: true,
-        });
+        // Create auth user (auto-recover orphan auth records when possible)
+        const createAuthUser = async () => {
+          return await adminClient.auth.admin.createUser({
+            email,
+            password,
+            email_confirm: true,
+          });
+        };
+
+        let authData: any = null;
+
+        const { data: firstAuthData, error: authError } = await createAuthUser();
 
         if (authError) {
           console.error("Auth creation error:", authError.message, authError);
-          // Provide user-friendly error messages
-          let errorMessage = authError.message;
-          if (authError.message.includes("already been registered") || authError.message.includes("already exists")) {
-            errorMessage = "A user with this email address already exists";
+
+          const isDuplicateEmail =
+            authError.message.includes("already been registered") ||
+            authError.message.includes("already exists");
+
+          if (!isDuplicateEmail) {
+            return new Response(
+              JSON.stringify({ error: authError.message }),
+              { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
           }
-          return new Response(
-            JSON.stringify({ error: errorMessage }),
-            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
+
+          // If the email exists, check whether it's a real user (has a profile) or an orphan auth record.
+          const normalizedEmail = String(email || "").toLowerCase();
+          let existingAuthUser: any = null;
+
+          // Find the auth user by email (paginate to avoid missing users)
+          let page = 1;
+          const perPage = 1000;
+          while (!existingAuthUser) {
+            const { data: usersPage, error: listError } = await adminClient.auth.admin.listUsers({
+              page,
+              perPage,
+            });
+
+            if (listError) {
+              console.error("Auth list users error:", listError);
+              break;
+            }
+
+            existingAuthUser =
+              usersPage.users.find((u: any) => (u.email || "").toLowerCase() === normalizedEmail) ?? null;
+
+            if (existingAuthUser || usersPage.users.length < perPage) break;
+            page += 1;
+          }
+
+          if (existingAuthUser) {
+            const { data: existingProfile } = await adminClient
+              .from("profiles")
+              .select("id, tenant_id")
+              .eq("id", existingAuthUser.id)
+              .maybeSingle();
+
+            if (existingProfile) {
+              return new Response(
+                JSON.stringify({
+                  error: "A user with this email address already exists",
+                  existingUserId: existingProfile.id,
+                  existingTenantId: existingProfile.tenant_id,
+                }),
+                { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+              );
+            }
+
+            // Orphan auth user: delete and retry once.
+            console.log(`Orphan auth user detected for ${email}. Deleting and retrying create_user...`);
+
+            await adminClient
+              .from("institutional_profiles")
+              .update({ created_by_user_id: null })
+              .eq("created_by_user_id", existingAuthUser.id);
+
+            const { error: orphanDeleteError } = await adminClient.auth.admin.deleteUser(existingAuthUser.id);
+
+            if (orphanDeleteError) {
+              console.error("Error deleting orphan auth user:", orphanDeleteError);
+              return new Response(
+                JSON.stringify({ error: "Unable to clean up existing auth record. Please try again." }),
+                { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+              );
+            }
+
+            const { data: retryAuthData, error: retryAuthError } = await createAuthUser();
+            if (retryAuthError) {
+              console.error("Auth creation error after orphan cleanup:", retryAuthError.message, retryAuthError);
+              return new Response(
+                JSON.stringify({ error: "Unable to recreate user after orphan cleanup. Please try again." }),
+                { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+              );
+            }
+
+            authData = retryAuthData;
+          }
+
+          if (!authData) {
+            return new Response(
+              JSON.stringify({ error: "A user with this email address already exists" }),
+              { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+        } else {
+          authData = firstAuthData;
         }
 
         // Create profile
