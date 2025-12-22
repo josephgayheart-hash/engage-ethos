@@ -292,7 +292,10 @@ export default function LandingPage() {
                 <Link 
                   to={feature.link}
                   key={feature.title}
-                  className={`group ${colors.bg} ${colors.border} border-2 rounded-2xl p-6 ${colors.hoverBorder} hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer block`}
+                  className={`group ${colors.bg} ${colors.border} border-2 rounded-2xl p-6 ${colors.hoverBorder} hover:shadow-2xl hover:-translate-y-3 hover:scale-[1.02] transition-all duration-500 ease-out cursor-pointer block`}
+                  style={{ 
+                    transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  }}
                 >
                   <div className={`p-3 rounded-xl ${colors.iconBg} w-fit mb-4 group-hover:scale-110 transition-transform`}>
                     <feature.icon className={`w-6 h-6 ${colors.iconColor}`} />
