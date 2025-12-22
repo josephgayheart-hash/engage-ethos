@@ -450,13 +450,78 @@ serve(async (req) => {
 
         console.log(`Deleting user: ${targetProfile.email} (${userId})`);
 
-        // Delete user roles first
+        // Delete all user-related data before deleting the auth user
+        // Order matters - delete dependent records first
+
+        // Delete personal messages
+        await adminClient
+          .from("personal_messages")
+          .delete()
+          .eq("user_id", userId);
+
+        // Delete playground messages (via conversations)
+        const { data: conversations } = await adminClient
+          .from("playground_conversations")
+          .select("id")
+          .eq("user_id", userId);
+        
+        if (conversations && conversations.length > 0) {
+          const conversationIds = conversations.map(c => c.id);
+          await adminClient
+            .from("playground_messages")
+            .delete()
+            .in("conversation_id", conversationIds);
+        }
+
+        // Delete playground conversations
+        await adminClient
+          .from("playground_conversations")
+          .delete()
+          .eq("user_id", userId);
+
+        // Delete content DNA samples
+        await adminClient
+          .from("content_dna_samples")
+          .delete()
+          .eq("user_id", userId);
+
+        // Delete BYOC uploads
+        await adminClient
+          .from("byoc_uploads")
+          .delete()
+          .eq("user_id", userId);
+
+        // Delete tool usage events
+        await adminClient
+          .from("tool_usage_events")
+          .delete()
+          .eq("user_id", userId);
+
+        // Delete beta feedback
+        await adminClient
+          .from("beta_feedback")
+          .delete()
+          .eq("user_id", userId);
+
+        // Delete email nudges
+        await adminClient
+          .from("email_nudges")
+          .delete()
+          .eq("user_id", userId);
+
+        // Delete referrals
+        await adminClient
+          .from("referrals")
+          .delete()
+          .eq("referrer_user_id", userId);
+
+        // Delete user roles
         await adminClient
           .from("user_roles")
           .delete()
           .eq("user_id", userId);
 
-        // Delete profile (this should cascade, but be explicit)
+        // Delete profile
         await adminClient
           .from("profiles")
           .delete()
