@@ -180,12 +180,12 @@ export default function LandingPage() {
         </div>
 
         {/* Wave Divider to How It Works (dark navy) */}
-        <div className="absolute bottom-0 left-0 right-0">
+        <div className="absolute -bottom-px left-0 right-0">
           <svg 
             viewBox="0 0 1440 120" 
             fill="none" 
             xmlns="http://www.w3.org/2000/svg"
-            className="w-full h-auto"
+            className="w-full h-auto block"
             preserveAspectRatio="none"
           >
             <path 
@@ -208,12 +208,12 @@ export default function LandingPage() {
         <div className="absolute bottom-1/3 right-[20%] w-16 h-16 bg-[hsl(340_75%_55%_/_0.15)] rounded-full blur-xl" />
         
         {/* Wave transition at bottom to mint section */}
-        <div className="absolute bottom-0 left-0 right-0">
+        <div className="absolute -bottom-px left-0 right-0">
           <svg 
             viewBox="0 0 1440 80" 
             fill="none" 
             xmlns="http://www.w3.org/2000/svg"
-            className="w-full h-auto"
+            className="w-full h-auto block"
             preserveAspectRatio="none"
           >
             <path 
@@ -314,12 +314,12 @@ export default function LandingPage() {
         </div>
         
         {/* Wave transition to CTA section */}
-        <div className="absolute bottom-0 left-0 right-0">
+        <div className="absolute -bottom-px left-0 right-0">
           <svg 
             viewBox="0 0 1440 80" 
             fill="none" 
             xmlns="http://www.w3.org/2000/svg"
-            className="w-full h-auto"
+            className="w-full h-auto block"
             preserveAspectRatio="none"
           >
             <path 

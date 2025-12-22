@@ -216,6 +216,7 @@ const AdminPanel = () => {
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sendEmailOpen, setSendEmailOpen] = useState(false);
+  const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
 
   // Fetch all data
   const fetchData = async () => {
@@ -276,6 +277,16 @@ const AdminPanel = () => {
       const { data: sharedTemplatesData } = await supabase
         .from('shared_templates')
         .select('id, tenant_id');
+
+      // Fetch pending onboarding requests count
+      const { data: pendingRequestsData, error: pendingError } = await supabase
+        .from('onboarding_requests')
+        .select('id')
+        .eq('request_status', 'submitted');
+      
+      if (!pendingError) {
+        setPendingRequestsCount(pendingRequestsData?.length || 0);
+      }
 
       // Map users with institution names
       const usersWithInstitution = (profilesData || []).map(profile => {
@@ -621,10 +632,15 @@ const AdminPanel = () => {
                   Users
                 </Link>
               </Button>
-              <Button variant="outline" asChild>
+              <Button variant="outline" asChild className="relative">
                 <Link to="/admin/onboarding">
                   <UserPlus className="w-4 h-4 mr-2" />
                   Requests
+                  {pendingRequestsCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-xs font-bold px-1.5">
+                      {pendingRequestsCount > 99 ? '99+' : pendingRequestsCount}
+                    </span>
+                  )}
                 </Link>
               </Button>
             </div>

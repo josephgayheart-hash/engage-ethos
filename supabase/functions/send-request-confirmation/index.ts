@@ -208,6 +208,115 @@ const handler = async (req: Request): Promise<Response> => {
       console.log("Email nudge logged successfully");
     }
 
+    // Send notification to all super admins
+    try {
+      // Fetch super admin emails
+      const { data: superAdminRoles, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "super_admin");
+
+      if (rolesError) {
+        console.error("Error fetching super admin roles:", rolesError);
+      } else if (superAdminRoles && superAdminRoles.length > 0) {
+        const superAdminUserIds = superAdminRoles.map(r => r.user_id);
+        
+        // Fetch super admin profiles to get emails
+        const { data: superAdminProfiles, error: profilesError } = await supabase
+          .from("profiles")
+          .select("email, first_name")
+          .in("id", superAdminUserIds);
+
+        if (profilesError) {
+          console.error("Error fetching super admin profiles:", profilesError);
+        } else if (superAdminProfiles && superAdminProfiles.length > 0) {
+          const superAdminEmails = superAdminProfiles.map(p => p.email);
+          console.log(`Sending admin notification to ${superAdminEmails.length} super admins`);
+
+          const adminSubject = `🔔 New Access Request: ${firstName} ${lastName} from ${institutionName}`;
+          
+          const adminHtmlContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            </head>
+            <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8fafc;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; padding: 40px 20px;">
+                <tr>
+                  <td align="center">
+                    <table width="100%" max-width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden;">
+                      <!-- Header -->
+                      <tr>
+                        <td style="background-color: #1a2036; padding: 32px 40px; text-align: center;">
+                          <h1 style="margin: 0; color: #ffffff; font-size: 20px; font-weight: 700;">🔔 New Access Request</h1>
+                        </td>
+                      </tr>
+                      
+                      <!-- Body -->
+                      <tr>
+                        <td style="padding: 32px 40px;">
+                          <p style="margin: 0 0 20px 0; color: #475569; font-size: 16px; line-height: 1.6;">
+                            A new user has requested access to CampusVoice.AI:
+                          </p>
+                          
+                          <!-- Request Details -->
+                          <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; border-radius: 0 8px 8px 0; margin: 20px 0;">
+                            <p style="margin: 0 0 8px 0; color: #1e293b; font-size: 16px;"><strong>Name:</strong> ${firstName} ${lastName}</p>
+                            <p style="margin: 0 0 8px 0; color: #1e293b; font-size: 16px;"><strong>Email:</strong> ${email}</p>
+                            <p style="margin: 0; color: #1e293b; font-size: 16px;"><strong>Institution:</strong> ${institutionName}</p>
+                          </div>
+                          
+                          <!-- CTA Button -->
+                          <div style="text-align: center; margin: 28px 0;">
+                            <a href="https://app.campusvoice.ai/admin/onboarding" style="display: inline-block; background-color: #7c3aed; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">
+                              Review Pending Requests
+                            </a>
+                          </div>
+                          
+                          <p style="margin: 20px 0 0 0; color: #64748b; font-size: 14px; text-align: center;">
+                            You're receiving this because you're a CampusVoice.AI super admin.
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </body>
+            </html>
+          `;
+
+          // Send to all super admins
+          const adminEmailResponse = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${RESEND_API_KEY}`,
+            },
+            body: JSON.stringify({
+              from: "CampusVoice.AI <noreply@campusvoice.ai>",
+              to: superAdminEmails,
+              subject: adminSubject,
+              html: adminHtmlContent,
+            }),
+          });
+
+          const adminEmailData = await adminEmailResponse.json();
+          
+          if (!adminEmailResponse.ok) {
+            console.error("Failed to send admin notification:", adminEmailData);
+          } else {
+            console.log(`Admin notification sent successfully to ${superAdminEmails.length} super admins:`, adminEmailData);
+          }
+        }
+      }
+    } catch (adminError) {
+      console.error("Error sending admin notification:", adminError);
+      // Don't throw - we don't want to fail the main email if admin notification fails
+    }
+
     return new Response(JSON.stringify({ success: true, ...responseData }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
