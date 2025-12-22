@@ -1,11 +1,88 @@
 import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import type { SavedMessage, LibraryFilters, SortOption } from '@/types/library';
 
 const STORAGE_KEY = 'uplaybook_message_library';
+const SYNCED_DB_MESSAGES_KEY = 'uplaybook_synced_db_messages';
 
 export function useMessageLibrary() {
   const [messages, setMessages] = useState<SavedMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Check for database messages (like seeded samples) and sync them to localStorage
+  const syncDatabaseMessages = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Get list of already synced message IDs
+      const syncedIds = JSON.parse(localStorage.getItem(SYNCED_DB_MESSAGES_KEY) || '[]');
+
+      // Fetch messages from database that haven't been synced yet
+      const { data: dbMessages, error } = await supabase
+        .from('personal_messages')
+        .select('*')
+        .eq('user_id', user.id)
+        .not('id', 'in', `(${syncedIds.length > 0 ? syncedIds.map((id: string) => `"${id}"`).join(',') : '""'})`);
+
+      if (error) {
+        console.error('Failed to fetch database messages:', error);
+        return;
+      }
+
+      if (dbMessages && dbMessages.length > 0) {
+        // Convert database messages to SavedMessage format
+        const newMessages: SavedMessage[] = dbMessages.map(dbMsg => ({
+          id: dbMsg.id,
+          title: dbMsg.title,
+          content: dbMsg.content,
+          channel: dbMsg.channel as any,
+          audience: dbMsg.audience as any,
+          domain: dbMsg.domain as any,
+          moment: dbMsg.moment as any,
+          goal: dbMsg.goal as any,
+          tone: dbMsg.tone as any,
+          senderRecommendation: dbMsg.sender_recommendation || undefined,
+          createdAt: dbMsg.created_at,
+          updatedAt: dbMsg.updated_at,
+          versions: [{
+            id: crypto.randomUUID(),
+            content: dbMsg.content,
+            createdAt: dbMsg.created_at,
+          }],
+          notes: dbMsg.notes || undefined,
+          approved: dbMsg.approved || false,
+          mode: (dbMsg.mode as 'evaluated' | 'generated' | 'kit') || 'generated',
+          institutionalProfileId: dbMsg.institutional_profile_id || undefined,
+          source: (dbMsg.metadata as any)?.source || 'other',
+        }));
+
+        // Merge with existing localStorage messages
+        const stored = localStorage.getItem(STORAGE_KEY);
+        let existingMessages: SavedMessage[] = [];
+        if (stored) {
+          try {
+            existingMessages = JSON.parse(stored);
+          } catch (e) {
+            console.error('Failed to parse message library:', e);
+          }
+        }
+
+        // Add new messages to the beginning
+        const mergedMessages = [...newMessages, ...existingMessages];
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(mergedMessages));
+        setMessages(mergedMessages);
+
+        // Track synced IDs
+        const newSyncedIds = [...syncedIds, ...dbMessages.map(m => m.id)];
+        localStorage.setItem(SYNCED_DB_MESSAGES_KEY, JSON.stringify(newSyncedIds));
+
+        console.log(`Synced ${newMessages.length} messages from database to local library`);
+      }
+    } catch (err) {
+      console.error('Error syncing database messages:', err);
+    }
+  }, []);
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -17,7 +94,10 @@ export function useMessageLibrary() {
       }
     }
     setIsLoading(false);
-  }, []);
+
+    // Sync database messages after loading local storage
+    syncDatabaseMessages();
+  }, [syncDatabaseMessages]);
 
   const saveToStorage = useCallback((msgs: SavedMessage[]) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs));

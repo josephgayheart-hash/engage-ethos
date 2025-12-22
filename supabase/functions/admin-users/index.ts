@@ -173,6 +173,33 @@ serve(async (req) => {
           }
         }
 
+        // Seed a sample message in the user's personal library
+        try {
+          await adminClient.from("personal_messages").insert({
+            user_id: authData.user.id,
+            tenant_id: effectiveTenantId,
+            title: "Welcome! Here's a Sample Email",
+            content: `Subject: Join Us for Wildcat Weekend!\n\nDear [First Name],\n\nWe're excited to invite you to Wildcat Weekend, happening [Date] on our beautiful campus!\n\nThis is your chance to:\n• Tour our state-of-the-art facilities\n• Meet current students and faculty\n• Experience campus life firsthand\n• Get your questions answered by admissions counselors\n\nSpace is limited, so register today at [Link].\n\nWe can't wait to meet you!\n\nGo Wildcats!\n[Sender Name]\n[Title]\n[Department]`,
+            channel: "email",
+            audience: "prospective-students",
+            domain: "admissions",
+            moment: "inquiry-response",
+            goal: "drive-action",
+            tone: "enthusiastic",
+            mode: "generated",
+            approved: false,
+            notes: "This is a sample message to help you get started. Feel free to edit, duplicate, or delete it!",
+            metadata: { 
+              isSeedMessage: true,
+              source: "onboarding"
+            }
+          });
+          console.log(`Seeded sample message for new user ${authData.user.id}`);
+        } catch (seedError) {
+          console.error("Failed to seed sample message:", seedError);
+          // Don't fail user creation if seeding fails
+        }
+
         // Create audit log
         await adminClient.from("audit_log").insert({
           tenant_id: effectiveTenantId,
@@ -584,6 +611,33 @@ serve(async (req) => {
           tenant_id: profileTenantId,
           role: userRole,
         });
+
+        // Seed a sample message in the user's personal library
+        try {
+          await adminClient.from("personal_messages").insert({
+            user_id: authData.user.id,
+            tenant_id: profileTenantId,
+            title: "Welcome! Here's a Sample Email",
+            content: `Subject: Join Us for Campus Visit Day!\n\nDear [First Name],\n\nWe're excited to invite you to Campus Visit Day, happening [Date] on our beautiful campus!\n\nThis is your chance to:\n• Tour our state-of-the-art facilities\n• Meet current students and faculty\n• Experience campus life firsthand\n• Get your questions answered by admissions counselors\n\nSpace is limited, so register today at [Link].\n\nWe can't wait to meet you!\n\nBest regards,\n[Sender Name]\n[Title]\n[Department]`,
+            channel: "email",
+            audience: "prospective-students",
+            domain: "admissions",
+            moment: "inquiry-response",
+            goal: "drive-action",
+            tone: "enthusiastic",
+            mode: "generated",
+            approved: false,
+            notes: "This is a sample message to help you get started. Feel free to edit, duplicate, or delete it!",
+            metadata: { 
+              isSeedMessage: true,
+              source: "onboarding"
+            }
+          });
+          console.log(`Seeded sample message for onboarded user ${authData.user.id}`);
+        } catch (seedError) {
+          console.error("Failed to seed sample message:", seedError);
+          // Don't fail approval if seeding fails
+        }
 
         // Update request status
         await adminClient
