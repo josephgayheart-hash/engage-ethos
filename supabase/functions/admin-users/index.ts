@@ -453,6 +453,12 @@ serve(async (req) => {
         // Delete all user-related data before deleting the auth user
         // Order matters - delete dependent records first
 
+        // Nullify created_by_user_id on institutional_profiles (don't delete the profiles, just orphan them)
+        await adminClient
+          .from("institutional_profiles")
+          .update({ created_by_user_id: null })
+          .eq("created_by_user_id", userId);
+
         // Delete personal messages
         await adminClient
           .from("personal_messages")
