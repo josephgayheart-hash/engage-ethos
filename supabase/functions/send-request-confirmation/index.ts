@@ -163,7 +163,7 @@ const handler = async (req: Request): Promise<Response> => {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "CampusVoice.AI <noreply@campusvoice.ai>",
+        from: "CampusVoice.AI <onboarding@resend.dev>",
         to: [email],
         subject,
         html: htmlContent,
@@ -296,7 +296,7 @@ const handler = async (req: Request): Promise<Response> => {
               "Authorization": `Bearer ${RESEND_API_KEY}`,
             },
             body: JSON.stringify({
-              from: "CampusVoice.AI <noreply@campusvoice.ai>",
+              from: "CampusVoice.AI <onboarding@resend.dev>",
               to: superAdminEmails,
               subject: adminSubject,
               html: adminHtmlContent,
