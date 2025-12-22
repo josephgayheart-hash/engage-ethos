@@ -525,8 +525,14 @@ serve(async (req) => {
         });
 
         if (authError) {
+          console.error("Auth creation error during onboarding approval:", authError.message, authError);
+          // Provide user-friendly error messages
+          let errorMessage = authError.message;
+          if (authError.message.includes("already been registered") || authError.message.includes("already exists")) {
+            errorMessage = `A user with email "${request.email}" already exists. They may need to be deleted first or this request should be rejected.`;
+          }
           return new Response(
-            JSON.stringify({ error: authError.message }),
+            JSON.stringify({ error: errorMessage }),
             { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
