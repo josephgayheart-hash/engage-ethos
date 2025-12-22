@@ -848,6 +848,76 @@ serve(async (req) => {
         );
       }
 
+      case "cleanup_orphan_auth": {
+        // Super admin only - clean up orphan auth users (users in auth.users but not in profiles)
+        if (!isSuperAdmin) {
+          return new Response(
+            JSON.stringify({ error: "Super admin access required" }),
+            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        const { email } = body;
+        
+        // Get users from auth
+        const { data: authUsers, error: listError } = await adminClient.auth.admin.listUsers();
+        
+        if (listError) {
+          return new Response(
+            JSON.stringify({ error: listError.message }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Find the auth user by email
+        const orphanUser = authUsers.users.find(u => u.email === email);
+        
+        if (!orphanUser) {
+          return new Response(
+            JSON.stringify({ error: "Auth user not found" }),
+            { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Check if they have a profile
+        const { data: profile } = await adminClient
+          .from("profiles")
+          .select("id")
+          .eq("id", orphanUser.id)
+          .single();
+
+        if (profile) {
+          return new Response(
+            JSON.stringify({ error: "User has a profile - use normal delete instead" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Clean up any remaining references
+        await adminClient
+          .from("institutional_profiles")
+          .update({ created_by_user_id: null })
+          .eq("created_by_user_id", orphanUser.id);
+
+        // Delete the orphan auth user
+        const { error: deleteError } = await adminClient.auth.admin.deleteUser(orphanUser.id);
+
+        if (deleteError) {
+          console.error("Error deleting orphan auth user:", deleteError);
+          return new Response(
+            JSON.stringify({ error: deleteError.message }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        console.log(`Cleaned up orphan auth user: ${email}`);
+
+        return new Response(
+          JSON.stringify({ success: true, deletedEmail: email }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
       default:
         return new Response(
           JSON.stringify({ error: "Unknown action" }),

@@ -116,6 +116,11 @@ export default function AdminUsersPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isImpersonatingUser, setIsImpersonatingUser] = useState<string | null>(null);
 
+  // Orphan cleanup dialog
+  const [showOrphanCleanupDialog, setShowOrphanCleanupDialog] = useState(false);
+  const [orphanEmail, setOrphanEmail] = useState('');
+  const [isCleaningOrphan, setIsCleaningOrphan] = useState(false);
+
   const fetchUsers = async () => {
     setIsLoading(true);
     try {
@@ -251,9 +256,17 @@ export default function AdminUsersPage() {
 
       fetchUsers();
     } catch (error: any) {
+      const errorMessage = error.message || 'Failed to create user';
+      
+      // Check if this is a duplicate email error
+      if (errorMessage.includes('already exists')) {
+        setOrphanEmail(newUser.email);
+        setShowOrphanCleanupDialog(true);
+      }
+      
       toast({
         title: 'Error',
-        description: error.message || 'Failed to create user',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -404,6 +417,38 @@ export default function AdminUsersPage() {
     }
   };
 
+  const handleCleanupOrphan = async () => {
+    if (!orphanEmail) return;
+
+    setIsCleaningOrphan(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-users', {
+        body: {
+          action: 'cleanup_orphan_auth',
+          email: orphanEmail,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast({
+        title: 'Orphan User Cleaned Up',
+        description: `Auth record for ${orphanEmail} has been removed. You can now create a new user with this email.`,
+      });
+
+      setShowOrphanCleanupDialog(false);
+      setOrphanEmail('');
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to clean up orphan user',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsCleaningOrphan(false);
+    }
+  };
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({ title: 'Copied to clipboard' });
@@ -984,6 +1029,57 @@ export default function AdminUsersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Orphan Cleanup Dialog - Super Admin Only */}
+      {isSuperAdmin && (
+        <Dialog open={showOrphanCleanupDialog} onOpenChange={setShowOrphanCleanupDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <div className="mx-auto bg-amber-100 rounded-full p-3 mb-2">
+                <AlertTriangle className="w-6 h-6 text-amber-600" />
+              </div>
+              <DialogTitle className="font-serif text-center">Orphan Auth Record Detected</DialogTitle>
+              <DialogDescription className="text-center">
+                An auth record exists for <strong>{orphanEmail}</strong> but there's no corresponding user profile. This can happen after a partial deletion.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 my-4">
+              <p className="text-sm text-amber-800">
+                <strong>Would you like to clean up this orphan record?</strong> This will remove the auth-only record so you can create a fresh user with this email.
+              </p>
+            </div>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowOrphanCleanupDialog(false);
+                  setOrphanEmail('');
+                }}
+                disabled={isCleaningOrphan}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleCleanupOrphan}
+                disabled={isCleaningOrphan}
+                className="bg-amber-600 hover:bg-amber-700"
+              >
+                {isCleaningOrphan ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Cleaning...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Clean Up & Retry
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
