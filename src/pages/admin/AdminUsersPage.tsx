@@ -217,13 +217,40 @@ export default function AdminUsersPage() {
         },
       });
 
-      // Check for edge function errors - the error might be in data.error even when error is null
+      // Handle edge function errors without throwing (prevents blank-screen error overlays)
       if (error) {
-        // Try to extract error message from the error object
         const errorMessage = error.message || 'Failed to create user';
-        throw new Error(errorMessage);
+
+        if (errorMessage.includes('already exists')) {
+          setShowCreateDialog(false);
+          setOrphanEmail(newUser.email);
+          setShowOrphanCleanupDialog(true);
+        }
+
+        toast({
+          title: 'Error',
+          description: errorMessage,
+          variant: 'destructive',
+        });
+        return;
       }
-      if (data?.error) throw new Error(data.error);
+
+      if (data?.error) {
+        const errorMessage = String(data.error);
+
+        if (errorMessage.includes('already exists')) {
+          setShowCreateDialog(false);
+          setOrphanEmail(newUser.email);
+          setShowOrphanCleanupDialog(true);
+        }
+
+        toast({
+          title: 'Error',
+          description: errorMessage,
+          variant: 'destructive',
+        });
+        return;
+      }
 
       setShowCreateDialog(false);
       setCredentials({ email: newUser.email, password: tempPassword });
