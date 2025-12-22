@@ -55,7 +55,7 @@ const getWhereHaveYouBeenHtml = (firstName: string, institutionName: string, las
               <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                 <tr>
                   <td style="background-color: #ffffff; padding: 12px 16px; border-radius: 8px;">
-                    <img src="https://yeuwpuzbccqnqdlnjhfm.supabase.co/storage/v1/object/public/institution-logos/campusvoice-logo.png" alt="CampusVoice.AI" style="height: 40px; width: auto;" />
+                    <img src="https://campusvoice.ai/campusvoice-email-logo.png" alt="CampusVoice.AI" style="height: 40px; width: auto;" />
                   </td>
                 </tr>
               </table>
