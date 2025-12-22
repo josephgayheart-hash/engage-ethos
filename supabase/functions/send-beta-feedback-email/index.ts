@@ -30,6 +30,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const body: EmailRequest = await req.json();
     const appUrl = "https://campusvoice.ai";
+    const logoUrl = `${supabaseUrl}/storage/v1/object/public/brand-assets/CampusVoice.AI_logo.png`;
 
     // If runAutomated is true, find eligible users (24hrs since last login, never received this email)
     if (body.runAutomated) {
@@ -102,7 +103,8 @@ const handler = async (req: Request): Promise<Response> => {
           .replace(/\{\{last_name\}\}/g, user.last_name || "")
           .replace(/\{\{email\}\}/g, user.email)
           .replace(/\{\{institution\}\}/g, tenant?.institution_name || "")
-          .replace(/\{\{app_url\}\}/g, appUrl);
+          .replace(/\{\{app_url\}\}/g, appUrl)
+          .replace(/\{\{logo_url\}\}/g, logoUrl);
 
         try {
           await resend.emails.send({
@@ -181,6 +183,7 @@ const handler = async (req: Request): Promise<Response> => {
           .replace(/\{\{email\}\}/g, email)
           .replace(/\{\{institution\}\}/g, institutionName || "")
           .replace(/\{\{app_url\}\}/g, appUrl)
+          .replace(/\{\{logo_url\}\}/g, logoUrl)
       : `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h1 style="color: #4F46E5;">🎉 Thank You for Joining CampusVoice.AI Beta!</h1>
           <p>Hi ${firstName},</p>
