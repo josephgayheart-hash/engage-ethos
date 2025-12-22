@@ -395,12 +395,12 @@ export default function HowItWorksSection() {
       </div>
 
       {/* Wave Divider to next section */}
-      <div className="absolute bottom-0 left-0 right-0">
+      <div className="absolute -bottom-px left-0 right-0">
         <svg
           viewBox="0 0 1440 80"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-auto"
+          className="w-full h-auto block"
           preserveAspectRatio="none"
         >
           <path
