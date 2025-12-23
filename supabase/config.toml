@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.extract-semantics]
 verify_jwt = true
+
+[functions.track-email-click]
+verify_jwt = false

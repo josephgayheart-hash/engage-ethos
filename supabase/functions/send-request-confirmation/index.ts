@@ -22,6 +22,11 @@ interface RequestConfirmationEmailRequest {
   requestId?: string;
 }
 
+const getTrackingUrl = (nudgeId: string, destination: string, linkName: string) => {
+  const baseUrl = `${SUPABASE_URL}/functions/v1/track-email-click`;
+  return `${baseUrl}?id=${nudgeId}&url=${encodeURIComponent(destination)}&link=${encodeURIComponent(linkName)}`;
+};
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -62,25 +67,23 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Request confirmation email sent successfully:", responseData);
 
     const systemTenantId = "00000000-0000-0000-0000-000000000000";
-    const { error: nudgeError } = await supabase.from("email_nudges").insert({
+    await supabase.from("email_nudges").insert({
       user_id: requestId || "00000000-0000-0000-0000-000000000001",
       tenant_id: systemTenantId,
       nudge_type: "request_confirmation",
       email_type: "request_confirmation",
       email_count: 1,
-      subject: subject,
+      subject,
       recipient_name: `${firstName} ${lastName}`,
       recipient_email: email,
       provider: "resend",
       provider_message_id: responseData.id,
       delivery_status: "sent",
+      status: "sent",
       metadata: { institution_name: institutionName, request_id: requestId },
     });
-    if (nudgeError) {
-      console.error("Error logging email nudge:", nudgeError);
-    }
 
-    // Send notification to super admins
+    // Send notification to super admins with tracking
     try {
       const { data: superAdminRoles } = await supabase
         .from("user_roles")
@@ -91,16 +94,36 @@ const handler = async (req: Request): Promise<Response> => {
         const superAdminUserIds = superAdminRoles.map(r => r.user_id);
         const { data: superAdminProfiles } = await supabase
           .from("profiles")
-          .select("email")
+          .select("email, tenant_id")
           .in("id", superAdminUserIds);
 
         if (superAdminProfiles && superAdminProfiles.length > 0) {
           const superAdminEmails = superAdminProfiles.map(p => p.email);
           const adminSubject = `New Access Request: ${firstName} ${lastName} from ${institutionName}`;
-          
-          const adminHtml = `<div style="max-width:600px;margin:0 auto;font-family:Arial,sans-serif"><div style="background:#1a2036;padding:24px;text-align:center;border-radius:8px 8px 0 0"><h1 style="margin:0;color:#fff;font-size:18px">New Access Request</h1></div><div style="background:#fff;padding:24px;border:1px solid #e2e8f0;border-top:none"><p style="margin:0 0 16px;color:#475569;font-size:15px">A new user has requested access:</p><div style="background:#fef3c7;border-left:3px solid #f59e0b;padding:14px;border-radius:0 6px 6px 0;margin:16px 0"><p style="margin:0 0 6px;color:#1e293b;font-size:14px"><strong>Name:</strong> ${firstName} ${lastName}</p><p style="margin:0 0 6px;color:#1e293b;font-size:14px"><strong>Email:</strong> ${email}</p><p style="margin:0;color:#1e293b;font-size:14px"><strong>Institution:</strong> ${institutionName}</p></div><div style="text-align:center;margin:20px 0"><a href="https://www.campusvoice.ai/admin/onboarding" style="display:inline-block;background:#7c3aed;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600;font-size:14px">Review Requests</a></div><p style="margin:16px 0 0;color:#64748b;font-size:12px;text-align:center">You're receiving this because you're a super admin.</p></div></div>`;
+          const adminUrl = "https://www.campusvoice.ai/admin/onboarding";
 
-          await fetch("https://api.resend.com/emails", {
+          // Create admin nudge for tracking
+          const { data: adminNudge } = await supabase.from("email_nudges").insert({
+            user_id: superAdminUserIds[0],
+            tenant_id: superAdminProfiles[0]?.tenant_id || systemTenantId,
+            nudge_type: "admin_notification",
+            email_type: "admin_notification",
+            email_count: 1,
+            subject: adminSubject,
+            recipient_name: "Super Admins",
+            recipient_email: superAdminEmails.join(", "),
+            status: "pending",
+            delivery_status: "pending",
+            metadata: { request_from: email, institution: institutionName },
+          }).select("id").single();
+
+          const trackingAdminUrl = adminNudge?.id 
+            ? getTrackingUrl(adminNudge.id, adminUrl, "review_requests_button")
+            : adminUrl;
+
+          const adminHtml = `<div style="max-width:600px;margin:0 auto;font-family:Arial,sans-serif"><div style="background:#1a2036;padding:24px;text-align:center;border-radius:8px 8px 0 0"><h1 style="margin:0;color:#fff;font-size:18px">New Access Request</h1></div><div style="background:#fff;padding:24px;border:1px solid #e2e8f0;border-top:none"><p style="margin:0 0 16px;color:#475569;font-size:15px">A new user has requested access:</p><div style="background:#fef3c7;border-left:3px solid #f59e0b;padding:14px;border-radius:0 6px 6px 0;margin:16px 0"><p style="margin:0 0 6px;color:#1e293b;font-size:14px"><strong>Name:</strong> ${firstName} ${lastName}</p><p style="margin:0 0 6px;color:#1e293b;font-size:14px"><strong>Email:</strong> ${email}</p><p style="margin:0;color:#1e293b;font-size:14px"><strong>Institution:</strong> ${institutionName}</p></div><div style="text-align:center;margin:20px 0"><a href="${trackingAdminUrl}" style="display:inline-block;background:#7c3aed;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600;font-size:14px">Review Requests</a></div><p style="margin:16px 0 0;color:#64748b;font-size:12px;text-align:center">You're receiving this because you're a super admin.</p></div></div>`;
+
+          const adminResponse = await fetch("https://api.resend.com/emails", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -113,6 +136,16 @@ const handler = async (req: Request): Promise<Response> => {
               html: adminHtml,
             }),
           });
+
+          const adminResponseData = await adminResponse.json();
+          if (adminNudge?.id) {
+            await supabase.from("email_nudges").update({
+              status: adminResponse.ok ? "sent" : "failed",
+              provider: "resend",
+              provider_message_id: adminResponseData?.id,
+              delivery_status: adminResponse.ok ? "sent" : "failed",
+            }).eq("id", adminNudge.id);
+          }
           console.log(`Admin notification sent to ${superAdminEmails.length} super admins`);
         }
       }

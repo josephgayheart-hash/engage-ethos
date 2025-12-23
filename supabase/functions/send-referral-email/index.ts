@@ -25,14 +25,19 @@ interface ReferralEmailRequest {
 
 const logoUrl = "https://yeuwpuzbccqnqdlnjhfm.supabase.co/storage/v1/object/public/brand-assets/campusvoice-email-logo.png";
 
-const getSameInstitutionHtml = (refereeName: string, referrerName: string, institutionName: string, tenantId: string, personalMessage?: string) => {
-  const messageBlock = personalMessage ? `<div style="background:#fef3c7;border-radius:6px;padding:14px;margin:16px 0;border-left:3px solid #f59e0b"><p style="margin:0 0 4px;color:#92400e;font-size:11px;font-weight:600;text-transform:uppercase">Message from ${referrerName}:</p><p style="margin:0;color:#78350f;font-size:14px;font-style:italic">"${personalMessage}"</p></div>` : '';
-  return `<div style="max-width:600px;margin:0 auto;font-family:Arial,sans-serif"><div style="background:#1a2036;padding:24px;text-align:center;border-radius:8px 8px 0 0"><table cellpadding="0" cellspacing="0" style="margin:0 auto"><tr><td style="background:#fff;padding:10px 14px;border-radius:6px"><img src="${logoUrl}" alt="CampusVoice.AI" style="height:36px"/></td></tr></table><h1 style="margin:16px 0 0;color:#fff;font-size:20px">You're Invited to Join!</h1></div><div style="background:#fff;padding:24px;border:1px solid #e2e8f0;border-top:none"><p style="margin:0 0 14px;color:#1e293b;font-size:16px;font-weight:600">Hi ${refereeName},</p><p style="margin:0 0 16px;color:#475569;font-size:14px;line-height:1.5"><strong>${referrerName}</strong> has invited you to join the <strong>${institutionName}</strong> team on <strong>CampusVoice.AI</strong>.</p>${messageBlock}<div style="background:#eff6ff;border-radius:6px;padding:16px;margin:16px 0;border-left:3px solid #3b82f6"><p style="margin:0 0 10px;color:#1e40af;font-size:13px;font-weight:600">What is CampusVoice.AI?</p><p style="margin:0;color:#1e40af;font-size:13px;line-height:1.5">AI-powered message creation, content scoring, and shared templates for higher ed teams.</p></div><div style="text-align:center;margin:20px 0"><a href="https://www.campusvoice.ai/request-access?ref=colleague&tenant=${tenantId}&institution=${encodeURIComponent(institutionName)}" style="display:inline-block;background:#3b82f6;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:600">Complete Your Profile</a></div></div><div style="background:#f8fafc;padding:16px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;text-align:center"><p style="margin:0;color:#94a3b8;font-size:11px">— The CampusVoice.AI Team</p></div></div>`;
+const getTrackingUrl = (nudgeId: string, destination: string, linkName: string) => {
+  const baseUrl = `${SUPABASE_URL}/functions/v1/track-email-click`;
+  return `${baseUrl}?id=${nudgeId}&url=${encodeURIComponent(destination)}&link=${encodeURIComponent(linkName)}`;
 };
 
-const getOtherInstitutionHtml = (refereeName: string, referrerName: string, referrerInstitution: string, refereeInstitution: string, personalMessage?: string) => {
+const getSameInstitutionHtml = (refereeName: string, referrerName: string, institutionName: string, trackingUrl: string, personalMessage?: string) => {
   const messageBlock = personalMessage ? `<div style="background:#fef3c7;border-radius:6px;padding:14px;margin:16px 0;border-left:3px solid #f59e0b"><p style="margin:0 0 4px;color:#92400e;font-size:11px;font-weight:600;text-transform:uppercase">Message from ${referrerName}:</p><p style="margin:0;color:#78350f;font-size:14px;font-style:italic">"${personalMessage}"</p></div>` : '';
-  return `<div style="max-width:600px;margin:0 auto;font-family:Arial,sans-serif"><div style="background:#1a2036;padding:24px;text-align:center;border-radius:8px 8px 0 0"><table cellpadding="0" cellspacing="0" style="margin:0 auto"><tr><td style="background:#fff;padding:10px 14px;border-radius:6px"><img src="${logoUrl}" alt="CampusVoice.AI" style="height:36px"/></td></tr></table><h1 style="margin:16px 0 0;color:#fff;font-size:20px">You've Been Invited!</h1></div><div style="background:#fff;padding:24px;border:1px solid #e2e8f0;border-top:none"><p style="margin:0 0 14px;color:#1e293b;font-size:16px;font-weight:600">Hi ${refereeName},</p><p style="margin:0 0 16px;color:#475569;font-size:14px;line-height:1.5"><strong>${referrerName}</strong> from <strong>${referrerInstitution}</strong> thinks you and <strong>${refereeInstitution}</strong> would love <strong>CampusVoice.AI</strong>!</p>${messageBlock}<div style="background:#eff6ff;border-radius:6px;padding:16px;margin:16px 0;border-left:3px solid #3b82f6"><p style="margin:0 0 10px;color:#1e40af;font-size:13px;font-weight:600">What is CampusVoice.AI?</p><p style="margin:0;color:#1e40af;font-size:13px;line-height:1.5">AI-powered message creation, content scoring, and institutional templates for higher ed.</p></div><div style="text-align:center;margin:20px 0"><a href="https://www.campusvoice.ai/request-access?ref=colleague&institution=${encodeURIComponent(refereeInstitution)}" style="display:inline-block;background:#3b82f6;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:600">Request Access for ${refereeInstitution}</a></div></div><div style="background:#f8fafc;padding:16px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;text-align:center"><p style="margin:0;color:#94a3b8;font-size:11px">— The CampusVoice.AI Team</p></div></div>`;
+  return `<div style="max-width:600px;margin:0 auto;font-family:Arial,sans-serif"><div style="background:#1a2036;padding:24px;text-align:center;border-radius:8px 8px 0 0"><table cellpadding="0" cellspacing="0" style="margin:0 auto"><tr><td style="background:#fff;padding:10px 14px;border-radius:6px"><img src="${logoUrl}" alt="CampusVoice.AI" style="height:36px"/></td></tr></table><h1 style="margin:16px 0 0;color:#fff;font-size:20px">You're Invited to Join!</h1></div><div style="background:#fff;padding:24px;border:1px solid #e2e8f0;border-top:none"><p style="margin:0 0 14px;color:#1e293b;font-size:16px;font-weight:600">Hi ${refereeName},</p><p style="margin:0 0 16px;color:#475569;font-size:14px;line-height:1.5"><strong>${referrerName}</strong> has invited you to join the <strong>${institutionName}</strong> team on <strong>CampusVoice.AI</strong>.</p>${messageBlock}<div style="background:#eff6ff;border-radius:6px;padding:16px;margin:16px 0;border-left:3px solid #3b82f6"><p style="margin:0 0 10px;color:#1e40af;font-size:13px;font-weight:600">What is CampusVoice.AI?</p><p style="margin:0;color:#1e40af;font-size:13px;line-height:1.5">AI-powered message creation, content scoring, and shared templates for higher ed teams.</p></div><div style="text-align:center;margin:20px 0"><a href="${trackingUrl}" style="display:inline-block;background:#3b82f6;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:600">Complete Your Profile</a></div></div><div style="background:#f8fafc;padding:16px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;text-align:center"><p style="margin:0;color:#94a3b8;font-size:11px">— The CampusVoice.AI Team</p></div></div>`;
+};
+
+const getOtherInstitutionHtml = (refereeName: string, referrerName: string, referrerInstitution: string, refereeInstitution: string, trackingUrl: string, personalMessage?: string) => {
+  const messageBlock = personalMessage ? `<div style="background:#fef3c7;border-radius:6px;padding:14px;margin:16px 0;border-left:3px solid #f59e0b"><p style="margin:0 0 4px;color:#92400e;font-size:11px;font-weight:600;text-transform:uppercase">Message from ${referrerName}:</p><p style="margin:0;color:#78350f;font-size:14px;font-style:italic">"${personalMessage}"</p></div>` : '';
+  return `<div style="max-width:600px;margin:0 auto;font-family:Arial,sans-serif"><div style="background:#1a2036;padding:24px;text-align:center;border-radius:8px 8px 0 0"><table cellpadding="0" cellspacing="0" style="margin:0 auto"><tr><td style="background:#fff;padding:10px 14px;border-radius:6px"><img src="${logoUrl}" alt="CampusVoice.AI" style="height:36px"/></td></tr></table><h1 style="margin:16px 0 0;color:#fff;font-size:20px">You've Been Invited!</h1></div><div style="background:#fff;padding:24px;border:1px solid #e2e8f0;border-top:none"><p style="margin:0 0 14px;color:#1e293b;font-size:16px;font-weight:600">Hi ${refereeName},</p><p style="margin:0 0 16px;color:#475569;font-size:14px;line-height:1.5"><strong>${referrerName}</strong> from <strong>${referrerInstitution}</strong> thinks you and <strong>${refereeInstitution}</strong> would love <strong>CampusVoice.AI</strong>!</p>${messageBlock}<div style="background:#eff6ff;border-radius:6px;padding:16px;margin:16px 0;border-left:3px solid #3b82f6"><p style="margin:0 0 10px;color:#1e40af;font-size:13px;font-weight:600">What is CampusVoice.AI?</p><p style="margin:0;color:#1e40af;font-size:13px;line-height:1.5">AI-powered message creation, content scoring, and institutional templates for higher ed.</p></div><div style="text-align:center;margin:20px 0"><a href="${trackingUrl}" style="display:inline-block;background:#3b82f6;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:600">Request Access for ${refereeInstitution}</a></div></div><div style="background:#f8fafc;padding:16px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;text-align:center"><p style="margin:0;color:#94a3b8;font-size:11px">— The CampusVoice.AI Team</p></div></div>`;
 };
 
 const handler = async (req: Request): Promise<Response> => {
@@ -45,15 +50,50 @@ const handler = async (req: Request): Promise<Response> => {
     const data: ReferralEmailRequest = await req.json();
     console.log("Processing referral email:", data.referralType, "for", data.refereeEmail);
 
-    let emailHtml: string;
     let subject: string;
-
     if (data.referralType === "same_institution") {
       subject = `${data.referrerName} invited you to join ${data.institutionName} on CampusVoice.AI`;
-      emailHtml = getSameInstitutionHtml(data.refereeName, data.referrerName, data.institutionName, data.tenantId || "", data.personalMessage);
     } else {
       subject = `${data.referrerName} thinks you'd love CampusVoice.AI!`;
-      emailHtml = getOtherInstitutionHtml(data.refereeName, data.referrerName, data.referrerInstitution, data.institutionName, data.personalMessage);
+    }
+
+    // Create nudge record first to get ID for tracking
+    let nudgeId: string | null = null;
+    if (data.tenantId && data.referrerUserId) {
+      const { data: nudge, error: nudgeError } = await supabase.from("email_nudges").insert({
+        user_id: data.referrerUserId,
+        tenant_id: data.tenantId,
+        nudge_type: "referral",
+        email_type: "referral",
+        email_count: 1,
+        subject,
+        recipient_name: data.refereeName,
+        recipient_email: data.refereeEmail,
+        status: "pending",
+        delivery_status: "pending",
+        metadata: { referral_type: data.referralType, referrer_name: data.referrerName, institution: data.institutionName },
+      }).select("id").single();
+      
+      if (!nudgeError && nudge) {
+        nudgeId = nudge.id;
+        console.log(`Created nudge record: ${nudgeId}`);
+      }
+    }
+
+    // Build tracking URLs
+    let emailHtml: string;
+    if (data.referralType === "same_institution") {
+      const destinationUrl = `https://www.campusvoice.ai/request-access?ref=colleague&tenant=${data.tenantId}&institution=${encodeURIComponent(data.institutionName)}`;
+      const trackingUrl = nudgeId 
+        ? getTrackingUrl(nudgeId, destinationUrl, "complete_profile_button")
+        : destinationUrl;
+      emailHtml = getSameInstitutionHtml(data.refereeName, data.referrerName, data.institutionName, trackingUrl, data.personalMessage);
+    } else {
+      const destinationUrl = `https://www.campusvoice.ai/request-access?ref=colleague&institution=${encodeURIComponent(data.institutionName)}`;
+      const trackingUrl = nudgeId 
+        ? getTrackingUrl(nudgeId, destinationUrl, "request_access_button")
+        : destinationUrl;
+      emailHtml = getOtherInstitutionHtml(data.refereeName, data.referrerName, data.referrerInstitution, data.institutionName, trackingUrl, data.personalMessage);
     }
 
     const response = await fetch("https://api.resend.com/emails", {
@@ -74,29 +114,22 @@ const handler = async (req: Request): Promise<Response> => {
     
     if (!response.ok) {
       console.error("Resend API error:", responseData);
+      if (nudgeId) {
+        await supabase.from("email_nudges").update({ status: "failed", delivery_status: "failed" }).eq("id", nudgeId);
+      }
       throw new Error(responseData.message || "Failed to send email");
     }
 
     console.log("Referral email sent successfully:", responseData);
 
-    if (data.tenantId && data.referrerUserId) {
-      const { error: nudgeError } = await supabase.from("email_nudges").insert({
-        user_id: data.referrerUserId,
-        tenant_id: data.tenantId,
-        nudge_type: "referral",
-        email_type: "referral",
-        email_count: 1,
-        subject: subject,
-        recipient_name: data.refereeName,
-        recipient_email: data.refereeEmail,
+    // Update nudge with success status
+    if (nudgeId) {
+      await supabase.from("email_nudges").update({
+        status: "sent",
         provider: "resend",
         provider_message_id: responseData.id,
         delivery_status: "sent",
-        metadata: { referral_type: data.referralType, referrer_name: data.referrerName, institution: data.institutionName },
-      });
-      if (nudgeError) {
-        console.error("Error logging email nudge:", nudgeError);
-      }
+      }).eq("id", nudgeId);
     }
 
     return new Response(JSON.stringify({ success: true, result: responseData }), {

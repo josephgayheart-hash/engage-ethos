@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,6 +20,11 @@ interface EmailRequest {
 }
 
 const logoUrl = "https://yeuwpuzbccqnqdlnjhfm.supabase.co/storage/v1/object/public/brand-assets/campusvoice-email-logo.png";
+
+const getTrackingUrl = (nudgeId: string, destination: string, linkName: string) => {
+  const baseUrl = `${SUPABASE_URL}/functions/v1/track-email-click`;
+  return `${baseUrl}?id=${nudgeId}&url=${encodeURIComponent(destination)}&link=${encodeURIComponent(linkName)}`;
+};
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -92,16 +98,37 @@ const handler = async (req: Request): Promise<Response> => {
           .eq("id", user.tenant_id)
           .single();
 
+        // Create nudge first for tracking
+        const { data: nudge } = await supabase.from("email_nudges").insert({
+          tenant_id: user.tenant_id,
+          user_id: user.id,
+          nudge_type: "beta_thank_you",
+          email_count: 1,
+          recipient_email: user.email,
+          recipient_name: `${user.first_name} ${user.last_name}`,
+          subject: template.subject.replace(/\{\{first_name\}\}/g, user.first_name),
+          email_type: "beta_feedback",
+          status: "pending",
+          metadata: { automated: true, template_id: template.id },
+        }).select("id").single();
+
+        const nudgeId = nudge?.id;
+        const feedbackUrl = `${appUrl}/feedback`;
+        const trackingFeedbackUrl = nudgeId 
+          ? getTrackingUrl(nudgeId, feedbackUrl, "share_feedback_button")
+          : feedbackUrl;
+
         const htmlContent = template.html_content
           .replace(/\{\{first_name\}\}/g, user.first_name)
           .replace(/\{\{last_name\}\}/g, user.last_name || "")
           .replace(/\{\{email\}\}/g, user.email)
           .replace(/\{\{institution\}\}/g, tenant?.institution_name || "")
           .replace(/\{\{app_url\}\}/g, appUrl)
-          .replace(/\{\{logo_url\}\}/g, logoUrl);
+          .replace(/\{\{logo_url\}\}/g, logoUrl)
+          .replace(/href="[^"]*\/feedback"/g, `href="${trackingFeedbackUrl}"`);
 
         try {
-          await resend.emails.send({
+          const emailResponse = await resend.emails.send({
             from: "CampusVoice.AI <hello@campusvoice.ai>",
             to: [user.email],
             subject: template.subject.replace(/\{\{first_name\}\}/g, user.first_name),
@@ -116,18 +143,14 @@ const handler = async (req: Request): Promise<Response> => {
             metadata: { automated: true },
           });
 
-          await supabase.from("email_nudges").insert({
-            tenant_id: user.tenant_id,
-            user_id: user.id,
-            nudge_type: "beta_thank_you",
-            email_count: 1,
-            recipient_email: user.email,
-            recipient_name: `${user.first_name} ${user.last_name}`,
-            subject: template.subject.replace(/\{\{first_name\}\}/g, user.first_name),
-            email_type: "beta_feedback",
-            status: "sent",
-            metadata: { automated: true, template_id: template.id },
-          });
+          if (nudgeId) {
+            await supabase.from("email_nudges").update({
+              status: "sent",
+              provider: "resend",
+              provider_message_id: emailResponse?.data?.id || null,
+              delivery_status: "sent",
+            }).eq("id", nudgeId);
+          }
 
           await supabase
             .from("email_templates")
@@ -138,6 +161,9 @@ const handler = async (req: Request): Promise<Response> => {
           console.log(`Sent beta feedback email to ${user.email}`);
         } catch (emailError) {
           console.error(`Failed to send to ${user.email}:`, emailError);
+          if (nudgeId) {
+            await supabase.from("email_nudges").update({ status: "failed", delivery_status: "failed" }).eq("id", nudgeId);
+          }
         }
       }
 
@@ -162,25 +188,6 @@ const handler = async (req: Request): Promise<Response> => {
       .eq("template_key", "beta_thank_you")
       .maybeSingle();
 
-    const htmlContent = template
-      ? template.html_content
-          .replace(/\{\{first_name\}\}/g, firstName)
-          .replace(/\{\{last_name\}\}/g, lastName || "")
-          .replace(/\{\{email\}\}/g, email)
-          .replace(/\{\{institution\}\}/g, institutionName || "")
-          .replace(/\{\{app_url\}\}/g, appUrl)
-          .replace(/\{\{logo_url\}\}/g, logoUrl)
-      : `<div style="max-width:600px;margin:0 auto;font-family:Arial,sans-serif"><div style="background:#1a2036;padding:24px;text-align:center;border-radius:8px 8px 0 0"><table cellpadding="0" cellspacing="0" style="margin:0 auto"><tr><td style="background:#fff;padding:10px 14px;border-radius:6px"><img src="${logoUrl}" alt="CampusVoice.AI" style="height:36px"/></td></tr></table><h1 style="margin:16px 0 0;color:#fff;font-size:20px">Thank You!</h1></div><div style="background:#fff;padding:24px;border:1px solid #e2e8f0;border-top:none"><p style="margin:0 0 14px;color:#1e293b;font-size:16px">Hi ${firstName},</p><p style="margin:0 0 16px;color:#475569;font-size:14px;line-height:1.5">Thanks for exploring CampusVoice.AI! Your feedback shapes our product.</p><div style="text-align:center;margin:20px 0"><a href="${appUrl}/feedback" style="display:inline-block;background:#1e293b;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:600">Share Feedback</a></div></div><div style="background:#f8fafc;padding:16px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;text-align:center"><p style="margin:0;color:#94a3b8;font-size:11px">— The CampusVoice.AI Team</p></div></div>`;
-
-    const emailResponse = await resend.emails.send({
-      from: "CampusVoice.AI <hello@campusvoice.ai>",
-      to: [email],
-      subject: template?.subject?.replace(/\{\{first_name\}\}/g, firstName) || `Thank You for Joining CampusVoice.AI Beta!`,
-      html: htmlContent,
-    });
-
-    console.log("Beta feedback email sent:", emailResponse);
-
     let tenantId = null;
     if (userId) {
       const { data: profile } = await supabase
@@ -191,8 +198,10 @@ const handler = async (req: Request): Promise<Response> => {
       tenantId = profile?.tenant_id;
     }
 
+    // Create nudge first for tracking
+    let nudgeId: string | null = null;
     if (tenantId && userId) {
-      await supabase.from("email_nudges").insert({
+      const { data: nudge } = await supabase.from("email_nudges").insert({
         tenant_id: tenantId,
         user_id: userId,
         nudge_type: "beta_thank_you",
@@ -201,12 +210,44 @@ const handler = async (req: Request): Promise<Response> => {
         recipient_name: `${firstName} ${lastName || ""}`.trim(),
         subject: template?.subject?.replace(/\{\{first_name\}\}/g, firstName) || `Thank You for Joining CampusVoice.AI Beta!`,
         email_type: "beta_feedback",
+        status: "pending",
+        metadata: { manual: true, template_id: template?.id },
+      }).select("id").single();
+      nudgeId = nudge?.id || null;
+    }
+
+    const feedbackUrl = `${appUrl}/feedback`;
+    const trackingFeedbackUrl = nudgeId 
+      ? getTrackingUrl(nudgeId, feedbackUrl, "share_feedback_button")
+      : feedbackUrl;
+
+    const htmlContent = template
+      ? template.html_content
+          .replace(/\{\{first_name\}\}/g, firstName)
+          .replace(/\{\{last_name\}\}/g, lastName || "")
+          .replace(/\{\{email\}\}/g, email)
+          .replace(/\{\{institution\}\}/g, institutionName || "")
+          .replace(/\{\{app_url\}\}/g, appUrl)
+          .replace(/\{\{logo_url\}\}/g, logoUrl)
+          .replace(/href="[^"]*\/feedback"/g, `href="${trackingFeedbackUrl}"`)
+      : `<div style="max-width:600px;margin:0 auto;font-family:Arial,sans-serif"><div style="background:#1a2036;padding:24px;text-align:center;border-radius:8px 8px 0 0"><table cellpadding="0" cellspacing="0" style="margin:0 auto"><tr><td style="background:#fff;padding:10px 14px;border-radius:6px"><img src="${logoUrl}" alt="CampusVoice.AI" style="height:36px"/></td></tr></table><h1 style="margin:16px 0 0;color:#fff;font-size:20px">Thank You!</h1></div><div style="background:#fff;padding:24px;border:1px solid #e2e8f0;border-top:none"><p style="margin:0 0 14px;color:#1e293b;font-size:16px">Hi ${firstName},</p><p style="margin:0 0 16px;color:#475569;font-size:14px;line-height:1.5">Thanks for exploring CampusVoice.AI! Your feedback shapes our product.</p><div style="text-align:center;margin:20px 0"><a href="${trackingFeedbackUrl}" style="display:inline-block;background:#1e293b;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:600">Share Feedback</a></div></div><div style="background:#f8fafc;padding:16px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;text-align:center"><p style="margin:0;color:#94a3b8;font-size:11px">— The CampusVoice.AI Team</p></div></div>`;
+
+    const emailResponse = await resend.emails.send({
+      from: "CampusVoice.AI <hello@campusvoice.ai>",
+      to: [email],
+      subject: template?.subject?.replace(/\{\{first_name\}\}/g, firstName) || `Thank You for Joining CampusVoice.AI Beta!`,
+      html: htmlContent,
+    });
+
+    console.log("Beta feedback email sent:", emailResponse);
+
+    if (nudgeId) {
+      await supabase.from("email_nudges").update({
         status: "sent",
         provider: "resend",
         provider_message_id: emailResponse?.data?.id || null,
         delivery_status: "sent",
-        metadata: { manual: true, template_id: template?.id },
-      });
+      }).eq("id", nudgeId);
 
       if (template) {
         await supabase
