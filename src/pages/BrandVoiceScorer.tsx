@@ -11,6 +11,7 @@ import { AIBadge } from "@/components/ui/ai-indicator";
 import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useToast } from "@/hooks/use-toast";
+import { useToolTracking } from "@/hooks/useToolTracking";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   ArrowLeft, 
@@ -36,6 +37,7 @@ const BrandVoiceScorer = () => {
   const { toast } = useToast();
   const { config } = useInstitutionalConfig();
   const { contentDNA } = useContentDNAForGeneration();
+  const { trackToolUse } = useToolTracking();
   const [content, setContent] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<BrandVoiceAnalysis | null>(null);
@@ -48,6 +50,12 @@ const BrandVoiceScorer = () => {
     }
 
     setIsAnalyzing(true);
+    
+    // Track tool usage
+    trackToolUse('brand_voice_scorer', 'analyze', {
+      contentLength: content.length,
+      hasContentDNA: !!contentDNA,
+    });
     
     // Simulate brand voice analysis based on institutional config
     setTimeout(() => {

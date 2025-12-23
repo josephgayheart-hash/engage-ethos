@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { usePlaygroundConversations } from "@/hooks/usePlaygroundConversations";
+import { useToolTracking } from "@/hooks/useToolTracking";
 import { supabase } from "@/integrations/supabase/client";
 import { ConversationList } from "@/components/playground/ConversationList";
 import { ChatInterface } from "@/components/playground/ChatInterface";
@@ -28,6 +29,7 @@ const PlaygroundPage = () => {
   const { toast } = useToast();
   const { user, tenant } = useAuth();
   const { profiles } = useInstitutionalProfiles();
+  const { trackToolUse } = useToolTracking();
   
   const {
     conversations,
@@ -250,6 +252,14 @@ const PlaygroundPage = () => {
       if (messages.length === 0) {
         await updateConversationTitle(conversationId, generateTitle(messageContent));
       }
+
+      // Track tool usage
+      trackToolUse('playground', 'chat', {
+        hasProfile: !!selectedProfileId,
+        hasDNA: !!selectedDNAId,
+        model: selectedModel,
+        messageLength: messageContent.length,
+      });
 
       // Stream the response
       let fullResponse = '';

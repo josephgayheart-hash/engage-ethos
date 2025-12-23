@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AIBadge } from "@/components/ui/ai-indicator";
 import { useToast } from "@/hooks/use-toast";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
+import { useToolTracking } from "@/hooks/useToolTracking";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   ArrowLeft, 
@@ -37,6 +38,7 @@ const languages = [
 const TranslationTool = () => {
   const { toast } = useToast();
   const { contentDNA } = useContentDNAForGeneration();
+  const { trackToolUse } = useToolTracking();
   const [sourceText, setSourceText] = useState("");
   const [sourceLanguage, setSourceLanguage] = useState("en");
   const [targetLanguage, setTargetLanguage] = useState("es");
@@ -50,6 +52,14 @@ const TranslationTool = () => {
     }
 
     setIsTranslating(true);
+    
+    // Track tool usage
+    trackToolUse('translation', 'translate', {
+      sourceLanguage,
+      targetLanguage,
+      textLength: sourceText.length,
+    });
+    
     try {
       const { data, error } = await supabase.functions.invoke('generate-message', {
         body: {

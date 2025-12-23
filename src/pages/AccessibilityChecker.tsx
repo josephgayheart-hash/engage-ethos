@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { checkAccessibility, getScoreColor, getScoreLabel, type AccessibilityResult } from "@/lib/accessibilityChecker";
 import { analyzeReadingLevel, type ReadingLevelResult } from "@/lib/readingLevel";
+import { useToolTracking } from "@/hooks/useToolTracking";
 import { 
   ArrowLeft, 
   Accessibility,
@@ -28,9 +29,16 @@ const AccessibilityCheckerPage = () => {
   const [channel, setChannel] = useState("email");
   const [accessibilityResult, setAccessibilityResult] = useState<AccessibilityResult | null>(null);
   const [readingResult, setReadingResult] = useState<ReadingLevelResult | null>(null);
+  const { trackToolUse } = useToolTracking();
 
   const handleAnalyze = () => {
     if (!content.trim()) return;
+    
+    // Track tool usage
+    trackToolUse('accessibility_checker', 'analyze', {
+      channel,
+      contentLength: content.length,
+    });
     
     const accessibility = checkAccessibility(content, channel);
     const reading = analyzeReadingLevel(content);
