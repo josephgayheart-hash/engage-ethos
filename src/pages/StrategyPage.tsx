@@ -31,6 +31,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
+import { useToolTracking } from "@/hooks/useToolTracking";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target, Users, UserCheck, Mail, FileDown, MessageSquare, Globe, Phone, FileText, Search, Megaphone, Building2 } from "lucide-react";
 import { mapMessages } from "@/lib/evaluateMessage";
@@ -84,6 +85,7 @@ const StrategyPage = () => {
   const { profile, isAdmin, isApprover } = useAuth();
   const { addMessage, updateMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
+  const { trackToolUse } = useToolTracking();
   const location = useLocation();
   const resultsRef = useRef<HTMLDivElement>(null);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
@@ -291,6 +293,20 @@ const StrategyPage = () => {
         endDate?.toISOString()
       );
       setMapperResult(result);
+
+      // Track tool usage
+      trackToolUse('mapper', 'use', {
+        channels: selectedChannels,
+        audience: context.audience,
+        moment: context.moment,
+        profileId: selectedProfileId,
+        profileName: selectedProfileName,
+        useContentDNA,
+        journeyWeeks,
+        cadence,
+        escalation,
+      });
+
       toast({
         title: "Strategy Generated",
         description: "Your messaging journey map is ready.",
