@@ -1319,6 +1319,74 @@ const AdminPanel = () => {
 
             {/* Email Activity Tab */}
             <TabsContent value="emails" className="mt-4 space-y-4">
+              {/* Email Analytics Summary */}
+              {emailNudges.length > 0 && (() => {
+                const totalSent = emailNudges.length;
+                const delivered = emailNudges.filter(n => n.delivered_at).length;
+                const opened = emailNudges.filter(n => n.opened_at).length;
+                const clicked = emailNudges.filter(n => n.clicked_at).length;
+                const bounced = emailNudges.filter(n => n.bounced_at).length;
+                
+                const deliveryRate = totalSent > 0 ? ((delivered / totalSent) * 100).toFixed(1) : '0';
+                const openRate = delivered > 0 ? ((opened / delivered) * 100).toFixed(1) : '0';
+                const clickRate = opened > 0 ? ((clicked / opened) * 100).toFixed(1) : '0';
+                const bounceRate = totalSent > 0 ? ((bounced / totalSent) * 100).toFixed(1) : '0';
+                
+                return (
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <Card className="border-l-4 border-l-blue-500">
+                      <CardContent className="pt-4 pb-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Send className="w-4 h-4 text-blue-500" />
+                          <p className="text-xs text-muted-foreground">Total Sent</p>
+                        </div>
+                        <p className="text-2xl font-bold">{totalSent}</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-l-4 border-l-green-500">
+                      <CardContent className="pt-4 pb-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <CheckCircle2 className="w-4 h-4 text-green-500" />
+                          <p className="text-xs text-muted-foreground">Delivery Rate</p>
+                        </div>
+                        <p className="text-2xl font-bold">{deliveryRate}%</p>
+                        <p className="text-[10px] text-muted-foreground">{delivered} of {totalSent}</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-l-4 border-l-purple-500">
+                      <CardContent className="pt-4 pb-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Eye className="w-4 h-4 text-purple-500" />
+                          <p className="text-xs text-muted-foreground">Open Rate</p>
+                        </div>
+                        <p className="text-2xl font-bold">{openRate}%</p>
+                        <p className="text-[10px] text-muted-foreground">{opened} of {delivered} delivered</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-l-4 border-l-indigo-500">
+                      <CardContent className="pt-4 pb-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <ExternalLink className="w-4 h-4 text-indigo-500" />
+                          <p className="text-xs text-muted-foreground">Click Rate</p>
+                        </div>
+                        <p className="text-2xl font-bold">{clickRate}%</p>
+                        <p className="text-[10px] text-muted-foreground">{clicked} of {opened} opened</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-l-4 border-l-red-500">
+                      <CardContent className="pt-4 pb-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <XCircle className="w-4 h-4 text-red-500" />
+                          <p className="text-xs text-muted-foreground">Bounce Rate</p>
+                        </div>
+                        <p className="text-2xl font-bold">{bounceRate}%</p>
+                        <p className="text-[10px] text-muted-foreground">{bounced} bounced</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                );
+              })()}
+              
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
