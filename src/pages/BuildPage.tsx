@@ -24,6 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
+import { useToolTracking } from "@/hooks/useToolTracking";
 import { BrandLayerSelector, BrandLayerActiveBadge, BrandLayerSelection } from "@/components/BrandLayerSelector";
 import { BrandAdherenceScore } from "@/components/BrandAdherenceScore";
 
@@ -104,6 +105,7 @@ const BuildPage = () => {
   const location = useLocation();
   const { addMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
+  const { trackToolUse } = useToolTracking();
   
   // Check for remix state from navigation
   const remixState = location.state as {
@@ -207,6 +209,17 @@ const BuildPage = () => {
 
       const result = await buildMessage(contextWithChannels, configForGeneration);
       setBuilderResult(result);
+
+      // Track tool usage
+      trackToolUse('build', 'use', {
+        channels: selectedChannels,
+        audience: context.audience,
+        moment: context.moment,
+        profileId: selectedProfileId,
+        profileName: selectedProfileName,
+        useContentDNA,
+        channelCount: selectedChannels.length,
+      });
       
       toast({
         title: "Messages Generated",

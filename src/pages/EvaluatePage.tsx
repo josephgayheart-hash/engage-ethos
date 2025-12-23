@@ -18,6 +18,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { AIBadge } from "@/components/ui/ai-indicator";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
+import { useToolTracking } from "@/hooks/useToolTracking";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, ArrowRight, FileText, AlertCircle, Save, RefreshCw, CalendarIcon, Clock } from "lucide-react";
 import { evaluateMessage } from "@/lib/evaluateMessage";
@@ -28,6 +29,7 @@ const EvaluatePage = () => {
   const { toast } = useToast();
   const { profile } = useAuth();
   const { addMessage } = useMessageLibrary();
+  const { trackToolUse } = useToolTracking();
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [selectedProfileName, setSelectedProfileName] = useState<string | undefined>(undefined);
   const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfig | null>(null);
@@ -52,6 +54,16 @@ const EvaluatePage = () => {
     try {
       const result = await evaluateMessage(messageContent, context, institutionalConfig || undefined);
       setEvaluationResult(result);
+
+      // Track tool usage
+      trackToolUse('evaluate', 'use', {
+        channel: context.channel,
+        audience: context.audience,
+        moment: context.moment,
+        profileId: selectedProfileId,
+        profileName: selectedProfileName,
+        messageLength: messageContent.length,
+      });
       
       if (autoSave) {
         const title = `Evaluated: ${messageContent.slice(0, 40)}${messageContent.length > 40 ? '...' : ''}`;
