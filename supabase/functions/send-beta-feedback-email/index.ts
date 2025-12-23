@@ -31,7 +31,7 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const body: EmailRequest = await req.json();
-    const appUrl = "https://campusvoice.ai";
+    const appUrl = "https://www.campusvoice.ai";
 
     if (body.runAutomated) {
       console.log("Running automated beta feedback email check...");
