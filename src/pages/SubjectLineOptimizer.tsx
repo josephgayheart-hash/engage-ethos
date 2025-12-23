@@ -14,6 +14,7 @@ import { AIBadge } from "@/components/ui/ai-indicator";
 import { useToast } from "@/hooks/use-toast";
 import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
+import { useToolTracking } from "@/hooks/useToolTracking";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   ArrowLeft, 
@@ -35,6 +36,7 @@ const SubjectLineOptimizer = () => {
   const { toast } = useToast();
   const { config: institutionalConfig } = useInstitutionalConfig();
   const { contentDNA } = useContentDNAForGeneration();
+  const { trackToolUse } = useToolTracking();
   const [subjectLine, setSubjectLine] = useState("");
   const [previewText, setPreviewText] = useState("");
   const [audience, setAudience] = useState("first-year");
@@ -72,6 +74,15 @@ const SubjectLineOptimizer = () => {
     }
 
     setIsGenerating(true);
+    
+    // Track tool usage
+    trackToolUse('subject_line_optimizer', 'generate', {
+      subjectLength: subjectLine.length,
+      audience,
+      goal,
+      hasContentDNA: !!contentDNA,
+    });
+    
     try {
       const { data, error } = await supabase.functions.invoke('generate-message', {
         body: {
