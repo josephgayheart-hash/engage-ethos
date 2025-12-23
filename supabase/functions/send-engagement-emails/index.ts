@@ -16,9 +16,14 @@ const corsHeaders = {
 
 const logoUrl = "https://yeuwpuzbccqnqdlnjhfm.supabase.co/storage/v1/object/public/brand-assets/campusvoice-email-logo.png";
 
-const getInviteReminderHtml = (firstName: string, institutionName: string, daysAgo: number) => `<div style="max-width:600px;margin:0 auto;font-family:Arial,sans-serif"><div style="background:#1a2036;padding:24px;text-align:center;border-radius:8px 8px 0 0"><table cellpadding="0" cellspacing="0" style="margin:0 auto"><tr><td style="background:#fff;padding:10px 14px;border-radius:6px"><img src="${logoUrl}" alt="CampusVoice.AI" style="height:36px"/></td></tr></table><h1 style="margin:16px 0 0;color:#fff;font-size:20px">Your Account is Waiting!</h1></div><div style="background:#fff;padding:24px;border:1px solid #e2e8f0;border-top:none"><p style="margin:0 0 14px;color:#1e293b;font-size:16px;font-weight:600">Hi ${firstName},</p><p style="margin:0 0 16px;color:#475569;font-size:14px;line-height:1.5">Your CampusVoice.AI account was created ${daysAgo} days ago, but we haven't seen you log in yet! <strong>${institutionName}</strong> has given you access.</p><div style="background:#f0fdf4;border-radius:6px;padding:16px;margin:16px 0;border-left:3px solid #22c55e"><p style="margin:0 0 10px;color:#166534;font-size:13px;font-weight:600">Here's what you can do:</p><p style="margin:0;color:#166534;font-size:13px;line-height:1.6">Build AI-powered messages, score your content, and access templates.</p></div><div style="text-align:center;margin:20px 0"><a href="https://www.campusvoice.ai/login" style="display:inline-block;background:#1e293b;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:600">Login Now</a></div><p style="margin:16px 0 0;color:#64748b;font-size:12px;text-align:center">Forgot your password? Request a new one on the login page.</p></div><div style="background:#f8fafc;padding:16px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;text-align:center"><p style="margin:0;color:#94a3b8;font-size:11px">— The CampusVoice.AI Team</p></div></div>`;
+const getTrackingUrl = (nudgeId: string, destination: string, linkName: string) => {
+  const baseUrl = `${SUPABASE_URL}/functions/v1/track-email-click`;
+  return `${baseUrl}?id=${nudgeId}&url=${encodeURIComponent(destination)}&link=${encodeURIComponent(linkName)}`;
+};
 
-const getWeMissYouHtml = (firstName: string, institutionName: string, daysSinceLogin: number) => `<div style="max-width:600px;margin:0 auto;font-family:Arial,sans-serif"><div style="background:#1a2036;padding:24px;text-align:center;border-radius:8px 8px 0 0"><table cellpadding="0" cellspacing="0" style="margin:0 auto"><tr><td style="background:#fff;padding:10px 14px;border-radius:6px"><img src="${logoUrl}" alt="CampusVoice.AI" style="height:36px"/></td></tr></table><h1 style="margin:16px 0 0;color:#fff;font-size:20px">We Miss You!</h1></div><div style="background:#fff;padding:24px;border:1px solid #e2e8f0;border-top:none"><p style="margin:0 0 14px;color:#1e293b;font-size:16px;font-weight:600">Hi ${firstName},</p><p style="margin:0 0 16px;color:#475569;font-size:14px;line-height:1.5">It's been ${daysSinceLogin} days since you visited CampusVoice.AI. We'd love to help you create great content for <strong>${institutionName}</strong>!</p><div style="background:#eff6ff;border-radius:6px;padding:16px;margin:16px 0;border-left:3px solid #3b82f6"><p style="margin:0 0 10px;color:#1e40af;font-size:13px;font-weight:600">Quick ideas to get started:</p><p style="margin:0;color:#1e40af;font-size:13px;line-height:1.6">Draft a message, score your content, browse templates, or try the Playground.</p></div><div style="text-align:center;margin:20px 0"><a href="https://www.campusvoice.ai/login" style="display:inline-block;background:#3b82f6;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:600">Jump Back In</a></div><p style="margin:16px 0 0;color:#64748b;font-size:12px;text-align:center">We're always adding new features based on your feedback!</p></div><div style="background:#f8fafc;padding:16px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;text-align:center"><p style="margin:0;color:#94a3b8;font-size:11px">— The CampusVoice.AI Team</p></div></div>`;
+const getInviteReminderHtml = (firstName: string, institutionName: string, daysAgo: number, trackingLoginUrl: string) => `<div style="max-width:600px;margin:0 auto;font-family:Arial,sans-serif"><div style="background:#1a2036;padding:24px;text-align:center;border-radius:8px 8px 0 0"><table cellpadding="0" cellspacing="0" style="margin:0 auto"><tr><td style="background:#fff;padding:10px 14px;border-radius:6px"><img src="${logoUrl}" alt="CampusVoice.AI" style="height:36px"/></td></tr></table><h1 style="margin:16px 0 0;color:#fff;font-size:20px">Your Account is Waiting!</h1></div><div style="background:#fff;padding:24px;border:1px solid #e2e8f0;border-top:none"><p style="margin:0 0 14px;color:#1e293b;font-size:16px;font-weight:600">Hi ${firstName},</p><p style="margin:0 0 16px;color:#475569;font-size:14px;line-height:1.5">Your CampusVoice.AI account was created ${daysAgo} days ago, but we haven't seen you log in yet! <strong>${institutionName}</strong> has given you access.</p><div style="background:#f0fdf4;border-radius:6px;padding:16px;margin:16px 0;border-left:3px solid #22c55e"><p style="margin:0 0 10px;color:#166534;font-size:13px;font-weight:600">Here's what you can do:</p><p style="margin:0;color:#166534;font-size:13px;line-height:1.6">Build AI-powered messages, score your content, and access templates.</p></div><div style="text-align:center;margin:20px 0"><a href="${trackingLoginUrl}" style="display:inline-block;background:#1e293b;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:600">Login Now</a></div><p style="margin:16px 0 0;color:#64748b;font-size:12px;text-align:center">Forgot your password? Request a new one on the login page.</p></div><div style="background:#f8fafc;padding:16px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;text-align:center"><p style="margin:0;color:#94a3b8;font-size:11px">— The CampusVoice.AI Team</p></div></div>`;
+
+const getWeMissYouHtml = (firstName: string, institutionName: string, daysSinceLogin: number, trackingLoginUrl: string) => `<div style="max-width:600px;margin:0 auto;font-family:Arial,sans-serif"><div style="background:#1a2036;padding:24px;text-align:center;border-radius:8px 8px 0 0"><table cellpadding="0" cellspacing="0" style="margin:0 auto"><tr><td style="background:#fff;padding:10px 14px;border-radius:6px"><img src="${logoUrl}" alt="CampusVoice.AI" style="height:36px"/></td></tr></table><h1 style="margin:16px 0 0;color:#fff;font-size:20px">We Miss You!</h1></div><div style="background:#fff;padding:24px;border:1px solid #e2e8f0;border-top:none"><p style="margin:0 0 14px;color:#1e293b;font-size:16px;font-weight:600">Hi ${firstName},</p><p style="margin:0 0 16px;color:#475569;font-size:14px;line-height:1.5">It's been ${daysSinceLogin} days since you visited CampusVoice.AI. We'd love to help you create great content for <strong>${institutionName}</strong>!</p><div style="background:#eff6ff;border-radius:6px;padding:16px;margin:16px 0;border-left:3px solid #3b82f6"><p style="margin:0 0 10px;color:#1e40af;font-size:13px;font-weight:600">Quick ideas to get started:</p><p style="margin:0;color:#1e40af;font-size:13px;line-height:1.6">Draft a message, score your content, browse templates, or try the Playground.</p></div><div style="text-align:center;margin:20px 0"><a href="${trackingLoginUrl}" style="display:inline-block;background:#3b82f6;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:600">Jump Back In</a></div><p style="margin:16px 0 0;color:#64748b;font-size:12px;text-align:center">We're always adding new features based on your feedback!</p></div><div style="background:#f8fafc;padding:16px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;text-align:center"><p style="margin:0;color:#94a3b8;font-size:11px">— The CampusVoice.AI Team</p></div></div>`;
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -31,6 +36,7 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
     const now = new Date();
     const results = { inviteReminders: 0, weMissYou: 0, errors: [] as string[] };
+    const loginUrl = "https://www.campusvoice.ai/login";
 
     const twoDaysAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
     const fiveDaysAgo = new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000);
@@ -73,6 +79,26 @@ const handler = async (req: Request): Promise<Response> => {
             const subject = "Your CampusVoice.AI account is waiting!";
             
             try {
+              // Create nudge record first
+              const { data: nudge, error: nudgeError } = await supabase.from("email_nudges").insert({
+                user_id: user.id,
+                tenant_id: user.tenant_id,
+                nudge_type: "invite_reminder",
+                email_type: "invite_reminder",
+                email_count: nudgeCount + 1,
+                subject,
+                recipient_name: `${user.first_name} ${user.last_name}`,
+                recipient_email: user.email,
+                status: "pending",
+                delivery_status: "pending",
+                metadata: { institution_name: institutionName, reminder_number: reminderNumber },
+              }).select("id").single();
+
+              const nudgeId = nudge?.id;
+              const trackingLoginUrl = nudgeId 
+                ? getTrackingUrl(nudgeId, loginUrl, "login_now_button")
+                : loginUrl;
+
               const response = await fetch("https://api.resend.com/emails", {
                 method: "POST",
                 headers: {
@@ -83,45 +109,28 @@ const handler = async (req: Request): Promise<Response> => {
                   from: "CampusVoice.AI <noreply@campusvoice.ai>",
                   to: [user.email],
                   subject,
-                  html: getInviteReminderHtml(user.first_name, institutionName, daysAgo),
+                  html: getInviteReminderHtml(user.first_name, institutionName, daysAgo, trackingLoginUrl),
                 }),
               });
 
               const responseData = await response.json();
 
               if (response.ok) {
-                const { data: existingNudge } = await supabase
-                  .from("email_nudges")
-                  .select("id, email_count")
-                  .eq("user_id", user.id)
-                  .eq("nudge_type", "invite_reminder")
-                  .maybeSingle();
-
-                if (existingNudge) {
-                  await supabase
-                    .from("email_nudges")
-                    .update({ email_count: existingNudge.email_count + 1, sent_at: now.toISOString(), provider: "resend", provider_message_id: responseData.id, delivery_status: "sent" })
-                    .eq("id", existingNudge.id);
-                } else {
-                  await supabase.from("email_nudges").insert({
-                    user_id: user.id,
-                    tenant_id: user.tenant_id,
-                    nudge_type: "invite_reminder",
-                    email_type: "invite_reminder",
-                    email_count: 1,
-                    subject: subject,
-                    recipient_name: `${user.first_name} ${user.last_name}`,
-                    recipient_email: user.email,
+                if (nudgeId) {
+                  await supabase.from("email_nudges").update({
+                    status: "sent",
                     provider: "resend",
                     provider_message_id: responseData.id,
                     delivery_status: "sent",
-                    metadata: { institution_name: institutionName, reminder_number: reminderNumber },
-                  });
+                  }).eq("id", nudgeId);
                 }
 
                 results.inviteReminders++;
                 console.log(`Sent invite reminder ${reminderNumber} to ${user.email}`);
               } else {
+                if (nudgeId) {
+                  await supabase.from("email_nudges").update({ status: "failed", delivery_status: "failed" }).eq("id", nudgeId);
+                }
                 results.errors.push(`Failed to send to ${user.email}: ${responseData.message}`);
               }
             } catch (err: any) {
@@ -162,6 +171,26 @@ const handler = async (req: Request): Promise<Response> => {
           const subject = "We miss you at CampusVoice.AI!";
           
           try {
+            // Create nudge record first
+            const { data: nudge, error: nudgeError } = await supabase.from("email_nudges").insert({
+              user_id: user.id,
+              tenant_id: user.tenant_id,
+              nudge_type: "we_miss_you",
+              email_type: "we_miss_you",
+              email_count: 1,
+              subject,
+              recipient_name: `${user.first_name} ${user.last_name}`,
+              recipient_email: user.email,
+              status: "pending",
+              delivery_status: "pending",
+              metadata: { institution_name: institutionName, days_since_login: daysSinceLogin },
+            }).select("id").single();
+
+            const nudgeId = nudge?.id;
+            const trackingLoginUrl = nudgeId 
+              ? getTrackingUrl(nudgeId, loginUrl, "jump_back_in_button")
+              : loginUrl;
+
             const response = await fetch("https://api.resend.com/emails", {
               method: "POST",
               headers: {
@@ -172,45 +201,28 @@ const handler = async (req: Request): Promise<Response> => {
                 from: "CampusVoice.AI <noreply@campusvoice.ai>",
                 to: [user.email],
                 subject,
-                html: getWeMissYouHtml(user.first_name, institutionName, daysSinceLogin),
+                html: getWeMissYouHtml(user.first_name, institutionName, daysSinceLogin, trackingLoginUrl),
               }),
             });
 
             const responseData = await response.json();
 
             if (response.ok) {
-              const { data: existingNudge } = await supabase
-                .from("email_nudges")
-                .select("id, email_count")
-                .eq("user_id", user.id)
-                .eq("nudge_type", "we_miss_you")
-                .maybeSingle();
-
-              if (existingNudge) {
-                await supabase
-                  .from("email_nudges")
-                  .update({ email_count: existingNudge.email_count + 1, sent_at: now.toISOString(), provider: "resend", provider_message_id: responseData.id, delivery_status: "sent" })
-                  .eq("id", existingNudge.id);
-              } else {
-                await supabase.from("email_nudges").insert({
-                  user_id: user.id,
-                  tenant_id: user.tenant_id,
-                  nudge_type: "we_miss_you",
-                  email_type: "we_miss_you",
-                  email_count: 1,
-                  subject: subject,
-                  recipient_name: `${user.first_name} ${user.last_name}`,
-                  recipient_email: user.email,
+              if (nudgeId) {
+                await supabase.from("email_nudges").update({
+                  status: "sent",
                   provider: "resend",
                   provider_message_id: responseData.id,
                   delivery_status: "sent",
-                  metadata: { institution_name: institutionName, days_since_login: daysSinceLogin },
-                });
+                }).eq("id", nudgeId);
               }
 
               results.weMissYou++;
               console.log(`Sent we miss you email to ${user.email}`);
             } else {
+              if (nudgeId) {
+                await supabase.from("email_nudges").update({ status: "failed", delivery_status: "failed" }).eq("id", nudgeId);
+              }
               results.errors.push(`Failed to send to ${user.email}: ${responseData.message}`);
             }
           } catch (err: any) {

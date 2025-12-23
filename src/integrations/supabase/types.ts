@@ -413,6 +413,7 @@ export type Database = {
           events: Json
           id: string
           last_event_at: string | null
+          link_clicks: Json | null
           metadata: Json | null
           nudge_type: string
           opened_at: string | null
@@ -437,6 +438,7 @@ export type Database = {
           events?: Json
           id?: string
           last_event_at?: string | null
+          link_clicks?: Json | null
           metadata?: Json | null
           nudge_type: string
           opened_at?: string | null
@@ -461,6 +463,7 @@ export type Database = {
           events?: Json
           id?: string
           last_event_at?: string | null
+          link_clicks?: Json | null
           metadata?: Json | null
           nudge_type?: string
           opened_at?: string | null
