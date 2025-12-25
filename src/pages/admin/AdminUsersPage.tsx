@@ -353,6 +353,16 @@ export default function AdminUsersPage() {
       if (data?.error) throw new Error(data.error);
 
       // Then send the invite email
+      const { data: currentProfile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('id', currentUser?.id)
+        .single();
+
+      const inviterName = currentProfile 
+        ? `${currentProfile.first_name} ${currentProfile.last_name}` 
+        : undefined;
+
       const { error: emailError } = await supabase.functions.invoke('send-invite-email', {
         body: {
           email: resendUser.email,
@@ -361,6 +371,7 @@ export default function AdminUsersPage() {
           temporaryPassword: newPassword,
           institutionName: tenant?.institution_name || 'Your Institution',
           role: resendUser.roles[0] || 'user',
+          inviterName,
         },
       });
 

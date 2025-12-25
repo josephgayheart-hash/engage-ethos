@@ -23,6 +23,7 @@ interface InviteEmailRequest {
   role: string;
   tenantId?: string;
   userId?: string;
+  inviterName?: string;
 }
 
 const getTrackingUrl = (nudgeId: string, destination: string, linkName: string) => {
@@ -37,9 +38,9 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
-    const { email, firstName, lastName, temporaryPassword, institutionName, role, tenantId, userId }: InviteEmailRequest = await req.json();
+    const { email, firstName, lastName, temporaryPassword, institutionName, role, tenantId, userId, inviterName }: InviteEmailRequest = await req.json();
 
-    console.log(`Sending invite email to ${email} for ${institutionName}`);
+    console.log(`Sending invite email to ${email} for ${institutionName} (invited by ${inviterName || 'system'})`);
 
     const roleDisplayName = role === 'super_admin' 
       ? 'CampusVoice Super Admin' 
@@ -50,7 +51,10 @@ const handler = async (req: Request): Promise<Response> => {
           : 'University User';
 
     const logoUrl = "https://yeuwpuzbccqnqdlnjhfm.supabase.co/storage/v1/object/public/brand-assets/campusvoice-email-logo.png";
-    const subject = `Welcome to CampusVoice.AI - ${institutionName}`;
+    const invitedByText = inviterName ? `${inviterName} has invited you` : `You've been invited`;
+    const subject = inviterName 
+      ? `${inviterName} invited you to CampusVoice.AI` 
+      : `Welcome to CampusVoice.AI - ${institutionName}`;
     const loginUrl = "https://www.campusvoice.ai/login";
 
     // Create nudge record first to get ID for tracking
@@ -81,7 +85,7 @@ const handler = async (req: Request): Promise<Response> => {
       ? getTrackingUrl(nudgeId, loginUrl, "login_button")
       : loginUrl;
 
-    const htmlContent = `<div style="max-width:600px;margin:0 auto;font-family:Arial,sans-serif"><div style="background:#1a2036;padding:28px;text-align:center;border-radius:8px 8px 0 0"><table cellpadding="0" cellspacing="0" style="margin:0 auto"><tr><td style="background:#fff;padding:12px 16px;border-radius:8px"><img src="${logoUrl}" alt="CampusVoice.AI" style="height:40px"/></td></tr></table><h1 style="margin:18px 0 0;color:#fff;font-size:22px">Welcome to CampusVoice.AI</h1><p style="margin:6px 0 0;color:#94a3b8;font-size:13px">AI-Powered Communication Platform</p></div><div style="background:#fff;padding:28px;border:1px solid #e2e8f0;border-top:none"><h2 style="margin:0 0 12px;color:#1e293b;font-size:20px">Welcome, ${firstName}!</h2><p style="margin:0 0 18px;color:#475569;font-size:15px;line-height:1.5">You've been invited to join <strong>${institutionName}</strong> as a <strong>${roleDisplayName}</strong>.</p><div style="background:#f1f5f9;border-radius:8px;padding:18px;margin:18px 0"><p style="margin:0 0 12px;color:#1e293b;font-size:13px;font-weight:600;text-transform:uppercase">Your Login Credentials</p><p style="margin:0 0 4px;color:#64748b;font-size:11px;text-transform:uppercase">Email</p><p style="margin:0 0 10px;color:#1e293b;font-size:14px;font-family:monospace;background:#fff;padding:8px;border-radius:4px;border:1px solid #e2e8f0">${email}</p><p style="margin:0 0 4px;color:#64748b;font-size:11px;text-transform:uppercase">Temporary Password</p><p style="margin:0;color:#1e293b;font-size:14px;font-family:monospace;background:#fff;padding:8px;border-radius:4px;border:1px solid #e2e8f0">${temporaryPassword}</p></div><div style="text-align:center;margin:24px 0"><a href="${trackingLoginUrl}" style="display:inline-block;background:#1e293b;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:600">Login to CampusVoice.AI</a></div><div style="background:#fef3c7;border-left:3px solid #f59e0b;padding:12px;border-radius:0 6px 6px 0"><p style="margin:0;color:#92400e;font-size:13px;line-height:1.4"><strong>Important:</strong> You'll be prompted to change your password on first login.</p></div></div><div style="background:#f8fafc;padding:18px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;text-align:center"><p style="margin:0 0 4px;color:#64748b;font-size:13px">Welcome to the team!</p><p style="margin:0;color:#94a3b8;font-size:11px">— The CampusVoice.AI Team</p></div></div>`;
+    const htmlContent = `<div style="max-width:600px;margin:0 auto;font-family:Arial,sans-serif"><div style="background:#1a2036;padding:28px;text-align:center;border-radius:8px 8px 0 0"><table cellpadding="0" cellspacing="0" style="margin:0 auto"><tr><td style="background:#fff;padding:12px 16px;border-radius:8px"><img src="${logoUrl}" alt="CampusVoice.AI" style="height:40px"/></td></tr></table><h1 style="margin:18px 0 0;color:#fff;font-size:22px">Welcome to CampusVoice.AI</h1><p style="margin:6px 0 0;color:#94a3b8;font-size:13px">AI-Powered Communication Platform</p></div><div style="background:#fff;padding:28px;border:1px solid #e2e8f0;border-top:none"><h2 style="margin:0 0 12px;color:#1e293b;font-size:20px">Welcome, ${firstName}!</h2><p style="margin:0 0 18px;color:#475569;font-size:15px;line-height:1.5">${invitedByText} to join <strong>${institutionName}</strong> as a <strong>${roleDisplayName}</strong>.</p><div style="background:#f1f5f9;border-radius:8px;padding:18px;margin:18px 0"><p style="margin:0 0 12px;color:#1e293b;font-size:13px;font-weight:600;text-transform:uppercase">Your Login Credentials</p><p style="margin:0 0 4px;color:#64748b;font-size:11px;text-transform:uppercase">Email</p><p style="margin:0 0 10px;color:#1e293b;font-size:14px;font-family:monospace;background:#fff;padding:8px;border-radius:4px;border:1px solid #e2e8f0">${email}</p><p style="margin:0 0 4px;color:#64748b;font-size:11px;text-transform:uppercase">Temporary Password</p><p style="margin:0;color:#1e293b;font-size:14px;font-family:monospace;background:#fff;padding:8px;border-radius:4px;border:1px solid #e2e8f0">${temporaryPassword}</p></div><div style="text-align:center;margin:24px 0"><a href="${trackingLoginUrl}" style="display:inline-block;background:#1e293b;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:600">Login to CampusVoice.AI</a></div><div style="background:#fef3c7;border-left:3px solid #f59e0b;padding:12px;border-radius:0 6px 6px 0"><p style="margin:0;color:#92400e;font-size:13px;line-height:1.4"><strong>Important:</strong> You'll be prompted to change your password on first login.</p></div></div><div style="background:#f8fafc;padding:18px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;text-align:center"><p style="margin:0 0 4px;color:#64748b;font-size:13px">Welcome to the team!</p><p style="margin:0;color:#94a3b8;font-size:11px">— The CampusVoice.AI Team</p></div></div>`;
 
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",

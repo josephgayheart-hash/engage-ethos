@@ -313,6 +313,17 @@ serve(async (req) => {
 
             const institutionName = tenantData?.institution_name || "Your Institution";
 
+            // Get inviter's name (the requesting user)
+            const { data: inviterProfile } = await adminClient
+              .from("profiles")
+              .select("first_name, last_name")
+              .eq("id", requestingUser.id)
+              .single();
+
+            const inviterName = inviterProfile 
+              ? `${inviterProfile.first_name} ${inviterProfile.last_name}` 
+              : undefined;
+
             // Call the send-invite-email function
             const emailResponse = await fetch(`${supabaseUrl}/functions/v1/send-invite-email`, {
               method: "POST",
@@ -327,6 +338,7 @@ serve(async (req) => {
                 temporaryPassword: password,
                 institutionName,
                 role: rolesToCreate[0] || "user",
+                inviterName,
               }),
             });
 

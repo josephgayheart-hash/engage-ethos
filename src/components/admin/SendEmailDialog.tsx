@@ -181,6 +181,11 @@ export function SendEmailDialog({
     setIsSending(true);
     try {
       const temporaryPassword = generateTemporaryPassword();
+
+      // Get inviter's name
+      const inviterName = profile 
+        ? `${profile.first_name} ${profile.last_name}` 
+        : undefined;
       
       const { error } = await supabase.functions.invoke('send-invite-email', {
         body: {
@@ -191,7 +196,8 @@ export function SendEmailDialog({
           institutionName: selectedTenantName,
           role: inviteRole,
           tenantId: selectedTenant,
-          userId: profile?.id || ''
+          userId: profile?.id || '',
+          inviterName,
         }
       });
 
