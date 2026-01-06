@@ -332,7 +332,8 @@ const BuildPage = () => {
       : 'Message Draft';
 
     const saveTimeout = setTimeout(async () => {
-      await saveDraft('message', draftData, title, currentDraft?.id);
+      // Use silent mode for background auto-save (no refetch, no toast)
+      await saveDraft('message', draftData, title, currentDraft?.id, true);
       setDraftSavedRecently(true);
       // Reset the indicator after 3 seconds
       setTimeout(() => setDraftSavedRecently(false), 3000);
