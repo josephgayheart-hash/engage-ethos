@@ -269,7 +269,7 @@ serve(async (req) => {
             user_id: authData.user.id,
             tenant_id: effectiveTenantId,
             title: "Welcome! Here's a Sample Email",
-            content: `Subject: Join Us for Wildcat Weekend!\n\nDear [First Name],\n\nWe're excited to invite you to Wildcat Weekend, happening [Date] on our beautiful campus!\n\nThis is your chance to:\n• Tour our state-of-the-art facilities\n• Meet current students and faculty\n• Experience campus life firsthand\n• Get your questions answered by admissions counselors\n\nSpace is limited, so register today at [Link].\n\nWe can't wait to meet you!\n\nGo Wildcats!\n[Sender Name]\n[Title]\n[Department]`,
+            content: `Subject: Join Us for Griffin Weekend!\n\nDear [First Name],\n\nWe're excited to invite you to Griffin Weekend, happening [Date] on our beautiful campus!\n\nThis is your chance to:\n• Tour our state-of-the-art facilities\n• Meet current students and faculty\n• Experience campus life firsthand\n• Get your questions answered by admissions counselors\n\nSpace is limited, so register today at [Link].\n\nWe can't wait to meet you!\n\nGo Griffins!\n[Sender Name]\n[Title]\n[Department]`,
             channel: "email",
             audience: "prospective-students",
             domain: "admissions",
