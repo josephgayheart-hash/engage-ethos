@@ -40,7 +40,8 @@ import {
   Wrench,
   CheckCircle2,
   CircleDot,
-  Building2
+  Building2,
+  User
 } from "lucide-react";
 
 const Index = () => {
@@ -471,14 +472,20 @@ const Index = () => {
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1 min-w-0">
                                 <h4 className="text-sm font-medium truncate">{msg.title}</h4>
-                                <div className="flex items-center gap-2 mt-1">
+                                <div className="flex items-center gap-2 mt-1 flex-wrap">
                                   <Badge variant="outline" className="text-xs px-1.5 py-0">
                                     <ChannelIcon className="w-3 h-3 mr-1" />
                                     {msg.channel}
                                   </Badge>
+                                  {msg.createdByName && (
+                                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                      <User className="w-3 h-3" />
+                                      {msg.createdByName}
+                                    </span>
+                                  )}
                                   <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                    <Clock className="w-3 h-3" />
-                                    {new Date(msg.createdAt).toLocaleDateString()}
+                                    <Calendar className="w-3 h-3" />
+                                    {new Date(msg.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                   </span>
                                 </div>
                               </div>
@@ -532,11 +539,16 @@ const Index = () => {
                                     {template.playbook}
                                   </Badge>
                                 )}
-                                {template.collegeName && (
-                                  <span className="text-xs text-muted-foreground truncate">
-                                    {template.collegeName}
+                                {template.owner && (
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                    <User className="w-3 h-3" />
+                                    {template.owner}
                                   </span>
                                 )}
+                                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <Calendar className="w-3 h-3" />
+                                  {new Date(template.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                </span>
                               </div>
                             </div>
                             <Badge variant="default" className="text-xs shrink-0 flex items-center gap-1">

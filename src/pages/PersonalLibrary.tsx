@@ -328,7 +328,7 @@ const PersonalLibrary = () => {
                     <TableHead>Source</TableHead>
                     <TableHead>Channel</TableHead>
                     <TableHead>Audience</TableHead>
-                    <TableHead>Date</TableHead>
+                    <TableHead>Created</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -354,8 +354,9 @@ const PersonalLibrary = () => {
                       </TableCell>
                       <TableCell className="capitalize text-muted-foreground">{message.channel || '—'}</TableCell>
                       <TableCell>{message.audience}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {new Date(message.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      <TableCell className="text-muted-foreground text-xs">
+                        {message.createdByName && <span className="mr-2">{message.createdByName}</span>}
+                        {new Date(message.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">

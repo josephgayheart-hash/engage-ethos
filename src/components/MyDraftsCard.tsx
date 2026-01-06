@@ -3,18 +3,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useUserDrafts, UserDraft } from "@/hooks/useUserDrafts";
-import { formatDistanceToNow } from "date-fns";
+import { useAuth } from "@/contexts/AuthContext";
+import { format, formatDistanceToNow } from "date-fns";
 import { 
   FileEdit, 
   PenTool, 
   Map, 
   Trash2, 
   ArrowRight,
-  Clock
+  Clock,
+  User,
+  Calendar
 } from "lucide-react";
 
 export function MyDraftsCard() {
   const { drafts, loading, deleteDraft } = useUserDrafts();
+  const { profile } = useAuth();
 
   const messageDrafts = drafts.filter(d => d.draft_type === 'message');
   const journeyDrafts = drafts.filter(d => d.draft_type === 'journey');
@@ -145,9 +149,16 @@ export function MyDraftsCard() {
                       {draft.draft_type}
                     </Badge>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Clock className="w-3 h-3" />
-                    {formatDistanceToNow(new Date(draft.updated_at), { addSuffix: true })}
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      {format(new Date(draft.updated_at), 'MMM d, yyyy')}
+                    </div>
+                    <span>•</span>
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {formatDistanceToNow(new Date(draft.updated_at), { addSuffix: true })}
+                    </div>
                     {contextInfo?.audience && (
                       <>
                         <span>•</span>
