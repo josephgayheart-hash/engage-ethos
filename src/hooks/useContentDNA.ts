@@ -16,6 +16,7 @@ export interface ContentDNASample {
   sample_type: string;
   title: string | null;
   source_description: string | null;
+  source_url: string | null;
   created_at: string;
   // Semantic extraction fields
   semantic_summary: string | null;
@@ -225,6 +226,7 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
       sampleType?: string;
       title?: string;
       sourceDescription?: string;
+      sourceUrl?: string;
       fileType?: string;
       fileSize?: number;
     } = {}
@@ -252,6 +254,7 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
           sample_type: options.sampleType || 'other',
           title: options.title || null,
           source_description: options.sourceDescription || null,
+          source_url: options.sourceUrl || null,
         })
         .select()
         .single();

@@ -4,6 +4,7 @@ import { Header } from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
 import { useContentDNA, ContentDNASample } from '@/hooks/useContentDNA';
 import { useInstitutionalProfiles } from '@/hooks/useInstitutionalProfiles';
+import { WebCrawlTab } from '@/components/dna/WebCrawlTab';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -58,6 +59,7 @@ import {
   Save,
   Plus,
   ChevronDown,
+  Globe,
 } from 'lucide-react';
 import { extractTextFromFile, getAcceptString } from '@/lib/documentParser';
 import { DNATuningControls, DNAAdjustments } from '@/components/DNATuningControls';
@@ -809,6 +811,10 @@ export default function ContentDNAPage() {
               <Upload className="w-4 h-4" />
               Upload Content
             </TabsTrigger>
+            <TabsTrigger value="webcrawl" className="flex items-center gap-2">
+              <Globe className="w-4 h-4" />
+              WebCrawl
+            </TabsTrigger>
             <TabsTrigger value="analysis" className="flex items-center gap-2">
               <Sparkles className="w-4 h-4" />
               Voice Profile
@@ -1100,6 +1106,21 @@ export default function ContentDNAPage() {
                 </CardContent>
               </Card>
             )}
+          </TabsContent>
+
+          {/* WebCrawl Tab */}
+          <TabsContent value="webcrawl">
+            <WebCrawlTab 
+              samples={samples}
+              onImportUrl={async (url, content, options) => {
+                await addSample(content, `Web import - ${new Date().toLocaleDateString()}`, {
+                  sampleType: options.sampleType,
+                  title: options.title,
+                  sourceUrl: options.sourceUrl,
+                });
+              }}
+              onDeleteSample={deleteSample}
+            />
           </TabsContent>
 
           {/* Voice Profile Tab */}

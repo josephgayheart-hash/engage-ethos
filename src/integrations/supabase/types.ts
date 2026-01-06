@@ -289,6 +289,7 @@ export type Database = {
           semantic_summary: string | null
           source_description: string | null
           source_type: string | null
+          source_url: string | null
           tenant_id: string
           title: string | null
           user_id: string
@@ -308,6 +309,7 @@ export type Database = {
           semantic_summary?: string | null
           source_description?: string | null
           source_type?: string | null
+          source_url?: string | null
           tenant_id: string
           title?: string | null
           user_id: string
@@ -327,6 +329,7 @@ export type Database = {
           semantic_summary?: string | null
           source_description?: string | null
           source_type?: string | null
+          source_url?: string | null
           tenant_id?: string
           title?: string | null
           user_id?: string
