@@ -1,0 +1,1085 @@
+import { useState, useEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Header } from "@/components/Header";
+import { InstitutionalConfig } from "@/components/InstitutionalConfig";
+import { ProfileSetupWizard } from "@/components/ProfileSetupWizard";
+import { SubUnitSetupWizard } from "@/components/SubUnitSetupWizard";
+import { useInstitutionalProfiles, type InstitutionalProfile, type ProfileType } from "@/hooks/useInstitutionalProfiles";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Label } from "@/components/ui/label";
+import { WaveBackground } from "@/components/WaveBackground";
+import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
+import { 
+  ArrowLeft,
+  Building2, 
+  Plus, 
+  Pencil, 
+  Trash2, 
+  Copy, 
+  ChevronRight,
+  FolderOpen,
+  CheckCircle2,
+  Circle,
+  Dna,
+  GraduationCap,
+  Layers,
+  Building,
+  Briefcase,
+  ChevronDown,
+  Palette,
+  Image,
+  Upload,
+  Save,
+  X,
+  Loader2,
+  ExternalLink,
+  Settings,
+  AlertCircle,
+} from "lucide-react";
+import type { InstitutionalConfig as InstitutionalConfigType, ProfileType as ConfigProfileType } from "@/types/uplaybook";
+
+const PROFILE_TYPE_ICONS: Record<ProfileType, React.ReactNode> = {
+  university: <Building2 className="w-4 h-4" />,
+  college: <GraduationCap className="w-4 h-4" />,
+  division: <Layers className="w-4 h-4" />,
+  unit: <Building className="w-4 h-4" />,
+  department: <Briefcase className="w-4 h-4" />,
+};
+
+const PROFILE_TYPE_LABELS: Record<ProfileType, string> = {
+  university: 'University',
+  college: 'College',
+  division: 'Division',
+  unit: 'Unit',
+  department: 'Department',
+};
+
+const MAX_LOGO_SIZE = 2 * 1024 * 1024;
+const MAX_LOGO_DIMENSION = 400;
+
+export default function UniversitySettingsPage() {
+  const navigate = useNavigate();
+  const { tenant, refreshProfile, isAdmin, isSuperAdmin } = useAuth();
+  const { profiles, createProfile, updateProfile, deleteProfile, duplicateProfile, getChildProfiles, getRootProfiles, getParentProfile, refreshProfiles } = useInstitutionalProfiles();
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Tabs
+  const [activeTab, setActiveTab] = useState("branding");
+  
+  // Profile management state
+  const [editingProfile, setEditingProfile] = useState<InstitutionalProfile | null>(null);
+  const [showWizard, setShowWizard] = useState(false);
+  const [showSubUnitWizard, setShowSubUnitWizard] = useState(false);
+  const [subUnitParent, setSubUnitParent] = useState<InstitutionalProfile | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [profileToDelete, setProfileToDelete] = useState<InstitutionalProfile | null>(null);
+  const [duplicateName, setDuplicateName] = useState("");
+  const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
+  const [profileToDuplicate, setProfileToDuplicate] = useState<InstitutionalProfile | null>(null);
+  const [expandedProfiles, setExpandedProfiles] = useState<Set<string>>(new Set());
+  const [isDeletingProfile, setIsDeletingProfile] = useState(false);
+  
+  // Branding state
+  const [isEditingInstitution, setIsEditingInstitution] = useState(false);
+  const [institutionName, setInstitutionName] = useState('');
+  const [isSavingInstitution, setIsSavingInstitution] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [primaryColor, setPrimaryColor] = useState('#1F2A44');
+  const [accentColor, setAccentColor] = useState('#2C7A7B');
+  const [primaryColorInput, setPrimaryColorInput] = useState('#1F2A44');
+  const [accentColorInput, setAccentColorInput] = useState('#2C7A7B');
+  const [isSavingColors, setIsSavingColors] = useState(false);
+
+  // Content DNA stats per profile
+  const [dnaStats, setDnaStats] = useState<Record<string, { samples: number; hasAnalysis: boolean }>>({});
+
+  useEffect(() => {
+    if (tenant?.institution_name) {
+      setInstitutionName(tenant.institution_name);
+    }
+    if (tenant?.logo_url) {
+      setLogoUrl(tenant.logo_url);
+    }
+    if (tenant?.primary_color) {
+      setPrimaryColor(tenant.primary_color);
+      setPrimaryColorInput(tenant.primary_color);
+    }
+    if (tenant?.accent_color) {
+      setAccentColor(tenant.accent_color);
+      setAccentColorInput(tenant.accent_color);
+    }
+  }, [tenant]);
+
+  // Fetch DNA stats for each profile
+  useEffect(() => {
+    const fetchDnaStats = async () => {
+      if (!tenant?.id || profiles.length === 0) return;
+      
+      const stats: Record<string, { samples: number; hasAnalysis: boolean }> = {};
+      
+      for (const profile of profiles) {
+        const [samplesResult, analysisResult] = await Promise.all([
+          supabase.from('content_dna_samples').select('id', { count: 'exact', head: true }).eq('profile_id', profile.id),
+          supabase.from('content_dna_analysis').select('id').eq('profile_id', profile.id).maybeSingle(),
+        ]);
+        
+        stats[profile.id] = {
+          samples: samplesResult.count || 0,
+          hasAnalysis: !!analysisResult.data,
+        };
+      }
+      
+      setDnaStats(stats);
+    };
+    
+    fetchDnaStats();
+  }, [tenant?.id, profiles]);
+
+  const toggleExpanded = (profileId: string) => {
+    setExpandedProfiles(prev => {
+      const next = new Set(prev);
+      if (next.has(profileId)) {
+        next.delete(profileId);
+      } else {
+        next.add(profileId);
+      }
+      return next;
+    });
+  };
+
+  // Branding handlers
+  const resizeImage = (file: File): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const img = document.createElement('img');
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > MAX_LOGO_DIMENSION || height > MAX_LOGO_DIMENSION) {
+          if (width > height) {
+            height = (height / width) * MAX_LOGO_DIMENSION;
+            width = MAX_LOGO_DIMENSION;
+          } else {
+            width = (width / height) * MAX_LOGO_DIMENSION;
+            height = MAX_LOGO_DIMENSION;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        ctx?.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => blob ? resolve(blob) : reject(new Error('Failed to resize')),
+          'image/png',
+          0.9
+        );
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  const handleSaveInstitution = async () => {
+    if (!tenant?.id || !institutionName.trim()) return;
+    
+    setIsSavingInstitution(true);
+    try {
+      const { error } = await supabase
+        .from('tenants')
+        .update({ institution_name: institutionName.trim() })
+        .eq('id', tenant.id);
+
+      if (error) throw error;
+
+      await refreshProfile();
+      setIsEditingInstitution(false);
+      toast({ title: 'Institution Updated', description: 'Your institution name has been saved.' });
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setIsSavingInstitution(false);
+    }
+  };
+
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !tenant?.id) return;
+
+    if (file.size > MAX_LOGO_SIZE) {
+      toast({ title: 'File too large', description: 'Logo must be less than 2MB', variant: 'destructive' });
+      return;
+    }
+
+    setIsUploadingLogo(true);
+    try {
+      const resizedBlob = await resizeImage(file);
+      const fileName = `${tenant.id}/logo-${Date.now()}.png`;
+
+      if (tenant.logo_url) {
+        const oldPath = tenant.logo_url.split('/').pop();
+        if (oldPath) {
+          await supabase.storage.from('institution-logos').remove([`${tenant.id}/${oldPath}`]);
+        }
+      }
+
+      const { error: uploadError } = await supabase.storage
+        .from('institution-logos')
+        .upload(fileName, resizedBlob, { contentType: 'image/png', upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage.from('institution-logos').getPublicUrl(fileName);
+
+      const { error: updateError } = await supabase
+        .from('tenants')
+        .update({ logo_url: publicUrl })
+        .eq('id', tenant.id);
+
+      if (updateError) throw updateError;
+
+      setLogoUrl(publicUrl);
+      await refreshProfile();
+      toast({ title: 'Logo Uploaded', description: 'Your institution logo has been updated.' });
+    } catch (error: any) {
+      toast({ title: 'Upload Failed', description: error.message, variant: 'destructive' });
+    } finally {
+      setIsUploadingLogo(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveLogo = async () => {
+    if (!tenant?.id || !tenant.logo_url) return;
+
+    setIsUploadingLogo(true);
+    try {
+      const urlParts = tenant.logo_url.split('/');
+      const fileName = urlParts[urlParts.length - 1];
+      await supabase.storage.from('institution-logos').remove([`${tenant.id}/${fileName}`]);
+
+      const { error } = await supabase.from('tenants').update({ logo_url: null }).eq('id', tenant.id);
+      if (error) throw error;
+
+      setLogoUrl(null);
+      await refreshProfile();
+      toast({ title: 'Logo Removed' });
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  };
+
+  const handleSaveColors = async () => {
+    if (!tenant?.id) return;
+
+    setIsSavingColors(true);
+    try {
+      const { error } = await supabase
+        .from('tenants')
+        .update({ primary_color: primaryColorInput, accent_color: accentColorInput })
+        .eq('id', tenant.id);
+
+      if (error) throw error;
+
+      setPrimaryColor(primaryColorInput);
+      setAccentColor(accentColorInput);
+      await refreshProfile();
+      toast({ title: 'Colors Saved' });
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setIsSavingColors(false);
+    }
+  };
+
+  const handleColorInputChange = (value: string, setter: (v: string) => void) => {
+    if (value === '' || /^#?[0-9A-Fa-f]{0,6}$/.test(value)) {
+      if (value && !value.startsWith('#')) value = '#' + value;
+      setter(value);
+    }
+  };
+
+  // Profile handlers
+  const handleCreateProfile = async (name: string, config: InstitutionalConfigType) => {
+    const profile = await createProfile(name, config, null, 'university');
+    setShowWizard(false);
+    if (profile) {
+      setEditingProfile(profile);
+      setActiveTab("profiles");
+      toast({ title: "Profile created", description: `"${profile.name}" is ready to use.` });
+    }
+  };
+
+  const handleCreateSubUnit = async (name: string, config: InstitutionalConfigType, profileType: ConfigProfileType) => {
+    if (!subUnitParent) return;
+    const profile = await createProfile(name, config, subUnitParent.id, profileType as ProfileType);
+    setShowSubUnitWizard(false);
+    setSubUnitParent(null);
+    if (profile) {
+      setExpandedProfiles(prev => new Set([...prev, subUnitParent.id]));
+      setEditingProfile(profile);
+      toast({ title: `${PROFILE_TYPE_LABELS[profileType as ProfileType]} created`, description: `"${name}" is now part of ${subUnitParent.name}.` });
+    }
+  };
+
+  const handleUpdateConfig = async (config: InstitutionalConfigType) => {
+    if (!editingProfile) return;
+    await updateProfile(editingProfile.id, { config });
+    setEditingProfile({ ...editingProfile, config });
+  };
+
+  const handleRenameProfile = async (newName: string) => {
+    if (!editingProfile || !newName.trim()) return;
+    await updateProfile(editingProfile.id, { name: newName.trim() });
+    setEditingProfile({ ...editingProfile, name: newName.trim() });
+  };
+
+  const handleDeleteProfile = async () => {
+    if (!profileToDelete) return;
+    
+    setIsDeletingProfile(true);
+    try {
+      // First delete associated Content DNA samples
+      const { error: samplesError } = await supabase
+        .from('content_dna_samples')
+        .delete()
+        .eq('profile_id', profileToDelete.id);
+      
+      if (samplesError) {
+        console.error('Error deleting samples:', samplesError);
+      }
+
+      // Delete Content DNA analysis
+      const { error: analysisError } = await supabase
+        .from('content_dna_analysis')
+        .delete()
+        .eq('profile_id', profileToDelete.id);
+      
+      if (analysisError) {
+        console.error('Error deleting analysis:', analysisError);
+      }
+
+      // Delete Content DNA adjustments
+      const { error: adjustmentsError } = await supabase
+        .from('content_dna_adjustments')
+        .delete()
+        .eq('profile_id', profileToDelete.id);
+      
+      if (adjustmentsError) {
+        console.error('Error deleting adjustments:', adjustmentsError);
+      }
+
+      // Now delete the profile itself
+      await deleteProfile(profileToDelete.id);
+      
+      if (editingProfile?.id === profileToDelete.id) {
+        setEditingProfile(null);
+      }
+      
+      toast({ title: "Profile deleted", description: "Profile and all associated Content DNA have been removed." });
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message || "Failed to delete profile", variant: "destructive" });
+    } finally {
+      setIsDeletingProfile(false);
+      setDeleteDialogOpen(false);
+      setProfileToDelete(null);
+    }
+  };
+
+  const handleDuplicateProfile = async () => {
+    if (!profileToDuplicate || !duplicateName.trim()) return;
+    const newProfile = await duplicateProfile(profileToDuplicate.id, duplicateName.trim());
+    setDuplicateDialogOpen(false);
+    setProfileToDuplicate(null);
+    setDuplicateName("");
+    if (newProfile) {
+      toast({ title: "Profile duplicated", description: `"${newProfile.name}" created.` });
+    }
+  };
+
+  const getProfileSummary = (profile: InstitutionalProfile) => {
+    const parts: string[] = [];
+    if (profile.config.institutionName) parts.push(profile.config.institutionName);
+    if (profile.config.mascot) parts.push(profile.config.mascot);
+    const ctaCount = (profile.config.primaryCTAs?.length || 0) + (profile.config.secondaryCTAs?.length || 0);
+    if (ctaCount > 0) parts.push(`${ctaCount} CTAs`);
+    return parts.length > 0 ? parts.join(' • ') : 'Empty profile';
+  };
+
+  const getProfileCompletion = (config: InstitutionalConfigType) => {
+    const checks = [
+      { key: 'name', done: !!config.institutionName?.trim() },
+      { key: 'abbrev', done: !!config.institutionAbbreviation?.trim() },
+      { key: 'logo', done: !!config.logoUrl?.trim() },
+      { key: 'primary', done: !!config.primaryColor && config.primaryColor !== '#1F2A44' },
+      { key: 'emailDomain', done: !!config.emailDomain?.trim() },
+      { key: 'contactEmail', done: !!config.primaryContactEmail?.trim() },
+      { key: 'portal', done: !!config.portalName?.trim() },
+      { key: 'primaryCTAs', done: (config.primaryCTAs?.length || 0) > 0 },
+    ];
+    
+    const completed = checks.filter(c => c.done).length;
+    const percentage = Math.round((completed / checks.length) * 100);
+    return { completed, total: checks.length, percentage };
+  };
+
+  if (!isAdmin && !isSuperAdmin) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-16 text-center">
+          <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+          <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
+          <p className="text-muted-foreground">You need admin privileges to access University Settings.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      
+      {/* Page Header */}
+      <div className="relative overflow-hidden pb-8">
+        <WaveBackground variant="default" />
+        
+        <div className="relative container mx-auto px-4 pt-10 pb-4">
+          <div className="max-w-6xl mx-auto">
+            {/* Breadcrumb */}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+              <Link to="/dashboard" className="hover:text-foreground transition-colors flex items-center gap-1">
+                <ArrowLeft className="w-4 h-4" />
+                Home
+              </Link>
+              <span>/</span>
+              <span className="text-foreground">University Settings</span>
+            </div>
+
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  {logoUrl ? (
+                    <img src={logoUrl} alt={tenant?.institution_name || ''} className="w-10 h-10 object-contain rounded" />
+                  ) : (
+                    <Building2 className="w-6 h-6 text-primary" />
+                  )}
+                </div>
+                <div>
+                  <h1 className="font-serif text-2xl md:text-3xl font-bold">{tenant?.institution_name || 'University Settings'}</h1>
+                  <p className="text-muted-foreground text-sm">
+                    Manage your institution's branding, profiles, and Content DNA
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <main className="container mx-auto px-4 py-6">
+        <div className="max-w-6xl mx-auto">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="mb-6">
+              <TabsTrigger value="branding" className="flex items-center gap-2">
+                <Palette className="w-4 h-4" />
+                Branding
+              </TabsTrigger>
+              <TabsTrigger value="profiles" className="flex items-center gap-2">
+                <Building2 className="w-4 h-4" />
+                Profiles ({profiles.length})
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Branding Tab */}
+            <TabsContent value="branding" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Institution Name */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Building2 className="w-5 h-5" />
+                      Institution Name
+                    </CardTitle>
+                    <CardDescription>
+                      The primary name of your institution displayed throughout the app
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {isEditingInstitution ? (
+                      <div className="space-y-3">
+                        <Input
+                          value={institutionName}
+                          onChange={(e) => setInstitutionName(e.target.value)}
+                          placeholder="Enter institution name"
+                        />
+                        <div className="flex gap-2">
+                          <Button onClick={handleSaveInstitution} disabled={isSavingInstitution} size="sm">
+                            {isSavingInstitution ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Save className="w-4 h-4 mr-1" />}
+                            Save
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => {
+                            setIsEditingInstitution(false);
+                            setInstitutionName(tenant?.institution_name || '');
+                          }}>
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium">{tenant?.institution_name || 'Not set'}</span>
+                        <Button variant="outline" size="sm" onClick={() => setIsEditingInstitution(true)}>
+                          <Pencil className="w-4 h-4 mr-1" />
+                          Edit
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Logo */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Image className="w-5 h-5" />
+                      Institution Logo
+                    </CardTitle>
+                    <CardDescription>
+                      Upload your institution's logo (PNG, JPG, max 2MB)
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center gap-4">
+                      {logoUrl ? (
+                        <div className="relative group">
+                          <img src={logoUrl} alt="Logo" className="w-20 h-20 object-contain rounded border bg-white p-2" />
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            className="absolute -top-2 -right-2 w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={handleRemoveLogo}
+                            disabled={isUploadingLogo}
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="w-20 h-20 rounded border-2 border-dashed flex items-center justify-center bg-muted/30">
+                          <Image className="w-8 h-8 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div>
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          onChange={handleLogoUpload}
+                          accept="image/*"
+                          className="hidden"
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isUploadingLogo}
+                        >
+                          {isUploadingLogo ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Upload className="w-4 h-4 mr-1" />}
+                          {logoUrl ? 'Change' : 'Upload'}
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Colors */}
+                <Card className="lg:col-span-2">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Palette className="w-5 h-5" />
+                      Brand Colors
+                    </CardTitle>
+                    <CardDescription>
+                      Set your institution's primary and accent colors
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap items-end gap-6">
+                      <div className="space-y-2">
+                        <Label>Primary Color</Label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={primaryColorInput.length === 7 ? primaryColorInput : primaryColor}
+                            onChange={(e) => setPrimaryColorInput(e.target.value)}
+                            className="w-10 h-10 rounded cursor-pointer border-0"
+                          />
+                          <Input
+                            value={primaryColorInput}
+                            onChange={(e) => handleColorInputChange(e.target.value, setPrimaryColorInput)}
+                            className="w-28 font-mono text-sm"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label>Accent Color</Label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={accentColorInput.length === 7 ? accentColorInput : accentColor}
+                            onChange={(e) => setAccentColorInput(e.target.value)}
+                            className="w-10 h-10 rounded cursor-pointer border-0"
+                          />
+                          <Input
+                            value={accentColorInput}
+                            onChange={(e) => handleColorInputChange(e.target.value, setAccentColorInput)}
+                            className="w-28 font-mono text-sm"
+                          />
+                        </div>
+                      </div>
+
+                      {(primaryColorInput !== primaryColor || accentColorInput !== accentColor) && (
+                        <Button onClick={handleSaveColors} disabled={isSavingColors}>
+                          {isSavingColors ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Save className="w-4 h-4 mr-1" />}
+                          Save Colors
+                        </Button>
+                      )}
+                    </div>
+
+                    {/* Preview */}
+                    <div className="mt-6 p-4 rounded-lg border bg-white">
+                      <p className="text-sm text-muted-foreground mb-3">Preview:</p>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded flex items-center justify-center text-white font-bold" style={{ backgroundColor: primaryColorInput }}>
+                          {tenant?.institution_name?.charAt(0) || 'U'}
+                        </div>
+                        <div>
+                          <p className="font-medium" style={{ color: primaryColorInput }}>{tenant?.institution_name || 'Your University'}</p>
+                          <p className="text-sm" style={{ color: accentColorInput }}>Welcome message with accent color</p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            {/* Profiles Tab */}
+            <TabsContent value="profiles">
+              {showWizard ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Building2 className="w-5 h-5" />
+                      Create Institutional Profile
+                    </CardTitle>
+                    <CardDescription>
+                      Set up a new institution profile with branding, contact info, and key systems
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ProfileSetupWizard
+                      onComplete={handleCreateProfile}
+                      onCancel={() => setShowWizard(false)}
+                    />
+                  </CardContent>
+                </Card>
+              ) : showSubUnitWizard && subUnitParent ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Layers className="w-5 h-5" />
+                      Create Sub-Unit
+                    </CardTitle>
+                    <CardDescription>
+                      Create a college, division, unit, or department under {subUnitParent.name}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <SubUnitSetupWizard
+                      parentProfile={subUnitParent}
+                      onComplete={handleCreateSubUnit}
+                      onCancel={() => {
+                        setShowSubUnitWizard(false);
+                        setSubUnitParent(null);
+                      }}
+                    />
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Profile List */}
+                  <div className="lg:col-span-1 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h2 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
+                        Your Profiles
+                      </h2>
+                      <Button size="sm" className="h-8" onClick={() => setShowWizard(true)}>
+                        <Plus className="w-3 h-3 mr-1" />
+                        New
+                      </Button>
+                    </div>
+
+                    {profiles.length === 0 ? (
+                      <Card className="border-dashed">
+                        <CardContent className="flex flex-col items-center justify-center py-8 text-center">
+                          <FolderOpen className="w-10 h-10 text-muted-foreground/50 mb-3" />
+                          <p className="text-sm text-muted-foreground mb-3">
+                            No profiles yet. Create one to get started.
+                          </p>
+                          <Button size="sm" variant="outline" onClick={() => setShowWizard(true)}>
+                            <Plus className="w-3 h-3 mr-1" />
+                            Create First Profile
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ) : (
+                      <div className="space-y-2">
+                        {getRootProfiles().map(profile => {
+                          const children = getChildProfiles(profile.id);
+                          const hasChildren = children.length > 0;
+                          const isExpanded = expandedProfiles.has(profile.id);
+                          const stats = dnaStats[profile.id];
+                          
+                          return (
+                            <div key={profile.id}>
+                              <Card 
+                                className={`cursor-pointer transition-all hover:border-secondary/50 ${
+                                  editingProfile?.id === profile.id 
+                                    ? 'border-secondary bg-secondary/5 shadow-sm' 
+                                    : ''
+                                }`}
+                              >
+                                <CardContent className="p-3">
+                                  <div className="flex items-start gap-2">
+                                    {hasChildren ? (
+                                      <button 
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          toggleExpanded(profile.id);
+                                        }}
+                                        className="mt-2 p-0.5 hover:bg-muted rounded transition-colors"
+                                      >
+                                        <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isExpanded ? '' : '-rotate-90'}`} />
+                                      </button>
+                                    ) : (
+                                      <div className="w-5" />
+                                    )}
+                                    
+                                    <div 
+                                      className="flex-1 flex items-start gap-3"
+                                      onClick={() => setEditingProfile(profile)}
+                                    >
+                                      {profile.config.logoUrl ? (
+                                        <img
+                                          src={profile.config.logoUrl}
+                                          alt={profile.name}
+                                          className="w-10 h-10 object-contain rounded bg-white border p-1 flex-shrink-0"
+                                        />
+                                      ) : (
+                                        <div
+                                          className="w-10 h-10 rounded flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                                          style={{ backgroundColor: profile.config.primaryColor || '#1F2A44' }}
+                                        >
+                                          {(profile.config.institutionAbbreviation || profile.name)?.charAt(0) || 'U'}
+                                        </div>
+                                      )}
+                                      
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[profile.profileType]}</span>
+                                          <h3 className="font-medium text-sm truncate">{profile.name}</h3>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground truncate mt-0.5">
+                                          {getProfileSummary(profile)}
+                                        </p>
+                                        <div className="flex items-center gap-2 mt-1.5">
+                                          {stats && (
+                                            <Badge variant={stats.hasAnalysis ? "default" : "outline"} className="text-[10px] h-4 px-1 gap-1">
+                                              <Dna className="w-2.5 h-2.5" />
+                                              {stats.samples} samples
+                                            </Badge>
+                                          )}
+                                          {hasChildren && (
+                                            <Badge variant="outline" className="text-[10px] h-4 px-1">
+                                              {children.length} sub-unit{children.length > 1 ? 's' : ''}
+                                            </Badge>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-1" />
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                              
+                              {hasChildren && isExpanded && (
+                                <div className="ml-6 mt-1 space-y-1 border-l-2 border-muted pl-2">
+                                  {children.map(child => (
+                                    <Card 
+                                      key={child.id}
+                                      className={`cursor-pointer transition-all hover:border-secondary/50 ${
+                                        editingProfile?.id === child.id 
+                                          ? 'border-secondary bg-secondary/5 shadow-sm' 
+                                          : ''
+                                      }`}
+                                      onClick={() => setEditingProfile(child)}
+                                    >
+                                      <CardContent className="p-2.5">
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[child.profileType]}</span>
+                                          <div className="flex-1 min-w-0">
+                                            <h4 className="font-medium text-sm truncate">{child.config.unitName || child.name}</h4>
+                                          </div>
+                                          <Badge variant="outline" className="text-[10px] h-4 px-1">
+                                            {PROFILE_TYPE_LABELS[child.profileType]}
+                                          </Badge>
+                                          <ChevronRight className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                                        </div>
+                                      </CardContent>
+                                    </Card>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Profile Editor */}
+                  <div className="lg:col-span-2">
+                    {editingProfile ? (
+                      <Card>
+                        <CardHeader className="pb-4">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3">
+                                <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[editingProfile.profileType]}</span>
+                                <Input
+                                  value={editingProfile.config.unitName || editingProfile.name}
+                                  onChange={(e) => {
+                                    if (editingProfile.profileType === 'university') {
+                                      handleRenameProfile(e.target.value);
+                                    } else {
+                                      handleUpdateConfig({ ...editingProfile.config, unitName: e.target.value });
+                                    }
+                                  }}
+                                  className="font-serif text-lg font-bold h-auto py-1 px-2 border-transparent hover:border-border focus:border-border max-w-xs"
+                                />
+                              </div>
+                              <CardDescription className="mt-1">
+                                {editingProfile.profileType === 'university' 
+                                  ? 'Configure Content DNA, terminology, and branding'
+                                  : `Part of ${getParentProfile(editingProfile.id)?.name || 'parent institution'}`
+                                }
+                              </CardDescription>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              {/* Content DNA link */}
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 gap-1"
+                                onClick={() => navigate(`/admin/content-dna?profileId=${editingProfile.id}`)}
+                              >
+                                <Dna className="w-3 h-3" />
+                                Content DNA
+                                <ExternalLink className="w-3 h-3" />
+                              </Button>
+                              
+                              {editingProfile.profileType === 'university' && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 gap-1"
+                                  onClick={() => {
+                                    setSubUnitParent(editingProfile);
+                                    setShowSubUnitWizard(true);
+                                  }}
+                                >
+                                  <Plus className="w-3 h-3" />
+                                  Add Sub-Unit
+                                </Button>
+                              )}
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => {
+                                  setProfileToDuplicate(editingProfile);
+                                  setDuplicateName(`${editingProfile.config.unitName || editingProfile.name} (Copy)`);
+                                  setDuplicateDialogOpen(true);
+                                }}
+                              >
+                                <Copy className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-destructive hover:text-destructive"
+                                onClick={() => {
+                                  setProfileToDelete(editingProfile);
+                                  setDeleteDialogOpen(true);
+                                }}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                          {/* Profile Completion */}
+                          {(() => {
+                            const completion = getProfileCompletion(editingProfile.config);
+                            const stats = dnaStats[editingProfile.id];
+                            return (
+                              <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    {completion.percentage === 100 ? (
+                                      <CheckCircle2 className="w-5 h-5 text-green-600" />
+                                    ) : (
+                                      <Settings className="w-5 h-5 text-secondary" />
+                                    )}
+                                    <span className="font-medium text-sm">Profile Setup</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    {stats && (
+                                      <Badge variant={stats.hasAnalysis ? "default" : "secondary"} className="gap-1">
+                                        <Dna className="w-3 h-3" />
+                                        {stats.hasAnalysis ? 'DNA Active' : `${stats.samples} samples`}
+                                      </Badge>
+                                    )}
+                                    <Badge variant={completion.percentage === 100 ? "default" : "secondary"}>
+                                      {completion.percentage}%
+                                    </Badge>
+                                  </div>
+                                </div>
+                                <Progress value={completion.percentage} className="h-2" />
+                              </div>
+                            );
+                          })()}
+                          
+                          <InstitutionalConfig 
+                            config={editingProfile.config} 
+                            onChange={handleUpdateConfig}
+                            profileId={editingProfile.id}
+                          />
+                        </CardContent>
+                      </Card>
+                    ) : (
+                      <Card className="border-dashed">
+                        <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                          <Building2 className="w-12 h-12 text-muted-foreground/30 mb-4" />
+                          <h3 className="font-medium text-lg mb-1">Select a Profile</h3>
+                          <p className="text-sm text-muted-foreground max-w-sm">
+                            Choose a profile from the list to edit, or create a new one to get started.
+                          </p>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </div>
+      </main>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Profile</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{profileToDelete?.name}"? 
+              <br /><br />
+              <strong>This will also delete:</strong>
+              <ul className="list-disc list-inside mt-2 text-left">
+                <li>All Content DNA samples ({dnaStats[profileToDelete?.id || '']?.samples || 0} samples)</li>
+                <li>Voice analysis and brand platform data</li>
+                <li>DNA adjustments and tuning</li>
+              </ul>
+              <br />
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingProfile}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteProfile} 
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeletingProfile}
+            >
+              {isDeletingProfile ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
+              Delete Profile & Content DNA
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Duplicate Dialog */}
+      <Dialog open={duplicateDialogOpen} onOpenChange={setDuplicateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Duplicate Profile</DialogTitle>
+            <DialogDescription>
+              Create a copy of "{profileToDuplicate?.name}" with a new name.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="duplicate-name">New Profile Name</Label>
+              <Input
+                id="duplicate-name"
+                value={duplicateName}
+                onChange={(e) => setDuplicateName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleDuplicateProfile()}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDuplicateDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleDuplicateProfile} disabled={!duplicateName.trim()}>
+              Duplicate
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

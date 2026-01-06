@@ -435,10 +435,10 @@ export default function AdminConsolePage() {
       stat: onboardingStats.pending > 0 ? `${onboardingStats.pending} pending` : 'No pending'
     }] : []),
     {
-      title: 'Institutional Profiles',
-      description: 'Manage sub-units, colleges, and departments',
-      icon: FolderTree,
-      href: '/settings',
+      title: 'University Settings',
+      description: 'Branding, profiles, and Content DNA management',
+      icon: Building2,
+      href: '/university-settings',
       color: 'bg-[hsl(262,52%,47%)]',
       stat: contentStats.institutionalProfiles > 0 ? `${contentStats.institutionalProfiles} profiles` : 'Configure'
     },
@@ -465,14 +465,6 @@ export default function AdminConsolePage() {
       href: '/approvals',
       color: 'bg-[hsl(45,93%,47%)]',
       stat: 'Review queue'
-    },
-    {
-      title: 'Institution Settings',
-      description: 'Configure voice, lexicon, and branding',
-      icon: Settings,
-      href: '/settings',
-      color: 'bg-[hsl(220,14%,46%)]',
-      stat: 'Configuration'
     },
   ];
 
