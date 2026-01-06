@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Library, FolderOpen, Settings, Home, LogOut, User, CheckCircle, UserPlus, Building2, PenTool, Route, ChevronDown, Sparkles } from "lucide-react";
+import { Library, FolderOpen, Settings, Home, LogOut, User, CheckCircle, UserPlus, Building2, PenTool, Route, ChevronDown, Sparkles, FileEdit } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
@@ -146,6 +146,13 @@ export function Header() {
                     <Link to="/shared-library" className="flex items-center gap-2 cursor-pointer">
                       <Library className="w-4 h-4" />
                       University Library
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard#drafts" className="flex items-center gap-2 cursor-pointer">
+                      <FileEdit className="w-4 h-4" />
+                      My Drafts
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
