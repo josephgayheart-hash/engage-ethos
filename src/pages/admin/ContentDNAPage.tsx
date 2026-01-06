@@ -560,96 +560,54 @@ export default function ContentDNAPage() {
             </div>
           </div>
 
-          {/* Institutional Profile Selector - Prominent guidance */}
+          {/* Institutional Profile Selector - Clean horizontal layout */}
           {profiles.length > 0 && (
-            <Card className={`mt-6 border-2 ${selectedProfile ? 'border-primary/30 bg-primary/5' : 'border-amber-500 bg-amber-50'}`}>
-              <CardContent className="py-4">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2.5 rounded-lg ${selectedProfile ? 'bg-primary/10' : 'bg-amber-100'}`}>
-                      <Building2 className={`w-5 h-5 ${selectedProfile ? 'text-primary' : 'text-amber-600'}`} />
-                    </div>
-                    <div>
-                      {selectedProfile ? (
-                        <>
-                          <p className="text-sm font-medium text-foreground flex items-center gap-2">
-                            <CheckCircle2 className="w-4 h-4 text-green-600" />
-                            Content DNA for: <span className="font-bold">{selectedProfile.name}</span>
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            All samples and analysis are scoped to this profile
-                          </p>
-                        </>
-                      ) : (
-                        <>
-                          <p className="text-sm font-medium text-amber-800 flex items-center gap-2">
-                            <AlertCircle className="w-4 h-4" />
-                            No Profile Selected
-                          </p>
-                          <p className="text-xs text-amber-700">
-                            Select an institutional profile to organize your Content DNA
-                          </p>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {/* Profile selector dropdown style */}
-                    <Select
-                      value={selectedProfile?.id || 'none'}
-                      onValueChange={(value) => {
-                        if (value === 'none') {
-                          navigate('/admin/content-dna');
-                        } else {
-                          navigate(`/admin/content-dna?profileId=${value}`);
-                        }
-                      }}
-                    >
-                      <SelectTrigger className="w-[220px] h-9">
-                        <SelectValue placeholder="Select a profile..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none" className="text-muted-foreground">
-                          <span className="flex items-center gap-2">
-                            <Building2 className="w-4 h-4" />
-                            Institution-wide (no profile)
-                          </span>
-                        </SelectItem>
-                        {profiles.map((p) => (
-                          <SelectItem key={p.id} value={p.id}>
-                            <span className="flex items-center gap-2">
-                              {p.config.logoUrl ? (
-                                <img src={p.config.logoUrl} alt="" className="w-4 h-4 rounded object-contain" />
-                              ) : (
-                                <div 
-                                  className="w-4 h-4 rounded text-[8px] flex items-center justify-center text-white font-bold"
-                                  style={{ backgroundColor: p.config.primaryColor || '#1F2A44' }}
-                                >
-                                  {p.name.charAt(0)}
-                                </div>
-                              )}
-                              {p.name}
-                            </span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    
-                    {/* Manage Profiles Link */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-9 gap-1.5"
-                      onClick={() => navigate('/university-settings?tab=profiles')}
-                    >
-                      <Settings className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Manage</span>
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="mt-6 flex items-center gap-4 p-4 rounded-lg border bg-card">
+              <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Profile:</span>
+              
+              {/* Profile buttons as a segmented control */}
+              <div className="flex items-center gap-1 flex-wrap flex-1">
+                <Button
+                  variant={!selectedProfile ? "default" : "ghost"}
+                  size="sm"
+                  className="h-8"
+                  onClick={() => navigate('/admin/content-dna')}
+                >
+                  All
+                </Button>
+                {profiles.map((p) => (
+                  <Button
+                    key={p.id}
+                    variant={selectedProfile?.id === p.id ? "default" : "ghost"}
+                    size="sm"
+                    className="h-8 gap-1.5"
+                    onClick={() => navigate(`/admin/content-dna?profileId=${p.id}`)}
+                  >
+                    {p.config.logoUrl ? (
+                      <img src={p.config.logoUrl} alt="" className="w-4 h-4 rounded object-contain" />
+                    ) : (
+                      <div 
+                        className="w-4 h-4 rounded text-[8px] flex items-center justify-center text-white font-bold shrink-0"
+                        style={{ backgroundColor: p.config.primaryColor || '#1F2A44' }}
+                      >
+                        {p.name.charAt(0)}
+                      </div>
+                    )}
+                    <span className="truncate max-w-[120px]">{p.name}</span>
+                  </Button>
+                ))}
+              </div>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 gap-1.5 text-muted-foreground shrink-0"
+                onClick={() => navigate('/university-settings?tab=profiles')}
+              >
+                <Settings className="w-3.5 h-3.5" />
+                Manage
+              </Button>
+            </div>
           )}
 
           {/* No Profiles - Create First */}
