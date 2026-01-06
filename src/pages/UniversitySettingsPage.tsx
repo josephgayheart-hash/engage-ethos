@@ -493,14 +493,32 @@ export default function UniversitySettingsPage() {
         
         <div className="relative container mx-auto px-4 pt-10 pb-4">
           <div className="max-w-6xl mx-auto">
-            {/* Breadcrumb */}
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-              <Link to="/dashboard" className="hover:text-foreground transition-colors flex items-center gap-1">
-                <ArrowLeft className="w-4 h-4" />
-                Home
-              </Link>
-              <span>/</span>
-              <span className="text-foreground">University Settings</span>
+            {/* Breadcrumb with quick links */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Link to="/dashboard" className="hover:text-foreground transition-colors flex items-center gap-1">
+                  <ArrowLeft className="w-4 h-4" />
+                  Home
+                </Link>
+                <span>/</span>
+                <span className="text-foreground">University Settings</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <Link 
+                  to="/build" 
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-pillar-cognitive/10 text-pillar-cognitive hover:bg-pillar-cognitive/20 transition-colors font-medium"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  Message Builder
+                </Link>
+                <Link 
+                  to="/strategy" 
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-pillar-consensus/10 text-pillar-consensus hover:bg-pillar-consensus/20 transition-colors font-medium"
+                >
+                  <Layers className="w-3.5 h-3.5" />
+                  Journey Designer
+                </Link>
+              </div>
             </div>
 
             {/* Header */}

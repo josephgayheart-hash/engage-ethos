@@ -207,8 +207,8 @@ const AppRoutes = () => (
     <Route path="/email-preview" element={<RequireAuth><EmailPreview /></RequireAuth>} />
     <Route path="/benchmarks" element={<RequireAuth><PerformanceBenchmarks /></RequireAuth>} />
     <Route path="/translate" element={<RequireAuth><TranslationTool /></RequireAuth>} />
-    <Route path="/settings" element={<RequireAuth><SettingsPage /></RequireAuth>} />
-    <Route path="/university-settings" element={<RequireAuth><RequireAdmin><UniversitySettingsPage /></RequireAdmin></RequireAuth>} />
+    <Route path="/settings" element={<Navigate to="/university-settings" replace />} />
+    <Route path="/university-settings" element={<RequireAuth><UniversitySettingsPage /></RequireAuth>} />
     <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
     
     {/* Approver routes */}

@@ -82,7 +82,7 @@ export function InstitutionalProfileSelector({
           </p>
         </div>
         <Button variant="outline" size="sm" asChild>
-          <Link to="/settings" className="flex items-center gap-1">
+          <Link to="/university-settings" className="flex items-center gap-1">
             <Settings className="w-3 h-3" />
             Create Profile
           </Link>
@@ -123,7 +123,7 @@ export function InstitutionalProfileSelector({
           Generate As
         </Label>
         <Button variant="ghost" size="sm" className="h-6 px-2 text-xs" asChild>
-          <Link to="/settings" className="flex items-center gap-1">
+          <Link to="/university-settings" className="flex items-center gap-1">
             Manage
             <ChevronRight className="w-3 h-3" />
           </Link>
