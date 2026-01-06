@@ -62,6 +62,8 @@ import {
   ChevronDown,
   Globe,
   Pencil,
+  PenTool,
+  ArrowRight,
 } from 'lucide-react';
 import { extractTextFromFile, getAcceptString } from '@/lib/documentParser';
 import { DNATuningControls, DNAAdjustments } from '@/components/DNATuningControls';
@@ -902,6 +904,35 @@ export default function ContentDNAPage() {
               Samples and analysis will be specific to this institutional profile.
             </AlertDescription>
           </Alert>
+        )}
+
+        {/* Generate Content CTA - Shows when DNA is configured */}
+        {analysis?.voice_analysis && (
+          <Card className="mb-6 border-2 border-primary bg-gradient-to-r from-primary/5 to-primary/10">
+            <CardContent className="py-5">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-primary/10 rounded-lg">
+                    <PenTool className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-foreground">Ready to Generate Content</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Your Content DNA is configured. Generate on-brand messages using the Message Builder.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => navigate(`/build${profileIdFromUrl ? `?profileId=${profileIdFromUrl}` : ''}`)}
+                  className="gap-2"
+                >
+                  <PenTool className="w-4 h-4" />
+                  Open Message Builder
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* PROMINENT: Ready to Analyze Banner - Shows when samples exist but no analysis yet */}
