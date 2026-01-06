@@ -782,156 +782,104 @@ export default function UniversitySettingsPage() {
                         </CardContent>
                       </Card>
                     ) : (
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         {getRootProfiles().map(profile => {
                           const children = getChildProfiles(profile.id);
                           const hasChildren = children.length > 0;
                           const isExpanded = expandedProfiles.has(profile.id);
-                          const stats = dnaStats[profile.id];
                           const isSelected = editingProfile?.id === profile.id;
                           
                           return (
                             <div key={profile.id}>
-                              {/* Parent Profile Card */}
-                              <Card 
-                                className={`cursor-pointer transition-all hover:border-primary/40 hover:shadow-sm ${
+                              {/* Parent Profile Card - Clean minimal design */}
+                              <div 
+                                className={`group relative rounded-lg border p-3 cursor-pointer transition-all ${
                                   isSelected 
-                                    ? 'border-primary bg-primary/5 shadow-md ring-1 ring-primary/20' 
-                                    : 'border-border'
+                                    ? 'border-primary bg-primary/5 shadow-sm' 
+                                    : 'border-border hover:border-primary/40 hover:bg-muted/30'
                                 }`}
                                 onClick={() => setEditingProfile(profile)}
                               >
-                                <CardContent className="p-0">
-                                  <div className="flex items-stretch">
-                                    {/* Main Content Area */}
-                                    <div className="flex-1 p-4 flex items-start gap-3 min-w-0">
-                                      {/* Logo/Avatar */}
-                                      {profile.config.logoUrl ? (
-                                        <img
-                                          src={profile.config.logoUrl}
-                                          alt={profile.name}
-                                          className="w-11 h-11 object-contain rounded-lg bg-white border p-1 flex-shrink-0"
-                                        />
-                                      ) : (
-                                        <div
-                                          className="w-11 h-11 rounded-lg flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
-                                          style={{ backgroundColor: profile.config.primaryColor || '#1F2A44' }}
-                                        >
-                                          {(profile.config.institutionAbbreviation || profile.name)?.charAt(0) || 'U'}
-                                        </div>
+                                <div className="flex items-center gap-3">
+                                  {/* Logo/Avatar */}
+                                  {profile.config.logoUrl ? (
+                                    <img
+                                      src={profile.config.logoUrl}
+                                      alt={profile.name}
+                                      className="w-10 h-10 object-contain rounded-md bg-white border p-0.5 flex-shrink-0"
+                                    />
+                                  ) : (
+                                    <div
+                                      className="w-10 h-10 rounded-md flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                                      style={{ backgroundColor: profile.config.primaryColor || '#1F2A44' }}
+                                    >
+                                      {(profile.config.institutionAbbreviation || profile.name)?.charAt(0) || 'U'}
+                                    </div>
+                                  )}
+
+                                  {/* Profile Info */}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <h3 className="font-semibold text-sm truncate">{profile.name}</h3>
+                                      {isSelected && (
+                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                          Active
+                                        </span>
                                       )}
-
-                                      {/* Profile Info */}
-                                      <div className="flex-1 min-w-0 pr-2">
-                                        <div className="flex items-center gap-2 flex-wrap">
-                                          <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[profile.profileType]}</span>
-                                          <h3 className="font-semibold text-sm truncate">{profile.name}</h3>
-                                          <Badge variant="outline" className="text-[10px] h-4 px-1.5">
-                                            {PROFILE_TYPE_LABELS[profile.profileType]}
-                                          </Badge>
-                                          {stats?.hasAnalysis && (
-                                            <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
-                                              DNA Active
-                                            </Badge>
-                                          )}
-                                          {isSelected && (
-                                            <Badge variant="default" className="text-[10px] h-4 px-1.5 bg-primary">
-                                              Editing
-                                            </Badge>
-                                          )}
-                                        </div>
-
-                                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                                          {getProfileSummary(profile)}
-                                        </p>
-
-                                        <div className="mt-2 text-[11px] text-muted-foreground">
-                                          Updated {format(new Date(profile.updatedAt), 'MMM d, yyyy')}
-                                        </div>
-                                      </div>
                                     </div>
-
-                                    {/* Fixed Action Column (aligned, padded, explicit) */}
-                                    <div className="w-24 shrink-0 border-l border-border bg-muted/30 grid grid-cols-2 divide-x divide-border">
-                                      <div className="flex items-stretch">
-                                        {hasChildren ? (
-                                          <button
-                                            type="button"
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              toggleExpanded(profile.id);
-                                            }}
-                                            className="w-full px-1 py-2 hover:bg-muted/60 transition-colors"
-                                            aria-label={isExpanded ? `Collapse ${children.length} sub-units` : `Expand ${children.length} sub-units`}
-                                          >
-                                            <div className="h-full flex flex-col items-center justify-center gap-1 leading-none">
-                                              <div className="flex items-center gap-1 text-muted-foreground">
-                                                <ChevronDown
-                                                  className={`w-3.5 h-3.5 transition-transform duration-200 ${isExpanded ? '' : '-rotate-90'}`}
-                                                />
-                                                <span className="text-xs font-semibold text-foreground">{children.length}</span>
-                                              </div>
-                                              <span className="text-[10px] text-muted-foreground">Sub-units</span>
-                                            </div>
-                                          </button>
-                                        ) : (
-                                          <div className="w-full" />
-                                        )}
-                                      </div>
-
-                                      <div className="flex items-center justify-center">
-                                        <ChevronRight
-                                          className={`w-4 h-4 transition-colors ${isSelected ? 'text-primary' : 'text-muted-foreground/50'}`}
-                                        />
-                                      </div>
-                                    </div>
+                                    <p className="text-xs text-muted-foreground truncate mt-0.5">
+                                      {profile.config.institutionAbbreviation && `${profile.config.institutionAbbreviation} • `}
+                                      {profile.config.mascot || PROFILE_TYPE_LABELS[profile.profileType]}
+                                    </p>
                                   </div>
-                                </CardContent>
-                              </Card>
+
+                                  {/* Sub-units indicator */}
+                                  {hasChildren && (
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleExpanded(profile.id);
+                                      }}
+                                      className="flex items-center gap-1 px-2 py-1 text-xs rounded-md border bg-background hover:bg-muted transition-colors"
+                                    >
+                                      <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isExpanded ? '' : '-rotate-90'}`} />
+                                      <span>{children.length} sub-unit{children.length !== 1 ? 's' : ''}</span>
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
                               
                               {/* Child Profiles (Sub-units) */}
                               {hasChildren && isExpanded && (
-                                <div className="ml-5 mt-2 space-y-1.5 border-l-2 border-primary/20 pl-3">
+                                <div className="ml-4 mt-1.5 space-y-1 border-l-2 border-primary/20 pl-3">
                                   {children.map(child => {
                                     const isChildSelected = editingProfile?.id === child.id;
                                     return (
-                                      <Card 
+                                      <div 
                                         key={child.id}
-                                        className={`cursor-pointer transition-all hover:border-primary/40 ${
+                                        className={`group rounded-md border p-2.5 cursor-pointer transition-all ${
                                           isChildSelected 
-                                            ? 'border-primary bg-primary/5 shadow-sm ring-1 ring-primary/20' 
-                                            : 'border-border'
+                                            ? 'border-primary bg-primary/5' 
+                                            : 'border-border hover:border-primary/40 hover:bg-muted/30'
                                         }`}
                                         onClick={() => setEditingProfile(child)}
                                       >
-                                        <CardContent className="p-0">
-                                          <div className="flex items-stretch">
-                                            {/* Main Content */}
-                                            <div className="flex-1 p-3 flex items-center gap-2 min-w-0 pr-2">
-                                              <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[child.profileType]}</span>
-                                              <div className="flex-1 min-w-0">
-                                                <h4 className="font-medium text-sm truncate">{child.config.unitName || child.name}</h4>
-                                              </div>
-                                              <Badge variant="outline" className="text-[10px] h-4 px-1.5 flex-shrink-0">
-                                                {PROFILE_TYPE_LABELS[child.profileType]}
-                                              </Badge>
-                                              {isChildSelected && (
-                                                <Badge variant="default" className="text-[10px] h-4 px-1.5 bg-primary flex-shrink-0">
-                                                  Editing
-                                                </Badge>
-                                              )}
-                                            </div>
-
-                                            {/* Action Column (keeps alignment with parent rows) */}
-                                            <div className="w-24 shrink-0 border-l border-border bg-muted/30 grid grid-cols-2 divide-x divide-border">
-                                              <div />
-                                              <div className="flex items-center justify-center">
-                                                <ChevronRight className={`w-4 h-4 transition-colors ${isChildSelected ? 'text-primary' : 'text-muted-foreground/50'}`} />
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </CardContent>
-                                      </Card>
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[child.profileType]}</span>
+                                          <span className="flex-1 text-sm font-medium truncate">{child.config.unitName || child.name}</span>
+                                          {isChildSelected && (
+                                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                                              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                              Active
+                                            </span>
+                                          )}
+                                          <Badge variant="outline" className="text-[10px] h-4 px-1.5 flex-shrink-0">
+                                            {PROFILE_TYPE_LABELS[child.profileType]}
+                                          </Badge>
+                                        </div>
+                                      </div>
                                     );
                                   })}
                                 </div>
@@ -946,34 +894,28 @@ export default function UniversitySettingsPage() {
                   {/* Profile Editor */}
                   <div className="lg:col-span-2">
                     {editingProfile ? (
-                      <Card>
-                        <CardHeader className="pb-4">
-                          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-3">
-                                <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[editingProfile.profileType]}</span>
-                                <Input
-                                  value={editingProfile.config.unitName || editingProfile.name}
-                                  onChange={(e) => {
-                                    if (editingProfile.profileType === 'university') {
-                                      handleRenameProfile(e.target.value);
-                                    } else {
-                                      handleUpdateConfig({ ...editingProfile.config, unitName: e.target.value });
-                                    }
-                                  }}
-                                  className="font-serif text-lg font-bold h-auto py-1 px-2 border-transparent hover:border-border focus:border-border w-full sm:max-w-xs"
-                                />
+                      <div className="space-y-4">
+                        {/* Sticky Action Bar */}
+                        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border rounded-lg p-3 shadow-sm">
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            {/* Left: Editing indicator */}
+                            <div className="flex items-center gap-3">
+                              <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800">
+                                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                                <span className="text-sm font-medium text-green-700 dark:text-green-400">
+                                  Editing
+                                </span>
                               </div>
-                              <CardDescription className="mt-1">
-                                {editingProfile.profileType === 'university' 
-                                  ? 'Configure Content DNA, terminology, and branding'
-                                  : `Part of ${getParentProfile(editingProfile.id)?.name || 'parent institution'}`
-                                }
-                              </CardDescription>
+                              <div className="flex items-center gap-2">
+                                <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[editingProfile.profileType]}</span>
+                                <span className="font-semibold text-sm truncate max-w-[200px]">
+                                  {editingProfile.config.unitName || editingProfile.name}
+                                </span>
+                              </div>
                             </div>
 
-                            <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2">
-                              {/* Content DNA link */}
+                            {/* Right: Actions */}
+                            <div className="flex items-center gap-2">
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -981,7 +923,7 @@ export default function UniversitySettingsPage() {
                                 onClick={() => navigate(`/admin/content-dna?profileId=${editingProfile.id}`)}
                               >
                                 <Dna className="w-3 h-3" />
-                                Content DNA
+                                <span className="hidden sm:inline">Content DNA</span>
                                 <ExternalLink className="w-3 h-3" />
                               </Button>
 
@@ -996,7 +938,7 @@ export default function UniversitySettingsPage() {
                                   }}
                                 >
                                   <Plus className="w-3 h-3" />
-                                  Add Sub-Unit
+                                  <span className="hidden sm:inline">Add Sub-Unit</span>
                                 </Button>
                               )}
 
@@ -1004,6 +946,7 @@ export default function UniversitySettingsPage() {
                                 variant="ghost"
                                 size="icon"
                                 className="h-8 w-8"
+                                title="Duplicate"
                                 onClick={() => {
                                   setProfileToDuplicate(editingProfile);
                                   setDuplicateName(`${editingProfile.config.unitName || editingProfile.name} (Copy)`);
@@ -1016,6 +959,7 @@ export default function UniversitySettingsPage() {
                                 variant="ghost"
                                 size="icon"
                                 className="h-8 w-8 text-destructive hover:text-destructive"
+                                title="Delete"
                                 onClick={() => {
                                   setProfileToDelete(editingProfile);
                                   setDeleteDialogOpen(true);
@@ -1025,7 +969,32 @@ export default function UniversitySettingsPage() {
                               </Button>
                             </div>
                           </div>
-                        </CardHeader>
+                        </div>
+
+                        {/* Editor Card */}
+                        <Card>
+                          <CardHeader className="pb-4">
+                            <div className="flex items-center gap-3">
+                              <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[editingProfile.profileType]}</span>
+                              <Input
+                                value={editingProfile.config.unitName || editingProfile.name}
+                                onChange={(e) => {
+                                  if (editingProfile.profileType === 'university') {
+                                    handleRenameProfile(e.target.value);
+                                  } else {
+                                    handleUpdateConfig({ ...editingProfile.config, unitName: e.target.value });
+                                  }
+                                }}
+                                className="font-serif text-lg font-bold h-auto py-1 px-2 border-transparent hover:border-border focus:border-border w-full sm:max-w-xs"
+                              />
+                            </div>
+                            <CardDescription className="mt-1">
+                              {editingProfile.profileType === 'university' 
+                                ? 'Configure Content DNA, terminology, and branding'
+                                : `Part of ${getParentProfile(editingProfile.id)?.name || 'parent institution'}`
+                              }
+                            </CardDescription>
+                          </CardHeader>
                         <CardContent className="space-y-6">
                           {/* Profile Completion */}
                           {(() => {
@@ -1065,7 +1034,8 @@ export default function UniversitySettingsPage() {
                             profileId={editingProfile.id}
                           />
                         </CardContent>
-                      </Card>
+                        </Card>
+                      </div>
                     ) : (
                       <Card className="border-dashed">
                         <CardContent className="flex flex-col items-center justify-center py-16 text-center">
