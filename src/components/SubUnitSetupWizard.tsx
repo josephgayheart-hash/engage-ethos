@@ -49,10 +49,10 @@ interface WizardStep {
 
 const UNIT_TYPE_LABELS: Record<ProfileType, { label: string; icon: React.ReactNode; description: string }> = {
   university: { label: 'University', icon: <Building2 className="w-4 h-4" />, description: 'Top-level institution' },
-  college: { label: 'College', icon: <GraduationCap className="w-4 h-4" />, description: 'e.g., College of Engineering, College of Arts & Sciences' },
-  division: { label: 'Division', icon: <Layers className="w-4 h-4" />, description: 'e.g., Division of Student Affairs, Academic Affairs' },
-  unit: { label: 'Unit/Center', icon: <Building className="w-4 h-4" />, description: 'e.g., Career Center, Writing Center, Research Center' },
-  department: { label: 'Department', icon: <Briefcase className="w-4 h-4" />, description: 'e.g., Department of Computer Science, Marketing Department' },
+  college: { label: 'College', icon: <GraduationCap className="w-4 h-4" />, description: 'e.g., College of Arts & Sciences, School of Business' },
+  division: { label: 'Division', icon: <Layers className="w-4 h-4" />, description: 'e.g., Division of Student Life, Academic Affairs' },
+  unit: { label: 'Unit/Center', icon: <Building className="w-4 h-4" />, description: 'e.g., Griffin Career Center, Academic Success Center' },
+  department: { label: 'Department', icon: <Briefcase className="w-4 h-4" />, description: 'e.g., Department of Biology, Communications Office' },
 };
 
 const STEPS: WizardStep[] = [
@@ -305,7 +305,7 @@ export function SubUnitSetupWizard({ parentProfile, onComplete, onCancel }: SubU
               </Label>
               <Input
                 id="unitName"
-                placeholder={`e.g., ${profileType === 'college' ? 'College of Engineering' : profileType === 'division' ? 'Division of Student Affairs' : profileType === 'department' ? 'Department of Computer Science' : 'Career Services Center'}`}
+                placeholder={`e.g., ${profileType === 'college' ? 'College of Arts & Sciences' : profileType === 'division' ? 'Division of Student Life' : profileType === 'department' ? 'Department of Biology' : 'Griffin Career Center'}`}
                 value={config.unitName || ''}
                 onChange={(e) => updateConfig({ unitName: e.target.value })}
                 className="text-lg"
@@ -319,7 +319,7 @@ export function SubUnitSetupWizard({ parentProfile, onComplete, onCancel }: SubU
                 </Label>
                 <Input
                   id="unitAbbreviation"
-                  placeholder="e.g., CoE, DSA, CS"
+                  placeholder="e.g., CAS, DSL, BIO"
                   value={config.unitAbbreviation || ''}
                   onChange={(e) => updateConfig({ unitAbbreviation: e.target.value })}
                 />
@@ -330,7 +330,7 @@ export function SubUnitSetupWizard({ parentProfile, onComplete, onCancel }: SubU
                 </Label>
                 <Input
                   id="unitLocation"
-                  placeholder="e.g., Engineering Building, Room 101"
+                  placeholder="e.g., Lakewood Hall, Suite 200"
                   value={config.unitLocation || ''}
                   onChange={(e) => updateConfig({ unitLocation: e.target.value })}
                 />
@@ -428,7 +428,7 @@ export function SubUnitSetupWizard({ parentProfile, onComplete, onCancel }: SubU
                       <Label htmlFor="deanName">Dean Name</Label>
                       <Input
                         id="deanName"
-                        placeholder="e.g., Dr. Jane Smith"
+                        placeholder="e.g., Dr. Margaret Chen"
                         value={config.deanName || ''}
                         onChange={(e) => updateConfig({ deanName: e.target.value })}
                       />
@@ -437,7 +437,7 @@ export function SubUnitSetupWizard({ parentProfile, onComplete, onCancel }: SubU
                       <Label htmlFor="deanTitle">Title</Label>
                       <Input
                         id="deanTitle"
-                        placeholder="e.g., Dean of Engineering"
+                        placeholder="e.g., Dean of Arts & Sciences"
                         value={config.deanTitle || ''}
                         onChange={(e) => updateConfig({ deanTitle: e.target.value })}
                       />
@@ -448,7 +448,7 @@ export function SubUnitSetupWizard({ parentProfile, onComplete, onCancel }: SubU
                     <Input
                       id="deanEmail"
                       type="email"
-                      placeholder="dean@university.edu"
+                      placeholder="e.g., dean.cas@lakewood.edu"
                       value={config.deanEmail || ''}
                       onChange={(e) => updateConfig({ deanEmail: e.target.value })}
                     />
@@ -463,7 +463,7 @@ export function SubUnitSetupWizard({ parentProfile, onComplete, onCancel }: SubU
                       <Label htmlFor="vpName">Vice President Name</Label>
                       <Input
                         id="vpName"
-                        placeholder="e.g., Dr. John Doe"
+                        placeholder="e.g., Dr. Robert Martinez"
                         value={config.vicePresidentName || ''}
                         onChange={(e) => updateConfig({ vicePresidentName: e.target.value })}
                       />
@@ -472,7 +472,7 @@ export function SubUnitSetupWizard({ parentProfile, onComplete, onCancel }: SubU
                       <Label htmlFor="vpTitle">Title</Label>
                       <Input
                         id="vpTitle"
-                        placeholder="e.g., VP for Student Affairs"
+                        placeholder="e.g., VP for Student Life"
                         value={config.vicePresidentTitle || ''}
                         onChange={(e) => updateConfig({ vicePresidentTitle: e.target.value })}
                       />
@@ -483,7 +483,7 @@ export function SubUnitSetupWizard({ parentProfile, onComplete, onCancel }: SubU
                     <Input
                       id="vpEmail"
                       type="email"
-                      placeholder="vp@university.edu"
+                      placeholder="e.g., vp.studentlife@lakewood.edu"
                       value={config.vicePresidentEmail || ''}
                       onChange={(e) => updateConfig({ vicePresidentEmail: e.target.value })}
                     />
@@ -498,7 +498,7 @@ export function SubUnitSetupWizard({ parentProfile, onComplete, onCancel }: SubU
                       <Label htmlFor="directorName">Director Name</Label>
                       <Input
                         id="directorName"
-                        placeholder="e.g., Sarah Johnson"
+                        placeholder="e.g., Sarah Thompson"
                         value={config.directorName || ''}
                         onChange={(e) => updateConfig({ directorName: e.target.value })}
                       />
@@ -518,7 +518,7 @@ export function SubUnitSetupWizard({ parentProfile, onComplete, onCancel }: SubU
                     <Input
                       id="directorEmail"
                       type="email"
-                      placeholder="director@university.edu"
+                      placeholder="e.g., careers@lakewood.edu"
                       value={config.directorEmail || ''}
                       onChange={(e) => updateConfig({ directorEmail: e.target.value })}
                     />
@@ -533,7 +533,7 @@ export function SubUnitSetupWizard({ parentProfile, onComplete, onCancel }: SubU
                       <Label htmlFor="chairName">Department Chair Name</Label>
                       <Input
                         id="chairName"
-                        placeholder="e.g., Dr. Michael Chen"
+                        placeholder="e.g., Dr. Lisa Park"
                         value={config.departmentChairName || ''}
                         onChange={(e) => updateConfig({ departmentChairName: e.target.value })}
                       />
@@ -542,7 +542,7 @@ export function SubUnitSetupWizard({ parentProfile, onComplete, onCancel }: SubU
                       <Label htmlFor="chairTitle">Title</Label>
                       <Input
                         id="chairTitle"
-                        placeholder="e.g., Chair, Computer Science"
+                        placeholder="e.g., Chair, Department of Biology"
                         value={config.departmentChairTitle || ''}
                         onChange={(e) => updateConfig({ departmentChairTitle: e.target.value })}
                       />
@@ -553,7 +553,7 @@ export function SubUnitSetupWizard({ parentProfile, onComplete, onCancel }: SubU
                     <Input
                       id="chairEmail"
                       type="email"
-                      placeholder="chair@university.edu"
+                      placeholder="e.g., biology@lakewood.edu"
                       value={config.departmentChairEmail || ''}
                       onChange={(e) => updateConfig({ departmentChairEmail: e.target.value })}
                     />
@@ -570,7 +570,7 @@ export function SubUnitSetupWizard({ parentProfile, onComplete, onCancel }: SubU
                   <Label htmlFor="eaName">Name</Label>
                   <Input
                     id="eaName"
-                    placeholder="e.g., Pat Williams"
+                    placeholder="e.g., Jamie Rodriguez"
                     value={config.executiveAssistantName || ''}
                     onChange={(e) => updateConfig({ executiveAssistantName: e.target.value })}
                   />
@@ -580,7 +580,7 @@ export function SubUnitSetupWizard({ parentProfile, onComplete, onCancel }: SubU
                   <Input
                     id="eaEmail"
                     type="email"
-                    placeholder="assistant@university.edu"
+                    placeholder="e.g., admin.cas@lakewood.edu"
                     value={config.executiveAssistantEmail || ''}
                     onChange={(e) => updateConfig({ executiveAssistantEmail: e.target.value })}
                   />
@@ -612,7 +612,7 @@ export function SubUnitSetupWizard({ parentProfile, onComplete, onCancel }: SubU
                 <Input
                   id="unitEmail"
                   type="email"
-                  placeholder="unit@university.edu"
+                  placeholder="e.g., artsci@lakewood.edu"
                   value={config.unitMainEmail || ''}
                   onChange={(e) => updateConfig({ unitMainEmail: e.target.value })}
                 />
@@ -625,7 +625,7 @@ export function SubUnitSetupWizard({ parentProfile, onComplete, onCancel }: SubU
               </Label>
               <Input
                 id="unitWebsite"
-                placeholder="https://engineering.university.edu"
+                placeholder="e.g., artsci.lakewood.edu"
                 value={config.unitWebsite || ''}
                 onChange={(e) => updateConfig({ unitWebsite: e.target.value })}
               />
