@@ -88,7 +88,7 @@ const StrategyPage = () => {
   const { addMessage, updateMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
   const { trackToolUse } = useToolTracking();
-  const { saveDraft, currentDraft, setCurrentDraft, deleteDraft, getMostRecentDraft } = useUserDrafts('journey');
+  const { saveDraft, currentDraft, setCurrentDraft, deleteDraft, loadDraftById } = useUserDrafts('journey');
   const location = useLocation();
   const resultsRef = useRef<HTMLDivElement>(null);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
@@ -142,24 +142,28 @@ const StrategyPage = () => {
 
     // Resume draft from dashboard
     if (state?.resumeDraftId) {
-      const draft = getMostRecentDraft('journey');
-      if (draft && draft.id === state.resumeDraftId) {
-        const draftData = draft.draft_data as Record<string, unknown>;
-        if (draftData.context) setContext(draftData.context as MessageContext);
-        if (draftData.selectedChannels) setSelectedChannels(draftData.selectedChannels as Channel[]);
-        if (draftData.selectedProfileId) setSelectedProfileId(draftData.selectedProfileId as string);
-        if (draftData.selectedProfileName) setSelectedProfileName(draftData.selectedProfileName as string);
-        if (draftData.mapperResult) setMapperResult(draftData.mapperResult as MapperResult);
-        if (draftData.journeyWeeks) setJourneyWeeks(draftData.journeyWeeks as number);
-        if (draftData.startDate) setStartDate(new Date(draftData.startDate as string));
-        if (draftData.endDate) setEndDate(new Date(draftData.endDate as string));
-        setCurrentDraft(draft);
-        toast({
-          title: "Draft Resumed",
-          description: `Continuing "${draft.title || 'your journey draft'}"`,
-        });
-      }
-      window.history.replaceState({}, document.title);
+      const loadAndResumeDraft = async () => {
+        const draft = await loadDraftById(state.resumeDraftId!);
+        if (draft) {
+          const draftData = draft.draft_data as Record<string, unknown>;
+          if (draftData.context) setContext(draftData.context as MessageContext);
+          if (draftData.selectedChannels) setSelectedChannels(draftData.selectedChannels as Channel[]);
+          if (draftData.selectedProfileId) setSelectedProfileId(draftData.selectedProfileId as string);
+          if (draftData.selectedProfileName) setSelectedProfileName(draftData.selectedProfileName as string);
+          if (draftData.mapperResult) setMapperResult(draftData.mapperResult as MapperResult);
+          if (draftData.journeyWeeks) setJourneyWeeks(draftData.journeyWeeks as number);
+          if (draftData.startDate) setStartDate(new Date(draftData.startDate as string));
+          if (draftData.endDate) setEndDate(new Date(draftData.endDate as string));
+          if (draftData.cadence) setCadence(draftData.cadence as CadenceFrequency);
+          if (draftData.escalation) setEscalation(draftData.escalation as EscalationPattern);
+          toast({
+            title: "Draft Resumed",
+            description: `Continuing "${draft.title || 'your journey draft'}"`,
+          });
+        }
+        window.history.replaceState({}, document.title);
+      };
+      loadAndResumeDraft();
       return;
     }
 

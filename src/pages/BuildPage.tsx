@@ -112,7 +112,7 @@ const BuildPage = () => {
   const { addTemplate } = useSharedLibrary();
   const { trackToolUse } = useToolTracking();
   const { profiles } = useInstitutionalProfiles();
-  const { saveDraft, currentDraft, setCurrentDraft, deleteDraft, getMostRecentDraft } = useUserDrafts('message');
+  const { saveDraft, currentDraft, setCurrentDraft, deleteDraft, loadDraftById } = useUserDrafts('message');
   
   // Check for profileId from URL params (from Content DNA page navigation)
   const profileIdFromUrl = searchParams.get('profileId');
@@ -278,19 +278,20 @@ const BuildPage = () => {
     }
   }, []);
 
-  // Resume draft from navigation or load most recent draft
+  // Resume draft from navigation
   useEffect(() => {
-    if (remixState?.resumeDraftId) {
-      // Resume specific draft from dashboard
-      const draft = getMostRecentDraft('message');
-      if (draft && draft.id === remixState.resumeDraftId) {
+    const resumeDraftId = remixState?.resumeDraftId;
+    if (!resumeDraftId) return;
+
+    const loadAndResumeDraft = async () => {
+      const draft = await loadDraftById(resumeDraftId);
+      if (draft) {
         const draftData = draft.draft_data as Record<string, unknown>;
         if (draftData.context) setContext(draftData.context as MessageContext);
         if (draftData.selectedChannels) setSelectedChannels(draftData.selectedChannels as Channel[]);
         if (draftData.selectedProfileId) setSelectedProfileId(draftData.selectedProfileId as string);
         if (draftData.selectedProfileName) setSelectedProfileName(draftData.selectedProfileName as string);
         if (draftData.builderResult) setBuilderResult(draftData.builderResult as BuilderResult);
-        setCurrentDraft(draft);
         toast({
           title: "Draft Resumed",
           description: `Continuing "${draft.title || 'your message draft'}"`,
@@ -298,8 +299,10 @@ const BuildPage = () => {
       }
       // Clear navigation state
       window.history.replaceState({}, document.title);
-    }
-  }, [remixState?.resumeDraftId]);
+    };
+
+    loadAndResumeDraft();
+  }, [remixState?.resumeDraftId, loadDraftById]);
 
   // Auto-save draft periodically
   const [draftSavedRecently, setDraftSavedRecently] = useState(false);
