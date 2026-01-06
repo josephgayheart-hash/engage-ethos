@@ -165,6 +165,20 @@ export default function UniversitySettingsPage() {
     fetchDnaStats();
   }, [tenant?.id, profiles]);
 
+  // Auto-expand profiles that have children
+  useEffect(() => {
+    if (profiles.length > 0) {
+      const profilesWithChildren = profiles
+        .filter(p => !p.parentProfileId)
+        .filter(parent => profiles.some(child => child.parentProfileId === parent.id))
+        .map(p => p.id);
+      
+      if (profilesWithChildren.length > 0) {
+        setExpandedProfiles(new Set(profilesWithChildren));
+      }
+    }
+  }, [profiles]);
+
   const toggleExpanded = (profileId: string) => {
     setExpandedProfiles(prev => {
       const next = new Set(prev);
@@ -831,19 +845,21 @@ export default function UniversitySettingsPage() {
                                       </div>
                                     </div>
                                     
-                                    {/* Expand/Chevron */}
-                                    <div className="flex items-center gap-1 flex-shrink-0">
+                                    {/* Expand/Chevron - improved spacing */}
+                                    <div className="flex items-center gap-2 flex-shrink-0 ml-2">
                                       {hasChildren && (
                                         <button 
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             toggleExpanded(profile.id);
                                           }}
-                                          className="p-1 hover:bg-muted rounded transition-colors"
+                                          className="p-1.5 hover:bg-muted rounded-md transition-colors"
+                                          title={isExpanded ? "Collapse sub-units" : "Expand sub-units"}
                                         >
-                                          <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isExpanded ? '' : '-rotate-90'}`} />
+                                          <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isExpanded ? '' : '-rotate-90'}`} />
                                         </button>
                                       )}
+                                      <div className="w-px h-6 bg-border" />
                                       <ChevronRight className="w-4 h-4 text-muted-foreground" />
                                     </div>
                                   </div>
