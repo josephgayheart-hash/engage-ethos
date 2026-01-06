@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useToast } from "@/hooks/use-toast";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { JourneyFlowDiagram } from "@/components/JourneyFlowDiagram";
 import { openInGoogleDocs, formatForGoogleDocs } from "@/lib/googleDocsExport";
@@ -97,6 +98,7 @@ export function JourneyViewer({
   institutionalConfig: providedInstitutionalConfig
 }: JourneyViewerProps) {
   const { toast } = useToast();
+  const { tenant } = useAuth();
   const { getProfileHierarchy } = useInstitutionalProfiles();
 
   // Extract metadata if available
@@ -291,13 +293,18 @@ export function JourneyViewer({
           </TabsTrigger>
         </TabsList>
 
-        {/* Diagram View */}
         <TabsContent value="diagram" className="mt-4">
           <JourneyFlowDiagram 
             journey={journey} 
             context={context as MessageContext | undefined}
             startDate={startDate}
             endDate={endDate}
+            branding={{
+              institutionName: tenant?.institution_name,
+              logoUrl: tenant?.logo_url,
+              primaryColor: tenant?.primary_color,
+              accentColor: tenant?.accent_color,
+            }}
           />
         </TabsContent>
 
