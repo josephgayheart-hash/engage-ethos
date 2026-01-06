@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useToolTracking } from '@/hooks/useToolTracking';
 import type { SavedMessage, LibraryFilters, SortOption } from '@/types/library';
 
 const STORAGE_KEY = 'uplaybook_message_library';
@@ -8,6 +9,7 @@ const SYNCED_DB_MESSAGES_KEY = 'uplaybook_synced_db_messages';
 export function useMessageLibrary() {
   const [messages, setMessages] = useState<SavedMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { trackToolUse } = useToolTracking();
 
   // Check for database messages (like seeded samples) and sync them to localStorage
   const syncDatabaseMessages = useCallback(async () => {
@@ -119,8 +121,16 @@ export function useMessageLibrary() {
     };
     const updated = [newMessage, ...messages];
     saveToStorage(updated);
+    
+    // Track the save action
+    trackToolUse('personal_library', 'save', {
+      channel: message.channel,
+      audience: message.audience,
+      source: message.source,
+    });
+    
     return newMessage;
-  }, [messages, saveToStorage]);
+  }, [messages, saveToStorage, trackToolUse]);
 
   const updateMessage = useCallback((id: string, updates: Partial<SavedMessage>, addVersion = false) => {
     const now = new Date().toISOString();
@@ -149,7 +159,8 @@ export function useMessageLibrary() {
   const deleteMessage = useCallback((id: string) => {
     const updated = messages.filter(msg => msg.id !== id);
     saveToStorage(updated);
-  }, [messages, saveToStorage]);
+    trackToolUse('personal_library', 'delete');
+  }, [messages, saveToStorage, trackToolUse]);
 
   const duplicateMessage = useCallback((id: string) => {
     const original = messages.find(msg => msg.id === id);
@@ -171,8 +182,9 @@ export function useMessageLibrary() {
     };
     const updated = [duplicate, ...messages];
     saveToStorage(updated);
+    trackToolUse('personal_library', 'duplicate');
     return duplicate;
-  }, [messages, saveToStorage]);
+  }, [messages, saveToStorage, trackToolUse]);
 
   const filterMessages = useCallback((filters: LibraryFilters, sort: SortOption = 'newest'): SavedMessage[] => {
     let filtered = [...messages];
@@ -254,8 +266,11 @@ ${message.versions.length > 1 ? `VERSION HISTORY\n---------------\n${message.ver
     a.download = `${message.title.replace(/[^a-z0-9]/gi, '_')}.txt`;
     a.click();
     URL.revokeObjectURL(url);
+    
+    trackToolUse('personal_library', 'export', { channel: message.channel });
+    
     return message;
-  }, [messages]);
+  }, [messages, trackToolUse]);
 
   const clearAllMessages = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);

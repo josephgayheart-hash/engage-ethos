@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { FeedbackButton } from "@/components/FeedbackButton";
 import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { usePageTracking } from "@/hooks/usePageTracking";
 import Index from "./pages/Index";
 import LandingPage from "./pages/LandingPage";
 import OnboardingPage from "./pages/OnboardingPage";
@@ -55,6 +56,12 @@ import LibraryFeaturePage from "./pages/features/LibraryFeaturePage";
 import OGPreviewPage from "./pages/OGPreviewPage";
 
 const queryClient = new QueryClient();
+
+// Component to track page views
+function PageTracker() {
+  usePageTracking();
+  return null;
+}
 
 // Protected route wrapper - requires authentication
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -247,6 +254,7 @@ const App = () => (
     <TooltipProvider>
       <BrowserRouter>
         <AuthProvider>
+          <PageTracker />
           <ScrollToTop />
           <ImpersonationWrapper />
           <Toaster />

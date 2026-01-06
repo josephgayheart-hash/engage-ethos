@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useToolTracking } from '@/hooks/useToolTracking';
 import type { SharedTemplate, LibraryFilters, LibraryEntryStatus } from '@/types/library';
 
 const STORAGE_KEY = 'persist_shared_library';
@@ -173,6 +174,7 @@ const DEFAULT_TEMPLATES: SharedTemplate[] = [
 export function useSharedLibrary() {
   const [templates, setTemplates] = useState<SharedTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { trackToolUse } = useToolTracking();
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -267,13 +269,19 @@ export function useSharedLibrary() {
       changeHistory: [],
     };
     saveToStorage([newTemplate, ...templates]);
+    
+    trackToolUse('university_library', 'submit', {
+      status: template.status,
+    });
+    
     return newTemplate;
-  }, [templates, saveToStorage]);
+  }, [templates, saveToStorage, trackToolUse]);
 
   const deleteTemplate = useCallback((id: string) => {
     const updated = templates.filter(t => t.id !== id);
     saveToStorage(updated);
-  }, [templates, saveToStorage]);
+    trackToolUse('university_library', 'delete');
+  }, [templates, saveToStorage, trackToolUse]);
 
   const clearAllTemplates = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
