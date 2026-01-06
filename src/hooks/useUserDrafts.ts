@@ -138,7 +138,7 @@ export function useUserDrafts(draftType?: DraftType) {
     }
   }, [currentDraft, fetchDrafts]);
 
-  // Load a specific draft
+  // Load a specific draft by ID
   const loadDraft = useCallback((draftId: string): UserDraft | null => {
     const draft = drafts.find(d => d.id === draftId);
     if (draft) {
@@ -147,6 +147,37 @@ export function useUserDrafts(draftType?: DraftType) {
     }
     return null;
   }, [drafts]);
+
+  // Fetch and load a draft by ID (async - fetches from DB if not in local state)
+  const loadDraftById = useCallback(async (draftId: string): Promise<UserDraft | null> => {
+    // First check local state
+    const localDraft = drafts.find(d => d.id === draftId);
+    if (localDraft) {
+      setCurrentDraft(localDraft);
+      return localDraft;
+    }
+
+    // If not found locally, fetch from database
+    if (!user) return null;
+
+    try {
+      const { data, error } = await supabase
+        .from('user_drafts')
+        .select('*')
+        .eq('id', draftId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) throw error;
+      
+      const draft = data as unknown as UserDraft;
+      setCurrentDraft(draft);
+      return draft;
+    } catch (error) {
+      console.error('Error loading draft:', error);
+      return null;
+    }
+  }, [drafts, user]);
 
   // Clear current draft (after saving to library)
   const clearCurrentDraft = useCallback(async () => {
@@ -172,6 +203,7 @@ export function useUserDrafts(draftType?: DraftType) {
     saveDraft,
     deleteDraft,
     loadDraft,
+    loadDraftById,
     clearCurrentDraft,
     hasUnsavedDrafts,
     getMostRecentDraft,
