@@ -158,7 +158,8 @@ export type Channel =
   | 'phone-call'
   | 'digital-ad-search'
   | 'digital-ad-social'
-  | 'talking-points';
+  | 'talking-points'
+  | 'news-article';
 
 export type MessageDomain = 
   // Student domains

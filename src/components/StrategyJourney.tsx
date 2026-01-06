@@ -67,6 +67,7 @@ const channelIcons: Record<Channel, React.ReactNode> = {
   'digital-ad-search': <Target className="w-4 h-4" />,
   'digital-ad-social': <Megaphone className="w-4 h-4" />,
   'talking-points': <Mic className="w-4 h-4" />,
+  'news-article': <FileText className="w-4 h-4" />,
 };
 
 const phaseColors: Record<StrategyPhase, string> = {
@@ -93,6 +94,7 @@ const channelColors: Record<Channel, string> = {
   'digital-ad-search': 'bg-yellow-500 text-black',
   'digital-ad-social': 'bg-indigo-500 text-white',
   'talking-points': 'bg-teal-500 text-white',
+  'news-article': 'bg-slate-600 text-white',
 };
 
 const channelBorderColors: Record<Channel, string> = {
@@ -106,6 +108,7 @@ const channelBorderColors: Record<Channel, string> = {
   'digital-ad-search': 'border-l-yellow-500',
   'digital-ad-social': 'border-l-indigo-500',
   'talking-points': 'border-l-teal-500',
+  'news-article': 'border-l-slate-600',
 };
 
 const channelDotColors: Record<Channel, string> = {
@@ -119,9 +122,10 @@ const channelDotColors: Record<Channel, string> = {
   'digital-ad-search': 'bg-yellow-500',
   'digital-ad-social': 'bg-indigo-500',
   'talking-points': 'bg-teal-500',
+  'news-article': 'bg-slate-600',
 };
 
-const allChannels: Channel[] = ['email', 'sms', 'portal', 'social-media', 'landing-page', 'direct-mail', 'phone-call', 'digital-ad-search', 'digital-ad-social', 'talking-points'];
+const allChannels: Channel[] = ['email', 'sms', 'portal', 'social-media', 'landing-page', 'direct-mail', 'phone-call', 'digital-ad-search', 'digital-ad-social', 'talking-points', 'news-article'];
 
 // Helper to format channel names with proper capitalization
 const formatChannelName = (channel: string): string => {

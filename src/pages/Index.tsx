@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
+import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { useAuth } from "@/contexts/AuthContext";
 import { ResearchFoundation } from "@/components/ResearchFoundation";
 import { 
@@ -37,12 +38,14 @@ import {
   Languages,
   Wrench,
   CheckCircle2,
-  CircleDot
+  CircleDot,
+  Building2
 } from "lucide-react";
 
 const Index = () => {
   const { messages } = useMessageLibrary();
   const { templates } = useSharedLibrary();
+  const { profiles: institutionalProfiles } = useInstitutionalProfiles();
   const { isAdmin, isSuperAdmin, profile, tenant } = useAuth();
 
   const recentMessages = messages.slice(0, 3);
@@ -50,6 +53,9 @@ const Index = () => {
 
   // Check if user has completed setup (has used the settings page)
   const hasProfile = !!profile;
+  
+  // Check if institutional profiles exist
+  const hasInstitutionalProfiles = institutionalProfiles.length > 0;
 
   const utilityTools = [
     {
@@ -184,7 +190,7 @@ const Index = () => {
             </div>
             
             <div className="grid md:grid-cols-4 gap-4 pb-4">
-              {/* Step 1: Setup Institution */}
+              {/* Step 1: Setup/Manage Institution */}
               <Link to="/settings">
                 <Card className="h-full cursor-pointer card-workflow card-workflow-primary group">
                   <CardContent className="p-6">
@@ -192,17 +198,50 @@ const Index = () => {
                       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
                         1
                       </div>
-                      <Badge variant="outline" className="text-xs">Configure</Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {hasInstitutionalProfiles ? 'Manage' : 'Configure'}
+                      </Badge>
                     </div>
                     <div className="icon-container icon-container-lg bg-primary/10 mb-4">
-                      <Settings className="w-6 h-6 text-primary" />
+                      {hasInstitutionalProfiles ? (
+                        <Building2 className="w-6 h-6 text-primary" />
+                      ) : (
+                        <Settings className="w-6 h-6 text-primary" />
+                      )}
                     </div>
-                    <h3 className="font-serif font-semibold text-lg mb-2">Setup Your Institution</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Build your institution profile. Subunits inherit brand elements with clear hierarchy and control.
+                    <h3 className="font-serif font-semibold text-lg mb-2">
+                      {hasInstitutionalProfiles 
+                        ? `Manage My Institution${institutionalProfiles.length > 1 ? 's' : ''}`
+                        : 'Setup Your Institution'
+                      }
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      {hasInstitutionalProfiles
+                        ? 'View and edit your institutional profiles, brand settings, and Content DNA.'
+                        : 'Build your institution profile. Subunits inherit brand elements with clear hierarchy and control.'
+                      }
                     </p>
+                    {/* Profile tags */}
+                    {hasInstitutionalProfiles && (
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {institutionalProfiles.slice(0, 3).map((p) => (
+                          <Badge 
+                            key={p.id} 
+                            variant="secondary" 
+                            className="text-[10px] px-1.5 py-0"
+                          >
+                            {p.name}
+                          </Badge>
+                        ))}
+                        {institutionalProfiles.length > 3 && (
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                            +{institutionalProfiles.length - 3} more
+                          </Badge>
+                        )}
+                      </div>
+                    )}
                     <div className="flex items-center text-sm text-primary font-medium group-hover:gap-2 transition-all">
-                      Configure Settings
+                      {hasInstitutionalProfiles ? 'Manage Profiles' : 'Configure Settings'}
                       <ArrowRight className="w-4 h-4 ml-1" />
                     </div>
                   </CardContent>

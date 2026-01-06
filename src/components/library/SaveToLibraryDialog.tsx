@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -35,12 +36,15 @@ const CHANNEL_OPTIONS: { value: Channel | "none"; label: string }[] = [
   { value: "digital-ad-search", label: "Search Ad" },
   { value: "digital-ad-social", label: "Social Ad" },
   { value: "talking-points", label: "Talking Points" },
+  { value: "news-article", label: "News Article" },
 ];
 
 interface SaveToLibraryDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (name: string, channel?: Channel) => string | undefined | Promise<string | undefined>;
+  /** Optional callback to also save to personal library when saving to shared */
+  onSaveToPersonal?: (name: string, channel?: Channel) => string | undefined | Promise<string | undefined>;
   libraryType: LibraryType;
   defaultName?: string;
   contentType?: string;
@@ -51,6 +55,7 @@ export function SaveToLibraryDialog({
   open,
   onOpenChange,
   onSave,
+  onSaveToPersonal,
   libraryType,
   defaultName = "",
   contentType = "item",
@@ -60,6 +65,7 @@ export function SaveToLibraryDialog({
   const [channel, setChannel] = useState<Channel | "none">("none");
   const [savedId, setSavedId] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
+  const [alsoSaveToPersonal, setAlsoSaveToPersonal] = useState(false);
 
   const handleSave = async () => {
     if (!name.trim()) return;
@@ -67,6 +73,12 @@ export function SaveToLibraryDialog({
     const selectedChannel = channel === "none" ? undefined : channel;
     const result = onSave(name.trim(), selectedChannel);
     const id = result instanceof Promise ? await result : result;
+    
+    // If saving to shared library and user wants to also save to personal
+    if (libraryType === 'shared' && alsoSaveToPersonal && onSaveToPersonal) {
+      const personalResult = onSaveToPersonal(name.trim(), selectedChannel);
+      if (personalResult instanceof Promise) await personalResult;
+    }
     
     if (id) {
       setSavedId(id);
@@ -84,6 +96,7 @@ export function SaveToLibraryDialog({
     setChannel("none");
     setSavedId(null);
     setIsSaved(false);
+    setAlsoSaveToPersonal(false);
     onOpenChange(false);
   };
 
@@ -151,6 +164,23 @@ export function SaveToLibraryDialog({
                   </p>
                 </div>
               )}
+
+              {/* Also save to personal library checkbox - only show when saving to shared */}
+              {libraryType === 'shared' && onSaveToPersonal && (
+                <div className="flex items-center space-x-2 pt-2 border-t">
+                  <Checkbox
+                    id="also-save-personal"
+                    checked={alsoSaveToPersonal}
+                    onCheckedChange={(checked) => setAlsoSaveToPersonal(checked === true)}
+                  />
+                  <Label 
+                    htmlFor="also-save-personal" 
+                    className="text-sm font-normal cursor-pointer"
+                  >
+                    Also save to My Library
+                  </Label>
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={handleClose}>
@@ -171,6 +201,7 @@ export function SaveToLibraryDialog({
                 <p className="font-medium text-green-900 dark:text-green-100">{name}</p>
                 <p className="text-sm text-green-700 dark:text-green-300">
                   Saved to {libraryType === "personal" ? "Personal" : "Shared"} Library
+                  {alsoSaveToPersonal && libraryType === 'shared' && " and My Library"}
                 </p>
               </div>
             </div>

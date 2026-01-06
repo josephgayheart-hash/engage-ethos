@@ -49,6 +49,7 @@ const channelOptions: { value: Channel; label: string }[] = [
   { value: 'digital-ad-search', label: 'Search Ads (Google/Bing)' },
   { value: 'digital-ad-social', label: 'Social Ads (Meta/LinkedIn)' },
   { value: 'talking-points', label: 'Executive Talking Points' },
+  { value: 'news-article', label: 'News Article' },
 ];
 
 const audienceLabels: Record<string, string> = {
@@ -107,7 +108,7 @@ const StrategyPage = () => {
   const [cadence, setCadence] = useState<CadenceFrequency>('weekly');
   const [escalation, setEscalation] = useState<EscalationPattern>('none');
   const [estimatedTouchpoints, setEstimatedTouchpoints] = useState<number>(12);
-  const [useContentDNA, setUseContentDNA] = useState(false);
+  const [useContentDNA, setUseContentDNA] = useState(true);
   const [brandSelection, setBrandSelection] = useState<BrandLayerSelection>({
     pillars: [],
     proofPoints: [],

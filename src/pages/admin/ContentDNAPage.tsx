@@ -2064,6 +2064,32 @@ export default function ContentDNAPage() {
                   disabled={!isAdmin}
                 />
                 
+                {/* Show saved guidelines if they differ from current input */}
+                {analysis?.custom_instructions && analysis.custom_instructions.trim() && 
+                  customInstructions !== analysis.custom_instructions && (
+                  <div className="p-3 rounded-lg border border-border bg-muted/30">
+                    <Label className="text-xs text-muted-foreground mb-2 block">Last Saved Guidelines:</Label>
+                    <p className="text-sm text-foreground whitespace-pre-wrap line-clamp-6">
+                      {analysis.custom_instructions}
+                    </p>
+                  </div>
+                )}
+                
+                {/* Always show saved content summary when guidelines exist */}
+                {analysis?.custom_instructions && analysis.custom_instructions.trim() && 
+                  customInstructions === analysis.custom_instructions && (
+                  <div className="p-3 rounded-lg border border-emerald-200 bg-emerald-50/50">
+                    <div className="flex items-center gap-2 mb-1">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      <Label className="text-xs font-medium text-emerald-700">Saved Guidelines</Label>
+                    </div>
+                    <p className="text-xs text-emerald-600">
+                      {analysis.custom_instructions.split('\n').filter(Boolean).length} guideline(s) • 
+                      {' '}{analysis.custom_instructions.length} characters
+                    </p>
+                  </div>
+                )}
+                
                 {isAdmin && (
                   <div className="flex items-center justify-between">
                     {/* Unsaved changes indicator */}

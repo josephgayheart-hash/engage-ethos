@@ -58,6 +58,7 @@ const channelIcons: Record<Channel, React.ReactNode> = {
   'digital-ad-search': <Search className="w-4 h-4" />,
   'digital-ad-social': <Megaphone className="w-4 h-4" />,
   'talking-points': <Mic className="w-4 h-4" />,
+  'news-article': <FileText className="w-4 h-4" />,
 };
 
 const channelLabels: Record<Channel, string> = {
@@ -71,6 +72,7 @@ const channelLabels: Record<Channel, string> = {
   'digital-ad-search': 'Search Ad (Google/Bing)',
   'digital-ad-social': 'Social Ad (Meta/LinkedIn)',
   'talking-points': 'Executive Talking Points',
+  'news-article': 'News Article',
 };
 
 export function ChannelPreview({ channel, content, onCopy, onContentChange, onSaveToLibrary }: ChannelPreviewProps) {
