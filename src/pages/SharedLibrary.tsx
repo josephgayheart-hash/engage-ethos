@@ -350,7 +350,7 @@ const SharedLibrary = () => {
                         <TableHead>Source</TableHead>
                         <TableHead>Playbook</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Updated</TableHead>
+                        <TableHead>Created By</TableHead>
                         <TableHead>Version</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -371,8 +371,9 @@ const SharedLibrary = () => {
                           <TableCell>
                             <StatusBadge status={template.status} />
                           </TableCell>
-                          <TableCell className="text-muted-foreground">
-                            {new Date(template.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          <TableCell className="text-muted-foreground text-xs">
+                            {template.owner && <span className="mr-2">{template.owner}</span>}
+                            {new Date(template.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                           </TableCell>
                           <TableCell className="text-muted-foreground">v{template.version}</TableCell>
                         </TableRow>
