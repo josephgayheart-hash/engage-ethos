@@ -7,6 +7,10 @@ import { MessageInput } from "@/components/MessageInput";
 import { EvaluationResults } from "@/components/EvaluationResults";
 import { LibraryNav } from "@/components/LibraryNav";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
+import { ContentDNAIndicator } from "@/components/ContentDNAIndicator";
+import { ContentDNAExplainer } from "@/components/ContentDNAExplainer";
+import { BrandLayerSelector, BrandLayerSelection } from "@/components/BrandLayerSelector";
+import { BuilderStepSection } from "@/components/BuilderStepSection";
 import { WaveBackground } from "@/components/WaveBackground";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,8 +23,9 @@ import { AIBadge } from "@/components/ui/ai-indicator";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useToolTracking } from "@/hooks/useToolTracking";
+import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, ArrowRight, FileText, AlertCircle, Save, RefreshCw, CalendarIcon, Clock } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileText, AlertCircle, Save, RefreshCw, CalendarIcon, Clock, Building2, Target, Users } from "lucide-react";
 import { evaluateMessage } from "@/lib/evaluateMessage";
 import { useAuth } from "@/contexts/AuthContext";
 import type { MessageContext, EvaluationResult, InstitutionalConfig } from "@/types/uplaybook";
@@ -42,6 +47,15 @@ const EvaluatePage = () => {
   const [evaluationResult, setEvaluationResult] = useState<EvaluationResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [autoSave, setAutoSave] = useState(true);
+  const [useContentDNA, setUseContentDNA] = useState(true);
+  const [brandSelection, setBrandSelection] = useState<BrandLayerSelection>({
+    pillars: [],
+    proofPoints: [],
+    commitments: [],
+    pathways: [],
+    includePromise: true,
+  });
+  const { contentDNA, isLoading: isContentDNALoading } = useContentDNAForGeneration({ profileId: selectedProfileId });
 
   const canProcess = messageContent.trim().length > 20;
 
@@ -165,25 +179,82 @@ const EvaluatePage = () => {
                 Set the context for your message to get accurate evaluation
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Institutional Profile Selector */}
-              <InstitutionalProfileSelector
-                selectedProfileId={selectedProfileId}
-                onProfileChange={(id, config, name) => {
-                  setSelectedProfileId(id);
-                  setInstitutionalConfig(config);
-                  setSelectedProfileName(name);
-                }}
-              />
+            <CardContent className="space-y-8">
+              
+              {/* Step 1: Institutional Profile */}
+              <BuilderStepSection
+                stepNumber={1}
+                title="Select Your Profile"
+                description="Choose the institutional profile for evaluation"
+                icon={<Building2 className="w-4 h-4" />}
+              >
+                <InstitutionalProfileSelector
+                  selectedProfileId={selectedProfileId}
+                  onProfileChange={(id, config, name) => {
+                    setSelectedProfileId(id);
+                    setInstitutionalConfig(config);
+                    setSelectedProfileName(name);
+                  }}
+                />
+              </BuilderStepSection>
 
-              <ContextSelector context={context} onChange={setContext} mode="evaluator" />
-              
-              <Separator />
-              
-              <MessageInput 
-                value={messageContent} 
-                onChange={setMessageContent} 
-              />
+              {/* Step 2: Brand Layer */}
+              <BuilderStepSection
+                stepNumber={2}
+                title="Brand Layer"
+                description="Apply your brand voice for evaluation scoring"
+                helpText="When enabled, the evaluator will compare your message against your brand voice, platform elements, and custom guidelines."
+                icon={<Target className="w-4 h-4" />}
+              >
+                <div className="space-y-4">
+                  <ContentDNAIndicator
+                    enabled={useContentDNA}
+                    onToggle={setUseContentDNA}
+                    selectedProfileId={selectedProfileId}
+                    selectedProfileName={selectedProfileName}
+                  />
+
+                  {useContentDNA && contentDNA?.brandPlatform && (
+                    <BrandLayerSelector
+                      brandPlatform={contentDNA.brandPlatform}
+                      selection={brandSelection}
+                      onSelectionChange={setBrandSelection}
+                      isLoading={isContentDNALoading}
+                      compact
+                    />
+                  )}
+
+                  <ContentDNAExplainer
+                    context="evaluator"
+                    defaultOpen={false}
+                    collapsible={true}
+                    showManageLink={true}
+                  />
+                </div>
+              </BuilderStepSection>
+
+              {/* Step 3: Audience & Context */}
+              <BuilderStepSection
+                stepNumber={3}
+                title="Define Your Audience"
+                description="Who is this message for and what's the situation?"
+                icon={<Users className="w-4 h-4" />}
+              >
+                <ContextSelector context={context} onChange={setContext} mode="evaluator" />
+              </BuilderStepSection>
+
+              {/* Step 4: Message Content */}
+              <BuilderStepSection
+                stepNumber={4}
+                title="Your Message"
+                description="Paste or type the message you want to evaluate"
+                icon={<FileText className="w-4 h-4" />}
+              >
+                <MessageInput 
+                  value={messageContent} 
+                  onChange={setMessageContent} 
+                />
+              </BuilderStepSection>
 
               {/* Urgency & Deadline Section */}
               <div className="space-y-3 pt-2 border-t border-border">

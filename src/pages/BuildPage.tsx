@@ -577,24 +577,33 @@ const BuildPage = () => {
             </CardHeader>
             <CardContent className="space-y-8">
               
-              {/* Step 1: Brand & Profile */}
+              {/* Step 1: Institutional Profile */}
               <BuilderStepSection
                 stepNumber={1}
-                title="Select Your Brand Context"
-                description="Choose the institutional profile and voice settings for your message"
-                helpText="Select which college, department, or unit this message represents. When Content DNA is enabled, the AI combines your Voice Analysis (tone, vocabulary, sentence patterns) with your Brand Platform (pillars, proof points) and Custom Instructions to generate on-brand messaging."
+                title="Select Your Profile"
+                description="Choose the institutional profile for your message"
+                helpText="Select which college, department, or unit this message represents."
                 icon={<Building2 className="w-4 h-4" />}
               >
-                <div className="space-y-4">
-                  <InstitutionalProfileSelector
-                    selectedProfileId={selectedProfileId}
-                    onProfileChange={(id, config, name) => {
-                      setSelectedProfileId(id);
-                      setInstitutionalConfig(config);
-                      setSelectedProfileName(name);
-                    }}
-                  />
+                <InstitutionalProfileSelector
+                  selectedProfileId={selectedProfileId}
+                  onProfileChange={(id, config, name) => {
+                    setSelectedProfileId(id);
+                    setInstitutionalConfig(config);
+                    setSelectedProfileName(name);
+                  }}
+                />
+              </BuilderStepSection>
 
+              {/* Step 2: Brand Layer (with Content DNA inside) */}
+              <BuilderStepSection
+                stepNumber={2}
+                title="Brand Layer"
+                description="Apply your brand voice and platform elements"
+                helpText="When Content DNA is enabled, the AI combines your Voice Analysis (tone, vocabulary, sentence patterns) with your Brand Platform (pillars, proof points) and Custom Instructions to generate on-brand messaging."
+                icon={<Target className="w-4 h-4" />}
+              >
+                <div className="space-y-4">
                   {/* Content DNA Indicator */}
                   <ContentDNAIndicator
                     enabled={useContentDNA}
@@ -624,9 +633,9 @@ const BuildPage = () => {
                 </div>
               </BuilderStepSection>
 
-              {/* Step 2: Audience & Context */}
+              {/* Step 3: Audience & Context */}
               <BuilderStepSection
-                stepNumber={2}
+                stepNumber={3}
                 title="Define Your Audience"
                 description="Who are you communicating with and what's the situation?"
                 helpText="Select the primary audience type, their specific cohort characteristics, and the communication moment. These selections help the AI generate contextually appropriate messaging."
@@ -635,9 +644,9 @@ const BuildPage = () => {
                 <ContextSelector context={context} onChange={setContext} mode="builder" />
               </BuilderStepSection>
 
-              {/* Step 3: Channel Selection */}
+              {/* Step 4: Channel Selection */}
               <BuilderStepSection
-                stepNumber={3}
+                stepNumber={4}
                 title="Choose Your Channels"
                 description="Select which communication channels to generate content for"
                 helpText="You can select multiple channels to generate a coordinated multi-channel message kit. Each channel will receive appropriately formatted content."
@@ -671,9 +680,9 @@ const BuildPage = () => {
 
               <BuilderStepDivider label="Optional Enhancements" />
 
-              {/* Step 4: Urgency & Deadline */}
+              {/* Step 5: Urgency & Deadline */}
               <BuilderStepSection
-                stepNumber={4}
+                stepNumber={5}
                 title="Urgency & Deadline"
                 description="Add time-sensitive elements to create urgency"
                 helpText="When you specify a deadline, the AI will incorporate countdown language and urgency cues into your messaging to motivate action."

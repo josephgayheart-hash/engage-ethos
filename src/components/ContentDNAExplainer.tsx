@@ -23,7 +23,7 @@ import { cn } from '@/lib/utils';
 import DNATuningDiagram from './DNATuningDiagram';
 
 interface ContentDNAExplainerProps {
-  context: 'content-dna-page' | 'message-builder' | 'journey-designer';
+  context: 'content-dna-page' | 'message-builder' | 'journey-designer' | 'evaluator';
   defaultOpen?: boolean;
   collapsible?: boolean;
   showManageLink?: boolean;
