@@ -45,6 +45,8 @@ interface SaveToLibraryDialogProps {
   onSave: (name: string, channel?: Channel) => string | undefined | Promise<string | undefined>;
   /** Optional callback to also save to personal library when saving to shared */
   onSaveToPersonal?: (name: string, channel?: Channel) => string | undefined | Promise<string | undefined>;
+  /** Optional callback to also save to shared library when saving to personal */
+  onSaveToShared?: (name: string, channel?: Channel) => string | undefined | Promise<string | undefined>;
   libraryType: LibraryType;
   defaultName?: string;
   contentType?: string;
@@ -56,6 +58,7 @@ export function SaveToLibraryDialog({
   onOpenChange,
   onSave,
   onSaveToPersonal,
+  onSaveToShared,
   libraryType,
   defaultName = "",
   contentType = "item",
@@ -66,6 +69,7 @@ export function SaveToLibraryDialog({
   const [savedId, setSavedId] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [alsoSaveToPersonal, setAlsoSaveToPersonal] = useState(false);
+  const [alsoSaveToShared, setAlsoSaveToShared] = useState(false);
 
   const handleSave = async () => {
     if (!name.trim()) return;
@@ -78,6 +82,12 @@ export function SaveToLibraryDialog({
     if (libraryType === 'shared' && alsoSaveToPersonal && onSaveToPersonal) {
       const personalResult = onSaveToPersonal(name.trim(), selectedChannel);
       if (personalResult instanceof Promise) await personalResult;
+    }
+    
+    // If saving to personal library and user wants to also save to shared
+    if (libraryType === 'personal' && alsoSaveToShared && onSaveToShared) {
+      const sharedResult = onSaveToShared(name.trim(), selectedChannel);
+      if (sharedResult instanceof Promise) await sharedResult;
     }
     
     if (id) {
@@ -97,6 +107,7 @@ export function SaveToLibraryDialog({
     setSavedId(null);
     setIsSaved(false);
     setAlsoSaveToPersonal(false);
+    setAlsoSaveToShared(false);
     onOpenChange(false);
   };
 
@@ -181,6 +192,23 @@ export function SaveToLibraryDialog({
                   </Label>
                 </div>
               )}
+
+              {/* Also save to shared library checkbox - only show when saving to personal */}
+              {libraryType === 'personal' && onSaveToShared && (
+                <div className="flex items-center space-x-2 pt-2 border-t">
+                  <Checkbox
+                    id="also-save-shared"
+                    checked={alsoSaveToShared}
+                    onCheckedChange={(checked) => setAlsoSaveToShared(checked === true)}
+                  />
+                  <Label 
+                    htmlFor="also-save-shared" 
+                    className="text-sm font-normal cursor-pointer"
+                  >
+                    Also submit to University Library
+                  </Label>
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={handleClose}>
@@ -200,8 +228,9 @@ export function SaveToLibraryDialog({
               <div className="flex-1">
                 <p className="font-medium text-green-900 dark:text-green-100">{name}</p>
                 <p className="text-sm text-green-700 dark:text-green-300">
-                  Saved to {libraryType === "personal" ? "Personal" : "Shared"} Library
+                  Saved to {libraryType === "personal" ? "My Library" : "University Library"}
                   {alsoSaveToPersonal && libraryType === 'shared' && " and My Library"}
+                  {alsoSaveToShared && libraryType === 'personal' && " and University Library"}
                 </p>
               </div>
             </div>

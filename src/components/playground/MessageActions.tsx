@@ -64,57 +64,72 @@ export function MessageActions({ content, messageId }: MessageActionsProps) {
     setSaveDialogOpen(true);
   };
 
+  const handleSaveToPersonal = (name: string, channel?: Channel): string | undefined => {
+    try {
+      const savedMessage = addMessage({
+        title: name,
+        content: content,
+        channel: channel,
+        approved: false,
+        mode: "generated",
+        source: "copywriter",
+        createdByUserId: profile?.id,
+        createdByName: profile ? `${profile.first_name} ${profile.last_name}` : undefined,
+      });
+      return savedMessage.id;
+    } catch (error) {
+      console.error("Error saving to personal library:", error);
+      return undefined;
+    }
+  };
+
+  const handleSaveToShared = (name: string, channel?: Channel): string | undefined => {
+    try {
+      const savedTemplate = addTemplate({
+        title: name,
+        intentStatement: "Generated from Copywriter",
+        content: content,
+        playbook: "Copywriter",
+        owner: profile ? `${profile.first_name} ${profile.last_name}` : "Current User",
+        maintainer: profile ? `${profile.first_name} ${profile.last_name}` : "Current User",
+        status: (isAdmin || isApprover) ? "published" : "submitted",
+        version: "1.0",
+        requiredFields: {
+          audience: [],
+          moment: [],
+          channel: channel ? [channel] : [],
+        },
+        useCases: {
+          whenToUse: ["General communications"],
+          whenNotToUse: [],
+        },
+        ethicalGuardrails: ["Review content before publishing"],
+        placeholders: [],
+        source: "copywriter",
+      });
+      return savedTemplate.id;
+    } catch (error) {
+      console.error("Error saving to shared library:", error);
+      return undefined;
+    }
+  };
+
   const handleSave = (name: string, channel?: Channel): string | undefined => {
     try {
       if (saveLibraryType === "personal") {
-        const savedMessage = addMessage({
-          title: name,
-          content: content,
-          channel: channel, // User-selected channel (or undefined)
-          approved: false,
-          mode: "generated",
-          source: "copywriter",
-          createdByUserId: profile?.id,
-          createdByName: profile ? `${profile.first_name} ${profile.last_name}` : undefined,
-        });
-
+        const id = handleSaveToPersonal(name, channel);
         toast({
           title: "Saved!",
-          description: "Message saved to Personal Library",
+          description: "Message saved to My Library",
         });
-
-        return savedMessage.id;
+        return id;
       } else {
-        // Save to shared library
-        const savedTemplate = addTemplate({
-          title: name,
-          intentStatement: "Generated from Copywriter",
-          content: content,
-          playbook: "Copywriter",
-          owner: profile ? `${profile.first_name} ${profile.last_name}` : "Current User",
-          maintainer: profile ? `${profile.first_name} ${profile.last_name}` : "Current User",
-          status: (isAdmin || isApprover) ? "published" : "submitted",
-          version: "1.0",
-          requiredFields: {
-            audience: [],
-            moment: [],
-            channel: channel ? [channel] : [], // User-selected channel
-          },
-          useCases: {
-            whenToUse: ["General communications"],
-            whenNotToUse: [],
-          },
-          ethicalGuardrails: ["Review content before publishing"],
-          placeholders: [],
-          source: "copywriter",
-        });
-
+        const id = handleSaveToShared(name, channel);
         toast({
           title: "Saved!",
-          description: `Message ${(isAdmin || isApprover) ? "published to" : "submitted to"} Shared Library`,
+          description: `Message ${(isAdmin || isApprover) ? "published to" : "submitted to"} University Library`,
         });
-
-        return savedTemplate.id;
+        return id;
       }
     } catch (error) {
       console.error("Error saving message:", error);
@@ -175,7 +190,7 @@ export function MessageActions({ content, messageId }: MessageActionsProps) {
           size="sm"
           className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
           onClick={() => handleSaveClick("personal")}
-          title="Save to Personal Library"
+          title="Save to My Library"
         >
           <BookmarkPlus className="h-3.5 w-3.5 mr-1" />
           <span className="hidden sm:inline">My Library</span>
@@ -186,10 +201,10 @@ export function MessageActions({ content, messageId }: MessageActionsProps) {
           size="sm"
           className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
           onClick={() => handleSaveClick("shared")}
-          title="Save to Shared Library"
+          title="Save to University Library"
         >
           <BookmarkPlus className="h-3.5 w-3.5 mr-1" />
-          <span className="hidden sm:inline">Shared</span>
+          <span className="hidden sm:inline">University</span>
         </Button>
       </div>
 
@@ -197,6 +212,8 @@ export function MessageActions({ content, messageId }: MessageActionsProps) {
         open={saveDialogOpen}
         onOpenChange={setSaveDialogOpen}
         onSave={handleSave}
+        onSaveToPersonal={handleSaveToPersonal}
+        onSaveToShared={handleSaveToShared}
         libraryType={saveLibraryType}
         contentType="message"
         showChannelSelector={true}

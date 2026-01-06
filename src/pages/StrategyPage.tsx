@@ -1315,6 +1315,8 @@ const StrategyPage = () => {
         open={saveToLibraryOpen}
         onOpenChange={setSaveToLibraryOpen}
         onSave={saveToLibraryType === 'personal' ? handleSaveToLibraryConfirm : handleShareToLibraryConfirm}
+        onSaveToPersonal={saveToLibraryType === 'shared' ? handleSaveToLibraryConfirm : undefined}
+        onSaveToShared={saveToLibraryType === 'personal' ? handleShareToLibraryConfirm : undefined}
         libraryType={saveToLibraryType}
         defaultName={`Strategy Journey: ${audienceLabels[context.audience || ''] || context.audience} - ${context.moment} (${journeyWeeks} weeks)`}
         contentType="journey"
