@@ -558,6 +558,95 @@ export default function ContentDNAPage() {
               )}
             </div>
           </div>
+
+          {/* Institutional Profile Selector */}
+          {profiles.length > 0 && (
+            <Card className="mt-6 border-border bg-card/80 backdrop-blur-sm">
+              <CardContent className="py-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <Building2 className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Institutional Profile</p>
+                      <p className="text-xs text-muted-foreground">
+                        {selectedProfile ? 'Content DNA is scoped to this profile' : 'Select a profile for scoped Content DNA'}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {/* Profile chips */}
+                    {profiles.slice(0, 5).map((p) => (
+                      <Button
+                        key={p.id}
+                        variant={selectedProfile?.id === p.id ? "default" : "outline"}
+                        size="sm"
+                        className="h-8 gap-1.5"
+                        onClick={() => {
+                          if (selectedProfile?.id === p.id) {
+                            // Deselect - go to institution-wide DNA
+                            navigate('/admin/content-dna');
+                          } else {
+                            navigate(`/admin/content-dna?profileId=${p.id}`);
+                          }
+                        }}
+                      >
+                        {p.config.logoUrl ? (
+                          <img src={p.config.logoUrl} alt="" className="w-4 h-4 rounded object-contain" />
+                        ) : (
+                          <div 
+                            className="w-4 h-4 rounded text-[8px] flex items-center justify-center text-white font-bold"
+                            style={{ backgroundColor: p.config.primaryColor || '#1F2A44' }}
+                          >
+                            {p.name.charAt(0)}
+                          </div>
+                        )}
+                        <span className="max-w-24 truncate">{p.name}</span>
+                      </Button>
+                    ))}
+                    {profiles.length > 5 && (
+                      <Badge variant="secondary" className="text-xs">
+                        +{profiles.length - 5} more
+                      </Badge>
+                    )}
+                    
+                    {/* Divider */}
+                    <div className="h-6 w-px bg-border mx-1" />
+                    
+                    {/* Manage Profiles Link */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 gap-1.5 text-muted-foreground"
+                      onClick={() => navigate('/university-settings?tab=profiles')}
+                    >
+                      <Settings className="w-3.5 h-3.5" />
+                      Manage Profiles
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* No Profiles - Create First */}
+          {profiles.length === 0 && isAdmin && (
+            <Card className="mt-6 border-dashed border-2 bg-muted/30">
+              <CardContent className="py-6 text-center">
+                <Building2 className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
+                <h3 className="font-medium text-foreground mb-1">No Institutional Profiles</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Create an institutional profile to organize Content DNA by department or college.
+                </p>
+                <Button onClick={() => navigate('/university-settings?tab=profiles')} size="sm">
+                  <Plus className="w-4 h-4 mr-1" />
+                  Create First Profile
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
 
