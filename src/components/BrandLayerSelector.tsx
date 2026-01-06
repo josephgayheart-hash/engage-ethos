@@ -263,6 +263,8 @@ function BrandPlatformTabs({
   onToggleCommitment,
   onTogglePathway,
   onTogglePromise,
+  onSelectAll,
+  onClearAll,
   onPillarEdit,
 }: BrandPlatformTabsProps) {
   const [editingPillarIndex, setEditingPillarIndex] = useState<number | null>(null);
@@ -303,10 +305,52 @@ function BrandPlatformTabs({
 
   return (
     <div className="space-y-4">
-      {/* Selection Summary - At the top for visibility */}
+      {/* Select All / Clear All Buttons - Always visible at top */}
+      <div className="flex items-center justify-between border-b border-border pb-3">
+        <Label className="text-sm font-medium text-foreground">Select Brand Elements</Label>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={onSelectAll} className="text-xs h-7">
+            Select All
+          </Button>
+          <Button variant="ghost" size="sm" onClick={onClearAll} className="text-xs h-7">
+            Clear
+          </Button>
+        </div>
+      </div>
+
+      {/* Tabbed interface for other elements - Moved to top for prominence */}
+      {availableTabs.length > 0 && (
+        <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
+          <TabsList 
+            className="grid w-full h-auto p-1 bg-muted/50 border border-border/60 rounded-lg" 
+            style={{ gridTemplateColumns: `repeat(${availableTabs.length}, 1fr)` }}
+          >
+            {availableTabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <TabsTrigger 
+                  key={tab.id} 
+                  value={tab.id}
+                  className="flex flex-col gap-0.5 py-2 px-2 text-xs rounded-md font-medium transition-all duration-200
+                    data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/60
+                    data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground data-[state=inactive]:hover:bg-muted"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <Icon className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">{tab.label}</span>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground data-[state=active]:text-accent font-medium">
+                    {tab.selected}/{tab.count}
+                  </span>
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+
+      {/* Selection Summary */}
       {(selection.pillars.length > 0 || selection.proofPoints.length > 0 || 
         selection.commitments.length > 0 || selection.pathways.length > 0 || selection.includePromise) && (
-        <div className="p-3 rounded-lg bg-primary/10 border border-primary/30">
+        <div className="p-3 rounded-lg bg-primary/10 border border-primary/30 mt-3">
           <Label className="text-xs font-semibold text-primary mb-2 block">Active Brand Elements</Label>
           <div className="flex flex-wrap gap-1.5">
             {selection.includePromise && (
@@ -346,7 +390,7 @@ function BrandPlatformTabs({
       {/* Brand Promise */}
       {brandPlatform.brandPromise && (
         <div 
-          className={`p-3 rounded-lg border cursor-pointer transition-all ${
+          className={`p-3 rounded-lg border cursor-pointer transition-all mt-3 ${
             selection.includePromise
               ? 'border-primary bg-primary/10 ring-1 ring-primary/20'
               : 'border-border bg-background hover:border-primary/50'
@@ -374,35 +418,6 @@ function BrandPlatformTabs({
           </div>
         </div>
       )}
-
-      {/* Tabbed interface for other elements */}
-      {availableTabs.length > 0 && (
-        <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
-          <TabsList 
-            className="grid w-full h-auto p-1 bg-muted/50 border border-border/60 rounded-lg" 
-            style={{ gridTemplateColumns: `repeat(${availableTabs.length}, 1fr)` }}
-          >
-            {availableTabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <TabsTrigger 
-                  key={tab.id} 
-                  value={tab.id}
-                  className="flex flex-col gap-0.5 py-2 px-2 text-xs rounded-md font-medium transition-all duration-200
-                    data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/60
-                    data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground data-[state=inactive]:hover:bg-muted"
-                >
-                  <div className="flex items-center gap-1.5">
-                    <Icon className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">{tab.label}</span>
-                  </div>
-                  <span className="text-[10px] text-muted-foreground data-[state=active]:text-accent font-medium">
-                    {tab.selected}/{tab.count}
-                  </span>
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
 
           {/* Pillars Tab */}
           <TabsContent value="pillars" className="mt-3 space-y-2">
