@@ -92,6 +92,21 @@ export function WebCrawlTab({ samples, onImportUrl, onDeleteSample }: WebCrawlTa
   const [discoverySampleType, setDiscoverySampleType] = useState('web_copy');
   const [isImportingSelected, setIsImportingSelected] = useState(false);
   
+  // Helper to safely extract hostname from URL
+  const getHostname = (url: string | null | undefined): string => {
+    if (!url) return '';
+    try {
+      // Add protocol if missing
+      let formattedUrl = url.trim();
+      if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
+        formattedUrl = `https://${formattedUrl}`;
+      }
+      return new URL(formattedUrl).hostname;
+    } catch {
+      return url; // Return original if parsing fails
+    }
+  };
+
   // Stats
   const webCrawledSamples = samples.filter(s => s.source_url);
   const totalWebWords = webCrawledSamples.reduce((acc, s) => 
@@ -100,13 +115,7 @@ export function WebCrawlTab({ samples, onImportUrl, onDeleteSample }: WebCrawlTa
   const uniqueDomains = new Set(
     webCrawledSamples
       .filter(s => s.source_url)
-      .map(s => {
-        try {
-          return new URL(s.source_url!).hostname;
-        } catch {
-          return '';
-        }
-      })
+      .map(s => getHostname(s.source_url))
       .filter(Boolean)
   );
   const lastImport = webCrawledSamples.length > 0 
@@ -702,12 +711,12 @@ export function WebCrawlTab({ samples, onImportUrl, onDeleteSample }: WebCrawlTa
                       </TableCell>
                       <TableCell>
                         <a
-                          href={sample.source_url || '#'}
+                          href={sample.source_url?.startsWith('http') ? sample.source_url : `https://${sample.source_url}` || '#'}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-1 text-primary hover:underline max-w-48 truncate"
                         >
-                          {sample.source_url ? new URL(sample.source_url).hostname : 'N/A'}
+                          {getHostname(sample.source_url) || 'N/A'}
                           <ExternalLink className="w-3 h-3 flex-shrink-0" />
                         </a>
                       </TableCell>
