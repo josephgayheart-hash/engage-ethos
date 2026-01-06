@@ -185,6 +185,10 @@ function detectContentType(text: string): string | null {
 export default function ContentDNAPage() {
   const { tenant, profile, isAdmin } = useAuth();
   const location = useLocation();
+  
+  // Brand pillar inline editing state
+  const [editingPillarIndex, setEditingPillarIndex] = useState<number | null>(null);
+  const [editingPillarData, setEditingPillarData] = useState<{ name: string; description: string } | null>(null);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -216,6 +220,7 @@ export default function ContentDNAPage() {
     updateSample,
     analyzeVoice,
     updateCustomInstructions,
+    updateBrandPlatform,
     resetContentDNA,
     extractSemantics,
     searchSamples,
@@ -385,6 +390,40 @@ export default function ContentDNAPage() {
     
     setEditingSampleId(null);
     setEditingSampleData(null);
+  };
+
+  // Brand pillar inline editing handlers
+  const handleStartPillarEdit = (index: number, pillar: { name: string; description: string }) => {
+    setEditingPillarIndex(index);
+    setEditingPillarData({ name: pillar.name, description: pillar.description });
+  };
+
+  const handleCancelPillarEdit = () => {
+    setEditingPillarIndex(null);
+    setEditingPillarData(null);
+  };
+
+  const handleSavePillarEdit = async () => {
+    if (editingPillarIndex === null || !editingPillarData || !analysis?.brand_platform) return;
+    
+    // Create updated brand pillars array
+    const updatedPillars = [...(analysis.brand_platform.brandPillars || [])];
+    updatedPillars[editingPillarIndex] = {
+      ...updatedPillars[editingPillarIndex],
+      name: editingPillarData.name,
+      description: editingPillarData.description,
+    };
+    
+    // Update brand platform with new pillars
+    const updatedBrandPlatform = {
+      ...analysis.brand_platform,
+      brandPillars: updatedPillars,
+    };
+    
+    await updateBrandPlatform(updatedBrandPlatform);
+    
+    setEditingPillarIndex(null);
+    setEditingPillarData(null);
   };
 
   // Library inline upload handlers
@@ -1886,18 +1925,78 @@ export default function ContentDNAPage() {
                         {analysis.brand_platform.brandPillars.map((pillar: { name: string; description: string; keywords?: string[] }, idx: number) => (
                           <div 
                             key={idx} 
-                            className="p-4 rounded-lg border border-[hsl(220,13%,88%)] bg-[hsl(210,20%,98%)]"
+                            className="p-4 rounded-lg border border-[hsl(220,13%,88%)] bg-[hsl(210,20%,98%)] relative group"
                           >
-                            <h4 className="font-medium text-[hsl(222,47%,11%)] mb-1">{pillar.name}</h4>
-                            <p className="text-sm text-[hsl(220,14%,46%)] mb-2">{pillar.description}</p>
-                            {pillar.keywords && pillar.keywords.length > 0 && (
-                              <div className="flex flex-wrap gap-1">
-                                {pillar.keywords.map((keyword: string, kidx: number) => (
-                                  <Badge key={kidx} variant="outline" className="text-xs">
-                                    {keyword}
-                                  </Badge>
-                                ))}
+                            {editingPillarIndex === idx && editingPillarData ? (
+                              // Inline editing mode
+                              <div className="space-y-3">
+                                <div>
+                                  <Label className="text-xs text-muted-foreground mb-1 block">Pillar Name</Label>
+                                  <Input
+                                    value={editingPillarData.name}
+                                    onChange={(e) => setEditingPillarData({ ...editingPillarData, name: e.target.value })}
+                                    className="font-medium"
+                                    placeholder="Pillar name..."
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="text-xs text-muted-foreground mb-1 block">Description</Label>
+                                  <Textarea
+                                    value={editingPillarData.description}
+                                    onChange={(e) => setEditingPillarData({ ...editingPillarData, description: e.target.value })}
+                                    className="text-sm min-h-[80px]"
+                                    placeholder="Pillar description..."
+                                  />
+                                </div>
+                                <div className="flex items-center gap-2 pt-1">
+                                  <Button
+                                    size="sm"
+                                    onClick={handleSavePillarEdit}
+                                    disabled={isSaving}
+                                    className="bg-[hsl(173,58%,39%)] hover:bg-[hsl(173,58%,34%)]"
+                                  >
+                                    {isSaving ? (
+                                      <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                                    ) : (
+                                      <Save className="w-3 h-3 mr-1" />
+                                    )}
+                                    Save
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={handleCancelPillarEdit}
+                                  >
+                                    <X className="w-3 h-3 mr-1" />
+                                    Cancel
+                                  </Button>
+                                </div>
                               </div>
+                            ) : (
+                              // Display mode
+                              <>
+                                {isAdmin && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 p-0"
+                                    onClick={() => handleStartPillarEdit(idx, pillar)}
+                                  >
+                                    <Pencil className="w-3.5 h-3.5" />
+                                  </Button>
+                                )}
+                                <h4 className="font-medium text-[hsl(222,47%,11%)] mb-1 pr-8">{pillar.name}</h4>
+                                <p className="text-sm text-[hsl(220,14%,46%)] mb-2">{pillar.description}</p>
+                                {pillar.keywords && pillar.keywords.length > 0 && (
+                                  <div className="flex flex-wrap gap-1">
+                                    {pillar.keywords.map((keyword: string, kidx: number) => (
+                                      <Badge key={kidx} variant="outline" className="text-xs">
+                                        {keyword}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                )}
+                              </>
                             )}
                           </div>
                         ))}
