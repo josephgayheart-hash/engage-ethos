@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -19,9 +21,12 @@ import {
   Info,
   FileCheck,
   Route,
-  Handshake
+  Handshake,
+  Pencil,
+  X,
+  Check
 } from 'lucide-react';
-import type { BrandPlatform } from '@/types/uplaybook';
+import type { BrandPlatform, BrandPillar } from '@/types/uplaybook';
 
 // Selected brand elements for generation
 export interface BrandLayerSelection {
@@ -36,6 +41,8 @@ interface BrandLayerSelectorProps {
   brandPlatform: BrandPlatform | null;
   selection: BrandLayerSelection;
   onSelectionChange: (selection: BrandLayerSelection) => void;
+  /** Callback when a pillar is edited - passes the updated pillar */
+  onPillarEdit?: (pillarIndex: number, updates: { name: string; description: string }) => void;
   isLoading?: boolean;
   className?: string;
   compact?: boolean;
@@ -53,6 +60,7 @@ export function BrandLayerSelector({
   brandPlatform,
   selection = defaultSelection,
   onSelectionChange,
+  onPillarEdit,
   isLoading = false,
   className = '',
   compact = false,
@@ -177,6 +185,7 @@ export function BrandLayerSelector({
             onTogglePromise={togglePromise}
             onSelectAll={selectAll}
             onClearAll={clearAll}
+            onPillarEdit={onPillarEdit}
           />
         </CollapsibleContent>
       </Collapsible>
@@ -222,6 +231,7 @@ export function BrandLayerSelector({
           onTogglePromise={togglePromise}
           onSelectAll={selectAll}
           onClearAll={clearAll}
+          onPillarEdit={onPillarEdit}
         />
       </CardContent>
     </Card>
@@ -240,6 +250,7 @@ interface BrandPlatformTabsProps {
   onTogglePromise: () => void;
   onSelectAll: () => void;
   onClearAll: () => void;
+  onPillarEdit?: (pillarIndex: number, updates: { name: string; description: string }) => void;
 }
 
 function BrandPlatformTabs({
@@ -252,11 +263,35 @@ function BrandPlatformTabs({
   onToggleCommitment,
   onTogglePathway,
   onTogglePromise,
+  onPillarEdit,
 }: BrandPlatformTabsProps) {
+  const [editingPillarIndex, setEditingPillarIndex] = useState<number | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+
   const pillarCount = brandPlatform?.brandPillars?.length || 0;
   const proofCount = brandPlatform?.proofPoints?.length || 0;
   const commitmentCount = brandPlatform?.commitments?.length || 0;
   const pathwayCount = brandPlatform?.brandPathways?.length || 0;
+
+  const startEditing = (index: number, pillar: { name: string; description: string }) => {
+    setEditingPillarIndex(index);
+    setEditName(pillar.name);
+    setEditDescription(pillar.description);
+  };
+
+  const cancelEditing = () => {
+    setEditingPillarIndex(null);
+    setEditName('');
+    setEditDescription('');
+  };
+
+  const saveEditing = () => {
+    if (editingPillarIndex !== null && onPillarEdit) {
+      onPillarEdit(editingPillarIndex, { name: editName, description: editDescription });
+    }
+    cancelEditing();
+  };
 
   // Determine which tabs to show based on available data
   const availableTabs = [
@@ -371,46 +406,96 @@ function BrandPlatformTabs({
 
           {/* Pillars Tab */}
           <TabsContent value="pillars" className="mt-3 space-y-2">
-            {brandPlatform.brandPillars?.map((pillar) => (
+            {brandPlatform.brandPillars?.map((pillar, index) => (
               <div
                 key={pillar.name}
-                className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                  selection.pillars.includes(pillar.name)
-                    ? 'border-primary bg-primary/10 ring-1 ring-primary/20'
-                    : 'border-border bg-background hover:border-primary/50'
+                className={`p-3 rounded-lg border transition-all ${
+                  editingPillarIndex === index
+                    ? 'border-primary bg-primary/5 ring-1 ring-primary/30'
+                    : selection.pillars.includes(pillar.name)
+                      ? 'border-primary bg-primary/10 ring-1 ring-primary/20 cursor-pointer'
+                      : 'border-border bg-background hover:border-primary/50 cursor-pointer'
                 }`}
-                onClick={() => onTogglePillar(pillar.name)}
+                onClick={() => editingPillarIndex !== index && onTogglePillar(pillar.name)}
               >
-                <div className="flex items-start gap-3">
-                  <Checkbox
-                    checked={selection.pillars.includes(pillar.name)}
-                    onCheckedChange={() => onTogglePillar(pillar.name)}
-                    className="mt-0.5"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium text-sm">{pillar.name}</span>
-                      {selection.pillars.includes(pillar.name) && (
-                        <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
-                      )}
+                {editingPillarIndex === index ? (
+                  /* Edit Mode */
+                  <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Pillar Name</Label>
+                      <Input
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        className="mt-1"
+                        autoFocus
+                      />
                     </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">{pillar.description}</p>
-                    {pillar.keywords && pillar.keywords.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {pillar.keywords.slice(0, 4).map((keyword) => (
-                          <Badge key={keyword} variant="outline" className="text-xs">
-                            {keyword}
-                          </Badge>
-                        ))}
-                        {pillar.keywords.length > 4 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{pillar.keywords.length - 4}
-                          </Badge>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Description</Label>
+                      <Textarea
+                        value={editDescription}
+                        onChange={(e) => setEditDescription(e.target.value)}
+                        className="mt-1 min-h-[60px]"
+                      />
+                    </div>
+                    <div className="flex items-center justify-end gap-2">
+                      <Button variant="ghost" size="sm" onClick={cancelEditing}>
+                        <X className="w-3 h-3 mr-1" />
+                        Cancel
+                      </Button>
+                      <Button size="sm" onClick={saveEditing} disabled={!onPillarEdit}>
+                        <Check className="w-3 h-3 mr-1" />
+                        Save
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  /* View Mode */
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      checked={selection.pillars.includes(pillar.name)}
+                      onCheckedChange={() => onTogglePillar(pillar.name)}
+                      className="mt-0.5"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-medium text-sm">{pillar.name}</span>
+                        {selection.pillars.includes(pillar.name) && (
+                          <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
+                        )}
+                        {onPillarEdit && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-5 w-5 p-0 opacity-50 hover:opacity-100"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              startEditing(index, pillar);
+                            }}
+                          >
+                            <Pencil className="w-3 h-3" />
+                          </Button>
                         )}
                       </div>
-                    )}
+                      <p className="text-xs text-muted-foreground mt-0.5">{pillar.description}</p>
+                      {pillar.keywords && pillar.keywords.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {pillar.keywords.slice(0, 4).map((keyword) => (
+                            <Badge key={keyword} variant="outline" className="text-xs">
+                              {keyword}
+                            </Badge>
+                          ))}
+                          {pillar.keywords.length > 4 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{pillar.keywords.length - 4}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             ))}
           </TabsContent>

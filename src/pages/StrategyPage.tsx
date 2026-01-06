@@ -731,24 +731,33 @@ const StrategyPage = () => {
             </CardHeader>
             <CardContent className="space-y-8">
               
-              {/* Step 1: Brand & Profile */}
+              {/* Step 1: Institutional Profile */}
               <BuilderStepSection
                 stepNumber={1}
-                title="Select Your Brand Context"
-                description="Choose the institutional profile and voice settings for your journey"
-                helpText="Select which college, department, or unit this journey represents. When Content DNA is enabled, the AI combines your Voice Analysis (tone, vocabulary, patterns) with your Brand Platform (pillars, proof points) and Custom Instructions to generate on-brand journey content."
+                title="Select Your Profile"
+                description="Choose the institutional profile for your journey"
+                helpText="Select which college, department, or unit this journey represents."
                 icon={<Building2 className="w-4 h-4" />}
               >
-                <div className="space-y-4">
-                  <InstitutionalProfileSelector
-                    selectedProfileId={selectedProfileId}
-                    onProfileChange={(id, config, name) => {
-                      setSelectedProfileId(id);
-                      setInstitutionalConfig(config);
-                      setSelectedProfileName(name);
-                    }}
-                  />
+                <InstitutionalProfileSelector
+                  selectedProfileId={selectedProfileId}
+                  onProfileChange={(id, config, name) => {
+                    setSelectedProfileId(id);
+                    setInstitutionalConfig(config);
+                    setSelectedProfileName(name);
+                  }}
+                />
+              </BuilderStepSection>
 
+              {/* Step 2: Brand Layer (with Content DNA inside) */}
+              <BuilderStepSection
+                stepNumber={2}
+                title="Brand Layer"
+                description="Apply your brand voice and platform elements"
+                helpText="When Content DNA is enabled, the AI combines your Voice Analysis (tone, vocabulary, patterns) with your Brand Platform (pillars, proof points) and Custom Instructions to generate on-brand journey content."
+                icon={<Target className="w-4 h-4" />}
+              >
+                <div className="space-y-4">
                   {/* Content DNA Indicator */}
                   <ContentDNAIndicator
                     enabled={useContentDNA}
@@ -778,9 +787,9 @@ const StrategyPage = () => {
                 </div>
               </BuilderStepSection>
 
-              {/* Step 2: Audience & Context */}
+              {/* Step 3: Audience & Context */}
               <BuilderStepSection
-                stepNumber={2}
+                stepNumber={3}
                 title="Define Your Audience"
                 description="Who are you communicating with and what's the situation?"
                 helpText="Select the primary audience type, their specific cohort characteristics, and the communication moment. These selections help the AI generate contextually appropriate touchpoints throughout the journey."
@@ -789,9 +798,9 @@ const StrategyPage = () => {
                 <ContextSelector context={context} onChange={setContext} mode="mapper" />
               </BuilderStepSection>
 
-              {/* Step 3: Channel Selection */}
+              {/* Step 4: Channel Selection */}
               <BuilderStepSection
-                stepNumber={3}
+                stepNumber={4}
                 title="Choose Your Channels"
                 description="Select which channels to use throughout the journey"
                 helpText="The AI will strategically distribute touchpoints across your selected channels based on effectiveness and audience preferences."
@@ -823,9 +832,9 @@ const StrategyPage = () => {
                 </div>
               </BuilderStepSection>
 
-              {/* Step 4: Journey Timeline */}
+              {/* Step 5: Journey Timeline */}
               <BuilderStepSection
-                stepNumber={4}
+                stepNumber={5}
                 title="Set Your Timeline"
                 description="Define the start date, end date, and duration of your journey"
                 helpText="Typical journeys are 8-12 weeks for enrollment campaigns, 16 weeks for semester-long, or 32+ weeks for year-long initiatives. The AI will distribute touchpoints appropriately."
@@ -924,9 +933,9 @@ const StrategyPage = () => {
                 </div>
               </BuilderStepSection>
 
-              {/* Step 5: Cadence & Escalation */}
+              {/* Step 6: Cadence & Escalation */}
               <BuilderStepSection
-                stepNumber={5}
+                stepNumber={6}
                 title="Configure Cadence & Escalation"
                 description="Set the frequency and intensity pattern of your touchpoints"
                 helpText="Cadence controls how often touchpoints occur. Escalation patterns adjust intensity over time - e.g., 'gradual increase' starts gently and builds urgency as deadlines approach."
@@ -944,9 +953,9 @@ const StrategyPage = () => {
 
               <BuilderStepDivider label="Optional Enhancements" />
 
-              {/* Step 6: Diagram Toggle */}
+              {/* Step 7: Diagram Toggle */}
               <BuilderStepSection
-                stepNumber={6}
+                stepNumber={7}
                 title="Visual Journey Diagram"
                 description="Generate an interactive flow diagram of the journey"
                 helpText="The diagram provides a visual overview of your journey, showing how touchpoints connect and flow over time. Great for presentations and stakeholder reviews."
