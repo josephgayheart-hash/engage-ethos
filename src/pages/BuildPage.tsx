@@ -69,6 +69,7 @@ const channelOptions: { value: Channel; label: string }[] = [
   { value: 'digital-ad-search', label: 'Search Ads (Google/Bing)' },
   { value: 'digital-ad-social', label: 'Social Ads (Meta/LinkedIn)' },
   { value: 'talking-points', label: 'Executive Talking Points' },
+  { value: 'news-article', label: 'News Article' },
 ];
 
 const audienceLabels: Record<string, string> = {
@@ -164,7 +165,7 @@ const BuildPage = () => {
   const [saveToLibraryOpen, setSaveToLibraryOpen] = useState(false);
   const [saveToLibraryChannel, setSaveToLibraryChannel] = useState<Channel | null>(null);
   const [saveToLibraryType, setSaveToLibraryType] = useState<'personal' | 'shared'>('personal');
-  const [useContentDNA, setUseContentDNA] = useState(false);
+  const [useContentDNA, setUseContentDNA] = useState(true);
   const [brandSelection, setBrandSelection] = useState<BrandLayerSelection>({
     pillars: [],
     proofPoints: [],
