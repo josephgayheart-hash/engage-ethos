@@ -370,6 +370,11 @@ const Index = () => {
             </div>
           </section>
 
+          {/* My Drafts Section - Moved above More Tools */}
+          <section>
+            <MyDraftsCard />
+          </section>
+
           {/* More Tools Section */}
           <section className="relative">
             <div className="absolute inset-0 -mx-4 px-4 bg-zone-mint rounded-2xl -z-10 opacity-40" />
@@ -429,11 +434,6 @@ const Index = () => {
                 </Link>
               )}
             </div>
-          </section>
-
-          {/* My Drafts Section */}
-          <section>
-            <MyDraftsCard />
           </section>
 
           {/* Libraries Section */}
