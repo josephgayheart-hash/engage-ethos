@@ -247,7 +247,7 @@ const BuildPage = () => {
       
       toast({
         title: "Messages Generated",
-        description: `Content created for ${selectedChannels.length} channel${selectedChannels.length > 1 ? 's' : ''}.`,
+        description: `Content created for ${selectedChannels.length} channel${selectedChannels.length > 1 ? 's' : ''}. Auto-saving to drafts...`,
       });
     } catch (error) {
       console.error("Build failed:", error);
@@ -302,6 +302,8 @@ const BuildPage = () => {
   }, [remixState?.resumeDraftId]);
 
   // Auto-save draft periodically
+  const [draftSavedRecently, setDraftSavedRecently] = useState(false);
+  
   useEffect(() => {
     // Only auto-save if there's meaningful content
     const hasContent = context.audience || context.moment || builderResult;
@@ -321,8 +323,11 @@ const BuildPage = () => {
       ? `${audienceLabels[context.audience] || context.audience}${context.moment ? ` - ${context.moment}` : ''}`
       : 'Message Draft';
 
-    const saveTimeout = setTimeout(() => {
-      saveDraft('message', draftData, title, currentDraft?.id);
+    const saveTimeout = setTimeout(async () => {
+      await saveDraft('message', draftData, title, currentDraft?.id);
+      setDraftSavedRecently(true);
+      // Reset the indicator after 3 seconds
+      setTimeout(() => setDraftSavedRecently(false), 3000);
     }, 3000); // Auto-save after 3 seconds of inactivity
 
     return () => clearTimeout(saveTimeout);
@@ -598,12 +603,17 @@ const BuildPage = () => {
         <div className="space-y-6">
 
           {/* Auto-save Draft Indicator */}
-          {currentDraft && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-3 py-2 rounded-lg">
+          {(currentDraft || draftSavedRecently) && (
+            <div className={cn(
+              "flex items-center gap-2 text-sm px-3 py-2 rounded-lg transition-all",
+              draftSavedRecently 
+                ? "bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20" 
+                : "bg-muted/50 text-muted-foreground"
+            )}>
               <FileEdit className="w-4 h-4" />
-              <span>Draft auto-saved</span>
+              <span>{draftSavedRecently ? '✓ Saved to My Drafts' : 'Draft auto-saved'}</span>
               <span className="text-xs">•</span>
-              <span className="text-xs">{currentDraft.title || 'Untitled'}</span>
+              <span className="text-xs">{currentDraft?.title || 'Untitled'}</span>
             </div>
           )}
 

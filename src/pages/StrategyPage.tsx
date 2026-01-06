@@ -234,6 +234,8 @@ const StrategyPage = () => {
   }, [location.state, toast]);
 
   // Auto-save draft periodically
+  const [draftSavedRecently, setDraftSavedRecently] = useState(false);
+  
   useEffect(() => {
     // Only auto-save if there's meaningful content
     const hasContent = context.audience || context.moment || mapperResult;
@@ -258,8 +260,11 @@ const StrategyPage = () => {
       ? `${audienceLabels[context.audience] || context.audience} Journey${context.moment ? ` - ${context.moment}` : ''}`
       : 'Journey Draft';
 
-    const saveTimeout = setTimeout(() => {
-      saveDraft('journey', draftData, title, currentDraft?.id);
+    const saveTimeout = setTimeout(async () => {
+      await saveDraft('journey', draftData, title, currentDraft?.id);
+      setDraftSavedRecently(true);
+      // Reset the indicator after 3 seconds
+      setTimeout(() => setDraftSavedRecently(false), 3000);
     }, 3000); // Auto-save after 3 seconds of inactivity
 
     return () => clearTimeout(saveTimeout);
@@ -376,7 +381,7 @@ const StrategyPage = () => {
 
       toast({
         title: "Strategy Generated",
-        description: "Your messaging journey map is ready.",
+        description: "Your messaging journey map is ready. Auto-saving to drafts...",
       });
     } catch (error) {
       console.error("Strategy generation failed:", error);
@@ -791,12 +796,17 @@ const StrategyPage = () => {
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto space-y-6">
           {/* Auto-save Draft Indicator */}
-          {currentDraft && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-3 py-2 rounded-lg">
+          {(currentDraft || draftSavedRecently) && (
+            <div className={cn(
+              "flex items-center gap-2 text-sm px-3 py-2 rounded-lg transition-all",
+              draftSavedRecently 
+                ? "bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20" 
+                : "bg-muted/50 text-muted-foreground"
+            )}>
               <FileEdit className="w-4 h-4" />
-              <span>Draft auto-saved</span>
+              <span>{draftSavedRecently ? '✓ Saved to My Drafts' : 'Draft auto-saved'}</span>
               <span className="text-xs">•</span>
-              <span className="text-xs">{currentDraft.title || 'Untitled'}</span>
+              <span className="text-xs">{currentDraft?.title || 'Untitled'}</span>
             </div>
           )}
 
