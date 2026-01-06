@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,9 +20,14 @@ import {
 export function MyDraftsCard() {
   const { drafts, loading, deleteDraft } = useUserDrafts();
   const { profile } = useAuth();
+  const [showAll, setShowAll] = useState(false);
 
   const messageDrafts = drafts.filter(d => d.draft_type === 'message');
   const journeyDrafts = drafts.filter(d => d.draft_type === 'journey');
+  
+  const INITIAL_DISPLAY_COUNT = 5;
+  const displayedDrafts = showAll ? drafts : drafts.slice(0, INITIAL_DISPLAY_COUNT);
+  const hasMore = drafts.length > INITIAL_DISPLAY_COUNT;
 
   const handleDelete = async (e: React.MouseEvent, draftId: string) => {
     e.preventDefault();
@@ -95,10 +101,13 @@ export function MyDraftsCard() {
       
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <FileEdit className="w-5 h-5 text-primary" />
-            My Drafts
-          </CardTitle>
+          <div>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <FileEdit className="w-5 h-5 text-primary" />
+              My Drafts
+            </CardTitle>
+            <p className="text-xs text-muted-foreground mt-0.5">Pick up where you left off</p>
+          </div>
           <div className="flex gap-1.5">
             {messageDrafts.length > 0 && (
               <Badge variant="secondary" className="text-xs bg-pillar-cognitive/10 text-pillar-cognitive">
@@ -116,7 +125,7 @@ export function MyDraftsCard() {
         </div>
       </CardHeader>
       <CardContent className="space-y-2">
-        {drafts.slice(0, 4).map((draft) => {
+        {displayedDrafts.map((draft) => {
           const Icon = getDraftIcon(draft.draft_type);
           const draftData = draft.draft_data as Record<string, unknown>;
           const contextInfo = draftData?.context as Record<string, unknown> | undefined;
@@ -180,12 +189,27 @@ export function MyDraftsCard() {
           );
         })}
         
-        {drafts.length > 4 && (
-          <div className="text-center pt-2">
-            <Badge variant="outline" className="text-xs">
-              +{drafts.length - 4} more drafts
-            </Badge>
-          </div>
+        {hasMore && !showAll && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="w-full text-muted-foreground hover:text-foreground"
+            onClick={() => setShowAll(true)}
+          >
+            View {drafts.length - INITIAL_DISPLAY_COUNT} more
+            <ArrowRight className="w-3 h-3 ml-1" />
+          </Button>
+        )}
+        
+        {showAll && hasMore && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="w-full text-muted-foreground hover:text-foreground"
+            onClick={() => setShowAll(false)}
+          >
+            Show less
+          </Button>
         )}
       </CardContent>
     </Card>
