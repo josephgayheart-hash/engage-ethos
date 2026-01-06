@@ -58,11 +58,13 @@ export function useUserDrafts(draftType?: DraftType) {
   }, [fetchDrafts]);
 
   // Save or update draft
+  // silent: if true, don't refetch drafts list (for background auto-save)
   const saveDraft = useCallback(async (
     type: DraftType,
     data: Record<string, unknown>,
     title?: string,
-    existingDraftId?: string
+    existingDraftId?: string,
+    silent?: boolean
   ): Promise<UserDraft | null> => {
     if (!user || !tenantId) return null;
 
@@ -84,7 +86,10 @@ export function useUserDrafts(draftType?: DraftType) {
         
         const draft = updated as unknown as UserDraft;
         setCurrentDraft(draft);
-        await fetchDrafts();
+        // Only refetch if not silent (background auto-save skips this)
+        if (!silent) {
+          await fetchDrafts();
+        }
         return draft;
       } else {
         // Create new draft
@@ -104,12 +109,18 @@ export function useUserDrafts(draftType?: DraftType) {
         
         const draft = created as unknown as UserDraft;
         setCurrentDraft(draft);
-        await fetchDrafts();
+        // Only refetch if not silent
+        if (!silent) {
+          await fetchDrafts();
+        }
         return draft;
       }
     } catch (error) {
       console.error('Error saving draft:', error);
-      toast.error('Failed to save draft');
+      // Only show error toast if not silent
+      if (!silent) {
+        toast.error('Failed to save draft');
+      }
       return null;
     }
   }, [user, tenantId, fetchDrafts]);
