@@ -32,8 +32,9 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useToolTracking } from "@/hooks/useToolTracking";
+import { useUserDrafts } from "@/hooks/useUserDrafts";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target, Users, UserCheck, Mail, FileDown, MessageSquare, Globe, Phone, FileText, Search, Megaphone, Building2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target, Users, UserCheck, Mail, FileDown, MessageSquare, Globe, Phone, FileText, Search, Megaphone, Building2, FileEdit } from "lucide-react";
 import { mapMessages } from "@/lib/evaluateMessage";
 import { useAuth } from "@/contexts/AuthContext";
 import type { MessageContext, MapperResult, Channel, InstitutionalConfig } from "@/types/uplaybook";
@@ -87,6 +88,7 @@ const StrategyPage = () => {
   const { addMessage, updateMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
   const { trackToolUse } = useToolTracking();
+  const { saveDraft, currentDraft, setCurrentDraft, deleteDraft, getMostRecentDraft } = useUserDrafts('journey');
   const location = useLocation();
   const resultsRef = useRef<HTMLDivElement>(null);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
@@ -125,10 +127,11 @@ const StrategyPage = () => {
   const [editingJourneyId, setEditingJourneyId] = useState<string | null>(null);
   const [remixedFrom, setRemixedFrom] = useState<{ title: string; id?: string; source: 'personal' | 'university' } | null>(null);
 
-  // Load journey data from navigation state (for edit/remix)
+  // Load journey data from navigation state (for edit/remix/resume)
   useEffect(() => {
     const state = location.state as { 
       editMode?: 'edit' | 'remix';
+      resumeDraftId?: string;
       journeyId?: string;
       journeyData?: any;
       metadata?: any;
@@ -136,6 +139,29 @@ const StrategyPage = () => {
       originalId?: string;
       source?: 'personal' | 'university';
     } | null;
+
+    // Resume draft from dashboard
+    if (state?.resumeDraftId) {
+      const draft = getMostRecentDraft('journey');
+      if (draft && draft.id === state.resumeDraftId) {
+        const draftData = draft.draft_data as Record<string, unknown>;
+        if (draftData.context) setContext(draftData.context as MessageContext);
+        if (draftData.selectedChannels) setSelectedChannels(draftData.selectedChannels as Channel[]);
+        if (draftData.selectedProfileId) setSelectedProfileId(draftData.selectedProfileId as string);
+        if (draftData.selectedProfileName) setSelectedProfileName(draftData.selectedProfileName as string);
+        if (draftData.mapperResult) setMapperResult(draftData.mapperResult as MapperResult);
+        if (draftData.journeyWeeks) setJourneyWeeks(draftData.journeyWeeks as number);
+        if (draftData.startDate) setStartDate(new Date(draftData.startDate as string));
+        if (draftData.endDate) setEndDate(new Date(draftData.endDate as string));
+        setCurrentDraft(draft);
+        toast({
+          title: "Draft Resumed",
+          description: `Continuing "${draft.title || 'your journey draft'}"`,
+        });
+      }
+      window.history.replaceState({}, document.title);
+      return;
+    }
 
     if (state?.journeyData) {
       // Set the journey result
@@ -206,6 +232,46 @@ const StrategyPage = () => {
       window.history.replaceState({}, document.title);
     }
   }, [location.state, toast]);
+
+  // Auto-save draft periodically
+  useEffect(() => {
+    // Only auto-save if there's meaningful content
+    const hasContent = context.audience || context.moment || mapperResult;
+    if (!hasContent) return;
+
+    const draftData = {
+      context,
+      selectedChannels,
+      selectedProfileId,
+      selectedProfileName,
+      mapperResult,
+      journeyWeeks,
+      startDate: startDate?.toISOString(),
+      endDate: endDate?.toISOString(),
+      useContentDNA,
+      cadence,
+      escalation,
+    };
+
+    // Generate title from context
+    const title = context.audience 
+      ? `${audienceLabels[context.audience] || context.audience} Journey${context.moment ? ` - ${context.moment}` : ''}`
+      : 'Journey Draft';
+
+    const saveTimeout = setTimeout(() => {
+      saveDraft('journey', draftData, title, currentDraft?.id);
+    }, 3000); // Auto-save after 3 seconds of inactivity
+
+    return () => clearTimeout(saveTimeout);
+  }, [context, selectedChannels, selectedProfileId, mapperResult, journeyWeeks, startDate, endDate, useContentDNA, cadence, escalation]);
+
+  // Clear draft when saving to library
+  const clearDraftAfterSave = useCallback(async () => {
+    if (currentDraft) {
+      await deleteDraft(currentDraft.id);
+      setCurrentDraft(null);
+    }
+  }, [currentDraft, deleteDraft, setCurrentDraft]);
 
   // Auto-calculate weeks when dates change
   const handleStartDateChange = (date: Date | undefined) => {
@@ -425,6 +491,9 @@ const StrategyPage = () => {
       setRemixedFrom(null);
     }
 
+    // Clear the draft after saving to library
+    clearDraftAfterSave();
+
     return savedMessage.id;
   };
 
@@ -487,6 +556,9 @@ const StrategyPage = () => {
       institutionalProfileId: selectedProfileId || undefined,
       institutionalProfileName: selectedProfileName || undefined,
     });
+
+    // Clear the draft after saving to library
+    clearDraftAfterSave();
 
     return savedTemplate.id;
   };
@@ -718,6 +790,16 @@ const StrategyPage = () => {
       
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto space-y-6">
+          {/* Auto-save Draft Indicator */}
+          {currentDraft && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-3 py-2 rounded-lg">
+              <FileEdit className="w-4 h-4" />
+              <span>Draft auto-saved</span>
+              <span className="text-xs">•</span>
+              <span className="text-xs">{currentDraft.title || 'Untitled'}</span>
+            </div>
+          )}
+
           {/* Library Navigation */}
           <LibraryNav mode="journeys" />
 

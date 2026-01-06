@@ -8,6 +8,7 @@ import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { useAuth } from "@/contexts/AuthContext";
 import { ResearchFoundation } from "@/components/ResearchFoundation";
+import { MyDraftsCard } from "@/components/MyDraftsCard";
 import { 
   Shield, 
   Brain, 
@@ -428,6 +429,11 @@ const Index = () => {
                 </Link>
               )}
             </div>
+          </section>
+
+          {/* My Drafts Section */}
+          <section>
+            <MyDraftsCard />
           </section>
 
           {/* Libraries Section */}
