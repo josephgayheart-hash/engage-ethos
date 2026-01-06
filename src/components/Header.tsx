@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Library, FolderOpen, Settings, Home, LogOut, User, CheckCircle, UserPlus, Building2 } from "lucide-react";
+import { Library, FolderOpen, Settings, Home, LogOut, User, CheckCircle, UserPlus, Building2, PenTool, Route, ChevronDown, Sparkles } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
@@ -61,7 +61,8 @@ export function Header() {
             </>
           )}
         </div>
-        <nav className="flex items-center gap-2 md:gap-4">
+        <nav className="flex items-center gap-1 md:gap-2">
+          {/* Home - All users */}
           <Link
             to="/dashboard" 
             className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
@@ -69,37 +70,131 @@ export function Header() {
             <Home className="w-4 h-4" />
             <span className="hidden sm:inline">Home</span>
           </Link>
-          <Link
-            to="/library" 
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
-          >
-            <FolderOpen className="w-4 h-4" />
-            <span className="hidden sm:inline">My Library</span>
-          </Link>
-          <Link 
-            to="/shared-library" 
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
-          >
-            <Library className="w-4 h-4" />
-            <span className="hidden sm:inline">University Library</span>
-          </Link>
-          {isApprover && (
-            <Link 
-              to="/approvals" 
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
-            >
-              <CheckCircle className="w-4 h-4" />
-              <span className="hidden md:inline">Approvals</span>
-            </Link>
-          )}
-          {isAdmin && (
-            <Link 
-              to={isSuperAdmin ? "/admin/panel" : "/admin/console"}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
-            >
-              <Settings className="w-4 h-4" />
-              <span className="hidden md:inline">{isSuperAdmin ? "Super Admin" : "Admin"}</span>
-            </Link>
+
+          {/* Super Admin: Keep original navigation unchanged */}
+          {isSuperAdmin ? (
+            <>
+              <Link
+                to="/library" 
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
+              >
+                <FolderOpen className="w-4 h-4" />
+                <span className="hidden sm:inline">My Library</span>
+              </Link>
+              <Link 
+                to="/shared-library" 
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
+              >
+                <Library className="w-4 h-4" />
+                <span className="hidden sm:inline">University Library</span>
+              </Link>
+              {isApprover && (
+                <Link 
+                  to="/approvals" 
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  <span className="hidden md:inline">Approvals</span>
+                </Link>
+              )}
+              <Link 
+                to="/admin/panel"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
+              >
+                <Settings className="w-4 h-4" />
+                <span className="hidden md:inline">Super Admin</span>
+              </Link>
+            </>
+          ) : (
+            <>
+              {/* Non-Super Admin Navigation */}
+              {/* Build - Message Builder */}
+              <Link
+                to="/build" 
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
+              >
+                <PenTool className="w-4 h-4" />
+                <span className="hidden sm:inline">Build</span>
+              </Link>
+
+              {/* Strategy - Journey Designer */}
+              <Link
+                to="/strategy" 
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
+              >
+                <Route className="w-4 h-4" />
+                <span className="hidden sm:inline">Strategy</span>
+              </Link>
+
+              {/* Libraries Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 px-2 py-1.5">
+                    <Library className="w-4 h-4" />
+                    <span className="hidden sm:inline">Libraries</span>
+                    <ChevronDown className="w-3 h-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link to="/library" className="flex items-center gap-2 cursor-pointer">
+                      <FolderOpen className="w-4 h-4" />
+                      My Library
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/shared-library" className="flex items-center gap-2 cursor-pointer">
+                      <Library className="w-4 h-4" />
+                      University Library
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Approvals - Approvers only */}
+              {isApprover && (
+                <Link 
+                  to="/approvals" 
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  <span className="hidden md:inline">Approvals</span>
+                </Link>
+              )}
+
+              {/* Admin Dropdown - Tenant Admins only */}
+              {isAdmin && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 px-2 py-1.5">
+                      <Settings className="w-4 h-4" />
+                      <span className="hidden md:inline">Admin</span>
+                      <ChevronDown className="w-3 h-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-52">
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin/console" className="flex items-center gap-2 cursor-pointer">
+                        <Settings className="w-4 h-4" />
+                        Admin Console
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/university-settings" className="flex items-center gap-2 cursor-pointer">
+                        <Building2 className="w-4 h-4" />
+                        University Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin/content-dna" className="flex items-center gap-2 cursor-pointer">
+                        <Sparkles className="w-4 h-4" />
+                        Content DNA Studio
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </>
           )}
 
           {/* User Menu */}
