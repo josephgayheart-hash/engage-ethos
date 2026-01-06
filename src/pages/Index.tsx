@@ -318,7 +318,7 @@ const Index = () => {
                     </div>
                     <h3 className="font-serif font-semibold text-lg mb-2">Content DNA Studio</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Upload samples, tune voice dimensions, and manage your content library. Build the AI foundation for on-brand messaging.
+                      Upload samples or scrape content from your website, tune voice dimensions, and manage your content library. Build the AI foundation for on-brand messaging.
                     </p>
                     <div className="flex items-center text-sm text-[hsl(270_70%_55%)] font-medium group-hover:gap-2 transition-all">
                       Open Studio

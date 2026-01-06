@@ -17,7 +17,8 @@ import {
   BookOpen,
   Zap,
   ArrowRight,
-  Workflow
+  Workflow,
+  Globe
 } from "lucide-react";
 import campusvoiceLogo from "@/assets/campusvoice-logo.png";
 import { FeatureNavigation } from "@/components/FeatureNavigation";
@@ -28,6 +29,11 @@ const capabilities = [
     icon: Upload,
     title: "Upload Content Samples",
     description: "Add emails, newsletters, speeches, social posts, and web copy. Support for PDF, Word, and text files with automatic text extraction.",
+  },
+  {
+    icon: Globe,
+    title: "Web Content Import",
+    description: "Scrape content directly from your institution's website. Discover pages, import in bulk, and build your Content DNA from live web sources.",
   },
   {
     icon: Sparkles,
@@ -120,7 +126,7 @@ export default function ContentDNAFeaturePage() {
               <span className="block text-primary">Content DNA Studio</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              Upload content samples, tune voice dimensions, and manage your content library. Build the complete AI foundation for on-brand messaging.
+              Upload content samples, scrape content from your website, tune voice dimensions, and manage your content library. Build the complete AI foundation for on-brand messaging.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
               <Link to="/request-access">
@@ -162,12 +168,21 @@ export default function ContentDNAFeaturePage() {
                 </div>
                 
                 <div className="space-y-3 mb-6">
-                  {["President's Welcome Email", "Fall Newsletter Intro", "Commencement Speech", "Social Media Campaign"].map((sample, i) => (
+                  {[
+                    { name: "President's Welcome Email", type: "Email", source: "upload" },
+                    { name: "Fall Newsletter Intro", type: "Newsletter", source: "upload" },
+                    { name: "About Us Page", type: "Website", source: "web" },
+                    { name: "Social Media Campaign", type: "Social Media", source: "upload" },
+                  ].map((sample, i) => (
                     <div key={i} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                      <FileText className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm flex-1">{sample}</span>
-                      <Badge variant="secondary" className="text-xs">
-                        {sampleTypes[i % sampleTypes.length]}
+                      {sample.source === "web" ? (
+                        <Globe className="w-4 h-4 text-primary" />
+                      ) : (
+                        <FileText className="w-4 h-4 text-muted-foreground" />
+                      )}
+                      <span className="text-sm flex-1">{sample.name}</span>
+                      <Badge variant={sample.source === "web" ? "default" : "secondary"} className="text-xs">
+                        {sample.source === "web" ? "Web Import" : sample.type}
                       </Badge>
                     </div>
                   ))}
@@ -242,7 +257,7 @@ export default function ContentDNAFeaturePage() {
               How Content DNA Works
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Three simple steps to capture your authentic institutional voice
+              Multiple ways to capture your authentic institutional voice
             </p>
           </div>
 
