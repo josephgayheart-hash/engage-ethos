@@ -233,6 +233,7 @@ const BuildPage = () => {
 
       const result = await buildMessage(contextWithChannels, configForGeneration);
       setBuilderResult(result);
+      setJustGenerated(true); // Mark as freshly generated to trigger scroll
 
       // Track tool usage
       trackToolUse('build', 'use', {
@@ -261,12 +262,16 @@ const BuildPage = () => {
     }
   };
 
-  // Auto-scroll to results when content is generated
+  // Track whether we just generated (vs resumed a draft)
+  const [justGenerated, setJustGenerated] = useState(false);
+  
+  // Auto-scroll to results only when freshly generated (not when resuming a draft)
   useEffect(() => {
-    if (builderResult?.channelDrafts && resultsRef.current) {
+    if (justGenerated && builderResult?.channelDrafts && resultsRef.current) {
       resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setJustGenerated(false); // Reset so we don't scroll again
     }
-  }, [builderResult]);
+  }, [justGenerated, builderResult]);
 
   // Show remix notification
   useEffect(() => {
@@ -925,10 +930,29 @@ const BuildPage = () => {
                         />
                       )}
                     </div>
-                    <Button variant="outline" size="sm" onClick={handleReset}>
-                      <RefreshCw className="w-4 h-4 mr-2" />
-                      Start Over
-                    </Button>
+                    <div className="flex items-center gap-4">
+                      {/* Date stamp and user info */}
+                      {currentDraft && (
+                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1.5">
+                            <User className="w-3.5 h-3.5" />
+                            <span>{profile ? `${profile.first_name} ${profile.last_name}` : 'You'}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <CalendarIcon className="w-3.5 h-3.5" />
+                            <span>{format(new Date(currentDraft.updated_at), 'MMM d, yyyy')}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Clock className="w-3.5 h-3.5" />
+                            <span>{format(new Date(currentDraft.updated_at), 'h:mm a')}</span>
+                          </div>
+                        </div>
+                      )}
+                      <Button variant="outline" size="sm" onClick={handleReset}>
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Start Over
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
