@@ -371,73 +371,12 @@ const Index = () => {
             </div>
           </section>
 
-          {/* My Drafts Section - Moved above More Tools */}
+          {/* My Drafts Section */}
           <section>
             <MyDraftsCard />
           </section>
 
-          {/* More Tools Section */}
-          <section className="relative">
-            <div className="absolute inset-0 -mx-4 px-4 bg-zone-mint rounded-2xl -z-10 opacity-40" />
-            
-            <div className="flex items-center justify-between mb-4 pt-4">
-              <h2 className="section-header">More Tools</h2>
-              <Badge variant="outline" className="flex items-center gap-1 bg-[hsl(82_85%_55%_/_0.1)] text-[hsl(82_70%_35%)] border-[hsl(82_85%_55%_/_0.3)]">
-                <Sparkles className="w-3 h-3" />
-                AI-Powered
-              </Badge>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pb-4">
-              <Link to="/call-script">
-                <Card className="h-full cursor-pointer card-interactive group">
-                  <CardContent className="p-4">
-                    <div className="icon-container icon-container-md bg-pillar-ethics/10 mb-3">
-                      <Phone className="w-5 h-5 text-pillar-ethics" />
-                    </div>
-                    <h3 className="font-medium text-sm mb-1">Call Scripts</h3>
-                    <p className="text-xs text-muted-foreground">Phone outreach scripts</p>
-                  </CardContent>
-                </Card>
-              </Link>
-              <Link to="/playground">
-                <Card className="h-full cursor-pointer card-interactive group">
-                  <CardContent className="p-4">
-                    <div className="icon-container icon-container-md bg-pillar-susceptibility/10 mb-3">
-                      <PenTool className="w-5 h-5 text-pillar-susceptibility" />
-                    </div>
-                    <h3 className="font-medium text-sm mb-1">Copywriter</h3>
-                    <p className="text-xs text-muted-foreground">AI-powered messaging</p>
-                  </CardContent>
-                </Card>
-              </Link>
-              <Link to="/byoc">
-                <Card className="h-full cursor-pointer card-interactive group">
-                  <CardContent className="p-4">
-                    <div className="icon-container icon-container-md bg-secondary/10 mb-3">
-                      <Upload className="w-5 h-5 text-secondary" />
-                    </div>
-                    <h3 className="font-medium text-sm mb-1">BYOC</h3>
-                    <p className="text-xs text-muted-foreground">Import your own comms</p>
-                  </CardContent>
-                </Card>
-              </Link>
-              {isAdmin && (
-                <Link to={isSuperAdmin ? "/admin/panel" : "/admin/console"}>
-                  <Card className="h-full cursor-pointer card-interactive group">
-                    <CardContent className="p-4">
-                      <div className="icon-container icon-container-md bg-muted mb-3">
-                        <Settings className="w-5 h-5 text-muted-foreground" />
-                      </div>
-                      <h3 className="font-medium text-sm mb-1">{isSuperAdmin ? 'System Admin' : 'Admin Console'}</h3>
-                      <p className="text-xs text-muted-foreground">Manage users & settings</p>
-                    </CardContent>
-                  </Card>
-                </Link>
-              )}
-            </div>
-          </section>
-
-          {/* Libraries Section */}
+          {/* Libraries Section - Moved after My Drafts */}
           <section className="grid md:grid-cols-2 gap-6">
             {/* My Library */}
             <Card className="border-border/60 hover:shadow-md transition-shadow">
@@ -563,6 +502,67 @@ const Index = () => {
                 )}
               </CardContent>
             </Card>
+          </section>
+
+          {/* More Tools Section */}
+          <section className="relative">
+            <div className="absolute inset-0 -mx-4 px-4 bg-zone-mint rounded-2xl -z-10 opacity-40" />
+            
+            <div className="flex items-center justify-between mb-4 pt-4">
+              <h2 className="section-header">More Tools</h2>
+              <Badge variant="outline" className="flex items-center gap-1 bg-[hsl(82_85%_55%_/_0.1)] text-[hsl(82_70%_35%)] border-[hsl(82_85%_55%_/_0.3)]">
+                <Sparkles className="w-3 h-3" />
+                AI-Powered
+              </Badge>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pb-4">
+              <Link to="/call-script">
+                <Card className="h-full cursor-pointer card-interactive group">
+                  <CardContent className="p-4">
+                    <div className="icon-container icon-container-md bg-pillar-ethics/10 mb-3">
+                      <Phone className="w-5 h-5 text-pillar-ethics" />
+                    </div>
+                    <h3 className="font-medium text-sm mb-1">Call Scripts</h3>
+                    <p className="text-xs text-muted-foreground">Phone outreach scripts</p>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link to="/playground">
+                <Card className="h-full cursor-pointer card-interactive group">
+                  <CardContent className="p-4">
+                    <div className="icon-container icon-container-md bg-pillar-susceptibility/10 mb-3">
+                      <PenTool className="w-5 h-5 text-pillar-susceptibility" />
+                    </div>
+                    <h3 className="font-medium text-sm mb-1">Copywriter</h3>
+                    <p className="text-xs text-muted-foreground">AI-powered messaging</p>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link to="/byoc">
+                <Card className="h-full cursor-pointer card-interactive group">
+                  <CardContent className="p-4">
+                    <div className="icon-container icon-container-md bg-secondary/10 mb-3">
+                      <Upload className="w-5 h-5 text-secondary" />
+                    </div>
+                    <h3 className="font-medium text-sm mb-1">BYOC</h3>
+                    <p className="text-xs text-muted-foreground">Import your own comms</p>
+                  </CardContent>
+                </Card>
+              </Link>
+              {isAdmin && (
+                <Link to={isSuperAdmin ? "/admin/panel" : "/admin/console"}>
+                  <Card className="h-full cursor-pointer card-interactive group">
+                    <CardContent className="p-4">
+                      <div className="icon-container icon-container-md bg-muted mb-3">
+                        <Settings className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                      <h3 className="font-medium text-sm mb-1">{isSuperAdmin ? 'System Admin' : 'Admin Console'}</h3>
+                      <p className="text-xs text-muted-foreground">Manage users & settings</p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              )}
+            </div>
           </section>
 
           {/* Utility Tools Section */}
