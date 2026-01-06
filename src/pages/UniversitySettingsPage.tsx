@@ -1012,6 +1012,9 @@ export default function UniversitySettingsPage() {
                                 : `Part of ${getParentProfile(editingProfile.id)?.name || 'parent institution'}`
                               }
                             </CardDescription>
+                            <p className="text-xs text-muted-foreground mt-2">
+                              Last updated {format(new Date(editingProfile.updatedAt), 'MMM d, yyyy \'at\' h:mm a')}
+                            </p>
                           </CardHeader>
                         <CardContent className="space-y-6">
                           {/* Profile Completion */}
