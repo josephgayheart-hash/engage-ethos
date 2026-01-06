@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
 import { Header } from "@/components/Header";
 import { ContextSelector } from "@/components/ContextSelector";
@@ -7,6 +7,7 @@ import { LibraryNav } from "@/components/LibraryNav";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
 import { ChannelPreview } from "@/components/ChannelPreview";
 import { ContentDNAIndicator, ContentDNAActiveBadge } from "@/components/ContentDNAIndicator";
+import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { ContentDNAExplainer } from "@/components/ContentDNAExplainer";
 import { BuilderStepSection, BuilderStepDivider } from "@/components/BuilderStepSection";
 import { WaveBackground } from "@/components/WaveBackground";
@@ -103,9 +104,14 @@ const BuildPage = () => {
   const { toast } = useToast();
   const { profile, isAdmin, isApprover } = useAuth();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { addMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
   const { trackToolUse } = useToolTracking();
+  const { profiles } = useInstitutionalProfiles();
+  
+  // Check for profileId from URL params (from Content DNA page navigation)
+  const profileIdFromUrl = searchParams.get('profileId');
   
   // Check for remix state from navigation
   const remixState = location.state as {
@@ -124,12 +130,25 @@ const BuildPage = () => {
     source?: string;
   } | null;
 
+  // Find profile name from URL param if needed
+  const profileFromUrl = profileIdFromUrl ? profiles.find(p => p.id === profileIdFromUrl) : null;
+
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(
-    remixState?.institutionalProfileId || null
+    profileIdFromUrl || remixState?.institutionalProfileId || null
   );
   const [selectedProfileName, setSelectedProfileName] = useState<string | undefined>(
-    remixState?.institutionalProfileName
+    profileFromUrl?.name || remixState?.institutionalProfileName
   );
+  
+  // Update profile name when profiles load and we have a URL param
+  useEffect(() => {
+    if (profileIdFromUrl && !selectedProfileName && profiles.length > 0) {
+      const foundProfile = profiles.find(p => p.id === profileIdFromUrl);
+      if (foundProfile) {
+        setSelectedProfileName(foundProfile.name);
+      }
+    }
+  }, [profileIdFromUrl, profiles, selectedProfileName]);
   const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfig | null>(null);
   const [context, setContext] = useState<MessageContext>({
     audience: (remixState?.remixContext?.audience as any) || undefined,

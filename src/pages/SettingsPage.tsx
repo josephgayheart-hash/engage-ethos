@@ -48,9 +48,11 @@ import {
   Layers,
   Building,
   Briefcase,
-  ChevronDown
+  ChevronDown,
+  PenTool,
+  ArrowRight
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import type { InstitutionalConfig as InstitutionalConfigType, ProfileType as ConfigProfileType } from "@/types/uplaybook";
@@ -74,6 +76,7 @@ const PROFILE_TYPE_LABELS: Record<ProfileType, string> = {
 const SettingsPage = () => {
   const { profiles, createProfile, updateProfile, deleteProfile, duplicateProfile, getChildProfiles, getRootProfiles, getParentProfile } = useInstitutionalProfiles();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const [editingProfile, setEditingProfile] = useState<InstitutionalProfile | null>(null);
   const [showWizard, setShowWizard] = useState(false);
@@ -621,6 +624,35 @@ const SettingsPage = () => {
                       );
                     })()}
                     
+                    {/* Quick Actions - Connect to Content DNA and Message Builder */}
+                    <div className="rounded-lg border bg-gradient-to-r from-primary/5 to-secondary/5 p-4">
+                      <div className="flex items-center justify-between gap-4">
+                        <div>
+                          <h4 className="font-medium text-sm">Quick Actions</h4>
+                          <p className="text-xs text-muted-foreground">Configure voice and generate content for this profile</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5"
+                            onClick={() => navigate(`/admin/content-dna?profileId=${editingProfile.id}`)}
+                          >
+                            <Dna className="w-4 h-4" />
+                            Content DNA
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="gap-1.5"
+                            onClick={() => navigate(`/build?profileId=${editingProfile.id}`)}
+                          >
+                            <PenTool className="w-4 h-4" />
+                            Message Builder
+                            <ArrowRight className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
                     <InstitutionalConfig 
                       config={editingProfile.config} 
                       onChange={handleUpdateConfig}
