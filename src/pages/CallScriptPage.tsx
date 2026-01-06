@@ -21,6 +21,7 @@ import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
+import { useToolTracking } from "@/hooks/useToolTracking";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { WaveBackground } from "@/components/WaveBackground";
@@ -105,6 +106,7 @@ const CallScriptPage = () => {
   const { toast } = useToast();
   const { profile } = useAuth();
   const { addMessage } = useMessageLibrary();
+  const { trackToolUse } = useToolTracking();
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [selectedProfileName, setSelectedProfileName] = useState<string | undefined>(undefined);
   const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfig | null>(null);
@@ -145,6 +147,13 @@ const CallScriptPage = () => {
 
     setIsGenerating(true);
     setCallScript(null);
+
+    // Track tool usage
+    trackToolUse('call_script', 'generate', {
+      audience,
+      domain,
+      useContentDNA,
+    });
 
     try {
       // Build config with Content DNA and brand selection
