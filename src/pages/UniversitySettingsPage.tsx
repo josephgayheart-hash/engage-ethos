@@ -782,64 +782,69 @@ export default function UniversitySettingsPage() {
                                     : ''
                                 }`}
                               >
-                                <CardContent className="p-3">
-                                  <div className="flex items-start gap-2">
-                                    {hasChildren ? (
-                                      <button 
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          toggleExpanded(profile.id);
-                                        }}
-                                        className="mt-2 p-0.5 hover:bg-muted rounded transition-colors"
-                                      >
-                                        <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isExpanded ? '' : '-rotate-90'}`} />
-                                      </button>
+                                <CardContent className="p-4">
+                                  <div 
+                                    className="flex items-center gap-3 cursor-pointer"
+                                    onClick={() => setEditingProfile(profile)}
+                                  >
+                                    {/* Logo/Avatar */}
+                                    {profile.config.logoUrl ? (
+                                      <img
+                                        src={profile.config.logoUrl}
+                                        alt={profile.name}
+                                        className="w-12 h-12 object-contain rounded-lg bg-white border p-1.5 flex-shrink-0"
+                                      />
                                     ) : (
-                                      <div className="w-5" />
+                                      <div
+                                        className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-base flex-shrink-0"
+                                        style={{ backgroundColor: profile.config.primaryColor || '#1F2A44' }}
+                                      >
+                                        {(profile.config.institutionAbbreviation || profile.name)?.charAt(0) || 'U'}
+                                      </div>
                                     )}
                                     
-                                    <div 
-                                      className="flex-1 flex items-start gap-3"
-                                      onClick={() => setEditingProfile(profile)}
-                                    >
-                                      {profile.config.logoUrl ? (
-                                        <img
-                                          src={profile.config.logoUrl}
-                                          alt={profile.name}
-                                          className="w-10 h-10 object-contain rounded bg-white border p-1 flex-shrink-0"
-                                        />
-                                      ) : (
-                                        <div
-                                          className="w-10 h-10 rounded flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
-                                          style={{ backgroundColor: profile.config.primaryColor || '#1F2A44' }}
-                                        >
-                                          {(profile.config.institutionAbbreviation || profile.name)?.charAt(0) || 'U'}
-                                        </div>
-                                      )}
-                                      
-                                      <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2">
-                                          <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[profile.profileType]}</span>
-                                          <h3 className="font-medium text-sm truncate">{profile.name}</h3>
-                                        </div>
-                                        <p className="text-xs text-muted-foreground truncate mt-0.5">
-                                          {getProfileSummary(profile)}
-                                        </p>
-                                        <div className="flex items-center gap-2 mt-1.5">
-                                          {stats && (
-                                            <Badge variant={stats.hasAnalysis ? "default" : "outline"} className="text-[10px] h-4 px-1 gap-1">
-                                              <Dna className="w-2.5 h-2.5" />
-                                              {stats.samples} samples
-                                            </Badge>
-                                          )}
-                                          {hasChildren && (
-                                            <Badge variant="outline" className="text-[10px] h-4 px-1">
-                                              {children.length} sub-unit{children.length > 1 ? 's' : ''}
-                                            </Badge>
-                                          )}
-                                        </div>
+                                    {/* Content */}
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[profile.profileType]}</span>
+                                        <h3 className="font-semibold text-sm truncate">{profile.name}</h3>
                                       </div>
-                                      <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-1" />
+                                      <p className="text-xs text-muted-foreground truncate mt-1">
+                                        {getProfileSummary(profile)}
+                                      </p>
+                                      <div className="flex items-center gap-2 mt-2">
+                                        {stats && (
+                                          <div 
+                                            className="w-3 h-3 rounded-full flex-shrink-0"
+                                            style={{ backgroundColor: profile.config.primaryColor || '#1F2A44' }}
+                                          />
+                                        )}
+                                        {profile.config.accentColor && (
+                                          <div 
+                                            className="w-3 h-3 rounded-full flex-shrink-0"
+                                            style={{ backgroundColor: profile.config.accentColor }}
+                                          />
+                                        )}
+                                        <span className="text-xs text-muted-foreground">
+                                          {format(new Date(profile.createdAt), 'MMM d')}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    
+                                    {/* Expand/Chevron */}
+                                    <div className="flex items-center gap-1 flex-shrink-0">
+                                      {hasChildren && (
+                                        <button 
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleExpanded(profile.id);
+                                          }}
+                                          className="p-1 hover:bg-muted rounded transition-colors"
+                                        >
+                                          <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isExpanded ? '' : '-rotate-90'}`} />
+                                        </button>
+                                      )}
+                                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
                                     </div>
                                   </div>
                                 </CardContent>
