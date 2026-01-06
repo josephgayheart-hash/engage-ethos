@@ -82,7 +82,7 @@ const cohortLabels: Record<string, string> = {
 
 const StrategyPage = () => {
   const { toast } = useToast();
-  const { profile, isAdmin, isApprover } = useAuth();
+  const { profile, isAdmin, isApprover, tenant } = useAuth();
   const { addMessage, updateMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
   const { trackToolUse } = useToolTracking();
@@ -1174,6 +1174,12 @@ const StrategyPage = () => {
                         context={context}
                         startDate={startDate?.toISOString()} 
                         endDate={endDate?.toISOString()}
+                        branding={{
+                          institutionName: tenant?.institution_name,
+                          logoUrl: tenant?.logo_url,
+                          primaryColor: tenant?.primary_color,
+                          accentColor: tenant?.accent_color,
+                        }}
                       />
                     </CardContent>
                   </Card>

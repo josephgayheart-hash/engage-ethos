@@ -13,7 +13,8 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { toPng, toSvg } from 'html-to-image';
-import { Mail, MessageSquare, Globe, Phone, Share2, FileText, Download, Image, FileCode, Users, Target, Calendar, Megaphone, Search, FileSpreadsheet } from 'lucide-react';
+import { jsPDF } from 'jspdf';
+import { Mail, MessageSquare, Globe, Phone, Share2, FileText, Download, Image, FileCode, Users, Target, Calendar, Megaphone, Search, FileSpreadsheet, Building2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,11 +28,19 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { StrategyJourney, JourneyTouchpoint, MessageContext } from '@/types/uplaybook';
 
+interface UniversityBranding {
+  institutionName?: string;
+  logoUrl?: string | null;
+  primaryColor?: string;
+  accentColor?: string;
+}
+
 interface JourneyFlowDiagramProps {
   journey: StrategyJourney;
   context?: MessageContext;
   startDate?: string;
   endDate?: string;
+  branding?: UniversityBranding;
 }
 
 // Helper to calculate date for a specific week
@@ -218,10 +227,197 @@ const nodeTypes = {
   journeyInfo: JourneyInfoNode,
 };
 
-export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: JourneyFlowDiagramProps) => {
+export const JourneyFlowDiagram = ({ journey, context, startDate, endDate, branding }: JourneyFlowDiagramProps) => {
   const flowRef = useRef<HTMLDivElement>(null);
   const [exportBg, setExportBg] = useState<'themed' | 'white' | 'transparent'>('themed');
   const [exportQuality, setExportQuality] = useState<'standard' | 'high'>('high');
+
+  // Export branded PDF one-pager
+  const exportBrandedPDF = useCallback(async () => {
+    const flowElement = flowRef.current?.querySelector('.react-flow') as HTMLElement;
+    if (!flowElement) return;
+
+    try {
+      // Capture the diagram as PNG
+      const diagramDataUrl = await toPng(flowElement, {
+        backgroundColor: '#ffffff',
+        quality: 1,
+        pixelRatio: 2,
+      });
+
+      // Create PDF (landscape letter size for better fit)
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'pt',
+        format: 'letter',
+      });
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 40;
+
+      // Parse brand colors (default to professional navy/blue if not provided)
+      const primaryColor = branding?.primaryColor || '#1e3a5f';
+      const accentColor = branding?.accentColor || '#3b82f6';
+      
+      // Convert hex to RGB for jsPDF
+      const hexToRgb = (hex: string) => {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16)
+        } : { r: 30, g: 58, b: 95 };
+      };
+
+      const primary = hexToRgb(primaryColor);
+      const accent = hexToRgb(accentColor);
+
+      // Header band with primary color
+      pdf.setFillColor(primary.r, primary.g, primary.b);
+      pdf.rect(0, 0, pageWidth, 70, 'F');
+
+      // Accent color stripe
+      pdf.setFillColor(accent.r, accent.g, accent.b);
+      pdf.rect(0, 70, pageWidth, 4, 'F');
+
+      // Add logo if available
+      let textStartX = margin;
+      if (branding?.logoUrl) {
+        try {
+          // Load and add logo
+          const logoImg = new window.Image();
+          logoImg.crossOrigin = 'anonymous';
+          await new Promise<void>((resolve, reject) => {
+            logoImg.onload = () => resolve();
+            logoImg.onerror = reject;
+            logoImg.src = branding.logoUrl!;
+          });
+          
+          const logoHeight = 50;
+          const logoWidth = (logoImg.width / logoImg.height) * logoHeight;
+          pdf.addImage(logoImg, 'PNG', margin, 10, logoWidth, logoHeight);
+          textStartX = margin + logoWidth + 15;
+        } catch (e) {
+          console.warn('Could not load logo for PDF:', e);
+        }
+      }
+
+      // Institution name in header
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(20);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(branding?.institutionName || 'Communication Journey', textStartX, 38);
+
+      // Subtitle
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('Strategic Communication Journey Map', textStartX, 55);
+
+      // Journey overview section
+      const overviewY = 90;
+      pdf.setTextColor(primary.r, primary.g, primary.b);
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Journey Overview', margin, overviewY);
+      
+      pdf.setTextColor(60, 60, 60);
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      
+      // Wrap overview text
+      const overviewLines = pdf.splitTextToSize(journey.overview, pageWidth - margin * 2);
+      pdf.text(overviewLines.slice(0, 2), margin, overviewY + 15);
+
+      // Metadata row
+      const metaY = overviewY + 45;
+      pdf.setFontSize(9);
+      
+      // Target Audience
+      pdf.setTextColor(primary.r, primary.g, primary.b);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Target Audience:', margin, metaY);
+      pdf.setTextColor(60, 60, 60);
+      pdf.setFont('helvetica', 'normal');
+      const audienceText = [context?.audience, context?.cohort, context?.moment]
+        .filter(Boolean)
+        .map(v => v?.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()))
+        .join(' • ') || 'All Students';
+      pdf.text(audienceText, margin + 85, metaY);
+
+      // Timeline
+      const timelineX = pageWidth / 2;
+      pdf.setTextColor(primary.r, primary.g, primary.b);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Timeline:', timelineX, metaY);
+      pdf.setTextColor(60, 60, 60);
+      pdf.setFont('helvetica', 'normal');
+      const startStr = startDate ? new Date(startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+      const endStr = endDate ? new Date(endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+      const timelineText = startStr && endStr ? `${startStr} - ${endStr} (${journey.totalWeeks} weeks)` : `${journey.totalWeeks} weeks`;
+      pdf.text(timelineText, timelineX + 50, metaY);
+
+      // Touchpoints count
+      const touchpointsX = pageWidth - margin - 150;
+      pdf.setTextColor(primary.r, primary.g, primary.b);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Touchpoints:', touchpointsX, metaY);
+      pdf.setTextColor(60, 60, 60);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`${journey.touchpoints.length} communications`, touchpointsX + 65, metaY);
+
+      // Divider line
+      pdf.setDrawColor(200, 200, 200);
+      pdf.setLineWidth(0.5);
+      pdf.line(margin, metaY + 12, pageWidth - margin, metaY + 12);
+
+      // Add diagram image
+      const diagramY = metaY + 25;
+      const diagramImg = new window.Image();
+      diagramImg.src = diagramDataUrl;
+      await new Promise<void>((resolve) => {
+        diagramImg.onload = () => resolve();
+      });
+
+      const availableWidth = pageWidth - margin * 2;
+      const availableHeight = pageHeight - diagramY - 50;
+      const imgAspect = diagramImg.width / diagramImg.height;
+      const boxAspect = availableWidth / availableHeight;
+
+      let imgWidth, imgHeight;
+      if (imgAspect > boxAspect) {
+        imgWidth = availableWidth;
+        imgHeight = availableWidth / imgAspect;
+      } else {
+        imgHeight = availableHeight;
+        imgWidth = availableHeight * imgAspect;
+      }
+
+      const imgX = (pageWidth - imgWidth) / 2;
+      pdf.addImage(diagramImg, 'PNG', imgX, diagramY, imgWidth, imgHeight);
+
+      // Footer
+      const footerY = pageHeight - 25;
+      pdf.setFillColor(primary.r, primary.g, primary.b);
+      pdf.rect(0, pageHeight - 30, pageWidth, 30, 'F');
+      
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(8);
+      const timestamp = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      pdf.text(`Generated on ${timestamp}`, margin, footerY);
+      
+      if (branding?.institutionName) {
+        pdf.text(`© ${new Date().getFullYear()} ${branding.institutionName}`, pageWidth - margin - 150, footerY);
+      }
+
+      // Download
+      const filename = `${(branding?.institutionName || 'Journey').replace(/\s+/g, '-').toLowerCase()}-journey-${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(filename);
+
+    } catch (error) {
+      console.error('Error exporting branded PDF:', error);
+    }
+  }, [journey, context, startDate, endDate, branding]);
 
   // Export functions with options
   const exportToImage = useCallback((format: 'png' | 'svg') => {
@@ -577,6 +773,16 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate }: Jou
                 <DropdownMenuItem onClick={() => exportToImage('svg')}>
                   <FileCode className="w-4 h-4 mr-2" />
                   Export as SVG
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Building2 className="w-3 h-3 text-primary" />
+                  <span className="text-primary font-medium">Branded Export</span>
+                </DropdownMenuLabel>
+                <DropdownMenuItem onClick={exportBrandedPDF} className="font-medium">
+                  <FileText className="w-4 h-4 mr-2 text-primary" />
+                  Export Branded PDF
                 </DropdownMenuItem>
                 
                 <DropdownMenuSeparator />
