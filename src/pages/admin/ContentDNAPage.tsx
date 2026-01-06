@@ -560,54 +560,85 @@ export default function ContentDNAPage() {
             </div>
           </div>
 
-          {/* Institutional Profile Selector - Clean horizontal layout */}
+          {/* Institutional Profile Selector Card */}
           {profiles.length > 0 && (
-            <div className="mt-6 flex items-center gap-4 p-4 rounded-lg border bg-card">
-              <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Profile:</span>
-              
-              {/* Profile buttons as a segmented control */}
-              <div className="flex items-center gap-1 flex-wrap flex-1">
-                <Button
-                  variant={!selectedProfile ? "default" : "ghost"}
-                  size="sm"
-                  className="h-8"
-                  onClick={() => navigate('/admin/content-dna')}
-                >
-                  All
-                </Button>
-                {profiles.map((p) => (
-                  <Button
-                    key={p.id}
-                    variant={selectedProfile?.id === p.id ? "default" : "ghost"}
-                    size="sm"
-                    className="h-8 gap-1.5"
-                    onClick={() => navigate(`/admin/content-dna?profileId=${p.id}`)}
-                  >
-                    {p.config.logoUrl ? (
-                      <img src={p.config.logoUrl} alt="" className="w-4 h-4 rounded object-contain" />
+            <Card className={`mt-6 ${selectedProfile ? 'border-primary/30 bg-primary/5' : 'border-amber-400 border-dashed border-2 bg-amber-50'}`}>
+              <CardContent className="py-5">
+                <div className="flex items-center gap-4">
+                  {/* Status Icon */}
+                  <div className={`p-3 rounded-lg shrink-0 ${selectedProfile ? 'bg-primary/10' : 'bg-amber-100'}`}>
+                    {selectedProfile ? (
+                      <CheckCircle2 className="w-7 h-7 text-primary" />
                     ) : (
-                      <div 
-                        className="w-4 h-4 rounded text-[8px] flex items-center justify-center text-white font-bold shrink-0"
-                        style={{ backgroundColor: p.config.primaryColor || '#1F2A44' }}
-                      >
-                        {p.name.charAt(0)}
-                      </div>
+                      <AlertCircle className="w-7 h-7 text-amber-600" />
                     )}
-                    <span className="truncate max-w-[120px]">{p.name}</span>
-                  </Button>
-                ))}
-              </div>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 gap-1.5 text-muted-foreground shrink-0"
-                onClick={() => navigate('/university-settings?tab=profiles')}
-              >
-                <Settings className="w-3.5 h-3.5" />
-                Manage
-              </Button>
-            </div>
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className={`font-medium mb-1 ${selectedProfile ? 'text-foreground' : 'text-amber-800'}`}>
+                      {selectedProfile ? 'Content DNA Profile Active' : 'Select an Institutional Profile'}
+                    </h3>
+                    <p className={`text-sm ${selectedProfile ? 'text-muted-foreground' : 'text-amber-700'}`}>
+                      {selectedProfile 
+                        ? `Viewing and managing Content DNA for ${selectedProfile.name}. All samples and analysis are scoped to this profile.`
+                        : 'Content DNA needs to be associated with an institutional profile. Select a profile to view or configure its unique voice settings.'
+                      }
+                    </p>
+                  </div>
+                  
+                  {/* Profile Selector */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Select 
+                      value={selectedProfile?.id || 'none'} 
+                      onValueChange={(value) => {
+                        if (value === 'none') {
+                          navigate('/admin/content-dna');
+                        } else {
+                          navigate(`/admin/content-dna?profileId=${value}`);
+                        }
+                      }}
+                    >
+                      <SelectTrigger className={`w-[220px] ${selectedProfile ? 'border-primary/30' : 'border-amber-400'}`}>
+                        <SelectValue placeholder="Choose a profile..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-popover">
+                        <SelectItem value="none">
+                          <span className="text-muted-foreground">All Profiles</span>
+                        </SelectItem>
+                        {profiles.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            <div className="flex items-center gap-2">
+                              {p.config.logoUrl ? (
+                                <img src={p.config.logoUrl} alt="" className="w-4 h-4 rounded object-contain" />
+                              ) : (
+                                <div 
+                                  className="w-4 h-4 rounded text-[8px] flex items-center justify-center text-white font-bold"
+                                  style={{ backgroundColor: p.config.primaryColor || '#1F2A44' }}
+                                >
+                                  {p.name.charAt(0)}
+                                </div>
+                              )}
+                              <span>{p.name}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="gap-1.5 text-muted-foreground"
+                      onClick={() => navigate('/university-settings?tab=profiles')}
+                    >
+                      <Settings className="w-4 h-4" />
+                      Manage
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* No Profiles - Create First */}
