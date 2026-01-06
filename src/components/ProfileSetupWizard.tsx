@@ -249,7 +249,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
               </Label>
               <Input
                 id="institutionName"
-                placeholder="e.g., University of Kentucky"
+                placeholder="e.g., Lakewood University"
                 value={config.institutionName || ''}
                 onChange={(e) => updateConfig({ institutionName: e.target.value })}
                 className="text-lg"
@@ -266,7 +266,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
                 </Label>
                 <Input
                   id="abbreviation"
-                  placeholder="e.g., UK, UCLA"
+                  placeholder="e.g., LU, LWU"
                   value={config.institutionAbbreviation || ''}
                   onChange={(e) => updateConfig({ institutionAbbreviation: e.target.value })}
                 />
@@ -277,7 +277,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
                 </Label>
                 <Input
                   id="mascot"
-                  placeholder="e.g., Wildcats"
+                  placeholder="e.g., Griffins, Falcons"
                   value={config.mascot || ''}
                   onChange={(e) => updateConfig({ mascot: e.target.value })}
                 />
@@ -288,7 +288,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
               <Label className="text-sm font-medium">Spirit Phrases & Slogans</Label>
               <div className="flex gap-2">
                 <Input
-                  placeholder="e.g., Go Big Blue!"
+                  placeholder="e.g., Go Griffins!"
                   value={sloganInput}
                   onChange={(e) => setSloganInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addSlogan())}
@@ -559,7 +559,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
               </Label>
               <Input
                 id="portalName"
-                placeholder="e.g., myUK, BruinDirect, MyPack"
+                placeholder="e.g., MyLakewood, Student Hub"
                 value={config.portalName || ''}
                 onChange={(e) => updateConfig({ portalName: e.target.value })}
               />

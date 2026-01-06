@@ -274,7 +274,7 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
         <TabsContent value="identity" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {renderTextField('Institution Name', 'institutionName', 'e.g., Lakewood University')}
-            {renderTextField('Abbreviation', 'institutionAbbreviation', 'e.g., LU, UK')}
+            {renderTextField('Abbreviation', 'institutionAbbreviation', 'e.g., LU, LWU')}
             {renderTextField('Mascot / Nickname', 'mascot', 'e.g., Griffins')}
           </div>
           
@@ -299,8 +299,8 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
                   {renderTextField('Text Alert Number', 'textAlertNumber', 'e.g., 55555')}
                   {renderTextField('Appointment Booking Link', 'appointmentLink', 'e.g., calendly.com/advising')}
                 </div>
-                {renderArrayField('Website Links', 'websiteLinks', 'websiteLink', 'e.g., advising.university.edu')}
-                {renderArrayField('Social Media Handles', 'socialMediaHandles', 'socialHandle', 'e.g., @UKStudentSuccess')}
+                {renderArrayField('Website Links', 'websiteLinks', 'websiteLink', 'e.g., advising.lakewood.edu')}
+                {renderArrayField('Social Media Handles', 'socialMediaHandles', 'socialHandle', 'e.g., @LakewoodSuccess')}
               </AccordionContent>
             </AccordionItem>
           </Accordion>
