@@ -105,6 +105,7 @@ CHANNEL-SPECIFIC REQUIREMENTS:
 - PHONE CALL: Include opening statement, purpose statement, 3-5 talking points, objection handlers, closing options, and voicemail script
 - DIGITAL-AD-SEARCH: Google/Bing search ad with 3 headlines (max 30 chars each) and 2 descriptions (max 90 chars each)
 - DIGITAL-AD-SOCIAL: Meta/LinkedIn ad with primary text, headline, description, and CTA button
+- NEWS-ARTICLE: University news article with headline, subheadline, lead paragraph, body paragraphs, pull quote, boilerplate, and media contact. Write in inverted pyramid style with journalistic objectivity.
 - TALKING-POINTS: Executive talking points for senior leaders with opening hook, 5 key messages (2-3 sentences each), supporting data, anticipated Q&A with responses, and closing statement
 
 IMPORTANT: Respond ONLY with valid JSON:
@@ -134,6 +135,17 @@ IMPORTANT: Respond ONLY with valid JSON:
       "headline": "Bold headline (40 chars max)",
       "description": "Link description",
       "ctaButton": "Learn More"
+    },
+    "news-article": {
+      "headline": "Compelling headline (8-12 words)",
+      "subheadline": "Supporting context (15-20 words)",
+      "leadParagraph": "Who, what, when, where, why in 2-3 sentences",
+      "bodyParagraphs": ["Paragraph 2", "Paragraph 3", "Paragraph 4", "Paragraph 5"],
+      "pullQuote": { "quote": "Direct quote", "attribution": "Name, Title" },
+      "boilerplate": "Institutional boilerplate",
+      "mediaContact": { "name": "...", "title": "...", "email": "...", "phone": "..." },
+      "suggestedTags": ["Tag 1", "Tag 2"],
+      "relatedLinks": ["Link 1", "Link 2"]
     },
     "talking-points": {
       "context": "Specific meeting/speech context",
