@@ -345,6 +345,26 @@ export interface TalkingPointsDraft {
   closingStatement?: string; // Powerful 2-3 sentence closing
 }
 
+export interface NewsArticleDraft {
+  headline: string;
+  subheadline?: string;
+  leadParagraph: string;
+  bodyParagraphs: string[];
+  pullQuote?: {
+    quote: string;
+    attribution: string;
+  };
+  boilerplate?: string;
+  mediaContact?: {
+    name: string;
+    title: string;
+    email: string;
+    phone?: string;
+  };
+  suggestedTags?: string[];
+  relatedLinks?: string[];
+}
+
 export interface ChannelDrafts {
   email?: EmailDraft;
   sms?: string;
@@ -356,6 +376,7 @@ export interface ChannelDrafts {
   'digital-ad-search'?: SearchAdDraft;
   'digital-ad-social'?: SocialAdDraft;
   'talking-points'?: TalkingPointsDraft;
+  'news-article'?: NewsArticleDraft;
 }
 
 // Brand Adherence Scoring

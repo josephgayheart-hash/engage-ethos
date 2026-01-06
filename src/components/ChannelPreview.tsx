@@ -36,6 +36,7 @@ import type {
   SearchAdDraft,
   SocialAdDraft,
   TalkingPointsDraft,
+  NewsArticleDraft,
   Channel 
 } from "@/types/uplaybook";
 
@@ -279,6 +280,19 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
       }
       if (tp.transitionPhrases?.length) result += `TRANSITION PHRASES:\n${tp.transitionPhrases.map(t => `→ "${t}"`).join('\n')}\n\n`;
       if (tp.closingStatement) result += `CLOSING STATEMENT:\n"${tp.closingStatement}"`;
+      return result;
+    }
+    if (channel === 'news-article') {
+      const article = c as NewsArticleDraft;
+      let result = `${article.headline}\n`;
+      if (article.subheadline) result += `${article.subheadline}\n`;
+      result += `\n${article.leadParagraph}\n\n`;
+      if (article.bodyParagraphs?.length) result += article.bodyParagraphs.join('\n\n') + '\n\n';
+      if (article.pullQuote) result += `"${article.pullQuote.quote}"\n— ${article.pullQuote.attribution}\n\n`;
+      if (article.boilerplate) result += `---\n${article.boilerplate}\n`;
+      if (article.mediaContact) {
+        result += `\nMedia Contact:\n${article.mediaContact.name}, ${article.mediaContact.title}\n${article.mediaContact.email}${article.mediaContact.phone ? ` | ${article.mediaContact.phone}` : ''}\n`;
+      }
       return result;
     }
     return '';
@@ -601,6 +615,74 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     );
   };
 
+  const renderNewsArticleEdit = () => {
+    const article = editedContent as NewsArticleDraft;
+    return (
+      <div className="space-y-3">
+        <div>
+          <Label className="text-xs text-muted-foreground">Headline</Label>
+          <Input
+            value={article.headline || ''}
+            onChange={(e) => setEditedContent({ ...article, headline: e.target.value })}
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">Subheadline</Label>
+          <Input
+            value={article.subheadline || ''}
+            onChange={(e) => setEditedContent({ ...article, subheadline: e.target.value })}
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">Lead Paragraph (The Lede)</Label>
+          <Textarea
+            value={article.leadParagraph || ''}
+            onChange={(e) => setEditedContent({ ...article, leadParagraph: e.target.value })}
+            className="mt-1 min-h-[80px]"
+          />
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">Body Paragraphs (one per line, blank line between)</Label>
+          <Textarea
+            value={(article.bodyParagraphs || []).join('\n\n')}
+            onChange={(e) => setEditedContent({ ...article, bodyParagraphs: e.target.value.split('\n\n').filter(Boolean) })}
+            className="mt-1 min-h-[150px]"
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label className="text-xs text-muted-foreground">Pull Quote</Label>
+            <Textarea
+              value={article.pullQuote?.quote || ''}
+              onChange={(e) => setEditedContent({ ...article, pullQuote: { ...article.pullQuote, quote: e.target.value, attribution: article.pullQuote?.attribution || '' } })}
+              className="mt-1 min-h-[60px]"
+              placeholder="A compelling quote..."
+            />
+          </div>
+          <div>
+            <Label className="text-xs text-muted-foreground">Quote Attribution</Label>
+            <Input
+              value={article.pullQuote?.attribution || ''}
+              onChange={(e) => setEditedContent({ ...article, pullQuote: { ...article.pullQuote, quote: article.pullQuote?.quote || '', attribution: e.target.value } })}
+              className="mt-1"
+              placeholder="Name, Title"
+            />
+          </div>
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">Boilerplate (About the Institution)</Label>
+          <Textarea
+            value={article.boilerplate || ''}
+            onChange={(e) => setEditedContent({ ...article, boilerplate: e.target.value })}
+            className="mt-1 min-h-[60px]"
+          />
+        </div>
+      </div>
+    );
+  };
+
   const renderEditContent = () => {
     switch (channel) {
       case 'email':
@@ -620,6 +702,8 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
         return renderSocialAdEdit();
       case 'talking-points':
         return renderTalkingPointsEdit();
+      case 'news-article':
+        return renderNewsArticleEdit();
       default:
         return renderSimpleTextEdit();
     }
@@ -933,6 +1017,70 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     </div>
   );
 
+  const renderNewsArticlePreview = (article: NewsArticleDraft) => (
+    <div className="space-y-4">
+      {/* Article Header */}
+      <div className="border-b border-border pb-4">
+        <h2 className="text-xl font-bold mb-2">{article.headline}</h2>
+        {article.subheadline && (
+          <p className="text-sm text-muted-foreground italic">{article.subheadline}</p>
+        )}
+      </div>
+      
+      {/* Lead Paragraph */}
+      <div className="bg-muted/30 rounded-lg p-4 border-l-4 border-primary">
+        <p className="text-sm leading-relaxed font-medium">{article.leadParagraph}</p>
+      </div>
+      
+      {/* Body Paragraphs */}
+      {article.bodyParagraphs && article.bodyParagraphs.length > 0 && (
+        <div className="space-y-3">
+          {article.bodyParagraphs.map((paragraph, i) => (
+            <p key={i} className="text-sm leading-relaxed">{paragraph}</p>
+          ))}
+        </div>
+      )}
+      
+      {/* Pull Quote */}
+      {article.pullQuote && article.pullQuote.quote && (
+        <div className="bg-primary/5 rounded-lg p-4 border-l-4 border-primary my-4">
+          <p className="text-lg italic mb-2">"{article.pullQuote.quote}"</p>
+          <p className="text-sm font-medium text-muted-foreground">— {article.pullQuote.attribution}</p>
+        </div>
+      )}
+      
+      {/* Boilerplate */}
+      {article.boilerplate && (
+        <div className="bg-muted/50 rounded-lg p-4 border border-border mt-4">
+          <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">About</p>
+          <p className="text-sm">{article.boilerplate}</p>
+        </div>
+      )}
+      
+      {/* Media Contact */}
+      {article.mediaContact && (
+        <div className="bg-card rounded-lg p-4 border border-border">
+          <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Media Contact</p>
+          <p className="text-sm font-medium">{article.mediaContact.name}</p>
+          <p className="text-xs text-muted-foreground">{article.mediaContact.title}</p>
+          <p className="text-sm text-primary">{article.mediaContact.email}</p>
+          {article.mediaContact.phone && (
+            <p className="text-sm">{article.mediaContact.phone}</p>
+          )}
+        </div>
+      )}
+      
+      {/* Tags */}
+      {article.suggestedTags && article.suggestedTags.length > 0 && (
+        <div className="flex flex-wrap gap-2 pt-2">
+          {article.suggestedTags.map((tag, i) => (
+            <span key={i} className="text-xs bg-muted px-2 py-1 rounded-full">#{tag}</span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   const renderContent = () => {
     const displayContent = isEditing ? editedContent : content;
     if (!displayContent) return <p className="text-muted-foreground text-sm">No content generated</p>;
@@ -961,6 +1109,14 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
         if (typeof displayContent === 'object' && displayContent !== null && 
             ('keyMessages' in displayContent || 'context' in displayContent || 'audience' in displayContent || 'openingHook' in displayContent)) {
           return renderTalkingPointsPreview(displayContent as TalkingPointsDraft);
+        }
+        // Fallback to displaying as formatted text
+        return <p className="text-sm whitespace-pre-wrap">{String(displayContent)}</p>;
+      case 'news-article':
+        // Check if content is a valid NewsArticleDraft object
+        if (typeof displayContent === 'object' && displayContent !== null && 
+            ('headline' in displayContent || 'leadParagraph' in displayContent)) {
+          return renderNewsArticlePreview(displayContent as NewsArticleDraft);
         }
         // Fallback to displaying as formatted text
         return <p className="text-sm whitespace-pre-wrap">{String(displayContent)}</p>;

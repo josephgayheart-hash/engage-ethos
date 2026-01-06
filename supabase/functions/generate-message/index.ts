@@ -161,6 +161,40 @@ ${daysUntilDeadline ? `- Days Until Deadline: ${daysUntilDeadline} days remainin
         "phone-call": "Phone call script talking points. Bullet format. Include greeting, key message, and closing.",
         "digital-ad-search": `Google/Bing Search Ad. Return JSON object with exact fields: { "headlines": ["Headline 1 (max 30 chars)", "Headline 2 (max 30 chars)", "Headline 3 (max 30 chars)"], "descriptions": ["Description 1 (max 90 chars)", "Description 2 (max 90 chars)"], "displayUrl": "university.edu/path" }`,
         "digital-ad-social": `Meta/LinkedIn Social Ad. Return JSON object with exact fields: { "primaryText": "Main ad copy (125 chars ideal)", "headline": "Bold headline (40 chars max)", "description": "Link description (optional)", "ctaButton": "Learn More", "platform": "meta" }`,
+        "news-article": `University News Article for .edu news/media sites. Return JSON object with exact fields:
+{
+  "headline": "Compelling headline that grabs attention (8-12 words, active voice)",
+  "subheadline": "Supporting subheadline that adds context (15-20 words)",
+  "leadParagraph": "The lede - answers who, what, when, where, why in 2-3 compelling sentences. Front-load the most newsworthy information.",
+  "bodyParagraphs": [
+    "Second paragraph - expand on the key details with quotes from relevant stakeholders",
+    "Third paragraph - provide context, background, or supporting data",
+    "Fourth paragraph - include additional perspectives or implications",
+    "Fifth paragraph - future outlook or call to action"
+  ],
+  "pullQuote": {
+    "quote": "A compelling direct quote from a key figure",
+    "attribution": "Name, Title"
+  },
+  "boilerplate": "Standard institutional boilerplate about the university (2-3 sentences)",
+  "mediaContact": {
+    "name": "Media contact name",
+    "title": "Title",
+    "email": "email@university.edu",
+    "phone": "(xxx) xxx-xxxx"
+  },
+  "suggestedTags": ["Tag 1", "Tag 2", "Tag 3"],
+  "relatedLinks": ["Link description 1", "Link description 2"]
+}
+
+STYLE GUIDE FOR UNIVERSITY NEWS:
+- Write in inverted pyramid style (most important info first)
+- Use active voice and strong verbs
+- Include at least one direct quote from a university official or stakeholder
+- Maintain journalistic objectivity while highlighting institutional achievements
+- Reference specific programs, initiatives, or data points
+- Keep paragraphs short (2-3 sentences max for web readability)
+- Include context that connects to broader institutional mission or community impact`,
         "talking-points": `Executive Talking Points for a president, dean, provost, or senior leader. MUST return valid JSON with these fields:
 {
   "context": "Specific meeting/speech context (e.g., 'Board of Trustees quarterly meeting', 'Alumni donor reception')",
