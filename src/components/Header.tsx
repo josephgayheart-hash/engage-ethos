@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Library, FolderOpen, Settings, Home, LogOut, User, CheckCircle, UserPlus } from "lucide-react";
+import { Library, FolderOpen, Settings, Home, LogOut, User, CheckCircle, UserPlus, Building2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
@@ -132,6 +132,22 @@ export function Header() {
                     My Profile
                   </Link>
                 </DropdownMenuItem>
+                {isAdmin && (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link to="/university-settings" className="flex items-center gap-2 cursor-pointer">
+                        <Building2 className="w-4 h-4" />
+                        University Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to={isSuperAdmin ? "/admin/panel" : "/admin/console"} className="flex items-center gap-2 cursor-pointer">
+                        <Settings className="w-4 h-4" />
+                        {isSuperAdmin ? "Super Admin Panel" : "Admin Console"}
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
                 <DropdownMenuItem onClick={() => setReferDialogOpen(true)} className="cursor-pointer">
                   <UserPlus className="w-4 h-4 mr-2" />
                   Invite a Colleague

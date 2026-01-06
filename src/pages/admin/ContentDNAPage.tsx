@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useSearchParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
 import { useContentDNA, ContentDNASample } from '@/hooks/useContentDNA';
@@ -60,6 +60,7 @@ import {
   Plus,
   ChevronDown,
   Globe,
+  Pencil,
 } from 'lucide-react';
 import { extractTextFromFile, getAcceptString } from '@/lib/documentParser';
 import { DNATuningControls, DNAAdjustments } from '@/components/DNATuningControls';
@@ -137,6 +138,7 @@ const SAMPLE_TYPES = [
 export default function ContentDNAPage() {
   const { tenant, profile, isAdmin } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -658,7 +660,7 @@ export default function ContentDNAPage() {
                   <TooltipTrigger>
                     <div 
                       className="w-6 h-6 rounded-full border border-border"
-                      style={{ backgroundColor: tenant?.primary_color || 'hsl(222,47%,14%)' }}
+                      style={{ backgroundColor: selectedProfile?.config?.primaryColor || tenant?.primary_color || 'hsl(222,47%,14%)' }}
                     />
                   </TooltipTrigger>
                   <TooltipContent>Primary Color</TooltipContent>
@@ -667,12 +669,29 @@ export default function ContentDNAPage() {
                   <TooltipTrigger>
                     <div 
                       className="w-6 h-6 rounded-full border border-border"
-                      style={{ backgroundColor: tenant?.accent_color || 'hsl(173,58%,39%)' }}
+                      style={{ backgroundColor: selectedProfile?.config?.accentColor || tenant?.accent_color || 'hsl(173,58%,39%)' }}
                     />
                   </TooltipTrigger>
                   <TooltipContent>Accent Color</TooltipContent>
                 </Tooltip>
               </div>
+              {/* Edit Settings Button */}
+              {isAdmin && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5"
+                      onClick={() => navigate('/university-settings')}
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Edit Settings</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Edit University Settings</TooltipContent>
+                </Tooltip>
+              )}
             </div>
           </CardContent>
         </Card>
