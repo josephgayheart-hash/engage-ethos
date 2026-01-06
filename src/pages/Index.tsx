@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -6,8 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
-import { useContentDNA } from "@/hooks/useContentDNA";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { ResearchFoundation } from "@/components/ResearchFoundation";
 import { MyDraftsCard } from "@/components/MyDraftsCard";
 import { 
@@ -60,9 +61,25 @@ const Index = () => {
   // Check if institutional profiles exist
   const hasInstitutionalProfiles = institutionalProfiles.length > 0;
 
-  // Check if Content DNA is active (has analysis with voice data)
-  const { analysis: contentDNAAnalysis } = useContentDNA();
-  const hasActiveContentDNA = !!contentDNAAnalysis?.last_analyzed_at;
+  // Check if Content DNA is active for ANY profile in the tenant
+  const [hasActiveContentDNA, setHasActiveContentDNA] = useState(false);
+  
+  useEffect(() => {
+    const checkContentDNA = async () => {
+      if (!tenant?.id) return;
+      
+      const { data } = await supabase
+        .from('content_dna_analysis')
+        .select('id, last_analyzed_at')
+        .eq('tenant_id', tenant.id)
+        .not('last_analyzed_at', 'is', null)
+        .limit(1);
+      
+      setHasActiveContentDNA(data && data.length > 0);
+    };
+    
+    checkContentDNA();
+  }, [tenant?.id]);
 
   const utilityTools = [
     {
