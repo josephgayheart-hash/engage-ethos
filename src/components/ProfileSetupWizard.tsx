@@ -672,6 +672,29 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
               </CardContent>
             </Card>
 
+            {/* Encouraging next steps message */}
+            <Card className="border-amber-500/30 bg-amber-50 dark:bg-amber-950/20">
+              <CardContent className="py-4">
+                <div className="flex gap-3">
+                  <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30 shrink-0">
+                    <Sparkles className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="font-medium text-sm text-amber-800 dark:text-amber-300">Great start! There's more to explore</p>
+                    <p className="text-xs text-amber-700/80 dark:text-amber-400/80">
+                      This gets you started with the essentials. After creation, you can continue to refine your profile by adding:
+                    </p>
+                    <ul className="text-xs text-amber-700/80 dark:text-amber-400/80 mt-2 space-y-1 ml-4 list-disc">
+                      <li>Campus locations, buildings, and support centers</li>
+                      <li>Staff titles, leadership names, and advisor roles</li>
+                      <li>Academic terminology and preferred phrases</li>
+                      <li>Calls-to-action and signature templates</li>
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <Card className="border-primary/30 bg-primary/5">
               <CardContent className="py-4">
                 <div className="flex items-center gap-3">
@@ -681,15 +704,15 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
                   <div>
                     <p className="font-medium text-sm">Content DNA</p>
                     <p className="text-xs text-muted-foreground">
-                      After creation, configure your institution's unique voice and communication style
+                      After creation, configure your institution's unique voice and communication style by uploading sample content
                     </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <p className="text-sm text-muted-foreground text-center">
-              You can always update these settings and add more details after creation.
+            <p className="text-sm text-muted-foreground text-center italic">
+              The more details you add, the better your AI-generated messages will represent your institution.
             </p>
           </div>
         );
