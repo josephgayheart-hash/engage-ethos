@@ -678,6 +678,42 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
     failed: samples.filter(s => s.extraction_status === 'failed').length,
   };
 
+  // Update sample metadata
+  const updateSample = async (sampleId: string, updates: {
+    title?: string;
+    sample_type?: string;
+    source_description?: string;
+  }) => {
+    if (!tenant?.id) return;
+
+    try {
+      const { error } = await supabase
+        .from('content_dna_samples')
+        .update(updates)
+        .eq('id', sampleId)
+        .eq('tenant_id', tenant.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setSamples(prev => prev.map(s => 
+        s.id === sampleId ? { ...s, ...updates } : s
+      ));
+
+      toast({
+        title: 'Sample Updated',
+        description: 'The sample metadata has been updated.',
+      });
+    } catch (error: any) {
+      console.error('Error updating sample:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to update sample',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return {
     samples,
     analysis,
@@ -690,6 +726,7 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
     extractionStats,
     addSample,
     deleteSample,
+    updateSample,
     analyzeVoice,
     updateCustomInstructions,
     updateBrandPlatform,

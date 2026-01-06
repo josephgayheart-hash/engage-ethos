@@ -136,6 +136,50 @@ const SAMPLE_TYPES = [
   { value: 'other', label: 'Other', category: 'Other' },
 ];
 
+// Helper to auto-detect if pasted content looks like an email
+function detectContentType(text: string): string | null {
+  const lowerText = text.toLowerCase();
+  
+  // Email indicators
+  const emailPatterns = [
+    /^subject:/mi,
+    /^from:/mi,
+    /^to:/mi,
+    /^dear\s+/mi,
+    /^hi\s+\w+,/mi,
+    /^hello\s+\w+,/mi,
+    /^good\s+(morning|afternoon|evening)/mi,
+    /best\s+regards/mi,
+    /sincerely,/mi,
+    /warm\s+regards/mi,
+    /thanks,?\s*$/mi,
+    /^re:/mi,
+    /^fwd:/mi,
+  ];
+  
+  const emailMatches = emailPatterns.filter(pattern => pattern.test(text)).length;
+  if (emailMatches >= 2) {
+    return 'email';
+  }
+  
+  // Newsletter indicators
+  if (lowerText.includes('unsubscribe') || lowerText.includes('view in browser') || lowerText.includes('newsletter')) {
+    return 'newsletter';
+  }
+  
+  // SMS indicators (short, no formal greeting)
+  if (text.length < 320 && !text.includes('\n\n') && !/^(dear|hi|hello|good)/i.test(text.trim())) {
+    return 'sms';
+  }
+  
+  // Press release indicators
+  if (/for\s+immediate\s+release/i.test(text) || /press\s+release/i.test(text) || /media\s+contact/i.test(text)) {
+    return 'press_release';
+  }
+  
+  return null;
+}
+
 export default function ContentDNAPage() {
   const { tenant, profile, isAdmin } = useAuth();
   const location = useLocation();
@@ -167,6 +211,7 @@ export default function ContentDNAPage() {
     extractionStats,
     addSample,
     deleteSample,
+    updateSample,
     analyzeVoice,
     updateCustomInstructions,
     resetContentDNA,
@@ -174,6 +219,14 @@ export default function ContentDNAPage() {
     searchSamples,
     saveAdjustments,
   } = useContentDNA({ profileId: profileIdFromUrl });
+  
+  // Editing sample state
+  const [editingSampleId, setEditingSampleId] = useState<string | null>(null);
+  const [editingSampleData, setEditingSampleData] = useState<{
+    title: string;
+    sample_type: string;
+    source_description: string;
+  } | null>(null);
   
   const [isResetting, setIsResetting] = useState(false);
   
@@ -291,6 +344,45 @@ export default function ContentDNAPage() {
     setSearchQuery('');
     setSearchResults([]);
     setHasSearched(false);
+  };
+
+  // Handle text input with auto-detection
+  const handleTextInputChange = (value: string, setType: (type: string) => void) => {
+    // Auto-detect content type when user pastes content
+    if (value.length > 50) {
+      const detectedType = detectContentType(value);
+      if (detectedType) {
+        setType(detectedType);
+      }
+    }
+  };
+
+  // Edit sample handlers
+  const handleStartEdit = (sample: ContentDNASample) => {
+    setEditingSampleId(sample.id);
+    setEditingSampleData({
+      title: sample.title || sample.file_name,
+      sample_type: sample.sample_type || 'other',
+      source_description: sample.source_description || '',
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingSampleId(null);
+    setEditingSampleData(null);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingSampleId || !editingSampleData) return;
+    
+    await updateSample(editingSampleId, {
+      title: editingSampleData.title,
+      sample_type: editingSampleData.sample_type,
+      source_description: editingSampleData.source_description || undefined,
+    });
+    
+    setEditingSampleId(null);
+    setEditingSampleData(null);
   };
 
   // Library inline upload handlers
@@ -1412,7 +1504,10 @@ export default function ContentDNAPage() {
                     <Label>Content</Label>
                     <Textarea
                       value={textInput}
-                      onChange={(e) => setTextInput(e.target.value)}
+                      onChange={(e) => {
+                        setTextInput(e.target.value);
+                        handleTextInputChange(e.target.value, setSampleType);
+                      }}
                       placeholder="Paste your email, newsletter, or other communication here..."
                       className="h-[180px]"
                     />
@@ -2195,7 +2290,10 @@ export default function ContentDNAPage() {
                           <div>
                             <Textarea
                               value={libraryTextInput}
-                              onChange={(e) => setLibraryTextInput(e.target.value)}
+                              onChange={(e) => {
+                                setLibraryTextInput(e.target.value);
+                                handleTextInputChange(e.target.value, setLibrarySampleType);
+                              }}
                               placeholder="Paste your content here..."
                               className="min-h-[120px]"
                             />
@@ -2379,100 +2477,206 @@ export default function ContentDNAPage() {
                       {samples.map((sample) => {
                         const isOwnSample = sample.user_id === profile?.id;
                         const canDelete = isOwnSample || isAdmin;
+                        const canEdit = isOwnSample || isAdmin;
+                        const isEditing = editingSampleId === sample.id;
                         
                         return (
                           <div
                             key={sample.id}
-                            className="p-4 border border-[hsl(220,13%,88%)] rounded-lg bg-white hover:bg-[hsl(210,20%,98%)] transition-colors"
+                            className={`p-4 border rounded-lg transition-colors ${
+                              isEditing 
+                                ? 'border-primary bg-primary/5' 
+                                : 'border-[hsl(220,13%,88%)] bg-white hover:bg-[hsl(210,20%,98%)]'
+                            }`}
                           >
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <h4 className="font-medium text-[hsl(222,47%,11%)] truncate">
-                                    {sample.title || sample.file_name}
-                                  </h4>
-                                  <Badge variant="outline" className="text-xs">
-                                    {SAMPLE_TYPES.find(t => t.value === sample.sample_type)?.label || sample.sample_type}
-                                  </Badge>
-                                  <Badge variant={isOwnSample ? 'default' : 'secondary'} className="text-xs">
-                                    {isOwnSample ? 'You' : 'Team'}
-                                  </Badge>
-                                  {/* Extraction status */}
-                                  {sample.extraction_status === 'completed' ? (
-                                    <Tooltip>
-                                      <TooltipTrigger>
-                                        <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200">
-                                          <CheckCircle2 className="w-3 h-3 mr-1" />
-                                          Indexed
-                                        </Badge>
-                                      </TooltipTrigger>
-                                      <TooltipContent>
-                                        <p className="max-w-xs text-xs">Searchable for DNA refinement</p>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  ) : sample.extraction_status === 'failed' ? (
-                                    <Badge variant="outline" className="text-xs bg-red-50 text-red-700 border-red-200">
-                                      <X className="w-3 h-3 mr-1" />
-                                      Failed
-                                    </Badge>
-                                  ) : (
-                                    <Badge variant="outline" className="text-xs bg-amber-50 text-amber-600 border-amber-200">
-                                      <Clock className="w-3 h-3 mr-1" />
-                                      Pending
-                                    </Badge>
-                                  )}
+                            {isEditing && editingSampleData ? (
+                              /* Edit Mode */
+                              <div className="space-y-3">
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div>
+                                    <Label className="text-xs">Title</Label>
+                                    <Input
+                                      value={editingSampleData.title}
+                                      onChange={(e) => setEditingSampleData({
+                                        ...editingSampleData,
+                                        title: e.target.value
+                                      })}
+                                      className="mt-1"
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs">Content Type</Label>
+                                    <Select 
+                                      value={editingSampleData.sample_type} 
+                                      onValueChange={(value) => setEditingSampleData({
+                                        ...editingSampleData,
+                                        sample_type: value
+                                      })}
+                                    >
+                                      <SelectTrigger className="mt-1">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {Object.entries(
+                                          SAMPLE_TYPES.reduce((acc, type) => {
+                                            if (!acc[type.category]) acc[type.category] = [];
+                                            acc[type.category].push(type);
+                                            return acc;
+                                          }, {} as Record<string, typeof SAMPLE_TYPES>)
+                                        ).map(([category, types]) => (
+                                          <SelectGroup key={category}>
+                                            <SelectLabel>{category}</SelectLabel>
+                                            {types.map((type) => (
+                                              <SelectItem key={type.value} value={type.value}>
+                                                {type.label}
+                                              </SelectItem>
+                                            ))}
+                                          </SelectGroup>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
                                 </div>
-                                {sample.source_description && (
-                                  <p className="text-sm text-[hsl(220,14%,46%)] mb-2">
-                                    {sample.source_description}
-                                  </p>
-                                )}
-                                <p className="text-sm text-[hsl(220,14%,46%)] line-clamp-2">
-                                  {sample.content_text?.substring(0, 200)}...
-                                </p>
-                                {/* Key themes display for indexed samples */}
-                                {sample.extraction_status === 'completed' && sample.key_themes && sample.key_themes.length > 0 && (
-                                  <div className="flex flex-wrap gap-1 mt-2">
-                                    {sample.key_themes.slice(0, 5).map((theme, idx) => (
-                                      <Badge key={idx} variant="secondary" className="text-[10px] px-1.5 py-0 bg-blue-50 text-blue-700 border-blue-200">
-                                        {theme}
+                                <div>
+                                  <Label className="text-xs">Source Description</Label>
+                                  <Input
+                                    value={editingSampleData.source_description}
+                                    onChange={(e) => setEditingSampleData({
+                                      ...editingSampleData,
+                                      source_description: e.target.value
+                                    })}
+                                    placeholder="e.g., President's welcome message"
+                                    className="mt-1"
+                                  />
+                                </div>
+                                <div className="flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    onClick={handleSaveEdit}
+                                    className="bg-secondary hover:bg-secondary/90"
+                                  >
+                                    <Save className="w-3 h-3 mr-1" />
+                                    Save
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={handleCancelEdit}
+                                  >
+                                    Cancel
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              /* View Mode */
+                              <div className="flex items-start justify-between gap-4">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <h4 className="font-medium text-[hsl(222,47%,11%)] truncate">
+                                      {sample.title || sample.file_name}
+                                    </h4>
+                                    <Badge variant="outline" className="text-xs">
+                                      {SAMPLE_TYPES.find(t => t.value === sample.sample_type)?.label || sample.sample_type}
+                                    </Badge>
+                                    <Badge variant={isOwnSample ? 'default' : 'secondary'} className="text-xs">
+                                      {isOwnSample ? 'You' : 'Team'}
+                                    </Badge>
+                                    {/* Extraction status */}
+                                    {sample.extraction_status === 'completed' ? (
+                                      <Tooltip>
+                                        <TooltipTrigger>
+                                          <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200">
+                                            <CheckCircle2 className="w-3 h-3 mr-1" />
+                                            Indexed
+                                          </Badge>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                          <p className="max-w-xs text-xs">Searchable for DNA refinement</p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    ) : sample.extraction_status === 'failed' ? (
+                                      <Badge variant="outline" className="text-xs bg-red-50 text-red-700 border-red-200">
+                                        <X className="w-3 h-3 mr-1" />
+                                        Failed
                                       </Badge>
-                                    ))}
-                                    {sample.key_themes.length > 5 && (
-                                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                                        +{sample.key_themes.length - 5}
+                                    ) : (
+                                      <Badge variant="outline" className="text-xs bg-amber-50 text-amber-600 border-amber-200">
+                                        <Clock className="w-3 h-3 mr-1" />
+                                        Pending
                                       </Badge>
                                     )}
                                   </div>
-                                )}
-                                <div className="flex items-center gap-4 mt-2 text-xs text-[hsl(220,14%,46%)]">
-                                  <span className="flex items-center gap-1">
-                                    <Clock className="w-3 h-3" />
-                                    {formatDate(sample.created_at)}
-                                  </span>
-                                  {sample.file_size && (
-                                    <span>{Math.round(sample.file_size / 1024)} KB</span>
+                                  {sample.source_description && (
+                                    <p className="text-sm text-[hsl(220,14%,46%)] mb-2">
+                                      {sample.source_description}
+                                    </p>
+                                  )}
+                                  <p className="text-sm text-[hsl(220,14%,46%)] line-clamp-2">
+                                    {sample.content_text?.substring(0, 200)}...
+                                  </p>
+                                  {/* Key themes display for indexed samples */}
+                                  {sample.extraction_status === 'completed' && sample.key_themes && sample.key_themes.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 mt-2">
+                                      {sample.key_themes.slice(0, 5).map((theme, idx) => (
+                                        <Badge key={idx} variant="secondary" className="text-[10px] px-1.5 py-0 bg-blue-50 text-blue-700 border-blue-200">
+                                          {theme}
+                                        </Badge>
+                                      ))}
+                                      {sample.key_themes.length > 5 && (
+                                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                                          +{sample.key_themes.length - 5}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  )}
+                                  <div className="flex items-center gap-4 mt-2 text-xs text-[hsl(220,14%,46%)]">
+                                    <span className="flex items-center gap-1">
+                                      <Clock className="w-3 h-3" />
+                                      {formatDate(sample.created_at)}
+                                    </span>
+                                    {sample.file_size && (
+                                      <span>{Math.round(sample.file_size / 1024)} KB</span>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  {canEdit && (
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="text-muted-foreground hover:text-foreground"
+                                          onClick={() => handleStartEdit(sample)}
+                                        >
+                                          <Pencil className="w-4 h-4" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>Edit metadata</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  )}
+                                  {canDelete && (
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="text-[hsl(0,84%,60%)] hover:text-[hsl(0,84%,50%)] hover:bg-red-50"
+                                          onClick={() => deleteSample(sample.id)}
+                                        >
+                                          <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>{isOwnSample ? 'Delete your sample' : 'Delete (admin)'}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
                                   )}
                                 </div>
                               </div>
-                              {canDelete && (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="text-[hsl(0,84%,60%)] hover:text-[hsl(0,84%,50%)] hover:bg-red-50"
-                                      onClick={() => deleteSample(sample.id)}
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>{isOwnSample ? 'Delete your sample' : 'Delete (admin)'}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              )}
-                            </div>
+                            )}
                           </div>
                         );
                       })}
@@ -2490,13 +2694,14 @@ export default function ContentDNAPage() {
                           <TableHead>Owner</TableHead>
                           <TableHead>Date</TableHead>
                           <TableHead className="w-[80px]">Size</TableHead>
-                          <TableHead className="w-[60px]"></TableHead>
+                          <TableHead className="w-[100px]"></TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {samples.map((sample) => {
                           const isOwnSample = sample.user_id === profile?.id;
                           const canDelete = isOwnSample || isAdmin;
+                          const canEdit = isOwnSample || isAdmin;
                           
                           return (
                             <TableRow key={sample.id} className="hover:bg-muted/50">
@@ -2545,23 +2750,42 @@ export default function ContentDNAPage() {
                                 {sample.file_size ? `${Math.round(sample.file_size / 1024)} KB` : '-'}
                               </TableCell>
                               <TableCell>
-                                {canDelete && (
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                        onClick={() => deleteSample(sample.id)}
-                                      >
-                                        <Trash2 className="w-4 h-4" />
-                                      </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>{isOwnSample ? 'Delete your sample' : 'Delete (admin)'}</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                )}
+                                <div className="flex items-center gap-1">
+                                  {canEdit && (
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                          onClick={() => handleStartEdit(sample)}
+                                        >
+                                          <Pencil className="w-4 h-4" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>Edit metadata</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  )}
+                                  {canDelete && (
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                          onClick={() => deleteSample(sample.id)}
+                                        >
+                                          <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>{isOwnSample ? 'Delete your sample' : 'Delete (admin)'}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  )}
+                                </div>
                               </TableCell>
                             </TableRow>
                           );
