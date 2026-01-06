@@ -30,6 +30,11 @@ import {
   Eye,
   Shield,
   Save,
+  Layers,
+  Dna,
+  FolderTree,
+  CheckCircle2,
+  XCircle,
 } from 'lucide-react';
 
 interface UserProfile {
@@ -71,6 +76,28 @@ interface ToolUsageEvent {
   created_at: string;
 }
 
+interface InstitutionalProfile {
+  id: string;
+  name: string;
+  profile_type: string;
+  parent_profile_id: string | null;
+  config: any;
+  created_at: string;
+  created_by_user_id: string | null;
+}
+
+interface ContentDNAAnalysis {
+  id: string;
+  profile_id: string | null;
+  sample_count: number;
+  voice_analysis: any;
+  brand_platform: any;
+  custom_instructions: string | null;
+  created_at: string;
+  updated_at: string;
+  profile_name?: string;
+}
+
 type RoleType = 'admin' | 'user' | 'approver' | 'super_admin';
 
 export default function UserDetailPage() {
@@ -85,6 +112,8 @@ export default function UserDetailPage() {
   const [userRoles, setUserRoles] = useState<RoleType[]>([]);
   const [messages, setMessages] = useState<PersonalMessage[]>([]);
   const [toolUsage, setToolUsage] = useState<ToolUsageEvent[]>([]);
+  const [institutionalProfiles, setInstitutionalProfiles] = useState<InstitutionalProfile[]>([]);
+  const [contentDNAs, setContentDNAs] = useState<ContentDNAAnalysis[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSavingRoles, setIsSavingRoles] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
@@ -140,6 +169,40 @@ export default function UserDetailPage() {
         .order('created_at', { ascending: false })
         .limit(50);
       setToolUsage(toolUsageData || []);
+
+      // Fetch institutional profiles created by user (within their tenant)
+      const { data: profilesData } = await supabase
+        .from('institutional_profiles')
+        .select('*')
+        .eq('tenant_id', userData.tenant_id)
+        .eq('created_by_user_id', id)
+        .order('created_at', { ascending: false });
+      setInstitutionalProfiles(profilesData || []);
+
+      // Fetch content DNA analyses for the tenant (show all to understand what's configured)
+      const { data: dnaData } = await supabase
+        .from('content_dna_analysis')
+        .select('*')
+        .eq('tenant_id', userData.tenant_id)
+        .order('updated_at', { ascending: false });
+      
+      // Get profile names for DNA entries
+      if (dnaData && dnaData.length > 0) {
+        const profileIds = dnaData.filter(d => d.profile_id).map(d => d.profile_id);
+        const { data: dnaProfiles } = await supabase
+          .from('institutional_profiles')
+          .select('id, name')
+          .in('id', profileIds);
+        
+        const profileMap = new Map(dnaProfiles?.map(p => [p.id, p.name]) || []);
+        const enrichedDNA = dnaData.map(d => ({
+          ...d,
+          profile_name: d.profile_id ? profileMap.get(d.profile_id) || 'Unknown Profile' : 'Institution-wide'
+        }));
+        setContentDNAs(enrichedDNA);
+      } else {
+        setContentDNAs([]);
+      }
 
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -346,7 +409,7 @@ export default function UserDetailPage() {
               </div>
 
               {/* Quick Stats */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
                 <Card>
                   <CardContent className="p-3">
                     <div className="flex items-center gap-2">
@@ -369,6 +432,32 @@ export default function UserDetailPage() {
                       <div>
                         <p className="text-xl font-bold">{toolUsage.length}</p>
                         <p className="text-[10px] text-muted-foreground">Tool Events</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 rounded bg-teal-500/10">
+                        <FolderTree className="w-4 h-4 text-teal-600" />
+                      </div>
+                      <div>
+                        <p className="text-xl font-bold">{institutionalProfiles.length}</p>
+                        <p className="text-[10px] text-muted-foreground">Profiles Created</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 rounded bg-pink-500/10">
+                        <Dna className="w-4 h-4 text-pink-600" />
+                      </div>
+                      <div>
+                        <p className="text-xl font-bold">{contentDNAs.length}</p>
+                        <p className="text-[10px] text-muted-foreground">Content DNAs</p>
                       </div>
                     </div>
                   </CardContent>
@@ -403,11 +492,13 @@ export default function UserDetailPage() {
 
               {/* Tabs */}
               <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid grid-cols-4 w-full">
+                <TabsList className="grid grid-cols-6 w-full">
                   <TabsTrigger value="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="profiles">Profiles</TabsTrigger>
+                  <TabsTrigger value="dna">Content DNA</TabsTrigger>
                   <TabsTrigger value="messages">Messages</TabsTrigger>
                   <TabsTrigger value="activity">Activity</TabsTrigger>
-                  <TabsTrigger value="profile">Profile</TabsTrigger>
+                  <TabsTrigger value="profile">Account</TabsTrigger>
                 </TabsList>
 
                 {/* Overview Tab */}
@@ -462,6 +553,139 @@ export default function UserDetailPage() {
                       </CardContent>
                     </Card>
                   </div>
+                </TabsContent>
+
+                {/* Institutional Profiles Tab */}
+                <TabsContent value="profiles" className="mt-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="font-serif flex items-center gap-2">
+                        <FolderTree className="w-5 h-5" />
+                        Institutional Profiles Created
+                      </CardTitle>
+                      <CardDescription>
+                        Profiles (universities, colleges, departments) created by this user
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ScrollArea className="h-[400px]">
+                        <div className="space-y-3">
+                          {institutionalProfiles.map(profile => (
+                            <Card key={profile.id} className="border">
+                              <CardContent className="p-4">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex items-center gap-3">
+                                    <div className="p-2 rounded bg-teal-500/10">
+                                      <Layers className="w-4 h-4 text-teal-600" />
+                                    </div>
+                                    <div>
+                                      <h4 className="font-medium">{profile.name}</h4>
+                                      <div className="flex items-center gap-2 mt-1">
+                                        <Badge variant="outline" className="text-xs capitalize">
+                                          {profile.profile_type}
+                                        </Badge>
+                                        {profile.parent_profile_id && (
+                                          <Badge variant="secondary" className="text-xs">Sub-unit</Badge>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <span className="text-xs text-muted-foreground">
+                                    {formatDate(profile.created_at)}
+                                  </span>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                          {institutionalProfiles.length === 0 && (
+                            <div className="text-center py-8 text-muted-foreground">
+                              <FolderTree className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                              <p className="text-sm">No profiles created by this user</p>
+                            </div>
+                          )}
+                        </div>
+                      </ScrollArea>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* Content DNA Tab */}
+                <TabsContent value="dna" className="mt-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="font-serif flex items-center gap-2">
+                        <Dna className="w-5 h-5" />
+                        Content DNA Configurations
+                      </CardTitle>
+                      <CardDescription>
+                        Voice analysis and brand guidelines for this institution
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ScrollArea className="h-[400px]">
+                        <div className="space-y-3">
+                          {contentDNAs.map(dna => {
+                            const hasVoice = dna.voice_analysis && Object.keys(dna.voice_analysis).length > 0;
+                            const hasBrand = dna.brand_platform && Object.keys(dna.brand_platform).length > 0;
+                            
+                            return (
+                              <Card key={dna.id} className="border">
+                                <CardContent className="p-4">
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex items-center gap-3">
+                                      <div className="p-2 rounded bg-pink-500/10">
+                                        <Dna className="w-4 h-4 text-pink-600" />
+                                      </div>
+                                      <div>
+                                        <h4 className="font-medium">{dna.profile_name}</h4>
+                                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                          <Badge variant="secondary" className="text-xs">
+                                            {dna.sample_count} samples
+                                          </Badge>
+                                          <div className="flex items-center gap-1 text-xs">
+                                            {hasVoice ? (
+                                              <CheckCircle2 className="w-3 h-3 text-green-500" />
+                                            ) : (
+                                              <XCircle className="w-3 h-3 text-muted-foreground" />
+                                            )}
+                                            <span className={hasVoice ? 'text-green-600' : 'text-muted-foreground'}>
+                                              Voice
+                                            </span>
+                                          </div>
+                                          <div className="flex items-center gap-1 text-xs">
+                                            {hasBrand ? (
+                                              <CheckCircle2 className="w-3 h-3 text-green-500" />
+                                            ) : (
+                                              <XCircle className="w-3 h-3 text-muted-foreground" />
+                                            )}
+                                            <span className={hasBrand ? 'text-green-600' : 'text-muted-foreground'}>
+                                              Brand
+                                            </span>
+                                          </div>
+                                          {dna.custom_instructions && (
+                                            <Badge variant="outline" className="text-xs">Custom Instructions</Badge>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <span className="text-xs text-muted-foreground">
+                                      Updated {formatDate(dna.updated_at)}
+                                    </span>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            );
+                          })}
+                          {contentDNAs.length === 0 && (
+                            <div className="text-center py-8 text-muted-foreground">
+                              <Dna className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                              <p className="text-sm">No Content DNA configured for this institution</p>
+                            </div>
+                          )}
+                        </div>
+                      </ScrollArea>
+                    </CardContent>
+                  </Card>
                 </TabsContent>
 
                 {/* Messages Tab */}
