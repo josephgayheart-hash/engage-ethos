@@ -184,7 +184,7 @@ const communityPartnerMomentOptions: { value: CommunicationMoment; label: string
   { value: 'partnership-sustain', label: 'Sustain Partnership' },
   { value: 'community-event', label: 'Participate in Events' },
   { value: 'success-story-share', label: 'Share Success Stories' },
-  { value: 'campus-event', label: 'Campus Engagement' },
+  { value: 'campus-event', label: 'Campus Event' },
 ];
 
 const higherEdLeaderMomentOptions: { value: CommunicationMoment; label: string }[] = [
