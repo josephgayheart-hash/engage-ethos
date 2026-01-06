@@ -16,6 +16,7 @@ import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { useAuth } from "@/contexts/AuthContext";
 import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import { JourneyViewer, isJourneyContent, parseJourneyContent } from "@/components/library/JourneyViewer";
+import { RichContentRenderer } from "@/components/library/RichContentRenderer";
 import type { InstitutionalConfig } from "@/types/uplaybook";
 import { 
   ChevronRight, 
@@ -478,12 +479,10 @@ const MessageDetailPage = () => {
                     <CardTitle className="text-lg">Message Content</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="bg-muted rounded-lg p-6">
-                      <pre className="whitespace-pre-wrap text-sm font-sans leading-relaxed">{message.content}</pre>
-                      {message.channel === 'sms' && (
-                        <SmsCharCounter text={message.content} className="mt-4" />
-                      )}
-                    </div>
+                    <RichContentRenderer 
+                      content={message.content} 
+                      channel={message.channel || message.channels?.[0]} 
+                    />
                   </CardContent>
                 </Card>
               )}
