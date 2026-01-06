@@ -93,7 +93,7 @@ export default function UniversitySettingsPage() {
   
   // Get initial tab from URL or default to branding
   const tabFromUrl = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState(tabFromUrl === 'profiles' ? 'profiles' : 'branding');
+  const [activeTab, setActiveTab] = useState(tabFromUrl === 'branding' ? 'branding' : 'profiles');
   
   // Profile management state
   const [editingProfile, setEditingProfile] = useState<InstitutionalProfile | null>(null);
@@ -547,13 +547,13 @@ export default function UniversitySettingsPage() {
         <div className="max-w-6xl mx-auto">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-6">
-              <TabsTrigger value="branding" className="flex items-center gap-2">
-                <Palette className="w-4 h-4" />
-                Branding
-              </TabsTrigger>
               <TabsTrigger value="profiles" className="flex items-center gap-2">
                 <Building2 className="w-4 h-4" />
                 Profiles ({profiles.length})
+              </TabsTrigger>
+              <TabsTrigger value="branding" className="flex items-center gap-2">
+                <Palette className="w-4 h-4" />
+                Branding
               </TabsTrigger>
             </TabsList>
 
