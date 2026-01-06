@@ -165,19 +165,21 @@ export default function UniversitySettingsPage() {
     fetchDnaStats();
   }, [tenant?.id, profiles]);
 
-  // Auto-expand profiles that have children - run once when profiles load
+  // Auto-expand parents with sub-units when the user opens the Profiles tab (first time only)
   useEffect(() => {
-    if (profiles.length > 0 && expandedProfiles.size === 0) {
-      const profilesWithChildren = profiles
-        .filter(p => !p.parentProfileId)
-        .filter(parent => profiles.some(child => child.parentProfileId === parent.id))
-        .map(p => p.id);
-      
-      if (profilesWithChildren.length > 0) {
-        setExpandedProfiles(new Set(profilesWithChildren));
-      }
+    if (activeTab !== 'profiles') return;
+    if (profiles.length === 0) return;
+    if (expandedProfiles.size > 0) return;
+
+    const parentIds = new Set<string>();
+    for (const p of profiles) {
+      if (p.parentProfileId) parentIds.add(p.parentProfileId);
     }
-  }, [profiles, expandedProfiles.size]);
+
+    if (parentIds.size > 0) {
+      setExpandedProfiles(new Set(Array.from(parentIds)));
+    }
+  }, [activeTab, profiles, expandedProfiles.size]);
 
   const toggleExpanded = (profileId: string) => {
     setExpandedProfiles(prev => {
@@ -802,7 +804,7 @@ export default function UniversitySettingsPage() {
                                 <CardContent className="p-0">
                                   <div className="flex items-stretch">
                                     {/* Main Content Area */}
-                                    <div className="flex-1 p-4 flex items-center gap-3 min-w-0">
+                                    <div className="flex-1 p-4 flex items-start gap-3 min-w-0">
                                       {/* Logo/Avatar */}
                                       {profile.config.logoUrl ? (
                                         <img
@@ -818,60 +820,70 @@ export default function UniversitySettingsPage() {
                                           {(profile.config.institutionAbbreviation || profile.name)?.charAt(0) || 'U'}
                                         </div>
                                       )}
-                                      
+
                                       {/* Profile Info */}
-                                      <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2">
+                                      <div className="flex-1 min-w-0 pr-2">
+                                        <div className="flex items-center gap-2 flex-wrap">
                                           <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[profile.profileType]}</span>
                                           <h3 className="font-semibold text-sm truncate">{profile.name}</h3>
+                                          <Badge variant="outline" className="text-[10px] h-4 px-1.5">
+                                            {PROFILE_TYPE_LABELS[profile.profileType]}
+                                          </Badge>
+                                          {stats?.hasAnalysis && (
+                                            <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
+                                              DNA Active
+                                            </Badge>
+                                          )}
                                           {isSelected && (
                                             <Badge variant="default" className="text-[10px] h-4 px-1.5 bg-primary">
                                               Editing
                                             </Badge>
                                           )}
                                         </div>
-                                        <p className="text-xs text-muted-foreground truncate mt-0.5">
+
+                                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                                           {getProfileSummary(profile)}
                                         </p>
-                                        <div className="flex items-center gap-2 mt-1.5">
-                                          <div 
-                                            className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                                            style={{ backgroundColor: profile.config.primaryColor || '#1F2A44' }}
-                                          />
-                                          {profile.config.accentColor && (
-                                            <div 
-                                              className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                                              style={{ backgroundColor: profile.config.accentColor }}
-                                            />
-                                          )}
-                                          <span className="text-[11px] text-muted-foreground">
-                                            {format(new Date(profile.createdAt), 'MMM d, yyyy')}
-                                          </span>
+
+                                        <div className="mt-2 text-[11px] text-muted-foreground">
+                                          Updated {format(new Date(profile.updatedAt), 'MMM d, yyyy')}
                                         </div>
                                       </div>
                                     </div>
-                                    
-                                    {/* Fixed Action Column */}
-                                    <div className="flex items-center border-l border-border bg-muted/30 px-3 gap-2 flex-shrink-0">
-                                      {/* Sub-units toggle */}
-                                      {hasChildren ? (
-                                        <button 
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            toggleExpanded(profile.id);
-                                          }}
-                                          className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
-                                          title={isExpanded ? "Collapse sub-units" : "Expand sub-units"}
-                                        >
-                                          <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isExpanded ? '' : '-rotate-90'}`} />
-                                          <span className="font-medium">{children.length}</span>
-                                        </button>
-                                      ) : (
-                                        <div className="w-[52px]" /> 
-                                      )}
-                                      
-                                      {/* Select indicator */}
-                                      <ChevronRight className={`w-4 h-4 transition-colors ${isSelected ? 'text-primary' : 'text-muted-foreground/50'}`} />
+
+                                    {/* Fixed Action Column (aligned, padded, explicit) */}
+                                    <div className="w-24 shrink-0 border-l border-border bg-muted/30 grid grid-cols-2 divide-x divide-border">
+                                      <div className="flex items-stretch">
+                                        {hasChildren ? (
+                                          <button
+                                            type="button"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleExpanded(profile.id);
+                                            }}
+                                            className="w-full px-1 py-2 hover:bg-muted/60 transition-colors"
+                                            aria-label={isExpanded ? `Collapse ${children.length} sub-units` : `Expand ${children.length} sub-units`}
+                                          >
+                                            <div className="h-full flex flex-col items-center justify-center gap-1 leading-none">
+                                              <div className="flex items-center gap-1 text-muted-foreground">
+                                                <ChevronDown
+                                                  className={`w-3.5 h-3.5 transition-transform duration-200 ${isExpanded ? '' : '-rotate-90'}`}
+                                                />
+                                                <span className="text-xs font-semibold text-foreground">{children.length}</span>
+                                              </div>
+                                              <span className="text-[10px] text-muted-foreground">Sub-units</span>
+                                            </div>
+                                          </button>
+                                        ) : (
+                                          <div className="w-full" />
+                                        )}
+                                      </div>
+
+                                      <div className="flex items-center justify-center">
+                                        <ChevronRight
+                                          className={`w-4 h-4 transition-colors ${isSelected ? 'text-primary' : 'text-muted-foreground/50'}`}
+                                        />
+                                      </div>
                                     </div>
                                   </div>
                                 </CardContent>
@@ -895,7 +907,7 @@ export default function UniversitySettingsPage() {
                                         <CardContent className="p-0">
                                           <div className="flex items-stretch">
                                             {/* Main Content */}
-                                            <div className="flex-1 p-3 flex items-center gap-2 min-w-0">
+                                            <div className="flex-1 p-3 flex items-center gap-2 min-w-0 pr-2">
                                               <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[child.profileType]}</span>
                                               <div className="flex-1 min-w-0">
                                                 <h4 className="font-medium text-sm truncate">{child.config.unitName || child.name}</h4>
@@ -909,10 +921,13 @@ export default function UniversitySettingsPage() {
                                                 </Badge>
                                               )}
                                             </div>
-                                            
-                                            {/* Action Column */}
-                                            <div className="flex items-center border-l border-border bg-muted/30 px-3 flex-shrink-0">
-                                              <ChevronRight className={`w-4 h-4 transition-colors ${isChildSelected ? 'text-primary' : 'text-muted-foreground/50'}`} />
+
+                                            {/* Action Column (keeps alignment with parent rows) */}
+                                            <div className="w-24 shrink-0 border-l border-border bg-muted/30 grid grid-cols-2 divide-x divide-border">
+                                              <div />
+                                              <div className="flex items-center justify-center">
+                                                <ChevronRight className={`w-4 h-4 transition-colors ${isChildSelected ? 'text-primary' : 'text-muted-foreground/50'}`} />
+                                              </div>
                                             </div>
                                           </div>
                                         </CardContent>
@@ -933,8 +948,8 @@ export default function UniversitySettingsPage() {
                     {editingProfile ? (
                       <Card>
                         <CardHeader className="pb-4">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-3">
                                 <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[editingProfile.profileType]}</span>
                                 <Input
@@ -946,7 +961,7 @@ export default function UniversitySettingsPage() {
                                       handleUpdateConfig({ ...editingProfile.config, unitName: e.target.value });
                                     }
                                   }}
-                                  className="font-serif text-lg font-bold h-auto py-1 px-2 border-transparent hover:border-border focus:border-border max-w-xs"
+                                  className="font-serif text-lg font-bold h-auto py-1 px-2 border-transparent hover:border-border focus:border-border w-full sm:max-w-xs"
                                 />
                               </div>
                               <CardDescription className="mt-1">
@@ -956,7 +971,8 @@ export default function UniversitySettingsPage() {
                                 }
                               </CardDescription>
                             </div>
-                            <div className="flex items-center gap-1">
+
+                            <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2">
                               {/* Content DNA link */}
                               <Button
                                 variant="outline"
@@ -968,7 +984,7 @@ export default function UniversitySettingsPage() {
                                 Content DNA
                                 <ExternalLink className="w-3 h-3" />
                               </Button>
-                              
+
                               {editingProfile.profileType === 'university' && (
                                 <Button
                                   variant="outline"
@@ -983,6 +999,7 @@ export default function UniversitySettingsPage() {
                                   Add Sub-Unit
                                 </Button>
                               )}
+
                               <Button
                                 variant="ghost"
                                 size="icon"
