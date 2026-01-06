@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -228,8 +229,8 @@ export default function ContentDNAPage() {
     localStorage.setItem('contentDnaLibraryViewMode', mode);
   };
 
-  // Active tab state
-  const [activeTab, setActiveTab] = useState('upload');
+  // Active tab state - default to summary
+  const [activeTab, setActiveTab] = useState('summary');
 
   // Search state for Content Library
   const [searchQuery, setSearchQuery] = useState('');
@@ -559,71 +560,91 @@ export default function ContentDNAPage() {
             </div>
           </div>
 
-          {/* Institutional Profile Selector */}
+          {/* Institutional Profile Selector - Prominent guidance */}
           {profiles.length > 0 && (
-            <Card className="mt-6 border-border bg-card/80 backdrop-blur-sm">
+            <Card className={`mt-6 border-2 ${selectedProfile ? 'border-primary/30 bg-primary/5' : 'border-amber-500 bg-amber-50'}`}>
               <CardContent className="py-4">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <Building2 className="w-5 h-5 text-primary" />
+                    <div className={`p-2.5 rounded-lg ${selectedProfile ? 'bg-primary/10' : 'bg-amber-100'}`}>
+                      <Building2 className={`w-5 h-5 ${selectedProfile ? 'text-primary' : 'text-amber-600'}`} />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-foreground">Institutional Profile</p>
-                      <p className="text-xs text-muted-foreground">
-                        {selectedProfile ? 'Content DNA is scoped to this profile' : 'Select a profile for scoped Content DNA'}
-                      </p>
+                      {selectedProfile ? (
+                        <>
+                          <p className="text-sm font-medium text-foreground flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-green-600" />
+                            Content DNA for: <span className="font-bold">{selectedProfile.name}</span>
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            All samples and analysis are scoped to this profile
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-sm font-medium text-amber-800 flex items-center gap-2">
+                            <AlertCircle className="w-4 h-4" />
+                            No Profile Selected
+                          </p>
+                          <p className="text-xs text-amber-700">
+                            Select an institutional profile to organize your Content DNA
+                          </p>
+                        </>
+                      )}
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-2 flex-wrap">
-                    {/* Profile chips */}
-                    {profiles.slice(0, 5).map((p) => (
-                      <Button
-                        key={p.id}
-                        variant={selectedProfile?.id === p.id ? "default" : "outline"}
-                        size="sm"
-                        className="h-8 gap-1.5"
-                        onClick={() => {
-                          if (selectedProfile?.id === p.id) {
-                            // Deselect - go to institution-wide DNA
-                            navigate('/admin/content-dna');
-                          } else {
-                            navigate(`/admin/content-dna?profileId=${p.id}`);
-                          }
-                        }}
-                      >
-                        {p.config.logoUrl ? (
-                          <img src={p.config.logoUrl} alt="" className="w-4 h-4 rounded object-contain" />
-                        ) : (
-                          <div 
-                            className="w-4 h-4 rounded text-[8px] flex items-center justify-center text-white font-bold"
-                            style={{ backgroundColor: p.config.primaryColor || '#1F2A44' }}
-                          >
-                            {p.name.charAt(0)}
-                          </div>
-                        )}
-                        <span className="max-w-24 truncate">{p.name}</span>
-                      </Button>
-                    ))}
-                    {profiles.length > 5 && (
-                      <Badge variant="secondary" className="text-xs">
-                        +{profiles.length - 5} more
-                      </Badge>
-                    )}
-                    
-                    {/* Divider */}
-                    <div className="h-6 w-px bg-border mx-1" />
+                    {/* Profile selector dropdown style */}
+                    <Select
+                      value={selectedProfile?.id || 'none'}
+                      onValueChange={(value) => {
+                        if (value === 'none') {
+                          navigate('/admin/content-dna');
+                        } else {
+                          navigate(`/admin/content-dna?profileId=${value}`);
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="w-[220px] h-9">
+                        <SelectValue placeholder="Select a profile..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none" className="text-muted-foreground">
+                          <span className="flex items-center gap-2">
+                            <Building2 className="w-4 h-4" />
+                            Institution-wide (no profile)
+                          </span>
+                        </SelectItem>
+                        {profiles.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            <span className="flex items-center gap-2">
+                              {p.config.logoUrl ? (
+                                <img src={p.config.logoUrl} alt="" className="w-4 h-4 rounded object-contain" />
+                              ) : (
+                                <div 
+                                  className="w-4 h-4 rounded text-[8px] flex items-center justify-center text-white font-bold"
+                                  style={{ backgroundColor: p.config.primaryColor || '#1F2A44' }}
+                                >
+                                  {p.name.charAt(0)}
+                                </div>
+                              )}
+                              {p.name}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     
                     {/* Manage Profiles Link */}
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
-                      className="h-8 gap-1.5 text-muted-foreground"
+                      className="h-9 gap-1.5"
                       onClick={() => navigate('/university-settings?tab=profiles')}
                     >
                       <Settings className="w-3.5 h-3.5" />
-                      Manage Profiles
+                      <span className="hidden sm:inline">Manage</span>
                     </Button>
                   </div>
                 </div>
@@ -633,17 +654,23 @@ export default function ContentDNAPage() {
 
           {/* No Profiles - Create First */}
           {profiles.length === 0 && isAdmin && (
-            <Card className="mt-6 border-dashed border-2 bg-muted/30">
-              <CardContent className="py-6 text-center">
-                <Building2 className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
-                <h3 className="font-medium text-foreground mb-1">No Institutional Profiles</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Create an institutional profile to organize Content DNA by department or college.
-                </p>
-                <Button onClick={() => navigate('/university-settings?tab=profiles')} size="sm">
-                  <Plus className="w-4 h-4 mr-1" />
-                  Create First Profile
-                </Button>
+            <Card className="mt-6 border-dashed border-2 border-amber-400 bg-amber-50">
+              <CardContent className="py-6">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-amber-100 rounded-lg">
+                    <Building2 className="w-8 h-8 text-amber-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-medium text-amber-800 mb-1">Create an Institutional Profile</h3>
+                    <p className="text-sm text-amber-700">
+                      Content DNA needs to be associated with an institutional profile. Create your first profile to get started.
+                    </p>
+                  </div>
+                  <Button onClick={() => navigate('/university-settings?tab=profiles')} className="bg-amber-600 hover:bg-amber-700">
+                    <Plus className="w-4 h-4 mr-1" />
+                    Create Profile
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           )}
@@ -914,10 +941,14 @@ export default function ContentDNAPage() {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white border border-[hsl(220,13%,88%)]">
+          <TabsList className="bg-white border border-[hsl(220,13%,88%)] flex-wrap h-auto gap-1 p-1">
+            <TabsTrigger value="summary" className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4" />
+              Summary
+            </TabsTrigger>
             <TabsTrigger value="upload" className="flex items-center gap-2">
               <Upload className="w-4 h-4" />
-              Upload Content
+              Upload
             </TabsTrigger>
             <TabsTrigger value="webcrawl" className="flex items-center gap-2">
               <Globe className="w-4 h-4" />
@@ -933,31 +964,285 @@ export default function ContentDNAPage() {
             </TabsTrigger>
             <TabsTrigger value="instructions" className="flex items-center gap-2">
               <Settings className="w-4 h-4" />
-              Custom Instructions
+              Instructions
             </TabsTrigger>
             <TabsTrigger value="library" className="flex items-center gap-2">
               <BookOpen className="w-4 h-4" />
-              Content Library
+              Library
             </TabsTrigger>
             <TabsTrigger value="refine" className="flex items-center gap-2">
               <Wand2 className="w-4 h-4" />
-              Refine DNA
+              Refine
             </TabsTrigger>
             <TabsTrigger value="history" className="flex items-center gap-2">
               <History className="w-4 h-4" />
               History
             </TabsTrigger>
           </TabsList>
-          
-          {/* Info banner explaining unified analysis */}
-          <Alert className="border-primary/20 bg-primary/5">
-            <Dna className="h-4 w-4" />
-            <AlertDescription className="ml-2 text-sm">
-              <strong>One analysis, two outputs:</strong> When you analyze your content samples, the AI extracts both your 
-              <span className="text-emerald-700 font-medium"> Voice Profile</span> and 
-              <span className="text-blue-700 font-medium"> Brand Platform</span> together in a single pass.
-            </AlertDescription>
-          </Alert>
+
+          {/* Summary Tab - Analytics Overview */}
+          <TabsContent value="summary">
+            <div className="space-y-6">
+              {/* Profile Status Header */}
+              <Card className="border-border">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {(selectedProfile?.config?.logoUrl || tenant?.logo_url) ? (
+                        <img 
+                          src={selectedProfile?.config?.logoUrl || tenant?.logo_url || ''}
+                          alt="Logo"
+                          className="w-12 h-12 object-contain rounded-lg border bg-white p-1"
+                        />
+                      ) : (
+                        <div 
+                          className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg"
+                          style={{ backgroundColor: selectedProfile?.config?.primaryColor || tenant?.primary_color || '#1F2A44' }}
+                        >
+                          {(selectedProfile?.name || tenant?.institution_name)?.charAt(0) || 'U'}
+                        </div>
+                      )}
+                      <div>
+                        <CardTitle className="text-lg">
+                          {selectedProfile?.name || tenant?.institution_name || 'Institution'} Content DNA
+                        </CardTitle>
+                        <CardDescription>
+                          {selectedProfile ? 'Profile-specific Content DNA' : 'Institution-wide Content DNA'}
+                        </CardDescription>
+                      </div>
+                    </div>
+                    {isAdmin && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate('/university-settings')}
+                      >
+                        <Pencil className="w-4 h-4 mr-1" />
+                        Edit Settings
+                      </Button>
+                    )}
+                  </div>
+                </CardHeader>
+              </Card>
+
+              {/* Quick Stats Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Card className="border-border">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-blue-100">
+                        <FileText className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">{samples.length}</p>
+                        <p className="text-xs text-muted-foreground">Content Samples</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-border">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-emerald-100">
+                        <Globe className="w-5 h-5 text-emerald-600" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">{samples.filter(s => s.source_url).length}</p>
+                        <p className="text-xs text-muted-foreground">Web Scraped</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-border">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg ${analysis?.voice_analysis ? 'bg-green-100' : 'bg-amber-100'}`}>
+                        <Dna className={`w-5 h-5 ${analysis?.voice_analysis ? 'text-green-600' : 'text-amber-600'}`} />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">{analysis?.voice_analysis ? 'Active' : 'Pending'}</p>
+                        <p className="text-xs text-muted-foreground">Voice Profile</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-border">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg ${analysis?.brand_platform ? 'bg-purple-100' : 'bg-gray-100'}`}>
+                        <Target className={`w-5 h-5 ${analysis?.brand_platform ? 'text-purple-600' : 'text-gray-400'}`} />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">
+                          {analysis?.brand_platform?.brandPillars?.length || 0}
+                        </p>
+                        <p className="text-xs text-muted-foreground">Brand Pillars</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Content Breakdown */}
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Sample Types Distribution */}
+                <Card className="border-border">
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <BookOpen className="w-4 h-4" />
+                      Content Types
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {samples.length > 0 ? (
+                      <div className="space-y-3">
+                        {Object.entries(
+                          samples.reduce((acc, s) => {
+                            const type = s.sample_type || 'other';
+                            acc[type] = (acc[type] || 0) + 1;
+                            return acc;
+                          }, {} as Record<string, number>)
+                        )
+                          .sort((a, b) => b[1] - a[1])
+                          .slice(0, 6)
+                          .map(([type, count]) => {
+                            const typeInfo = SAMPLE_TYPES.find(t => t.value === type);
+                            const percentage = Math.round((count / samples.length) * 100);
+                            return (
+                              <div key={type} className="space-y-1">
+                                <div className="flex items-center justify-between text-sm">
+                                  <span className="text-muted-foreground">{typeInfo?.label || type}</span>
+                                  <span className="font-medium">{count}</span>
+                                </div>
+                                <Progress value={percentage} className="h-1.5" />
+                              </div>
+                            );
+                          })}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground text-center py-6">
+                        No samples uploaded yet
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* DNA Status */}
+                <Card className="border-border">
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Sparkles className="w-4 h-4" />
+                      Analysis Status
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Voice Analysis Status */}
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-2.5 h-2.5 rounded-full ${analysis?.voice_analysis ? 'bg-green-500' : 'bg-amber-500'}`} />
+                        <span className="text-sm font-medium">Voice Profile</span>
+                      </div>
+                      {analysis?.voice_analysis ? (
+                        <Badge variant="default" className="bg-green-100 text-green-800 hover:bg-green-100">
+                          Analyzed
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary">Pending</Badge>
+                      )}
+                    </div>
+
+                    {/* Brand Platform Status */}
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-2.5 h-2.5 rounded-full ${analysis?.brand_platform ? 'bg-green-500' : 'bg-gray-300'}`} />
+                        <span className="text-sm font-medium">Brand Platform</span>
+                      </div>
+                      {analysis?.brand_platform ? (
+                        <Badge variant="default" className="bg-purple-100 text-purple-800 hover:bg-purple-100">
+                          {analysis.brand_platform.brandPillars?.length || 0} pillars
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline">Not extracted</Badge>
+                      )}
+                    </div>
+
+                    {/* Semantic Extraction Status */}
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-2.5 h-2.5 rounded-full ${extractionStats.completed > 0 ? 'bg-blue-500' : 'bg-gray-300'}`} />
+                        <span className="text-sm font-medium">Semantic Extraction</span>
+                      </div>
+                      <Badge variant="outline">
+                        {extractionStats.completed}/{extractionStats.total} processed
+                      </Badge>
+                    </div>
+
+                    {/* Last Analysis Date */}
+                    {analysis?.last_analyzed_at && (
+                      <div className="pt-2 text-xs text-muted-foreground text-center">
+                        Last analyzed: {new Date(analysis.last_analyzed_at).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit'
+                        })}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Quick Actions */}
+              <Card className="border-border">
+                <CardHeader>
+                  <CardTitle className="text-base">Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-3">
+                    <Button variant="outline" onClick={() => setActiveTab('upload')}>
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload Content
+                    </Button>
+                    <Button variant="outline" onClick={() => setActiveTab('webcrawl')}>
+                      <Globe className="w-4 h-4 mr-2" />
+                      Scrape Website
+                    </Button>
+                    {samples.length > 0 && !analysis?.voice_analysis && (
+                      <Button onClick={analyzeVoice} disabled={isAnalyzing} className="bg-secondary hover:bg-secondary/90">
+                        {isAnalyzing ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Analyzing...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            Analyze Content DNA
+                          </>
+                        )}
+                      </Button>
+                    )}
+                    {analysis?.voice_analysis && (
+                      <Button variant="outline" onClick={() => setActiveTab('analysis')}>
+                        <Dna className="w-4 h-4 mr-2" />
+                        View Voice Profile
+                      </Button>
+                    )}
+                    {analysis?.brand_platform && (
+                      <Button variant="outline" onClick={() => setActiveTab('brand-platform')}>
+                        <Target className="w-4 h-4 mr-2" />
+                        View Brand Platform
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
           {/* Upload Content Tab */}
           <TabsContent value="upload">
