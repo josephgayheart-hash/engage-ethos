@@ -1990,14 +1990,35 @@ export default function ContentDNAPage() {
           <TabsContent value="instructions">
             <Card className="border-[hsl(220,13%,88%)]">
               <CardHeader>
-                <CardTitle className="text-[hsl(222,47%,11%)]">Custom Brand Guidelines</CardTitle>
-                <CardDescription>
-                  {isAdmin 
-                    ? 'Add specific instructions, rules, and guidelines for AI-generated messages. These will be applied alongside the Content DNA analysis.'
-                    : 'View the brand guidelines that admins have set for AI-generated messages.'}
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-[hsl(222,47%,11%)]">Custom Brand Guidelines</CardTitle>
+                    <CardDescription>
+                      {isAdmin 
+                        ? 'Add specific instructions, rules, and guidelines for AI-generated messages. These will be applied alongside the Content DNA analysis.'
+                        : 'View the brand guidelines that admins have set for AI-generated messages.'}
+                    </CardDescription>
+                  </div>
+                  {/* Active indicator when instructions are saved */}
+                  {analysis?.custom_instructions && analysis.custom_instructions.trim() && (
+                    <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100">
+                      <CheckCircle2 className="w-3 h-3 mr-1" />
+                      Applied to AI
+                    </Badge>
+                  )}
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Status banner when guidelines are active */}
+                {analysis?.custom_instructions && analysis.custom_instructions.trim() && (
+                  <Alert className="border-emerald-200 bg-emerald-50">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                    <AlertDescription className="text-emerald-700 ml-2">
+                      Your custom guidelines are active and will be applied to all AI-generated content.
+                    </AlertDescription>
+                  </Alert>
+                )}
+                
                 <Textarea
                   value={customInstructions}
                   onChange={(e) => setCustomInstructions(e.target.value)}
@@ -2011,11 +2032,20 @@ export default function ContentDNAPage() {
                   className="h-[250px]"
                   disabled={!isAdmin}
                 />
+                
                 {isAdmin && (
-                  <div className="flex justify-end">
+                  <div className="flex items-center justify-between">
+                    {/* Unsaved changes indicator */}
+                    {customInstructions !== (analysis?.custom_instructions || '') && (
+                      <span className="text-sm text-amber-600 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        Unsaved changes
+                      </span>
+                    )}
+                    <div className="flex-1" />
                     <Button
                       onClick={handleSaveInstructions}
-                      disabled={isSaving}
+                      disabled={isSaving || customInstructions === (analysis?.custom_instructions || '')}
                       className="bg-[hsl(222,47%,14%)] hover:bg-[hsl(222,47%,20%)]"
                     >
                       {isSaving ? (
@@ -2024,7 +2054,10 @@ export default function ContentDNAPage() {
                           Saving...
                         </>
                       ) : (
-                        'Save Guidelines'
+                        <>
+                          <Save className="w-4 h-4 mr-2" />
+                          Save Guidelines
+                        </>
                       )}
                     </Button>
                   </div>
