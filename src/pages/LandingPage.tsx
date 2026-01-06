@@ -27,8 +27,8 @@ const features = [
   },
   {
     icon: BarChart3,
-    title: 'Content DNA Scoring',
-    description: 'Score messages against your institutional brand platform, not just generic persuasion principles.',
+    title: 'Content DNA Studio',
+    description: 'Upload samples or scrape content from your website. Score messages against your institutional brand platform.',
     link: '/features/content-dna',
   },
   {

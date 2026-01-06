@@ -1,8 +1,8 @@
-import { Upload, Database, Zap, Library } from "lucide-react";
+import { Upload, Database, Zap, Library, Globe } from "lucide-react";
 import { useLayoutEffect, useRef, useState } from "react";
 
 const leftSteps = [
-  { icon: Upload, label: "Upload Your Content" },
+  { icon: Globe, label: "Upload or Scrape Content" },
   { icon: Database, label: "Import Brand Assets" },
   { icon: Zap, label: "Define Your Voice" },
 ];
@@ -133,7 +133,7 @@ export default function HowItWorksSection() {
             </span>
           </h2>
           <p className="text-white/60 text-lg max-w-2xl mx-auto">
-            Feed your brand assets and content samples into CampusVoice—our AI extracts your Content DNA and brand layer, then crafts on-brand messages ready for review and distribution across your campus communications.
+            Feed your brand assets, upload content samples, or scrape directly from your website—our AI extracts your Content DNA and brand layer, then crafts on-brand messages ready for review and distribution across your campus communications.
           </p>
         </div>
 
@@ -328,12 +328,12 @@ export default function HowItWorksSection() {
 
           {/* Content positioned over SVG */}
           <div className="relative z-10 flex flex-col items-center">
-            {/* Box 1 - Upload */}
+            {/* Box 1 - Upload or Scrape */}
             <div className="flex flex-col items-center">
               <div className="w-52 h-14 rounded-xl bg-[hsl(222_40%_16%)] border border-white/10 flex items-center justify-center">
-                <Upload className="w-5 h-5 text-white/70" />
+                <Globe className="w-5 h-5 text-white/70" />
               </div>
-              <span className="mt-2 text-white/50 text-xs text-center">Upload Your Content</span>
+              <span className="mt-2 text-white/50 text-xs text-center">Upload or Scrape Content</span>
             </div>
 
             {/* Spacer for line */}
