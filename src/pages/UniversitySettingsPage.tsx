@@ -165,9 +165,9 @@ export default function UniversitySettingsPage() {
     fetchDnaStats();
   }, [tenant?.id, profiles]);
 
-  // Auto-expand profiles that have children
+  // Auto-expand profiles that have children - run once when profiles load
   useEffect(() => {
-    if (profiles.length > 0) {
+    if (profiles.length > 0 && expandedProfiles.size === 0) {
       const profilesWithChildren = profiles
         .filter(p => !p.parentProfileId)
         .filter(parent => profiles.some(child => child.parentProfileId === parent.id))
@@ -177,7 +177,7 @@ export default function UniversitySettingsPage() {
         setExpandedProfiles(new Set(profilesWithChildren));
       }
     }
-  }, [profiles]);
+  }, [profiles, expandedProfiles.size]);
 
   const toggleExpanded = (profileId: string) => {
     setExpandedProfiles(prev => {
@@ -780,118 +780,145 @@ export default function UniversitySettingsPage() {
                         </CardContent>
                       </Card>
                     ) : (
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         {getRootProfiles().map(profile => {
                           const children = getChildProfiles(profile.id);
                           const hasChildren = children.length > 0;
                           const isExpanded = expandedProfiles.has(profile.id);
                           const stats = dnaStats[profile.id];
+                          const isSelected = editingProfile?.id === profile.id;
                           
                           return (
                             <div key={profile.id}>
+                              {/* Parent Profile Card */}
                               <Card 
-                                className={`cursor-pointer transition-all hover:border-secondary/50 ${
-                                  editingProfile?.id === profile.id 
-                                    ? 'border-secondary bg-secondary/5 shadow-sm' 
-                                    : ''
+                                className={`cursor-pointer transition-all hover:border-primary/40 hover:shadow-sm ${
+                                  isSelected 
+                                    ? 'border-primary bg-primary/5 shadow-md ring-1 ring-primary/20' 
+                                    : 'border-border'
                                 }`}
+                                onClick={() => setEditingProfile(profile)}
                               >
-                                <CardContent className="p-4">
-                                  <div 
-                                    className="flex items-center gap-3 cursor-pointer"
-                                    onClick={() => setEditingProfile(profile)}
-                                  >
-                                    {/* Logo/Avatar */}
-                                    {profile.config.logoUrl ? (
-                                      <img
-                                        src={profile.config.logoUrl}
-                                        alt={profile.name}
-                                        className="w-12 h-12 object-contain rounded-lg bg-white border p-1.5 flex-shrink-0"
-                                      />
-                                    ) : (
-                                      <div
-                                        className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-base flex-shrink-0"
-                                        style={{ backgroundColor: profile.config.primaryColor || '#1F2A44' }}
-                                      >
-                                        {(profile.config.institutionAbbreviation || profile.name)?.charAt(0) || 'U'}
-                                      </div>
-                                    )}
-                                    
-                                    {/* Content */}
-                                    <div className="flex-1 min-w-0">
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[profile.profileType]}</span>
-                                        <h3 className="font-semibold text-sm truncate">{profile.name}</h3>
-                                      </div>
-                                      <p className="text-xs text-muted-foreground truncate mt-1">
-                                        {getProfileSummary(profile)}
-                                      </p>
-                                      <div className="flex items-center gap-2 mt-2">
-                                        {stats && (
+                                <CardContent className="p-0">
+                                  <div className="flex items-stretch">
+                                    {/* Main Content Area */}
+                                    <div className="flex-1 p-4 flex items-center gap-3 min-w-0">
+                                      {/* Logo/Avatar */}
+                                      {profile.config.logoUrl ? (
+                                        <img
+                                          src={profile.config.logoUrl}
+                                          alt={profile.name}
+                                          className="w-11 h-11 object-contain rounded-lg bg-white border p-1 flex-shrink-0"
+                                        />
+                                      ) : (
+                                        <div
+                                          className="w-11 h-11 rounded-lg flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                                          style={{ backgroundColor: profile.config.primaryColor || '#1F2A44' }}
+                                        >
+                                          {(profile.config.institutionAbbreviation || profile.name)?.charAt(0) || 'U'}
+                                        </div>
+                                      )}
+                                      
+                                      {/* Profile Info */}
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[profile.profileType]}</span>
+                                          <h3 className="font-semibold text-sm truncate">{profile.name}</h3>
+                                          {isSelected && (
+                                            <Badge variant="default" className="text-[10px] h-4 px-1.5 bg-primary">
+                                              Editing
+                                            </Badge>
+                                          )}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground truncate mt-0.5">
+                                          {getProfileSummary(profile)}
+                                        </p>
+                                        <div className="flex items-center gap-2 mt-1.5">
                                           <div 
-                                            className="w-3 h-3 rounded-full flex-shrink-0"
+                                            className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                                             style={{ backgroundColor: profile.config.primaryColor || '#1F2A44' }}
                                           />
-                                        )}
-                                        {profile.config.accentColor && (
-                                          <div 
-                                            className="w-3 h-3 rounded-full flex-shrink-0"
-                                            style={{ backgroundColor: profile.config.accentColor }}
-                                          />
-                                        )}
-                                        <span className="text-xs text-muted-foreground">
-                                          {format(new Date(profile.createdAt), 'MMM d')}
-                                        </span>
+                                          {profile.config.accentColor && (
+                                            <div 
+                                              className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                                              style={{ backgroundColor: profile.config.accentColor }}
+                                            />
+                                          )}
+                                          <span className="text-[11px] text-muted-foreground">
+                                            {format(new Date(profile.createdAt), 'MMM d, yyyy')}
+                                          </span>
+                                        </div>
                                       </div>
                                     </div>
                                     
-                                    {/* Expand/Chevron - improved spacing */}
-                                    <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                                      {hasChildren && (
+                                    {/* Fixed Action Column */}
+                                    <div className="flex items-center border-l border-border bg-muted/30 px-3 gap-2 flex-shrink-0">
+                                      {/* Sub-units toggle */}
+                                      {hasChildren ? (
                                         <button 
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             toggleExpanded(profile.id);
                                           }}
-                                          className="p-1.5 hover:bg-muted rounded-md transition-colors"
+                                          className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
                                           title={isExpanded ? "Collapse sub-units" : "Expand sub-units"}
                                         >
-                                          <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isExpanded ? '' : '-rotate-90'}`} />
+                                          <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isExpanded ? '' : '-rotate-90'}`} />
+                                          <span className="font-medium">{children.length}</span>
                                         </button>
+                                      ) : (
+                                        <div className="w-[52px]" /> 
                                       )}
-                                      <div className="w-px h-6 bg-border" />
-                                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                                      
+                                      {/* Select indicator */}
+                                      <ChevronRight className={`w-4 h-4 transition-colors ${isSelected ? 'text-primary' : 'text-muted-foreground/50'}`} />
                                     </div>
                                   </div>
                                 </CardContent>
                               </Card>
                               
+                              {/* Child Profiles (Sub-units) */}
                               {hasChildren && isExpanded && (
-                                <div className="ml-6 mt-1 space-y-1 border-l-2 border-muted pl-2">
-                                  {children.map(child => (
-                                    <Card 
-                                      key={child.id}
-                                      className={`cursor-pointer transition-all hover:border-secondary/50 ${
-                                        editingProfile?.id === child.id 
-                                          ? 'border-secondary bg-secondary/5 shadow-sm' 
-                                          : ''
-                                      }`}
-                                      onClick={() => setEditingProfile(child)}
-                                    >
-                                      <CardContent className="p-2.5">
-                                        <div className="flex items-center gap-2">
-                                          <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[child.profileType]}</span>
-                                          <div className="flex-1 min-w-0">
-                                            <h4 className="font-medium text-sm truncate">{child.config.unitName || child.name}</h4>
+                                <div className="ml-5 mt-2 space-y-1.5 border-l-2 border-primary/20 pl-3">
+                                  {children.map(child => {
+                                    const isChildSelected = editingProfile?.id === child.id;
+                                    return (
+                                      <Card 
+                                        key={child.id}
+                                        className={`cursor-pointer transition-all hover:border-primary/40 ${
+                                          isChildSelected 
+                                            ? 'border-primary bg-primary/5 shadow-sm ring-1 ring-primary/20' 
+                                            : 'border-border'
+                                        }`}
+                                        onClick={() => setEditingProfile(child)}
+                                      >
+                                        <CardContent className="p-0">
+                                          <div className="flex items-stretch">
+                                            {/* Main Content */}
+                                            <div className="flex-1 p-3 flex items-center gap-2 min-w-0">
+                                              <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[child.profileType]}</span>
+                                              <div className="flex-1 min-w-0">
+                                                <h4 className="font-medium text-sm truncate">{child.config.unitName || child.name}</h4>
+                                              </div>
+                                              <Badge variant="outline" className="text-[10px] h-4 px-1.5 flex-shrink-0">
+                                                {PROFILE_TYPE_LABELS[child.profileType]}
+                                              </Badge>
+                                              {isChildSelected && (
+                                                <Badge variant="default" className="text-[10px] h-4 px-1.5 bg-primary flex-shrink-0">
+                                                  Editing
+                                                </Badge>
+                                              )}
+                                            </div>
+                                            
+                                            {/* Action Column */}
+                                            <div className="flex items-center border-l border-border bg-muted/30 px-3 flex-shrink-0">
+                                              <ChevronRight className={`w-4 h-4 transition-colors ${isChildSelected ? 'text-primary' : 'text-muted-foreground/50'}`} />
+                                            </div>
                                           </div>
-                                          <Badge variant="outline" className="text-[10px] h-4 px-1">
-                                            {PROFILE_TYPE_LABELS[child.profileType]}
-                                          </Badge>
-                                          <ChevronRight className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                                        </div>
-                                      </CardContent>
-                                    </Card>
-                                  ))}
+                                        </CardContent>
+                                      </Card>
+                                    );
+                                  })}
                                 </div>
                               )}
                             </div>
