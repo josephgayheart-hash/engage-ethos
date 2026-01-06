@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
 import { Header } from "@/components/Header";
@@ -26,6 +26,7 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useToolTracking } from "@/hooks/useToolTracking";
+import { useUserDrafts } from "@/hooks/useUserDrafts";
 import { BrandLayerSelector, BrandLayerActiveBadge, BrandLayerSelection } from "@/components/BrandLayerSelector";
 import { BrandAdherenceScore } from "@/components/BrandAdherenceScore";
 
@@ -52,7 +53,8 @@ import {
   Building2,
   Dna,
   MessageSquare,
-  Target
+  Target,
+  FileEdit
 } from "lucide-react";
 import { buildMessage } from "@/lib/evaluateMessage";
 import { useAuth } from "@/contexts/AuthContext";
@@ -110,13 +112,15 @@ const BuildPage = () => {
   const { addTemplate } = useSharedLibrary();
   const { trackToolUse } = useToolTracking();
   const { profiles } = useInstitutionalProfiles();
+  const { saveDraft, currentDraft, setCurrentDraft, deleteDraft, getMostRecentDraft } = useUserDrafts('message');
   
   // Check for profileId from URL params (from Content DNA page navigation)
   const profileIdFromUrl = searchParams.get('profileId');
   
-  // Check for remix state from navigation
+  // Check for remix state or resume draft from navigation
   const remixState = location.state as {
     remixMode?: boolean;
+    resumeDraftId?: string;
     remixContext?: {
       audience: string;
       moment: string;
@@ -274,6 +278,64 @@ const BuildPage = () => {
     }
   }, []);
 
+  // Resume draft from navigation or load most recent draft
+  useEffect(() => {
+    if (remixState?.resumeDraftId) {
+      // Resume specific draft from dashboard
+      const draft = getMostRecentDraft('message');
+      if (draft && draft.id === remixState.resumeDraftId) {
+        const draftData = draft.draft_data as Record<string, unknown>;
+        if (draftData.context) setContext(draftData.context as MessageContext);
+        if (draftData.selectedChannels) setSelectedChannels(draftData.selectedChannels as Channel[]);
+        if (draftData.selectedProfileId) setSelectedProfileId(draftData.selectedProfileId as string);
+        if (draftData.selectedProfileName) setSelectedProfileName(draftData.selectedProfileName as string);
+        if (draftData.builderResult) setBuilderResult(draftData.builderResult as BuilderResult);
+        setCurrentDraft(draft);
+        toast({
+          title: "Draft Resumed",
+          description: `Continuing "${draft.title || 'your message draft'}"`,
+        });
+      }
+      // Clear navigation state
+      window.history.replaceState({}, document.title);
+    }
+  }, [remixState?.resumeDraftId]);
+
+  // Auto-save draft periodically
+  useEffect(() => {
+    // Only auto-save if there's meaningful content
+    const hasContent = context.audience || context.moment || builderResult;
+    if (!hasContent) return;
+
+    const draftData = {
+      context,
+      selectedChannels,
+      selectedProfileId,
+      selectedProfileName,
+      builderResult,
+      useContentDNA,
+    };
+
+    // Generate title from context
+    const title = context.audience 
+      ? `${audienceLabels[context.audience] || context.audience}${context.moment ? ` - ${context.moment}` : ''}`
+      : 'Message Draft';
+
+    const saveTimeout = setTimeout(() => {
+      saveDraft('message', draftData, title, currentDraft?.id);
+    }, 3000); // Auto-save after 3 seconds of inactivity
+
+    return () => clearTimeout(saveTimeout);
+  }, [context, selectedChannels, selectedProfileId, builderResult, useContentDNA]);
+
+  // Clear draft when saving to library
+  const clearDraftAfterSave = useCallback(async () => {
+    if (currentDraft) {
+      await deleteDraft(currentDraft.id);
+      setCurrentDraft(null);
+    }
+  }, [currentDraft, deleteDraft, setCurrentDraft]);
+
   const handleCopyContent = async (text: string) => {
     await navigator.clipboard.writeText(text);
     toast({ title: "Copied to clipboard" });
@@ -368,6 +430,9 @@ const BuildPage = () => {
       createdByUserId: profile?.id,
       createdByName: profile ? `${profile.first_name} ${profile.last_name}` : undefined,
     });
+
+    // Clear the draft after saving to library
+    clearDraftAfterSave();
 
     return savedMessage.id;
   };
@@ -531,6 +596,16 @@ const BuildPage = () => {
       
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         <div className="space-y-6">
+
+          {/* Auto-save Draft Indicator */}
+          {currentDraft && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-3 py-2 rounded-lg">
+              <FileEdit className="w-4 h-4" />
+              <span>Draft auto-saved</span>
+              <span className="text-xs">•</span>
+              <span className="text-xs">{currentDraft.title || 'Untitled'}</span>
+            </div>
+          )}
 
           {/* Remix Banner */}
           {remixState?.remixMode && remixOriginalTitle && (
