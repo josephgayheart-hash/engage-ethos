@@ -28,6 +28,7 @@ import EmailPreview from "./pages/EmailPreview";
 import PerformanceBenchmarks from "./pages/PerformanceBenchmarks";
 import TranslationTool from "./pages/TranslationTool";
 import SettingsPage from "./pages/SettingsPage";
+import UniversitySettingsPage from "./pages/UniversitySettingsPage";
 import NotFound from "./pages/NotFound";
 import LoginPage from "./pages/LoginPage";
 import RequestAccessPage from "./pages/RequestAccessPage";
@@ -200,6 +201,7 @@ const AppRoutes = () => (
     <Route path="/benchmarks" element={<RequireAuth><PerformanceBenchmarks /></RequireAuth>} />
     <Route path="/translate" element={<RequireAuth><TranslationTool /></RequireAuth>} />
     <Route path="/settings" element={<RequireAuth><SettingsPage /></RequireAuth>} />
+    <Route path="/university-settings" element={<RequireAuth><RequireAdmin><UniversitySettingsPage /></RequireAdmin></RequireAuth>} />
     <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
     
     {/* Approver routes */}
