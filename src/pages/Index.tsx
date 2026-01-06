@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
+import { useContentDNA } from "@/hooks/useContentDNA";
 import { useAuth } from "@/contexts/AuthContext";
 import { ResearchFoundation } from "@/components/ResearchFoundation";
 import { MyDraftsCard } from "@/components/MyDraftsCard";
@@ -58,6 +59,10 @@ const Index = () => {
   
   // Check if institutional profiles exist
   const hasInstitutionalProfiles = institutionalProfiles.length > 0;
+
+  // Check if Content DNA is active (has analysis with voice data)
+  const { analysis: contentDNAAnalysis } = useContentDNA();
+  const hasActiveContentDNA = !!contentDNAAnalysis?.last_analyzed_at;
 
   const utilityTools = [
     {
@@ -352,17 +357,30 @@ const Index = () => {
                       <div className="w-8 h-8 rounded-full bg-[hsl(270_70%_60%_/_0.1)] flex items-center justify-center text-sm font-bold text-[hsl(270_70%_55%)]">
                         4
                       </div>
-                      <Badge variant="outline" className="text-xs bg-[hsl(270_70%_60%_/_0.05)] text-[hsl(270_70%_55%)] border-[hsl(270_70%_60%_/_0.3)]">Studio</Badge>
+                      <Badge variant="outline" className="text-xs bg-[hsl(270_70%_60%_/_0.05)] text-[hsl(270_70%_55%)] border-[hsl(270_70%_60%_/_0.3)]">
+                        {hasActiveContentDNA ? 'Manage' : 'Studio'}
+                      </Badge>
+                      {hasActiveContentDNA && (
+                        <div className="flex items-center gap-1">
+                          <div className="w-2 h-2 rounded-full bg-[hsl(82_85%_45%)] animate-pulse" />
+                          <span className="text-[10px] text-[hsl(82_70%_35%)] font-medium">Active</span>
+                        </div>
+                      )}
                     </div>
                     <div className="icon-container icon-container-lg bg-[hsl(270_70%_60%_/_0.1)] mb-4">
                       <Sparkles className="w-6 h-6 text-[hsl(270_70%_55%)]" />
                     </div>
-                    <h3 className="font-serif font-semibold text-lg mb-2">Content DNA Studio</h3>
+                    <h3 className="font-serif font-semibold text-lg mb-2">
+                      {hasActiveContentDNA ? 'Manage My Content DNA' : 'Content DNA Studio'}
+                    </h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Upload samples or scrape content from your website, tune voice dimensions, and manage your content library. Build the AI foundation for on-brand messaging.
+                      {hasActiveContentDNA 
+                        ? 'View and refine your voice analysis, brand pillars, and AI foundation settings.'
+                        : 'Upload samples or scrape content from your website, tune voice dimensions, and manage your content library. Build the AI foundation for on-brand messaging.'
+                      }
                     </p>
                     <div className="flex items-center text-sm text-[hsl(270_70%_55%)] font-medium group-hover:gap-2 transition-all">
-                      Open Studio
+                      {hasActiveContentDNA ? 'Manage DNA' : 'Open Studio'}
                       <ArrowRight className="w-4 h-4 ml-1" />
                     </div>
                   </CardContent>
