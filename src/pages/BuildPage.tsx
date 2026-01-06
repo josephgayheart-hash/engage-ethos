@@ -1052,6 +1052,8 @@ const BuildPage = () => {
             ? handleSaveIndividualChannelConfirm
             : handleSaveToLibraryConfirm
         }
+        onSaveToPersonal={saveToLibraryType === 'shared' ? handleSaveToLibraryConfirm : undefined}
+        onSaveToShared={saveToLibraryType === 'personal' ? handleShareToLibraryConfirm : undefined}
         libraryType={saveToLibraryType}
         defaultName={
           saveToLibraryChannel
