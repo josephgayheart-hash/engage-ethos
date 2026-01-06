@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { InstitutionalConfig } from "@/components/InstitutionalConfig";
 import { ProfileSetupWizard } from "@/components/ProfileSetupWizard";
@@ -85,13 +85,15 @@ const MAX_LOGO_DIMENSION = 400;
 
 export default function UniversitySettingsPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { tenant, refreshProfile, isAdmin, isSuperAdmin } = useAuth();
   const { profiles, createProfile, updateProfile, deleteProfile, duplicateProfile, getChildProfiles, getRootProfiles, getParentProfile, refreshProfiles } = useInstitutionalProfiles();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Tabs
-  const [activeTab, setActiveTab] = useState("branding");
+  // Get initial tab from URL or default to branding
+  const tabFromUrl = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(tabFromUrl === 'profiles' ? 'profiles' : 'branding');
   
   // Profile management state
   const [editingProfile, setEditingProfile] = useState<InstitutionalProfile | null>(null);
