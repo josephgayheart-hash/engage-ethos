@@ -44,7 +44,7 @@ export function ResearchFoundation() {
           Research Foundation
         </h2>
         <p className="text-muted-foreground max-w-2xl">
-          UPlaybook evaluations are grounded in peer-reviewed persuasion and communication research 
+          CampusVoice.ai evaluations are grounded in peer-reviewed persuasion and communication research 
           that has been tested in higher education contexts.
         </p>
       </div>
@@ -83,7 +83,7 @@ export function ResearchFoundation() {
                 Ethical Commitment
               </h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                UPlaybook is designed for ethical persuasion—communication that influences 
+                CampusVoice.ai is designed for ethical persuasion—communication that influences 
                 while preserving autonomy (O'Keefe). This tool provides decision support 
                 for marketers, enrollment teams, and student success professionals. 
                 It does not predict individual student behavior, diagnose psychological traits, 
