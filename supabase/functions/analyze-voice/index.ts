@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { checkRateLimit, getClientIP, rateLimitExceededResponse, logSecurityEvent } from "../_shared/rateLimit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -74,6 +75,12 @@ serve(async (req) => {
   }
 
   try {
+    // Rate limiting: 30 requests per minute per IP
+    const clientIP = getClientIP(req);
+    const rateLimit = await checkRateLimit(clientIP, "analyze-voice", { maxRequests: 30, windowSeconds: 60 });
+    if (!rateLimit.allowed) {
+      return rateLimitExceededResponse(rateLimit);
+    }
     const { samples } = await req.json();
     
     if (!samples || !Array.isArray(samples) || samples.length === 0) {
