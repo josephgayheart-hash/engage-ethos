@@ -15,11 +15,13 @@ import {
   CheckCircle2,
   GraduationCap,
   Globe,
-  Quote
+  Quote,
+  Calendar
 } from 'lucide-react';
 import campusvoiceLogo from '@/assets/campusvoice-logo-new.png';
 import HowItWorksSection from '@/components/landing/HowItWorksSection';
 import { SEOHead } from '@/components/SEOHead';
+import { RequestDemoDialog } from '@/components/landing/RequestDemoDialog';
 
 const features = [
   {
@@ -392,16 +394,18 @@ export default function LandingPage() {
                 Request Beta Access
               </Link>
             </Button>
-            <Button 
-              asChild
-              variant="ghost"
-              size="lg"
-              className="text-white hover:text-white hover:bg-white/20 rounded-full border-2 border-white/30"
-            >
-              <Link to="/login">
-                Already have an account? Sign in
-              </Link>
-            </Button>
+            <RequestDemoDialog
+              trigger={
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  className="text-white hover:text-white hover:bg-white/20 rounded-full border-2 border-white/30"
+                >
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Learn More
+                </Button>
+              }
+            />
           </div>
         </div>
       </section>
