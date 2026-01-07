@@ -8,8 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { UserPlus, CheckCircle2, Loader2, ArrowLeft, Users, Sparkles, Shield, Brain, GraduationCap, ArrowRight } from 'lucide-react';
+import { UserPlus, CheckCircle2, Loader2, ArrowLeft, Users, Sparkles, Shield, Brain, GraduationCap, ArrowRight, Clock, FileCheck, Mail } from 'lucide-react';
 import campusvoiceLogo from '@/assets/campusvoice-logo.png';
+import { SEOHead } from '@/components/SEOHead';
 
 const REFERRAL_OPTIONS = [
   { value: 'colleague', label: 'Colleague or peer recommendation' },
@@ -27,6 +28,12 @@ const trustIndicators = [
   { icon: Shield, label: 'Brand Governance' },
   { icon: Brain, label: 'Research-Driven' },
   { icon: GraduationCap, label: 'Built for Higher Ed' },
+];
+
+const processSteps = [
+  { icon: FileCheck, label: 'Submit Request', description: 'Complete the form' },
+  { icon: Clock, label: 'Review', description: '24-48 hour review' },
+  { icon: Mail, label: 'Credentials', description: 'Receive login via email' },
 ];
 
 export default function RequestAccessPage() {
@@ -170,6 +177,12 @@ export default function RequestAccessPage() {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
+      <SEOHead 
+        title="Request Beta Access - CampusVoice.AI"
+        description="Join the CampusVoice.AI beta program. Get early access to AI-powered strategic messaging intelligence built for higher education."
+        keywords={['CampusVoice beta', 'higher education AI', 'enrollment marketing', 'request access']}
+      />
+      
       {/* Gradient background matching landing page */}
       <div className="absolute inset-0 bg-zone-hero" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(200_70%_90%_/_0.4),_transparent_50%)]" />
@@ -201,6 +214,25 @@ export default function RequestAccessPage() {
             <p className="text-muted-foreground text-sm">
               Strategic Messaging Intelligence for Higher Education
             </p>
+          </div>
+
+          {/* What Happens Next Timeline */}
+          <div className="bg-card/80 backdrop-blur-sm rounded-xl border border-border/60 p-4">
+            <p className="text-xs font-medium text-muted-foreground mb-3 text-center">What happens next?</p>
+            <div className="flex items-center justify-between gap-2">
+              {processSteps.map((step, index) => (
+                <div key={step.label} className="flex flex-col items-center text-center flex-1">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+                    <step.icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <p className="text-xs font-medium text-foreground">{step.label}</p>
+                  <p className="text-xs text-muted-foreground">{step.description}</p>
+                  {index < processSteps.length - 1 && (
+                    <div className="absolute hidden" /> 
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Request Card */}

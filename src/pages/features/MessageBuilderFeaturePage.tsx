@@ -21,6 +21,9 @@ import {
 } from "lucide-react";
 import campusvoiceLogo from "@/assets/campusvoice-logo.png";
 import { FeatureNavigation } from "@/components/FeatureNavigation";
+import { SEOHead } from "@/components/SEOHead";
+import { FeatureBreadcrumbs } from "@/components/FeatureBreadcrumbs";
+import { MobileNav } from "@/components/MobileNav";
 
 const channels = [
   { icon: Mail, label: "Email", color: "text-blue-500", description: "Subject lines, body copy, CTAs" },
@@ -72,6 +75,12 @@ const features = [
 export default function MessageBuilderFeaturePage() {
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead 
+        title="AI Message Builder - Multi-Channel Content | CampusVoice.AI"
+        description="Generate brand-aligned content across 8 channels including email, SMS, landing pages, and call scripts. AI-powered messaging for higher education."
+        keywords={['AI message builder', 'higher education marketing', 'multi-channel messaging', 'enrollment communications']}
+      />
+      
       {/* Navigation */}
       <nav className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -79,22 +88,29 @@ export default function MessageBuilderFeaturePage() {
             <Link to="/" className="flex items-center gap-2">
               <img src={campusvoiceLogo} alt="CampusVoice" className="h-8" />
             </Link>
+            <div className="hidden md:block">
+              <FeatureBreadcrumbs items={[
+                { label: 'Features' },
+                { label: 'Message Builder' }
+              ]} />
+            </div>
           </div>
           <div className="flex items-center gap-3">
-            <Link to="/">
+            <Link to="/" className="hidden md:inline-flex">
               <Button variant="ghost" size="sm">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back
               </Button>
             </Link>
-            <Link to="/login">
+            <Link to="/login" className="hidden md:inline-flex">
               <Button variant="outline" size="sm">Sign In</Button>
             </Link>
-            <Link to="/request-access">
+            <Link to="/request-access" className="hidden md:inline-flex">
               <Button size="sm" className="bg-primary hover:bg-primary/90">
                 Join Beta
               </Button>
             </Link>
+            <MobileNav />
           </div>
         </div>
       </nav>
