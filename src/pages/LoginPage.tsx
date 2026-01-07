@@ -321,7 +321,7 @@ export default function LoginPage() {
             </div>
 
             <p className="text-center text-xs text-muted-foreground">
-              © 2025 CampusVoice.AI. Research-grounded messaging intelligence.
+              © 2026 CampusVoice.AI. Research-grounded messaging intelligence.
             </p>
           </div>
         </div>

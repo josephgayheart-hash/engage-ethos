@@ -13,10 +13,13 @@ import {
   Brain,
   Zap,
   CheckCircle2,
-  GraduationCap
+  GraduationCap,
+  Globe,
+  Quote
 } from 'lucide-react';
 import campusvoiceLogo from '@/assets/campusvoice-logo-new.png';
 import HowItWorksSection from '@/components/landing/HowItWorksSection';
+import { SEOHead } from '@/components/SEOHead';
 
 const features = [
   {
@@ -32,6 +35,12 @@ const features = [
     link: '/features/content-dna',
   },
   {
+    icon: Globe,
+    title: 'WebCrawl Intelligence',
+    description: 'Automatically extract brand voice from your website. Our AI crawls your pages to understand your unique tone and style.',
+    link: '/features/content-dna',
+  },
+  {
     icon: Target,
     title: 'Journey Flow Builder',
     description: 'Map multi-channel strategies with duration, intensity, and ramp-up controls. The differentiator for comms leaders.',
@@ -42,6 +51,24 @@ const features = [
     title: 'University Library',
     description: 'Governed content with approval workflows. Personal drafts for experimentation. Shared libraries for approved, on-brand plays.',
     link: '/features/library',
+  },
+];
+
+const testimonials = [
+  {
+    quote: "Finally, a way to protect our brand across every college without being in every meeting.",
+    role: "Chief Marketing Officer",
+    institution: "Research University",
+  },
+  {
+    quote: "The journey planner changed how we think about enrollment communications.",
+    role: "Director of Admissions",
+    institution: "Liberal Arts College",
+  },
+  {
+    quote: "Our team went from 3 days to 3 hours for campaign creation.",
+    role: "Communications Manager",
+    institution: "Community College",
   },
 ];
 
@@ -73,6 +100,11 @@ const trustIndicators = [
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <SEOHead 
+        title="CampusVoice.AI - Strategic Messaging Intelligence for Higher Education"
+        description="Plan, strategize, and execute brand-aligned communications at scale. Research-driven messaging intelligence built for higher education."
+        keywords={['higher education communications', 'enrollment marketing', 'brand messaging AI', 'university marketing', 'college admissions']}
+      />
       {/* Hero Section */}
       <header className="relative overflow-hidden">
         {/* AI-Inspired Gradient Background */}
@@ -374,6 +406,42 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Social Proof Section */}
+      <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-[hsl(270_60%_50%)]">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <Badge className="mb-3 bg-white/20 text-white border-white/30">
+              <Users className="w-3 h-3 mr-1" />
+              Trusted by Higher Ed Leaders
+            </Badge>
+            <h3 className="text-xl sm:text-2xl text-white font-serif">
+              What CCOs Are Saying
+            </h3>
+          </div>
+          <div className="grid sm:grid-cols-3 gap-6">
+            {testimonials.map((testimonial, index) => (
+              <div 
+                key={index}
+                className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20"
+              >
+                <Quote className="w-8 h-8 text-[hsl(82_85%_60%)] mb-4 opacity-80" />
+                <p className="text-white/90 italic mb-4 text-sm leading-relaxed">
+                  "{testimonial.quote}"
+                </p>
+                <div className="border-t border-white/20 pt-3">
+                  <p className="text-white/70 text-xs">
+                    {testimonial.role}
+                  </p>
+                  <p className="text-white/50 text-xs">
+                    {testimonial.institution}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Footer - Playful but professional */}
       <footer className="py-10 px-4 sm:px-6 lg:px-8 bg-primary">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -384,7 +452,7 @@ export default function LandingPage() {
               className="h-7 w-auto max-w-[140px] brightness-0 invert opacity-90"
             />
             <span className="text-sm text-primary-foreground/70">
-              © 2025 CampusVoice.AI
+              © 2026 CampusVoice.AI
             </span>
           </div>
           <p className="text-sm text-primary-foreground/60">
