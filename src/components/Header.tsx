@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Library, FolderOpen, Settings, Home, LogOut, User, CheckCircle, UserPlus, Building2, PenTool, Route, ChevronDown, Sparkles, FileEdit } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { BetaBanner } from "@/components/BetaBanner";
 import { ReferColleagueDialog } from "@/components/ReferColleagueDialog";
 import campusvoiceLogo from "@/assets/campusvoice-logo-new.png";
+import { cn } from "@/lib/utils";
 
 const MAX_LOGO_HEIGHT = 32;
 const MAX_LOGO_WIDTH = 120;
@@ -21,7 +22,24 @@ const MAX_LOGO_WIDTH = 120;
 export function Header() {
   const { user, profile, tenant, isAdmin, isSuperAdmin, isApprover, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [referDialogOpen, setReferDialogOpen] = useState(false);
+
+  // Helper to check if a path is active
+  const isActive = (path: string) => {
+    if (path === '/dashboard') {
+      return location.pathname === '/dashboard' || location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
+
+  // Active link styles
+  const linkStyles = (path: string) => cn(
+    "text-sm transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md",
+    isActive(path) 
+      ? "text-primary bg-primary/10 font-medium" 
+      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+  );
 
   const handleLogout = async () => {
     await logout();
@@ -65,7 +83,7 @@ export function Header() {
           {/* Home - All users */}
           <Link
             to="/dashboard" 
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
+            className={linkStyles('/dashboard')}
           >
             <Home className="w-4 h-4" />
             <span className="hidden sm:inline">Home</span>
@@ -76,14 +94,14 @@ export function Header() {
             <>
               <Link
                 to="/library" 
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
+                className={linkStyles('/library')}
               >
                 <FolderOpen className="w-4 h-4" />
                 <span className="hidden sm:inline">My Library</span>
               </Link>
               <Link 
                 to="/shared-library" 
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
+                className={linkStyles('/shared-library')}
               >
                 <Library className="w-4 h-4" />
                 <span className="hidden sm:inline">University Library</span>
@@ -91,7 +109,7 @@ export function Header() {
               {isApprover && (
                 <Link 
                   to="/approvals" 
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
+                  className={linkStyles('/approvals')}
                 >
                   <CheckCircle className="w-4 h-4" />
                   <span className="hidden md:inline">Approvals</span>
@@ -99,7 +117,7 @@ export function Header() {
               )}
               <Link 
                 to="/admin/panel"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
+                className={linkStyles('/admin/panel')}
               >
                 <Settings className="w-4 h-4" />
                 <span className="hidden md:inline">Super Admin</span>
@@ -111,7 +129,7 @@ export function Header() {
               {/* Build - Message Builder */}
               <Link
                 to="/build" 
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
+                className={linkStyles('/build')}
               >
                 <PenTool className="w-4 h-4" />
                 <span className="hidden sm:inline">Build</span>
@@ -120,7 +138,7 @@ export function Header() {
               {/* Strategy - Journey Designer */}
               <Link
                 to="/strategy" 
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
+                className={linkStyles('/strategy')}
               >
                 <Route className="w-4 h-4" />
                 <span className="hidden sm:inline">Strategy</span>
@@ -162,7 +180,7 @@ export function Header() {
               {isApprover && (
                 <Link 
                   to="/approvals" 
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted"
+                  className={linkStyles('/approvals')}
                 >
                   <CheckCircle className="w-4 h-4" />
                   <span className="hidden md:inline">Approvals</span>
