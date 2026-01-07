@@ -17,7 +17,8 @@ import {
   Sparkles,
   CheckCircle2,
   Layers,
-  Dna
+  Dna,
+  Newspaper
 } from "lucide-react";
 import campusvoiceLogo from "@/assets/campusvoice-logo.png";
 import { FeatureNavigation } from "@/components/FeatureNavigation";
@@ -35,6 +36,7 @@ const channels = [
   { icon: Megaphone, label: "Social Ads", color: "text-pink-500", description: "Primary text, headlines, CTAs" },
   { icon: FileText, label: "Direct Mail", color: "text-amber-500", description: "Letters, postcards, brochures" },
   { icon: Users, label: "Talking Points", color: "text-teal-500", description: "Executive briefings, Q&A prep" },
+  { icon: Newspaper, label: "News Article", color: "text-indigo-500", description: "Press releases, announcements" },
 ];
 
 const audiences = [
@@ -311,6 +313,13 @@ export default function MessageBuilderFeaturePage() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Wave Divider to yellow section */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto" preserveAspectRatio="none">
+            <path d="M0 80L60 70C120 60 240 40 360 35C480 30 600 40 720 50C840 60 960 55 1080 45C1200 35 1320 30 1380 27L1440 25V80H1380C1320 80 1200 80 1080 80C960 80 840 80 720 80C600 80 480 80 360 80C240 80 120 80 60 80H0Z" fill="hsl(48 100% 92%)"/>
+          </svg>
         </div>
       </section>
 
