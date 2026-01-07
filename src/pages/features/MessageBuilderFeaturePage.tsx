@@ -24,6 +24,7 @@ import { FeatureNavigation } from "@/components/FeatureNavigation";
 import { SEOHead } from "@/components/SEOHead";
 import { FeatureBreadcrumbs } from "@/components/FeatureBreadcrumbs";
 import { MobileNav } from "@/components/MobileNav";
+import { BuilderStepsShowcase } from "@/components/BuilderStepsShowcase";
 
 const channels = [
   { icon: Mail, label: "Email", color: "text-blue-500", description: "Subject lines, body copy, CTAs" },
@@ -199,7 +200,16 @@ export default function MessageBuilderFeaturePage() {
         </div>
       </section>
 
-      {/* Builder Interface Mock */}
+      {/* Builder Steps Showcase */}
+      <section className="py-20 relative overflow-hidden">
+        {/* Lens flares */}
+        <div className="absolute top-20 left-[15%] w-40 h-40 bg-[hsl(220_70%_60%_/_0.08)] rounded-full blur-3xl" />
+        <div className="absolute bottom-24 right-[10%] w-32 h-32 bg-[hsl(82_85%_55%_/_0.1)] rounded-full blur-2xl" />
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <BuilderStepsShowcase />
+        </div>
+      </section>
       <section className="py-20 relative overflow-hidden">
         {/* Lens flares */}
         <div className="absolute top-16 left-[18%] w-32 h-32 bg-[hsl(200_100%_50%_/_0.08)] rounded-full blur-2xl" />
