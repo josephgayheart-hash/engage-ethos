@@ -433,6 +433,14 @@ export default function AdminConsolePage() {
       href: '/admin/onboarding',
       color: 'bg-[hsl(173,58%,39%)]',
       stat: onboardingStats.pending > 0 ? `${onboardingStats.pending} pending` : 'No pending'
+    },
+    {
+      title: 'Security Events',
+      description: 'Monitor rate limits and security incidents',
+      icon: Shield,
+      href: '/admin/security-events',
+      color: 'bg-[hsl(0,72%,51%)]',
+      stat: 'Monitor'
     }] : []),
     {
       title: 'University Settings',

@@ -43,6 +43,7 @@ import SeedDataPage from "./pages/admin/SeedDataPage";
 import InstitutionDetailPage from "./pages/admin/InstitutionDetailPage";
 import UserDetailPage from "./pages/admin/UserDetailPage";
 import ContentDNAPage from "./pages/admin/ContentDNAPage";
+import SecurityEventsPage from "./pages/admin/SecurityEventsPage";
 import ApprovalsPage from "./pages/ApprovalsPage";
 import InitialSetupPage from "./pages/InitialSetupPage";
 import MessageDetailPage from "./pages/MessageDetailPage";
@@ -217,9 +218,10 @@ const AppRoutes = () => (
     {/* Super Admin routes */}
     <Route path="/admin/panel" element={<RequireAuth><RequireSuperAdmin><AdminPanel /></RequireSuperAdmin></RequireAuth>} />
     <Route path="/admin/onboarding" element={<RequireAuth><RequireSuperAdmin><AdminOnboardingPage /></RequireSuperAdmin></RequireAuth>} />
-    <Route path="/admin/qa" element={<RequireAuth><RequireSuperAdmin><QADiagnosticsPage /></RequireSuperAdmin></RequireAuth>} />
-    <Route path="/admin/seed" element={<RequireAuth><RequireSuperAdmin><SeedDataPage /></RequireSuperAdmin></RequireAuth>} />
-    <Route path="/admin/institution/:id" element={<RequireAuth><RequireSuperAdmin><InstitutionDetailPage /></RequireSuperAdmin></RequireAuth>} />
+        <Route path="/admin/qa" element={<RequireAuth><RequireSuperAdmin><QADiagnosticsPage /></RequireSuperAdmin></RequireAuth>} />
+        <Route path="/admin/seed" element={<RequireAuth><RequireSuperAdmin><SeedDataPage /></RequireSuperAdmin></RequireAuth>} />
+        <Route path="/admin/security-events" element={<RequireAuth><RequireSuperAdmin><SecurityEventsPage /></RequireSuperAdmin></RequireAuth>} />
+        <Route path="/admin/institution/:id" element={<RequireAuth><RequireSuperAdmin><InstitutionDetailPage /></RequireSuperAdmin></RequireAuth>} />
     <Route path="/admin/user/:id" element={<RequireAuth><RequireSuperAdmin><UserDetailPage /></RequireSuperAdmin></RequireAuth>} />
     
     {/* Content DNA - accessible to all authenticated users */}
