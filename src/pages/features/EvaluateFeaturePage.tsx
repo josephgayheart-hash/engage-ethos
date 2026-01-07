@@ -18,6 +18,9 @@ import {
 } from "lucide-react";
 import campusvoiceLogo from "@/assets/campusvoice-logo.png";
 import { FeatureNavigation } from "@/components/FeatureNavigation";
+import { SEOHead } from "@/components/SEOHead";
+import { FeatureBreadcrumbs } from "@/components/FeatureBreadcrumbs";
+import { MobileNav } from "@/components/MobileNav";
 
 const pillars = [
   { 
@@ -91,6 +94,12 @@ const features = [
 export default function EvaluateFeaturePage() {
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead 
+        title="Message Evaluator - Five-Pillar Analysis | CampusVoice.AI"
+        description="Score your messages against five persuasion pillars: Authority, Relevance, Emotional Appeal, Clarity, and Social Proof. AI-powered feedback for higher education."
+        keywords={['message evaluation', 'persuasion scoring', 'content analysis', 'higher education copywriting', 'brand alignment']}
+      />
+      
       {/* Navigation */}
       <nav className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -98,25 +107,33 @@ export default function EvaluateFeaturePage() {
             <Link to="/" className="flex items-center gap-2">
               <img src={campusvoiceLogo} alt="CampusVoice" className="h-8" />
             </Link>
+            <div className="hidden md:block">
+              <FeatureBreadcrumbs items={[
+                { label: 'Features', href: '/features/message-builder' },
+                { label: 'Message Evaluator' }
+              ]} />
+            </div>
           </div>
           <div className="flex items-center gap-3">
-            <Link to="/">
+            <Link to="/" className="hidden md:inline-flex">
               <Button variant="ghost" size="sm">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back
               </Button>
             </Link>
-            <Link to="/login">
+            <Link to="/login" className="hidden md:inline-flex">
               <Button variant="outline" size="sm">Sign In</Button>
             </Link>
-            <Link to="/request-access">
+            <Link to="/request-access" className="hidden md:inline-flex">
               <Button size="sm" className="bg-primary hover:bg-primary/90">
                 Join Beta
               </Button>
             </Link>
+            <MobileNav />
           </div>
         </div>
       </nav>
+
 
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 md:py-32">

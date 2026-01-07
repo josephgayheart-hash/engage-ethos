@@ -23,6 +23,9 @@ import {
 import campusvoiceLogo from "@/assets/campusvoice-logo.png";
 import { FeatureNavigation } from "@/components/FeatureNavigation";
 import DNATuningDiagram from "@/components/DNATuningDiagram";
+import { SEOHead } from "@/components/SEOHead";
+import { FeatureBreadcrumbs } from "@/components/FeatureBreadcrumbs";
+import { MobileNav } from "@/components/MobileNav";
 
 const capabilities = [
   {
@@ -74,6 +77,12 @@ const sampleTypes = [
 export default function ContentDNAFeaturePage() {
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead 
+        title="Content DNA Studio - AI Voice Analysis | CampusVoice.AI"
+        description="Upload content samples or scrape your website to build your institution's unique Content DNA. AI-powered voice analysis for consistent, on-brand messaging."
+        keywords={['content DNA', 'voice analysis', 'AI brand voice', 'higher education messaging', 'institutional voice']}
+      />
+      
       {/* Navigation */}
       <nav className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -81,22 +90,29 @@ export default function ContentDNAFeaturePage() {
             <Link to="/" className="flex items-center gap-2">
               <img src={campusvoiceLogo} alt="CampusVoice" className="h-8" />
             </Link>
+            <div className="hidden md:block">
+              <FeatureBreadcrumbs items={[
+                { label: 'Features', href: '/features/message-builder' },
+                { label: 'Content DNA Studio' }
+              ]} />
+            </div>
           </div>
           <div className="flex items-center gap-3">
-            <Link to="/">
+            <Link to="/" className="hidden md:inline-flex">
               <Button variant="ghost" size="sm">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back
               </Button>
             </Link>
-            <Link to="/login">
+            <Link to="/login" className="hidden md:inline-flex">
               <Button variant="outline" size="sm">Sign In</Button>
             </Link>
-            <Link to="/request-access">
+            <Link to="/request-access" className="hidden md:inline-flex">
               <Button size="sm" className="bg-primary hover:bg-primary/90">
                 Join Beta
               </Button>
             </Link>
+            <MobileNav />
           </div>
         </div>
       </nav>
