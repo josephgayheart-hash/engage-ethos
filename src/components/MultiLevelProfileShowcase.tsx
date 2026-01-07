@@ -49,7 +49,7 @@ const profileHierarchy: ProfileNode = {
         },
         {
           id: "finance",
-          name: "Finance Department",
+          name: "International Office",
           type: "department",
           icon: Users,
           hasDNA: false,
