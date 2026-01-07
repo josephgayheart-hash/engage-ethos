@@ -991,6 +991,33 @@ export type Database = {
           },
         ]
       }
+      rate_limits: {
+        Row: {
+          created_at: string
+          endpoint: string
+          id: string
+          identifier: string
+          request_count: number
+          window_start: string
+        }
+        Insert: {
+          created_at?: string
+          endpoint: string
+          id?: string
+          identifier: string
+          request_count?: number
+          window_start?: string
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string
+          id?: string
+          identifier?: string
+          request_count?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
       referrals: {
         Row: {
           created_at: string
@@ -1027,6 +1054,36 @@ export type Database = {
           referrer_tenant_id?: string
           referrer_user_id?: string
           status?: string
+        }
+        Relationships: []
+      }
+      security_events: {
+        Row: {
+          created_at: string
+          endpoint: string | null
+          event_type: string
+          id: string
+          identifier: string | null
+          metadata: Json | null
+          severity: string
+        }
+        Insert: {
+          created_at?: string
+          endpoint?: string | null
+          event_type: string
+          id?: string
+          identifier?: string | null
+          metadata?: Json | null
+          severity?: string
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string | null
+          event_type?: string
+          id?: string
+          identifier?: string | null
+          metadata?: Json | null
+          severity?: string
         }
         Relationships: []
       }
@@ -1256,6 +1313,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_rate_limit: {
+        Args: {
+          p_endpoint: string
+          p_identifier: string
+          p_max_requests?: number
+          p_window_seconds?: number
+        }
+        Returns: boolean
+      }
       get_user_tenant_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
