@@ -138,7 +138,7 @@ const cohortLabels: Record<string, string> = {
 
 const BuildPage = () => {
   const { toast } = useToast();
-  const { profile, isAdmin, isApprover } = useAuth();
+  const { profile, isAdmin, isApprover, tenant } = useAuth();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { addMessage } = useMessageLibrary();
