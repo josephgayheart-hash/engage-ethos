@@ -221,7 +221,7 @@ const TemplateDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { profile } = useAuth();
+  const { profile, tenant } = useAuth();
   const { templates, getTemplateById, deleteTemplate } = useSharedLibrary();
   const { addMessage } = useMessageLibrary();
   const { getProfile } = useInstitutionalProfiles();
@@ -586,20 +586,25 @@ const TemplateDetailPage = () => {
                   // Try to parse the content into structured format
                   const parsedContent = parseTemplateContent(displayContent, templateChannel);
                   
-                  return (
-                    <ChannelPreview
-                      channel={templateChannel}
-                      content={parsedContent}
-                      onCopy={handleCopy}
-                      onSaveToLibrary={() => handlePull()}
-                      institutionName={profileConfig?.institutionName}
-                      branding={{
-                        primaryColor: profileConfig?.primaryColor,
-                        accentColor: profileConfig?.accentColor,
-                        logoUrl: profileConfig?.logoUrl,
-                      }}
-                    />
-                  );
+                    return (
+                      <ChannelPreview
+                        channel={templateChannel}
+                        content={parsedContent}
+                        onCopy={handleCopy}
+                        onSaveToLibrary={() => handlePull()}
+                        institutionName={(() => {
+                          const unit = (profileConfig?.unitName || template.institutionalProfileName || "").trim();
+                          const inst = (profileConfig?.institutionName || tenant?.institution_name || "").trim();
+                          if (unit && inst) return `${unit}\n${inst}`;
+                          return inst || unit || undefined;
+                        })()}
+                        branding={{
+                          primaryColor: (profileConfig?.primaryColor || tenant?.primary_color) || undefined,
+                          accentColor: (profileConfig?.accentColor || tenant?.accent_color) || undefined,
+                          logoUrl: (profileConfig?.logoUrl || tenant?.logo_url) || undefined,
+                        }}
+                      />
+                    );
                 })()
               )}
 

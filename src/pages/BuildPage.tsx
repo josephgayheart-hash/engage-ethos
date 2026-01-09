@@ -1156,11 +1156,17 @@ const BuildPage = () => {
                       onCopy={handleCopyContent}
                       onContentChange={handleContentChange}
                       onSaveToLibrary={() => handleSaveIndividualChannelClick(channel)}
-                      institutionName={institutionalConfig?.institutionName}
+                      institutionName={(() => {
+                        const cfg = institutionalConfig || (selectedProfileId ? profiles.find(p => p.id === selectedProfileId)?.config : null);
+                        const unit = (cfg?.unitName || selectedProfileName || "").trim();
+                        const inst = (cfg?.institutionName || tenant?.institution_name || "").trim();
+                        if (unit && inst) return `${unit}\n${inst}`;
+                        return inst || unit || undefined;
+                      })()}
                       branding={{
-                        primaryColor: institutionalConfig?.primaryColor,
-                        accentColor: institutionalConfig?.accentColor,
-                        logoUrl: institutionalConfig?.logoUrl,
+                        primaryColor: (institutionalConfig?.primaryColor || tenant?.primary_color) || undefined,
+                        accentColor: (institutionalConfig?.accentColor || tenant?.accent_color) || undefined,
+                        logoUrl: (institutionalConfig?.logoUrl || tenant?.logo_url) || undefined,
                       }}
                     />
                   );
