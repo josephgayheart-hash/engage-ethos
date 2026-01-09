@@ -5,9 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { firecrawlApi } from '@/lib/api/firecrawl';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { WebStructureDiagram } from './WebStructureDiagram';
 import { 
   Globe, 
   Loader2, 
@@ -27,7 +29,9 @@ import {
   GraduationCap,
   Phone,
   Navigation,
-  LayoutGrid
+  LayoutGrid,
+  ListTree,
+  Network
 } from 'lucide-react';
 
 interface ParsedSection {
@@ -217,7 +221,7 @@ export function AnalyzerInput({ onAnalyze, isAnalyzing, disabled }: AnalyzerInpu
           </Button>
         </div>
 
-        {/* Section Selector */}
+        {/* Section Selector with View Toggle */}
         {sections.length > 0 && (
           <div className="space-y-3 border rounded-lg p-4 bg-muted/30">
             <div className="flex items-center justify-between">
@@ -243,64 +247,89 @@ export function AnalyzerInput({ onAnalyze, isAnalyzing, disabled }: AnalyzerInpu
               </div>
             </div>
 
-            <div className="max-h-[280px] overflow-y-auto space-y-2 pr-2">
-              {sections.map((section) => {
-                const config = SECTION_TYPE_CONFIG[section.type] || SECTION_TYPE_CONFIG['general'];
-                const Icon = config.icon;
-                const isSelected = selectedIds.has(section.id);
-                const isExpanded = expandedIds.has(section.id);
+            <Tabs defaultValue="list" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 h-8">
+                <TabsTrigger value="list" className="text-xs gap-1.5">
+                  <ListTree className="w-3.5 h-3.5" />
+                  List View
+                </TabsTrigger>
+                <TabsTrigger value="diagram" className="text-xs gap-1.5">
+                  <Network className="w-3.5 h-3.5" />
+                  Structure View
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="list" className="mt-3">
+                <div className="max-h-[280px] overflow-y-auto space-y-2 pr-2">
+                  {sections.map((section) => {
+                    const config = SECTION_TYPE_CONFIG[section.type] || SECTION_TYPE_CONFIG['general'];
+                    const Icon = config.icon;
+                    const isSelected = selectedIds.has(section.id);
+                    const isExpanded = expandedIds.has(section.id);
 
-                return (
-                  <Collapsible key={section.id} open={isExpanded} onOpenChange={() => toggleExpand(section.id)}>
-                    <div 
-                      className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
-                        isSelected ? 'bg-primary/5 border-primary/30' : 'bg-background border-transparent'
-                      }`}
-                    >
-                      <Checkbox
-                        checked={isSelected}
-                        onCheckedChange={() => toggleSection(section.id)}
-                        className="shrink-0"
-                      />
-                      <Icon className={`w-4 h-4 ${config.color} shrink-0`} />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-sm truncate">{section.title}</span>
-                          <Badge variant="outline" className="text-[10px] shrink-0">
-                            {config.label}
-                          </Badge>
-                          {section.isRecommended && (
-                            <Badge className="text-[10px] bg-green-500/10 text-green-600 border-green-500/30 shrink-0">
-                              Recommended
-                            </Badge>
-                          )}
+                    return (
+                      <Collapsible key={section.id} open={isExpanded} onOpenChange={() => toggleExpand(section.id)}>
+                        <div 
+                          className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
+                            isSelected ? 'bg-primary/5 border-primary/30' : 'bg-background border-transparent'
+                          }`}
+                        >
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={() => toggleSection(section.id)}
+                            className="shrink-0"
+                          />
+                          <Icon className={`w-4 h-4 ${config.color} shrink-0`} />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-sm truncate">{section.title}</span>
+                              <Badge variant="outline" className="text-[10px] shrink-0">
+                                {config.label}
+                              </Badge>
+                              {section.isRecommended && (
+                                <Badge className="text-[10px] bg-green-500/10 text-green-600 border-green-500/30 shrink-0">
+                                  Recommended
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {section.wordCount} words
+                            </p>
+                          </div>
+                          <CollapsibleTrigger asChild>
+                            <Button variant="ghost" size="sm" className="shrink-0 h-7 w-7 p-0">
+                              {isExpanded ? (
+                                <ChevronDown className="w-4 h-4" />
+                              ) : (
+                                <ChevronRight className="w-4 h-4" />
+                              )}
+                            </Button>
+                          </CollapsibleTrigger>
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          {section.wordCount} words
-                        </p>
-                      </div>
-                      <CollapsibleTrigger asChild>
-                        <Button variant="ghost" size="sm" className="shrink-0 h-7 w-7 p-0">
-                          {isExpanded ? (
-                            <ChevronDown className="w-4 h-4" />
-                          ) : (
-                            <ChevronRight className="w-4 h-4" />
-                          )}
-                        </Button>
-                      </CollapsibleTrigger>
-                    </div>
-                    <CollapsibleContent>
-                      <div className="ml-10 mt-2 p-3 bg-muted/30 rounded-lg text-sm text-muted-foreground">
-                        <p className="whitespace-pre-wrap line-clamp-6">
-                          {section.content.slice(0, 500)}
-                          {section.content.length > 500 && '...'}
-                        </p>
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
-                );
-              })}
-            </div>
+                        <CollapsibleContent>
+                          <div className="ml-10 mt-2 p-3 bg-muted/30 rounded-lg text-sm text-muted-foreground">
+                            <p className="whitespace-pre-wrap line-clamp-6">
+                              {section.content.slice(0, 500)}
+                              {section.content.length > 500 && '...'}
+                            </p>
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
+                    );
+                  })}
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="diagram" className="mt-3">
+                <WebStructureDiagram
+                  url={url}
+                  pageTitle={scrapedTitle}
+                  sections={sections}
+                  selectedIds={selectedIds}
+                  onToggleSection={toggleSection}
+                />
+              </TabsContent>
+            </Tabs>
           </div>
         )}
 
