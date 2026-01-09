@@ -141,35 +141,40 @@ export default function WebContentAnalyzerPage() {
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
               <Link to="/dashboard">
                 <Button variant="ghost" size="sm">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Dashboard
                 </Button>
               </Link>
-              <div>
-                <h1 className="font-serif text-2xl font-bold text-foreground flex items-center gap-2">
-                  <Search className="w-6 h-6 text-[hsl(200_100%_45%)]" />
-                  Web Content Analyzer
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  Analyze any web content against your Content DNA and brand guidelines
-                </p>
-              </div>
             </div>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-[hsl(200_100%_45%)] to-[hsl(220_90%_50%)] text-white">
+                <Search className="w-6 h-6" />
+              </div>
+              <h1 className="font-serif text-2xl font-bold text-foreground">
+                Web Content Analyzer
+              </h1>
+            </div>
+            <p className="text-muted-foreground max-w-2xl">
+              Check how well your web content aligns with your brand voice. Paste text or import a URL, 
+              and we'll score it against your Content DNA—then help you rewrite any sections that need improvement.
+            </p>
           </div>
 
-          {/* Profile Selector */}
-          <Card className="mb-6">
+          {/* Profile Selector - Cleaner Design */}
+          <Card className="mb-6 border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
             <CardContent className="py-4">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Dna className="w-4 h-4" />
-                  <span>Analyzing against:</span>
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-primary/10">
+                    <Dna className="w-4 h-4 text-primary" />
+                  </div>
+                  <span className="text-sm font-medium text-foreground">Analyzing against:</span>
                 </div>
-                <div className="flex-1 max-w-md">
+                <div className="flex-1 min-w-[200px] max-w-sm">
                   <InstitutionalProfileSelector
                     selectedProfileId={selectedProfileId}
                     onProfileChange={setSelectedProfileId}
@@ -177,9 +182,9 @@ export default function WebContentAnalyzerPage() {
                   />
                 </div>
                 {contentDNA?.last_analyzed_at && (
-                  <Badge variant="outline" className="flex items-center gap-1">
-                    <Sparkles className="w-3 h-3" />
-                    Content DNA Active
+                  <Badge className="bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-500/15">
+                    <Sparkles className="w-3 h-3 mr-1" />
+                    DNA Active
                   </Badge>
                 )}
               </div>
@@ -342,12 +347,37 @@ export default function WebContentAnalyzerPage() {
                   voiceAnalysis={contentDNA?.voice_analysis}
                 />
               ) : (
-                <Card>
-                  <CardContent className="py-12 text-center">
-                    <Search className="w-8 h-8 mx-auto mb-4 text-muted-foreground/50" />
-                    <p className="text-sm text-muted-foreground">
-                      Enter content to analyze against your Content DNA
-                    </p>
+                <Card className="border-dashed">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                      How It Works
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3">
+                      <div className="flex gap-3">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">1</div>
+                        <div>
+                          <p className="text-sm font-medium">Paste or Import</p>
+                          <p className="text-xs text-muted-foreground">Add text or fetch content from a URL</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">2</div>
+                        <div>
+                          <p className="text-sm font-medium">AI Analysis</p>
+                          <p className="text-xs text-muted-foreground">We score each section against your Content DNA</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">3</div>
+                        <div>
+                          <p className="text-sm font-medium">Improve</p>
+                          <p className="text-xs text-muted-foreground">Use AI Rewrite to align content with your brand</p>
+                        </div>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               )}
