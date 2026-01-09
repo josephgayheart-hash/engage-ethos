@@ -54,11 +54,38 @@ import {
   Dna,
   MessageSquare,
   Target,
-  FileEdit
+  FileEdit,
+  Smartphone,
+  Share2,
+  Globe,
+  LayoutTemplate,
+  Send,
+  Phone,
+  Search,
+  Megaphone,
+  Mic,
+  Newspaper,
+  Heart,
+  type LucideIcon
 } from "lucide-react";
 import { buildMessage } from "@/lib/evaluateMessage";
 import { useAuth } from "@/contexts/AuthContext";
 import type { MessageContext, BuilderResult, InstitutionalConfig, Channel, ChannelDrafts } from "@/types/uplaybook";
+
+const channelIcons: Record<Channel, LucideIcon> = {
+  'email': Mail,
+  'sms': Smartphone,
+  'social-media': Share2,
+  'portal': Globe,
+  'landing-page': LayoutTemplate,
+  'direct-mail': Send,
+  'phone-call': Phone,
+  'digital-ad-search': Search,
+  'digital-ad-social': Megaphone,
+  'talking-points': Mic,
+  'news-article': Newspaper,
+  'case-for-care': Heart,
+};
 
 const channelOptions: { value: Channel; label: string }[] = [
   { value: 'email', label: 'Email' },
@@ -754,22 +781,26 @@ const BuildPage = () => {
                       Select All
                     </Button>
                   </div>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                    {channelOptions.map(channel => (
-                      <div key={channel.value} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`channel-${channel.value}`}
-                          checked={selectedChannels.includes(channel.value)}
-                          onCheckedChange={() => toggleChannel(channel.value)}
-                        />
-                        <label
-                          htmlFor={`channel-${channel.value}`}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                        >
-                          {channel.label}
-                        </label>
-                      </div>
-                    ))}
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {channelOptions.map(channel => {
+                      const ChannelIcon = channelIcons[channel.value];
+                      return (
+                        <div key={channel.value} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`channel-${channel.value}`}
+                            checked={selectedChannels.includes(channel.value)}
+                            onCheckedChange={() => toggleChannel(channel.value)}
+                          />
+                          <ChannelIcon className="w-4 h-4 text-muted-foreground" />
+                          <label
+                            htmlFor={`channel-${channel.value}`}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                          >
+                            {channel.label}
+                          </label>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </BuilderStepSection>
