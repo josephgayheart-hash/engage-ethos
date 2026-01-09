@@ -188,7 +188,13 @@ FOR EMPLOYEE COMMUNICATIONS:
 Formatting guidelines:
 - Keep messages concise and scannable
 - Use the recipient's preferred addressing style if provided
-- Include relevant institutional names and resources when available`;
+- Include relevant institutional names and resources when available
+
+CRITICAL - NO PLACEHOLDERS RULE:
+NEVER use placeholder text like "[University Name]", "[Institution]", "[Your Name]", "[Date]", or any text in square brackets.
+Always use the ACTUAL institution name, leader names, and specific details provided in the context.
+If specific information is not provided, use realistic generic alternatives (e.g., "our institution", "the Dean", "this semester").
+This applies to ALL generated content - emails, documents, talking points, cases for support, etc.`;
 
     let userPrompt = "";
 
@@ -359,7 +365,14 @@ STYLE GUIDE FOR CASE FOR SUPPORT:
 - Connect to institutional mission and brand pillars
 - End with a bold, inspiring call to partnership
 - Write with passion and authenticity throughout
-- Think of this as a magazine spread, not a boring report`
+- Think of this as a magazine spread, not a boring report
+
+CRITICAL - INSTITUTION NAME RULE:
+You MUST use the actual institution name provided in the INSTITUTIONAL VOICE & BRANDING section.
+NEVER use placeholder text like "[University Name]", "[Institution]", "[College Name]", or any bracketed placeholders.
+If the institution name is "Ohio State College of Arts and Sciences", use that exact name throughout.
+If no institution name is provided, use a generic but real-sounding alternative like "our institution" or "our college".
+THIS IS MANDATORY - every document title, campaign name, and reference must use the real institution name.`
       };
 
       // Build comprehensive institutional config string for prompts
