@@ -350,20 +350,44 @@ export function exportCaseForSupportToPDF(
 
   // Target Amount with accent color
   if (cfc.targetAmount) {
+    // Calculate dynamic box height based on content
+    const targetMaxWidth = contentWidth - 20;
+    
+    // Use fitTextToWidth for targetAmount to ensure it fits
+    doc.setFont("helvetica", "bold");
+    const targetFontSize = fitTextToWidth(cfc.targetAmount, targetMaxWidth, 22, 12);
+    doc.setFontSize(targetFontSize);
+    const targetLines = doc.splitTextToSize(cfc.targetAmount, targetMaxWidth);
+    
+    // Calculate dynamic box height based on lines
+    const lineHeight = targetFontSize * 0.5;
+    const boxHeight = Math.max(28, 14 + targetLines.length * lineHeight + 10);
+    
     doc.setFillColor(...accentLight);
-    doc.roundedRect(margin, y - 8, contentWidth, 28, 3, 3, "F");
+    doc.roundedRect(margin, y - 8, contentWidth, boxHeight, 3, 3, "F");
     doc.setDrawColor(...accentRgb);
     doc.setLineWidth(0.5);
-    doc.roundedRect(margin, y - 8, contentWidth, 28, 3, 3, "S");
+    doc.roundedRect(margin, y - 8, contentWidth, boxHeight, 3, 3, "S");
     
+    // Center the target amount text
     doc.setTextColor(...accentRgb);
-    doc.setFontSize(22);
+    doc.setFontSize(targetFontSize);
     doc.setFont("helvetica", "bold");
-    doc.text(cfc.targetAmount, pageWidth / 2, y + 6, { align: "center" });
+    
+    // Calculate Y position for centered text
+    const textBlockHeight = targetLines.length * lineHeight;
+    const startY = y - 8 + (boxHeight - textBlockHeight - 10) / 2 + lineHeight;
+    
+    targetLines.forEach((line: string, idx: number) => {
+      doc.text(line, pageWidth / 2, startY + idx * lineHeight, { align: "center" });
+    });
+    
+    // "Campaign Goal" label at bottom of box
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    doc.text("Campaign Goal", pageWidth / 2, y + 15, { align: "center" });
-    y += 38;
+    doc.text("Campaign Goal", pageWidth / 2, y - 8 + boxHeight - 6, { align: "center" });
+    
+    y += boxHeight + 10;
   }
 
   // Leader Message
