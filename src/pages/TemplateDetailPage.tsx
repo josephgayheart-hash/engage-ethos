@@ -593,6 +593,11 @@ const TemplateDetailPage = () => {
                       onCopy={handleCopy}
                       onSaveToLibrary={() => handlePull()}
                       institutionName={profileConfig?.institutionName}
+                      branding={{
+                        primaryColor: profileConfig?.primaryColor,
+                        accentColor: profileConfig?.accentColor,
+                        logoUrl: profileConfig?.logoUrl,
+                      }}
                     />
                   );
                 })()

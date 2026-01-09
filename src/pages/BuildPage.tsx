@@ -1112,6 +1112,11 @@ const BuildPage = () => {
                       onContentChange={handleContentChange}
                       onSaveToLibrary={() => handleSaveIndividualChannelClick(channel)}
                       institutionName={institutionalConfig?.institutionName}
+                      branding={{
+                        primaryColor: institutionalConfig?.primaryColor,
+                        accentColor: institutionalConfig?.accentColor,
+                        logoUrl: institutionalConfig?.logoUrl,
+                      }}
                     />
                   );
                 })}
