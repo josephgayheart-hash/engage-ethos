@@ -53,3 +53,9 @@ verify_jwt = false
 
 [functions.analyze-web-content]
 verify_jwt = false
+
+[functions.parse-story]
+verify_jwt = true
+
+[functions.parse-fact-book]
+verify_jwt = true

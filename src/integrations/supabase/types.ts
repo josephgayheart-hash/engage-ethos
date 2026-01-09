@@ -575,6 +575,93 @@ export type Database = {
         }
         Relationships: []
       }
+      fact_book: {
+        Row: {
+          as_of_date: string | null
+          category: string
+          change_amount: string | null
+          change_direction: string | null
+          context: string | null
+          created_at: string | null
+          created_by_user_id: string | null
+          display_format: string | null
+          id: string
+          is_highlight: boolean | null
+          label: string
+          previous_value: string | null
+          profile_id: string | null
+          sort_order: number | null
+          source_document: string | null
+          source_url: string | null
+          subcategory: string | null
+          tenant_id: string
+          updated_at: string | null
+          value: string
+          year: string | null
+        }
+        Insert: {
+          as_of_date?: string | null
+          category: string
+          change_amount?: string | null
+          change_direction?: string | null
+          context?: string | null
+          created_at?: string | null
+          created_by_user_id?: string | null
+          display_format?: string | null
+          id?: string
+          is_highlight?: boolean | null
+          label: string
+          previous_value?: string | null
+          profile_id?: string | null
+          sort_order?: number | null
+          source_document?: string | null
+          source_url?: string | null
+          subcategory?: string | null
+          tenant_id: string
+          updated_at?: string | null
+          value: string
+          year?: string | null
+        }
+        Update: {
+          as_of_date?: string | null
+          category?: string
+          change_amount?: string | null
+          change_direction?: string | null
+          context?: string | null
+          created_at?: string | null
+          created_by_user_id?: string | null
+          display_format?: string | null
+          id?: string
+          is_highlight?: boolean | null
+          label?: string
+          previous_value?: string | null
+          profile_id?: string | null
+          sort_order?: number | null
+          source_document?: string | null
+          source_url?: string | null
+          subcategory?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+          value?: string
+          year?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fact_book_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "institutional_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fact_book_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       institutional_config: {
         Row: {
           config: Json
@@ -1157,6 +1244,93 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "shared_templates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_bank: {
+        Row: {
+          campaigns: string[] | null
+          created_at: string | null
+          created_by_user_id: string | null
+          id: string
+          is_approved: boolean | null
+          is_featured: boolean | null
+          narrative: string
+          profile_id: string | null
+          programs: string[] | null
+          pull_quote: string | null
+          source_description: string | null
+          source_url: string | null
+          story_type: string
+          subject_image_url: string | null
+          subject_name: string | null
+          subject_role: string | null
+          tenant_id: string
+          themes: string[] | null
+          title: string
+          updated_at: string | null
+          usage_contexts: string[] | null
+        }
+        Insert: {
+          campaigns?: string[] | null
+          created_at?: string | null
+          created_by_user_id?: string | null
+          id?: string
+          is_approved?: boolean | null
+          is_featured?: boolean | null
+          narrative: string
+          profile_id?: string | null
+          programs?: string[] | null
+          pull_quote?: string | null
+          source_description?: string | null
+          source_url?: string | null
+          story_type: string
+          subject_image_url?: string | null
+          subject_name?: string | null
+          subject_role?: string | null
+          tenant_id: string
+          themes?: string[] | null
+          title: string
+          updated_at?: string | null
+          usage_contexts?: string[] | null
+        }
+        Update: {
+          campaigns?: string[] | null
+          created_at?: string | null
+          created_by_user_id?: string | null
+          id?: string
+          is_approved?: boolean | null
+          is_featured?: boolean | null
+          narrative?: string
+          profile_id?: string | null
+          programs?: string[] | null
+          pull_quote?: string | null
+          source_description?: string | null
+          source_url?: string | null
+          story_type?: string
+          subject_image_url?: string | null
+          subject_name?: string | null
+          subject_role?: string | null
+          tenant_id?: string
+          themes?: string[] | null
+          title?: string
+          updated_at?: string | null
+          usage_contexts?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_bank_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "institutional_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_bank_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
