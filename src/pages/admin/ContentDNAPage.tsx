@@ -1105,6 +1105,14 @@ export default function ContentDNAPage() {
               <Globe className="w-4 h-4" />
               WebCrawl
             </TabsTrigger>
+            <TabsTrigger value="stories" className="flex items-center gap-2">
+              <User className="w-4 h-4" />
+              Stories
+            </TabsTrigger>
+            <TabsTrigger value="facts" className="flex items-center gap-2">
+              <LayoutGrid className="w-4 h-4" />
+              Facts
+            </TabsTrigger>
             <TabsTrigger value="analysis" className="flex items-center gap-2">
               <Sparkles className="w-4 h-4" />
               Voice Profile
