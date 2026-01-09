@@ -38,7 +38,10 @@ import {
   User,
   Building2,
   Star,
-  Search
+  Search,
+  Link,
+  FileText,
+  CheckCircle2
 } from 'lucide-react';
 
 interface StoryBankTabProps {
@@ -65,6 +68,7 @@ export function StoryBankTab({ profileId }: StoryBankTabProps) {
     updateStory,
     deleteStory,
     parseStoryFromText,
+    scrapeAndParseStory,
     toggleFeatured,
   } = useStoryBank({ profileId });
 
@@ -90,7 +94,10 @@ export function StoryBankTab({ profileId }: StoryBankTabProps) {
 
   // Import state
   const [importText, setImportText] = useState('');
+  const [importUrl, setImportUrl] = useState('');
+  const [importMode, setImportMode] = useState<'text' | 'url'>('url');
   const [parsedStory, setParsedStory] = useState<CreateStoryInput | null>(null);
+  const [isScraping, setIsScraping] = useState(false);
 
   const filteredStories = stories.filter(story => {
     const matchesType = filterType === 'all' || story.story_type === filterType;
@@ -126,6 +133,20 @@ export function StoryBankTab({ profileId }: StoryBankTabProps) {
     const parsed = await parseStoryFromText(importText);
     if (parsed) {
       setParsedStory(parsed);
+    }
+  };
+
+  const handleScrapeUrl = async () => {
+    if (!importUrl.trim()) return;
+    
+    setIsScraping(true);
+    try {
+      const parsed = await scrapeAndParseStory(importUrl);
+      if (parsed) {
+        setParsedStory(parsed);
+      }
+    } finally {
+      setIsScraping(false);
     }
   };
 
@@ -405,68 +426,153 @@ export function StoryBankTab({ profileId }: StoryBankTabProps) {
                 Import Story with AI
               </DialogTitle>
               <DialogDescription>
-                Paste story text and let AI extract structured data
+                Scrape a news article URL or paste story text to import
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               {!parsedStory ? (
                 <>
-                  <div className="space-y-2">
-                    <Label>Story Text</Label>
-                    <Textarea
-                      value={importText}
-                      onChange={e => setImportText(e.target.value)}
-                      placeholder="Paste a story from a newsletter, article, or document..."
-                      rows={10}
-                    />
-                  </div>
-                  <Button 
-                    onClick={handleParseStory} 
-                    disabled={isParsing || !importText.trim()}
-                    className="w-full"
-                  >
-                    {isParsing ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Analyzing story...
-                      </>
-                    ) : (
-                      <>
-                        <Wand2 className="w-4 h-4 mr-2" />
-                        Parse Story
-                      </>
-                    )}
-                  </Button>
+                  {/* Import Mode Tabs */}
+                  <Tabs value={importMode} onValueChange={(v: 'text' | 'url') => setImportMode(v)}>
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="url" className="gap-2">
+                        <Link className="w-4 h-4" />
+                        From URL
+                      </TabsTrigger>
+                      <TabsTrigger value="text" className="gap-2">
+                        <FileText className="w-4 h-4" />
+                        Paste Text
+                      </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="url" className="space-y-4 mt-4">
+                      <div className="space-y-2">
+                        <Label>News Article or Story URL</Label>
+                        <Input
+                          value={importUrl}
+                          onChange={e => setImportUrl(e.target.value)}
+                          placeholder="https://news.university.edu/story/..."
+                          type="url"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Paste a URL from a news article, alumni magazine, or any webpage with a story
+                        </p>
+                      </div>
+                      <Button 
+                        onClick={handleScrapeUrl} 
+                        disabled={isParsing || isScraping || !importUrl.trim()}
+                        className="w-full"
+                      >
+                        {(isParsing || isScraping) ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            {isScraping ? 'Scraping page...' : 'Analyzing story...'}
+                          </>
+                        ) : (
+                          <>
+                            <Link className="w-4 h-4 mr-2" />
+                            Scrape & Import
+                          </>
+                        )}
+                      </Button>
+                    </TabsContent>
+
+                    <TabsContent value="text" className="space-y-4 mt-4">
+                      <div className="space-y-2">
+                        <Label>Story Text</Label>
+                        <Textarea
+                          value={importText}
+                          onChange={e => setImportText(e.target.value)}
+                          placeholder="Paste a story from a newsletter, article, or document..."
+                          rows={10}
+                        />
+                      </div>
+                      <Button 
+                        onClick={handleParseStory} 
+                        disabled={isParsing || !importText.trim()}
+                        className="w-full"
+                      >
+                        {isParsing ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Analyzing story...
+                          </>
+                        ) : (
+                          <>
+                            <Wand2 className="w-4 h-4 mr-2" />
+                            Parse Story
+                          </>
+                        )}
+                      </Button>
+                    </TabsContent>
+                  </Tabs>
                 </>
               ) : (
                 <>
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <h4 className="font-medium text-green-800 mb-2">Story Parsed Successfully</h4>
-                    <div className="space-y-2 text-sm">
-                      <p><strong>Title:</strong> {parsedStory.title}</p>
-                      <p><strong>Type:</strong> {parsedStory.story_type}</p>
+                  {/* Success Banner */}
+                  <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                        <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-green-800 dark:text-green-200">
+                          Story Parsed Successfully
+                        </h4>
+                        <p className="text-sm text-green-700 dark:text-green-300">
+                          Review the details below before adding
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Parsed Story Preview */}
+                  <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-3">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Title:</span>
+                        <p className="font-medium">{parsedStory.title}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Type:</span>
+                        <p className="font-medium capitalize">{parsedStory.story_type}</p>
+                      </div>
                       {parsedStory.subject_name && (
-                        <p><strong>Subject:</strong> {parsedStory.subject_name}</p>
+                        <div>
+                          <span className="text-muted-foreground">Subject:</span>
+                          <p className="font-medium">{parsedStory.subject_name}</p>
+                        </div>
                       )}
-                      {parsedStory.pull_quote && (
-                        <p><strong>Pull Quote:</strong> "{parsedStory.pull_quote}"</p>
-                      )}
-                      {parsedStory.themes && parsedStory.themes.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {parsedStory.themes.map((theme, idx) => (
-                            <Badge key={idx} variant="secondary" className="text-xs">
-                              {theme}
-                            </Badge>
-                          ))}
+                      {parsedStory.source_url && (
+                        <div>
+                          <span className="text-muted-foreground">Source:</span>
+                          <p className="font-medium truncate text-xs">{parsedStory.source_url}</p>
                         </div>
                       )}
                     </div>
+                    {parsedStory.pull_quote && (
+                      <div className="border-l-2 border-primary/50 pl-3 italic text-sm">
+                        "{parsedStory.pull_quote}"
+                      </div>
+                    )}
+                    {parsedStory.themes && parsedStory.themes.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {parsedStory.themes.map((theme, idx) => (
+                          <Badge key={idx} variant="secondary" className="text-xs">
+                            {theme}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                   </div>
+
                   <div className="space-y-2">
                     <Label>Narrative Preview</Label>
-                    <div className="bg-muted/50 rounded-lg p-3 text-sm max-h-40 overflow-y-auto">
-                      {parsedStory.narrative}
-                    </div>
+                    <ScrollArea className="h-32 border rounded-lg">
+                      <div className="p-3 text-sm">
+                        {parsedStory.narrative}
+                      </div>
+                    </ScrollArea>
                   </div>
                 </>
               )}
@@ -477,6 +583,7 @@ export function StoryBankTab({ profileId }: StoryBankTabProps) {
                 onClick={() => {
                   setShowImportDialog(false);
                   setImportText('');
+                  setImportUrl('');
                   setParsedStory(null);
                 }}
               >

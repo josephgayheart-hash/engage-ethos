@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { text } = await req.json();
+    const { text, sourceUrl, sourceTitle } = await req.json();
 
     if (!text || typeof text !== 'string') {
       return new Response(
@@ -40,6 +40,8 @@ Given a story or profile about a person (student, alumni, donor, faculty, staff,
 
 Return ONLY valid JSON with these exact fields. Do not include any other text or explanation.`;
 
+    console.log('Parsing story, text length:', text.length, 'sourceUrl:', sourceUrl || 'none');
+
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -47,13 +49,11 @@ Return ONLY valid JSON with these exact fields. Do not include any other text or
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Parse this story:\n\n${text.substring(0, 8000)}` }
+          { role: 'user', content: `Parse this story:\n\n${text.substring(0, 12000)}` }
         ],
-        temperature: 0.3,
-        max_tokens: 2000,
       }),
     });
 
@@ -67,6 +67,7 @@ Return ONLY valid JSON with these exact fields. Do not include any other text or
     const content = data.choices?.[0]?.message?.content;
 
     if (!content) {
+      console.error('No content in response, full response:', JSON.stringify(data));
       throw new Error('No response from AI');
     }
 
@@ -99,6 +100,14 @@ Return ONLY valid JSON with these exact fields. Do not include any other text or
     // Ensure themes is an array
     if (!Array.isArray(parsed.themes)) {
       parsed.themes = [];
+    }
+
+    // Add source info if provided
+    if (sourceUrl) {
+      parsed.source_url = sourceUrl;
+    }
+    if (sourceTitle) {
+      parsed.source_description = sourceTitle;
     }
 
     console.log('Successfully parsed story:', parsed.title);
