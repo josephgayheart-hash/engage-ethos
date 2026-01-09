@@ -28,7 +28,8 @@ import {
   Target,
   Cloud,
   ExternalLink,
-  Heart
+  Heart,
+  User
 } from "lucide-react";
 import type { 
   ChannelDrafts, 
@@ -78,7 +79,7 @@ const channelLabels: Record<Channel, string> = {
   'digital-ad-social': 'Social Ad (Meta/LinkedIn)',
   'talking-points': 'Executive Talking Points',
   'news-article': 'News Article',
-  'case-for-care': 'Case for Care',
+  'case-for-care': 'Case for Support',
 };
 
 export function ChannelPreview({ channel, content, onCopy, onContentChange, onSaveToLibrary }: ChannelPreviewProps) {
@@ -1208,72 +1209,247 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     }
   };
 
-  const renderCaseForCarePreview = (cfc: CaseForCareDraft) => (
-    <div className="space-y-4">
-      <div className="bg-rose-50 dark:bg-rose-950/30 rounded-lg p-4 border border-rose-200 dark:border-rose-800">
-        <div className="flex items-center gap-2 mb-3">
-          <Heart className="w-5 h-5 text-rose-600 dark:text-rose-400" />
-          <span className="font-semibold text-lg text-rose-700 dark:text-rose-300">Case for Care</span>
+  // Helper to render stat (handles both string and object format)
+  const renderStat = (stat: string | { value: string; label: string; context?: string }, index: number) => {
+    if (typeof stat === 'string') {
+      // Legacy string format - try to extract number
+      const match = stat.match(/^([\d.]+%?|\$[\d,.]+[BMK]?|#\d+|[\d,]+\+?)/);
+      if (match) {
+        const value = match[1];
+        const label = stat.replace(value, '').trim();
+        return (
+          <div key={index} className="text-center p-4 bg-card rounded-xl border shadow-sm">
+            <div className="text-3xl md:text-4xl font-bold text-primary mb-1">{value}</div>
+            <div className="text-xs text-muted-foreground uppercase tracking-wide">{label}</div>
+          </div>
+        );
+      }
+      return (
+        <div key={index} className="text-center p-4 bg-card rounded-xl border shadow-sm">
+          <div className="text-sm text-foreground">{stat}</div>
         </div>
-        {cfc.documentTitle && <h2 className="text-xl font-bold">{cfc.documentTitle}</h2>}
-        {cfc.campaignName && <p className="text-sm text-muted-foreground">{cfc.campaignName}</p>}
-        {cfc.targetAmount && <Badge variant="secondary" className="mt-2">{cfc.targetAmount}</Badge>}
+      );
+    }
+    // Object format { value, label, context }
+    return (
+      <div key={index} className="text-center p-4 bg-card rounded-xl border shadow-sm">
+        <div className="text-3xl md:text-4xl font-bold text-primary mb-1">{stat.value}</div>
+        <div className="text-xs text-muted-foreground uppercase tracking-wide">{stat.label}</div>
+        {stat.context && <div className="text-xs text-muted-foreground mt-1">{stat.context}</div>}
       </div>
-      {cfc.openingNarrative && (
-        <div className="bg-card rounded-lg p-4 border-l-4 border-rose-400">
-          <p className="text-sm leading-relaxed italic whitespace-pre-wrap">{cfc.openingNarrative}</p>
-        </div>
-      )}
-      {cfc.visionStatement && (
-        <div className="bg-primary/5 rounded-lg p-4">
-          <p className="text-xs font-semibold text-primary mb-2 uppercase">Vision</p>
-          <p className="text-sm font-medium">{cfc.visionStatement}</p>
-        </div>
-      )}
-      {cfc.keyPrograms && cfc.keyPrograms.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-xs font-semibold text-muted-foreground uppercase">Key Programs</p>
-          <div className="grid gap-2">
-            {cfc.keyPrograms.map((p, i) => (
-              <div key={i} className="bg-muted/30 rounded-lg p-3">
-                <p className="font-medium text-sm">{p.name}</p>
-                <p className="text-xs text-muted-foreground">{p.description}</p>
-                <p className="text-xs text-primary mt-1">Impact: {p.impact}</p>
-              </div>
-            ))}
+    );
+  };
+
+  const renderCaseForCarePreview = (cfc: CaseForCareDraft) => (
+    <div className="space-y-6 -mx-2">
+      {/* Hero Header */}
+      <div className="bg-gradient-to-br from-rose-600 via-rose-500 to-purple-600 rounded-2xl p-6 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
+        <div className="relative">
+          <div className="flex items-center gap-2 mb-3 opacity-90">
+            <Heart className="w-5 h-5" />
+            <span className="text-sm font-medium uppercase tracking-wider">Case for Support</span>
+          </div>
+          {cfc.documentTitle && (
+            <h2 className="text-2xl md:text-3xl font-bold mb-2">{cfc.documentTitle}</h2>
+          )}
+          {cfc.campaignTagline && (
+            <p className="text-lg italic opacity-90 mb-3">{cfc.campaignTagline}</p>
+          )}
+          <div className="flex flex-wrap gap-3 mt-4">
+            {cfc.campaignName && (
+              <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30">{cfc.campaignName}</Badge>
+            )}
+            {cfc.targetAmount && (
+              <Badge className="bg-white text-rose-600 hover:bg-white/90 font-bold">{cfc.targetAmount} Goal</Badge>
+            )}
           </div>
         </div>
+      </div>
+
+      {/* Opening Story Block */}
+      {(cfc.openingStory || cfc.openingNarrative) && (
+        <div className="relative bg-amber-50/50 dark:bg-amber-950/20 rounded-2xl p-6 border border-amber-200 dark:border-amber-800">
+          <div className="absolute -top-3 left-6 text-6xl text-amber-400/60 font-serif leading-none">"</div>
+          <div className="relative pt-4">
+            {cfc.openingStory?.headline && (
+              <h3 className="text-lg font-semibold text-amber-900 dark:text-amber-200 mb-3">{cfc.openingStory.headline}</h3>
+            )}
+            <p className="text-base leading-relaxed text-foreground/90 whitespace-pre-wrap font-serif">
+              {cfc.openingStory?.narrative || cfc.openingNarrative}
+            </p>
+            {cfc.openingStory?.attribution && (
+              <p className="text-sm text-muted-foreground mt-4 font-medium">— {cfc.openingStory.attribution}</p>
+            )}
+          </div>
+          <div className="absolute -bottom-3 right-6 text-6xl text-amber-400/60 font-serif leading-none rotate-180">"</div>
+        </div>
       )}
+
+      {/* Pull Quote Band */}
+      {cfc.pullQuotes && cfc.pullQuotes.length > 0 && (
+        <div className="bg-primary/5 border-l-4 border-primary rounded-r-xl p-6">
+          {cfc.pullQuotes.map((pq, i) => (
+            <div key={i} className={i > 0 ? 'mt-4 pt-4 border-t border-primary/20' : ''}>
+              <p className="text-xl md:text-2xl italic font-medium text-primary/90">"{pq.quote}"</p>
+              {pq.attribution && (
+                <p className="text-sm text-muted-foreground mt-2 text-right">— {pq.attribution}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Impact Statistics Grid */}
       {cfc.impactStatistics && cfc.impactStatistics.length > 0 && (
-        <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
-          <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-3 uppercase">Impact By The Numbers</p>
-          <div className="grid gap-1">
-            {cfc.impactStatistics.map((stat, i) => (
-              <div key={i} className="flex items-start gap-2 text-sm"><span>📊</span><span>{stat}</span></div>
-            ))}
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-2xl p-6 border border-blue-200 dark:border-blue-800">
+          <h3 className="text-sm font-bold text-blue-700 dark:text-blue-400 mb-4 uppercase tracking-wider flex items-center gap-2">
+            <span className="w-8 h-0.5 bg-blue-400" />
+            Impact by the Numbers
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {cfc.impactStatistics.map((stat, i) => renderStat(stat, i))}
           </div>
         </div>
       )}
-      {cfc.givingLevels && cfc.givingLevels.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-xs font-semibold text-muted-foreground uppercase">Ways to Give</p>
-          <div className="grid gap-2">
-            {cfc.givingLevels.map((g, i) => (
-              <div key={i} className="flex justify-between items-center bg-muted/30 rounded p-2">
-                <span className="font-semibold text-sm">{g.amount}</span>
-                <span className="text-xs text-muted-foreground">{g.impact}</span>
+
+      {/* Vision & Mission Cards */}
+      {(cfc.visionStatement || cfc.missionConnection) && (
+        <div className="grid md:grid-cols-2 gap-4">
+          {cfc.visionStatement && (
+            <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 rounded-xl p-5 border border-purple-200 dark:border-purple-800">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center">
+                  <Target className="w-4 h-4 text-white" />
+                </div>
+                <span className="text-xs font-bold uppercase tracking-wider text-purple-700 dark:text-purple-400">Vision</span>
+              </div>
+              <p className="text-sm font-medium text-foreground">{cfc.visionStatement}</p>
+            </div>
+          )}
+          {cfc.missionConnection && (
+            <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 rounded-xl p-5 border border-emerald-200 dark:border-emerald-800">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
+                  <Heart className="w-4 h-4 text-white" />
+                </div>
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Mission</span>
+              </div>
+              <p className="text-sm font-medium text-foreground">{cfc.missionConnection}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Problem Statement */}
+      {cfc.problemStatement && (
+        <div className="bg-rose-50/50 dark:bg-rose-950/20 rounded-xl p-5 border-l-4 border-rose-400">
+          <p className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 mb-2">The Challenge</p>
+          <p className="text-sm text-foreground">{cfc.problemStatement}</p>
+        </div>
+      )}
+
+      {/* Key Programs */}
+      {cfc.keyPrograms && cfc.keyPrograms.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Key Initiatives</h3>
+          <div className="grid md:grid-cols-2 gap-3">
+            {cfc.keyPrograms.map((p, i) => (
+              <div key={i} className="bg-card rounded-xl p-4 border shadow-sm hover:shadow-md transition-shadow">
+                <h4 className="font-semibold text-foreground mb-1">{p.name}</h4>
+                <p className="text-sm text-muted-foreground mb-2">{p.description}</p>
+                <div className="flex items-center gap-2 text-xs">
+                  <Badge variant="outline" className="text-primary border-primary/30 bg-primary/5">
+                    Impact: {p.impact}
+                  </Badge>
+                </div>
               </div>
             ))}
           </div>
         </div>
       )}
-      {cfc.callToAction && (
-        <div className="bg-rose-100 dark:bg-rose-900/30 rounded-lg p-4 text-center">
-          <p className="text-sm font-medium">{cfc.callToAction}</p>
+
+      {/* Testimonials */}
+      {cfc.testimonials && cfc.testimonials.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Voices of Impact</h3>
+          <div className="grid gap-3">
+            {cfc.testimonials.map((t, i) => (
+              <div key={i} className="bg-card rounded-xl p-5 border-l-4 border-rose-400 shadow-sm">
+                <p className="text-sm italic text-foreground mb-3">"{t.quote}"</p>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900 flex items-center justify-center">
+                    <User className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">{t.attribution}</p>
+                    {t.role && <p className="text-xs text-muted-foreground">{t.role}</p>}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
+
+      {/* Giving Levels - Tier Cards */}
+      {cfc.givingLevels && cfc.givingLevels.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Ways to Give</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {cfc.givingLevels.map((g, i) => {
+              // Make larger amounts more prominent
+              const isLarge = g.amount.includes('100') || g.amount.includes('million') || i === cfc.givingLevels!.length - 1;
+              return (
+                <div 
+                  key={i} 
+                  className={`rounded-xl p-4 text-center border transition-all hover:scale-105 ${
+                    isLarge 
+                      ? 'bg-gradient-to-br from-amber-400 to-orange-500 text-white border-amber-300 col-span-2 md:col-span-1' 
+                      : 'bg-card border-border'
+                  }`}
+                >
+                  <p className={`text-lg font-bold mb-1 ${isLarge ? 'text-white' : 'text-foreground'}`}>{g.amount}</p>
+                  <p className={`text-xs ${isLarge ? 'text-white/90' : 'text-muted-foreground'}`}>{g.impact}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Call to Action Banner */}
+      {cfc.callToAction && (
+        <div className="bg-gradient-to-r from-rose-600 to-purple-600 rounded-2xl p-6 text-white text-center">
+          <p className="text-lg md:text-xl font-semibold mb-4">{cfc.callToAction}</p>
+          {cfc.contactInfo && (
+            <div className="flex flex-wrap justify-center gap-4 text-sm opacity-90">
+              <span className="flex items-center gap-1">
+                <User className="w-4 h-4" />
+                {cfc.contactInfo.name}, {cfc.contactInfo.title}
+              </span>
+              {cfc.contactInfo.email && (
+                <span className="flex items-center gap-1">
+                  <Mail className="w-4 h-4" />
+                  {cfc.contactInfo.email}
+                </span>
+              )}
+              {cfc.contactInfo.phone && (
+                <span className="flex items-center gap-1">
+                  <Phone className="w-4 h-4" />
+                  {cfc.contactInfo.phone}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Closing Statement */}
       {cfc.closingStatement && (
-        <div className="border-t pt-4"><p className="text-sm italic text-center">{cfc.closingStatement}</p></div>
+        <div className="border-t-2 border-dashed border-muted pt-6 text-center">
+          <p className="text-base italic text-muted-foreground font-serif">{cfc.closingStatement}</p>
+        </div>
       )}
     </div>
   );

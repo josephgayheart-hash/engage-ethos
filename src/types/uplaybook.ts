@@ -369,31 +369,63 @@ export interface NewsArticleDraft {
   relatedLinks?: string[];
 }
 
+// Enhanced Case for Support structure with magazine-style elements
+export interface CaseForSupportStat {
+  value: string;        // "90%", "$2B", "#1"
+  label: string;        // "of students graduate on time"
+  context?: string;     // Optional additional context
+}
+
+export interface CaseForSupportStory {
+  headline?: string;           // "A Dream Realized"
+  narrative: string;           // The story content (2-3 paragraphs)
+  attribution?: string;        // "Maria Gonzalez, Class of 2024"
+}
+
+export interface CaseForSupportPullQuote {
+  quote: string;
+  attribution?: string;
+}
+
 export interface CaseForCareDraft {
   documentTitle: string;
   campaignName?: string;
+  campaignTagline?: string;           // "Dream Bold. Give Boldly."
   targetAmount?: string;
-  openingNarrative: string;
-  problemStatement: string;
-  visionStatement: string;
-  missionConnection: string;
-  keyPrograms: {
+  
+  // Story-driven opening (enhanced)
+  openingNarrative?: string;          // Legacy support
+  openingStory?: CaseForSupportStory; // New structured story
+  
+  problemStatement?: string;
+  visionStatement?: string;
+  missionConnection?: string;
+  
+  keyPrograms?: {
     name: string;
     description: string;
     impact: string;
   }[];
-  impactStatistics: string[];
-  testimonials: {
+  
+  // Impact statistics - supports both legacy string[] and new structured format
+  impactStatistics?: (string | CaseForSupportStat)[];
+  
+  // Pull quotes for visual emphasis
+  pullQuotes?: CaseForSupportPullQuote[];
+  
+  testimonials?: {
     quote: string;
     attribution: string;
     role?: string;
   }[];
+  
   givingLevels?: {
     amount: string;
     impact: string;
   }[];
-  callToAction: string;
-  closingStatement: string;
+  
+  callToAction?: string;
+  closingStatement?: string;
   contactInfo?: {
     name: string;
     title: string;

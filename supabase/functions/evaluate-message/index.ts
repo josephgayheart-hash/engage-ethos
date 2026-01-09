@@ -108,7 +108,7 @@ CHANNEL-SPECIFIC REQUIREMENTS:
 - DIGITAL-AD-SOCIAL: Meta/LinkedIn ad with primary text, headline, description, and CTA button
 - NEWS-ARTICLE: University news article with headline, subheadline, lead paragraph, body paragraphs, pull quote, boilerplate, and media contact. Write in inverted pyramid style with journalistic objectivity.
 - TALKING-POINTS: Executive talking points for senior leaders with opening hook, 5 key messages (2-3 sentences each), supporting data, anticipated Q&A with responses, and closing statement
-- CASE-FOR-CARE: Advancement Case for Support document for fundraising. Include document title, campaign name, opening narrative (2-3 emotional paragraphs with story), problem statement, vision statement, mission connection, key programs (3-5 with name, description, impact), impact statistics (5+ specific data points), testimonials (2-3 quotes), giving levels, call to action, closing statement, and contact info.
+- CASE-FOR-CARE: Advancement Case for Support document for fundraising. Create a VIBRANT, magazine-style document with: document title, campaign name, campaign tagline, target amount, opening story (with headline, narrative, and attribution), problem statement, vision statement, mission connection, key programs (3-5), impact statistics (5+ as objects with value and label for BIG visual display, e.g. {"value": "94%", "label": "graduation rate"}), pull quotes (2-3 memorable quotes for visual emphasis), testimonials, giving levels, call to action, closing statement, and contact info.
 
 IMPORTANT: Respond ONLY with valid JSON:
 {
@@ -171,25 +171,42 @@ IMPORTANT: Respond ONLY with valid JSON:
       "closingStatement": "Powerful 2-3 sentence closing"
     },
     "case-for-care": {
-      "documentTitle": "A Case for the Future of Learning",
-      "campaignName": "Campaign for Tomorrow",
+      "documentTitle": "Transforming Tomorrow: A Case for Support",
+      "campaignName": "Campaign for Excellence",
+      "campaignTagline": "Dream Bold. Give Boldly.",
       "targetAmount": "$50 million",
-      "openingNarrative": "2-3 emotional paragraphs telling a compelling story...",
-      "problemStatement": "The challenge or need being addressed",
-      "visionStatement": "Bold vision for what's possible",
-      "missionConnection": "How this connects to institutional mission",
+      "openingStory": {
+        "headline": "A Dream Realized",
+        "narrative": "When Maria first walked through our doors, she carried not just textbooks but the weight of generations of hope...\n\nHer journey from first-generation student to Rhodes Scholar embodies everything we stand for...",
+        "attribution": "Maria Gonzalez, Class of 2024"
+      },
+      "problemStatement": "The challenge facing today's students...",
+      "visionStatement": "A bold vision for transformation...",
+      "missionConnection": "Rooted in our founding mission...",
       "keyPrograms": [
         { "name": "Program 1", "description": "...", "impact": "..." }
       ],
-      "impactStatistics": ["Stat 1", "Stat 2", "Stat 3", "Stat 4", "Stat 5"],
+      "impactStatistics": [
+        { "value": "94%", "label": "graduation rate" },
+        { "value": "#1", "label": "for upward mobility" },
+        { "value": "$2B", "label": "economic impact annually" },
+        { "value": "15K+", "label": "students supported" },
+        { "value": "200+", "label": "community partnerships" }
+      ],
+      "pullQuotes": [
+        { "quote": "Education is the most powerful tool we can use to change the world.", "attribution": "Chancellor Johnson" },
+        { "quote": "This university changed my life and my family's future forever.", "attribution": "James Chen, First-Gen Graduate" }
+      ],
       "testimonials": [
         { "quote": "...", "attribution": "Name, Title", "role": "Donor" }
       ],
       "givingLevels": [
-        { "amount": "$1,000", "impact": "Provides..." }
+        { "amount": "$1,000", "impact": "Provides emergency funds" },
+        { "amount": "$25,000", "impact": "Names a scholarship" },
+        { "amount": "$100,000", "impact": "Creates an endowment" }
       ],
-      "callToAction": "Specific ask with urgency",
-      "closingStatement": "Inspiring 2-3 sentence close",
+      "callToAction": "Join us in transforming lives. Your gift today...",
+      "closingStatement": "Together, we can ensure every student has the opportunity to succeed.",
       "contactInfo": { "name": "...", "title": "...", "email": "...", "phone": "..." }
     }
   },
@@ -685,6 +702,41 @@ Provide your evaluation as JSON.`;
 
     try {
       const result = JSON.parse(jsonContent);
+
+      // Normalize channelDrafts keys - AI sometimes returns variant key names
+      if (result.channelDrafts && typeof result.channelDrafts === 'object') {
+        const keyMappings: Record<string, string> = {
+          'caseForCare': 'case-for-care',
+          'case_for_care': 'case-for-care',
+          'caseForSupport': 'case-for-care',
+          'case-for-support': 'case-for-care',
+          'case_for_support': 'case-for-care',
+          'talkingPoints': 'talking-points',
+          'talking_points': 'talking-points',
+          'landingPage': 'landing-page',
+          'landing_page': 'landing-page',
+          'phoneCall': 'phone-call',
+          'phone_call': 'phone-call',
+          'directMail': 'direct-mail',
+          'direct_mail': 'direct-mail',
+          'socialMedia': 'social-media',
+          'social_media': 'social-media',
+          'newsArticle': 'news-article',
+          'news_article': 'news-article',
+          'digitalAdSearch': 'digital-ad-search',
+          'digital_ad_search': 'digital-ad-search',
+          'digitalAdSocial': 'digital-ad-social',
+          'digital_ad_social': 'digital-ad-social',
+        };
+        
+        for (const [wrongKey, correctKey] of Object.entries(keyMappings)) {
+          if (wrongKey in result.channelDrafts && !(correctKey in result.channelDrafts)) {
+            console.log(`Normalizing channelDrafts key: ${wrongKey} -> ${correctKey}`);
+            result.channelDrafts[correctKey] = result.channelDrafts[wrongKey];
+            delete result.channelDrafts[wrongKey];
+          }
+        }
+      }
 
       // Post-process mapper output so cadence "estimatedTouchpoints" stays within a reasonable range.
       if (
