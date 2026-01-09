@@ -21,7 +21,7 @@ import {
   CheckCircle2,
   RefreshCw,
   FileText,
-  Dna
+  Target
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -166,16 +166,14 @@ export default function WebContentAnalyzerPage() {
 
           {/* Brand Voice Profile Selector */}
           <Card className="mb-6 border-primary/20 overflow-hidden">
-            <CardContent className="p-0">
-              <div className="flex items-center">
-                {/* Label Section */}
-                <div className="flex items-center gap-2 px-4 py-3 bg-primary/5 border-r border-primary/10">
-                  <Dna className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-medium text-foreground whitespace-nowrap">Brand Voice Profile</span>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <Target className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium text-foreground">Voice Profile Match</span>
                 </div>
                 
-                {/* Selector Section */}
-                <div className="flex-1 px-4 py-2">
+                <div className="flex-1">
                   <InstitutionalProfileSelector
                     selectedProfileId={selectedProfileId}
                     onProfileChange={setSelectedProfileId}
@@ -183,14 +181,11 @@ export default function WebContentAnalyzerPage() {
                   />
                 </div>
                 
-                {/* Status Badge */}
                 {contentDNA?.last_analyzed_at && (
-                  <div className="px-4 py-3 border-l border-border">
-                    <Badge className="bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-500/15">
-                      <Sparkles className="w-3 h-3 mr-1" />
-                      DNA Active
-                    </Badge>
-                  </div>
+                  <Badge className="bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-500/15">
+                    <Sparkles className="w-3 h-3 mr-1" />
+                    DNA Active
+                  </Badge>
                 )}
               </div>
             </CardContent>
