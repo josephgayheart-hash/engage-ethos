@@ -47,3 +47,6 @@ verify_jwt = false
 
 [functions.send-demo-request]
 verify_jwt = false
+
+[functions.parse-web-sections]
+verify_jwt = false

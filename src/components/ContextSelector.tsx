@@ -32,6 +32,7 @@ interface ContextSelectorProps {
 
 // ============= AUDIENCE OPTIONS =============
 const audienceOptions: { value: AudienceType; label: string }[] = [
+  { value: 'general', label: 'General (All Audiences)' },
   { value: 'prospective', label: 'Prospective Student' },
   { value: 'first-year', label: 'First-Year Student' },
   { value: 'continuing', label: 'Continuing Student' },
@@ -111,6 +112,7 @@ const externalCohortOptions: { value: CohortContext; label: string }[] = [
 
 // ============= MOMENT OPTIONS BY AUDIENCE =============
 const studentMomentOptions: { value: CommunicationMoment; label: string }[] = [
+  { value: 'brand-awareness', label: 'Brand Awareness' },
   { value: 'recruitment', label: 'Recruitment' },
   { value: 'yield', label: 'Yield Campaign' },
   { value: 'summer-melt', label: 'Summer Melt Prevention' },
@@ -126,6 +128,7 @@ const studentMomentOptions: { value: CommunicationMoment; label: string }[] = [
 ];
 
 const employeeMomentOptions: { value: CommunicationMoment; label: string }[] = [
+  { value: 'brand-awareness', label: 'Brand Awareness' },
   { value: 'open-enrollment', label: 'Benefits Open Enrollment' },
   { value: 'performance-review', label: 'Performance Review Cycle' },
   { value: 'professional-development', label: 'Professional Development' },
@@ -140,6 +143,7 @@ const employeeMomentOptions: { value: CommunicationMoment; label: string }[] = [
 ];
 
 const alumniMomentOptions: { value: CommunicationMoment; label: string }[] = [
+  { value: 'brand-awareness', label: 'Brand Awareness' },
   { value: 'reunion-campaign', label: 'Reunion Campaign' },
   { value: 'homecoming', label: 'Homecoming' },
   { value: 'alumni-giving-day', label: 'Alumni Giving Day' },
@@ -151,6 +155,7 @@ const alumniMomentOptions: { value: CommunicationMoment; label: string }[] = [
 ];
 
 const parentMomentOptions: { value: CommunicationMoment; label: string }[] = [
+  { value: 'brand-awareness', label: 'Brand Awareness' },
   { value: 'family-orientation', label: 'Family Orientation' },
   { value: 'family-weekend', label: 'Family Weekend' },
   { value: 'parent-giving', label: 'Parent Giving Campaign' },
@@ -161,6 +166,7 @@ const parentMomentOptions: { value: CommunicationMoment; label: string }[] = [
 ];
 
 const donorMomentOptions: { value: CommunicationMoment; label: string }[] = [
+  { value: 'brand-awareness', label: 'Brand Awareness' },
   { value: 'annual-fund', label: 'Annual Fund Campaign' },
   { value: 'capital-campaign', label: 'Capital Campaign' },
   { value: 'giving-day', label: 'Giving Day' },
@@ -172,6 +178,7 @@ const donorMomentOptions: { value: CommunicationMoment; label: string }[] = [
 ];
 
 const policyMakerMomentOptions: { value: CommunicationMoment; label: string }[] = [
+  { value: 'brand-awareness', label: 'Brand Awareness' },
   { value: 'advocacy-support', label: 'Support University Priorities' },
   { value: 'funding-advocacy', label: 'Advocate for Increased Funding' },
   { value: 'legislative-event', label: 'Attend Legislative Events' },
@@ -180,6 +187,7 @@ const policyMakerMomentOptions: { value: CommunicationMoment; label: string }[] 
 ];
 
 const communityPartnerMomentOptions: { value: CommunicationMoment; label: string }[] = [
+  { value: 'brand-awareness', label: 'Brand Awareness' },
   { value: 'partnership-initiation', label: 'Initiate Partnership' },
   { value: 'partnership-sustain', label: 'Sustain Partnership' },
   { value: 'community-event', label: 'Participate in Events' },
@@ -188,6 +196,7 @@ const communityPartnerMomentOptions: { value: CommunicationMoment; label: string
 ];
 
 const higherEdLeaderMomentOptions: { value: CommunicationMoment; label: string }[] = [
+  { value: 'brand-awareness', label: 'Brand Awareness' },
   { value: 'research-collaboration', label: 'Initiate Research Collaboration' },
   { value: 'programming-collaboration', label: 'Program Collaboration' },
   { value: 'best-practices-share', label: 'Share Best Practices at Conferences' },
@@ -300,8 +309,22 @@ const toneOptions: { value: TonePreference; label: string }[] = [
 ];
 
 // ============= HELPER FUNCTIONS =============
-function getAudienceCategory(audience?: AudienceType): 'student' | 'employee' | 'alumni' | 'parent' | 'donor' | 'external' {
+// General cohort options for "General (All Audiences)"
+const generalCohortOptions: { value: CohortContext; label: string }[] = [
+  { value: 'none', label: 'No specific cohort' },
+];
+
+// General moment options for "General (All Audiences)"
+const generalMomentOptions: { value: CommunicationMoment; label: string }[] = [
+  { value: 'brand-awareness', label: 'Brand Awareness' },
+  { value: 'seasonal', label: 'Seasonal' },
+  { value: 'campus-event', label: 'Campus Event' },
+  { value: 'recognition', label: 'Recognition/Appreciation' },
+];
+
+function getAudienceCategory(audience?: AudienceType): 'general' | 'student' | 'employee' | 'alumni' | 'parent' | 'donor' | 'external' {
   if (!audience) return 'student';
+  if (audience === 'general') return 'general';
   
   const studentAudiences: AudienceType[] = ['prospective', 'first-year', 'continuing', 'at-risk', 'graduate', 'online-learner'];
   const employeeAudiences: AudienceType[] = ['employee'];
@@ -320,6 +343,7 @@ function getAudienceCategory(audience?: AudienceType): 'student' | 'employee' | 
 function getCohortOptions(audience?: AudienceType) {
   const category = getAudienceCategory(audience);
   switch (category) {
+    case 'general': return generalCohortOptions;
     case 'employee': return employeeCohortOptions;
     case 'alumni': return alumniCohortOptions;
     case 'parent': return parentCohortOptions;
@@ -332,6 +356,7 @@ function getCohortOptions(audience?: AudienceType) {
 function getMomentOptions(audience?: AudienceType) {
   const category = getAudienceCategory(audience);
   switch (category) {
+    case 'general': return generalMomentOptions;
     case 'employee': return employeeMomentOptions;
     case 'alumni': return alumniMomentOptions;
     case 'parent': return parentMomentOptions;

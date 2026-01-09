@@ -75,6 +75,7 @@ const channelOptions: { value: Channel; label: string }[] = [
 ];
 
 const audienceLabels: Record<string, string> = {
+  'general': 'General',
   'prospective': 'Prospective Student',
   'first-year': 'First-Year Student',
   'continuing': 'Continuing Student',
