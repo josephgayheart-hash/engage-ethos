@@ -1163,11 +1163,28 @@ const BuildPage = () => {
                         if (unit && inst) return `${unit}\n${inst}`;
                         return inst || unit || undefined;
                       })()}
-                      branding={{
-                        primaryColor: (institutionalConfig?.primaryColor || tenant?.primary_color) || undefined,
-                        accentColor: (institutionalConfig?.accentColor || tenant?.accent_color) || undefined,
-                        logoUrl: (institutionalConfig?.logoUrl || tenant?.logo_url) || undefined,
-                      }}
+                      branding={(() => {
+                        // Default colors that should be treated as "not set" (legacy defaults)
+                        const defaultPrimary = ['#1F2A44', '#1f2a44'];
+                        const defaultAccent = ['#2C7A7B', '#2c7a7b'];
+                        
+                        // Only use profile color if it's explicitly set and NOT a default value
+                        const profilePrimary = institutionalConfig?.primaryColor;
+                        const profileAccent = institutionalConfig?.accentColor;
+                        
+                        const effectivePrimary = (profilePrimary && !defaultPrimary.includes(profilePrimary)) 
+                          ? profilePrimary 
+                          : (tenant?.primary_color || undefined);
+                        const effectiveAccent = (profileAccent && !defaultAccent.includes(profileAccent)) 
+                          ? profileAccent 
+                          : (tenant?.accent_color || undefined);
+                        
+                        return {
+                          primaryColor: effectivePrimary,
+                          accentColor: effectiveAccent,
+                          logoUrl: institutionalConfig?.logoUrl || tenant?.logo_url || undefined,
+                        };
+                      })()}
                     />
                   );
                 })}

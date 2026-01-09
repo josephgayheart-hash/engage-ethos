@@ -598,11 +598,24 @@ const TemplateDetailPage = () => {
                           if (unit && inst) return `${unit}\n${inst}`;
                           return inst || unit || undefined;
                         })()}
-                        branding={{
-                          primaryColor: (profileConfig?.primaryColor || tenant?.primary_color) || undefined,
-                          accentColor: (profileConfig?.accentColor || tenant?.accent_color) || undefined,
-                          logoUrl: (profileConfig?.logoUrl || tenant?.logo_url) || undefined,
-                        }}
+                        branding={(() => {
+                          // Default colors that should be treated as "not set" (legacy defaults)
+                          const defaultPrimary = ['#1F2A44', '#1f2a44'];
+                          const defaultAccent = ['#2C7A7B', '#2c7a7b'];
+                          
+                          const effectivePrimary = (profileConfig?.primaryColor && !defaultPrimary.includes(profileConfig.primaryColor)) 
+                            ? profileConfig.primaryColor 
+                            : (tenant?.primary_color || undefined);
+                          const effectiveAccent = (profileConfig?.accentColor && !defaultAccent.includes(profileConfig.accentColor)) 
+                            ? profileConfig.accentColor 
+                            : (tenant?.accent_color || undefined);
+                          
+                          return {
+                            primaryColor: effectivePrimary,
+                            accentColor: effectiveAccent,
+                            logoUrl: profileConfig?.logoUrl || tenant?.logo_url || undefined,
+                          };
+                        })()}
                       />
                     );
                 })()
