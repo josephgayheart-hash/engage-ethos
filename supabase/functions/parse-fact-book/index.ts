@@ -93,7 +93,7 @@ Example output:
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4o-mini',
+          model: 'openai/gpt-5-mini',
           messages: [
             { role: 'system', content: systemPrompt },
             { 
@@ -101,8 +101,7 @@ Example output:
               content: `Extract facts from this ${sourceDocument ? `(source: ${sourceDocument})` : ''} document:\n\n${chunk}` 
             }
           ],
-          temperature: 0.2,
-          max_tokens: 4000,
+          max_completion_tokens: 4000,
         }),
       });
 
