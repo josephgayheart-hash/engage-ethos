@@ -116,6 +116,9 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // Add form state
+  const [addMode, setAddMode] = useState<'manual' | 'generate'>('manual');
+  const [generateText, setGenerateText] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
   const [newFact, setNewFact] = useState<CreateFactInput>({
     category: 'enrollment',
     label: '',
@@ -145,6 +148,8 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
     
     await addFact(newFact);
     setShowAddDialog(false);
+    setAddMode('manual');
+    setGenerateText('');
     setNewFact({
       category: 'enrollment',
       label: '',
@@ -154,6 +159,33 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
       display_format: 'number',
       is_highlight: false,
     });
+  };
+
+  const handleGenerateFromText = async () => {
+    if (!generateText.trim()) return;
+    
+    setIsGenerating(true);
+    try {
+      const parsed = await parseFactBookFromText(generateText);
+      if (parsed.length > 0) {
+        // Take the first parsed fact and populate the form
+        const firstFact = parsed[0];
+        setNewFact({
+          category: firstFact.category || 'other',
+          label: firstFact.label || '',
+          value: firstFact.value || '',
+          context: firstFact.context || '',
+          year: firstFact.year || '',
+          display_format: firstFact.display_format || 'number',
+          is_highlight: firstFact.is_highlight || false,
+          source_document: firstFact.source_document || '',
+        });
+        setAddMode('manual');
+        setGenerateText('');
+      }
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleParseFactBook = async () => {
@@ -442,7 +474,13 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
         )}
 
         {/* Add Fact Dialog */}
-        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+        <Dialog open={showAddDialog} onOpenChange={(open) => {
+          setShowAddDialog(open);
+          if (!open) {
+            setAddMode('manual');
+            setGenerateText('');
+          }
+        }}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>Add New Fact</DialogTitle>
@@ -450,109 +488,159 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                 Add a statistic or data point to your Fact Book
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+            
+            {/* Mode Toggle */}
+            <Tabs value={addMode} onValueChange={(v: 'manual' | 'generate') => setAddMode(v)} className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="manual" className="gap-2">
+                  <FileText className="w-4 h-4" />
+                  Manual Entry
+                </TabsTrigger>
+                <TabsTrigger value="generate" className="gap-2">
+                  <Wand2 className="w-4 h-4" />
+                  Generate from Text
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="generate" className="space-y-4 mt-4">
                 <div className="space-y-2">
-                  <Label>Category *</Label>
-                  <Select
-                    value={newFact.category}
-                    onValueChange={v => setNewFact(prev => ({ ...prev, category: v }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {FACT_CATEGORIES.map(cat => {
-                        const Icon = categoryIcons[cat.value] || MoreHorizontal;
-                        return (
-                          <SelectItem key={cat.value} value={cat.value}>
-                            <div className="flex items-center gap-2">
-                              <Icon className="w-4 h-4" />
-                              {cat.label}
-                            </div>
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
+                  <Label>Paste text containing a fact</Label>
+                  <Textarea
+                    value={generateText}
+                    onChange={e => setGenerateText(e.target.value)}
+                    placeholder="e.g., 'Our university has 67,957 students enrolled for Fall 2024, representing a 3% increase from last year.'"
+                    rows={4}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    AI will extract the fact details and populate the form for you to review
+                  </p>
                 </div>
+                <Button 
+                  onClick={handleGenerateFromText} 
+                  disabled={isGenerating || !generateText.trim()}
+                  className="w-full"
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Extracting fact...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Extract & Fill Form
+                    </>
+                  )}
+                </Button>
+              </TabsContent>
+              
+              <TabsContent value="manual" className="space-y-4 mt-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Category *</Label>
+                    <Select
+                      value={newFact.category}
+                      onValueChange={v => setNewFact(prev => ({ ...prev, category: v }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {FACT_CATEGORIES.map(cat => {
+                          const Icon = categoryIcons[cat.value] || MoreHorizontal;
+                          return (
+                            <SelectItem key={cat.value} value={cat.value}>
+                              <div className="flex items-center gap-2">
+                                <Icon className="w-4 h-4" />
+                                {cat.label}
+                              </div>
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Year</Label>
+                    <Input
+                      value={newFact.year || ''}
+                      onChange={e => setNewFact(prev => ({ ...prev, year: e.target.value }))}
+                      placeholder="e.g., 2024-25"
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-2">
-                  <Label>Year</Label>
+                  <Label>Label *</Label>
                   <Input
-                    value={newFact.year || ''}
-                    onChange={e => setNewFact(prev => ({ ...prev, year: e.target.value }))}
-                    placeholder="e.g., 2024-25"
+                    value={newFact.label}
+                    onChange={e => setNewFact(prev => ({ ...prev, label: e.target.value }))}
+                    placeholder="e.g., Total Enrollment"
                   />
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label>Label *</Label>
-                <Input
-                  value={newFact.label}
-                  onChange={e => setNewFact(prev => ({ ...prev, label: e.target.value }))}
-                  placeholder="e.g., Total Enrollment"
-                />
-              </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Value *</Label>
+                    <Input
+                      value={newFact.value}
+                      onChange={e => setNewFact(prev => ({ ...prev, value: e.target.value }))}
+                      placeholder="e.g., 67,957"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Display Format</Label>
+                    <Select
+                      value={newFact.display_format}
+                      onValueChange={(v: Fact['display_format']) => setNewFact(prev => ({ ...prev, display_format: v }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="number">Number</SelectItem>
+                        <SelectItem value="currency">Currency</SelectItem>
+                        <SelectItem value="percentage">Percentage</SelectItem>
+                        <SelectItem value="ranking">Ranking</SelectItem>
+                        <SelectItem value="text">Text</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
 
-              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Value *</Label>
+                  <Label>Context (optional)</Label>
                   <Input
-                    value={newFact.value}
-                    onChange={e => setNewFact(prev => ({ ...prev, value: e.target.value }))}
-                    placeholder="e.g., 67,957"
+                    value={newFact.context || ''}
+                    onChange={e => setNewFact(prev => ({ ...prev, context: e.target.value }))}
+                    placeholder="Additional context..."
                   />
                 </div>
+
                 <div className="space-y-2">
-                  <Label>Display Format</Label>
-                  <Select
-                    value={newFact.display_format}
-                    onValueChange={(v: Fact['display_format']) => setNewFact(prev => ({ ...prev, display_format: v }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="number">Number</SelectItem>
-                      <SelectItem value="currency">Currency</SelectItem>
-                      <SelectItem value="percentage">Percentage</SelectItem>
-                      <SelectItem value="ranking">Ranking</SelectItem>
-                      <SelectItem value="text">Text</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label>Source Document</Label>
+                  <Input
+                    value={newFact.source_document || ''}
+                    onChange={e => setNewFact(prev => ({ ...prev, source_document: e.target.value }))}
+                    placeholder="e.g., Fast Facts 2024"
+                  />
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Context (optional)</Label>
-                <Input
-                  value={newFact.context || ''}
-                  onChange={e => setNewFact(prev => ({ ...prev, context: e.target.value }))}
-                  placeholder="Additional context..."
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Source Document</Label>
-                <Input
-                  value={newFact.source_document || ''}
-                  onChange={e => setNewFact(prev => ({ ...prev, source_document: e.target.value }))}
-                  placeholder="e.g., Fast Facts 2024"
-                />
-              </div>
-            </div>
+              </TabsContent>
+            </Tabs>
+            
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddDialog(false)}>
                 Cancel
               </Button>
-              <Button 
-                onClick={handleAddFact} 
-                disabled={isSaving || !newFact.label || !newFact.value}
-              >
-                {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Add Fact
-              </Button>
+              {addMode === 'manual' && (
+                <Button 
+                  onClick={handleAddFact} 
+                  disabled={isSaving || !newFact.label || !newFact.value}
+                >
+                  {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  Add Fact
+                </Button>
+              )}
             </DialogFooter>
           </DialogContent>
         </Dialog>
