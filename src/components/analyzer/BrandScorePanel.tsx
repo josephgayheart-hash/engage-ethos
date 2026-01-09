@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -60,9 +60,10 @@ export function BrandScorePanel({ section, voiceAnalysis }: BrandScorePanelProps
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center justify-between">
-          <span className="text-lg">{section.title}</span>
+      <CardContent className="pt-5 space-y-4">
+        {/* Section Title with Score */}
+        <div className="flex items-center justify-between">
+          <span className="text-lg font-semibold">{section.title}</span>
           <div className={cn(
             "text-2xl font-bold",
             section.score >= 80 ? 'text-green-500' :
@@ -71,9 +72,8 @@ export function BrandScorePanel({ section, voiceAnalysis }: BrandScorePanelProps
           )}>
             {section.score}/100
           </div>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+        </div>
+
         {/* Voice Match */}
         {voiceAnalysis && (
           <div className="space-y-2">
