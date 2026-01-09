@@ -821,69 +821,134 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     );
   };
 
-  const renderEmailPreview = (email: EmailDraft) => (
-    <div className="space-y-3">
-      <div className="bg-muted/50 rounded-lg p-3 border border-border">
-        <p className="text-xs text-muted-foreground mb-1">Subject Line</p>
-        <p className="font-medium text-sm">{email.subject}</p>
-      </div>
-      <div className="bg-card rounded-lg p-4 border border-border">
-        <p className="text-xs text-muted-foreground mb-2">Email Body</p>
-        <p className="text-sm whitespace-pre-wrap">{email.body}</p>
-      </div>
-    </div>
-  );
-
-  const renderSmsPreview = (sms: string) => (
-    <div className="space-y-2">
-      <div className="bg-primary/10 rounded-2xl rounded-bl-sm p-4 max-w-[320px] border border-primary/20">
-        <p className="text-sm whitespace-pre-wrap">{sms}</p>
-      </div>
-      <SmsCharCounter text={sms} />
-    </div>
-  );
-
-  const renderSocialPreview = (post: string) => (
-    <div className="bg-card rounded-lg p-4 border border-border max-w-[400px]">
-      <div className="flex items-center gap-2 mb-3">
-        <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
-          <Share2 className="w-4 h-4 text-primary" />
+  const renderEmailPreview = (email: EmailDraft) => {
+    const primaryColor = branding?.primaryColor || '#0f766e'; // teal-700
+    const accentColor = branding?.accentColor || '#14b8a6'; // teal-500
+    const logoUrl = branding?.logoUrl;
+    
+    const headerStyle = {
+      background: `linear-gradient(135deg, ${primaryColor} 0%, ${accentColor} 100%)`,
+    };
+    
+    return (
+      <div className="space-y-0 border border-border rounded-lg overflow-hidden">
+        {/* Email Header with Branding */}
+        <div className="p-4 text-white" style={headerStyle}>
+          <div className="flex items-center gap-3">
+            {logoUrl && (
+              <img 
+                src={logoUrl} 
+                alt="Logo" 
+                className="w-10 h-10 object-contain bg-white/20 rounded-lg p-1"
+              />
+            )}
+            <div className="flex-1">
+              <p className="text-xs opacity-80">Subject Line</p>
+              <p className="font-semibold">{email.subject}</p>
+            </div>
+          </div>
         </div>
-        <div>
-          <p className="text-sm font-medium">Your Institution</p>
-          <p className="text-xs text-muted-foreground">@institution</p>
+        <div className="bg-card p-4">
+          <p className="text-sm whitespace-pre-wrap">{email.body}</p>
         </div>
       </div>
-      <p className="text-sm whitespace-pre-wrap">{post}</p>
-      <p className="text-xs text-muted-foreground mt-2">{post.length}/280 characters</p>
-    </div>
-  );
+    );
+  };
 
-  const renderPortalPreview = (notification: string) => (
-    <div className="bg-card rounded-lg border border-border overflow-hidden max-w-[400px]">
-      <div className="bg-primary/10 px-4 py-2 border-b border-border">
-        <p className="text-xs font-medium text-primary">New Notification</p>
+  const renderSmsPreview = (sms: string) => {
+    const primaryColor = branding?.primaryColor || '#0f766e';
+    
+    return (
+      <div className="space-y-2">
+        <div 
+          className="rounded-2xl rounded-bl-sm p-4 max-w-[320px] text-white"
+          style={{ backgroundColor: primaryColor }}
+        >
+          <p className="text-sm whitespace-pre-wrap">{sms}</p>
+        </div>
+        <SmsCharCounter text={sms} />
       </div>
-      <div className="p-4">
-        <p className="text-sm whitespace-pre-wrap">{notification}</p>
-      </div>
-    </div>
-  );
+    );
+  };
 
-  const renderLandingPagePreview = (lp: LandingPageDraft) => (
-    <div className="bg-card rounded-lg border border-border overflow-hidden">
-      <div className="bg-gradient-to-r from-primary/20 to-secondary/20 p-6 text-center">
-        <h2 className="text-xl font-bold mb-2">{lp.headline}</h2>
-        {lp.subheadline && (
-          <p className="text-sm text-muted-foreground">{lp.subheadline}</p>
-        )}
+  const renderSocialPreview = (post: string) => {
+    const primaryColor = branding?.primaryColor || '#0f766e';
+    const logoUrl = branding?.logoUrl;
+    
+    return (
+      <div className="bg-card rounded-lg p-4 border border-border max-w-[400px]">
+        <div className="flex items-center gap-2 mb-3">
+          {logoUrl ? (
+            <img src={logoUrl} alt="Logo" className="w-8 h-8 object-contain rounded-full" />
+          ) : (
+            <div 
+              className="w-8 h-8 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: `${primaryColor}20` }}
+            >
+              <Share2 className="w-4 h-4" style={{ color: primaryColor }} />
+            </div>
+          )}
+          <div>
+            <p className="text-sm font-medium">{institutionName || 'Your Institution'}</p>
+            <p className="text-xs text-muted-foreground">@institution</p>
+          </div>
+        </div>
+        <p className="text-sm whitespace-pre-wrap">{post}</p>
+        <p className="text-xs text-muted-foreground mt-2">{post.length}/280 characters</p>
       </div>
-      <div className="p-6">
-        <p className="text-sm whitespace-pre-wrap mb-4">{lp.body}</p>
-        <Button className="w-full">{lp.cta}</Button>
+    );
+  };
+
+  const renderPortalPreview = (notification: string) => {
+    const primaryColor = branding?.primaryColor || '#0f766e';
+    
+    return (
+      <div className="bg-card rounded-lg border border-border overflow-hidden max-w-[400px]">
+        <div 
+          className="px-4 py-2 border-b border-border"
+          style={{ backgroundColor: `${primaryColor}15` }}
+        >
+          <p className="text-xs font-medium" style={{ color: primaryColor }}>New Notification</p>
+        </div>
+        <div className="p-4">
+          <p className="text-sm whitespace-pre-wrap">{notification}</p>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  const renderLandingPagePreview = (lp: LandingPageDraft) => {
+    const primaryColor = branding?.primaryColor || '#0f766e';
+    const accentColor = branding?.accentColor || '#14b8a6';
+    const logoUrl = branding?.logoUrl;
+    
+    const headerStyle = {
+      background: `linear-gradient(135deg, ${primaryColor}30 0%, ${accentColor}30 100%)`,
+    };
+    
+    return (
+      <div className="bg-card rounded-lg border border-border overflow-hidden">
+        <div className="p-6 text-center" style={headerStyle}>
+          {logoUrl && (
+            <img src={logoUrl} alt="Logo" className="w-16 h-16 object-contain mx-auto mb-4" />
+          )}
+          <h2 className="text-xl font-bold mb-2">{lp.headline}</h2>
+          {lp.subheadline && (
+            <p className="text-sm text-muted-foreground">{lp.subheadline}</p>
+          )}
+        </div>
+        <div className="p-6">
+          <p className="text-sm whitespace-pre-wrap mb-4">{lp.body}</p>
+          <Button 
+            className="w-full text-white"
+            style={{ backgroundColor: primaryColor }}
+          >
+            {lp.cta}
+          </Button>
+        </div>
+      </div>
+    );
+  };
 
   const renderDirectMailPreview = (letter: string) => (
     <div className="bg-card rounded-lg p-6 border border-border shadow-sm max-w-[500px]">
@@ -975,159 +1040,198 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     </div>
   );
 
-  const renderSocialAdPreview = (ad: SocialAdDraft) => (
-    <div className="space-y-3">
-      {/* Meta/LinkedIn Ad Preview */}
-      <div className="bg-card rounded-lg border border-border overflow-hidden max-w-[400px]">
-        {/* Ad header */}
-        <div className="p-3 flex items-center gap-2 border-b border-border">
-          <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
-            <Megaphone className="w-5 h-5 text-primary" />
+  const renderSocialAdPreview = (ad: SocialAdDraft) => {
+    const primaryColor = branding?.primaryColor || '#0f766e';
+    const logoUrl = branding?.logoUrl;
+    
+    return (
+      <div className="space-y-3">
+        {/* Meta/LinkedIn Ad Preview */}
+        <div className="bg-card rounded-lg border border-border overflow-hidden max-w-[400px]">
+          {/* Ad header */}
+          <div className="p-3 flex items-center gap-2 border-b border-border">
+            {logoUrl ? (
+              <img src={logoUrl} alt="Logo" className="w-10 h-10 object-contain rounded-full" />
+            ) : (
+              <div 
+                className="w-10 h-10 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: `${primaryColor}20` }}
+              >
+                <Megaphone className="w-5 h-5" style={{ color: primaryColor }} />
+              </div>
+            )}
+            <div>
+              <p className="text-sm font-medium">{institutionName || 'Your Institution'}</p>
+              <p className="text-xs text-muted-foreground">Sponsored</p>
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-medium">Your Institution</p>
-            <p className="text-xs text-muted-foreground">Sponsored</p>
+          
+          {/* Primary text */}
+          <div className="p-3">
+            <p className="text-sm whitespace-pre-wrap">{ad.primaryText}</p>
+          </div>
+          
+          {/* Image placeholder */}
+          <div className="bg-muted/50 h-48 flex items-center justify-center border-y border-border">
+            <div className="text-center text-muted-foreground">
+              <Megaphone className="w-8 h-8 mx-auto mb-2 opacity-50" />
+              <p className="text-xs">Image uploaded separately</p>
+            </div>
+          </div>
+          
+          {/* Link preview */}
+          <div className="p-3 bg-muted/30">
+            <p className="text-xs text-muted-foreground uppercase">university.edu</p>
+            <p className="text-sm font-semibold">{ad.headline}</p>
+            {ad.description && <p className="text-xs text-muted-foreground">{ad.description}</p>}
+          </div>
+          
+          {/* CTA */}
+          <div className="p-3 border-t border-border">
+            <Button 
+              size="sm" 
+              className="w-full text-white"
+              style={{ backgroundColor: primaryColor }}
+            >
+              {ad.ctaButton || 'Learn More'}
+            </Button>
           </div>
         </div>
-        
-        {/* Primary text */}
-        <div className="p-3">
-          <p className="text-sm whitespace-pre-wrap">{ad.primaryText}</p>
-        </div>
-        
-        {/* Image placeholder */}
-        <div className="bg-muted/50 h-48 flex items-center justify-center border-y border-border">
-          <div className="text-center text-muted-foreground">
-            <Megaphone className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            <p className="text-xs">Image uploaded separately</p>
-          </div>
-        </div>
-        
-        {/* Link preview */}
-        <div className="p-3 bg-muted/30">
-          <p className="text-xs text-muted-foreground uppercase">university.edu</p>
-          <p className="text-sm font-semibold">{ad.headline}</p>
-          {ad.description && <p className="text-xs text-muted-foreground">{ad.description}</p>}
-        </div>
-        
-        {/* CTA */}
-        <div className="p-3 border-t border-border">
-          <Button size="sm" className="w-full">{ad.ctaButton || 'Learn More'}</Button>
-        </div>
+        <p className="text-xs text-muted-foreground italic">
+          Note: Upload your creative assets directly in Meta/LinkedIn Ads Manager
+        </p>
       </div>
-      <p className="text-xs text-muted-foreground italic">
-        Note: Upload your creative assets directly in Meta/LinkedIn Ads Manager
-      </p>
-    </div>
-  );
+    );
+  };
 
-  const renderTalkingPointsPreview = (tp: TalkingPointsDraft) => (
-    <div className="space-y-4">
-      {/* Header with context */}
-      <div className="bg-teal-50 dark:bg-teal-950/30 rounded-lg p-4 border border-teal-200 dark:border-teal-800">
-        <div className="flex items-center gap-2 mb-3">
-          <Mic className="w-5 h-5 text-teal-600 dark:text-teal-400" />
-          <span className="font-semibold text-lg text-teal-700 dark:text-teal-300">Executive Talking Points</span>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {tp.context && (
-            <div className="bg-white/50 dark:bg-black/20 rounded p-2">
-              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Context</p>
-              <p className="text-sm font-medium">{tp.context}</p>
+  const renderTalkingPointsPreview = (tp: TalkingPointsDraft) => {
+    const primaryColor = branding?.primaryColor || '#0f766e';
+    const accentColor = branding?.accentColor || '#14b8a6';
+    const logoUrl = branding?.logoUrl;
+    
+    const headerStyle = {
+      background: `linear-gradient(135deg, ${primaryColor}15 0%, ${accentColor}15 100%)`,
+      borderColor: `${primaryColor}40`,
+    };
+    
+    return (
+      <div className="space-y-4">
+        {/* Header with context and branding */}
+        <div className="rounded-lg p-4 border" style={headerStyle}>
+          <div className="flex items-center gap-3 mb-3">
+            {logoUrl && (
+              <img src={logoUrl} alt="Logo" className="w-10 h-10 object-contain rounded-lg" />
+            )}
+            <div className="flex items-center gap-2">
+              <Mic className="w-5 h-5" style={{ color: primaryColor }} />
+              <span className="font-semibold text-lg" style={{ color: primaryColor }}>Executive Talking Points</span>
             </div>
-          )}
-          {tp.audience && (
-            <div className="bg-white/50 dark:bg-black/20 rounded p-2">
-              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Audience</p>
-              <p className="text-sm font-medium">{tp.audience}</p>
-            </div>
-          )}
-        </div>
-      </div>
-      
-      {/* Opening Hook */}
-      {tp.openingHook && (
-        <div className="bg-green-50 dark:bg-green-950/30 rounded-lg p-4 border border-green-200 dark:border-green-800">
-          <p className="text-xs font-semibold text-green-700 dark:text-green-400 mb-2 uppercase tracking-wide">Opening Hook</p>
-          <p className="text-sm leading-relaxed italic border-l-2 border-green-400 pl-3">"{tp.openingHook}"</p>
-        </div>
-      )}
-      
-      {/* Key Messages - Enhanced display */}
-      {tp.keyMessages && tp.keyMessages.length > 0 && (
-        <div className="bg-card rounded-lg p-4 border-2 border-primary/20">
-          <p className="text-xs font-semibold text-primary mb-4 uppercase tracking-wide flex items-center gap-2">
-            <Target className="w-4 h-4" />
-            Key Talking Points
-          </p>
-          <div className="space-y-4">
-            {tp.keyMessages.map((message, i) => (
-              <div key={i} className="flex gap-3 bg-muted/30 rounded-lg p-3">
-                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">{i + 1}</span>
-                <p className="text-sm leading-relaxed pt-0.5">{message}</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {tp.context && (
+              <div className="bg-white/50 dark:bg-black/20 rounded p-2">
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Context</p>
+                <p className="text-sm font-medium">{tp.context}</p>
               </div>
-            ))}
+            )}
+            {tp.audience && (
+              <div className="bg-white/50 dark:bg-black/20 rounded p-2">
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Audience</p>
+                <p className="text-sm font-medium">{tp.audience}</p>
+              </div>
+            )}
           </div>
         </div>
-      )}
-      
-      {/* Supporting Data */}
-      {tp.supportingData && tp.supportingData.length > 0 && (
-        <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
-          <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-3 uppercase tracking-wide">Supporting Data & Evidence</p>
-          <div className="grid gap-2">
-            {tp.supportingData.map((data, i) => (
-              <div key={i} className="flex items-start gap-2 bg-white/50 dark:bg-black/20 rounded p-2">
-                <span className="text-blue-500 font-bold">📊</span>
-                <span className="text-sm">{data}</span>
-              </div>
-            ))}
+        
+        {/* Opening Hook */}
+        {tp.openingHook && (
+          <div className="rounded-lg p-4 border" style={{ backgroundColor: `${accentColor}10`, borderColor: `${accentColor}40` }}>
+            <p className="text-xs font-semibold mb-2 uppercase tracking-wide" style={{ color: accentColor }}>Opening Hook</p>
+            <p className="text-sm leading-relaxed italic border-l-2 pl-3" style={{ borderColor: accentColor }}>"{tp.openingHook}"</p>
           </div>
-        </div>
-      )}
-      
-      {/* Anticipated Q&A - Now with suggested responses */}
-      {tp.anticipatedQuestions && tp.anticipatedQuestions.length > 0 && (
-        <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-4 border border-amber-200 dark:border-amber-800">
-          <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 mb-3 uppercase tracking-wide">Anticipated Q&A</p>
-          <div className="space-y-3">
-            {tp.anticipatedQuestions.map((question, i) => (
-              <div key={i} className="bg-white/50 dark:bg-black/20 rounded-lg p-3 space-y-2">
-                <p className="text-sm">
-                  <span className="font-bold text-amber-700 dark:text-amber-400">Q:</span> {question}
-                </p>
-                {tp.suggestedResponses && tp.suggestedResponses[i] && (
-                  <p className="text-sm pl-4 border-l-2 border-amber-300 text-muted-foreground">
-                    <span className="font-bold text-green-600 dark:text-green-400">A:</span> {tp.suggestedResponses[i]}
+        )}
+        
+        {/* Key Messages - Enhanced display with branding */}
+        {tp.keyMessages && tp.keyMessages.length > 0 && (
+          <div className="bg-card rounded-lg p-4 border-2" style={{ borderColor: `${primaryColor}30` }}>
+            <p className="text-xs font-semibold mb-4 uppercase tracking-wide flex items-center gap-2" style={{ color: primaryColor }}>
+              <Target className="w-4 h-4" />
+              Key Talking Points
+            </p>
+            <div className="space-y-4">
+              {tp.keyMessages.map((message, i) => (
+                <div key={i} className="flex gap-3 bg-muted/30 rounded-lg p-3">
+                  <span 
+                    className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold text-white"
+                    style={{ backgroundColor: primaryColor }}
+                  >
+                    {i + 1}
+                  </span>
+                  <p className="text-sm leading-relaxed pt-0.5">{message}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Supporting Data */}
+        {tp.supportingData && tp.supportingData.length > 0 && (
+          <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+            <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-3 uppercase tracking-wide">Supporting Data & Evidence</p>
+            <div className="grid gap-2">
+              {tp.supportingData.map((data, i) => (
+                <div key={i} className="flex items-start gap-2 bg-white/50 dark:bg-black/20 rounded p-2">
+                  <span className="text-blue-500 font-bold">📊</span>
+                  <span className="text-sm">{data}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Anticipated Q&A */}
+        {tp.anticipatedQuestions && tp.anticipatedQuestions.length > 0 && (
+          <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-4 border border-amber-200 dark:border-amber-800">
+            <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 mb-3 uppercase tracking-wide">Anticipated Q&A</p>
+            <div className="space-y-3">
+              {tp.anticipatedQuestions.map((question, i) => (
+                <div key={i} className="bg-white/50 dark:bg-black/20 rounded-lg p-3 space-y-2">
+                  <p className="text-sm">
+                    <span className="font-bold text-amber-700 dark:text-amber-400">Q:</span> {question}
                   </p>
-                )}
-              </div>
-            ))}
+                  {tp.suggestedResponses && tp.suggestedResponses[i] && (
+                    <p className="text-sm pl-4 border-l-2 border-amber-300 text-muted-foreground">
+                      <span className="font-bold text-green-600 dark:text-green-400">A:</span> {tp.suggestedResponses[i]}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
-      
-      {/* Transition Phrases */}
-      {tp.transitionPhrases && tp.transitionPhrases.length > 0 && (
-        <div className="bg-muted/50 rounded-lg p-4 border border-border">
-          <p className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wide">Transition Phrases</p>
-          <div className="flex flex-wrap gap-2">
-            {tp.transitionPhrases.map((phrase, i) => (
-              <span key={i} className="text-sm bg-background px-3 py-1.5 rounded-full border shadow-sm italic">"{phrase}"</span>
-            ))}
+        )}
+        
+        {/* Transition Phrases */}
+        {tp.transitionPhrases && tp.transitionPhrases.length > 0 && (
+          <div className="bg-muted/50 rounded-lg p-4 border border-border">
+            <p className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wide">Transition Phrases</p>
+            <div className="flex flex-wrap gap-2">
+              {tp.transitionPhrases.map((phrase, i) => (
+                <span key={i} className="text-sm bg-background px-3 py-1.5 rounded-full border shadow-sm italic">"{phrase}"</span>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
-      
-      {/* Closing Statement */}
-      {tp.closingStatement && (
-        <div className="bg-purple-50 dark:bg-purple-950/30 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
-          <p className="text-xs font-semibold text-purple-700 dark:text-purple-400 mb-2 uppercase tracking-wide">Closing Statement</p>
-          <p className="text-sm leading-relaxed font-medium border-l-2 border-purple-400 pl-3">"{tp.closingStatement}"</p>
-        </div>
-      )}
-    </div>
-  );
+        )}
+        
+        {/* Closing Statement */}
+        {tp.closingStatement && (
+          <div className="rounded-lg p-4 border" style={{ backgroundColor: `${primaryColor}08`, borderColor: `${primaryColor}30` }}>
+            <p className="text-xs font-semibold mb-2 uppercase tracking-wide" style={{ color: primaryColor }}>Closing Statement</p>
+            <p className="text-sm leading-relaxed font-medium border-l-2 pl-3" style={{ borderColor: primaryColor }}>"{tp.closingStatement}"</p>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const renderNewsArticlePreview = (article: NewsArticleDraft) => (
     <div className="space-y-4">
@@ -1279,15 +1383,39 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     );
   };
 
-  const renderCaseForCarePreview = (cfc: CaseForCareDraft) => (
+  const renderCaseForCarePreview = (cfc: CaseForCareDraft) => {
+    // Use branding colors or fallback to defaults
+    const primaryColor = branding?.primaryColor || '#be123c'; // rose-600
+    const accentColor = branding?.accentColor || '#9333ea'; // purple-600
+    const logoUrl = branding?.logoUrl;
+    
+    // Create gradient style using brand colors
+    const heroGradientStyle = {
+      background: `linear-gradient(135deg, ${primaryColor} 0%, ${accentColor} 100%)`,
+    };
+    const ctaGradientStyle = {
+      background: `linear-gradient(90deg, ${primaryColor} 0%, ${accentColor} 100%)`,
+    };
+    
+    return (
     <div className="space-y-6 -mx-2">
-      {/* Hero Header */}
-      <div className="bg-gradient-to-br from-rose-600 via-rose-500 to-purple-600 rounded-2xl p-6 text-white relative overflow-hidden">
+      {/* Hero Header with Brand Colors */}
+      <div className="rounded-2xl p-6 text-white relative overflow-hidden" style={heroGradientStyle}>
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
         <div className="relative">
-          <div className="flex items-center gap-2 mb-3 opacity-90">
-            <Heart className="w-5 h-5" />
-            <span className="text-sm font-medium uppercase tracking-wider">Case for Support</span>
+          {/* Logo + Label Row */}
+          <div className="flex items-center gap-3 mb-3">
+            {logoUrl && (
+              <img 
+                src={logoUrl} 
+                alt="Institution logo" 
+                className="w-12 h-12 object-contain bg-white/20 rounded-lg p-1"
+              />
+            )}
+            <div className="flex items-center gap-2 opacity-90">
+              <Heart className="w-5 h-5" />
+              <span className="text-sm font-medium uppercase tracking-wider">Case for Support</span>
+            </div>
           </div>
           {cfc.documentTitle && (
             <h2 className="text-2xl md:text-3xl font-bold mb-2">{cfc.documentTitle}</h2>
@@ -1300,7 +1428,7 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
               <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30">{cfc.campaignName}</Badge>
             )}
             {cfc.targetAmount && (
-              <Badge className="bg-white text-rose-600 hover:bg-white/90 font-bold">{cfc.targetAmount} Goal</Badge>
+              <Badge className="bg-white text-foreground hover:bg-white/90 font-bold">{cfc.targetAmount} Goal</Badge>
             )}
           </div>
         </div>
@@ -1554,9 +1682,9 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
         </div>
       )}
 
-      {/* Call to Action Banner */}
+      {/* Call to Action Banner with Brand Colors */}
       {cfc.callToAction && (
-        <div className="bg-gradient-to-r from-rose-600 to-purple-600 rounded-2xl p-6 text-white text-center">
+        <div className="rounded-2xl p-6 text-white text-center" style={ctaGradientStyle}>
           <p className="text-lg md:text-xl font-semibold mb-4">{cfc.callToAction}</p>
           {cfc.contactInfo && (
             <div className="flex flex-wrap justify-center gap-4 text-sm opacity-90">
@@ -1589,6 +1717,7 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
       )}
     </div>
   );
+  };
 
   return (
     <Card>
