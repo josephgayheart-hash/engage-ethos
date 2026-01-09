@@ -237,12 +237,17 @@ STYLE GUIDE FOR UNIVERSITY NEWS:
 }
 
 CRITICAL: Each field must contain SUBSTANTIAL, SPECIFIC content. Key messages should be complete talking points (2-3 sentences each), not fragments. Ground all content in the institutional brand platform, pillars, proof points, and pathways. Make this immediately usable by an executive.`,
-        "case-for-care": `Advancement Case for Support document for fundraising and philanthropy. Return JSON object with exact fields:
+        "case-for-care": `Advancement Case for Support document for fundraising and philanthropy. Create a VIBRANT, magazine-style document. Return JSON object with exact fields:
 {
-  "documentTitle": "A Case for the Future of Learning",
-  "campaignName": "Campaign for Tomorrow",
+  "documentTitle": "Transforming Tomorrow: A Case for Support",
+  "campaignName": "The Campaign for Excellence",
+  "campaignTagline": "Dream Bold. Give Boldly.",
   "targetAmount": "$50 million",
-  "openingNarrative": "2-3 paragraphs telling a compelling story that draws the reader in emotionally. Begin with a specific student, faculty member, or community member whose life has been transformed. Make it personal and urgent.",
+  "openingStory": {
+    "headline": "A Dream Realized",
+    "narrative": "2-3 paragraphs telling a compelling human story. Begin with a specific person whose life has been transformed. Make it personal, emotional, and urgent. Use vivid details and sensory language.",
+    "attribution": "Name of the person in the story, Class Year or Role"
+  },
   "problemStatement": "The challenge or need being addressed - why now, why this matters",
   "visionStatement": "Bold vision for what's possible with philanthropic support",
   "missionConnection": "How this campaign connects to the institutional mission and values",
@@ -252,11 +257,15 @@ CRITICAL: Each field must contain SUBSTANTIAL, SPECIFIC content. Key messages sh
     { "name": "Program 3", "description": "...", "impact": "..." }
   ],
   "impactStatistics": [
-    "94% of scholarship recipients graduate within 4 years",
-    "$2.3M in student emergency funds distributed last year",
-    "15,000 students served through academic support programs",
-    "12 new endowed professorships created",
-    "200+ community partnerships strengthened"
+    { "value": "94%", "label": "graduation rate", "context": "up 5% from 2020" },
+    { "value": "#1", "label": "for upward mobility in the region" },
+    { "value": "$2.3B", "label": "economic impact annually" },
+    { "value": "15,000+", "label": "students supported each year" },
+    { "value": "200+", "label": "community partnerships" }
+  ],
+  "pullQuotes": [
+    { "quote": "Education is the most powerful tool we can use to change the world.", "attribution": "Chancellor Name" },
+    { "quote": "This place changed my life and my family's future forever.", "attribution": "Graduate Name, Class Year" }
   ],
   "testimonials": [
     { "quote": "A compelling donor or student testimonial", "attribution": "Name, Title", "role": "Donor" },
@@ -278,15 +287,18 @@ CRITICAL: Each field must contain SUBSTANTIAL, SPECIFIC content. Key messages sh
   }
 }
 
-STYLE GUIDE FOR CASE FOR CARE:
-- Lead with emotion through compelling storytelling
+STYLE GUIDE FOR CASE FOR SUPPORT:
+- Lead with emotion through compelling storytelling - make readers FEEL the impact
 - Position the donor as the hero who makes transformation possible
+- Use LARGE, visual statistics (format as objects with value + label for display)
+- Include 2-3 powerful pull quotes for visual emphasis
 - Use clear, simple language (avoid jargon and academic speak)
 - Include specific, tangible impact statements
 - Make giving levels relatable ("provides X for Y students")
 - Connect to institutional mission and brand pillars
 - End with a bold, inspiring call to partnership
-- Write with passion and authenticity throughout`
+- Write with passion and authenticity throughout
+- Think of this as a magazine spread, not a boring report`
       };
 
       // Build comprehensive institutional config string for prompts
