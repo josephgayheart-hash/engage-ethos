@@ -41,8 +41,20 @@ import {
   Search,
   Link,
   FileText,
-  CheckCircle2
+  CheckCircle2,
+  Trash2
 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 interface StoryBankTabProps {
   profileId?: string | null;
@@ -67,10 +79,13 @@ export function StoryBankTab({ profileId }: StoryBankTabProps) {
     addStory,
     updateStory,
     deleteStory,
+    deleteAllStories,
     parseStoryFromText,
     scrapeAndParseStory,
     toggleFeatured,
   } = useStoryBank({ profileId });
+
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
@@ -199,6 +214,46 @@ export function StoryBankTab({ profileId }: StoryBankTabProps) {
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
+            {stories.length > 0 && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" className="text-destructive hover:text-destructive">
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete All
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete all stories?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete all {stories.length} stories from your Story Bank. 
+                      This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      onClick={async () => {
+                        setIsDeleting(true);
+                        await deleteAllStories();
+                        setIsDeleting(false);
+                      }}
+                      disabled={isDeleting}
+                    >
+                      {isDeleting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Deleting...
+                        </>
+                      ) : (
+                        'Delete All'
+                      )}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
             <Button variant="outline" onClick={() => setShowImportDialog(true)}>
               <Wand2 className="w-4 h-4 mr-2" />
               Import with AI

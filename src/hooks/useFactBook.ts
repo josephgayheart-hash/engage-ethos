@@ -303,6 +303,42 @@ export function useFactBook(options: UseFactBookOptions = {}) {
     }
   };
 
+  const deleteAllFacts = async (): Promise<boolean> => {
+    if (!tenant?.id) return false;
+    
+    try {
+      let query = supabase
+        .from('fact_book')
+        .delete()
+        .eq('tenant_id', tenant.id);
+      
+      if (profileId) {
+        query = query.eq('profile_id', profileId);
+      }
+      
+      const { error } = await query;
+      
+      if (error) throw error;
+      
+      setFacts([]);
+      
+      toast({
+        title: 'All facts deleted',
+        description: 'Your Fact Book has been cleared.',
+      });
+      
+      return true;
+    } catch (error: any) {
+      console.error('Error deleting all facts:', error);
+      toast({
+        title: 'Error deleting facts',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return false;
+    }
+  };
+
   const parseFactBookFromText = async (text: string, sourceDocument?: string): Promise<CreateFactInput[]> => {
     setIsParsing(true);
     try {
@@ -352,6 +388,7 @@ export function useFactBook(options: UseFactBookOptions = {}) {
     addFactsBulk,
     updateFact,
     deleteFact,
+    deleteAllFacts,
     parseFactBookFromText,
     toggleHighlight,
     getHighlightedFacts,

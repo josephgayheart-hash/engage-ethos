@@ -214,6 +214,42 @@ export function useStoryBank(options: UseStoryBankOptions = {}) {
     }
   };
 
+  const deleteAllStories = async (): Promise<boolean> => {
+    if (!tenant?.id) return false;
+    
+    try {
+      let query = supabase
+        .from('story_bank')
+        .delete()
+        .eq('tenant_id', tenant.id);
+      
+      if (profileId) {
+        query = query.eq('profile_id', profileId);
+      }
+      
+      const { error } = await query;
+      
+      if (error) throw error;
+      
+      setStories([]);
+      
+      toast({
+        title: 'All stories deleted',
+        description: 'Your Story Bank has been cleared.',
+      });
+      
+      return true;
+    } catch (error: any) {
+      console.error('Error deleting all stories:', error);
+      toast({
+        title: 'Error deleting stories',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return false;
+    }
+  };
+
   const parseStoryFromText = async (text: string, sourceUrl?: string): Promise<CreateStoryInput | null> => {
     setIsParsing(true);
     try {
@@ -315,6 +351,7 @@ export function useStoryBank(options: UseStoryBankOptions = {}) {
     addStory,
     updateStory,
     deleteStory,
+    deleteAllStories,
     parseStoryFromText,
     scrapeAndParseStory,
     toggleFeatured,
