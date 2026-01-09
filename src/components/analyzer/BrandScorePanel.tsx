@@ -60,39 +60,46 @@ export function BrandScorePanel({ section, voiceAnalysis }: BrandScorePanelProps
 
   return (
     <Card>
-      <CardContent className="pt-5 space-y-4">
-        {/* Section Title with Score */}
-        <div className="flex items-center justify-between">
-          <span className="text-lg font-semibold">{section.title}</span>
-          <div className={cn(
-            "text-2xl font-bold",
-            section.score >= 80 ? 'text-green-500' :
-            section.score >= 60 ? 'text-amber-500' :
-            'text-red-500'
-          )}>
-            {section.score}/100
+      <CardContent className="pt-5 space-y-5">
+        {/* Panel Header */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-2 min-w-0">
+            <Target className="w-5 h-5 text-primary" />
+            <h3 className="text-2xl font-semibold leading-none tracking-tight">
+              Voice Profile Match
+            </h3>
+          </div>
+
+          <div className="text-right">
+            <div
+              className={cn(
+                "text-3xl font-bold",
+                section.score >= 80
+                  ? "text-green-500"
+                  : section.score >= 60
+                    ? "text-amber-500"
+                    : "text-red-500",
+              )}
+            >
+              {section.score}/100
+            </div>
+            <div className="text-xs text-muted-foreground">Section Score</div>
           </div>
         </div>
 
-        {/* Voice Match */}
+        {/* Matched tones */}
         {voiceAnalysis && (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm font-medium">
-              <Target className="w-4 h-4 text-primary" />
-              Voice Profile Match
-            </div>
-            <div className="flex flex-wrap gap-1">
-              {voiceAnalysis.primaryTone && (
-                <Badge variant="secondary" className="text-xs">
-                  {voiceAnalysis.primaryTone}
-                </Badge>
-              )}
-              {voiceAnalysis.secondaryTones?.slice(0, 2).map((tone: string, i: number) => (
-                <Badge key={i} variant="outline" className="text-xs">
-                  {tone}
-                </Badge>
-              ))}
-            </div>
+          <div className="flex flex-wrap gap-1">
+            {voiceAnalysis.primaryTone && (
+              <Badge variant="secondary" className="text-xs">
+                {voiceAnalysis.primaryTone}
+              </Badge>
+            )}
+            {voiceAnalysis.secondaryTones?.slice(0, 2).map((tone: string, i: number) => (
+              <Badge key={i} variant="outline" className="text-xs">
+                {tone}
+              </Badge>
+            ))}
           </div>
         )}
 
