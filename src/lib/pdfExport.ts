@@ -263,15 +263,20 @@ export async function exportCaseForSupportToPDF(
   };
 
   const addText = (
-    text: string, 
+    text: string | undefined | null, 
     size: number, 
     style: "normal" | "bold" | "italic" = "normal", 
     color: [number, number, number] = [40, 40, 40]
   ) => {
+    // Guard against undefined/null text
+    const safeText = text || "";
+    if (!safeText) return;
+    
     doc.setFontSize(size);
     doc.setFont("helvetica", style);
     doc.setTextColor(...color);
-    const lines = doc.splitTextToSize(text, contentWidth - 5);
+    const lines = doc.splitTextToSize(safeText, contentWidth - 5);
+    if (!lines || lines.length === 0) return;
     checkPageBreak(lines.length * size * 0.5);
     doc.text(lines, margin, y);
     y += lines.length * size * 0.5 + 4;
@@ -422,12 +427,15 @@ export async function exportCaseForSupportToPDF(
     const messageText = cfc.leaderMessage.message || "";
     const truncatedMessage = messageText.length > 280 ? messageText.substring(0, 280) + "..." : messageText;
     const messageLines = doc.splitTextToSize(truncatedMessage, contentWidth - 15);
-    doc.text(messageLines, margin + 8, y + 5);
+    if (messageLines && messageLines.length > 0) {
+      doc.text(messageLines, margin + 8, y + 5);
+    }
     
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
     doc.setTextColor(...primaryRgb);
-    doc.text(`— ${cfc.leaderMessage.leaderName}, ${cfc.leaderMessage.leaderTitle}`, margin + 8, y + 37);
+    const leaderAttribution = `— ${cfc.leaderMessage.leaderName || "Leadership"}, ${cfc.leaderMessage.leaderTitle || ""}`.replace(/, $/, "");
+    doc.text(leaderAttribution, margin + 8, y + 37);
     y += 55;
   }
 
@@ -448,7 +456,9 @@ export async function exportCaseForSupportToPDF(
     const narrativeText = cfc.openingStory.narrative || "";
     const truncatedNarrative = narrativeText.length > 180 ? narrativeText.substring(0, 180) + "..." : narrativeText;
     const narrativeLines = doc.splitTextToSize(truncatedNarrative, contentWidth - 15);
-    doc.text(narrativeLines, margin + 8, y + 15);
+    if (narrativeLines && narrativeLines.length > 0) {
+      doc.text(narrativeLines, margin + 8, y + 15);
+    }
     
     if (cfc.openingStory.attribution) {
       doc.setFont("helvetica", "normal");
@@ -488,13 +498,15 @@ export async function exportCaseForSupportToPDF(
       doc.setTextColor(...primaryRgb);
       doc.setFontSize(10);
       doc.setFont("helvetica", "bold");
-      doc.text(pillar.name, margin + 5, y + 4);
+      doc.text(pillar.name || "Pillar", margin + 5, y + 4);
       
       doc.setFont("helvetica", "normal");
       doc.setTextColor(60, 60, 60);
       doc.setFontSize(9);
-      const descLines = doc.splitTextToSize(pillar.description, contentWidth - 15);
-      doc.text(descLines[0], margin + 5, y + 12);
+      const descLines = doc.splitTextToSize(pillar.description || "", contentWidth - 15);
+      if (descLines && descLines[0]) {
+        doc.text(descLines[0], margin + 5, y + 12);
+      }
       y += 24;
     });
   }
@@ -527,8 +539,14 @@ export async function exportCaseForSupportToPDF(
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
-      const statValue = typeof stat === "object" ? stat.value : stat;
-      const statLabel = typeof stat === "object" ? stat.label : "";
+      const statValue = (typeof stat === "object" ? stat.value : stat) || "";
+      const statLabel = (typeof stat === "object" ? stat.label : "") || "";
+      
+      // Skip if no value
+      if (!statValue) {
+        col++;
+        return;
+      }
       
       // Truncate stat value if too wide
       const maxValueWidth = statWidth - 8;
@@ -569,13 +587,16 @@ export async function exportCaseForSupportToPDF(
       doc.setTextColor(...primaryRgb);
       doc.setFontSize(10);
       doc.setFont("helvetica", "bold");
-      doc.text(`• ${program.name}`, margin, y);
+      doc.text(`• ${program.name || "Program"}`, margin, y);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9);
       doc.setTextColor(60, 60, 60);
-      const descLines = doc.splitTextToSize(`${program.description} (Impact: ${program.impact})`, contentWidth - 12);
-      doc.text(descLines, margin + 8, y + 6);
-      y += 10 + descLines.length * 4;
+      const programDesc = `${program.description || ""} (Impact: ${program.impact || "TBD"})`;
+      const descLines = doc.splitTextToSize(programDesc, contentWidth - 12);
+      if (descLines && descLines.length > 0) {
+        doc.text(descLines, margin + 8, y + 6);
+      }
+      y += 10 + (descLines?.length || 1) * 4;
     });
   }
 
@@ -594,12 +615,17 @@ export async function exportCaseForSupportToPDF(
       doc.setTextColor(...accentRgb);
       doc.setFontSize(10);
       doc.setFont("helvetica", "italic");
-      const quoteLines = doc.splitTextToSize(`"${quote.quote}"`, contentWidth - 20);
-      doc.text(quoteLines[0], margin + 10, y + 5);
+      const quoteText = quote.quote ? `"${quote.quote}"` : "";
+      if (quoteText) {
+        const quoteLines = doc.splitTextToSize(quoteText, contentWidth - 20);
+        if (quoteLines && quoteLines[0]) {
+          doc.text(quoteLines[0], margin + 10, y + 5);
+        }
+      }
 
       doc.setFontSize(9);
       doc.setFont("helvetica", "normal");
-      doc.text(`— ${quote.attribution}`, margin + 10, y + 15);
+      doc.text(`— ${quote.attribution || "Anonymous"}`, margin + 10, y + 15);
       y += 28;
     });
   }
@@ -618,7 +644,7 @@ export async function exportCaseForSupportToPDF(
       doc.setTextColor(...accentRgb);
       doc.setFontSize(10);
       doc.setFont("helvetica", "bold");
-      doc.text(category.category, margin, y);
+      doc.text(category.category || "Category", margin, y);
       y += 6;
 
       category.opportunities.forEach((opp) => {
@@ -626,12 +652,15 @@ export async function exportCaseForSupportToPDF(
         doc.setTextColor(...primaryRgb);
         doc.setFontSize(9);
         doc.setFont("helvetica", "bold");
-        doc.text(`${opp.name} - ${opp.amount}`, margin + 5, y);
+        const oppLabel = `${opp.name || "Opportunity"} - ${opp.amount || "TBD"}`;
+        doc.text(oppLabel, margin + 5, y);
         doc.setFont("helvetica", "normal");
         doc.setFontSize(8);
         doc.setTextColor(80, 80, 80);
-        const descLines = doc.splitTextToSize(opp.description, contentWidth - 15);
-        doc.text(descLines[0], margin + 5, y + 5);
+        const descLines = doc.splitTextToSize(opp.description || "", contentWidth - 15);
+        if (descLines && descLines[0]) {
+          doc.text(descLines[0], margin + 5, y + 5);
+        }
         y += 14;
       });
       y += 4;
@@ -654,11 +683,11 @@ export async function exportCaseForSupportToPDF(
 
       // Wrap impact text
       doc.setFontSize(9);
-      const impactLines = doc.splitTextToSize(level.impact, impactMaxWidth);
+      const impactLines = doc.splitTextToSize(level.impact || "", impactMaxWidth);
 
       // Dynamic box height based on wrapped lines
       const lineHeight = 4;
-      const boxHeight = Math.max(12, 6 + impactLines.length * lineHeight);
+      const boxHeight = Math.max(12, 6 + (impactLines?.length || 1) * lineHeight);
 
       checkPageBreak(boxHeight + 4);
 
@@ -670,15 +699,19 @@ export async function exportCaseForSupportToPDF(
       doc.setTextColor(...accentRgb);
       doc.setFontSize(10);
       doc.setFont("helvetica", "bold");
-      doc.text(level.amount, margin + 5, y + 5);
+      doc.text(level.amount || "$0", margin + 5, y + 5);
 
       // Wrapped impact text on right
       doc.setFont("helvetica", "normal");
       doc.setTextColor(60, 60, 60);
       doc.setFontSize(9);
-      impactLines.forEach((line: string, idx: number) => {
-        doc.text(line, margin + amountWidth, y + 5 + idx * lineHeight);
-      });
+      if (impactLines && impactLines.length > 0) {
+        impactLines.forEach((line: string, idx: number) => {
+          if (line) {
+            doc.text(line, margin + amountWidth, y + 5 + idx * lineHeight);
+          }
+        });
+      }
 
       y += boxHeight + 4;
     });
@@ -693,8 +726,10 @@ export async function exportCaseForSupportToPDF(
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
-    const ctaLines = doc.splitTextToSize(cfc.callToAction, contentWidth - 20);
-    doc.text(ctaLines, pageWidth / 2, y + 6, { align: "center" });
+    const ctaLines = doc.splitTextToSize(cfc.callToAction || "", contentWidth - 20);
+    if (ctaLines && ctaLines.length > 0) {
+      doc.text(ctaLines, pageWidth / 2, y + 6, { align: "center" });
+    }
     y += 28;
   }
 
@@ -709,9 +744,11 @@ export async function exportCaseForSupportToPDF(
     doc.text("FOR MORE INFORMATION:", margin + 5, y + 4);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(60, 60, 60);
-    const contactText = `${cfc.contactInfo.name}, ${cfc.contactInfo.title} | ${cfc.contactInfo.email}${cfc.contactInfo.phone ? ` | ${cfc.contactInfo.phone}` : ""}`;
+    const contactText = `${cfc.contactInfo.name || "Contact"}, ${cfc.contactInfo.title || ""} | ${cfc.contactInfo.email || ""}${cfc.contactInfo.phone ? ` | ${cfc.contactInfo.phone}` : ""}`;
     const contactLines = doc.splitTextToSize(contactText, contentWidth - 15);
-    doc.text(contactLines[0], margin + 5, y + 13);
+    if (contactLines && contactLines[0]) {
+      doc.text(contactLines[0], margin + 5, y + 13);
+    }
     y += 28;
   }
 
@@ -721,8 +758,10 @@ export async function exportCaseForSupportToPDF(
     doc.setTextColor(...accentRgb);
     doc.setFontSize(11);
     doc.setFont("helvetica", "italic");
-    const closingLines = doc.splitTextToSize(cfc.closingStatement, contentWidth);
-    doc.text(closingLines, pageWidth / 2, y + 5, { align: "center" });
+    const closingLines = doc.splitTextToSize(cfc.closingStatement || "", contentWidth);
+    if (closingLines && closingLines.length > 0) {
+      doc.text(closingLines, pageWidth / 2, y + 5, { align: "center" });
+    }
   }
 
   // Footer on all pages
