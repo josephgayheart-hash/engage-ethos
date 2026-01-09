@@ -340,9 +340,10 @@ export default function UniversitySettingsPage() {
   };
 
   const handleColorInputChange = (value: string, setter: (v: string) => void) => {
-    if (value === '' || /^#?[0-9A-Fa-f]{0,6}$/.test(value)) {
-      if (value && !value.startsWith('#')) value = '#' + value;
-      setter(value);
+    // Allow empty, or # followed by up to 6 hex characters
+    const stripped = value.startsWith('#') ? value.slice(1) : value;
+    if (stripped === '' || /^[0-9A-Fa-f]{0,6}$/.test(stripped)) {
+      setter(stripped === '' ? '' : '#' + stripped);
     }
   };
 
