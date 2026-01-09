@@ -164,28 +164,33 @@ export default function WebContentAnalyzerPage() {
             </p>
           </div>
 
-          {/* Profile Selector - Cleaner Design */}
-          <Card className="mb-6 border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
-            <CardContent className="py-4">
-              <div className="flex flex-wrap items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-primary/10">
-                    <Dna className="w-4 h-4 text-primary" />
-                  </div>
-                  <span className="text-sm font-medium text-foreground">Analyzing against:</span>
+          {/* Brand Voice Profile Selector */}
+          <Card className="mb-6 border-primary/20 overflow-hidden">
+            <CardContent className="p-0">
+              <div className="flex items-center">
+                {/* Label Section */}
+                <div className="flex items-center gap-2 px-4 py-3 bg-primary/5 border-r border-primary/10">
+                  <Dna className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium text-foreground whitespace-nowrap">Brand Voice Profile</span>
                 </div>
-                <div className="flex-1 min-w-[200px] max-w-sm">
+                
+                {/* Selector Section */}
+                <div className="flex-1 px-4 py-2">
                   <InstitutionalProfileSelector
                     selectedProfileId={selectedProfileId}
                     onProfileChange={setSelectedProfileId}
                     compact
                   />
                 </div>
+                
+                {/* Status Badge */}
                 {contentDNA?.last_analyzed_at && (
-                  <Badge className="bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-500/15">
-                    <Sparkles className="w-3 h-3 mr-1" />
-                    DNA Active
-                  </Badge>
+                  <div className="px-4 py-3 border-l border-border">
+                    <Badge className="bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-500/15">
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      DNA Active
+                    </Badge>
+                  </div>
                 )}
               </div>
             </CardContent>

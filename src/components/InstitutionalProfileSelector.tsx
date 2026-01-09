@@ -116,19 +116,21 @@ export function InstitutionalProfileSelector({
   };
 
   return (
-    <div className={`space-y-2 ${compact ? '' : 'p-4 rounded-lg border border-border bg-card'}`}>
-      <div className="flex items-center justify-between">
-        <Label className="text-sm font-medium flex items-center gap-2">
-          <Building2 className="w-4 h-4 text-secondary" />
-          Generate As
-        </Label>
-        <Button variant="ghost" size="sm" className="h-6 px-2 text-xs" asChild>
-          <Link to="/university-settings" className="flex items-center gap-1">
-            Manage
-            <ChevronRight className="w-3 h-3" />
-          </Link>
-        </Button>
-      </div>
+    <div className={`${compact ? '' : 'space-y-2 p-4 rounded-lg border border-border bg-card'}`}>
+      {!compact && (
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-medium flex items-center gap-2">
+            <Building2 className="w-4 h-4 text-secondary" />
+            Generate As
+          </Label>
+          <Button variant="ghost" size="sm" className="h-6 px-2 text-xs" asChild>
+            <Link to="/university-settings" className="flex items-center gap-1">
+              Manage
+              <ChevronRight className="w-3 h-3" />
+            </Link>
+          </Button>
+        </div>
+      )}
       
       <Select value={selectedProfileId || 'none'} onValueChange={handleChange}>
         <SelectTrigger className={`${compact ? 'h-9' : ''} ${selectedProfile ? 'border-secondary/50 bg-secondary/5' : ''}`}>
