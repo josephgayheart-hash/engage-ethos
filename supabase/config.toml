@@ -50,3 +50,6 @@ verify_jwt = false
 
 [functions.parse-web-sections]
 verify_jwt = false
+
+[functions.analyze-web-content]
+verify_jwt = false

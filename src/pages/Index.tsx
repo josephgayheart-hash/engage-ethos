@@ -43,7 +43,8 @@ import {
   CheckCircle2,
   CircleDot,
   Building2,
-  User
+  User,
+  Search
 } from "lucide-react";
 
 const Index = () => {
@@ -551,6 +552,19 @@ const Index = () => {
               </Badge>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pb-4">
+              {/* Web Content Analyzer - Prominent placement */}
+              <Link to="/web-analyzer">
+                <Card className="h-full cursor-pointer card-interactive group relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-[hsl(200_100%_50%_/_0.5)]" />
+                  <CardContent className="p-4">
+                    <div className="icon-container icon-container-md bg-[hsl(200_100%_50%_/_0.1)] mb-3">
+                      <Search className="w-5 h-5 text-[hsl(200_100%_45%)]" />
+                    </div>
+                    <h3 className="font-medium text-sm mb-1">Web Content Analyzer</h3>
+                    <p className="text-xs text-muted-foreground">Scan & score brand alignment</p>
+                  </CardContent>
+                </Card>
+              </Link>
               <Link to="/call-script">
                 <Card className="h-full cursor-pointer card-interactive group">
                   <CardContent className="p-4">

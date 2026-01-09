@@ -55,6 +55,7 @@ import JourneyDesignerFeaturePage from "./pages/features/JourneyDesignerFeatureP
 import EvaluateFeaturePage from "./pages/features/EvaluateFeaturePage";
 import LibraryFeaturePage from "./pages/features/LibraryFeaturePage";
 import OGPreviewPage from "./pages/OGPreviewPage";
+import WebContentAnalyzerPage from "./pages/WebContentAnalyzerPage";
 
 const queryClient = new QueryClient();
 
@@ -208,6 +209,7 @@ const AppRoutes = () => (
     <Route path="/email-preview" element={<RequireAuth><EmailPreview /></RequireAuth>} />
     <Route path="/benchmarks" element={<RequireAuth><PerformanceBenchmarks /></RequireAuth>} />
     <Route path="/translate" element={<RequireAuth><TranslationTool /></RequireAuth>} />
+    <Route path="/web-analyzer" element={<RequireAuth><WebContentAnalyzerPage /></RequireAuth>} />
     <Route path="/settings" element={<Navigate to="/university-settings" replace />} />
     <Route path="/university-settings" element={<RequireAuth><UniversitySettingsPage /></RequireAuth>} />
     <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
