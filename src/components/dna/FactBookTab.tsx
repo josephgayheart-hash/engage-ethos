@@ -46,7 +46,12 @@ import {
   Clock,
   Wallet,
   MoreHorizontal,
-  CheckCircle2
+  CheckCircle2,
+  LayoutGrid,
+  List,
+  FileSearch,
+  Sparkles,
+  Database
 } from 'lucide-react';
 import { extractTextFromFile, getAcceptString } from '@/lib/documentParser';
 
@@ -93,6 +98,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [editingFact, setEditingFact] = useState<Fact | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // Add form state
   const [newFact, setNewFact] = useState<CreateFactInput>({
@@ -250,28 +256,50 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
           </div>
         </div>
 
-        {/* Category Tabs */}
-        <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-6">
-          <TabsList className="flex-wrap h-auto gap-1">
-            <TabsTrigger value="all" className="text-xs">
-              All ({facts.length})
-            </TabsTrigger>
-            {FACT_CATEGORIES.filter(cat => 
-              facts.some(f => f.category === cat.value)
-            ).map(cat => {
-              const Icon = categoryIcons[cat.value] || MoreHorizontal;
-              const count = getFactsByCategory(cat.value).length;
-              return (
-                <TabsTrigger key={cat.value} value={cat.value} className="text-xs gap-1">
-                  <Icon className="w-3 h-3" />
-                  {cat.label} ({count})
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
-        </Tabs>
+        {/* Category Tabs + View Toggle */}
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="flex-1">
+            <TabsList className="flex-wrap h-auto gap-1">
+              <TabsTrigger value="all" className="text-xs">
+                All ({facts.length})
+              </TabsTrigger>
+              {FACT_CATEGORIES.filter(cat => 
+                facts.some(f => f.category === cat.value)
+              ).map(cat => {
+                const Icon = categoryIcons[cat.value] || MoreHorizontal;
+                const count = getFactsByCategory(cat.value).length;
+                return (
+                  <TabsTrigger key={cat.value} value={cat.value} className="text-xs gap-1">
+                    <Icon className="w-3 h-3" />
+                    {cat.label} ({count})
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+          </Tabs>
+          
+          {/* View Toggle */}
+          <div className="flex items-center gap-1 border rounded-lg p-1">
+            <Button
+              variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={() => setViewMode('grid')}
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={() => setViewMode('list')}
+            >
+              <List className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
 
-        {/* Facts Grid */}
+        {/* Facts Display */}
         {displayFacts.length === 0 ? (
           <div className="text-center py-12">
             <BarChart3 className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
@@ -290,7 +318,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
               </Button>
             </div>
           </div>
-        ) : (
+        ) : viewMode === 'grid' ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {displayFacts.map(fact => (
               <FactCard
@@ -302,6 +330,59 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                 onToggleHighlight={toggleHighlight}
               />
             ))}
+          </div>
+        ) : (
+          /* List View */
+          <div className="border rounded-lg divide-y">
+            {displayFacts.map(fact => {
+              const Icon = categoryIcons[fact.category] || MoreHorizontal;
+              return (
+                <div
+                  key={fact.id}
+                  className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <Icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium">{fact.label}</p>
+                      {fact.is_highlight && (
+                        <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Badge variant="outline" className="text-xs">
+                        {fact.category}
+                      </Badge>
+                      {fact.year && <span>{fact.year}</span>}
+                      {fact.context && <span className="truncate">• {fact.context}</span>}
+                    </div>
+                  </div>
+                  <p className="text-xl font-bold shrink-0">{fact.value}</p>
+                  {isAdmin && (
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={() => toggleHighlight(fact.id, !fact.is_highlight)}
+                      >
+                        <Star className={`w-4 h-4 ${fact.is_highlight ? 'text-amber-500 fill-amber-500' : ''}`} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={() => setEditingFact(fact)}
+                      >
+                        <FileText className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 
@@ -423,7 +504,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
 
         {/* Import Dialog */}
         <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-5xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Wand2 className="w-5 h-5" />
@@ -433,77 +514,111 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                 Upload a PDF or paste text to extract facts automatically
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 py-4">
+            <div className="flex-1 overflow-y-auto space-y-4 py-4">
               {parsedFacts.length === 0 ? (
                 <>
+                  {/* Processing Status Indicator */}
+                  {(isExtractingFile || isParsing) && (
+                    <div className="bg-primary/5 border border-primary/20 rounded-lg p-6">
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="relative">
+                          <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                            <Loader2 className="w-6 h-6 text-primary animate-spin" />
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-foreground">
+                            {isExtractingFile ? 'Extracting Document Text...' : 'AI Processing Facts...'}
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            {isExtractingFile 
+                              ? 'Reading and parsing your document content' 
+                              : 'Identifying and categorizing facts from your content'}
+                          </p>
+                        </div>
+                      </div>
+                      {/* Progress Steps */}
+                      <div className="flex items-center gap-2">
+                        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${
+                          isExtractingFile || isParsing ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
+                        }`}>
+                          <FileSearch className="w-4 h-4" />
+                          <span>Read Document</span>
+                          {!isExtractingFile && importText && <CheckCircle2 className="w-4 h-4 text-green-600" />}
+                        </div>
+                        <div className="h-px w-4 bg-border" />
+                        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${
+                          isParsing ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
+                        }`}>
+                          <Sparkles className="w-4 h-4" />
+                          <span>Extract Facts</span>
+                        </div>
+                        <div className="h-px w-4 bg-border" />
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm bg-muted text-muted-foreground">
+                          <Database className="w-4 h-4" />
+                          <span>Save to Fact Book</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* File Upload */}
-                  <div 
-                    className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      className="hidden"
-                      accept={getAcceptString()}
-                      onChange={handleFileSelect}
-                    />
-                    {isExtractingFile ? (
-                      <>
-                        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-primary" />
-                        <p className="text-sm text-muted-foreground">Extracting text...</p>
-                      </>
-                    ) : (
-                      <>
-                        <FileText className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                        <p className="font-medium">Click to upload a PDF</p>
-                        <p className="text-sm text-muted-foreground">or drag and drop</p>
-                      </>
-                    )}
-                  </div>
+                  {!isExtractingFile && !isParsing && (
+                    <>
+                      <div 
+                        className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          className="hidden"
+                          accept={getAcceptString()}
+                          onChange={handleFileSelect}
+                        />
+                        <FileText className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
+                        <p className="font-medium text-lg">Click to upload a PDF</p>
+                        <p className="text-sm text-muted-foreground">or drag and drop your fact book document</p>
+                      </div>
 
-                  <div className="flex items-center gap-4">
-                    <div className="h-px flex-1 bg-border" />
-                    <span className="text-sm text-muted-foreground">or paste text</span>
-                    <div className="h-px flex-1 bg-border" />
-                  </div>
+                      <div className="flex items-center gap-4">
+                        <div className="h-px flex-1 bg-border" />
+                        <span className="text-sm text-muted-foreground">or paste text directly</span>
+                        <div className="h-px flex-1 bg-border" />
+                      </div>
 
-                  <div className="space-y-2">
-                    <Label>Source Document Name</Label>
-                    <Input
-                      value={sourceDocument}
-                      onChange={e => setSourceDocument(e.target.value)}
-                      placeholder="e.g., Fast Facts 2024"
-                    />
-                  </div>
+                      <div className="grid md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                          <Label>Source Document Name</Label>
+                          <Input
+                            value={sourceDocument}
+                            onChange={e => setSourceDocument(e.target.value)}
+                            placeholder="e.g., Fast Facts 2024"
+                          />
+                        </div>
+                        <div className="md:col-span-2 space-y-2">
+                          <Label>Fact Book Text</Label>
+                          <Textarea
+                            value={importText}
+                            onChange={e => setImportText(e.target.value)}
+                            placeholder="Paste fact book content here..."
+                            rows={8}
+                            className="resize-none"
+                          />
+                        </div>
+                      </div>
 
-                  <div className="space-y-2">
-                    <Label>Fact Book Text</Label>
-                    <Textarea
-                      value={importText}
-                      onChange={e => setImportText(e.target.value)}
-                      placeholder="Paste fact book content here..."
-                      rows={10}
-                    />
-                  </div>
-
-                  <Button 
-                    onClick={handleParseFactBook} 
-                    disabled={isParsing || !importText.trim()}
-                    className="w-full"
-                  >
-                    {isParsing ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Extracting facts...
-                      </>
-                    ) : (
-                      <>
+                      <Button 
+                        onClick={handleParseFactBook} 
+                        disabled={isParsing || !importText.trim()}
+                        className="w-full"
+                        size="lg"
+                      >
                         <Wand2 className="w-4 h-4 mr-2" />
-                        Extract Facts
-                      </>
-                    )}
-                  </Button>
+                        Extract Facts with AI
+                      </Button>
+                    </>
+                  )}
                 </>
               ) : (
                 <>
