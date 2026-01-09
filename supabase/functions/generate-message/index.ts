@@ -101,6 +101,66 @@ IMPORTANT: Apply ONLY this Content DNA profile. Do not borrow language, phrases,
 `;
     }
 
+    // Build Stories & Facts prompt section if provided
+    let storiesFactsPrompt = "";
+    if (contentDNA?.stories?.length > 0 || contentDNA?.facts?.length > 0) {
+      storiesFactsPrompt = `
+=== STORIES & FACTS TO INCORPORATE ===
+These are REAL, verified stories and data points from the institution. Weave them naturally into the generated content.
+
+`;
+      if (contentDNA.stories?.length > 0) {
+        storiesFactsPrompt += `AVAILABLE STORIES (${contentDNA.stories.length} selected):
+Use these authentic narratives to humanize the message. Include quotes, subject names, and story elements where appropriate.
+
+${contentDNA.stories.map((s: any, i: number) => `
+STORY ${i + 1}: "${s.title}" (${s.story_type || s.storyType})
+${s.subject_name || s.subjectName ? `- Subject: ${s.subject_name || s.subjectName}${s.subject_role || s.subjectRole ? `, ${s.subject_role || s.subjectRole}` : ""}` : ""}
+${s.pull_quote || s.pullQuote ? `- Pull Quote: "${s.pull_quote || s.pullQuote}"` : ""}
+- Narrative: ${(s.narrative || "").substring(0, 600)}${s.narrative?.length > 600 ? "..." : ""}
+${s.themes?.length ? `- Themes: ${s.themes.join(", ")}` : ""}
+`).join("\n")}
+
+STORY USAGE GUIDELINES BY CHANNEL:
+- Email: Use pull quotes in body, mention student names in personalized sections
+- Landing Page: Feature story prominently in hero or testimonial sections
+- Case for Support: Lead with story, use throughout for emotional connection
+- Social Media: Short quote snippet with attribution
+- SMS: Brief reference to real student success
+- News Article: Include subject quotes and background narrative
+- Talking Points: Reference specific student examples for authenticity
+- Direct Mail: Open with compelling story excerpt
+
+`;
+      }
+
+      if (contentDNA.facts?.length > 0) {
+        storiesFactsPrompt += `AVAILABLE FACTS & STATISTICS (${contentDNA.facts.length} selected):
+Use these verified data points to add credibility and specificity. Display as bold statistics where visually impactful.
+
+${contentDNA.facts.map((f: any) => `
+• ${f.label}: ${f.value}${f.context ? ` (${f.context})` : ""}${f.year ? ` [${f.year}]` : ""}
+  Category: ${f.category}${f.subcategory ? ` > ${f.subcategory}` : ""}
+`).join("")}
+
+FACT USAGE GUIDELINES BY CHANNEL:
+- Email: Lead with compelling stat in subject line or opening hook
+- Landing Page: Display as large, visual statistics in dedicated section
+- Case for Support: Use for impact statistics section, giving levels, outcomes
+- Social Media: Single compelling stat as hook
+- SMS: One key number that drives action
+- News Article: Lead paragraph statistics, supporting data throughout
+- Talking Points: Supporting data points for key messages
+- Digital Ads: Headline statistics that grab attention
+- Direct Mail: Open with impact stat, reinforce in body
+
+`;
+      }
+
+      storiesFactsPrompt += `CRITICAL: These stories and facts are SPECIFICALLY SELECTED by the user. Incorporate them prominently and authentically in the generated content.
+`;
+    }
+
     let systemPrompt = `You are CampusVoice.AI, an AI assistant specialized in creating effective, ethical communications for higher education institutions - both student-facing and employee-facing.
 
 Your messages should:
@@ -110,6 +170,7 @@ Your messages should:
 - Minimize cognitive load with clear, scannable content
 - Include clear calls-to-action when appropriate
 ${contentDNAPrompt}
+${storiesFactsPrompt}
 FOR STUDENT COMMUNICATIONS:
 - Focus on academic success, engagement, and persistence
 - Reference student-relevant resources (advising, tutoring, financial aid)
