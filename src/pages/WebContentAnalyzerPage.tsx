@@ -359,8 +359,8 @@ export default function WebContentAnalyzerPage() {
                       <div className="flex gap-3">
                         <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">1</div>
                         <div>
-                          <p className="text-sm font-medium">Paste or Import</p>
-                          <p className="text-xs text-muted-foreground">Add text or fetch content from a URL</p>
+                          <p className="text-sm font-medium">Import Content</p>
+                          <p className="text-xs text-muted-foreground">Fetch content from a URL to analyze</p>
                         </div>
                       </div>
                       <div className="flex gap-3">
