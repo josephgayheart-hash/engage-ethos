@@ -214,17 +214,19 @@ export default function WebContentAnalyzerPage() {
           )}
 
           {/* Main Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Panel - Input or Results */}
-            <div className="lg:col-span-2 space-y-6">
-              {!analysisResult ? (
-                <AnalyzerInput 
-                  onAnalyze={handleAnalyze} 
-                  isAnalyzing={isAnalyzing}
-                  disabled={!contentDNA?.voice_analysis}
-                />
-              ) : (
-                <>
+          <div className="space-y-6">
+            {/* Section Selector - Always Visible */}
+            <AnalyzerInput 
+              onAnalyze={handleAnalyze} 
+              isAnalyzing={isAnalyzing}
+              disabled={!contentDNA?.voice_analysis}
+            />
+
+            {/* Analysis Results */}
+            {analysisResult && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Left Panel - Results */}
+                <div className="lg:col-span-2 space-y-6">
                   {/* Results Header */}
                   <Card>
                     <CardHeader className="pb-3">
@@ -325,63 +327,66 @@ export default function WebContentAnalyzerPage() {
                       </CardContent>
                     </Card>
                   )}
-                </>
-              )}
-            </div>
+                </div>
 
-            {/* Right Panel - Score Details */}
-            <div className="space-y-6">
-              {isAnalyzing ? (
-                <Card>
-                  <CardContent className="py-12 text-center">
-                    <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
-                    <p className="font-medium">Analyzing content...</p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Checking against your Content DNA
-                    </p>
-                  </CardContent>
-                </Card>
-              ) : analysisResult && selectedSection ? (
-                <BrandScorePanel
-                  section={selectedSection}
-                  voiceAnalysis={contentDNA?.voice_analysis}
-                />
-              ) : (
-                <Card className="border-dashed">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-primary" />
-                      How It Works
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-3">
-                      <div className="flex gap-3">
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">1</div>
-                        <div>
-                          <p className="text-sm font-medium">Import Content</p>
-                          <p className="text-xs text-muted-foreground">Fetch content from a URL to analyze</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-3">
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">2</div>
-                        <div>
-                          <p className="text-sm font-medium">AI Analysis</p>
-                          <p className="text-xs text-muted-foreground">We score each section against your Content DNA</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-3">
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">3</div>
-                        <div>
-                          <p className="text-sm font-medium">Improve</p>
-                          <p className="text-xs text-muted-foreground">Use AI Rewrite to align content with your brand</p>
-                        </div>
+                {/* Right Panel - Score Details */}
+                <div className="space-y-6">
+                  {isAnalyzing ? (
+                    <Card>
+                      <CardContent className="py-12 text-center">
+                        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+                        <p className="font-medium">Analyzing content...</p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Checking against your Content DNA
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ) : selectedSection ? (
+                    <BrandScorePanel
+                      section={selectedSection}
+                      voiceAnalysis={contentDNA?.voice_analysis}
+                    />
+                  ) : null}
+                </div>
+              </div>
+            )}
+
+            {/* How It Works - Only show when no results */}
+            {!analysisResult && !isAnalyzing && (
+              <Card className="border-dashed max-w-md">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    How It Works
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex gap-3">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">1</div>
+                      <div>
+                        <p className="text-sm font-medium">Import Content</p>
+                        <p className="text-xs text-muted-foreground">Fetch content from a URL to analyze</p>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+                    <div className="flex gap-3">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">2</div>
+                      <div>
+                        <p className="text-sm font-medium">AI Analysis</p>
+                        <p className="text-xs text-muted-foreground">We score each section against your Content DNA</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">3</div>
+                      <div>
+                        <p className="text-sm font-medium">Improve</p>
+                        <p className="text-xs text-muted-foreground">Use AI Rewrite to align content with your brand</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </main>
