@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AnalyzerInput } from '@/components/analyzer/AnalyzerInput';
 import { BrandScorePanel } from '@/components/analyzer/BrandScorePanel';
 import { ContentSectionCard } from '@/components/analyzer/ContentSectionCard';
 import { RewritePanel } from '@/components/analyzer/RewritePanel';
+import { InstitutionalProfileSelector } from '@/components/InstitutionalProfileSelector';
 import { useContentDNA } from '@/hooks/useContentDNA';
 import { useInstitutionalProfiles } from '@/hooks/useInstitutionalProfiles';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,7 +20,8 @@ import {
   AlertTriangle,
   CheckCircle2,
   RefreshCw,
-  FileText
+  FileText,
+  Dna
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -44,9 +45,21 @@ interface AnalysisResult {
 
 export default function WebContentAnalyzerPage() {
   const { toast } = useToast();
-  const { analysis: contentDNA, isLoading: dnaLoading } = useContentDNA();
   const { profiles } = useInstitutionalProfiles();
-  const selectedProfile = profiles?.[0];
+  
+  // Profile selection state
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  
+  // Use Content DNA for the selected profile
+  const { analysis: contentDNA, isLoading: dnaLoading } = useContentDNA({ profileId: selectedProfileId });
+  const selectedProfile = profiles?.find(p => p.id === selectedProfileId) || profiles?.[0];
+  
+  // Set initial profile when profiles load
+  useEffect(() => {
+    if (profiles?.length && !selectedProfileId) {
+      setSelectedProfileId(profiles[0].id);
+    }
+  }, [profiles, selectedProfileId]);
   
   const [content, setContent] = useState('');
   const [sourceUrl, setSourceUrl] = useState('');
@@ -146,15 +159,32 @@ export default function WebContentAnalyzerPage() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              {contentDNA?.last_analyzed_at && (
-                <Badge variant="outline" className="flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" />
-                  Content DNA Active
-                </Badge>
-              )}
-            </div>
           </div>
+
+          {/* Profile Selector */}
+          <Card className="mb-6">
+            <CardContent className="py-4">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Dna className="w-4 h-4" />
+                  <span>Analyzing against:</span>
+                </div>
+                <div className="flex-1 max-w-md">
+                  <InstitutionalProfileSelector
+                    selectedProfileId={selectedProfileId}
+                    onProfileChange={setSelectedProfileId}
+                    compact
+                  />
+                </div>
+                {contentDNA?.last_analyzed_at && (
+                  <Badge variant="outline" className="flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" />
+                    Content DNA Active
+                  </Badge>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
           {/* DNA Status Warning */}
           {!dnaLoading && !contentDNA?.voice_analysis && (
