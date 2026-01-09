@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import { useToast } from "@/hooks/use-toast";
 import { SalesforceCredentialsDialog } from "@/components/SalesforceCredentialsDialog";
@@ -321,8 +322,6 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
       if (cfc.callToAction) result += `CALL TO ACTION:\n${cfc.callToAction}\n\n`;
       if (cfc.closingStatement) result += `${cfc.closingStatement}`;
       return result;
-    }
-    return '';
     }
     return '';
   };
