@@ -1,0 +1,515 @@
+import jsPDF from "jspdf";
+import type { TalkingPointsDraft, CaseForCareDraft } from "@/types/uplaybook";
+
+export function exportTalkingPointsToPDF(tp: TalkingPointsDraft, institutionName?: string): void {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 20;
+  const contentWidth = pageWidth - margin * 2;
+  let y = 20;
+
+  const addText = (text: string, size: number, style: "normal" | "bold" | "italic" = "normal", color: [number, number, number] = [0, 0, 0]) => {
+    doc.setFontSize(size);
+    doc.setFont("helvetica", style);
+    doc.setTextColor(...color);
+    const lines = doc.splitTextToSize(text, contentWidth);
+    
+    // Check if we need a new page
+    const lineHeight = size * 0.5;
+    if (y + lines.length * lineHeight > doc.internal.pageSize.getHeight() - 20) {
+      doc.addPage();
+      y = 20;
+    }
+    
+    doc.text(lines, margin, y);
+    y += lines.length * lineHeight + 4;
+  };
+
+  const addSection = (title: string, color: [number, number, number] = [0, 100, 100]) => {
+    y += 6;
+    doc.setFillColor(...color);
+    doc.rect(margin, y - 5, contentWidth, 10, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text(title.toUpperCase(), margin + 4, y + 2);
+    y += 12;
+    doc.setTextColor(0, 0, 0);
+  };
+
+  // Header
+  doc.setFillColor(0, 128, 128);
+  doc.rect(0, 0, pageWidth, 35, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(20);
+  doc.setFont("helvetica", "bold");
+  doc.text("EXECUTIVE TALKING POINTS", margin, 22);
+  if (institutionName) {
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.text(institutionName, margin, 30);
+  }
+  y = 45;
+
+  // Context and Audience
+  if (tp.context || tp.audience) {
+    doc.setFillColor(240, 240, 240);
+    doc.rect(margin, y - 5, contentWidth, tp.context && tp.audience ? 30 : 18, "F");
+    doc.setTextColor(100, 100, 100);
+    doc.setFontSize(9);
+    
+    if (tp.context) {
+      doc.setFont("helvetica", "bold");
+      doc.text("CONTEXT:", margin + 4, y + 2);
+      doc.setFont("helvetica", "normal");
+      const contextLines = doc.splitTextToSize(tp.context, contentWidth - 60);
+      doc.text(contextLines, margin + 30, y + 2);
+    }
+    
+    if (tp.audience) {
+      const audienceY = tp.context ? y + 12 : y + 2;
+      doc.setFont("helvetica", "bold");
+      doc.text("AUDIENCE:", margin + 4, audienceY);
+      doc.setFont("helvetica", "normal");
+      const audienceLines = doc.splitTextToSize(tp.audience, contentWidth - 60);
+      doc.text(audienceLines, margin + 34, audienceY);
+    }
+    
+    y += tp.context && tp.audience ? 35 : 23;
+  }
+
+  // Opening Hook
+  if (tp.openingHook) {
+    addSection("Opening Hook", [34, 139, 34]);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "italic");
+    addText(`"${tp.openingHook}"`, 11, "italic");
+  }
+
+  // Key Messages
+  if (tp.keyMessages && tp.keyMessages.length > 0) {
+    addSection("Key Talking Points", [0, 100, 150]);
+    tp.keyMessages.forEach((message, i) => {
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.text(`${i + 1}.`, margin, y);
+      doc.setFont("helvetica", "normal");
+      const messageLines = doc.splitTextToSize(message, contentWidth - 10);
+      
+      if (y + messageLines.length * 5 > doc.internal.pageSize.getHeight() - 20) {
+        doc.addPage();
+        y = 20;
+      }
+      
+      doc.text(messageLines, margin + 10, y);
+      y += messageLines.length * 5 + 6;
+    });
+  }
+
+  // Supporting Data
+  if (tp.supportingData && tp.supportingData.length > 0) {
+    addSection("Supporting Data & Evidence", [30, 100, 180]);
+    tp.supportingData.forEach((data) => {
+      doc.setFontSize(10);
+      addText(`📊 ${data}`, 10);
+    });
+  }
+
+  // Q&A
+  if (tp.anticipatedQuestions && tp.anticipatedQuestions.length > 0) {
+    addSection("Anticipated Q&A", [180, 120, 0]);
+    tp.anticipatedQuestions.forEach((question, i) => {
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(180, 120, 0);
+      addText(`Q: ${question}`, 10, "bold", [150, 100, 0]);
+      
+      if (tp.suggestedResponses && tp.suggestedResponses[i]) {
+        doc.setTextColor(34, 139, 34);
+        addText(`A: ${tp.suggestedResponses[i]}`, 10, "normal", [34, 120, 34]);
+      }
+      y += 2;
+    });
+  }
+
+  // Transition Phrases
+  if (tp.transitionPhrases && tp.transitionPhrases.length > 0) {
+    addSection("Transition Phrases", [100, 100, 100]);
+    tp.transitionPhrases.forEach((phrase) => {
+      addText(`→ "${phrase}"`, 10, "italic");
+    });
+  }
+
+  // Closing Statement
+  if (tp.closingStatement) {
+    addSection("Closing Statement", [128, 0, 128]);
+    doc.setFontSize(11);
+    addText(`"${tp.closingStatement}"`, 11, "italic");
+  }
+
+  // Footer
+  const pageCount = doc.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text(
+      `Generated by CampusVoice.AI | Page ${i} of ${pageCount}`,
+      pageWidth / 2,
+      doc.internal.pageSize.getHeight() - 10,
+      { align: "center" }
+    );
+  }
+
+  doc.save("executive-talking-points.pdf");
+}
+
+export function exportCaseForSupportToPDF(cfc: CaseForCareDraft, institutionName?: string): void {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 20;
+  const contentWidth = pageWidth - margin * 2;
+  let y = 20;
+
+  const checkPageBreak = (requiredSpace: number) => {
+    if (y + requiredSpace > pageHeight - 25) {
+      doc.addPage();
+      y = 25;
+    }
+  };
+
+  const addText = (text: string, size: number, style: "normal" | "bold" | "italic" = "normal", color: [number, number, number] = [0, 0, 0]) => {
+    doc.setFontSize(size);
+    doc.setFont("helvetica", style);
+    doc.setTextColor(...color);
+    const lines = doc.splitTextToSize(text, contentWidth);
+    checkPageBreak(lines.length * size * 0.5);
+    doc.text(lines, margin, y);
+    y += lines.length * size * 0.5 + 4;
+  };
+
+  // Cover Page Header with Gradient Effect
+  doc.setFillColor(219, 39, 119); // Rose
+  doc.rect(0, 0, pageWidth, 80, "F");
+  doc.setFillColor(147, 51, 234); // Purple gradient overlay
+  doc.rect(0, 40, pageWidth, 40, "F");
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(28);
+  doc.setFont("helvetica", "bold");
+  const title = cfc.documentTitle || "CASE FOR SUPPORT";
+  doc.text(title.toUpperCase(), pageWidth / 2, 35, { align: "center" });
+
+  if (cfc.campaignName) {
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "normal");
+    doc.text(cfc.campaignName, pageWidth / 2, 50, { align: "center" });
+  }
+
+  if (cfc.campaignTagline) {
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "italic");
+    doc.text(`"${cfc.campaignTagline}"`, pageWidth / 2, 65, { align: "center" });
+  }
+
+  y = 95;
+
+  // Target Amount
+  if (cfc.targetAmount) {
+    doc.setFillColor(250, 240, 230);
+    doc.roundedRect(margin, y - 8, contentWidth, 25, 3, 3, "F");
+    doc.setTextColor(180, 100, 0);
+    doc.setFontSize(24);
+    doc.setFont("helvetica", "bold");
+    doc.text(cfc.targetAmount, pageWidth / 2, y + 8, { align: "center" });
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text("Campaign Goal", pageWidth / 2, y + 16, { align: "center" });
+    y += 35;
+  }
+
+  // Leader Message (if available)
+  if (cfc.leaderMessage) {
+    checkPageBreak(60);
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(margin, y - 5, contentWidth, 50, 3, 3, "F");
+    doc.setDrawColor(200, 200, 200);
+    doc.roundedRect(margin, y - 5, contentWidth, 50, 3, 3, "S");
+    
+    doc.setTextColor(80, 80, 80);
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "italic");
+    const messageLines = doc.splitTextToSize(cfc.leaderMessage.message?.substring(0, 300) + "...", contentWidth - 10);
+    doc.text(messageLines, margin + 5, y + 5);
+    
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.text(`— ${cfc.leaderMessage.leaderName}, ${cfc.leaderMessage.leaderTitle}`, margin + 5, y + 42);
+    y += 60;
+  }
+
+  // Opening Story
+  if (cfc.openingStory) {
+    checkPageBreak(50);
+    doc.setFillColor(240, 253, 244); // Light green
+    doc.roundedRect(margin, y - 5, contentWidth, 40, 3, 3, "F");
+    
+    doc.setTextColor(22, 101, 52);
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text(cfc.openingStory.headline || "A Story of Impact", margin + 5, y + 5);
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "italic");
+    doc.setTextColor(60, 60, 60);
+    const narrativeLines = doc.splitTextToSize(cfc.openingStory.narrative?.substring(0, 200) + "...", contentWidth - 10);
+    doc.text(narrativeLines, margin + 5, y + 15);
+    
+    if (cfc.openingStory.attribution) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.text(`— ${cfc.openingStory.attribution}`, margin + 5, y + 33);
+    }
+    y += 50;
+  }
+
+  // Vision Statement
+  if (cfc.visionStatement) {
+    checkPageBreak(30);
+    doc.setTextColor(128, 0, 128);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("OUR VISION", margin, y);
+    y += 8;
+    addText(cfc.visionStatement, 10);
+  }
+
+  // Strategic Pillars
+  if (cfc.strategicPillars && cfc.strategicPillars.length > 0) {
+    checkPageBreak(50);
+    doc.setTextColor(0, 100, 150);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("STRATEGIC PILLARS", margin, y);
+    y += 10;
+
+    cfc.strategicPillars.forEach((pillar) => {
+      checkPageBreak(20);
+      doc.setFillColor(240, 248, 255);
+      doc.roundedRect(margin, y - 3, contentWidth, 16, 2, 2, "F");
+      
+      doc.setTextColor(0, 80, 120);
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text(pillar.name, margin + 4, y + 4);
+      
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(60, 60, 60);
+      const descLines = doc.splitTextToSize(pillar.description, contentWidth - 10);
+      doc.text(descLines[0], margin + 4, y + 11);
+      y += 22;
+    });
+  }
+
+  // Impact Statistics
+  if (cfc.impactStatistics && cfc.impactStatistics.length > 0) {
+    checkPageBreak(40);
+    y += 5;
+    doc.setTextColor(0, 128, 128);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("IMPACT BY THE NUMBERS", margin, y);
+    y += 10;
+
+    const statWidth = (contentWidth - 10) / 3;
+    let col = 0;
+    let rowY = y;
+
+    cfc.impactStatistics.forEach((stat, i) => {
+      if (col === 3) {
+        col = 0;
+        rowY += 30;
+        checkPageBreak(30);
+      }
+
+      const x = margin + col * (statWidth + 5);
+      doc.setFillColor(0, 128, 128);
+      doc.roundedRect(x, rowY - 3, statWidth, 25, 2, 2, "F");
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(16);
+      doc.setFont("helvetica", "bold");
+      const statValue = typeof stat === "object" ? stat.value : stat;
+      const statLabel = typeof stat === "object" ? stat.label : "";
+      doc.text(statValue, x + statWidth / 2, rowY + 8, { align: "center" });
+
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "normal");
+      doc.text(statLabel, x + statWidth / 2, rowY + 17, { align: "center" });
+
+      col++;
+    });
+    y = rowY + 35;
+  }
+
+  // Key Programs
+  if (cfc.keyPrograms && cfc.keyPrograms.length > 0) {
+    checkPageBreak(40);
+    doc.setTextColor(180, 100, 0);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("KEY PROGRAMS", margin, y);
+    y += 8;
+
+    cfc.keyPrograms.forEach((program) => {
+      checkPageBreak(25);
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text(`• ${program.name}`, margin, y);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      const descLines = doc.splitTextToSize(`${program.description} (Impact: ${program.impact})`, contentWidth - 10);
+      doc.text(descLines, margin + 5, y + 6);
+      y += 8 + descLines.length * 4;
+    });
+  }
+
+  // Pull Quotes
+  if (cfc.pullQuotes && cfc.pullQuotes.length > 0) {
+    checkPageBreak(30);
+    y += 5;
+    cfc.pullQuotes.forEach((quote) => {
+      checkPageBreak(25);
+      doc.setFillColor(250, 245, 255);
+      doc.roundedRect(margin, y - 3, contentWidth, 20, 2, 2, "F");
+      doc.setDrawColor(180, 130, 200);
+      doc.setLineWidth(0.5);
+      doc.line(margin + 3, y, margin + 3, y + 14);
+
+      doc.setTextColor(100, 50, 130);
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "italic");
+      const quoteLines = doc.splitTextToSize(`"${quote.quote}"`, contentWidth - 20);
+      doc.text(quoteLines[0], margin + 8, y + 5);
+
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      doc.text(`— ${quote.attribution}`, margin + 8, y + 14);
+      y += 26;
+    });
+  }
+
+  // Giving Opportunities
+  if (cfc.givingOpportunities && cfc.givingOpportunities.length > 0) {
+    checkPageBreak(50);
+    doc.setTextColor(34, 139, 34);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("GIVING OPPORTUNITIES", margin, y);
+    y += 10;
+
+    cfc.givingOpportunities.forEach((category) => {
+      checkPageBreak(30);
+      doc.setTextColor(0, 100, 0);
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text(category.category, margin, y);
+      y += 6;
+
+      category.opportunities.forEach((opp) => {
+        checkPageBreak(15);
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "bold");
+        doc.text(`${opp.name} - ${opp.amount}`, margin + 5, y);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.setTextColor(80, 80, 80);
+        doc.text(opp.description, margin + 5, y + 5);
+        y += 12;
+      });
+      y += 4;
+    });
+  }
+
+  // Giving Levels
+  if (cfc.givingLevels && cfc.givingLevels.length > 0) {
+    checkPageBreak(40);
+    doc.setTextColor(180, 130, 0);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("WAYS TO GIVE", margin, y);
+    y += 10;
+
+    cfc.givingLevels.forEach((level) => {
+      checkPageBreak(12);
+      doc.setFillColor(255, 250, 240);
+      doc.roundedRect(margin, y - 3, contentWidth, 10, 2, 2, "F");
+      doc.setTextColor(180, 100, 0);
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text(level.amount, margin + 4, y + 4);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(80, 80, 80);
+      doc.text(level.impact, margin + 40, y + 4);
+      y += 14;
+    });
+  }
+
+  // Call to Action
+  if (cfc.callToAction) {
+    checkPageBreak(30);
+    y += 5;
+    doc.setFillColor(219, 39, 119);
+    doc.roundedRect(margin, y - 5, contentWidth, 20, 3, 3, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    const ctaLines = doc.splitTextToSize(cfc.callToAction, contentWidth - 20);
+    doc.text(ctaLines, pageWidth / 2, y + 5, { align: "center" });
+    y += 25;
+  }
+
+  // Contact Info
+  if (cfc.contactInfo) {
+    checkPageBreak(25);
+    doc.setFillColor(245, 245, 245);
+    doc.roundedRect(margin, y - 3, contentWidth, 20, 2, 2, "F");
+    doc.setTextColor(80, 80, 80);
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.text("FOR MORE INFORMATION:", margin + 4, y + 4);
+    doc.setFont("helvetica", "normal");
+    const contactText = `${cfc.contactInfo.name}, ${cfc.contactInfo.title} | ${cfc.contactInfo.email}${cfc.contactInfo.phone ? ` | ${cfc.contactInfo.phone}` : ""}`;
+    doc.text(contactText, margin + 4, y + 12);
+    y += 25;
+  }
+
+  // Closing Statement
+  if (cfc.closingStatement) {
+    checkPageBreak(20);
+    doc.setTextColor(100, 100, 100);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "italic");
+    const closingLines = doc.splitTextToSize(cfc.closingStatement, contentWidth);
+    doc.text(closingLines, pageWidth / 2, y + 5, { align: "center" });
+  }
+
+  // Footer on all pages
+  const pageCount = doc.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text(
+      `Generated by CampusVoice.AI | Page ${i} of ${pageCount}`,
+      pageWidth / 2,
+      pageHeight - 10,
+      { align: "center" }
+    );
+  }
+
+  doc.save("case-for-support.pdf");
+}

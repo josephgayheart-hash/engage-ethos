@@ -592,6 +592,7 @@ const TemplateDetailPage = () => {
                       content={parsedContent}
                       onCopy={handleCopy}
                       onSaveToLibrary={() => handlePull()}
+                      institutionName={profileConfig?.institutionName}
                     />
                   );
                 })()
