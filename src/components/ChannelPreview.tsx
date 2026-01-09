@@ -9,6 +9,7 @@ import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import { useToast } from "@/hooks/use-toast";
 import { SalesforceCredentialsDialog } from "@/components/SalesforceCredentialsDialog";
 import { openInGoogleDocs, formatForGoogleDocs } from "@/lib/googleDocsExport";
+import { exportTalkingPointsToPDF, exportCaseForSupportToPDF } from "@/lib/pdfExport";
 import { 
   Copy, 
   Check, 
@@ -35,7 +36,8 @@ import {
   Users,
   GraduationCap,
   Building2,
-  Sparkles
+  Sparkles,
+  FileDown
 } from "lucide-react";
 import type { 
   ChannelDrafts, 
@@ -56,6 +58,7 @@ interface ChannelPreviewProps {
   onCopy: (text: string) => void;
   onContentChange?: (channel: Channel, content: ChannelDrafts[keyof ChannelDrafts]) => void;
   onSaveToLibrary?: (channel: Channel, content: ChannelDrafts[keyof ChannelDrafts], contentText: string) => void | (() => void);
+  institutionName?: string;
 }
 
 const channelIcons: Record<Channel, React.ReactNode> = {
@@ -88,7 +91,7 @@ const channelLabels: Record<Channel, string> = {
   'case-for-care': 'Case for Support',
 };
 
-export function ChannelPreview({ channel, content, onCopy, onContentChange, onSaveToLibrary }: ChannelPreviewProps) {
+export function ChannelPreview({ channel, content, onCopy, onContentChange, onSaveToLibrary, institutionName }: ChannelPreviewProps) {
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState<ChannelDrafts[keyof ChannelDrafts]>(content);
@@ -104,6 +107,31 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     onCopy(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleExportToPDF = () => {
+    try {
+      if (channel === 'talking-points') {
+        exportTalkingPointsToPDF(editedContent as TalkingPointsDraft, institutionName);
+        toast({
+          title: "PDF Downloaded",
+          description: "Executive Talking Points exported successfully.",
+        });
+      } else if (channel === 'case-for-care') {
+        exportCaseForSupportToPDF(editedContent as CaseForCareDraft, institutionName);
+        toast({
+          title: "PDF Downloaded",
+          description: "Case for Support exported successfully.",
+        });
+      }
+    } catch (error) {
+      console.error("PDF export error:", error);
+      toast({
+        variant: "destructive",
+        title: "Export Failed",
+        description: "Could not generate PDF. Please try again.",
+      });
+    }
   };
 
   const handleOpenInGoogleDocs = async () => {
@@ -1614,6 +1642,16 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
                     title="Push to Salesforce Marketing Cloud"
                   >
                     <Cloud className="w-4 h-4 text-blue-500" />
+                  </Button>
+                )}
+                {['talking-points', 'case-for-care'].includes(channel) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleExportToPDF}
+                    title="Export to PDF"
+                  >
+                    <FileDown className="w-4 h-4 text-red-500" />
                   </Button>
                 )}
                 <Button

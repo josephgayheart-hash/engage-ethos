@@ -1111,6 +1111,7 @@ const BuildPage = () => {
                       onCopy={handleCopyContent}
                       onContentChange={handleContentChange}
                       onSaveToLibrary={() => handleSaveIndividualChannelClick(channel)}
+                      institutionName={institutionalConfig?.institutionName}
                     />
                   );
                 })}
