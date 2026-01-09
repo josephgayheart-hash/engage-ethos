@@ -599,7 +599,54 @@ CRITICAL GUARDRAILS:
 2. Do NOT use generic placeholders like "University Name", "[Portal Name]", or "[Institution]"
 3. Do NOT substitute information from other universities (e.g., do not use "Wildcats" if the mascot above is "Buckeyes")
 4. If a value is "Not specified", use a generic term (e.g., "your university") rather than borrowing from another institution
-5. Double-check that all mascots, slogans, and spirit phrases match ONLY what is listed above` : '';
+5. Double-check that all mascots, slogans, and spirit phrases match ONLY what is listed above
+${institutionalConfig.stories?.length > 0 || institutionalConfig.facts?.length > 0 ? `
+
+=== STORIES & FACTS TO INCORPORATE ===
+These are REAL, verified stories and data points from the institution. Weave them naturally into the generated content.
+
+${institutionalConfig.stories?.length > 0 ? `AVAILABLE STORIES (${institutionalConfig.stories.length} selected):
+Use these authentic narratives to humanize the message. Include quotes, subject names, and story elements where appropriate.
+
+${institutionalConfig.stories.map((s: any, i: number) => `
+STORY ${i + 1}: "${s.title}" (${s.story_type || s.storyType})
+${s.subject_name || s.subjectName ? `- Subject: ${s.subject_name || s.subjectName}${s.subject_role || s.subjectRole ? `, ${s.subject_role || s.subjectRole}` : ""}` : ""}
+${s.pull_quote || s.pullQuote ? `- Pull Quote: "${s.pull_quote || s.pullQuote}"` : ""}
+- Narrative: ${(s.narrative || "").substring(0, 600)}${s.narrative?.length > 600 ? "..." : ""}
+${s.themes?.length ? `- Themes: ${s.themes.join(", ")}` : ""}
+`).join("\n")}
+
+STORY USAGE GUIDELINES BY CHANNEL:
+- Email: Use pull quotes in body, mention student names in personalized sections
+- Landing Page: Feature story prominently in hero or testimonial sections
+- Case for Support: Lead with story, use throughout for emotional connection
+- Social Media: Short quote snippet with attribution
+- SMS: Brief reference to real student success
+- News Article: Include subject quotes and background narrative
+- Talking Points: Reference specific student examples for authenticity
+- Direct Mail: Open with compelling story excerpt
+` : ""}
+${institutionalConfig.facts?.length > 0 ? `AVAILABLE FACTS & STATISTICS (${institutionalConfig.facts.length} selected):
+Use these verified data points to add credibility and specificity. Display as bold statistics where visually impactful.
+
+${institutionalConfig.facts.map((f: any) => `
+• ${f.label}: ${f.value}${f.context ? ` (${f.context})` : ""}${f.year ? ` [${f.year}]` : ""}
+  Category: ${f.category}${f.subcategory ? ` > ${f.subcategory}` : ""}
+`).join("")}
+
+FACT USAGE GUIDELINES BY CHANNEL:
+- Email: Lead with compelling stat in subject line or opening hook
+- Landing Page: Display as large, visual statistics in dedicated section
+- Case for Support: Use for impact statistics section, giving levels, outcomes
+- Social Media: Single compelling stat as hook
+- SMS: One key number that drives action
+- News Article: Lead paragraph statistics, supporting data throughout
+- Talking Points: Supporting data points for key messages
+- Digital Ads: Headline statistics that grab attention
+- Direct Mail: Open with impact stat, reinforce in body
+` : ""}
+CRITICAL: These stories and facts are SPECIFICALLY SELECTED by the user. Incorporate them prominently and authentically in the generated content.
+` : ""}` : '';
 
     switch (mode) {
       case 'evaluator':
