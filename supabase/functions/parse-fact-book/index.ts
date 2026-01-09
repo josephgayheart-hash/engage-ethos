@@ -86,23 +86,26 @@ Example output:
     for (let i = 0; i < Math.min(chunks.length, 3); i++) {
       const chunk = chunks[i];
       
+      console.log(`Processing chunk ${i + 1} of ${Math.min(chunks.length, 3)}, length: ${chunk.length}`);
+      
+      const requestBody = {
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { 
+            role: 'user', 
+            content: `Extract facts from this ${sourceDocument ? `(source: ${sourceDocument})` : ''} document:\n\n${chunk}` 
+          }
+        ],
+      };
+      
       const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          model: 'openai/gpt-5-mini',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { 
-              role: 'user', 
-              content: `Extract facts from this ${sourceDocument ? `(source: ${sourceDocument})` : ''} document:\n\n${chunk}` 
-            }
-          ],
-          max_completion_tokens: 4000,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -112,12 +115,16 @@ Example output:
       }
 
       const data = await response.json();
+      console.log('API response structure:', JSON.stringify(Object.keys(data)));
+      
       const content = data.choices?.[0]?.message?.content;
 
       if (!content) {
-        console.error('No content in response for chunk', i);
+        console.error('No content in response for chunk', i, '- full response:', JSON.stringify(data).substring(0, 500));
         continue;
       }
+
+      console.log('Got content for chunk', i, '- length:', content.length);
 
       try {
         // Try to extract JSON from the response
@@ -125,8 +132,11 @@ Example output:
         if (jsonMatch) {
           const parsed = JSON.parse(jsonMatch[0]);
           if (parsed.facts && Array.isArray(parsed.facts)) {
+            console.log(`Parsed ${parsed.facts.length} facts from chunk ${i}`);
             allFacts.push(...parsed.facts);
           }
+        } else {
+          console.error('No JSON found in response for chunk', i);
         }
       } catch (parseError) {
         console.error('Failed to parse AI response for chunk', i, ':', content.substring(0, 200));
