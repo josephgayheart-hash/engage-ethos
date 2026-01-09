@@ -387,11 +387,36 @@ export interface CaseForSupportPullQuote {
   attribution?: string;
 }
 
+export interface CaseForSupportLeaderMessage {
+  leaderName: string;
+  leaderTitle: string;
+  message: string;               // The letter/message content
+  signature?: string;            // Optional signature line
+}
+
+export interface CaseForSupportStrategicPillar {
+  name: string;                  // e.g., "Preparing Change Makers"
+  description: string;           // 2-3 sentences
+  icon?: string;                 // Optional icon name hint
+}
+
+export interface CaseForSupportGivingOpportunity {
+  category: string;              // "Investing in Students", "Investing in Faculty"
+  opportunities: {
+    name: string;
+    amount: string;
+    description: string;
+  }[];
+}
+
 export interface CaseForCareDraft {
   documentTitle: string;
   campaignName?: string;
   campaignTagline?: string;           // "Dream Bold. Give Boldly."
   targetAmount?: string;
+  
+  // Dean's/Leader's Message (NEW - inspired by UC Davis)
+  leaderMessage?: CaseForSupportLeaderMessage;
   
   // Story-driven opening (enhanced)
   openingNarrative?: string;          // Legacy support
@@ -400,6 +425,9 @@ export interface CaseForCareDraft {
   problemStatement?: string;
   visionStatement?: string;
   missionConnection?: string;
+  
+  // Strategic Pillars (NEW - like "Preparing change makers", "Advancing health solutions", "Fostering communities")
+  strategicPillars?: CaseForSupportStrategicPillar[];
   
   keyPrograms?: {
     name: string;
@@ -418,6 +446,9 @@ export interface CaseForCareDraft {
     attribution: string;
     role?: string;
   }[];
+  
+  // Structured giving opportunities table (NEW - like UC Davis investment table)
+  givingOpportunities?: CaseForSupportGivingOpportunity[];
   
   givingLevels?: {
     amount: string;

@@ -29,7 +29,13 @@ import {
   Cloud,
   ExternalLink,
   Heart,
-  User
+  User,
+  BookOpen,
+  Lightbulb,
+  Users,
+  GraduationCap,
+  Building2,
+  Sparkles
 } from "lucide-react";
 import type { 
   ChannelDrafts, 
@@ -303,7 +309,7 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     }
     if (channel === 'case-for-care') {
       const cfc = c as CaseForCareDraft;
-      let result = `CASE FOR CARE\n${'='.repeat(40)}\n\n`;
+      let result = `CASE FOR SUPPORT\n${'='.repeat(40)}\n\n`;
       if (cfc.documentTitle) result += `${cfc.documentTitle}\n`;
       if (cfc.campaignName) result += `Campaign: ${cfc.campaignName}\n`;
       if (cfc.targetAmount) result += `Goal: ${cfc.targetAmount}\n\n`;
@@ -1267,6 +1273,65 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
         </div>
       </div>
 
+      {/* Leader's Message */}
+      {cfc.leaderMessage && (
+        <div className="bg-gradient-to-br from-slate-50 to-stone-50 dark:from-slate-950/50 dark:to-stone-950/50 rounded-2xl p-6 border border-slate-200 dark:border-slate-700">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-slate-600 to-slate-800 flex items-center justify-center flex-shrink-0">
+              <User className="w-6 h-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">A Message from Leadership</h3>
+              <p className="text-sm font-semibold text-foreground">{cfc.leaderMessage.leaderName}</p>
+              <p className="text-xs text-muted-foreground mb-4">{cfc.leaderMessage.leaderTitle}</p>
+              <p className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap italic">
+                {cfc.leaderMessage.message}
+              </p>
+              {cfc.leaderMessage.signature && (
+                <p className="text-sm font-medium text-foreground mt-4 pt-2 border-t border-slate-200 dark:border-slate-700">
+                  — {cfc.leaderMessage.signature}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Strategic Pillars */}
+      {cfc.strategicPillars && cfc.strategicPillars.length > 0 && (
+        <div className="space-y-4">
+          <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-primary" />
+            Our Strategic Vision
+          </h3>
+          <div className="grid md:grid-cols-3 gap-4">
+            {cfc.strategicPillars.map((pillar, i) => {
+              const pillarColors = [
+                'from-blue-500 to-cyan-500',
+                'from-purple-500 to-pink-500', 
+                'from-emerald-500 to-teal-500'
+              ];
+              const bgColors = [
+                'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800',
+                'bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800',
+                'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800'
+              ];
+              return (
+                <div key={i} className={`rounded-xl p-5 border ${bgColors[i % 3]}`}>
+                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${pillarColors[i % 3]} flex items-center justify-center mb-3`}>
+                    {i === 0 && <GraduationCap className="w-5 h-5 text-white" />}
+                    {i === 1 && <Lightbulb className="w-5 h-5 text-white" />}
+                    {i === 2 && <Users className="w-5 h-5 text-white" />}
+                  </div>
+                  <h4 className="font-semibold text-foreground mb-2">{pillar.name}</h4>
+                  <p className="text-sm text-muted-foreground">{pillar.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Opening Story Block */}
       {(cfc.openingStory || cfc.openingNarrative) && (
         <div className="relative bg-amber-50/50 dark:bg-amber-950/20 rounded-2xl p-6 border border-amber-200 dark:border-amber-800">
@@ -1392,8 +1457,46 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
         </div>
       )}
 
-      {/* Giving Levels - Tier Cards */}
-      {cfc.givingLevels && cfc.givingLevels.length > 0 && (
+      {/* Giving Opportunities Table (UC Davis style) */}
+      {cfc.givingOpportunities && cfc.givingOpportunities.length > 0 && (
+        <div className="space-y-4">
+          <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+            <Building2 className="w-4 h-4 text-primary" />
+            Philanthropic Opportunities
+          </h3>
+          <div className="grid md:grid-cols-3 gap-4">
+            {cfc.givingOpportunities.map((cat, i) => {
+              const catColors = [
+                'border-t-blue-500 bg-blue-50/50 dark:bg-blue-950/20',
+                'border-t-purple-500 bg-purple-50/50 dark:bg-purple-950/20',
+                'border-t-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20'
+              ];
+              const textColors = [
+                'text-blue-700 dark:text-blue-400',
+                'text-purple-700 dark:text-purple-400',
+                'text-emerald-700 dark:text-emerald-400'
+              ];
+              return (
+                <div key={i} className={`rounded-xl border border-t-4 ${catColors[i % 3]} p-4`}>
+                  <h4 className={`font-semibold text-sm mb-3 ${textColors[i % 3]}`}>{cat.category}</h4>
+                  <div className="space-y-3">
+                    {cat.opportunities.map((opp, j) => (
+                      <div key={j} className="bg-white/60 dark:bg-black/20 rounded-lg p-3">
+                        <p className="font-medium text-sm text-foreground">{opp.name}</p>
+                        <p className="text-lg font-bold text-primary">{opp.amount}</p>
+                        <p className="text-xs text-muted-foreground">{opp.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Giving Levels - Tier Cards (fallback/legacy) */}
+      {cfc.givingLevels && cfc.givingLevels.length > 0 && !cfc.givingOpportunities && (
         <div className="space-y-3">
           <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Ways to Give</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

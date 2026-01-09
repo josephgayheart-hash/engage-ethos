@@ -175,11 +175,22 @@ IMPORTANT: Respond ONLY with valid JSON:
       "campaignName": "Campaign for Excellence",
       "campaignTagline": "Dream Bold. Give Boldly.",
       "targetAmount": "$50 million",
+      "leaderMessage": {
+        "leaderName": "Dr. Jane Smith",
+        "leaderTitle": "Dean / President / Chancellor",
+        "message": "A personal, compelling 2-3 paragraph letter from leadership that establishes vision, gratitude, and invitation to partner...",
+        "signature": "Jane Smith, Ph.D."
+      },
       "openingStory": {
         "headline": "A Dream Realized",
         "narrative": "When Maria first walked through our doors, she carried not just textbooks but the weight of generations of hope...\n\nHer journey from first-generation student to Rhodes Scholar embodies everything we stand for...",
         "attribution": "Maria Gonzalez, Class of 2024"
       },
+      "strategicPillars": [
+        { "name": "Preparing Change Makers", "description": "Developing leaders who will transform their communities and fields..." },
+        { "name": "Advancing Innovation", "description": "Pioneering research and solutions that address society's greatest challenges..." },
+        { "name": "Fostering Healthy Communities", "description": "Partnering with communities to improve well-being and create lasting impact..." }
+      ],
       "problemStatement": "The challenge facing today's students...",
       "visionStatement": "A bold vision for transformation...",
       "missionConnection": "Rooted in our founding mission...",
@@ -199,6 +210,29 @@ IMPORTANT: Respond ONLY with valid JSON:
       ],
       "testimonials": [
         { "quote": "...", "attribution": "Name, Title", "role": "Donor" }
+      ],
+      "givingOpportunities": [
+        {
+          "category": "Investing in Students",
+          "opportunities": [
+            { "name": "Named Endowed Scholarship", "amount": "$50,000", "description": "Provides permanent support for future leaders" },
+            { "name": "Annual Scholarship", "amount": "$5,000", "description": "Opens doors to an exceptional education" }
+          ]
+        },
+        {
+          "category": "Investing in Faculty",
+          "opportunities": [
+            { "name": "Endowed Professorship", "amount": "$1.5 million", "description": "Attracts world-class scholars" },
+            { "name": "Research Fund", "amount": "$250,000", "description": "Supports critical investigation" }
+          ]
+        },
+        {
+          "category": "Investing in Innovation",
+          "opportunities": [
+            { "name": "Dean's Innovation Fund", "amount": "$25,000", "description": "Enables nimble response to opportunities" },
+            { "name": "Named Space", "amount": "$10,000+", "description": "Creates lasting legacy in our facilities" }
+          ]
+        }
       ],
       "givingLevels": [
         { "amount": "$1,000", "impact": "Provides emergency funds" },
