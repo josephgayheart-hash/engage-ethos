@@ -9,7 +9,7 @@ import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import { useToast } from "@/hooks/use-toast";
 import { SalesforceCredentialsDialog } from "@/components/SalesforceCredentialsDialog";
 import { openInGoogleDocs, formatForGoogleDocs } from "@/lib/googleDocsExport";
-import { exportTalkingPointsToPDF, exportCaseForSupportToPDF } from "@/lib/pdfExport";
+import { exportTalkingPointsToPDF, exportCaseForSupportToPDF, type BrandingOptions } from "@/lib/pdfExport";
 import { 
   Copy, 
   Check, 
@@ -59,6 +59,7 @@ interface ChannelPreviewProps {
   onContentChange?: (channel: Channel, content: ChannelDrafts[keyof ChannelDrafts]) => void;
   onSaveToLibrary?: (channel: Channel, content: ChannelDrafts[keyof ChannelDrafts], contentText: string) => void | (() => void);
   institutionName?: string;
+  branding?: BrandingOptions;
 }
 
 const channelIcons: Record<Channel, React.ReactNode> = {
@@ -91,7 +92,7 @@ const channelLabels: Record<Channel, string> = {
   'case-for-care': 'Case for Support',
 };
 
-export function ChannelPreview({ channel, content, onCopy, onContentChange, onSaveToLibrary, institutionName }: ChannelPreviewProps) {
+export function ChannelPreview({ channel, content, onCopy, onContentChange, onSaveToLibrary, institutionName, branding }: ChannelPreviewProps) {
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState<ChannelDrafts[keyof ChannelDrafts]>(content);
@@ -118,7 +119,7 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
           description: "Executive Talking Points exported successfully.",
         });
       } else if (channel === 'case-for-care') {
-        exportCaseForSupportToPDF(editedContent as CaseForCareDraft, institutionName);
+        exportCaseForSupportToPDF(editedContent as CaseForCareDraft, institutionName, branding);
         toast({
           title: "PDF Downloaded",
           description: "Case for Support exported successfully.",
