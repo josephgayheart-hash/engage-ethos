@@ -14,8 +14,50 @@ import {
   ArrowRight,
   Clock,
   User,
-  Calendar
+  Calendar,
+  Mail,
+  MessageSquare,
+  Share2,
+  Layout,
+  FileText,
+  Phone,
+  Search,
+  Users,
+  Megaphone,
+  Newspaper,
+  Heart
 } from "lucide-react";
+import type { Channel } from "@/types/uplaybook";
+
+const channelLabels: Record<string, string> = {
+  'email': 'Email',
+  'sms': 'SMS',
+  'social-media': 'Social',
+  'portal': 'Portal',
+  'landing-page': 'Landing Page',
+  'direct-mail': 'Direct Mail',
+  'phone-call': 'Phone',
+  'digital-ad-search': 'Search Ads',
+  'digital-ad-social': 'Social Ads',
+  'talking-points': 'Talking Points',
+  'news-article': 'News',
+  'case-for-care': 'Case for Support',
+};
+
+const channelIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+  'email': Mail,
+  'sms': MessageSquare,
+  'social-media': Share2,
+  'portal': Layout,
+  'landing-page': FileText,
+  'direct-mail': FileText,
+  'phone-call': Phone,
+  'digital-ad-search': Search,
+  'digital-ad-social': Users,
+  'talking-points': Megaphone,
+  'news-article': Newspaper,
+  'case-for-care': Heart,
+};
 
 export function MyDraftsCard() {
   const { drafts, loading, deleteDraft } = useUserDrafts();
@@ -129,6 +171,7 @@ export function MyDraftsCard() {
           const Icon = getDraftIcon(draft.draft_type);
           const draftData = draft.draft_data as Record<string, unknown>;
           const contextInfo = draftData?.context as Record<string, unknown> | undefined;
+          const selectedChannels = (draftData?.selectedChannels as Channel[]) || [];
           
           return (
             <Link 
@@ -158,12 +201,33 @@ export function MyDraftsCard() {
                       {draft.draft_type}
                     </Badge>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      {format(new Date(draft.updated_at), 'MMM d, yyyy')}
+                  {/* Channel badges for message drafts */}
+                  {draft.draft_type === 'message' && selectedChannels.length > 0 && (
+                    <div className="flex items-center gap-1 mt-1 flex-wrap">
+                      {selectedChannels.slice(0, 3).map((channel) => {
+                        const ChannelIcon = channelIcons[channel] || FileText;
+                        return (
+                          <Badge 
+                            key={channel} 
+                            variant="secondary" 
+                            className="text-[10px] px-1.5 py-0 h-5 bg-primary/5 text-primary/80"
+                          >
+                            <ChannelIcon className="w-3 h-3 mr-1" />
+                            {channelLabels[channel] || channel}
+                          </Badge>
+                        );
+                      })}
+                      {selectedChannels.length > 3 && (
+                        <Badge 
+                          variant="secondary" 
+                          className="text-[10px] px-1.5 py-0 h-5 bg-muted text-muted-foreground"
+                        >
+                          +{selectedChannels.length - 3}
+                        </Badge>
+                      )}
                     </div>
-                    <span>•</span>
+                  )}
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap mt-1">
                     <div className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
                       {formatDistanceToNow(new Date(draft.updated_at), { addSuffix: true })}
