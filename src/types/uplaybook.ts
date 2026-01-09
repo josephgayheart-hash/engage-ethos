@@ -162,7 +162,8 @@ export type Channel =
   | 'digital-ad-search'
   | 'digital-ad-social'
   | 'talking-points'
-  | 'news-article';
+  | 'news-article'
+  | 'case-for-care';
 
 export type MessageDomain = 
   // Student domains
@@ -368,6 +369,39 @@ export interface NewsArticleDraft {
   relatedLinks?: string[];
 }
 
+export interface CaseForCareDraft {
+  documentTitle: string;
+  campaignName?: string;
+  targetAmount?: string;
+  openingNarrative: string;
+  problemStatement: string;
+  visionStatement: string;
+  missionConnection: string;
+  keyPrograms: {
+    name: string;
+    description: string;
+    impact: string;
+  }[];
+  impactStatistics: string[];
+  testimonials: {
+    quote: string;
+    attribution: string;
+    role?: string;
+  }[];
+  givingLevels?: {
+    amount: string;
+    impact: string;
+  }[];
+  callToAction: string;
+  closingStatement: string;
+  contactInfo?: {
+    name: string;
+    title: string;
+    email: string;
+    phone?: string;
+  };
+}
+
 export interface ChannelDrafts {
   email?: EmailDraft;
   sms?: string;
@@ -380,6 +414,7 @@ export interface ChannelDrafts {
   'digital-ad-social'?: SocialAdDraft;
   'talking-points'?: TalkingPointsDraft;
   'news-article'?: NewsArticleDraft;
+  'case-for-care'?: CaseForCareDraft;
 }
 
 // Brand Adherence Scoring

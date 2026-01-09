@@ -58,6 +58,7 @@ const channelLabels: Record<string, string> = {
   'digital-ad-search': 'Search Ads',
   'digital-ad-social': 'Social Ads',
   'talking-points': 'Talking Points',
+  'case-for-care': 'Case for Care',
 };
 
 /**

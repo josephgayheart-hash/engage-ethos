@@ -108,6 +108,7 @@ CHANNEL-SPECIFIC REQUIREMENTS:
 - DIGITAL-AD-SOCIAL: Meta/LinkedIn ad with primary text, headline, description, and CTA button
 - NEWS-ARTICLE: University news article with headline, subheadline, lead paragraph, body paragraphs, pull quote, boilerplate, and media contact. Write in inverted pyramid style with journalistic objectivity.
 - TALKING-POINTS: Executive talking points for senior leaders with opening hook, 5 key messages (2-3 sentences each), supporting data, anticipated Q&A with responses, and closing statement
+- CASE-FOR-CARE: Advancement Case for Support document for fundraising. Include document title, campaign name, opening narrative (2-3 emotional paragraphs with story), problem statement, vision statement, mission connection, key programs (3-5 with name, description, impact), impact statistics (5+ specific data points), testimonials (2-3 quotes), giving levels, call to action, closing statement, and contact info.
 
 IMPORTANT: Respond ONLY with valid JSON:
 {
@@ -168,6 +169,28 @@ IMPORTANT: Respond ONLY with valid JSON:
       "suggestedResponses": ["Response to Q1", "Response to Q2", "Response to Q3"],
       "transitionPhrases": ["Transition phrase 1", "Transition phrase 2"],
       "closingStatement": "Powerful 2-3 sentence closing"
+    },
+    "case-for-care": {
+      "documentTitle": "A Case for the Future of Learning",
+      "campaignName": "Campaign for Tomorrow",
+      "targetAmount": "$50 million",
+      "openingNarrative": "2-3 emotional paragraphs telling a compelling story...",
+      "problemStatement": "The challenge or need being addressed",
+      "visionStatement": "Bold vision for what's possible",
+      "missionConnection": "How this connects to institutional mission",
+      "keyPrograms": [
+        { "name": "Program 1", "description": "...", "impact": "..." }
+      ],
+      "impactStatistics": ["Stat 1", "Stat 2", "Stat 3", "Stat 4", "Stat 5"],
+      "testimonials": [
+        { "quote": "...", "attribution": "Name, Title", "role": "Donor" }
+      ],
+      "givingLevels": [
+        { "amount": "$1,000", "impact": "Provides..." }
+      ],
+      "callToAction": "Specific ask with urgency",
+      "closingStatement": "Inspiring 2-3 sentence close",
+      "contactInfo": { "name": "...", "title": "...", "email": "...", "phone": "..." }
     }
   },
   "recommendedAuthority": "...",
