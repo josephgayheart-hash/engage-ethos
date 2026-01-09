@@ -214,11 +214,11 @@ export function useStoryBank(options: UseStoryBankOptions = {}) {
     }
   };
 
-  const parseStoryFromText = async (text: string): Promise<CreateStoryInput | null> => {
+  const parseStoryFromText = async (text: string, sourceUrl?: string): Promise<CreateStoryInput | null> => {
     setIsParsing(true);
     try {
       const { data, error } = await supabase.functions.invoke('parse-story', {
-        body: { text },
+        body: { text, sourceUrl },
       });
       
       if (error) throw error;
@@ -232,6 +232,64 @@ export function useStoryBank(options: UseStoryBankOptions = {}) {
       console.error('Error parsing story:', error);
       toast({
         title: 'Error parsing story',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return null;
+    } finally {
+      setIsParsing(false);
+    }
+  };
+
+  const scrapeAndParseStory = async (url: string): Promise<CreateStoryInput | null> => {
+    setIsParsing(true);
+    try {
+      // First, scrape the URL using firecrawl
+      const { data: scrapeData, error: scrapeError } = await supabase.functions.invoke('firecrawl-scrape', {
+        body: { 
+          url, 
+          options: { 
+            formats: ['markdown'],
+            onlyMainContent: true 
+          } 
+        },
+      });
+      
+      if (scrapeError) throw scrapeError;
+      
+      if (!scrapeData?.success) {
+        throw new Error(scrapeData?.error || 'Failed to scrape URL');
+      }
+      
+      const markdown = scrapeData.data?.markdown || scrapeData.markdown;
+      if (!markdown) {
+        throw new Error('No content found at this URL');
+      }
+      
+      // Then parse the scraped content as a story
+      const { data, error } = await supabase.functions.invoke('parse-story', {
+        body: { 
+          text: markdown, 
+          sourceUrl: url,
+          sourceTitle: scrapeData.data?.metadata?.title || scrapeData.metadata?.title
+        },
+      });
+      
+      if (error) throw error;
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      return {
+        ...data,
+        source_url: url,
+        source_description: scrapeData.data?.metadata?.title || scrapeData.metadata?.title || 'Scraped from URL',
+      } as CreateStoryInput;
+    } catch (error: any) {
+      console.error('Error scraping and parsing story:', error);
+      toast({
+        title: 'Error importing from URL',
         description: error.message,
         variant: 'destructive',
       });
@@ -258,6 +316,7 @@ export function useStoryBank(options: UseStoryBankOptions = {}) {
     updateStory,
     deleteStory,
     parseStoryFromText,
+    scrapeAndParseStory,
     toggleFeatured,
     getFeaturedStories,
     getStoriesByType,
