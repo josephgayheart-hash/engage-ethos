@@ -26,6 +26,7 @@ export interface DepartmentInfo {
 }
 
 export type AudienceType = 
+  | 'general'
   | 'prospective' 
   | 'first-year' 
   | 'continuing' 
@@ -87,6 +88,8 @@ export type CohortContext =
   | 'none';
 
 export type CommunicationMoment = 
+  // General moments (cross-audience)
+  | 'brand-awareness'
   // Student moments
   | 'early-term' 
   | 'midterm' 
