@@ -110,27 +110,31 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleExportToPDF = () => {
+  const handleExportToPDF = async () => {
     try {
-      if (channel === 'talking-points') {
+      if (channel === "talking-points") {
         exportTalkingPointsToPDF(editedContent as TalkingPointsDraft, institutionName);
         toast({
           title: "PDF Downloaded",
           description: "Executive Talking Points exported successfully.",
         });
-      } else if (channel === 'case-for-care') {
-        exportCaseForSupportToPDF(editedContent as CaseForCareDraft, institutionName, branding);
+        return;
+      }
+
+      if (channel === "case-for-care") {
+        await exportCaseForSupportToPDF(editedContent as CaseForCareDraft, institutionName, branding);
         toast({
           title: "PDF Downloaded",
           description: "Case for Support exported successfully.",
         });
+        return;
       }
     } catch (error) {
       console.error("PDF export error:", error);
       toast({
         variant: "destructive",
         title: "Export Failed",
-        description: "Could not generate PDF. Please try again.",
+        description: error instanceof Error ? error.message : "Could not generate PDF. Please try again.",
       });
     }
   };

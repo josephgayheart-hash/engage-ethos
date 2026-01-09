@@ -24,6 +24,30 @@ function lightenColor(rgb: [number, number, number], factor: number = 0.9): [num
   ];
 }
 
+async function loadImageAsDataUrl(url: string): Promise<{ dataUrl: string; format: "PNG" | "JPEG" }> {
+  const res = await fetch(url, { mode: "cors" });
+  if (!res.ok) throw new Error(`Failed to fetch logo (HTTP ${res.status})`);
+
+  const contentType = (res.headers.get("content-type") || "").toLowerCase();
+  const blob = await res.blob();
+
+  const format: "PNG" | "JPEG" = contentType.includes("png")
+    ? "PNG"
+    : contentType.includes("jpeg") || contentType.includes("jpg")
+      ? "JPEG"
+      : url.toLowerCase().endsWith(".png")
+        ? "PNG"
+        : "JPEG";
+
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("Failed to read logo data"));
+    reader.readAsDataURL(blob);
+  });
+
+  return { dataUrl, format };
+}
 export function exportTalkingPointsToPDF(tp: TalkingPointsDraft, institutionName?: string): void {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
