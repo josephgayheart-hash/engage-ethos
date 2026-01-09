@@ -248,14 +248,14 @@ export function AnalyzerInput({ onAnalyze, isAnalyzing, disabled }: AnalyzerInpu
             </div>
 
             <Tabs defaultValue="list" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 h-8">
-                <TabsTrigger value="list" className="text-xs gap-1.5">
+              <TabsList className="h-9 p-1 bg-muted/50">
+                <TabsTrigger value="list" className="text-xs px-3 gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
                   <ListTree className="w-3.5 h-3.5" />
-                  List View
+                  List
                 </TabsTrigger>
-                <TabsTrigger value="diagram" className="text-xs gap-1.5">
+                <TabsTrigger value="diagram" className="text-xs px-3 gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
                   <Network className="w-3.5 h-3.5" />
-                  Structure View
+                  Structure
                 </TabsTrigger>
               </TabsList>
               
