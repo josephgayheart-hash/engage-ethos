@@ -17,7 +17,10 @@ import {
   Target,
   MessageCircle,
   HelpCircle,
-  ArrowRight
+  ArrowRight,
+  Heart,
+  Users,
+  DollarSign
 } from "lucide-react";
 import type { 
   Channel, 
@@ -27,7 +30,8 @@ import type {
   SearchAdDraft,
   SocialAdDraft,
   TalkingPointsDraft,
-  NewsArticleDraft
+  NewsArticleDraft,
+  CaseForCareDraft
 } from "@/types/uplaybook";
 
 interface RichContentRendererProps {
@@ -221,6 +225,46 @@ const parseContent = (content: string, channel?: string): any => {
         description: descMatch?.[1]?.trim(),
         ctaButton: ctaMatch?.[1]?.trim() || 'Learn More',
       };
+    }
+  }
+
+  // Parse Case for Support format
+  if (channel === 'case-for-care' || content.includes('CASE FOR SUPPORT') || content.includes('documentTitle')) {
+    try {
+      const parsed = JSON.parse(content);
+      if (parsed.documentTitle || parsed.visionStatement || parsed.callToAction || parsed.openingNarrative) {
+        return { _type: 'case-for-care', ...parsed };
+      }
+    } catch {
+      // Try to parse from text format
+      const result: Partial<CaseForCareDraft> = {
+        documentTitle: '',
+        campaignName: '',
+        targetAmount: '',
+        openingNarrative: '',
+        visionStatement: '',
+        keyPrograms: [],
+        impactStatistics: [],
+        givingLevels: [],
+        callToAction: '',
+        closingStatement: '',
+      };
+
+      const titleMatch = content.match(/^(.+?)\n/);
+      const campaignMatch = content.match(/Campaign:\s*(.+?)(?:\n|$)/i);
+      const goalMatch = content.match(/Goal:\s*(.+?)(?:\n|$)/i);
+      const visionMatch = content.match(/VISION:\s*\n?([\s\S]*?)(?=KEY PROGRAMS|IMPACT|GIVING|CALL TO ACTION|$)/i);
+      const ctaMatch = content.match(/CALL TO ACTION:\s*\n?([\s\S]*?)(?=\n\n|$)/i);
+
+      if (titleMatch) result.documentTitle = titleMatch[1].trim();
+      if (campaignMatch) result.campaignName = campaignMatch[1].trim();
+      if (goalMatch) result.targetAmount = goalMatch[1].trim();
+      if (visionMatch) result.visionStatement = visionMatch[1].trim();
+      if (ctaMatch) result.callToAction = ctaMatch[1].trim();
+
+      if (result.documentTitle || result.visionStatement || result.callToAction) {
+        return { _type: 'case-for-care', ...result };
+      }
     }
   }
 
@@ -498,6 +542,171 @@ const SocialAdRenderer = ({ content }: { content: SocialAdDraft & { _type: strin
   </div>
 );
 
+// Render Case for Support
+const CaseForCareRenderer = ({ content }: { content: CaseForCareDraft & { _type: string } }) => (
+  <div className="space-y-6">
+    {/* Header */}
+    <div className="bg-gradient-to-r from-rose-500/10 to-pink-500/10 rounded-xl p-6 border border-rose-200 dark:border-rose-900">
+      <div className="flex items-center gap-3 mb-3">
+        <Heart className="w-6 h-6 text-rose-500" />
+        <span className="text-xs text-rose-600 dark:text-rose-400 uppercase tracking-wide font-medium">Case for Support</span>
+      </div>
+      {content.documentTitle && (
+        <h2 className="text-2xl font-bold mb-2">{content.documentTitle}</h2>
+      )}
+      {content.campaignName && (
+        <p className="text-lg text-muted-foreground">{content.campaignName}</p>
+      )}
+      {content.campaignTagline && (
+        <p className="text-sm italic text-rose-600 dark:text-rose-400 mt-2">"{content.campaignTagline}"</p>
+      )}
+      {content.targetAmount && (
+        <div className="mt-4 inline-flex items-center gap-2 bg-rose-500 text-white px-4 py-2 rounded-lg">
+          <DollarSign className="w-5 h-5" />
+          <span className="font-bold text-lg">{content.targetAmount}</span>
+        </div>
+      )}
+    </div>
+
+    {/* Leader Message */}
+    {content.leaderMessage && (
+      <div className="bg-muted/50 rounded-lg p-5 border-l-4 border-rose-500">
+        <p className="text-sm italic mb-3">"{content.leaderMessage.message}"</p>
+        <p className="text-sm font-medium text-rose-600 dark:text-rose-400">
+          — {content.leaderMessage.leaderName}, {content.leaderMessage.leaderTitle}
+        </p>
+      </div>
+    )}
+
+    {/* Opening Story or Narrative */}
+    {(content.openingStory || content.openingNarrative) && (
+      <div className="space-y-2">
+        <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-2">
+          <Quote className="w-4 h-4" />
+          Story of Impact
+        </h4>
+        {content.openingStory ? (
+          <div className="bg-card rounded-lg p-4 border">
+            {content.openingStory.headline && (
+              <h5 className="font-semibold mb-2">{content.openingStory.headline}</h5>
+            )}
+            <p className="text-sm italic">{content.openingStory.narrative}</p>
+            {content.openingStory.attribution && (
+              <p className="text-xs text-muted-foreground mt-2">— {content.openingStory.attribution}</p>
+            )}
+          </div>
+        ) : (
+          <p className="text-sm">{content.openingNarrative}</p>
+        )}
+      </div>
+    )}
+
+    {/* Vision Statement */}
+    {content.visionStatement && (
+      <div className="space-y-2">
+        <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-2">
+          <Target className="w-4 h-4" />
+          Our Vision
+        </h4>
+        <p className="text-sm">{content.visionStatement}</p>
+      </div>
+    )}
+
+    {/* Strategic Pillars */}
+    {content.strategicPillars && content.strategicPillars.length > 0 && (
+      <div className="space-y-3">
+        <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Strategic Pillars</h4>
+        <div className="grid gap-3 md:grid-cols-2">
+          {content.strategicPillars.map((pillar, i) => (
+            <div key={i} className="bg-card rounded-lg p-4 border">
+              <p className="font-medium text-rose-600 dark:text-rose-400">{pillar.name}</p>
+              <p className="text-sm text-muted-foreground mt-1">{pillar.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {/* Key Programs */}
+    {content.keyPrograms && content.keyPrograms.length > 0 && (
+      <div className="space-y-3">
+        <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Key Programs</h4>
+        <div className="space-y-2">
+          {content.keyPrograms.map((program, i) => (
+            <div key={i} className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+              <span className="flex-shrink-0 w-6 h-6 rounded-full bg-rose-500/10 text-rose-500 text-sm font-medium flex items-center justify-center">
+                {i + 1}
+              </span>
+              <div>
+                <p className="font-medium">{program.name}</p>
+                <p className="text-sm text-muted-foreground">{program.description}</p>
+                <p className="text-xs text-rose-600 dark:text-rose-400 mt-1">Impact: {program.impact}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {/* Impact Statistics */}
+    {content.impactStatistics && content.impactStatistics.length > 0 && (
+      <div className="space-y-3">
+        <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Impact by the Numbers</h4>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {content.impactStatistics.map((stat, i) => (
+            <div key={i} className="bg-rose-500 text-white rounded-lg p-4 text-center">
+              <p className="text-xl font-bold">{typeof stat === 'string' ? stat : stat.value}</p>
+              {typeof stat === 'object' && stat.label && (
+                <p className="text-xs opacity-90 mt-1">{stat.label}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {/* Giving Levels */}
+    {content.givingLevels && content.givingLevels.length > 0 && (
+      <div className="space-y-3">
+        <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-2">
+          <DollarSign className="w-4 h-4" />
+          Ways to Give
+        </h4>
+        <div className="space-y-2">
+          {content.givingLevels.map((level, i) => (
+            <div key={i} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+              <span className="font-bold text-rose-600 dark:text-rose-400">{level.amount}</span>
+              <span className="text-sm text-muted-foreground">{level.impact}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {/* Call to Action */}
+    {content.callToAction && (
+      <div className="bg-rose-500 text-white rounded-xl p-5 text-center">
+        <p className="font-medium">{content.callToAction}</p>
+      </div>
+    )}
+
+    {/* Closing Statement */}
+    {content.closingStatement && (
+      <p className="text-center text-sm italic text-muted-foreground">{content.closingStatement}</p>
+    )}
+
+    {/* Contact Info */}
+    {content.contactInfo && (
+      <div className="bg-muted/50 rounded-lg p-4 text-center text-sm">
+        <p className="font-medium">{content.contactInfo.name}</p>
+        <p className="text-muted-foreground">{content.contactInfo.title}</p>
+        <p className="text-rose-600 dark:text-rose-400">{content.contactInfo.email}</p>
+        {content.contactInfo.phone && <p className="text-muted-foreground">{content.contactInfo.phone}</p>}
+      </div>
+    )}
+  </div>
+);
+
 // Render multi-channel kit
 const KitRenderer = ({ sections }: { sections: { channel: string; content: string }[] }) => (
   <div className="space-y-6">
@@ -539,6 +748,7 @@ export function RichContentRenderer({ content, channel, className }: RichContent
       {parsed._type === 'landing-page' && <LandingPageRenderer content={parsed} />}
       {parsed._type === 'digital-ad-search' && <SearchAdRenderer content={parsed} />}
       {parsed._type === 'digital-ad-social' && <SocialAdRenderer content={parsed} />}
+      {parsed._type === 'case-for-care' && <CaseForCareRenderer content={parsed} />}
       {parsed._type === 'kit' && <KitRenderer sections={parsed.sections} />}
       {channel === 'sms' && typeof parsed === 'string' && <SmsRenderer content={parsed} />}
       
