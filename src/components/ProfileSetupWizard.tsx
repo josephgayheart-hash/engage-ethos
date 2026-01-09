@@ -25,7 +25,9 @@ import {
   Mail,
   Globe,
   GraduationCap,
-  Dna
+  Dna,
+  Users,
+  Heart
 } from 'lucide-react';
 
 interface ProfileSetupWizardProps {
@@ -55,16 +57,22 @@ const STEPS: WizardStep[] = [
     icon: <Palette className="w-5 h-5" />,
   },
   {
-    id: 'contact',
-    title: 'Primary Contact',
-    description: 'Main contact information',
-    icon: <Phone className="w-5 h-5" />,
+    id: 'leadership',
+    title: 'Leadership',
+    description: 'President, Provost, and key leaders',
+    icon: <Users className="w-5 h-5" />,
   },
   {
-    id: 'systems',
-    title: 'Key Systems',
-    description: 'Portals and platforms',
-    icon: <Globe className="w-5 h-5" />,
+    id: 'advancement',
+    title: 'Advancement',
+    description: 'Development and giving contacts',
+    icon: <Heart className="w-5 h-5" />,
+  },
+  {
+    id: 'contact',
+    title: 'Contact & Systems',
+    description: 'Contact info and platforms',
+    icon: <Phone className="w-5 h-5" />,
   },
   {
     id: 'review',
@@ -475,7 +483,226 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
           </div>
         );
 
-      case 2: // Contact
+      case 2: // Leadership
+        return (
+          <div className="space-y-6">
+            <div className="p-3 bg-muted/30 rounded-lg">
+              <p className="text-sm text-muted-foreground">
+                Add key leadership contacts that may appear in Case for Support documents and executive communications.
+              </p>
+            </div>
+
+            {/* President */}
+            <div className="space-y-4 p-4 border rounded-lg">
+              <h4 className="font-medium flex items-center gap-2">
+                <Users className="w-4 h-4 text-primary" />
+                President/Chancellor
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="presidentName">Name</Label>
+                  <Input
+                    id="presidentName"
+                    placeholder="e.g., Dr. John Smith"
+                    value={config.presidentName || ''}
+                    onChange={(e) => updateConfig({ presidentName: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="presidentTitle">Title</Label>
+                  <Input
+                    id="presidentTitle"
+                    placeholder="e.g., President"
+                    value={config.presidentTitle || ''}
+                    onChange={(e) => updateConfig({ presidentTitle: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Provost */}
+            <div className="space-y-4 p-4 border rounded-lg">
+              <h4 className="font-medium text-sm text-muted-foreground">Provost/Chief Academic Officer</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="provostName">Name</Label>
+                  <Input
+                    id="provostName"
+                    placeholder="e.g., Dr. Jane Doe"
+                    value={config.provostName || ''}
+                    onChange={(e) => updateConfig({ provostName: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="provostTitle">Title</Label>
+                  <Input
+                    id="provostTitle"
+                    placeholder="e.g., Provost and Executive Vice President"
+                    value={config.provostTitle || ''}
+                    onChange={(e) => updateConfig({ provostTitle: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* CFO */}
+            <div className="space-y-4 p-4 border rounded-lg">
+              <h4 className="font-medium text-sm text-muted-foreground">Chief Financial Officer (Optional)</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="cfoName">Name</Label>
+                  <Input
+                    id="cfoName"
+                    placeholder="e.g., Michael Johnson"
+                    value={config.cfoName || ''}
+                    onChange={(e) => updateConfig({ cfoName: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cfoTitle">Title</Label>
+                  <Input
+                    id="cfoTitle"
+                    placeholder="e.g., Senior Vice President for Finance"
+                    value={config.cfoTitle || ''}
+                    onChange={(e) => updateConfig({ cfoTitle: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 3: // Advancement
+        return (
+          <div className="space-y-6">
+            <div className="p-3 bg-muted/30 rounded-lg">
+              <p className="text-sm text-muted-foreground">
+                Development and advancement contacts for Case for Support documents and donor communications.
+              </p>
+            </div>
+
+            {/* Development Director */}
+            <div className="space-y-4 p-4 border rounded-lg">
+              <h4 className="font-medium flex items-center gap-2">
+                <Heart className="w-4 h-4 text-primary" />
+                Development Director
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="devDirectorName">Name</Label>
+                  <Input
+                    id="devDirectorName"
+                    placeholder="e.g., Sarah Williams"
+                    value={config.developmentDirectorName || ''}
+                    onChange={(e) => updateConfig({ developmentDirectorName: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="devDirectorTitle">Title</Label>
+                  <Input
+                    id="devDirectorTitle"
+                    placeholder="e.g., Vice President for University Advancement"
+                    value={config.developmentDirectorTitle || ''}
+                    onChange={(e) => updateConfig({ developmentDirectorTitle: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="devDirectorEmail">Email</Label>
+                  <Input
+                    id="devDirectorEmail"
+                    type="email"
+                    placeholder="e.g., advancement@university.edu"
+                    value={config.developmentDirectorEmail || ''}
+                    onChange={(e) => updateConfig({ developmentDirectorEmail: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="devDirectorPhone">Phone</Label>
+                  <Input
+                    id="devDirectorPhone"
+                    placeholder="e.g., (555) 123-4567"
+                    value={config.developmentDirectorPhone || ''}
+                    onChange={(e) => updateConfig({ developmentDirectorPhone: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Major Gifts Officer */}
+            <div className="space-y-4 p-4 border rounded-lg">
+              <h4 className="font-medium text-sm text-muted-foreground">Major Gifts Officer (Optional)</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="majorGiftsName">Name</Label>
+                  <Input
+                    id="majorGiftsName"
+                    placeholder="e.g., Robert Chen"
+                    value={config.majorGiftsOfficerName || ''}
+                    onChange={(e) => updateConfig({ majorGiftsOfficerName: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="majorGiftsTitle">Title</Label>
+                  <Input
+                    id="majorGiftsTitle"
+                    placeholder="e.g., Director of Major Gifts"
+                    value={config.majorGiftsOfficerTitle || ''}
+                    onChange={(e) => updateConfig({ majorGiftsOfficerTitle: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="majorGiftsEmail">Email</Label>
+                <Input
+                  id="majorGiftsEmail"
+                  type="email"
+                  placeholder="e.g., majorgifts@university.edu"
+                  value={config.majorGiftsOfficerEmail || ''}
+                  onChange={(e) => updateConfig({ majorGiftsOfficerEmail: e.target.value })}
+                />
+              </div>
+            </div>
+
+            {/* Alumni Relations */}
+            <div className="space-y-4 p-4 border rounded-lg">
+              <h4 className="font-medium text-sm text-muted-foreground">Alumni Relations Director (Optional)</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="alumniDirName">Name</Label>
+                  <Input
+                    id="alumniDirName"
+                    placeholder="e.g., Maria Garcia"
+                    value={config.alumniRelationsDirectorName || ''}
+                    onChange={(e) => updateConfig({ alumniRelationsDirectorName: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="alumniDirTitle">Title</Label>
+                  <Input
+                    id="alumniDirTitle"
+                    placeholder="e.g., Director of Alumni Relations"
+                    value={config.alumniRelationsDirectorTitle || ''}
+                    onChange={(e) => updateConfig({ alumniRelationsDirectorTitle: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="alumniDirEmail">Email</Label>
+                <Input
+                  id="alumniDirEmail"
+                  type="email"
+                  placeholder="e.g., alumni@university.edu"
+                  value={config.alumniRelationsDirectorEmail || ''}
+                  onChange={(e) => updateConfig({ alumniRelationsDirectorEmail: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 4: // Contact & Systems
         return (
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
@@ -543,64 +770,34 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
               )}
             </div>
 
-            <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
-              <Mail className="w-4 h-4 inline mr-2" />
-              You can add more detailed contact information, offices, and support centers later in the full configuration.
-            </p>
-          </div>
-        );
-
-      case 3: // Systems
-        return (
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="portalName" className="text-sm font-medium">
-                Student Portal Name
-              </Label>
-              <Input
-                id="portalName"
-                placeholder="e.g., MyLakewood, Student Hub"
-                value={config.portalName || ''}
-                onChange={(e) => updateConfig({ portalName: e.target.value })}
-              />
-              <p className="text-xs text-muted-foreground">
-                The name students use for your main student portal
-              </p>
-            </div>
-
             <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="portalName" className="text-sm font-medium">
+                  Student Portal Name
+                </Label>
+                <Input
+                  id="portalName"
+                  placeholder="e.g., MyLakewood, Student Hub"
+                  value={config.portalName || ''}
+                  onChange={(e) => updateConfig({ portalName: e.target.value })}
+                />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="lmsName" className="text-sm font-medium">
                   Learning Management System
                 </Label>
                 <Input
                   id="lmsName"
-                  placeholder="e.g., Canvas, Blackboard, Moodle"
+                  placeholder="e.g., Canvas, Blackboard"
                   value={config.lmsName || ''}
                   onChange={(e) => updateConfig({ lmsName: e.target.value })}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="advisingSystem" className="text-sm font-medium">
-                  Advising System
-                </Label>
-                <Input
-                  id="advisingSystem"
-                  placeholder="e.g., Navigate, Starfish, EAB"
-                  value={config.advisingSystemName || ''}
-                  onChange={(e) => updateConfig({ advisingSystemName: e.target.value })}
-                />
-              </div>
             </div>
-
-            <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
-              <GraduationCap className="w-4 h-4 inline mr-2" />
-              Additional systems (financial aid portal, degree audit, scheduling) can be configured in the full settings.
-            </p>
           </div>
         );
 
-      case 4: // Review
+      case 5: // Review
         return (
           <div className="space-y-6">
             <Card className="bg-muted/30">
@@ -652,6 +849,18 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
                   </div>
                 </div>
 
+                {(config.presidentName || config.developmentDirectorName) && (
+                  <div className="pt-3 border-t">
+                    <p className="text-muted-foreground text-sm mb-1">Leadership</p>
+                    <p className="text-sm">
+                      {[
+                        config.presidentName && `${config.presidentName} (${config.presidentTitle || 'President'})`,
+                        config.developmentDirectorName && `${config.developmentDirectorName} (${config.developmentDirectorTitle || 'Development'})`
+                      ].filter(Boolean).join(' • ')}
+                    </p>
+                  </div>
+                )}
+
                 {(config.primaryContactEmail || config.primaryContactPhone) && (
                   <div className="pt-3 border-t">
                     <p className="text-muted-foreground text-sm mb-1">Contact</p>
@@ -686,7 +895,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
                     </p>
                     <ul className="text-xs text-amber-700/80 dark:text-amber-400/80 mt-2 space-y-1 ml-4 list-disc">
                       <li>Campus locations, buildings, and support centers</li>
-                      <li>Staff titles, leadership names, and advisor roles</li>
+                      <li>Additional staff and advisor information</li>
                       <li>Academic terminology and preferred phrases</li>
                       <li>Calls-to-action and signature templates</li>
                     </ul>

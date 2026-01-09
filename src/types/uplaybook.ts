@@ -536,6 +536,32 @@ export interface InstitutionalConfig {
   executiveAssistantName?: string;
   executiveAssistantEmail?: string;
   
+  // Development/Advancement Leadership
+  developmentDirectorName?: string;
+  developmentDirectorTitle?: string;
+  developmentDirectorEmail?: string;
+  developmentDirectorPhone?: string;
+  seniorDevelopmentOfficerName?: string;
+  seniorDevelopmentOfficerTitle?: string;
+  seniorDevelopmentOfficerEmail?: string;
+  majorGiftsOfficerName?: string;
+  majorGiftsOfficerTitle?: string;
+  majorGiftsOfficerEmail?: string;
+  annualGivingManagerName?: string;
+  annualGivingManagerTitle?: string;
+  annualGivingManagerEmail?: string;
+  
+  // Additional Key Contacts for Case for Support
+  presidentName?: string;
+  presidentTitle?: string;
+  provostName?: string;
+  provostTitle?: string;
+  cfoName?: string;
+  cfoTitle?: string;
+  alumniRelationsDirectorName?: string;
+  alumniRelationsDirectorTitle?: string;
+  alumniRelationsDirectorEmail?: string;
+  
   // Unit-Specific Branding (can override parent)
   unitName?: string;             // e.g., "College of Engineering"
   unitAbbreviation?: string;     // e.g., "CoE"

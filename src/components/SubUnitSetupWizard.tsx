@@ -31,7 +31,8 @@ import {
   GraduationCap,
   Briefcase,
   Building,
-  Layers
+  Layers,
+  Heart
 } from 'lucide-react';
 
 interface SubUnitSetupWizardProps {
@@ -127,6 +128,11 @@ export function SubUnitSetupWizard({ parentProfile, onComplete, onCancel }: SubU
     departmentChairEmail: '',
     executiveAssistantName: '',
     executiveAssistantEmail: '',
+    // Development/Advancement fields
+    developmentDirectorName: '',
+    developmentDirectorTitle: '',
+    developmentDirectorEmail: '',
+    developmentDirectorPhone: '',
   });
 
   const updateConfig = (updates: Partial<InstitutionalConfig>) => {
@@ -587,6 +593,58 @@ export function SubUnitSetupWizard({ parentProfile, onComplete, onCancel }: SubU
                 </div>
               </div>
             </div>
+
+            {/* Development Director - for Case for Support */}
+            <div className="space-y-4 p-4 border rounded-lg border-primary/30 bg-primary/5">
+              <h4 className="font-medium flex items-center gap-2">
+                <Heart className="w-4 h-4 text-primary" />
+                Development Contact (for Case for Support)
+              </h4>
+              <p className="text-xs text-muted-foreground">
+                This contact will appear in Case for Support documents and donor communications.
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="unitDevDirName">Development Director Name</Label>
+                  <Input
+                    id="unitDevDirName"
+                    placeholder="e.g., Patricia Adams"
+                    value={config.developmentDirectorName || ''}
+                    onChange={(e) => updateConfig({ developmentDirectorName: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="unitDevDirTitle">Title</Label>
+                  <Input
+                    id="unitDevDirTitle"
+                    placeholder="e.g., Director of Development"
+                    value={config.developmentDirectorTitle || ''}
+                    onChange={(e) => updateConfig({ developmentDirectorTitle: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="unitDevDirEmail">Email</Label>
+                  <Input
+                    id="unitDevDirEmail"
+                    type="email"
+                    placeholder="e.g., giving.cas@lakewood.edu"
+                    value={config.developmentDirectorEmail || ''}
+                    onChange={(e) => updateConfig({ developmentDirectorEmail: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="unitDevDirPhone">Phone</Label>
+                  <Input
+                    id="unitDevDirPhone"
+                    placeholder="e.g., (555) 123-4567"
+                    value={config.developmentDirectorPhone || ''}
+                    onChange={(e) => updateConfig({ developmentDirectorPhone: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         );
 
@@ -697,6 +755,16 @@ export function SubUnitSetupWizard({ parentProfile, onComplete, onCancel }: SubU
                     <p className="text-muted-foreground text-sm">Leadership</p>
                     <p className="text-sm font-medium">{config.departmentChairName}</p>
                     <p className="text-sm text-muted-foreground">{config.departmentChairTitle || 'Department Chair'}</p>
+                  </div>
+                )}
+
+                {config.developmentDirectorName && (
+                  <div className="pt-3 border-t">
+                    <p className="text-muted-foreground text-sm flex items-center gap-1">
+                      <Heart className="w-3 h-3" /> Development
+                    </p>
+                    <p className="text-sm font-medium">{config.developmentDirectorName}</p>
+                    <p className="text-sm text-muted-foreground">{config.developmentDirectorTitle || 'Development Director'}</p>
                   </div>
                 )}
 
