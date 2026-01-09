@@ -1191,8 +1191,15 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
         }
         return <p className="text-sm whitespace-pre-wrap">{String(displayContent)}</p>;
       case 'case-for-care':
+        // Log for debugging
+        console.log('[ChannelPreview] case-for-care content:', displayContent, 'type:', typeof displayContent);
         if (typeof displayContent === 'object' && displayContent !== null && 
-            ('documentTitle' in displayContent || 'openingNarrative' in displayContent)) {
+            ('documentTitle' in displayContent || 'openingNarrative' in displayContent || 'visionStatement' in displayContent || 'callToAction' in displayContent)) {
+          return renderCaseForCarePreview(displayContent as CaseForCareDraft);
+        }
+        // If it's an object but doesn't match structure, try to display as JSON
+        if (typeof displayContent === 'object' && displayContent !== null) {
+          console.warn('[ChannelPreview] case-for-care content is object but missing expected fields:', Object.keys(displayContent));
           return renderCaseForCarePreview(displayContent as CaseForCareDraft);
         }
         return <p className="text-sm whitespace-pre-wrap">{String(displayContent)}</p>;
@@ -1208,7 +1215,7 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
           <Heart className="w-5 h-5 text-rose-600 dark:text-rose-400" />
           <span className="font-semibold text-lg text-rose-700 dark:text-rose-300">Case for Care</span>
         </div>
-        <h2 className="text-xl font-bold">{cfc.documentTitle}</h2>
+        {cfc.documentTitle && <h2 className="text-xl font-bold">{cfc.documentTitle}</h2>}
         {cfc.campaignName && <p className="text-sm text-muted-foreground">{cfc.campaignName}</p>}
         {cfc.targetAmount && <Badge variant="secondary" className="mt-2">{cfc.targetAmount}</Badge>}
       </div>
