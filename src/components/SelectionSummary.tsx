@@ -6,7 +6,9 @@ import {
   Clock, 
   Dna,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  BookOpen,
+  BarChart3
 } from "lucide-react";
 
 interface SelectionSummaryProps {
@@ -17,6 +19,8 @@ interface SelectionSummaryProps {
   channels: string[];
   useContentDNA?: boolean;
   journeyWeeks?: number;
+  storyCount?: number;
+  factCount?: number;
   className?: string;
 }
 
@@ -72,12 +76,15 @@ export function SelectionSummary({
   channels,
   useContentDNA,
   journeyWeeks,
+  storyCount = 0,
+  factCount = 0,
   className = '',
 }: SelectionSummaryProps) {
   const hasProfile = !!selectedProfileName;
   const hasAudience = !!audience;
   const hasChannels = channels.length > 0;
   const hasMoment = !!moment;
+  const hasStoriesOrFacts = storyCount > 0 || factCount > 0;
   
   const isReady = hasProfile && hasAudience && hasChannels;
 
@@ -159,6 +166,25 @@ export function SelectionSummary({
           <Badge variant="secondary" className="gap-1.5 bg-accent/10 text-accent border-accent/20">
             <Dna className="w-3 h-3" />
             Content DNA
+          </Badge>
+        )}
+
+        {/* Stories & Facts */}
+        {hasStoriesOrFacts && (
+          <Badge variant="secondary" className="gap-1.5 bg-secondary/50 text-secondary-foreground">
+            {storyCount > 0 && (
+              <>
+                <BookOpen className="w-3 h-3" />
+                {storyCount}
+              </>
+            )}
+            {storyCount > 0 && factCount > 0 && <span className="mx-0.5">+</span>}
+            {factCount > 0 && (
+              <>
+                <BarChart3 className="w-3 h-3" />
+                {factCount}
+              </>
+            )}
           </Badge>
         )}
       </div>

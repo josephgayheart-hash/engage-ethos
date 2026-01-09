@@ -18,6 +18,7 @@ import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
 import { BuilderStepSection, BuilderStepDivider } from "@/components/BuilderStepSection";
 import { WaveBackground } from "@/components/WaveBackground";
 import { SelectionSummary } from "@/components/SelectionSummary";
+import { StoryFactSelector } from "@/components/StoryFactSelector";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,8 @@ import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, 
 import { mapMessages } from "@/lib/evaluateMessage";
 import { useAuth } from "@/contexts/AuthContext";
 import type { MessageContext, MapperResult, Channel, InstitutionalConfig } from "@/types/uplaybook";
+import type { Story } from "@/hooks/useStoryBank";
+import type { Fact } from "@/hooks/useFactBook";
 
 const channelIcons: Record<Channel, LucideIcon> = {
   'email': Mail,
@@ -134,6 +137,8 @@ const StrategyPage = () => {
     pathways: [],
     includePromise: true,
   });
+  const [selectedStories, setSelectedStories] = useState<Story[]>([]);
+  const [selectedFacts, setSelectedFacts] = useState<Fact[]>([]);
   const { contentDNA, isLoading: isContentDNALoading } = useContentDNAForGeneration({ profileId: selectedProfileId });
   const [saveToLibraryOpen, setSaveToLibraryOpen] = useState(false);
   const [saveToLibraryType, setSaveToLibraryType] = useState<'personal' | 'shared'>('personal');
@@ -375,6 +380,25 @@ const StrategyPage = () => {
             // Pass brand platform and selected brand elements for generation
             brandPlatform: useContentDNA ? contentDNA?.brandPlatform : undefined,
             brandSelection: useContentDNA ? brandSelection : undefined,
+            // Pass selected stories and facts for content enrichment
+            stories: selectedStories.length > 0 ? selectedStories.map(s => ({
+              id: s.id,
+              title: s.title,
+              narrative: s.narrative,
+              pullQuote: s.pull_quote,
+              subjectName: s.subject_name,
+              subjectRole: s.subject_role,
+              storyType: s.story_type,
+              themes: s.themes,
+            })) : undefined,
+            facts: selectedFacts.length > 0 ? selectedFacts.map(f => ({
+              id: f.id,
+              category: f.category,
+              label: f.label,
+              value: f.value,
+              context: f.context,
+              year: f.year,
+            })) : undefined,
           }
         : undefined;
 
@@ -900,9 +924,27 @@ const StrategyPage = () => {
                 </div>
               </BuilderStepSection>
 
-              {/* Step 3: Audience & Context */}
+              {/* Step 3: Stories & Facts */}
               <BuilderStepSection
                 stepNumber={3}
+                title="Stories & Facts"
+                description="Select stories and statistics to reference throughout your journey"
+                helpText="Stories humanize your journey with real examples. Facts add credibility with concrete data points. The AI will weave these into touchpoints naturally."
+                icon={<BookMarked className="w-4 h-4" />}
+                optional
+              >
+                <StoryFactSelector
+                  profileId={selectedProfileId}
+                  selectedStories={selectedStories}
+                  selectedFacts={selectedFacts}
+                  onStoriesChange={setSelectedStories}
+                  onFactsChange={setSelectedFacts}
+                />
+              </BuilderStepSection>
+
+              {/* Step 4: Audience & Context */}
+              <BuilderStepSection
+                stepNumber={4}
                 title="Define Your Audience"
                 description="Who are you communicating with and what's the situation?"
                 helpText="Select the primary audience type, their specific cohort characteristics, and the communication moment. These selections help the AI generate contextually appropriate touchpoints throughout the journey."
@@ -911,9 +953,9 @@ const StrategyPage = () => {
                 <ContextSelector context={context} onChange={setContext} mode="mapper" />
               </BuilderStepSection>
 
-              {/* Step 4: Channel Selection */}
+              {/* Step 5: Channel Selection */}
               <BuilderStepSection
-                stepNumber={4}
+                stepNumber={5}
                 title="Choose Your Channels"
                 description="Select which channels to use throughout the journey"
                 helpText="The AI will strategically distribute touchpoints across your selected channels based on effectiveness and audience preferences."
@@ -949,9 +991,9 @@ const StrategyPage = () => {
                 </div>
               </BuilderStepSection>
 
-              {/* Step 5: Journey Timeline */}
+              {/* Step 6: Journey Timeline */}
               <BuilderStepSection
-                stepNumber={5}
+                stepNumber={6}
                 title="Set Your Timeline"
                 description="Define the start date, end date, and duration of your journey"
                 helpText="Typical journeys are 8-12 weeks for enrollment campaigns, 16 weeks for semester-long, or 32+ weeks for year-long initiatives. The AI will distribute touchpoints appropriately."
@@ -1050,9 +1092,9 @@ const StrategyPage = () => {
                 </div>
               </BuilderStepSection>
 
-              {/* Step 6: Cadence & Escalation */}
+              {/* Step 7: Cadence & Escalation */}
               <BuilderStepSection
-                stepNumber={6}
+                stepNumber={7}
                 title="Configure Cadence & Escalation"
                 description="Set the frequency and intensity pattern of your touchpoints"
                 helpText="Cadence controls how often touchpoints occur. Escalation patterns adjust intensity over time - e.g., 'gradual increase' starts gently and builds urgency as deadlines approach."
@@ -1070,9 +1112,9 @@ const StrategyPage = () => {
 
               <BuilderStepDivider label="Optional Enhancements" />
 
-              {/* Step 7: Diagram Toggle */}
+              {/* Step 8: Diagram Toggle */}
               <BuilderStepSection
-                stepNumber={7}
+                stepNumber={8}
                 title="Visual Journey Diagram"
                 description="Generate an interactive flow diagram of the journey"
                 helpText="The diagram provides a visual overview of your journey, showing how touchpoints connect and flow over time. Great for presentations and stakeholder reviews."
