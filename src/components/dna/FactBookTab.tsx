@@ -51,8 +51,20 @@ import {
   List,
   FileSearch,
   Sparkles,
-  Database
+  Database,
+  Trash2
 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { extractTextFromFile, getAcceptString } from '@/lib/documentParser';
 
 interface FactBookTabProps {
@@ -88,11 +100,14 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
     addFactsBulk,
     updateFact,
     deleteFact,
+    deleteAllFacts,
     parseFactBookFromText,
     toggleHighlight,
     getCategories,
     getFactsByCategory,
   } = useFactBook({ profileId });
+
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
@@ -228,6 +243,46 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
+            {facts.length > 0 && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" className="text-destructive hover:text-destructive">
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete All
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete all facts?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete all {facts.length} facts from your Fact Book. 
+                      This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      onClick={async () => {
+                        setIsDeleting(true);
+                        await deleteAllFacts();
+                        setIsDeleting(false);
+                      }}
+                      disabled={isDeleting}
+                    >
+                      {isDeleting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Deleting...
+                        </>
+                      ) : (
+                        'Delete All'
+                      )}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
             <Button variant="outline" onClick={() => setShowImportDialog(true)}>
               <Wand2 className="w-4 h-4 mr-2" />
               Import from PDF
