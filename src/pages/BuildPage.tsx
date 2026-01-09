@@ -12,6 +12,7 @@ import { ContentDNAExplainer } from "@/components/ContentDNAExplainer";
 import { BuilderStepSection, BuilderStepDivider } from "@/components/BuilderStepSection";
 import { WaveBackground } from "@/components/WaveBackground";
 import { SelectionSummary } from "@/components/SelectionSummary";
+import { StoryFactSelector } from "@/components/StoryFactSelector";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -66,11 +67,14 @@ import {
   Mic,
   Newspaper,
   Heart,
+  BookMarked,
   type LucideIcon
 } from "lucide-react";
 import { buildMessage } from "@/lib/evaluateMessage";
 import { useAuth } from "@/contexts/AuthContext";
 import type { MessageContext, BuilderResult, InstitutionalConfig, Channel, ChannelDrafts } from "@/types/uplaybook";
+import type { Story } from "@/hooks/useStoryBank";
+import type { Fact } from "@/hooks/useFactBook";
 
 const channelIcons: Record<Channel, LucideIcon> = {
   'email': Mail,
@@ -206,6 +210,8 @@ const BuildPage = () => {
     pathways: [],
     includePromise: true,
   });
+  const [selectedStories, setSelectedStories] = useState<Story[]>([]);
+  const [selectedFacts, setSelectedFacts] = useState<Fact[]>([]);
   const { contentDNA, isLoading: isContentDNALoading } = useContentDNAForGeneration({ profileId: selectedProfileId });
   const resultsRef = useRef<HTMLDivElement>(null);
   const canProcess = context.audience && context.moment && selectedChannels.length > 0;
@@ -257,6 +263,25 @@ const BuildPage = () => {
             // Pass brand platform and selected brand elements for generation
             brandPlatform: useContentDNA ? contentDNA?.brandPlatform : undefined,
             brandSelection: useContentDNA ? brandSelection : undefined,
+            // Pass selected stories and facts for content enrichment
+            stories: selectedStories.length > 0 ? selectedStories.map(s => ({
+              id: s.id,
+              title: s.title,
+              narrative: s.narrative,
+              pullQuote: s.pull_quote,
+              subjectName: s.subject_name,
+              subjectRole: s.subject_role,
+              storyType: s.story_type,
+              themes: s.themes,
+            })) : undefined,
+            facts: selectedFacts.length > 0 ? selectedFacts.map(f => ({
+              id: f.id,
+              category: f.category,
+              label: f.label,
+              value: f.value,
+              context: f.context,
+              year: f.year,
+            })) : undefined,
           }
         : undefined;
 
@@ -756,9 +781,27 @@ const BuildPage = () => {
                 </div>
               </BuilderStepSection>
 
-              {/* Step 3: Audience & Context */}
+              {/* Step 3: Stories & Facts */}
               <BuilderStepSection
                 stepNumber={3}
+                title="Stories & Facts"
+                description="Select stories and statistics to weave into your message"
+                helpText="Stories humanize your message with real examples. Facts add credibility with concrete data points. These are optional but recommended for richer content."
+                icon={<BookMarked className="w-4 h-4" />}
+                optional
+              >
+                <StoryFactSelector
+                  profileId={selectedProfileId}
+                  selectedStories={selectedStories}
+                  selectedFacts={selectedFacts}
+                  onStoriesChange={setSelectedStories}
+                  onFactsChange={setSelectedFacts}
+                />
+              </BuilderStepSection>
+
+              {/* Step 4: Audience & Context */}
+              <BuilderStepSection
+                stepNumber={4}
                 title="Define Your Audience"
                 description="Who are you communicating with and what's the situation?"
                 helpText="Select the primary audience type, their specific cohort characteristics, and the communication moment. These selections help the AI generate contextually appropriate messaging."
@@ -767,9 +810,9 @@ const BuildPage = () => {
                 <ContextSelector context={context} onChange={setContext} mode="builder" />
               </BuilderStepSection>
 
-              {/* Step 4: Channel Selection */}
+              {/* Step 5: Channel Selection */}
               <BuilderStepSection
-                stepNumber={4}
+                stepNumber={5}
                 title="Choose Your Channels"
                 description="Select which communication channels to generate content for"
                 helpText="You can select multiple channels to generate a coordinated multi-channel message kit. Each channel will receive appropriately formatted content."
@@ -807,9 +850,9 @@ const BuildPage = () => {
 
               <BuilderStepDivider label="Optional Enhancements" />
 
-              {/* Step 5: Urgency & Deadline */}
+              {/* Step 6: Urgency & Deadline */}
               <BuilderStepSection
-                stepNumber={5}
+                stepNumber={6}
                 title="Urgency & Deadline"
                 description="Add time-sensitive elements to create urgency"
                 helpText="When you specify a deadline, the AI will incorporate countdown language and urgency cues into your messaging to motivate action."
@@ -873,9 +916,9 @@ const BuildPage = () => {
                 )}
               </BuilderStepSection>
 
-              {/* Step 5: Additional Context */}
+              {/* Step 7: Additional Context */}
               <BuilderStepSection
-                stepNumber={5}
+                stepNumber={7}
                 title="Additional Context"
                 description="Provide campaign-specific details for more targeted messaging"
                 helpText="Add specific instructions, campaign themes, or refinement notes. Examples: 'Emphasize career outcomes' or 'Focus on FAFSA deadline' or 'Highlight peer success stories'."
@@ -900,6 +943,8 @@ const BuildPage = () => {
                     moment={context.moment}
                     channels={selectedChannels}
                     useContentDNA={useContentDNA}
+                    storyCount={selectedStories.length}
+                    factCount={selectedFacts.length}
                   />
                 </div>
                 
