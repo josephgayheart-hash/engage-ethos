@@ -583,44 +583,81 @@ export function WebStructureDiagram({
     setFocusedNodeId(null);
   }, []);
   
+  // Get unique section types from current sections for the legend
+  const uniqueSectionTypes = useMemo(() => {
+    const types = new Set<string>();
+    sections.forEach(s => types.add(s.type));
+    return Array.from(types);
+  }, [sections]);
+  
   return (
-    <div 
-      className="w-full rounded-xl border bg-gradient-to-b from-background to-muted/20 overflow-hidden" 
-      style={{ height: dynamicHeight }}
-    >
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        nodeTypes={nodeTypes}
-        connectionLineType={ConnectionLineType.SmoothStep}
-        onPaneClick={handlePaneClick}
-        fitView
-        fitViewOptions={{ padding: 0.2, minZoom: 0.5, maxZoom: 1.5 }}
-        proOptions={{ hideAttribution: true }}
-        nodesDraggable={true}
-        nodesConnectable={false}
-        elementsSelectable={true}
-        panOnDrag={true}
-        zoomOnScroll={true}
-        zoomOnPinch={true}
-        zoomOnDoubleClick={true}
-        minZoom={0.3}
-        maxZoom={2}
-        defaultViewport={{ x: 0, y: 0, zoom: 0.85 }}
+    <div className="space-y-3">
+      {/* Legend */}
+      <div className="flex flex-wrap items-center gap-4 px-4 py-3 bg-muted/50 rounded-lg border">
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Section Types:</span>
+        {uniqueSectionTypes.map(type => {
+          const config = SECTION_TYPE_CONFIG[type] || SECTION_TYPE_CONFIG['general'];
+          const Icon = config.icon;
+          return (
+            <div key={type} className="flex items-center gap-1.5">
+              <div 
+                className="w-3 h-3 rounded-sm" 
+                style={{ backgroundColor: config.color }}
+              />
+              <Icon className="w-3 h-3" style={{ color: config.color }} />
+              <span className="text-xs text-muted-foreground">{config.label}</span>
+            </div>
+          );
+        })}
+        <div className="flex items-center gap-1.5 ml-auto border-l pl-4">
+          <div className="w-3 h-3 rounded-full bg-green-500" />
+          <span className="text-xs text-muted-foreground">Recommended</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded-sm border-2 border-primary bg-primary/10" />
+          <span className="text-xs text-muted-foreground">Selected</span>
+        </div>
+      </div>
+      
+      {/* Diagram */}
+      <div 
+        className="w-full rounded-xl border bg-gradient-to-b from-background to-muted/20 overflow-hidden" 
+        style={{ height: dynamicHeight }}
       >
-        <Background 
-          color="hsl(var(--muted-foreground))" 
-          gap={24} 
-          size={1}
-          style={{ opacity: 0.3 }}
-        />
-        <Controls 
-          showInteractive={false}
-          className="!bg-card !border-border !shadow-lg [&>button]:!bg-card [&>button]:!border-border [&>button]:!text-foreground [&>button:hover]:!bg-muted"
-        />
-      </ReactFlow>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          nodeTypes={nodeTypes}
+          connectionLineType={ConnectionLineType.SmoothStep}
+          onPaneClick={handlePaneClick}
+          fitView
+          fitViewOptions={{ padding: 0.2, minZoom: 0.5, maxZoom: 1.5 }}
+          proOptions={{ hideAttribution: true }}
+          nodesDraggable={true}
+          nodesConnectable={false}
+          elementsSelectable={true}
+          panOnDrag={true}
+          zoomOnScroll={true}
+          zoomOnPinch={true}
+          zoomOnDoubleClick={true}
+          minZoom={0.3}
+          maxZoom={2}
+          defaultViewport={{ x: 0, y: 0, zoom: 0.85 }}
+        >
+          <Background 
+            color="hsl(var(--muted-foreground))" 
+            gap={24} 
+            size={1}
+            style={{ opacity: 0.3 }}
+          />
+          <Controls 
+            showInteractive={false}
+            className="!bg-card !border-border !shadow-lg [&>button]:!bg-card [&>button]:!border-border [&>button]:!text-foreground [&>button:hover]:!bg-muted"
+          />
+        </ReactFlow>
+      </div>
     </div>
   );
 }

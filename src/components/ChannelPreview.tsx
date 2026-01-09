@@ -113,7 +113,7 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
   const handleExportToPDF = async () => {
     try {
       if (channel === "talking-points") {
-        exportTalkingPointsToPDF(editedContent as TalkingPointsDraft, institutionName);
+        exportTalkingPointsToPDF(editedContent as TalkingPointsDraft, institutionName, branding);
         toast({
           title: "PDF Downloaded",
           description: "Executive Talking Points exported successfully.",
