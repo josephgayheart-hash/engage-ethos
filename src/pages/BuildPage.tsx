@@ -188,6 +188,19 @@ const BuildPage = () => {
     }
   }, [profileIdFromUrl, profiles, selectedProfileName]);
   const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfig | null>(null);
+
+  // Ensure institutionalConfig is populated when restoring a draft / deep-linking.
+  // Without this, generation can run with no institution context and the model will fall back to placeholders.
+  useEffect(() => {
+    if (!selectedProfileId) return;
+    if (institutionalConfig) return;
+    if (profiles.length === 0) return;
+
+    const found = profiles.find(p => p.id === selectedProfileId);
+    if (found?.config) {
+      setInstitutionalConfig(found.config);
+    }
+  }, [selectedProfileId, institutionalConfig, profiles]);
   const [context, setContext] = useState<MessageContext>({
     audience: (remixState?.remixContext?.audience as any) || undefined,
     moment: (remixState?.remixContext?.moment as any) || undefined,
@@ -253,9 +266,41 @@ const BuildPage = () => {
     try {
       const contextWithChannels = { ...context, channel: selectedChannels[0], channels: selectedChannels };
 
-      const configForGeneration = institutionalConfig
+      const selectedProfileConfig = selectedProfileId
+        ? profiles.find(p => p.id === selectedProfileId)?.config ?? null
+        : null;
+
+      const baseConfig = institutionalConfig ?? selectedProfileConfig;
+
+      // Always send an institutionalConfig to generation when we have *any* source of truth.
+      // This prevents placeholder fallbacks like "[University Name]".
+      const resolvedConfig: InstitutionalConfig | undefined = baseConfig
         ? {
-            ...institutionalConfig,
+            ...baseConfig,
+            institutionName:
+              baseConfig.institutionName?.trim() ||
+              tenant?.institution_name ||
+              baseConfig.unitName?.trim() ||
+              selectedProfileName ||
+              "our institution",
+            unitName: (baseConfig.unitName || selectedProfileName)?.trim() || undefined,
+            primaryColor: baseConfig.primaryColor || tenant?.primary_color,
+            accentColor: baseConfig.accentColor || tenant?.accent_color,
+            logoUrl: baseConfig.logoUrl || tenant?.logo_url || undefined,
+          }
+        : tenant
+          ? {
+              institutionName: tenant.institution_name,
+              unitName: selectedProfileName || undefined,
+              primaryColor: tenant.primary_color,
+              accentColor: tenant.accent_color,
+              logoUrl: tenant.logo_url || undefined,
+            }
+          : undefined;
+
+      const configForGeneration = resolvedConfig
+        ? {
+            ...resolvedConfig,
             // IMPORTANT: Always use the selected profile's Content DNA when enabled (never a cloned/stale voiceAnalysis).
             voiceAnalysis: useContentDNA
               ? ((contentDNA?.voiceAnalysis ?? undefined) as any)
