@@ -318,16 +318,6 @@ export async function exportCaseForSupportToPDF(
     return fontSize;
   };
 
-  // Institution name in top-right corner (separate from title area)
-  if (institutionName) {
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    const instMaxWidth = 80;
-    const instLines = doc.splitTextToSize(institutionName, instMaxWidth);
-    doc.text(instLines, pageWidth - margin, 15, { align: "right" });
-  }
-
   // Calculate available width for title (accounting for logo if present)
   const titleAvailableWidth = logoData 
     ? contentWidth - logoWidth - 18 
@@ -344,11 +334,11 @@ export async function exportCaseForSupportToPDF(
 
   // Wrap if still too long after scaling
   const titleLines = doc.splitTextToSize(title.toUpperCase(), titleAvailableWidth);
-  doc.text(titleLines, textStartX, 20);
+  doc.text(titleLines, textStartX, 22);
 
   // Calculate where title ends
   const titleLineHeight = titleFontSize * 0.5;
-  let headerY = 20 + (titleLines.length - 1) * titleLineHeight + 8;
+  let headerY = 22 + (titleLines.length - 1) * titleLineHeight + 8;
 
   // Campaign name below title
   if (cfc.campaignName) {
@@ -366,6 +356,16 @@ export async function exportCaseForSupportToPDF(
     const taglineText = `"${cfc.campaignTagline}"`;
     const taglineLines = doc.splitTextToSize(taglineText, titleAvailableWidth);
     doc.text(taglineLines, textStartX, headerY);
+    headerY += taglineLines.length * 5 + 2;
+  }
+
+  // Institution name BELOW tagline in left-aligned area (sub-unit/college name)
+  if (institutionName) {
+    doc.setTextColor(200, 200, 200);  // Lighter text for sub-unit
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    const instLines = doc.splitTextToSize(institutionName, titleAvailableWidth);
+    doc.text(instLines, textStartX, headerY);
   }
 
   y = 85;
