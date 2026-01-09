@@ -216,12 +216,15 @@ export function exportTalkingPointsToPDF(
     
     doc.setFontSize(8);
     doc.setTextColor(255, 255, 255);
-    doc.text(
-      `${institutionName || 'CampusVoice.AI'} | Page ${i} of ${pageCount}`,
-      pageWidth / 2,
-      pageHeight - 6,
-      { align: "center" }
-    );
+    
+    // Left side: Institution name
+    doc.text(institutionName || '', margin, pageHeight - 6);
+    
+    // Center: Page numbers
+    doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, pageHeight - 6, { align: "center" });
+    
+    // Right side: CampusVoice branding
+    doc.text("Powered by CampusVoice.AI", pageWidth - margin, pageHeight - 6, { align: "right" });
   }
 
   doc.save("executive-talking-points.pdf");
@@ -791,12 +794,15 @@ export async function exportCaseForSupportToPDF(
     
     doc.setFontSize(8);
     doc.setTextColor(255, 255, 255);
-    doc.text(
-      `${institutionName || 'CampusVoice.AI'} | Page ${i} of ${pageCount}`,
-      pageWidth / 2,
-      pageHeight - 8,
-      { align: "center" }
-    );
+    
+    // Left side: Institution name
+    doc.text(institutionName || '', margin, pageHeight - 8);
+    
+    // Center: Page numbers
+    doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, pageHeight - 8, { align: "center" });
+    
+    // Right side: CampusVoice branding
+    doc.text("Powered by CampusVoice.AI", pageWidth - margin, pageHeight - 8, { align: "right" });
   }
 
   doc.save("case-for-support.pdf");
