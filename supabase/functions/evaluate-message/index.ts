@@ -120,12 +120,12 @@ IMPORTANT: Respond ONLY with valid JSON:
     "landing-page": { "headline": "...", "subheadline": "...", "body": "...", "cta": "CTA button text" },
     "direct-mail": "Full letter content here",
     "phone-call": { 
-      "opening": "Hello, this is [Name] from [Institution]...",
+      "opening": "Hello, this is (your name) from (your institution)...",
       "purpose": "I'm calling today to...",
       "talkingPoints": ["Point 1", "Point 2", "Point 3"],
       "objectionHandlers": ["If busy: ...", "If not interested: ..."],
       "closing": "Thank you for your time...",
-      "voicemail": "Hi, this is [Name] from..."
+      "voicemail": "Hi, this is (your name) from (your institution)..."
     },
     "digital-ad-search": {
       "headlines": ["Headline 1 (max 30 chars)", "Headline 2", "Headline 3"],
@@ -427,9 +427,16 @@ CRITICAL GUARDRAIL: Use ONLY the information provided below. Do NOT borrow masco
 
 IDENTITY:
 - Institution Name: ${institutionalConfig.institutionName || 'Not specified'}
+- Unit / Profile Name: ${institutionalConfig.unitName || 'Not specified'}
+- Unit Type: ${institutionalConfig.unitType || 'Not specified'}
 - Abbreviation: ${institutionalConfig.institutionAbbreviation || 'Not specified'}
 - Mascot: ${institutionalConfig.mascot || 'Not specified'}
 - Slogans: ${institutionalConfig.slogans?.join(', ') || 'Not specified'}
+
+UNIT NAMING RULES (CRITICAL):
+- If a Unit / Profile Name is specified, you MUST use it throughout the content (especially for CASE-FOR-CARE).
+- Prefer formats like "${institutionalConfig.unitName || 'the unit'} at ${institutionalConfig.institutionName || 'the university'}" rather than generic "the university".
+- NEVER invent a different unit name.
 
 DIGITAL SYSTEMS (use these exact names):
 - Student Portal: ${institutionalConfig.portalName || 'student portal'}
@@ -596,9 +603,9 @@ IMPORTANT: The user has specifically selected these pillars to emphasize. Make s
 ` : ''}` : ''}
 CRITICAL GUARDRAILS:
 1. Use the EXACT institution name, system names, and terminology provided above
-2. Do NOT use generic placeholders like "University Name", "[Portal Name]", or "[Institution]"
+2. Do NOT use placeholder text of any kind (especially anything in square brackets like "[University Name]", "[Institution]", "[Portal Name]", etc.)
 3. Do NOT substitute information from other universities (e.g., do not use "Wildcats" if the mascot above is "Buckeyes")
-4. If a value is "Not specified", use a generic term (e.g., "your university") rather than borrowing from another institution
+4. If a value is "Not specified", use a generic term (e.g., "our institution") rather than borrowing from another institution
 5. Double-check that all mascots, slogans, and spirit phrases match ONLY what is listed above
 ${institutionalConfig.stories?.length > 0 || institutionalConfig.facts?.length > 0 ? `
 
