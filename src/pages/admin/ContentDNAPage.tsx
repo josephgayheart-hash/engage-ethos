@@ -5,6 +5,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useContentDNA, ContentDNASample } from '@/hooks/useContentDNA';
 import { useInstitutionalProfiles } from '@/hooks/useInstitutionalProfiles';
 import { WebCrawlTab } from '@/components/dna/WebCrawlTab';
+import { StoryBankTab } from '@/components/dna/StoryBankTab';
+import { FactBookTab } from '@/components/dna/FactBookTab';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -1676,6 +1678,16 @@ export default function ContentDNAPage() {
               }}
               onDeleteSample={deleteSample}
             />
+          </TabsContent>
+
+          {/* Stories Tab */}
+          <TabsContent value="stories">
+            <StoryBankTab profileId={profileIdFromUrl} />
+          </TabsContent>
+
+          {/* Facts Tab */}
+          <TabsContent value="facts">
+            <FactBookTab profileId={profileIdFromUrl} />
           </TabsContent>
 
           {/* Voice Profile Tab */}
