@@ -677,60 +677,76 @@ export async function exportCaseForSupportToPDF(
     y += 10;
 
     cfc.givingLevels.forEach((level) => {
-      // Calculate available width for impact text dynamically
-      const amountWidth = 50;
-      const impactMaxWidth = contentWidth - amountWidth - 15;
+      // Calculate widths - use more space for long amount text
+      const amountText = level.amount || "$0";
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      const amountTextWidth = doc.getTextWidth(amountText);
+      const amountColWidth = Math.max(70, amountTextWidth + 10); // At least 70, or text width + padding
+      const impactMaxWidth = contentWidth - amountColWidth - 10;
 
       // Wrap impact text
       doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
       const impactLines = doc.splitTextToSize(level.impact || "", impactMaxWidth);
 
       // Dynamic box height based on wrapped lines
-      const lineHeight = 4;
-      const boxHeight = Math.max(12, 6 + (impactLines?.length || 1) * lineHeight);
+      const lineHeight = 4.5;
+      const boxHeight = Math.max(14, 8 + (impactLines?.length || 1) * lineHeight);
 
-      checkPageBreak(boxHeight + 4);
+      checkPageBreak(boxHeight + 5);
 
       // Draw box with dynamic height
       doc.setFillColor(...accentLight);
       doc.roundedRect(margin, y - 3, contentWidth, boxHeight, 2, 2, "F");
 
-      // Amount on left
-      doc.setTextColor(...accentRgb);
+      // Amount on left - use dark text for better contrast on light background
+      doc.setTextColor(40, 40, 40); // Dark text instead of accent color
       doc.setFontSize(10);
       doc.setFont("helvetica", "bold");
-      doc.text(level.amount || "$0", margin + 5, y + 5);
+      doc.text(amountText, margin + 5, y + 6);
 
       // Wrapped impact text on right
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(60, 60, 60);
+      doc.setTextColor(40, 40, 40); // Dark text for readability
       doc.setFontSize(9);
       if (impactLines && impactLines.length > 0) {
         impactLines.forEach((line: string, idx: number) => {
           if (line) {
-            doc.text(line, margin + amountWidth, y + 5 + idx * lineHeight);
+            doc.text(line, margin + amountColWidth, y + 6 + idx * lineHeight);
           }
         });
       }
 
-      y += boxHeight + 4;
+      y += boxHeight + 5;
     });
   }
 
-  // Call to Action
+  // Call to Action - dynamic height based on content
   if (cfc.callToAction) {
-    checkPageBreak(32);
-    y += 5;
-    doc.setFillColor(...primaryRgb);
-    doc.roundedRect(margin, y - 5, contentWidth, 22, 3, 3, "F");
-    doc.setTextColor(255, 255, 255);
     doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
     const ctaLines = doc.splitTextToSize(cfc.callToAction || "", contentWidth - 20);
+    const ctaLineHeight = 5.5;
+    const ctaBoxHeight = Math.max(24, 12 + (ctaLines?.length || 1) * ctaLineHeight);
+    
+    checkPageBreak(ctaBoxHeight + 8);
+    y += 5;
+    doc.setFillColor(...primaryRgb);
+    doc.roundedRect(margin, y - 5, contentWidth, ctaBoxHeight, 3, 3, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
     if (ctaLines && ctaLines.length > 0) {
-      doc.text(ctaLines, pageWidth / 2, y + 6, { align: "center" });
+      // Center vertically within box
+      const textStartY = y - 5 + (ctaBoxHeight - ctaLines.length * ctaLineHeight) / 2 + ctaLineHeight;
+      ctaLines.forEach((line: string, idx: number) => {
+        if (line) {
+          doc.text(line, pageWidth / 2, textStartY + idx * ctaLineHeight, { align: "center" });
+        }
+      });
     }
-    y += 28;
+    y += ctaBoxHeight + 5;
   }
 
   // Contact Info
