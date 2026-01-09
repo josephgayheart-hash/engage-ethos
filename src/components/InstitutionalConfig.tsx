@@ -43,9 +43,11 @@ import {
   ExternalLink,
   Dna,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Image as ImageIcon
 } from "lucide-react";
 import type { InstitutionalConfig as InstitutionalConfigType, VoiceAnalysis } from "@/types/uplaybook";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface InstitutionalConfigProps {
   config: InstitutionalConfigType;
@@ -55,8 +57,10 @@ interface InstitutionalConfigProps {
 
 export function InstitutionalConfig({ config, onChange, profileId }: InstitutionalConfigProps) {
   const { toast } = useToast();
+  const { tenant } = useAuth();
   const { analysis, samples, isLoading: isContentDNALoading } = useContentDNA({ profileId });
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [sampleInput, setSampleInput] = useState('');
   const [inputs, setInputs] = useState({
     buildingName: '',
@@ -97,6 +101,77 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
   const removeFromArray = (field: keyof InstitutionalConfigType, value: string) => {
     const currentArray = (config[field] as string[]) || [];
     onChange({ ...config, [field]: currentArray.filter(v => v !== value) });
+  };
+
+  // Handle logo upload for this profile
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type and size
+    if (!file.type.startsWith('image/')) {
+      toast({
+        variant: "destructive",
+        title: "Invalid file type",
+        description: "Please upload an image file (PNG, JPG, etc.)",
+      });
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        variant: "destructive",
+        title: "File too large",
+        description: "Logo must be under 2MB",
+      });
+      return;
+    }
+
+    setIsUploadingLogo(true);
+
+    try {
+      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'png';
+      const fileName = `${tenant?.id || 'unknown'}/profile-${profileId || 'default'}-logo-${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('logos')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('logos')
+        .getPublicUrl(fileName);
+
+      onChange({ ...config, logoUrl: publicUrl });
+
+      toast({
+        title: "Logo uploaded",
+        description: "Your profile logo has been updated.",
+      });
+    } catch (error) {
+      console.error("Logo upload error:", error);
+      toast({
+        variant: "destructive",
+        title: "Upload failed",
+        description: "Could not upload logo. Please try again.",
+      });
+    } finally {
+      setIsUploadingLogo(false);
+      // Reset input
+      event.target.value = '';
+    }
+  };
+
+  const handleRemoveLogo = () => {
+    onChange({ ...config, logoUrl: undefined });
+    toast({
+      title: "Logo removed",
+      description: "Profile will use the institution logo instead.",
+    });
   };
 
   const addImportantDate = () => {
@@ -272,6 +347,90 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
 
         {/* Identity Tab */}
         <TabsContent value="identity" className="space-y-6">
+          {/* Profile Logo Section */}
+          <div className="p-4 bg-muted/50 rounded-lg">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                {config.logoUrl ? (
+                  <div className="relative">
+                    <img
+                      src={config.logoUrl}
+                      alt="Profile logo"
+                      className="w-20 h-20 object-contain rounded-lg border border-border bg-white p-2"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute -top-2 -right-2 h-6 w-6"
+                      onClick={handleRemoveLogo}
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                ) : (
+                  <label
+                    className="w-20 h-20 rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors bg-background"
+                  >
+                    {isUploadingLogo ? (
+                      <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                    ) : (
+                      <ImageIcon className="w-5 h-5 text-muted-foreground" />
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleLogoUpload}
+                      disabled={isUploadingLogo}
+                    />
+                  </label>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-medium text-sm flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4" />
+                  Profile Logo
+                </h4>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Upload a custom logo for this profile. If not set, the institution logo will be used.
+                </p>
+                {!config.logoUrl && (
+                  <label className="inline-block mt-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={isUploadingLogo}
+                      asChild
+                    >
+                      <span className="cursor-pointer">
+                        {isUploadingLogo ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-4 h-4 mr-2" />
+                            Upload Logo
+                          </>
+                        )}
+                      </span>
+                    </Button>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleLogoUpload}
+                      disabled={isUploadingLogo}
+                    />
+                  </label>
+                )}
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {renderTextField('Institution Name', 'institutionName', 'e.g., Lakewood University')}
             {renderTextField('Abbreviation', 'institutionAbbreviation', 'e.g., LU, LWU')}
