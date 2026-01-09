@@ -6,6 +6,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const LOVABLE_API_URL = 'https://ai.gateway.lovable.dev/v1/chat/completions';
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -18,17 +20,22 @@ serve(async (req) => {
 
     console.log('analyze-web-content called with mode:', mode || 'analyze');
 
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY is not configured');
+    }
+
     // Handle rewrite modes
     if (mode === 'rewrite') {
-      return await handleRewriteAll(sections, voiceAnalysis, brandPlatform);
+      return await handleRewriteAll(sections, voiceAnalysis, brandPlatform, LOVABLE_API_KEY);
     }
 
     if (mode === 'rewrite-section') {
-      return await handleRewriteSection(sectionContent, sectionTitle, issues, voiceAnalysis, brandPlatform);
+      return await handleRewriteSection(sectionContent, sectionTitle, issues, voiceAnalysis, brandPlatform, LOVABLE_API_KEY);
     }
 
     // Default: analyze mode
-    return await handleAnalyze(content, sourceUrl, voiceAnalysis, brandPlatform, profileConfig);
+    return await handleAnalyze(content, sourceUrl, voiceAnalysis, brandPlatform, profileConfig, LOVABLE_API_KEY);
 
   } catch (error: unknown) {
     console.error('Error in analyze-web-content:', error);
@@ -40,12 +47,56 @@ serve(async (req) => {
   }
 });
 
+async function callLovableAI(messages: { role: string; content: string }[], apiKey: string) {
+  const response = await fetch(LOVABLE_API_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'google/gemini-2.5-flash',
+      messages,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.text();
+    console.error('Lovable AI error:', response.status, errorData);
+    
+    if (response.status === 429) {
+      throw new Error('Rate limit exceeded. Please try again later.');
+    }
+    if (response.status === 402) {
+      throw new Error('AI usage limit reached. Please add credits.');
+    }
+    throw new Error(`AI API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const content = data.choices?.[0]?.message?.content;
+
+  if (!content) {
+    throw new Error('No response from AI');
+  }
+
+  return content;
+}
+
+function extractJSON(text: string): any {
+  // Try to extract JSON from the response (may be wrapped in markdown code blocks)
+  const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const jsonText = jsonMatch ? jsonMatch[1].trim() : text.trim();
+  return JSON.parse(jsonText);
+}
+
 async function handleAnalyze(
   content: string, 
   sourceUrl: string | undefined,
   voiceAnalysis: any,
   brandPlatform: any,
-  profileConfig: any
+  profileConfig: any,
+  apiKey: string
 ) {
   // Truncate content for analysis
   const maxChars = 12000;
@@ -111,39 +162,16 @@ Return a JSON response with this exact structure:
     "topIssues": ["<most important issue descriptions>"],
     "topStrengths": ["<most notable strength descriptions>"]
   }
-}`;
+}
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
-      ],
-      temperature: 0.3,
-      response_format: { type: 'json_object' }
-    }),
-  });
+Return ONLY the JSON, no additional text.`;
 
-  if (!response.ok) {
-    const errorData = await response.text();
-    console.error('OpenAI API error:', errorData);
-    throw new Error(`OpenAI API error: ${response.status}`);
-  }
+  const responseText = await callLovableAI([
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: userPrompt }
+  ], apiKey);
 
-  const data = await response.json();
-  const analysisText = data.choices[0]?.message?.content;
-
-  if (!analysisText) {
-    throw new Error('No response from AI');
-  }
-
-  const analysis = JSON.parse(analysisText);
+  const analysis = extractJSON(responseText);
   console.log('Analysis complete, sections:', analysis.sections?.length);
 
   return new Response(
@@ -155,7 +183,8 @@ Return a JSON response with this exact structure:
 async function handleRewriteAll(
   sections: any[],
   voiceAnalysis: any,
-  brandPlatform: any
+  brandPlatform: any,
+  apiKey: string
 ) {
   const systemPrompt = `You are a brand content writer specializing in higher education communications.
 Your task is to rewrite content to better align with the university's brand voice and guidelines.
@@ -193,39 +222,16 @@ Return a JSON response with this structure:
       "improvements": ["<what was improved>"]
     }
   ]
-}`;
+}
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
-      ],
-      temperature: 0.7,
-      response_format: { type: 'json_object' }
-    }),
-  });
+Return ONLY the JSON, no additional text.`;
 
-  if (!response.ok) {
-    const errorData = await response.text();
-    console.error('OpenAI API error:', errorData);
-    throw new Error(`OpenAI API error: ${response.status}`);
-  }
+  const responseText = await callLovableAI([
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: userPrompt }
+  ], apiKey);
 
-  const data = await response.json();
-  const rewriteText = data.choices[0]?.message?.content;
-
-  if (!rewriteText) {
-    throw new Error('No response from AI');
-  }
-
-  const result = JSON.parse(rewriteText);
+  const result = extractJSON(responseText);
   
   // Map section IDs back
   result.rewrittenSections = result.rewrittenSections?.map((r: any, i: number) => ({
@@ -246,7 +252,8 @@ async function handleRewriteSection(
   sectionTitle: string,
   issues: any[],
   voiceAnalysis: any,
-  brandPlatform: any
+  brandPlatform: any,
+  apiKey: string
 ) {
   const systemPrompt = `You are a brand content writer specializing in higher education communications.
 Your task is to rewrite a single content section to better align with the university's brand voice.
@@ -278,39 +285,16 @@ Return a JSON response with this structure:
     "rewritten": "<improved brand-aligned content>",
     "improvements": ["<what was improved>"]
   }
-}`;
+}
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
-      ],
-      temperature: 0.7,
-      response_format: { type: 'json_object' }
-    }),
-  });
+Return ONLY the JSON, no additional text.`;
 
-  if (!response.ok) {
-    const errorData = await response.text();
-    console.error('OpenAI API error:', errorData);
-    throw new Error(`OpenAI API error: ${response.status}`);
-  }
+  const responseText = await callLovableAI([
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: userPrompt }
+  ], apiKey);
 
-  const data = await response.json();
-  const rewriteText = data.choices[0]?.message?.content;
-
-  if (!rewriteText) {
-    throw new Error('No response from AI');
-  }
-
-  const result = JSON.parse(rewriteText);
+  const result = extractJSON(responseText);
   console.log('Section rewrite complete');
 
   return new Response(
