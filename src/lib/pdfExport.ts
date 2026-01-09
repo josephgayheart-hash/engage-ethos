@@ -227,11 +227,11 @@ export function exportTalkingPointsToPDF(
   doc.save("executive-talking-points.pdf");
 }
 
-export function exportCaseForSupportToPDF(
+export async function exportCaseForSupportToPDF(
   cfc: CaseForCareDraft, 
   institutionName?: string,
   branding?: BrandingOptions
-): void {
+): Promise<void> {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -239,11 +239,21 @@ export function exportCaseForSupportToPDF(
   const contentWidth = pageWidth - margin * 2;
   let y = 25;
 
-  // Extract branding colors
+  // Extract branding colors - use provided colors or sensible defaults
   const primaryRgb = hexToRgb(branding?.primaryColor || '#1F2A44');
   const accentRgb = hexToRgb(branding?.accentColor || '#2C7A7B');
   const primaryLight = lightenColor(primaryRgb, 0.92);
   const accentLight = lightenColor(accentRgb, 0.92);
+
+  // Pre-load logo if available
+  let logoData: { dataUrl: string; format: "PNG" | "JPEG" } | null = null;
+  if (branding?.logoUrl) {
+    try {
+      logoData = await loadImageAsDataUrl(branding.logoUrl);
+    } catch (e) {
+      console.error("Failed to load logo for PDF:", e);
+    }
+  }
 
   const checkPageBreak = (requiredSpace: number) => {
     if (y + requiredSpace > pageHeight - 30) {
@@ -271,14 +281,17 @@ export function exportCaseForSupportToPDF(
   doc.setFillColor(...primaryRgb);
   doc.rect(0, 0, pageWidth, 70, "F");
 
-  // Add logo if available
-  let logoLoaded = false;
-  if (branding?.logoUrl) {
+  // Add logo in top-left of header if available
+  const logoWidth = 25;
+  const logoHeight = 25;
+  let textStartX = margin;
+  
+  if (logoData) {
     try {
-      // Note: Logo loading is async, but jsPDF addImage needs sync data
-      // For now, we'll skip logo - would need to pre-load as base64
+      doc.addImage(logoData.dataUrl, logoData.format, margin, 10, logoWidth, logoHeight);
+      textStartX = margin + logoWidth + 8; // Shift text to the right of logo
     } catch (e) {
-      console.error("Failed to load logo:", e);
+      console.error("Failed to add logo to PDF:", e);
     }
   }
 
@@ -310,30 +323,34 @@ export function exportCaseForSupportToPDF(
     doc.text(instLines, pageWidth - margin, 15, { align: "right" });
   }
 
-  // Title with dynamic font sizing
+  // Calculate available width for title (accounting for logo if present)
+  const titleAvailableWidth = logoData 
+    ? contentWidth - logoWidth - 18 
+    : contentWidth - 10;
+
+  // Title with dynamic font sizing - position after logo if present
   doc.setTextColor(255, 255, 255);
   const title = cfc.documentTitle || "CASE FOR SUPPORT";
-  const titleMaxWidth = contentWidth - 10;
 
   // Start at 24pt, reduce until it fits (minimum 14pt)
-  const titleFontSize = fitTextToWidth(title.toUpperCase(), titleMaxWidth, 24, 14);
+  const titleFontSize = fitTextToWidth(title.toUpperCase(), titleAvailableWidth, 24, 14);
   doc.setFontSize(titleFontSize);
   doc.setFont("helvetica", "bold");
 
   // Wrap if still too long after scaling
-  const titleLines = doc.splitTextToSize(title.toUpperCase(), titleMaxWidth);
-  doc.text(titleLines, margin, 30);
+  const titleLines = doc.splitTextToSize(title.toUpperCase(), titleAvailableWidth);
+  doc.text(titleLines, textStartX, 20);
 
   // Calculate where title ends
   const titleLineHeight = titleFontSize * 0.5;
-  let headerY = 30 + (titleLines.length - 1) * titleLineHeight + 8;
+  let headerY = 20 + (titleLines.length - 1) * titleLineHeight + 8;
 
   // Campaign name below title
   if (cfc.campaignName) {
     doc.setFontSize(12);
     doc.setFont("helvetica", "normal");
-    const campaignLines = doc.splitTextToSize(cfc.campaignName, titleMaxWidth);
-    doc.text(campaignLines, margin, headerY);
+    const campaignLines = doc.splitTextToSize(cfc.campaignName, titleAvailableWidth);
+    doc.text(campaignLines, textStartX, headerY);
     headerY += campaignLines.length * 6 + 4;
   }
 
@@ -342,8 +359,8 @@ export function exportCaseForSupportToPDF(
     doc.setFontSize(10);
     doc.setFont("helvetica", "italic");
     const taglineText = `"${cfc.campaignTagline}"`;
-    const taglineLines = doc.splitTextToSize(taglineText, titleMaxWidth);
-    doc.text(taglineLines, margin, headerY);
+    const taglineLines = doc.splitTextToSize(taglineText, titleAvailableWidth);
+    doc.text(taglineLines, textStartX, headerY);
   }
 
   y = 85;
