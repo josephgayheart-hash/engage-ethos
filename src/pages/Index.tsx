@@ -44,7 +44,8 @@ import {
   CircleDot,
   Building2,
   User,
-  Search
+  Search,
+  Globe
 } from "lucide-react";
 
 const Index = () => {
@@ -342,29 +343,50 @@ const Index = () => {
               </div>
 
               {/* Step 3: Strategize */}
-              <Link to="/strategy">
-                <Card className="h-full cursor-pointer card-workflow card-workflow-consensus group">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-8 h-8 rounded-full bg-pillar-consensus/10 flex items-center justify-center text-sm font-bold text-pillar-consensus">
-                        3
+              <div className="grid grid-rows-2 gap-3 h-full">
+                <Link to="/web-analyzer" className="block">
+                  <Card className="h-full cursor-pointer card-workflow card-workflow-consensus group">
+                    <CardContent className="p-4 h-full flex flex-col justify-center">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-7 h-7 rounded-full bg-pillar-consensus/10 flex items-center justify-center text-xs font-bold text-pillar-consensus">
+                          3a
+                        </div>
+                        <Badge variant="outline" className="text-xs bg-pillar-consensus/5">Analyze</Badge>
                       </div>
-                      <Badge variant="outline" className="text-xs bg-pillar-consensus/5">Strategize</Badge>
-                    </div>
-                    <div className="icon-container icon-container-lg bg-pillar-consensus/10 mb-4">
-                      <Map className="w-6 h-6 text-pillar-consensus" />
-                    </div>
-                    <h3 className="font-serif font-semibold text-lg mb-2">Design Journeys</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Map multi-channel communication strategies for any initiative or campaign.
-                    </p>
-                    <div className="flex items-center text-sm text-pillar-consensus font-medium group-hover:gap-2 transition-all">
-                      Plan Strategy
-                      <ArrowRight className="w-4 h-4 ml-1" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
+                      <div className="flex items-center gap-3">
+                        <div className="icon-container icon-container-md bg-pillar-consensus/10 shrink-0">
+                          <Globe className="w-5 h-5 text-pillar-consensus" />
+                        </div>
+                        <div>
+                          <h3 className="font-serif font-semibold text-sm mb-0.5">Web Content Analyzer</h3>
+                          <p className="text-xs text-muted-foreground">Audit web pages for voice & structure</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+                <Link to="/strategy" className="block">
+                  <Card className="h-full cursor-pointer card-workflow card-workflow-consensus group">
+                    <CardContent className="p-4 h-full flex flex-col justify-center">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-7 h-7 rounded-full bg-pillar-consensus/10 flex items-center justify-center text-xs font-bold text-pillar-consensus">
+                          3b
+                        </div>
+                        <Badge variant="outline" className="text-xs bg-pillar-consensus/5">Strategize</Badge>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="icon-container icon-container-md bg-pillar-consensus/10 shrink-0">
+                          <Map className="w-6 h-6 text-pillar-consensus" />
+                        </div>
+                        <div>
+                          <h3 className="font-serif font-semibold text-sm mb-0.5">Design Journeys</h3>
+                          <p className="text-xs text-muted-foreground">Map multi-channel campaigns</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </div>
 
               {/* Step 4: Content DNA Studio */}
               <Link to="/content-dna">
