@@ -190,7 +190,7 @@ const BuildPage = () => {
     channel: (remixState?.remixContext?.channel as any) || 'email',
   });
   const [selectedChannels, setSelectedChannels] = useState<Channel[]>(
-    (remixState?.remixContext?.channels as Channel[]) || ['email']
+    (remixState?.remixContext?.channels as Channel[]) || []
   );
   const [builderResult, setBuilderResult] = useState<BuilderResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
