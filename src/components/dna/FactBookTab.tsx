@@ -507,11 +507,37 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                 </>
               ) : (
                 <>
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-green-800">
-                        {parsedFacts.length} Facts Extracted
-                      </h4>
+                  {/* Step 1: Extraction Success Banner */}
+                  <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                        <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-green-800 dark:text-green-200">
+                          Extraction Complete!
+                        </h4>
+                        <p className="text-sm text-green-700 dark:text-green-300">
+                          {parsedFacts.length} facts found in your document
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 2: Add to Fact Book Section */}
+                  <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Plus className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-foreground">
+                          Add to Your Fact Book
+                        </h4>
+                        <p className="text-sm text-muted-foreground">
+                          Select the facts you want to import
+                        </p>
+                      </div>
                       <div className="flex gap-2">
                         <Button size="sm" variant="ghost" onClick={selectAllFacts}>
                           Select All
@@ -521,13 +547,16 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                         </Button>
                       </div>
                     </div>
-                    <p className="text-sm text-green-700">
-                      {selectedParsedFacts.size} selected for import
-                    </p>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Badge variant="secondary" className="bg-primary/10 text-primary">
+                        {selectedParsedFacts.size} of {parsedFacts.length} selected
+                      </Badge>
+                    </div>
                   </div>
 
-                  <ScrollArea className="h-[400px]">
-                    <div className="space-y-2 pr-4">
+                  {/* Fact List */}
+                  <ScrollArea className="h-[350px] border rounded-lg">
+                    <div className="space-y-2 p-3">
                       {parsedFacts.map((fact, idx) => {
                         const Icon = categoryIcons[fact.category] || MoreHorizontal;
                         const isSelected = selectedParsedFacts.has(idx);
@@ -541,7 +570,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                             }`}
                             onClick={() => toggleFactSelection(idx)}
                           >
-                            <div className={`w-5 h-5 rounded border flex items-center justify-center ${
+                            <div className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 ${
                               isSelected ? 'bg-primary border-primary' : 'border-muted-foreground/50'
                             }`}>
                               {isSelected && <CheckCircle2 className="w-4 h-4 text-white" />}
