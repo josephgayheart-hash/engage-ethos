@@ -1,6 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { 
@@ -105,29 +105,27 @@ export function BrandScorePanel({ section, voiceAnalysis }: BrandScorePanelProps
               <AlertTriangle className="w-4 h-4 text-amber-500" />
               Issues Found ({section.issues.length})
             </div>
-            <ScrollArea className="h-[180px]">
-              <div className="space-y-2 pr-4">
-                {section.issues.map((issue, i) => (
-                  <div
-                    key={i}
-                    className={cn(
-                      "p-2 rounded-lg border text-sm",
-                      getSeverityBg(issue.severity)
-                    )}
-                  >
-                    <div className="flex items-start gap-2">
-                      {getSeverityIcon(issue.severity)}
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-xs">{issue.type}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {issue.message}
-                        </p>
-                      </div>
+            <div className="max-h-[180px] overflow-y-auto space-y-2 pr-1">
+              {section.issues.map((issue, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    "p-2 rounded-lg border text-sm",
+                    getSeverityBg(issue.severity)
+                  )}
+                >
+                  <div className="flex items-start gap-2">
+                    {getSeverityIcon(issue.severity)}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-xs">{issue.type}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {issue.message}
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
-            </ScrollArea>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
@@ -138,21 +136,19 @@ export function BrandScorePanel({ section, voiceAnalysis }: BrandScorePanelProps
               <CheckCircle2 className="w-4 h-4 text-green-500" />
               Strengths ({section.strengths.length})
             </div>
-            <ScrollArea className="h-[120px]">
-              <div className="space-y-2 pr-4">
-                {section.strengths.map((strength, i) => (
-                  <div
-                    key={i}
-                    className="p-2 rounded-lg border bg-green-500/10 border-green-500/20 text-sm"
-                  >
-                    <div className="flex items-start gap-2">
-                      <Sparkles className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-                      <p className="text-xs">{strength}</p>
-                    </div>
+            <div className="max-h-[120px] overflow-y-auto space-y-2 pr-1">
+              {section.strengths.map((strength, i) => (
+                <div
+                  key={i}
+                  className="p-2 rounded-lg border bg-green-500/10 border-green-500/20 text-sm"
+                >
+                  <div className="flex items-start gap-2">
+                    <Sparkles className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                    <p className="text-xs">{strength}</p>
                   </div>
-                ))}
-              </div>
-            </ScrollArea>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
