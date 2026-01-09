@@ -83,7 +83,7 @@ serve(async (req) => {
 
     console.log('Calling Lovable AI for section parsing...');
 
-    const response = await fetch('https://ai.lovable.dev/api/v1/chat/completions', {
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${lovableApiKey}`,
