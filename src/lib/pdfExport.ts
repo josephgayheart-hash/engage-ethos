@@ -282,31 +282,68 @@ export function exportCaseForSupportToPDF(
     }
   }
 
-  // Title
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(24);
-  doc.setFont("helvetica", "bold");
-  const title = cfc.documentTitle || "CASE FOR SUPPORT";
-  doc.text(title.toUpperCase(), margin, 35);
+  // Helper to dynamically reduce font size until text fits
+  const fitTextToWidth = (
+    text: string,
+    maxWidth: number,
+    startSize: number,
+    minSize: number
+  ): number => {
+    let fontSize = startSize;
+    doc.setFont("helvetica", "bold");
+    while (fontSize > minSize) {
+      doc.setFontSize(fontSize);
+      const textWidth = doc.getTextWidth(text);
+      if (textWidth <= maxWidth) break;
+      fontSize -= 1;
+    }
+    return fontSize;
+  };
 
-  // Campaign name and tagline
-  if (cfc.campaignName) {
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "normal");
-    doc.text(cfc.campaignName, margin, 48);
-  }
-
-  if (cfc.campaignTagline) {
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "italic");
-    doc.text(`"${cfc.campaignTagline}"`, margin, 60);
-  }
-
-  // Institution name on the right
+  // Institution name in top-right corner (separate from title area)
   if (institutionName) {
-    doc.setFontSize(10);
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
-    doc.text(institutionName, pageWidth - margin, 35, { align: "right" });
+    const instMaxWidth = 80;
+    const instLines = doc.splitTextToSize(institutionName, instMaxWidth);
+    doc.text(instLines, pageWidth - margin, 15, { align: "right" });
+  }
+
+  // Title with dynamic font sizing
+  doc.setTextColor(255, 255, 255);
+  const title = cfc.documentTitle || "CASE FOR SUPPORT";
+  const titleMaxWidth = contentWidth - 10;
+
+  // Start at 24pt, reduce until it fits (minimum 14pt)
+  const titleFontSize = fitTextToWidth(title.toUpperCase(), titleMaxWidth, 24, 14);
+  doc.setFontSize(titleFontSize);
+  doc.setFont("helvetica", "bold");
+
+  // Wrap if still too long after scaling
+  const titleLines = doc.splitTextToSize(title.toUpperCase(), titleMaxWidth);
+  doc.text(titleLines, margin, 30);
+
+  // Calculate where title ends
+  const titleLineHeight = titleFontSize * 0.5;
+  let headerY = 30 + (titleLines.length - 1) * titleLineHeight + 8;
+
+  // Campaign name below title
+  if (cfc.campaignName) {
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    const campaignLines = doc.splitTextToSize(cfc.campaignName, titleMaxWidth);
+    doc.text(campaignLines, margin, headerY);
+    headerY += campaignLines.length * 6 + 4;
+  }
+
+  // Campaign tagline
+  if (cfc.campaignTagline) {
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "italic");
+    const taglineText = `"${cfc.campaignTagline}"`;
+    const taglineLines = doc.splitTextToSize(taglineText, titleMaxWidth);
+    doc.text(taglineLines, margin, headerY);
   }
 
   y = 85;
@@ -451,12 +488,26 @@ export function exportCaseForSupportToPDF(
       doc.setFont("helvetica", "bold");
       const statValue = typeof stat === "object" ? stat.value : stat;
       const statLabel = typeof stat === "object" ? stat.label : "";
-      doc.text(statValue, x + statWidth / 2, y + 8, { align: "center" });
+      
+      // Truncate stat value if too wide
+      const maxValueWidth = statWidth - 8;
+      let displayValue = statValue;
+      if (doc.getTextWidth(statValue) > maxValueWidth) {
+        doc.setFontSize(11);
+        if (doc.getTextWidth(statValue) > maxValueWidth) {
+          displayValue = statValue.substring(0, 12) + "...";
+        }
+      }
+      doc.text(displayValue, x + statWidth / 2, rowY + 8, { align: "center" });
 
-      doc.setFontSize(8);
+      // Label with two-line support
+      doc.setFontSize(7);
       doc.setFont("helvetica", "normal");
       const labelLines = doc.splitTextToSize(statLabel, statWidth - 6);
-      doc.text(labelLines[0] || "", x + statWidth / 2, y + 17, { align: "center" });
+      doc.text(labelLines[0] || "", x + statWidth / 2, rowY + 15, { align: "center" });
+      if (labelLines[1]) {
+        doc.text(labelLines[1], x + statWidth / 2, rowY + 20, { align: "center" });
+      }
 
       col++;
     });
@@ -556,17 +607,39 @@ export function exportCaseForSupportToPDF(
     y += 10;
 
     cfc.givingLevels.forEach((level) => {
-      checkPageBreak(14);
+      // Calculate available width for impact text dynamically
+      const amountWidth = 50;
+      const impactMaxWidth = contentWidth - amountWidth - 15;
+
+      // Wrap impact text
+      doc.setFontSize(9);
+      const impactLines = doc.splitTextToSize(level.impact, impactMaxWidth);
+
+      // Dynamic box height based on wrapped lines
+      const lineHeight = 4;
+      const boxHeight = Math.max(12, 6 + impactLines.length * lineHeight);
+
+      checkPageBreak(boxHeight + 4);
+
+      // Draw box with dynamic height
       doc.setFillColor(...accentLight);
-      doc.roundedRect(margin, y - 3, contentWidth, 12, 2, 2, "F");
+      doc.roundedRect(margin, y - 3, contentWidth, boxHeight, 2, 2, "F");
+
+      // Amount on left
       doc.setTextColor(...accentRgb);
       doc.setFontSize(10);
       doc.setFont("helvetica", "bold");
       doc.text(level.amount, margin + 5, y + 5);
+
+      // Wrapped impact text on right
       doc.setFont("helvetica", "normal");
       doc.setTextColor(60, 60, 60);
-      doc.text(level.impact, margin + 45, y + 5);
-      y += 16;
+      doc.setFontSize(9);
+      impactLines.forEach((line: string, idx: number) => {
+        doc.text(line, margin + amountWidth, y + 5 + idx * lineHeight);
+      });
+
+      y += boxHeight + 4;
     });
   }
 
