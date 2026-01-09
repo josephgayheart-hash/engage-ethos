@@ -43,6 +43,12 @@ interface ParsedSection {
   isRecommended: boolean;
 }
 
+interface DiscoveredPage {
+  url: string;
+  path: string;
+  title: string;
+}
+
 interface AnalyzerInputProps {
   onAnalyze: (content: string, url?: string) => void;
   isAnalyzing: boolean;
@@ -75,6 +81,7 @@ export function AnalyzerInput({ onAnalyze, isAnalyzing, disabled }: AnalyzerInpu
   const [sections, setSections] = useState<ParsedSection[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [discoveredPages, setDiscoveredPages] = useState<DiscoveredPage[]>([]);
 
   const handleScrape = async () => {
     if (!url.trim()) return;
@@ -84,41 +91,90 @@ export function AnalyzerInput({ onAnalyze, isAnalyzing, disabled }: AnalyzerInpu
     setScrapedTitle('');
     setSections([]);
     setSelectedIds(new Set());
+    setDiscoveredPages([]);
 
     try {
-      const response = await firecrawlApi.scrape(url, { formats: ['markdown'] });
+      // Run scrape and map in parallel for efficiency
+      const [scrapeResponse, mapResponse] = await Promise.all([
+        firecrawlApi.scrape(url, { formats: ['markdown'] }),
+        firecrawlApi.map(url, { limit: 50, includeSubdomains: true })
+      ]);
 
-      if (!response.success || !response.data?.markdown) {
-        throw new Error(response.error || 'Failed to retrieve content');
+      if (!scrapeResponse.success || !scrapeResponse.data?.markdown) {
+        throw new Error(scrapeResponse.error || 'Failed to retrieve content');
       }
 
-      setScrapedContent(response.data.markdown);
-      setScrapedTitle(response.data.metadata?.title || '');
+      setScrapedContent(scrapeResponse.data.markdown);
+      setScrapedTitle(scrapeResponse.data.metadata?.title || '');
+
+      // Process discovered sub-pages from map
+      if (mapResponse.success && mapResponse.data?.links) {
+        const baseUrl = new URL(url);
+        const basePath = baseUrl.pathname;
+        
+        // Filter and format discovered pages
+        const pages: DiscoveredPage[] = mapResponse.data.links
+          .slice(0, 30) // Limit to 30 pages for display
+          .filter((link: string) => {
+            try {
+              const linkUrl = new URL(link);
+              // Only include same domain pages
+              return linkUrl.hostname === baseUrl.hostname || 
+                     linkUrl.hostname.endsWith(`.${baseUrl.hostname}`);
+            } catch {
+              return false;
+            }
+          })
+          .map((link: string) => {
+            try {
+              const linkUrl = new URL(link);
+              const pathSegments = linkUrl.pathname.split('/').filter(Boolean);
+              const lastSegment = pathSegments[pathSegments.length - 1] || 'Home';
+              const title = lastSegment
+                .replace(/-/g, ' ')
+                .replace(/_/g, ' ')
+                .replace(/\.(html?|php|aspx?)$/i, '')
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+              
+              return {
+                url: link,
+                path: linkUrl.pathname,
+                title: title || 'Page'
+              };
+            } catch {
+              return null;
+            }
+          })
+          .filter(Boolean) as DiscoveredPage[];
+        
+        setDiscoveredPages(pages);
+      }
 
       // Now parse sections
       setIsParsing(true);
       const { data: parseData, error: parseError } = await supabase.functions.invoke('parse-web-sections', {
-        body: { markdown: response.data.markdown, url }
+        body: { markdown: scrapeResponse.data.markdown, url }
       });
 
       if (parseError) {
         console.error('Parse error:', parseError);
-        // Fall back to using the whole content
         toast({
           title: 'Content Retrieved',
-          description: `Extracted ${response.data.markdown.split(/\s+/).length} words. Section parsing unavailable.`,
+          description: `Extracted ${scrapeResponse.data.markdown.split(/\s+/).length} words. Section parsing unavailable.`,
         });
       } else if (parseData?.sections) {
         setSections(parseData.sections);
-        // Auto-select recommended sections
         const recommendedIds = new Set<string>(
           parseData.sections.filter((s: ParsedSection) => s.isRecommended).map((s: ParsedSection) => s.id)
         );
         setSelectedIds(recommendedIds);
         
+        const pagesDiscovered = discoveredPages.length > 0 ? ` Discovered ${discoveredPages.length} sub-pages.` : '';
         toast({
           title: 'Content Retrieved',
-          description: `Found ${parseData.sections.length} sections. ${recommendedIds.size} recommended for analysis.`,
+          description: `Found ${parseData.sections.length} sections. ${recommendedIds.size} recommended.${pagesDiscovered}`,
         });
       }
     } catch (error: any) {
@@ -327,6 +383,7 @@ export function AnalyzerInput({ onAnalyze, isAnalyzing, disabled }: AnalyzerInpu
                   sections={sections}
                   selectedIds={selectedIds}
                   onToggleSection={toggleSection}
+                  discoveredPages={discoveredPages}
                 />
               </TabsContent>
             </Tabs>

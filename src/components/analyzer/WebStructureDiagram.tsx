@@ -42,12 +42,19 @@ interface ParsedSection {
   isRecommended: boolean;
 }
 
+interface DiscoveredPage {
+  url: string;
+  path: string;
+  title: string;
+}
+
 interface WebStructureDiagramProps {
   url: string;
   pageTitle?: string;
   sections: ParsedSection[];
   selectedIds: Set<string>;
   onToggleSection: (id: string) => void;
+  discoveredPages?: DiscoveredPage[];
 }
 
 const SECTION_TYPE_CONFIG: Record<string, { label: string; icon: React.ElementType; color: string }> = {
@@ -92,25 +99,44 @@ function DomainNode({ data }: NodeProps) {
 
 // Custom Page Node - Clean intermediate level
 function PageNode({ data }: NodeProps) {
+  const isCurrentPage = data.isCurrentPage;
+  const hasSubPages = data.hasSubPages;
+  
   return (
     <div className="group">
       <Handle 
         type="target" 
         position={Position.Top} 
-        className="!w-3 !h-3 !bg-primary !border-2 !border-background !-top-1.5"
+        className={cn(
+          "!w-3 !h-3 !border-2 !border-background !-top-1.5",
+          isCurrentPage ? "!bg-primary" : "!bg-muted-foreground"
+        )}
       />
-      <Handle 
-        type="source" 
-        position={Position.Bottom} 
-        className="!w-3 !h-3 !bg-muted-foreground !border-2 !border-background !-bottom-1.5"
-      />
-      <div className="px-5 py-4 rounded-xl bg-card border-2 border-primary/40 shadow-lg hover:shadow-xl transition-shadow">
+      {(isCurrentPage || hasSubPages) && (
+        <Handle 
+          type="source" 
+          position={Position.Bottom} 
+          className="!w-3 !h-3 !bg-muted-foreground !border-2 !border-background !-bottom-1.5"
+        />
+      )}
+      <div className={cn(
+        "px-5 py-4 rounded-xl bg-card border-2 shadow-lg hover:shadow-xl transition-shadow",
+        isCurrentPage ? "border-primary/40" : "border-border/50"
+      )}>
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <FileText className="w-5 h-5 text-primary" />
+          <div className={cn(
+            "p-2 rounded-lg",
+            isCurrentPage ? "bg-primary/10" : "bg-muted"
+          )}>
+            <FileText className={cn(
+              "w-5 h-5",
+              isCurrentPage ? "text-primary" : "text-muted-foreground"
+            )} />
           </div>
           <div>
-            <p className="text-[10px] uppercase tracking-wider font-medium text-muted-foreground">Page</p>
+            <p className="text-[10px] uppercase tracking-wider font-medium text-muted-foreground">
+              {isCurrentPage ? 'Current Page' : 'Sub-page'}
+            </p>
             <p className="font-semibold text-sm max-w-[180px] truncate">{data.label}</p>
             {data.path && data.path !== '/' && (
               <p className="text-xs text-muted-foreground/70 font-mono max-w-[180px] truncate">{data.path}</p>
@@ -214,7 +240,8 @@ export function WebStructureDiagram({
   pageTitle, 
   sections, 
   selectedIds, 
-  onToggleSection 
+  onToggleSection,
+  discoveredPages = []
 }: WebStructureDiagramProps) {
   
   const { initialNodes, initialEdges } = useMemo(() => {
@@ -223,37 +250,56 @@ export function WebStructureDiagram({
     
     // Parse domain from URL
     let domain = '';
-    let path = '';
+    let currentPath = '';
     try {
       const urlObj = new URL(url);
       domain = urlObj.hostname;
-      path = urlObj.pathname;
+      currentPath = urlObj.pathname;
     } catch {
       domain = url;
     }
     
     // Domain node at top center
+    const centerX = 400;
     nodes.push({
       id: 'domain',
       type: 'domain',
-      position: { x: 300, y: 0 },
+      position: { x: centerX, y: 0 },
       data: { label: domain },
       draggable: true,
     });
     
-    // Page node below domain
+    // Group discovered pages by depth level
+    const hasSubPages = discoveredPages.length > 0;
+    const pagesByDepth = new Map<number, DiscoveredPage[]>();
+    
+    discoveredPages.forEach(page => {
+      const depth = page.path.split('/').filter(Boolean).length;
+      if (!pagesByDepth.has(depth)) {
+        pagesByDepth.set(depth, []);
+      }
+      pagesByDepth.get(depth)!.push(page);
+    });
+    
+    // Find current page in discovered pages or create it
+    const currentPageInDiscovered = discoveredPages.find(p => p.path === currentPath);
+    
+    // Add current page node
+    const currentPageY = 120;
     nodes.push({
       id: 'page',
       type: 'page',
-      position: { x: 300, y: 120 },
+      position: { x: centerX, y: currentPageY },
       data: { 
-        label: pageTitle || 'Page',
-        path: path,
+        label: pageTitle || currentPageInDiscovered?.title || 'Page',
+        path: currentPath,
+        isCurrentPage: true,
+        hasSubPages: sections.length > 0,
       },
       draggable: true,
     });
     
-    // Edge from domain to page - vertical hierarchy
+    // Edge from domain to current page
     edges.push({
       id: 'domain-page',
       source: 'domain',
@@ -272,17 +318,92 @@ export function WebStructureDiagram({
       },
     });
     
-    // Layout sections in a tree pattern below the page
+    // Add discovered sub-pages as sibling nodes around the current page
+    const subPagesWidth = 180;
+    const subPagesSpacing = 20;
+    const subPagesStartY = 120;
+    
+    // Filter out the current page from discovered pages
+    const otherPages = discoveredPages.filter(p => p.path !== currentPath).slice(0, 15);
+    
+    if (otherPages.length > 0) {
+      // Position sub-pages on the left and right of the current page
+      const leftPages = otherPages.slice(0, Math.ceil(otherPages.length / 2));
+      const rightPages = otherPages.slice(Math.ceil(otherPages.length / 2));
+      
+      // Left side pages
+      leftPages.forEach((page, index) => {
+        const x = centerX - 280 - (index % 2) * (subPagesWidth + subPagesSpacing);
+        const y = subPagesStartY + Math.floor(index / 2) * 100;
+        
+        nodes.push({
+          id: `subpage-${page.path}`,
+          type: 'page',
+          position: { x, y },
+          data: { 
+            label: page.title,
+            path: page.path,
+            isCurrentPage: false,
+            hasSubPages: false,
+          },
+          draggable: true,
+        });
+        
+        edges.push({
+          id: `domain-subpage-${page.path}`,
+          source: 'domain',
+          target: `subpage-${page.path}`,
+          type: 'smoothstep',
+          style: { 
+            stroke: 'hsl(var(--muted-foreground))',
+            strokeWidth: 1,
+            opacity: 0.4,
+          },
+        });
+      });
+      
+      // Right side pages
+      rightPages.forEach((page, index) => {
+        const x = centerX + 280 + (index % 2) * (subPagesWidth + subPagesSpacing);
+        const y = subPagesStartY + Math.floor(index / 2) * 100;
+        
+        nodes.push({
+          id: `subpage-${page.path}`,
+          type: 'page',
+          position: { x, y },
+          data: { 
+            label: page.title,
+            path: page.path,
+            isCurrentPage: false,
+            hasSubPages: false,
+          },
+          draggable: true,
+        });
+        
+        edges.push({
+          id: `domain-subpage-${page.path}`,
+          source: 'domain',
+          target: `subpage-${page.path}`,
+          type: 'smoothstep',
+          style: { 
+            stroke: 'hsl(var(--muted-foreground))',
+            strokeWidth: 1,
+            opacity: 0.4,
+          },
+        });
+      });
+    }
+    
+    // Layout sections in a tree pattern below the current page
     const totalSections = sections.length;
     const nodeWidth = 200;
     const nodeHeight = 90;
     const horizontalSpacing = 20;
     const verticalSpacing = 30;
-    const startY = 280;
+    const startY = hasSubPages ? Math.max(320, 120 + Math.ceil(otherPages.length / 4) * 100 + 80) : 280;
     
     // Calculate layout - distribute sections evenly
     const maxPerRow = Math.min(4, Math.ceil(totalSections / Math.ceil(totalSections / 4)));
-    const rows = Math.ceil(totalSections / maxPerRow);
     
     sections.forEach((section, index) => {
       const row = Math.floor(index / maxPerRow);
@@ -291,7 +412,7 @@ export function WebStructureDiagram({
       
       // Center each row
       const rowWidth = sectionsInThisRow * nodeWidth + (sectionsInThisRow - 1) * horizontalSpacing;
-      const rowStartX = 300 - rowWidth / 2 + nodeWidth / 2;
+      const rowStartX = centerX - rowWidth / 2 + nodeWidth / 2;
       
       const x = rowStartX + colInRow * (nodeWidth + horizontalSpacing);
       const y = startY + row * (nodeHeight + verticalSpacing);
@@ -339,7 +460,7 @@ export function WebStructureDiagram({
     });
     
     return { initialNodes: nodes, initialEdges: edges };
-  }, [url, pageTitle, sections, selectedIds, onToggleSection]);
+  }, [url, pageTitle, sections, selectedIds, onToggleSection, discoveredPages]);
   
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -350,11 +471,12 @@ export function WebStructureDiagram({
     setEdges(initialEdges);
   }, [initialNodes, initialEdges, setNodes, setEdges]);
   
-  // Calculate dynamic height based on sections
+  // Calculate dynamic height based on sections and sub-pages
   const maxPerRow = Math.min(4, Math.ceil(sections.length / Math.ceil(sections.length / 4)));
-  const rows = Math.ceil(sections.length / maxPerRow);
+  const sectionRows = Math.ceil(sections.length / maxPerRow);
+  const subPageRows = Math.ceil(discoveredPages.length / 4);
   const minHeight = 400;
-  const dynamicHeight = Math.max(minHeight, 320 + rows * 120);
+  const dynamicHeight = Math.max(minHeight, 380 + sectionRows * 120 + subPageRows * 50);
   
   return (
     <div 
