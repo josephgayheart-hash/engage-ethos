@@ -51,6 +51,7 @@ const channelOptions: { value: Channel; label: string }[] = [
   { value: 'digital-ad-social', label: 'Social Ads (Meta/LinkedIn)' },
   { value: 'talking-points', label: 'Executive Talking Points' },
   { value: 'news-article', label: 'News Article' },
+  { value: 'case-for-care', label: 'Case for Care' },
 ];
 
 const audienceLabels: Record<string, string> = {

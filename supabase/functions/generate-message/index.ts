@@ -236,7 +236,57 @@ STYLE GUIDE FOR UNIVERSITY NEWS:
   "closingStatement": "A powerful 2-3 sentence closing that reinforces the brand promise, inspires action, and leaves a memorable impression."
 }
 
-CRITICAL: Each field must contain SUBSTANTIAL, SPECIFIC content. Key messages should be complete talking points (2-3 sentences each), not fragments. Ground all content in the institutional brand platform, pillars, proof points, and pathways. Make this immediately usable by an executive.`
+CRITICAL: Each field must contain SUBSTANTIAL, SPECIFIC content. Key messages should be complete talking points (2-3 sentences each), not fragments. Ground all content in the institutional brand platform, pillars, proof points, and pathways. Make this immediately usable by an executive.`,
+        "case-for-care": `Advancement Case for Support document for fundraising and philanthropy. Return JSON object with exact fields:
+{
+  "documentTitle": "A Case for the Future of Learning",
+  "campaignName": "Campaign for Tomorrow",
+  "targetAmount": "$50 million",
+  "openingNarrative": "2-3 paragraphs telling a compelling story that draws the reader in emotionally. Begin with a specific student, faculty member, or community member whose life has been transformed. Make it personal and urgent.",
+  "problemStatement": "The challenge or need being addressed - why now, why this matters",
+  "visionStatement": "Bold vision for what's possible with philanthropic support",
+  "missionConnection": "How this campaign connects to the institutional mission and values",
+  "keyPrograms": [
+    { "name": "Program Name", "description": "What the program does", "impact": "Specific measurable impact" },
+    { "name": "Program 2", "description": "...", "impact": "..." },
+    { "name": "Program 3", "description": "...", "impact": "..." }
+  ],
+  "impactStatistics": [
+    "94% of scholarship recipients graduate within 4 years",
+    "$2.3M in student emergency funds distributed last year",
+    "15,000 students served through academic support programs",
+    "12 new endowed professorships created",
+    "200+ community partnerships strengthened"
+  ],
+  "testimonials": [
+    { "quote": "A compelling donor or student testimonial", "attribution": "Name, Title", "role": "Donor" },
+    { "quote": "Another powerful quote", "attribution": "Name, Title", "role": "Student" }
+  ],
+  "givingLevels": [
+    { "amount": "$1,000", "impact": "Provides emergency funds for one student" },
+    { "amount": "$5,000", "impact": "Funds a summer research opportunity" },
+    { "amount": "$25,000", "impact": "Establishes a named scholarship" },
+    { "amount": "$100,000", "impact": "Creates an endowed fund for ongoing support" }
+  ],
+  "callToAction": "Join us in transforming lives. Your gift today will...",
+  "closingStatement": "Together, we can ensure that every student has the opportunity to succeed. Your partnership makes the difference.",
+  "contactInfo": {
+    "name": "Development Officer Name",
+    "title": "Director of Development",
+    "email": "giving@university.edu",
+    "phone": "(xxx) xxx-xxxx"
+  }
+}
+
+STYLE GUIDE FOR CASE FOR CARE:
+- Lead with emotion through compelling storytelling
+- Position the donor as the hero who makes transformation possible
+- Use clear, simple language (avoid jargon and academic speak)
+- Include specific, tangible impact statements
+- Make giving levels relatable ("provides X for Y students")
+- Connect to institutional mission and brand pillars
+- End with a bold, inspiring call to partnership
+- Write with passion and authenticity throughout`
       };
 
       // Build comprehensive institutional config string for prompts

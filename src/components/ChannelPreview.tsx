@@ -26,7 +26,8 @@ import {
   Mic,
   Target,
   Cloud,
-  ExternalLink
+  ExternalLink,
+  Heart
 } from "lucide-react";
 import type { 
   ChannelDrafts, 
@@ -37,6 +38,7 @@ import type {
   SocialAdDraft,
   TalkingPointsDraft,
   NewsArticleDraft,
+  CaseForCareDraft,
   Channel 
 } from "@/types/uplaybook";
 
@@ -60,6 +62,7 @@ const channelIcons: Record<Channel, React.ReactNode> = {
   'digital-ad-social': <Megaphone className="w-4 h-4" />,
   'talking-points': <Mic className="w-4 h-4" />,
   'news-article': <FileText className="w-4 h-4" />,
+  'case-for-care': <Heart className="w-4 h-4" />,
 };
 
 const channelLabels: Record<Channel, string> = {
@@ -74,6 +77,7 @@ const channelLabels: Record<Channel, string> = {
   'digital-ad-social': 'Social Ad (Meta/LinkedIn)',
   'talking-points': 'Executive Talking Points',
   'news-article': 'News Article',
+  'case-for-care': 'Case for Care',
 };
 
 export function ChannelPreview({ channel, content, onCopy, onContentChange, onSaveToLibrary }: ChannelPreviewProps) {
@@ -294,6 +298,31 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
         result += `\nMedia Contact:\n${article.mediaContact.name}, ${article.mediaContact.title}\n${article.mediaContact.email}${article.mediaContact.phone ? ` | ${article.mediaContact.phone}` : ''}\n`;
       }
       return result;
+    }
+    if (channel === 'case-for-care') {
+      const cfc = c as CaseForCareDraft;
+      let result = `CASE FOR CARE\n${'='.repeat(40)}\n\n`;
+      if (cfc.documentTitle) result += `${cfc.documentTitle}\n`;
+      if (cfc.campaignName) result += `Campaign: ${cfc.campaignName}\n`;
+      if (cfc.targetAmount) result += `Goal: ${cfc.targetAmount}\n\n`;
+      if (cfc.openingNarrative) result += `${cfc.openingNarrative}\n\n`;
+      if (cfc.visionStatement) result += `VISION:\n${cfc.visionStatement}\n\n`;
+      if (cfc.keyPrograms?.length) {
+        result += `KEY PROGRAMS:\n`;
+        cfc.keyPrograms.forEach(p => { result += `• ${p.name}: ${p.description} (Impact: ${p.impact})\n`; });
+        result += '\n';
+      }
+      if (cfc.impactStatistics?.length) result += `IMPACT:\n${cfc.impactStatistics.map(s => `📊 ${s}`).join('\n')}\n\n`;
+      if (cfc.givingLevels?.length) {
+        result += `GIVING LEVELS:\n`;
+        cfc.givingLevels.forEach(g => { result += `• ${g.amount}: ${g.impact}\n`; });
+        result += '\n';
+      }
+      if (cfc.callToAction) result += `CALL TO ACTION:\n${cfc.callToAction}\n\n`;
+      if (cfc.closingStatement) result += `${cfc.closingStatement}`;
+      return result;
+    }
+    return '';
     }
     return '';
   };
@@ -704,9 +733,53 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
         return renderTalkingPointsEdit();
       case 'news-article':
         return renderNewsArticleEdit();
+      case 'case-for-care':
+        return renderCaseForCareEdit();
       default:
         return renderSimpleTextEdit();
     }
+  };
+
+  const renderCaseForCareEdit = () => {
+    const cfc = editedContent as CaseForCareDraft;
+    return (
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label className="text-xs text-muted-foreground">Document Title</Label>
+            <Input value={cfc.documentTitle || ''} onChange={(e) => setEditedContent({ ...cfc, documentTitle: e.target.value })} className="mt-1" />
+          </div>
+          <div>
+            <Label className="text-xs text-muted-foreground">Campaign Name</Label>
+            <Input value={cfc.campaignName || ''} onChange={(e) => setEditedContent({ ...cfc, campaignName: e.target.value })} className="mt-1" />
+          </div>
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">Target Amount</Label>
+          <Input value={cfc.targetAmount || ''} onChange={(e) => setEditedContent({ ...cfc, targetAmount: e.target.value })} className="mt-1" placeholder="$50 million" />
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">Opening Narrative (Story)</Label>
+          <Textarea value={cfc.openingNarrative || ''} onChange={(e) => setEditedContent({ ...cfc, openingNarrative: e.target.value })} className="mt-1 min-h-[120px]" />
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">Vision Statement</Label>
+          <Textarea value={cfc.visionStatement || ''} onChange={(e) => setEditedContent({ ...cfc, visionStatement: e.target.value })} className="mt-1 min-h-[60px]" />
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">Impact Statistics (one per line)</Label>
+          <Textarea value={(cfc.impactStatistics || []).join('\n')} onChange={(e) => setEditedContent({ ...cfc, impactStatistics: e.target.value.split('\n').filter(Boolean) })} className="mt-1 min-h-[80px]" />
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">Call to Action</Label>
+          <Textarea value={cfc.callToAction || ''} onChange={(e) => setEditedContent({ ...cfc, callToAction: e.target.value })} className="mt-1 min-h-[60px]" />
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">Closing Statement</Label>
+          <Textarea value={cfc.closingStatement || ''} onChange={(e) => setEditedContent({ ...cfc, closingStatement: e.target.value })} className="mt-1 min-h-[60px]" />
+        </div>
+      </div>
+    );
   };
 
   const renderEmailPreview = (email: EmailDraft) => (
@@ -1113,17 +1186,91 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
         // Fallback to displaying as formatted text
         return <p className="text-sm whitespace-pre-wrap">{String(displayContent)}</p>;
       case 'news-article':
-        // Check if content is a valid NewsArticleDraft object
         if (typeof displayContent === 'object' && displayContent !== null && 
             ('headline' in displayContent || 'leadParagraph' in displayContent)) {
           return renderNewsArticlePreview(displayContent as NewsArticleDraft);
         }
-        // Fallback to displaying as formatted text
+        return <p className="text-sm whitespace-pre-wrap">{String(displayContent)}</p>;
+      case 'case-for-care':
+        if (typeof displayContent === 'object' && displayContent !== null && 
+            ('documentTitle' in displayContent || 'openingNarrative' in displayContent)) {
+          return renderCaseForCarePreview(displayContent as CaseForCareDraft);
+        }
         return <p className="text-sm whitespace-pre-wrap">{String(displayContent)}</p>;
       default:
         return <p className="text-sm whitespace-pre-wrap">{String(displayContent)}</p>;
     }
   };
+
+  const renderCaseForCarePreview = (cfc: CaseForCareDraft) => (
+    <div className="space-y-4">
+      <div className="bg-rose-50 dark:bg-rose-950/30 rounded-lg p-4 border border-rose-200 dark:border-rose-800">
+        <div className="flex items-center gap-2 mb-3">
+          <Heart className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+          <span className="font-semibold text-lg text-rose-700 dark:text-rose-300">Case for Care</span>
+        </div>
+        <h2 className="text-xl font-bold">{cfc.documentTitle}</h2>
+        {cfc.campaignName && <p className="text-sm text-muted-foreground">{cfc.campaignName}</p>}
+        {cfc.targetAmount && <Badge variant="secondary" className="mt-2">{cfc.targetAmount}</Badge>}
+      </div>
+      {cfc.openingNarrative && (
+        <div className="bg-card rounded-lg p-4 border-l-4 border-rose-400">
+          <p className="text-sm leading-relaxed italic whitespace-pre-wrap">{cfc.openingNarrative}</p>
+        </div>
+      )}
+      {cfc.visionStatement && (
+        <div className="bg-primary/5 rounded-lg p-4">
+          <p className="text-xs font-semibold text-primary mb-2 uppercase">Vision</p>
+          <p className="text-sm font-medium">{cfc.visionStatement}</p>
+        </div>
+      )}
+      {cfc.keyPrograms && cfc.keyPrograms.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground uppercase">Key Programs</p>
+          <div className="grid gap-2">
+            {cfc.keyPrograms.map((p, i) => (
+              <div key={i} className="bg-muted/30 rounded-lg p-3">
+                <p className="font-medium text-sm">{p.name}</p>
+                <p className="text-xs text-muted-foreground">{p.description}</p>
+                <p className="text-xs text-primary mt-1">Impact: {p.impact}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {cfc.impactStatistics && cfc.impactStatistics.length > 0 && (
+        <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+          <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-3 uppercase">Impact By The Numbers</p>
+          <div className="grid gap-1">
+            {cfc.impactStatistics.map((stat, i) => (
+              <div key={i} className="flex items-start gap-2 text-sm"><span>📊</span><span>{stat}</span></div>
+            ))}
+          </div>
+        </div>
+      )}
+      {cfc.givingLevels && cfc.givingLevels.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground uppercase">Ways to Give</p>
+          <div className="grid gap-2">
+            {cfc.givingLevels.map((g, i) => (
+              <div key={i} className="flex justify-between items-center bg-muted/30 rounded p-2">
+                <span className="font-semibold text-sm">{g.amount}</span>
+                <span className="text-xs text-muted-foreground">{g.impact}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {cfc.callToAction && (
+        <div className="bg-rose-100 dark:bg-rose-900/30 rounded-lg p-4 text-center">
+          <p className="text-sm font-medium">{cfc.callToAction}</p>
+        </div>
+      )}
+      {cfc.closingStatement && (
+        <div className="border-t pt-4"><p className="text-sm italic text-center">{cfc.closingStatement}</p></div>
+      )}
+    </div>
+  );
 
   return (
     <Card>
