@@ -373,34 +373,49 @@ export default function ForAgenciesPage() {
 
         {/* How It Works - Quick Overview */}
         <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/20">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl sm:text-4xl font-serif font-bold text-foreground mb-6">
-              Get Started in Three Steps
+          <div className="max-w-5xl mx-auto text-center">
+            <h2 className="text-3xl sm:text-4xl font-serif font-bold text-foreground mb-4">
+              How to Become a Partner
             </h2>
+            <p className="text-muted-foreground mb-12 max-w-2xl mx-auto">
+              We work closely with each agency partner to ensure the right fit and pricing for your client portfolio.
+            </p>
             
-            <div className="grid sm:grid-cols-3 gap-8 mt-12">
+            <div className="grid sm:grid-cols-4 gap-6 mt-12">
               <div className="text-center">
                 <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold text-xl flex items-center justify-center mx-auto mb-4">
                   1
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Apply for Partnership</h3>
-                <p className="text-sm text-muted-foreground">Quick application to join our agency program</p>
+                <h3 className="font-semibold text-lg mb-2">Submit Interest</h3>
+                <p className="text-sm text-muted-foreground">Tell us about your agency and university clients</p>
               </div>
               <div className="text-center">
                 <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold text-xl flex items-center justify-center mx-auto mb-4">
                   2
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Add Your Clients</h3>
-                <p className="text-sm text-muted-foreground">Set up each university with their own workspace</p>
+                <h3 className="font-semibold text-lg mb-2">Discovery Call</h3>
+                <p className="text-sm text-muted-foreground">We'll discuss scope, scale, and usage to determine the right plan</p>
               </div>
               <div className="text-center">
                 <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold text-xl flex items-center justify-center mx-auto mb-4">
                   3
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Start Creating</h3>
-                <p className="text-sm text-muted-foreground">Generate on-brand content for every client</p>
+                <h3 className="font-semibold text-lg mb-2">Onboarding</h3>
+                <p className="text-sm text-muted-foreground">Get set up with your agency dashboard and first client workspaces</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold text-xl flex items-center justify-center mx-auto mb-4">
+                  4
+                </div>
+                <h3 className="font-semibold text-lg mb-2">Start Building</h3>
+                <p className="text-sm text-muted-foreground">Begin creating on-brand content and managing client accounts</p>
               </div>
             </div>
+
+            <p className="text-sm text-muted-foreground mt-10 max-w-xl mx-auto">
+              Agency partnership includes custom pricing based on your client count and usage needs. 
+              Contact us to learn more about partnership tiers.
+            </p>
           </div>
         </section>
 
