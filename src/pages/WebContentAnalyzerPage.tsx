@@ -591,27 +591,37 @@ export default function WebContentAnalyzerPage() {
                       onClose={() => setShowRewrite(false)}
                     />
                   ) : (
-                    <Card>
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-lg flex items-center gap-2">
-                          <Dna className="w-5 h-5 text-primary" />
-                          Content Sections
-                        </CardTitle>
-                        <CardDescription>
-                          Click on a section to expand and see detailed analysis
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        {analysisResult.sections.map((section) => (
-                          <ContentSectionCard
-                            key={section.id}
-                            section={section}
-                            isSelected={section.id === selectedSectionId}
-                            onClick={() => setSelectedSectionId(section.id)}
-                          />
-                        ))}
-                      </CardContent>
-                    </Card>
+                    <div className="space-y-4">
+                      <Card>
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-lg flex items-center gap-2">
+                            <Dna className="w-5 h-5 text-primary" />
+                            Content Sections
+                          </CardTitle>
+                          <CardDescription>
+                            Click on a section to see detailed voice analysis
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          {analysisResult.sections.map((section) => (
+                            <ContentSectionCard
+                              key={section.id}
+                              section={section}
+                              isSelected={section.id === selectedSectionId}
+                              onClick={() => setSelectedSectionId(section.id)}
+                            />
+                          ))}
+                        </CardContent>
+                      </Card>
+
+                      {/* Voice Profile Match - Inline below sections */}
+                      {selectedSection && (
+                        <BrandScorePanel
+                          section={selectedSection}
+                          voiceAnalysis={contentDNA?.voice_analysis}
+                        />
+                      )}
+                    </div>
                   )}
                 </div>
               )}
@@ -634,27 +644,16 @@ export default function WebContentAnalyzerPage() {
 
               {/* Results-specific right column items */}
               {analysisResult && (
-                <>
-                  {/* Actions Card */}
-                  <AnalysisActionsCard
-                    onNewAnalysis={handleNewAnalysis}
-                    onRewrite={handleRewrite}
-                    showRewrite={showRewrite}
-                    onSaveDraft={handleSaveDraft}
-                    onSaveToPersonalLibrary={handleSaveToPersonalLibrary}
-                    onSaveToUniversityLibrary={handleSaveToUniversityLibrary}
-                    isSaving={isSaving}
-                    hasDraft={!!currentDraftId}
-                  />
-
-                  {/* Selected Section Details */}
-                  {selectedSection && !showRewrite && (
-                    <BrandScorePanel
-                      section={selectedSection}
-                      voiceAnalysis={contentDNA?.voice_analysis}
-                    />
-                  )}
-                </>
+                <AnalysisActionsCard
+                  onNewAnalysis={handleNewAnalysis}
+                  onRewrite={handleRewrite}
+                  showRewrite={showRewrite}
+                  onSaveDraft={handleSaveDraft}
+                  onSaveToPersonalLibrary={handleSaveToPersonalLibrary}
+                  onSaveToUniversityLibrary={handleSaveToUniversityLibrary}
+                  isSaving={isSaving}
+                  hasDraft={!!currentDraftId}
+                />
               )}
             </div>
           </div>
