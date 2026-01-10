@@ -410,9 +410,15 @@ export default function EvaluateFeaturePage() {
       <footer className="py-8 border-t border-border">
         <div className="container mx-auto px-4 text-center">
           <img src={campusvoiceLogo} alt="CampusVoice" className="h-6 mx-auto mb-4 opacity-60" />
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground mb-2">
             © {new Date().getFullYear()} CampusVoice. All rights reserved.
           </p>
+          <a 
+            href="mailto:sales@campusvoice.ai" 
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            sales@campusvoice.ai
+          </a>
         </div>
       </footer>
     </div>

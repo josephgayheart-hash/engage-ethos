@@ -129,7 +129,7 @@ const handler = async (req: Request): Promise<Response> => {
 
         try {
           const emailResponse = await resend.emails.send({
-            from: "CampusVoice.AI <hello@campusvoice.ai>",
+            from: "CampusVoice.AI <support@campusvoice.ai>",
             to: [user.email],
             subject: template.subject.replace(/\{\{first_name\}\}/g, user.first_name),
             html: htmlContent,
@@ -233,7 +233,7 @@ const handler = async (req: Request): Promise<Response> => {
       : `<div style="max-width:600px;margin:0 auto;font-family:Arial,sans-serif"><div style="background:#1a2036;padding:24px;text-align:center;border-radius:8px 8px 0 0"><table cellpadding="0" cellspacing="0" style="margin:0 auto"><tr><td style="background:#fff;padding:10px 14px;border-radius:6px"><img src="${logoUrl}" alt="CampusVoice.AI" style="height:36px"/></td></tr></table><h1 style="margin:16px 0 0;color:#fff;font-size:20px">Thank You!</h1></div><div style="background:#fff;padding:24px;border:1px solid #e2e8f0;border-top:none"><p style="margin:0 0 14px;color:#1e293b;font-size:16px">Hi ${firstName},</p><p style="margin:0 0 16px;color:#475569;font-size:14px;line-height:1.5">Thanks for exploring CampusVoice.AI! Your feedback shapes our product.</p><div style="text-align:center;margin:20px 0"><a href="${trackingFeedbackUrl}" style="display:inline-block;background:#1e293b;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:600">Share Feedback</a></div></div><div style="background:#f8fafc;padding:16px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;text-align:center"><p style="margin:0;color:#94a3b8;font-size:11px">— The CampusVoice.AI Team</p></div></div>`;
 
     const emailResponse = await resend.emails.send({
-      from: "CampusVoice.AI <hello@campusvoice.ai>",
+      from: "CampusVoice.AI <support@campusvoice.ai>",
       to: [email],
       subject: template?.subject?.replace(/\{\{first_name\}\}/g, firstName) || `Thank You for Joining CampusVoice.AI Beta!`,
       html: htmlContent,
