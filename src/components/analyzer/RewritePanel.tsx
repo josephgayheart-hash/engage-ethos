@@ -434,18 +434,18 @@ export function RewritePanel({
                         {/* Side-by-side comparison */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
                           {/* Original */}
-                          <div className="p-4 rounded-lg border bg-red-50/50 dark:bg-red-500/5 border-red-200 dark:border-red-500/20">
+                          <div className="p-4 rounded-lg border bg-red-50/50 dark:bg-red-500/5 border-red-200 dark:border-red-500/20 overflow-hidden">
                             <div className="flex items-center gap-2 mb-3">
                               <X className="w-4 h-4 text-red-500" />
                               <span className="text-sm font-semibold text-red-600">Original</span>
                             </div>
-                            <p className="text-sm text-muted-foreground leading-relaxed">
+                            <p className="text-sm text-muted-foreground leading-relaxed break-words overflow-wrap-anywhere">
                               {section.content.slice(0, 400)}{section.content.length > 400 ? "..." : ""}
                             </p>
                           </div>
 
                           {/* Improved */}
-                          <div className="p-4 rounded-lg border bg-green-50/50 dark:bg-green-500/5 border-green-200 dark:border-green-500/20">
+                          <div className="p-4 rounded-lg border bg-green-50/50 dark:bg-green-500/5 border-green-200 dark:border-green-500/20 overflow-hidden">
                             <div className="flex items-center justify-between mb-3">
                               <div className="flex items-center gap-2">
                                 <Check className="w-4 h-4 text-green-500" />
@@ -467,7 +467,7 @@ export function RewritePanel({
                                 )}
                               </Button>
                             </div>
-                            <p className="text-sm text-foreground leading-relaxed">
+                            <p className="text-sm text-foreground leading-relaxed break-words overflow-wrap-anywhere">
                               {rewritten.rewritten.slice(0, 400)}{rewritten.rewritten.length > 400 ? "..." : ""}
                             </p>
                           </div>
