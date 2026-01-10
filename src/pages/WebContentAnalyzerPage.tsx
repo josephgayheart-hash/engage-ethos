@@ -493,13 +493,44 @@ export default function WebContentAnalyzerPage() {
                 </CardContent>
               </Card>
 
-              {/* Content Input */}
-              <AnalyzerInput
-                onAnalyze={handleAnalyze} 
-                isAnalyzing={isAnalyzing}
-                isComplete={isAnalysisComplete}
-                disabled={!contentDNA?.voice_analysis}
-              />
+              {/* Content Input - Collapsed when rewrite is active */}
+              {showRewrite ? (
+                <Card className="border-primary/20 bg-primary/5">
+                  <CardContent className="py-3">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="p-2 rounded-lg bg-primary/10">
+                          <Search className="w-4 h-4 text-primary" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium truncate">
+                            {sourceUrl ? new URL(sourceUrl).hostname : 'Content Analyzed'}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {analysisResult?.sections.length || 0} sections • Score: {analysisResult?.overallScore}/100
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowRewrite(false)}
+                        className="shrink-0"
+                      >
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Back to Analysis
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <AnalyzerInput
+                  onAnalyze={handleAnalyze} 
+                  isAnalyzing={isAnalyzing}
+                  isComplete={isAnalysisComplete}
+                  disabled={!contentDNA?.voice_analysis}
+                />
+              )}
 
               {/* Analysis Results */}
               {analysisResult && (
