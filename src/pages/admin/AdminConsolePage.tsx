@@ -435,10 +435,10 @@ export default function AdminConsolePage() {
       stat: onboardingStats.pending > 0 ? `${onboardingStats.pending} pending` : 'No pending'
     },
     {
-      title: 'Security Events',
-      description: 'Monitor rate limits and security incidents',
+      title: 'Security & QA',
+      description: 'Security events, rate limits, and QA diagnostics',
       icon: Shield,
-      href: '/admin/security-events',
+      href: '/admin/qa',
       color: 'bg-[hsl(0,72%,51%)]',
       stat: 'Monitor'
     }] : []),
