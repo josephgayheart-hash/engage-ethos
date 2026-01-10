@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAgencyMode } from '@/hooks/useAgencyMode';
 import type { InstitutionalConfig } from '@/types/uplaybook';
 import {
   Building2,
@@ -39,7 +40,9 @@ interface ProfileSetupWizardProps {
 interface WizardStep {
   id: string;
   title: string;
+  agencyTitle?: string;
   description: string;
+  agencyDescription?: string;
   icon: React.ReactNode;
 }
 
@@ -47,19 +50,24 @@ const STEPS: WizardStep[] = [
   {
     id: 'identity',
     title: 'Institution Identity',
+    agencyTitle: 'Client Identity',
     description: 'Name, abbreviation, and mascot',
+    agencyDescription: 'University name and basic information',
     icon: <Building2 className="w-5 h-5" />,
   },
   {
     id: 'branding',
     title: 'Visual Branding',
+    agencyTitle: 'Client Branding',
     description: 'Logo and color palette',
+    agencyDescription: 'University logo and brand colors',
     icon: <Palette className="w-5 h-5" />,
   },
   {
     id: 'leadership',
     title: 'Leadership',
     description: 'President, Provost, and key leaders',
+    agencyDescription: 'University leadership contacts',
     icon: <Users className="w-5 h-5" />,
   },
   {
@@ -72,18 +80,22 @@ const STEPS: WizardStep[] = [
     id: 'contact',
     title: 'Contact & Systems',
     description: 'Contact info and platforms',
+    agencyDescription: 'University contact information',
     icon: <Phone className="w-5 h-5" />,
   },
   {
     id: 'review',
     title: 'Review & Create',
+    agencyTitle: 'Review & Add Client',
     description: 'Confirm your setup',
+    agencyDescription: 'Review client configuration',
     icon: <Check className="w-5 h-5" />,
   },
 ];
 
 export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: ProfileSetupWizardProps) {
   const { tenant } = useAuth();
+  const { isAgency, labels } = useAgencyMode();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -968,9 +980,11 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             {STEPS[currentStep].icon}
-            {STEPS[currentStep].title}
+            {isAgency && STEPS[currentStep].agencyTitle ? STEPS[currentStep].agencyTitle : STEPS[currentStep].title}
           </CardTitle>
-          <CardDescription>{STEPS[currentStep].description}</CardDescription>
+          <CardDescription>
+            {isAgency && STEPS[currentStep].agencyDescription ? STEPS[currentStep].agencyDescription : STEPS[currentStep].description}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {renderStepContent()}
@@ -1006,12 +1020,12 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
             {isSubmitting ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Creating...
+                {isAgency ? 'Adding Client...' : 'Creating...'}
               </>
             ) : (
               <>
                 <Check className="w-4 h-4 mr-2" />
-                Create Profile
+                {isAgency ? 'Add Client' : 'Create Profile'}
               </>
             )}
           </Button>

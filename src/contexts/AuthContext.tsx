@@ -3,7 +3,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-export type UserRole = 'admin' | 'user' | 'approver' | 'super_admin';
+export type UserRole = 'admin' | 'user' | 'approver' | 'super_admin' | 'agency_admin' | 'agency_user';
 export type UserStatus = 'invited' | 'pending' | 'active' | 'locked' | 'disabled';
 
 export interface UserProfile {
