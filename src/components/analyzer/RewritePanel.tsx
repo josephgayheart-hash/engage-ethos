@@ -263,67 +263,70 @@ export function RewritePanel({
   };
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
+    <Card className="border-[hsl(270_70%_55%)]/30 bg-gradient-to-br from-[hsl(270_70%_55%)]/5 to-transparent">
+      <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Wand2 className="w-4 h-4 text-primary" />
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Wand2 className="w-5 h-5 text-[hsl(270_70%_55%)]" />
               AI Brand Rewrite
             </CardTitle>
-            <CardDescription className="text-xs">
+            <CardDescription className="text-sm mt-1">
               Transform content to align with your brand voice
             </CardDescription>
           </div>
-          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={onClose}>
-            <X className="w-4 h-4" />
+          <Button variant="outline" size="sm" onClick={onClose}>
+            <X className="w-4 h-4 mr-1" />
+            Close
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-5">
         {/* Processing State - Shows during rewrite */}
         {isRewriting && (
-          <div className="p-4 rounded-lg border bg-primary/5 border-primary/20 space-y-3">
-            <div className="flex items-center gap-3">
+          <div className="p-5 rounded-xl border-2 bg-[hsl(270_70%_55%)]/5 border-[hsl(270_70%_55%)]/20 space-y-4">
+            <div className="flex items-center gap-4">
               <div className="relative">
-                <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                <div className="w-10 h-10 rounded-full bg-[hsl(270_70%_55%)]/20 flex items-center justify-center">
+                  <Loader2 className="w-5 h-5 animate-spin text-[hsl(270_70%_55%)]" />
+                </div>
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-foreground">
+                <p className="text-base font-semibold text-foreground">
                   {phaseMessages[processingPhase]}
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  {analysisResult.sections.length} sections to process
+                <p className="text-sm text-muted-foreground">
+                  Processing {analysisResult.sections.length} sections
                 </p>
               </div>
             </div>
-            <Progress value={progress} className="h-1.5" />
-            <div className="flex justify-between text-[10px] text-muted-foreground">
+            <Progress value={progress} className="h-2" />
+            <div className="flex justify-between text-xs text-muted-foreground font-medium">
               <span>Preparing</span>
               <span>Analyzing</span>
               <span>Rewriting</span>
-              <span>Done</span>
+              <span>Complete</span>
             </div>
           </div>
         )}
 
         {/* Initial State - Before rewrite */}
         {!isRewriting && rewrittenSections.length === 0 && (
-          <div className="text-center py-6">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-              <Sparkles className="w-6 h-6 text-primary" />
+          <div className="text-center py-8">
+            <div className="w-16 h-16 rounded-full bg-[hsl(270_70%_55%)]/10 flex items-center justify-center mx-auto mb-4">
+              <Sparkles className="w-8 h-8 text-[hsl(270_70%_55%)]" />
             </div>
-            <h3 className="text-sm font-medium mb-1">Ready to Rewrite</h3>
-            <p className="text-xs text-muted-foreground mb-4 max-w-xs mx-auto">
+            <h3 className="text-lg font-semibold mb-2">Ready to Rewrite</h3>
+            <p className="text-sm text-muted-foreground mb-5 max-w-md mx-auto">
               Transform your content to better align with your Content DNA and brand voice.
             </p>
             <Button
               onClick={handleRewriteAll}
               disabled={isRewriting}
-              size="sm"
-              className="bg-primary hover:bg-primary/90"
+              size="lg"
+              className="bg-[hsl(270_70%_55%)] hover:bg-[hsl(270_70%_50%)]"
             >
-              <Sparkles className="w-3.5 h-3.5 mr-2" />
+              <Sparkles className="w-4 h-4 mr-2" />
               Rewrite All Sections
             </Button>
           </div>
@@ -333,174 +336,183 @@ export function RewritePanel({
         {!isRewriting && rewrittenSections.length > 0 && (
           <>
             {/* Success header */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-green-500/10 border border-green-500/20">
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-green-600" />
-                <span className="text-sm font-medium text-green-700">
-                  {rewrittenSections.length} sections rewritten
+            <div className="flex items-center justify-between p-4 rounded-xl bg-green-500/10 border border-green-500/20">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
+                  <Check className="w-4 h-4 text-green-600" />
+                </div>
+                <span className="text-base font-semibold text-green-700">
+                  {rewrittenSections.length} sections rewritten successfully
                 </span>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="h-7 text-xs" onClick={handleCopyAll}>
-                  <Copy className="w-3 h-3 mr-1" />
+                <Button variant="outline" size="sm" onClick={handleCopyAll}>
+                  <Copy className="w-4 h-4 mr-2" />
                   Copy All
                 </Button>
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className="h-7 text-xs"
                   onClick={handleRewriteAll}
                   disabled={isRewriting}
                 >
-                  <RefreshCw className="w-3 h-3 mr-1" />
+                  <RefreshCw className="w-4 h-4 mr-2" />
                   Regenerate
                 </Button>
               </div>
             </div>
 
-            {/* Rewritten sections list - no scroll constraint for full visibility */}
-            <div className="space-y-3">
-                {analysisResult.sections.map((section) => {
-                  const rewritten = rewrittenSections.find(r => r.id === section.id);
-                  const isLoading = selectedSectionId === section.id;
-                  const isExpanded = expandedSections.has(section.id);
+            {/* Rewritten sections list */}
+            <div className="space-y-4">
+              {analysisResult.sections.map((section) => {
+                const rewritten = rewrittenSections.find(r => r.id === section.id);
+                const isLoading = selectedSectionId === section.id;
+                const isExpanded = expandedSections.has(section.id);
 
-                  return (
+                return (
+                  <div 
+                    key={section.id} 
+                    className={cn(
+                      "rounded-xl border-2 transition-all overflow-hidden",
+                      rewritten ? "border-green-500/30 bg-white dark:bg-card" : "border-muted bg-muted/30"
+                    )}
+                  >
+                    {/* Section header */}
                     <div 
-                      key={section.id} 
                       className={cn(
-                        "rounded-lg border transition-all",
-                        rewritten ? "border-green-500/30 bg-green-500/5" : "border-muted bg-muted/30"
+                        "flex items-center justify-between p-4 cursor-pointer",
+                        rewritten && "bg-green-500/5"
                       )}
+                      onClick={() => rewritten && toggleExpanded(section.id)}
                     >
-                      {/* Section header */}
-                      <div 
-                        className="flex items-center justify-between p-3 cursor-pointer"
-                        onClick={() => rewritten && toggleExpanded(section.id)}
-                      >
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <FileText className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                          <span className="text-xs font-medium truncate">{section.title}</span>
-                          {rewritten && (
-                            <Badge className="bg-green-500/20 text-green-700 text-[10px] px-1.5 py-0 h-4 shrink-0">
-                              <Check className="w-2.5 h-2.5 mr-0.5" />
-                              Done
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-1 shrink-0">
-                          {!rewritten && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 text-xs px-2"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleRewriteSection(section.id);
-                              }}
-                              disabled={isLoading}
-                            >
-                              {isLoading ? (
-                                <Loader2 className="w-3 h-3 animate-spin" />
-                              ) : (
-                                <>
-                                  <Sparkles className="w-3 h-3 mr-1" />
-                                  Rewrite
-                                </>
-                              )}
-                            </Button>
-                          )}
-                          {rewritten && (
-                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                              {isExpanded ? (
-                                <ChevronUp className="w-3.5 h-3.5" />
-                              ) : (
-                                <ChevronDown className="w-3.5 h-3.5" />
-                              )}
-                            </Button>
-                          )}
-                        </div>
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <FileText className="w-5 h-5 text-muted-foreground shrink-0" />
+                        <span className="text-base font-medium">{section.title}</span>
+                        {rewritten && (
+                          <Badge className="bg-green-500/20 text-green-700 text-xs px-2 py-0.5 shrink-0">
+                            <Check className="w-3 h-3 mr-1" />
+                            Done
+                          </Badge>
+                        )}
                       </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {!rewritten && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRewriteSection(section.id);
+                            }}
+                            disabled={isLoading}
+                          >
+                            {isLoading ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <>
+                                <Sparkles className="w-4 h-4 mr-2" />
+                                Rewrite
+                              </>
+                            )}
+                          </Button>
+                        )}
+                        {rewritten && (
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            {isExpanded ? (
+                              <ChevronUp className="w-5 h-5" />
+                            ) : (
+                              <ChevronDown className="w-5 h-5" />
+                            )}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
 
-                      {/* Expanded content */}
-                      {rewritten && isExpanded && (
-                        <div className="px-3 pb-3 space-y-3">
-                          {/* Comparison view */}
-                          <div className="grid grid-cols-2 gap-2">
-                            <div className="p-2 rounded border bg-red-500/5 border-red-500/20">
-                              <div className="text-[10px] font-medium text-red-600 mb-1 flex items-center gap-1">
-                                <X className="w-2.5 h-2.5" />
-                                Original
-                              </div>
-                              <p className="text-[11px] text-muted-foreground line-clamp-4">
-                                {section.content.slice(0, 300)}...
-                              </p>
+                    {/* Expanded content */}
+                    {rewritten && isExpanded && (
+                      <div className="px-4 pb-5 space-y-4 border-t border-green-500/20">
+                        {/* Side-by-side comparison */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                          {/* Original */}
+                          <div className="p-4 rounded-lg border bg-red-50/50 dark:bg-red-500/5 border-red-200 dark:border-red-500/20">
+                            <div className="flex items-center gap-2 mb-3">
+                              <X className="w-4 h-4 text-red-500" />
+                              <span className="text-sm font-semibold text-red-600">Original</span>
                             </div>
-                            <div className="p-2 rounded border bg-green-500/5 border-green-500/20">
-                              <div className="text-[10px] font-medium text-green-600 mb-1 flex items-center justify-between">
-                                <span className="flex items-center gap-1">
-                                  <Check className="w-2.5 h-2.5" />
-                                  Improved
-                                </span>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-5 w-5 p-0"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleCopy(rewritten.rewritten, section.id);
-                                  }}
-                                >
-                                  {copiedId === section.id ? (
-                                    <Check className="w-2.5 h-2.5 text-green-600" />
-                                  ) : (
-                                    <Copy className="w-2.5 h-2.5" />
-                                  )}
-                                </Button>
-                              </div>
-                              <p className="text-[11px] line-clamp-4">
-                                {rewritten.rewritten.slice(0, 300)}...
-                              </p>
-                            </div>
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                              {section.content.slice(0, 400)}{section.content.length > 400 ? "..." : ""}
+                            </p>
                           </div>
 
-                          {/* Improvements made */}
-                          {rewritten.improvements.length > 0 && (
-                            <div className="flex flex-wrap gap-1">
-                              {rewritten.improvements.slice(0, 3).map((imp, i) => (
-                                <Badge key={i} variant="secondary" className="text-[9px] px-1.5 py-0 h-4">
-                                  {imp}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-
-                          {/* Full rewritten content */}
-                          <div className="p-2 rounded border bg-background">
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-[10px] font-medium text-muted-foreground">Full Brand-Aligned Version</span>
+                          {/* Improved */}
+                          <div className="p-4 rounded-lg border bg-green-50/50 dark:bg-green-500/5 border-green-200 dark:border-green-500/20">
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-2">
+                                <Check className="w-4 h-4 text-green-500" />
+                                <span className="text-sm font-semibold text-green-600">Improved</span>
+                              </div>
                               <Button
-                                variant="outline"
+                                variant="ghost"
                                 size="sm"
-                                className="h-5 text-[10px] px-2"
+                                className="h-7"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleCopy(rewritten.rewritten, section.id);
                                 }}
                               >
-                                <Copy className="w-2.5 h-2.5 mr-1" />
-                                Copy
+                                {copiedId === section.id ? (
+                                  <Check className="w-4 h-4 text-green-600" />
+                                ) : (
+                                  <Copy className="w-4 h-4" />
+                                )}
                               </Button>
                             </div>
-                            <p className="text-xs whitespace-pre-wrap text-foreground">
-                              {rewritten.rewritten}
+                            <p className="text-sm text-foreground leading-relaxed">
+                              {rewritten.rewritten.slice(0, 400)}{rewritten.rewritten.length > 400 ? "..." : ""}
                             </p>
                           </div>
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
+
+                        {/* Improvements made */}
+                        {rewritten.improvements && rewritten.improvements.length > 0 && (
+                          <div className="p-4 rounded-lg bg-amber-50/50 dark:bg-amber-500/5 border border-amber-200 dark:border-amber-500/20">
+                            <p className="text-sm font-semibold text-amber-700 dark:text-amber-500 mb-2">Changes Made:</p>
+                            <ul className="space-y-1">
+                              {rewritten.improvements.map((imp, i) => (
+                                <li key={i} className="text-sm text-foreground flex items-start gap-2">
+                                  <ArrowRight className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                                  {imp}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Full rewritten content */}
+                        <div className="p-5 rounded-lg border-2 bg-white dark:bg-card border-green-500/30">
+                          <div className="flex items-center justify-between mb-4">
+                            <span className="text-sm font-semibold text-foreground">Full Brand-Aligned Version</span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCopy(rewritten.rewritten, section.id);
+                              }}
+                            >
+                              <Copy className="w-4 h-4 mr-2" />
+                              Copy
+                            </Button>
+                          </div>
+                          <p className="text-base leading-relaxed whitespace-pre-wrap text-foreground">
+                            {rewritten.rewritten}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </>
         )}

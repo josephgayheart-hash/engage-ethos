@@ -504,6 +504,19 @@ export default function WebContentAnalyzerPage() {
               {/* Analysis Results */}
               {analysisResult && (
                 <div ref={resultsRef} className="space-y-6 animate-fade-in">
+                  {/* AI Rewrite Panel - Shows at TOP when active */}
+                  {showRewrite && (
+                    <RewritePanel
+                      content={content}
+                      analysisResult={analysisResult}
+                      voiceAnalysis={contentDNA?.voice_analysis}
+                      brandPlatform={contentDNA?.brand_platform}
+                      onClose={() => setShowRewrite(false)}
+                      onRewriteStateChange={handleRewriteStateChange}
+                      autoStart={true}
+                    />
+                  )}
+
                   {/* Results Header with Score and Summary Stats */}
                   <Card>
                     <CardHeader className="pb-3">
@@ -599,7 +612,7 @@ export default function WebContentAnalyzerPage() {
                   </Card>
 
                   {/* DNA Alignment Panel */}
-                  {analysisResult.dnaAlignment && (
+                  {analysisResult.dnaAlignment && !showRewrite && (
                     <DNAAlignmentPanel
                       dnaAlignment={analysisResult.dnaAlignment}
                       brandVoiceCheck={analysisResult.brandVoiceCheck}
@@ -612,18 +625,8 @@ export default function WebContentAnalyzerPage() {
                     />
                   )}
 
-                  {/* Sections or Rewrite */}
-                  {showRewrite ? (
-                    <RewritePanel
-                      content={content}
-                      analysisResult={analysisResult}
-                      voiceAnalysis={contentDNA?.voice_analysis}
-                      brandPlatform={contentDNA?.brand_platform}
-                      onClose={() => setShowRewrite(false)}
-                      onRewriteStateChange={handleRewriteStateChange}
-                      autoStart={true}
-                    />
-                  ) : (
+                  {/* Content Sections - Only show when not rewriting */}
+                  {!showRewrite && (
                     <div className="space-y-4">
                       <Card>
                         <CardHeader className="pb-3">
