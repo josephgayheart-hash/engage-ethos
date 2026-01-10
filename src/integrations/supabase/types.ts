@@ -1144,6 +1144,57 @@ export type Database = {
         }
         Relationships: []
       }
+      sales_prospects: {
+        Row: {
+          brand_launch_date: string | null
+          contact_email: string | null
+          contact_name: string | null
+          contact_title: string | null
+          created_by_user_id: string | null
+          discovered_at: string | null
+          id: string
+          notes: string | null
+          source_article_title: string | null
+          source_article_url: string | null
+          status: string | null
+          university_name: string
+          updated_at: string | null
+          url: string
+        }
+        Insert: {
+          brand_launch_date?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_title?: string | null
+          created_by_user_id?: string | null
+          discovered_at?: string | null
+          id?: string
+          notes?: string | null
+          source_article_title?: string | null
+          source_article_url?: string | null
+          status?: string | null
+          university_name: string
+          updated_at?: string | null
+          url: string
+        }
+        Update: {
+          brand_launch_date?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_title?: string | null
+          created_by_user_id?: string | null
+          discovered_at?: string | null
+          id?: string
+          notes?: string | null
+          source_article_title?: string | null
+          source_article_url?: string | null
+          status?: string | null
+          university_name?: string
+          updated_at?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
       security_events: {
         Row: {
           created_at: string

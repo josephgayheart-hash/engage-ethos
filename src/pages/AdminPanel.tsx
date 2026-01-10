@@ -38,6 +38,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { SendEmailDialog } from "@/components/admin/SendEmailDialog";
 import { EmailTemplatesTab } from "@/components/admin/EmailTemplatesTab";
+import { BrandRadarTab } from "@/components/admin/BrandRadarTab";
 import { 
   ArrowLeft,
   Users, 
@@ -78,7 +79,8 @@ import {
   BookOpen,
   Heart,
   Zap,
-  ArrowRight
+  ArrowRight,
+  Radar,
 } from "lucide-react";
 
 // Types
@@ -756,7 +758,7 @@ const AdminPanel = () => {
 
           {/* Main Content Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid grid-cols-4 md:grid-cols-9 w-full">
+            <TabsList className="grid grid-cols-5 md:grid-cols-10 w-full">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="institutions">Institutions</TabsTrigger>
               <TabsTrigger value="content-dna">Content DNA</TabsTrigger>
@@ -765,6 +767,10 @@ const AdminPanel = () => {
               <TabsTrigger value="templates">Templates</TabsTrigger>
               <TabsTrigger value="sharing">Sharing</TabsTrigger>
               <TabsTrigger value="libraries">Libraries</TabsTrigger>
+              <TabsTrigger value="radar" className="gap-1">
+                <Radar className="w-3 h-3" />
+                Radar
+              </TabsTrigger>
               <TabsTrigger value="admin">Admin</TabsTrigger>
             </TabsList>
 
@@ -1722,6 +1728,11 @@ const AdminPanel = () => {
                   </CardContent>
                 </Card>
               </div>
+            </TabsContent>
+
+            {/* Brand Radar Tab */}
+            <TabsContent value="radar">
+              <BrandRadarTab />
             </TabsContent>
 
             {/* Admin Tab */}
