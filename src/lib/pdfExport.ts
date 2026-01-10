@@ -4,6 +4,7 @@ import type { TalkingPointsDraft, CaseForCareDraft } from "@/types/uplaybook";
 export interface BrandingOptions {
   primaryColor?: string;
   accentColor?: string;
+  tertiaryColor?: string;
   logoUrl?: string;
 }
 
@@ -48,186 +49,360 @@ async function loadImageAsDataUrl(url: string): Promise<{ dataUrl: string; forma
 
   return { dataUrl, format };
 }
-export function exportTalkingPointsToPDF(
-  tp: TalkingPointsDraft, 
+export async function exportTalkingPointsToPDF(
+  draft: TalkingPointsDraft,
   institutionName?: string,
   branding?: BrandingOptions
-): void {
-  const doc = new jsPDF();
+): Promise<void> {
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4',
+  });
+
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 20;
   const contentWidth = pageWidth - margin * 2;
-  let y = 20;
+  const headerHeight = 70;
+  const footerHeight = 25;
 
-  // Extract branding colors or use defaults
-  const primaryRgb = hexToRgb(branding?.primaryColor || '#0D9488'); // Teal
-  const accentRgb = hexToRgb(branding?.accentColor || '#14B8A6');
-  const primaryLight = lightenColor(primaryRgb, 0.9);
+  // Brand colors with defaults
+  const primaryColor = branding?.primaryColor || '#0D9488';
+  const accentColor = branding?.accentColor || '#2DD4BF';
+  const tertiaryColor = branding?.tertiaryColor || '#E2E8F0';
+  
+  const primaryRgb = hexToRgb(primaryColor);
+  const accentRgb = hexToRgb(accentColor);
+  const tertiaryRgb = hexToRgb(tertiaryColor);
+  const lightPrimaryRgb = lightenColor(primaryRgb, 0.85);
+  const lightAccentRgb = lightenColor(accentRgb, 0.85);
+  const lightTertiaryRgb = lightenColor(tertiaryRgb, 0.5);
 
-  const addText = (text: string, size: number, style: "normal" | "bold" | "italic" = "normal", color: [number, number, number] = [0, 0, 0]) => {
-    doc.setFontSize(size);
-    doc.setFont("helvetica", style);
-    doc.setTextColor(...color);
-    const lines = doc.splitTextToSize(text, contentWidth);
+  // Load logo if provided
+  let logoData: { dataUrl: string; format: 'PNG' | 'JPEG' } | null = null;
+  if (branding?.logoUrl) {
+    try {
+      logoData = await loadImageAsDataUrl(branding.logoUrl);
+    } catch (error) {
+      console.warn('Failed to load logo for PDF:', error);
+    }
+  }
+
+  let currentY = margin;
+  let pageNumber = 1;
+
+  const addHeader = () => {
+    // Header background
+    doc.setFillColor(primaryRgb[0], primaryRgb[1], primaryRgb[2]);
+    doc.rect(0, 0, pageWidth, headerHeight, 'F');
     
-    // Check if we need a new page
-    const lineHeight = size * 0.5;
-    if (y + lines.length * lineHeight > pageHeight - 20) {
-      doc.addPage();
-      y = 20;
+    // Accent strip at bottom of header
+    doc.setFillColor(accentRgb[0], accentRgb[1], accentRgb[2]);
+    doc.rect(0, headerHeight - 4, pageWidth, 4, 'F');
+
+    let textStartX = margin;
+
+    // Add logo if available
+    if (logoData) {
+      try {
+        const logoSize = 28;
+        const logoX = margin;
+        const logoY = (headerHeight - logoSize) / 2;
+        
+        // White background circle for logo
+        doc.setFillColor(255, 255, 255);
+        doc.circle(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2 + 2, 'F');
+        
+        doc.addImage(logoData.dataUrl, logoData.format, logoX, logoY, logoSize, logoSize);
+        textStartX = margin + logoSize + 12;
+      } catch (error) {
+        console.warn('Failed to add logo to PDF:', error);
+      }
+    }
+
+    // Title
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    
+    const title = 'EXECUTIVE TALKING POINTS';
+    const maxTitleWidth = pageWidth - textStartX - margin - 10;
+    let titleFontSize = 22;
+    doc.setFontSize(titleFontSize);
+    
+    while (doc.getTextWidth(title) > maxTitleWidth && titleFontSize > 14) {
+      titleFontSize -= 1;
+      doc.setFontSize(titleFontSize);
     }
     
-    doc.text(lines, margin, y);
-    y += lines.length * lineHeight + 4;
-  };
+    doc.text(title, textStartX, 28);
 
-  const addSection = (title: string, sectionColor?: [number, number, number]) => {
-    const color = sectionColor || primaryRgb;
-    y += 6;
-    doc.setFillColor(...color);
-    doc.rect(margin, y - 5, contentWidth, 10, "F");
+    // Institution name
+    if (institutionName) {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(12);
+      doc.setTextColor(255, 255, 255);
+      doc.text(institutionName, textStartX, 40);
+    }
+
+    // Topic/context badge
+    if (draft.context) {
+      doc.setFontSize(10);
+      doc.setTextColor(255, 255, 255);
+      const contextText = `Topic: ${draft.context}`;
+      doc.text(contextText, textStartX, 52);
+    }
+
+    // Date on the right
+    const dateStr = new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    doc.setFontSize(10);
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "bold");
-    doc.text(title.toUpperCase(), margin + 4, y + 2);
-    y += 12;
-    doc.setTextColor(0, 0, 0);
+    const dateWidth = doc.getTextWidth(dateStr);
+    doc.text(dateStr, pageWidth - margin - dateWidth, 28);
   };
 
-  // Header with branding color
-  doc.setFillColor(...primaryRgb);
-  doc.rect(0, 0, pageWidth, 35, "F");
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(20);
-  doc.setFont("helvetica", "bold");
-  doc.text("EXECUTIVE TALKING POINTS", margin, 22);
-  if (institutionName) {
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "normal");
-    doc.text(institutionName, margin, 30);
-  }
-  y = 45;
+  const addFooter = () => {
+    const footerY = pageHeight - footerHeight;
+    
+    // Footer background
+    doc.setFillColor(tertiaryRgb[0], tertiaryRgb[1], tertiaryRgb[2]);
+    doc.rect(0, footerY, pageWidth, footerHeight, 'F');
+    
+    // Accent line at top of footer
+    doc.setFillColor(primaryRgb[0], primaryRgb[1], primaryRgb[2]);
+    doc.rect(0, footerY, pageWidth, 2, 'F');
 
-  // Context and Audience
-  if (tp.context || tp.audience) {
-    doc.setFillColor(...primaryLight);
-    doc.rect(margin, y - 5, contentWidth, tp.context && tp.audience ? 30 : 18, "F");
-    doc.setTextColor(100, 100, 100);
+    // Footer text
+    doc.setTextColor(80, 80, 80);
     doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
     
-    if (tp.context) {
-      doc.setFont("helvetica", "bold");
-      doc.text("CONTEXT:", margin + 4, y + 2);
-      doc.setFont("helvetica", "normal");
-      const contextLines = doc.splitTextToSize(tp.context, contentWidth - 60);
-      doc.text(contextLines, margin + 30, y + 2);
+    const footerText = institutionName ? `${institutionName} | Executive Talking Points` : 'Executive Talking Points';
+    doc.text(footerText, margin, footerY + 14);
+
+    // Page number
+    const pageText = `Page ${pageNumber}`;
+    const pageTextWidth = doc.getTextWidth(pageText);
+    doc.text(pageText, pageWidth - margin - pageTextWidth, footerY + 14);
+  };
+
+  const checkPageBreak = (requiredHeight: number) => {
+    const maxY = pageHeight - footerHeight - 15;
+    if (currentY + requiredHeight > maxY) {
+      addFooter();
+      doc.addPage();
+      pageNumber++;
+      addHeader();
+      currentY = headerHeight + 15;
     }
-    
-    if (tp.audience) {
-      const audienceY = tp.context ? y + 12 : y + 2;
-      doc.setFont("helvetica", "bold");
-      doc.text("AUDIENCE:", margin + 4, audienceY);
-      doc.setFont("helvetica", "normal");
-      const audienceLines = doc.splitTextToSize(tp.audience, contentWidth - 60);
-      doc.text(audienceLines, margin + 34, audienceY);
-    }
-    
-    y += tp.context && tp.audience ? 35 : 23;
-  }
+  };
 
-  // Opening Hook
-  if (tp.openingHook) {
-    addSection("Opening Hook", [34, 139, 34]);
+  const drawSectionBox = (
+    title: string,
+    content: string | string[],
+    iconColor: [number, number, number],
+    bgColor: [number, number, number]
+  ) => {
+    const titleHeight = 10;
+    const contentLines = Array.isArray(content) ? content : [content];
+    
+    // Calculate content height
+    doc.setFontSize(10);
+    let totalContentHeight = 0;
+    contentLines.forEach(line => {
+      const wrappedLines = doc.splitTextToSize(line, contentWidth - 20);
+      totalContentHeight += wrappedLines.length * 5 + 3;
+    });
+    
+    const boxHeight = titleHeight + totalContentHeight + 12;
+    checkPageBreak(boxHeight + 8);
+
+    // Draw rounded box background
+    doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
+    doc.roundedRect(margin, currentY, contentWidth, boxHeight, 3, 3, 'F');
+    
+    // Left accent bar
+    doc.setFillColor(iconColor[0], iconColor[1], iconColor[2]);
+    doc.roundedRect(margin, currentY, 4, boxHeight, 2, 2, 'F');
+
+    // Section title
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
-    doc.setFont("helvetica", "italic");
-    addText(`"${tp.openingHook}"`, 11, "italic");
-  }
+    doc.setTextColor(iconColor[0], iconColor[1], iconColor[2]);
+    doc.text(title.toUpperCase(), margin + 12, currentY + 8);
 
-  // Key Messages
-  if (tp.keyMessages && tp.keyMessages.length > 0) {
-    addSection("Key Talking Points", accentRgb);
-    tp.keyMessages.forEach((message, i) => {
-      doc.setFontSize(11);
-      doc.setFont("helvetica", "bold");
-      doc.text(`${i + 1}.`, margin, y);
-      doc.setFont("helvetica", "normal");
-      const messageLines = doc.splitTextToSize(message, contentWidth - 10);
-      
-      if (y + messageLines.length * 5 > pageHeight - 20) {
-        doc.addPage();
-        y = 20;
-      }
-      
-      doc.text(messageLines, margin + 10, y);
-      y += messageLines.length * 5 + 6;
+    // Content
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(50, 50, 50);
+    
+    let contentY = currentY + titleHeight + 8;
+    contentLines.forEach(line => {
+      const wrappedLines = doc.splitTextToSize(line, contentWidth - 20);
+      wrappedLines.forEach((wrappedLine: string) => {
+        doc.text(wrappedLine, margin + 12, contentY);
+        contentY += 5;
+      });
+      contentY += 2;
     });
-  }
 
-  // Supporting Data
-  if (tp.supportingData && tp.supportingData.length > 0) {
-    addSection("Supporting Data & Evidence", [30, 100, 180]);
-    tp.supportingData.forEach((data) => {
-      doc.setFontSize(10);
-      addText(`📊 ${data}`, 10);
+    currentY += boxHeight + 8;
+  };
+
+  const drawBulletList = (
+    title: string,
+    items: string[],
+    iconColor: [number, number, number],
+    bgColor: [number, number, number]
+  ) => {
+    const titleHeight = 10;
+    
+    // Calculate content height
+    doc.setFontSize(10);
+    let totalContentHeight = 0;
+    items.forEach(item => {
+      const wrappedLines = doc.splitTextToSize(`• ${item}`, contentWidth - 24);
+      totalContentHeight += wrappedLines.length * 5 + 2;
     });
-  }
+    
+    const boxHeight = titleHeight + totalContentHeight + 12;
+    checkPageBreak(boxHeight + 8);
 
-  // Q&A
-  if (tp.anticipatedQuestions && tp.anticipatedQuestions.length > 0) {
-    addSection("Anticipated Q&A", [180, 120, 0]);
-    tp.anticipatedQuestions.forEach((question, i) => {
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(180, 120, 0);
-      addText(`Q: ${question}`, 10, "bold", [150, 100, 0]);
-      
-      if (tp.suggestedResponses && tp.suggestedResponses[i]) {
-        doc.setTextColor(34, 139, 34);
-        addText(`A: ${tp.suggestedResponses[i]}`, 10, "normal", [34, 120, 34]);
-      }
-      y += 2;
-    });
-  }
+    // Draw rounded box background
+    doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
+    doc.roundedRect(margin, currentY, contentWidth, boxHeight, 3, 3, 'F');
+    
+    // Left accent bar
+    doc.setFillColor(iconColor[0], iconColor[1], iconColor[2]);
+    doc.roundedRect(margin, currentY, 4, boxHeight, 2, 2, 'F');
 
-  // Transition Phrases
-  if (tp.transitionPhrases && tp.transitionPhrases.length > 0) {
-    addSection("Transition Phrases", [100, 100, 100]);
-    tp.transitionPhrases.forEach((phrase) => {
-      addText(`→ "${phrase}"`, 10, "italic");
-    });
-  }
-
-  // Closing Statement
-  if (tp.closingStatement) {
-    addSection("Closing Statement", [128, 0, 128]);
+    // Section title
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
-    addText(`"${tp.closingStatement}"`, 11, "italic");
+    doc.setTextColor(iconColor[0], iconColor[1], iconColor[2]);
+    doc.text(title.toUpperCase(), margin + 12, currentY + 8);
+
+    // Bullet items
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(50, 50, 50);
+    
+    let contentY = currentY + titleHeight + 8;
+    items.forEach(item => {
+      const wrappedLines = doc.splitTextToSize(`• ${item}`, contentWidth - 24);
+      wrappedLines.forEach((wrappedLine: string) => {
+        doc.text(wrappedLine, margin + 12, contentY);
+        contentY += 5;
+      });
+      contentY += 1;
+    });
+
+    currentY += boxHeight + 8;
+  };
+
+  // Add first page header
+  addHeader();
+  currentY = headerHeight + 15;
+
+  // Audience info box
+  if (draft.audience) {
+    doc.setFillColor(lightTertiaryRgb[0], lightTertiaryRgb[1], lightTertiaryRgb[2]);
+    doc.roundedRect(margin, currentY, contentWidth, 20, 3, 3, 'F');
+    doc.setDrawColor(primaryRgb[0], primaryRgb[1], primaryRgb[2]);
+    doc.setLineWidth(0.5);
+    doc.roundedRect(margin, currentY, contentWidth, 20, 3, 3, 'S');
+    
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(primaryRgb[0], primaryRgb[1], primaryRgb[2]);
+    doc.text('TARGET AUDIENCE', margin + 8, currentY + 8);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(50, 50, 50);
+    doc.text(draft.audience, margin + 8, currentY + 15);
+    
+    currentY += 28;
   }
 
-  // Footer
-  const pageCount = doc.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    
-    // Footer bar with primary color
-    doc.setFillColor(...primaryRgb);
-    doc.rect(0, pageHeight - 15, pageWidth, 15, "F");
-    
-    doc.setFontSize(8);
-    doc.setTextColor(255, 255, 255);
-    
-    // Left side: Institution name
-    doc.text(institutionName || '', margin, pageHeight - 6);
-    
-    // Center: Page numbers
-    doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, pageHeight - 6, { align: "center" });
-    
-    // Right side: CampusVoice branding
-    doc.text("Powered by CampusVoice.AI", pageWidth - margin, pageHeight - 6, { align: "right" });
+  // Opening Hook - Primary color
+  if (draft.openingHook) {
+    drawSectionBox(
+      'Opening Hook',
+      draft.openingHook,
+      primaryRgb,
+      lightPrimaryRgb
+    );
   }
 
-  doc.save("executive-talking-points.pdf");
+  // Key Talking Points - Accent color
+  if (draft.keyMessages && draft.keyMessages.length > 0) {
+    drawBulletList(
+      'Key Talking Points',
+      draft.keyMessages,
+      accentRgb,
+      lightAccentRgb
+    );
+  }
+
+  // Supporting Data - Primary color variation
+  if (draft.supportingData && draft.supportingData.length > 0) {
+    const dataVariant: [number, number, number] = [
+      Math.min(255, primaryRgb[0] + 40),
+      Math.min(255, primaryRgb[1] + 20),
+      primaryRgb[2]
+    ];
+    drawBulletList(
+      'Supporting Data',
+      draft.supportingData,
+      dataVariant,
+      lightenColor(dataVariant, 0.85)
+    );
+  }
+
+  // Anticipated Q&A - Tertiary/accent mix
+  if (draft.anticipatedQuestions && draft.anticipatedQuestions.length > 0) {
+    const qaColor: [number, number, number] = [
+      Math.floor((primaryRgb[0] + accentRgb[0]) / 2),
+      Math.floor((primaryRgb[1] + accentRgb[1]) / 2),
+      Math.floor((primaryRgb[2] + accentRgb[2]) / 2)
+    ];
+    drawBulletList(
+      'Anticipated Q&A',
+      draft.anticipatedQuestions,
+      qaColor,
+      lightenColor(qaColor, 0.85)
+    );
+  }
+
+  // Transition Phrases - Muted primary
+  if (draft.transitionPhrases && draft.transitionPhrases.length > 0) {
+    const transitionColor: [number, number, number] = lightenColor(primaryRgb, 0.3);
+    drawBulletList(
+      'Transition Phrases',
+      draft.transitionPhrases,
+      transitionColor,
+      lightenColor(transitionColor, 0.7)
+    );
+  }
+
+  // Closing Statement - Accent color
+  if (draft.closingStatement) {
+    drawSectionBox(
+      'Closing Statement',
+      draft.closingStatement,
+      accentRgb,
+      lightAccentRgb
+    );
+  }
+
+  // Add footer to last page
+  addFooter();
+
+  doc.save('executive-talking-points.pdf');
 }
 
 export async function exportCaseForSupportToPDF(
