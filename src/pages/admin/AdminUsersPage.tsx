@@ -58,7 +58,7 @@ import {
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 
-type RoleType = 'admin' | 'user' | 'approver' | 'super_admin';
+type RoleType = 'admin' | 'user' | 'approver' | 'super_admin' | 'agency_admin' | 'agency_user';
 
 interface TenantInfo {
   id: string;
@@ -90,7 +90,7 @@ export default function AdminUsersPage() {
     phone: '',
     department: '',
     title: '',
-    role: 'user' as 'user' | 'user_approver' | 'admin' | 'super_admin',
+    role: 'user' as 'user' | 'user_approver' | 'admin' | 'super_admin' | 'agency_admin' | 'agency_user',
   });
 
   // Credentials dialog
@@ -649,6 +649,10 @@ export default function AdminUsersPage() {
                         <div className="flex gap-1 flex-wrap">
                           {user.roles.includes('super_admin') ? (
                             <Badge className="bg-[hsl(280,60%,45%)] text-white">CampusVoice Super Admin</Badge>
+                          ) : user.roles.includes('agency_admin') ? (
+                            <Badge className="bg-amber-600 text-white">Agency Admin</Badge>
+                          ) : user.roles.includes('agency_user') ? (
+                            <Badge className="bg-amber-500 text-white">Agency User</Badge>
                           ) : user.roles.includes('admin') ? (
                             <Badge className="bg-[hsl(222,47%,14%)] text-white">University Admin</Badge>
                           ) : user.roles.includes('approver') ? (
@@ -845,7 +849,7 @@ export default function AdminUsersPage() {
               <Label htmlFor="role">Role</Label>
               <Select 
                 value={newUser.role} 
-                onValueChange={(value: 'user' | 'user_approver' | 'admin' | 'super_admin') => setNewUser(prev => ({ ...prev, role: value }))}
+                onValueChange={(value: 'user' | 'user_approver' | 'admin' | 'super_admin' | 'agency_admin' | 'agency_user') => setNewUser(prev => ({ ...prev, role: value }))}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -855,13 +859,21 @@ export default function AdminUsersPage() {
                   <SelectItem value="user_approver">University User + Approver</SelectItem>
                   <SelectItem value="admin">University Admin</SelectItem>
                   {isSuperAdmin && (
-                    <SelectItem value="super_admin">CampusVoice Super Admin</SelectItem>
+                    <>
+                      <SelectItem value="agency_admin">Agency Admin</SelectItem>
+                      <SelectItem value="agency_user">Agency User</SelectItem>
+                      <SelectItem value="super_admin">CampusVoice Super Admin</SelectItem>
+                    </>
                   )}
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
                 {newUser.role === 'super_admin' 
                   ? 'Full access to all institutions and system settings.'
+                  : newUser.role === 'agency_admin'
+                  ? 'Full admin access to their agency account including client management and team members.'
+                  : newUser.role === 'agency_user'
+                  ? 'Agency team member who can manage client content and messaging.'
                   : newUser.role === 'admin'
                   ? 'Full admin access to their institution including user management and Content DNA.'
                   : 'University Users can create and evaluate messages. Approvers can also review library submissions.'}
