@@ -198,7 +198,7 @@ export function MyDraftsCard() {
               state={{ resumeDraftId: draft.id }}
               className="block"
             >
-              <div className="p-3 rounded-lg border border-border/50 hover:border-primary/30 hover:bg-accent/30 transition-all group">
+              <div className="p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-accent/30 transition-all group">
                 {/* Top row: Icon, Title, Type badge, Delete button */}
                 <div className="flex items-start gap-3">
                   <div className={`icon-container icon-container-sm shrink-0 mt-0.5 ${
