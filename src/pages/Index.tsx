@@ -220,7 +220,7 @@ const Index = () => {
             
             <div className="grid md:grid-cols-4 gap-4 pb-4">
               {/* Step 1: Setup/Manage Institution or Clients */}
-              <Link to={isAgency ? "/agency/clients" : "/university-settings"}>
+              <Link to="/university-settings">
                 <Card className="h-full cursor-pointer card-workflow card-workflow-primary group">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-4">
