@@ -30,18 +30,18 @@ import { SEOHead } from "@/components/SEOHead";
 const processSteps = [
   {
     step: 1,
-    title: "Submit Application",
-    description: "Tell us about your agency and clients",
+    title: "Submit Your Interest",
+    description: "Tell us about your agency and university clients",
   },
   {
     step: 2,
-    title: "Partner Review",
-    description: "Our team reviews your application",
+    title: "Discovery Call",
+    description: "We'll reach out to discuss your needs and pricing",
   },
   {
     step: 3,
-    title: "Agency Setup",
-    description: "Get your agency dashboard access",
+    title: "Onboarding",
+    description: "Once approved, we set up your agency workspace",
   },
 ];
 
@@ -118,12 +118,12 @@ export default function AgencyRequestAccessPage() {
                 <CheckCircle className="h-8 w-8 text-primary" />
               </div>
               <h1 className="text-2xl font-bold text-foreground mb-3">
-                Application Submitted
+                Request Received
               </h1>
               <p className="text-muted-foreground mb-6">
                 Thank you for your interest in the CampusVoice Agency Partner
-                Program. Our team will review your application and reach out
-                within 48 hours.
+                Program. A member of our team will reach out within 48 hours
+                to schedule a discovery call and discuss pricing options.
               </p>
               <Link to="/for-agencies">
                 <Button variant="outline" className="gap-2">
@@ -191,8 +191,9 @@ export default function AgencyRequestAccessPage() {
                       Partner with CampusVoice
                     </CardTitle>
                     <p className="text-muted-foreground">
-                      Apply to become a CampusVoice agency partner and manage
-                      all your university clients from one platform.
+                      Request access to the CampusVoice Agency Partner Program.
+                      We'll reach out to discuss your needs, demo the platform, 
+                      and share pricing options.
                     </p>
                   </CardHeader>
                   <CardContent>
@@ -406,10 +407,14 @@ export default function AgencyRequestAccessPage() {
                         ) : (
                           <>
                             <Send className="h-4 w-4" />
-                            Submit Application
+                            Request Partnership Info
                           </>
                         )}
                       </Button>
+                      <p className="text-xs text-center text-muted-foreground mt-3">
+                        This is a request for information. We'll contact you to discuss 
+                        the program details and pricing before any account is created.
+                      </p>
                     </form>
                   </CardContent>
                 </Card>

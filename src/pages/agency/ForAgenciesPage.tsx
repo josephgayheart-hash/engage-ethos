@@ -99,8 +99,8 @@ export default function ForAgenciesPage() {
                 className="h-8 w-auto max-w-[160px]"
               />
             </Link>
-            <div className="flex items-center gap-3">
-              <Link to="/">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Link to="/" className="hidden sm:block">
                 <Button variant="ghost" size="sm">
                   For Universities
                 </Button>
@@ -111,9 +111,10 @@ export default function ForAgenciesPage() {
                 </Button>
               </Link>
               <Link to="/agency/request-access">
-                <Button size="sm" className="gap-2">
-                  <Briefcase className="h-4 w-4" />
-                  Become a Partner
+                <Button size="sm" className="gap-2 whitespace-nowrap">
+                  <Briefcase className="h-4 w-4 hidden sm:block" />
+                  <span className="sm:hidden">Apply</span>
+                  <span className="hidden sm:inline">Become a Partner</span>
                 </Button>
               </Link>
             </div>
