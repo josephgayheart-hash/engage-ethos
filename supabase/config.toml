@@ -62,3 +62,15 @@ verify_jwt = true
 
 [functions.firecrawl-search]
 verify_jwt = false
+
+[functions.extract-article-contacts]
+verify_jwt = false
+
+[functions.find-linkedin-profile]
+verify_jwt = false
+
+[functions.generate-outreach-message]
+verify_jwt = false
+
+[functions.send-prospect-email]
+verify_jwt = false
