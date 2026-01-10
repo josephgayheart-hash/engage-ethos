@@ -90,8 +90,9 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const adminEmails = profiles.map((p) => p.email);
-    console.log(`[send-demo-request] Notifying ${adminEmails.length} super admin(s)`);
+    // Always include sales@campusvoice.ai as primary recipient
+    const adminEmails = [...new Set(["sales@campusvoice.ai", ...profiles.map((p) => p.email)])];
+    console.log(`[send-demo-request] Notifying ${adminEmails.length} recipient(s)`);
 
     // Format the email content
     const emailHtml = `

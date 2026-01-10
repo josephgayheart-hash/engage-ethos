@@ -98,7 +98,8 @@ const handler = async (req: Request): Promise<Response> => {
           .in("id", superAdminUserIds);
 
         if (superAdminProfiles && superAdminProfiles.length > 0) {
-          const superAdminEmails = superAdminProfiles.map(p => p.email);
+          // Always include sales@campusvoice.ai as primary recipient for access requests
+          const superAdminEmails = [...new Set(["sales@campusvoice.ai", ...superAdminProfiles.map(p => p.email)])];
           const adminSubject = `New Access Request: ${firstName} ${lastName} from ${institutionName}`;
           const adminUrl = "https://www.campusvoice.ai/admin/onboarding";
 
