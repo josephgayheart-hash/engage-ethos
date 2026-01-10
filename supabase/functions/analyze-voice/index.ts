@@ -123,6 +123,7 @@ Analyze these samples and extract both the voice profile and brand platform as J
           { role: "system", content: ANALYSIS_PROMPT },
           { role: "user", content: userPrompt },
         ],
+        max_tokens: 4096,
         response_format: { type: "json_object" },
       }),
     });
