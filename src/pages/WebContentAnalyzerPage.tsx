@@ -149,19 +149,32 @@ export default function WebContentAnalyzerPage() {
       }
     };
 
-    // Generate title from source URL or content
-    const title = sourceUrl 
-      ? `Analysis: ${new URL(sourceUrl).hostname}` 
-      : `Analysis: ${content.substring(0, 30)}...`;
+    // Generate title from source URL or content (safely handle invalid URLs)
+    let title = 'Analysis Draft';
+    try {
+      if (sourceUrl) {
+        title = `Analysis: ${new URL(sourceUrl).hostname}`;
+      } else if (content) {
+        title = `Analysis: ${content.substring(0, 30)}...`;
+      }
+    } catch {
+      title = sourceUrl ? `Analysis: ${sourceUrl.substring(0, 30)}...` : 'Analysis Draft';
+    }
 
     const saveTimeout = setTimeout(async () => {
-      // Auto-save draft (refetch list so MyDraftsCard updates)
-      const draft = await saveDraft('analysis', draftData as unknown as Record<string, unknown>, title, currentDraftId || undefined);
-      if (draft) {
-        setCurrentDraftId(draft.id);
-        setDraftSavedRecently(true);
-        // Reset the indicator after 3 seconds
-        setTimeout(() => setDraftSavedRecently(false), 3000);
+      try {
+        // Auto-save draft (refetch list so MyDraftsCard updates)
+        console.log('Auto-saving analysis draft...', { title, hasResult: !!analysisResult });
+        const draft = await saveDraft('analysis', draftData as unknown as Record<string, unknown>, title, currentDraftId || undefined);
+        if (draft) {
+          console.log('Analysis draft saved:', draft.id);
+          setCurrentDraftId(draft.id);
+          setDraftSavedRecently(true);
+          // Reset the indicator after 3 seconds
+          setTimeout(() => setDraftSavedRecently(false), 3000);
+        }
+      } catch (error) {
+        console.error('Failed to auto-save analysis draft:', error);
       }
     }, 3000); // Auto-save after 3 seconds of inactivity
 
