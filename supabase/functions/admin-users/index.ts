@@ -950,6 +950,130 @@ serve(async (req) => {
         );
       }
 
+      case "change_user_tenant": {
+        // Super admin only - move a user to a different tenant
+        if (!isSuperAdmin) {
+          return new Response(
+            JSON.stringify({ error: "Super admin access required" }),
+            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        const { userId, newTenantId, createNewTenant, newTenantName, newTenantType } = body;
+
+        let targetTenantId = newTenantId;
+
+        // If creating a new tenant for this user
+        if (createNewTenant && newTenantName) {
+          const { data: newTenant, error: tenantError } = await adminClient
+            .from("tenants")
+            .insert({ 
+              institution_name: newTenantName,
+              tenant_type: newTenantType || 'university'
+            })
+            .select()
+            .single();
+
+          if (tenantError) {
+            console.error("Error creating new tenant:", tenantError);
+            return new Response(
+              JSON.stringify({ error: tenantError.message }),
+              { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+
+          targetTenantId = newTenant.id;
+
+          // Create institutional config for the new tenant
+          await adminClient
+            .from("institutional_config")
+            .insert({ tenant_id: newTenant.id });
+
+          console.log(`Created new tenant: ${newTenantName} (${newTenantType}) with id ${newTenant.id}`);
+        }
+
+        if (!targetTenantId) {
+          return new Response(
+            JSON.stringify({ error: "Target tenant ID required" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Get the user's current profile
+        const { data: currentProfile, error: profileError } = await adminClient
+          .from("profiles")
+          .select("*")
+          .eq("id", userId)
+          .single();
+
+        if (profileError || !currentProfile) {
+          return new Response(
+            JSON.stringify({ error: "User not found" }),
+            { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        const oldTenantId = currentProfile.tenant_id;
+
+        // Update the user's profile to the new tenant
+        const { error: updateError } = await adminClient
+          .from("profiles")
+          .update({ tenant_id: targetTenantId })
+          .eq("id", userId);
+
+        if (updateError) {
+          console.error("Error updating user tenant:", updateError);
+          return new Response(
+            JSON.stringify({ error: updateError.message }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Update user roles to the new tenant
+        await adminClient
+          .from("user_roles")
+          .update({ tenant_id: targetTenantId })
+          .eq("user_id", userId)
+          .eq("tenant_id", oldTenantId);
+
+        // Optionally move personal messages (keep them with the user)
+        await adminClient
+          .from("personal_messages")
+          .update({ tenant_id: targetTenantId })
+          .eq("user_id", userId);
+
+        // Optionally move drafts
+        await adminClient
+          .from("user_drafts")
+          .update({ tenant_id: targetTenantId })
+          .eq("user_id", userId);
+
+        // Audit log
+        await adminClient.from("audit_log").insert({
+          tenant_id: targetTenantId,
+          actor_user_id: requestingUser.id,
+          action: "change_user_tenant",
+          target_type: "user",
+          target_id: userId,
+          metadata: { 
+            old_tenant_id: oldTenantId, 
+            new_tenant_id: targetTenantId,
+            created_new_tenant: createNewTenant || false
+          },
+        });
+
+        console.log(`Moved user ${userId} from tenant ${oldTenantId} to ${targetTenantId}`);
+
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            newTenantId: targetTenantId,
+            createdNewTenant: createNewTenant || false
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
       case "cleanup_orphan_auth": {
         // Super admin only - clean up orphan auth users (users in auth.users but not in profiles)
         if (!isSuperAdmin) {
