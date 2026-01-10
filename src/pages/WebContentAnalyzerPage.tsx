@@ -8,14 +8,16 @@ import { BrandScorePanel } from '@/components/analyzer/BrandScorePanel';
 import { ContentSectionCard } from '@/components/analyzer/ContentSectionCard';
 import { RewritePanel } from '@/components/analyzer/RewritePanel';
 import { DNAAlignmentPanel } from '@/components/analyzer/DNAAlignmentPanel';
-import { VoiceProfileCard } from '@/components/analyzer/VoiceProfileCard';
 import { AnalysisActionsCard } from '@/components/analyzer/AnalysisActionsCard';
+import { InstitutionalProfileSelector } from '@/components/InstitutionalProfileSelector';
+import { ContentDNAActiveBadge } from '@/components/ContentDNAIndicator';
 import { useContentDNA } from '@/hooks/useContentDNA';
 import { useInstitutionalProfiles } from '@/hooks/useInstitutionalProfiles';
 import { useFactBook } from '@/hooks/useFactBook';
 import { useStoryBank } from '@/hooks/useStoryBank';
 import { useUserDrafts } from '@/hooks/useUserDrafts';
 import { useMessageLibrary } from '@/hooks/useMessageLibrary';
+import { useLastUsedProfile } from '@/hooks/useLastUsedProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { toast } from 'sonner';
@@ -27,7 +29,8 @@ import {
   AlertTriangle,
   FileText,
   Dna,
-  X
+  X,
+  Building2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { AnalysisResult, SavedAnalysisData, IssueRemediation } from '@/types/analyzer';
@@ -36,6 +39,7 @@ export default function WebContentAnalyzerPage() {
   const { toast: showToast } = useToast();
   const location = useLocation();
   const { profiles } = useInstitutionalProfiles();
+  const { lastUsedProfileId, setLastUsedProfileId, isLoaded: profilePrefLoaded } = useLastUsedProfile();
   
   // Draft management
   const { saveDraft, loadDraftById, currentDraft, setCurrentDraft } = useUserDrafts();
@@ -43,8 +47,9 @@ export default function WebContentAnalyzerPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
   
-  // Profile selection state
-  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  // Profile selection state - initialized from last used profile
+  const [selectedProfileId, setSelectedProfileIdLocal] = useState<string | null>(null);
+  const [selectedProfileName, setSelectedProfileName] = useState<string | undefined>();
   
   // Use Content DNA for the selected profile
   const { analysis: contentDNA, isLoading: dnaLoading } = useContentDNA({ profileId: selectedProfileId });
@@ -52,12 +57,38 @@ export default function WebContentAnalyzerPage() {
   const { stories } = useStoryBank({ profileId: selectedProfileId });
   const selectedProfile = profiles?.find(p => p.id === selectedProfileId) || profiles?.[0];
   
-  // Set initial profile when profiles load
-  useEffect(() => {
-    if (profiles?.length && !selectedProfileId) {
-      setSelectedProfileId(profiles[0].id);
+  // Wrapper to update both local state and persist to localStorage
+  const setSelectedProfileId = useCallback((id: string | null) => {
+    setSelectedProfileIdLocal(id);
+    if (id) {
+      setLastUsedProfileId(id);
+      const profile = profiles?.find(p => p.id === id);
+      setSelectedProfileName(profile?.name);
+    } else {
+      setSelectedProfileName(undefined);
     }
-  }, [profiles, selectedProfileId]);
+  }, [setLastUsedProfileId, profiles]);
+  
+  // Set initial profile when profiles load - prefer last used, then first profile
+  useEffect(() => {
+    if (!profilePrefLoaded || !profiles?.length) return;
+    if (selectedProfileId) return; // Already set
+    
+    // Check if last used profile exists in current profiles
+    if (lastUsedProfileId) {
+      const found = profiles.find(p => p.id === lastUsedProfileId);
+      if (found) {
+        setSelectedProfileIdLocal(lastUsedProfileId);
+        setSelectedProfileName(found.name);
+        return;
+      }
+    }
+    
+    // Fall back to first profile
+    setSelectedProfileIdLocal(profiles[0].id);
+    setSelectedProfileName(profiles[0].name);
+    setLastUsedProfileId(profiles[0].id);
+  }, [profiles, profilePrefLoaded, lastUsedProfileId, selectedProfileId, setLastUsedProfileId]);
   
   const [content, setContent] = useState('');
   const [sourceUrl, setSourceUrl] = useState('');
@@ -400,6 +431,38 @@ export default function WebContentAnalyzerPage() {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Left Column - Input & Results */}
             <div className="lg:col-span-3 space-y-6">
+              {/* Profile Selection - Prominent placement before analysis */}
+              <Card>
+                <CardContent className="py-4">
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Building2 className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">Voice Profile:</span>
+                    </div>
+                    <div className="flex-1 min-w-[200px]">
+                      <InstitutionalProfileSelector
+                        selectedProfileId={selectedProfileId}
+                        onProfileChange={(id, _config, name) => {
+                          setSelectedProfileId(id);
+                          if (name) setSelectedProfileName(name);
+                        }}
+                      />
+                    </div>
+                    {contentDNA?.last_analyzed_at && (
+                      <ContentDNAActiveBadge />
+                    )}
+                    {!contentDNA?.last_analyzed_at && selectedProfileId && !dnaLoading && (
+                      <Link to={`/content-dna?profileId=${selectedProfileId}`}>
+                        <Button variant="outline" size="sm" className="gap-1.5">
+                          <Dna className="w-3.5 h-3.5" />
+                          Setup DNA
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Content Input */}
               <AnalyzerInput
                 onAnalyze={handleAnalyze} 
@@ -436,13 +499,6 @@ export default function WebContentAnalyzerPage() {
                           <div className="text-xs text-muted-foreground">Overall Score</div>
                         </div>
                       </div>
-                      
-                      {/* Voice Profile - inline with matching font size */}
-                      <VoiceProfileCard
-                        selectedProfileId={selectedProfileId}
-                        onProfileChange={setSelectedProfileId}
-                        hasDNA={!!contentDNA?.last_analyzed_at}
-                      />
                     </CardHeader>
                     <CardContent className="space-y-4">
                       {/* Executive Summary */}
