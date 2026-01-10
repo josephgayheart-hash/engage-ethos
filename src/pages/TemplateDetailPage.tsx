@@ -602,6 +602,7 @@ const TemplateDetailPage = () => {
                           // Default colors that should be treated as "not set" (legacy defaults)
                           const defaultPrimary = ['#1F2A44', '#1f2a44'];
                           const defaultAccent = ['#2C7A7B', '#2c7a7b'];
+                          const defaultTertiary = ['#E2E8F0', '#e2e8f0'];
                           
                           const effectivePrimary = (profileConfig?.primaryColor && !defaultPrimary.includes(profileConfig.primaryColor)) 
                             ? profileConfig.primaryColor 
@@ -609,10 +610,14 @@ const TemplateDetailPage = () => {
                           const effectiveAccent = (profileConfig?.accentColor && !defaultAccent.includes(profileConfig.accentColor)) 
                             ? profileConfig.accentColor 
                             : (tenant?.accent_color || undefined);
+                          const effectiveTertiary = (profileConfig?.tertiaryColor && !defaultTertiary.includes(profileConfig.tertiaryColor)) 
+                            ? profileConfig.tertiaryColor 
+                            : undefined;
                           
                           return {
                             primaryColor: effectivePrimary,
                             accentColor: effectiveAccent,
+                            tertiaryColor: effectiveTertiary,
                             logoUrl: profileConfig?.logoUrl || tenant?.logo_url || undefined,
                           };
                         })()}
