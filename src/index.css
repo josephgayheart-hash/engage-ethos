@@ -558,3 +558,9 @@
 .animate-pulse-subtle {
   animation: pulseSoft 3s ease-in-out infinite;
 }
+
+/* Text overflow utility for long URLs and unbreakable content */
+.overflow-wrap-anywhere {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
