@@ -8,6 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -35,6 +38,8 @@ import {
   FolderTree,
   CheckCircle2,
   XCircle,
+  ArrowRightLeft,
+  Plus,
 } from 'lucide-react';
 
 interface UserProfile {
@@ -54,6 +59,7 @@ interface UserProfile {
 interface TenantInfo {
   id: string;
   institution_name: string;
+  tenant_type: 'university' | 'agency';
 }
 
 interface PersonalMessage {
@@ -114,8 +120,15 @@ export default function UserDetailPage() {
   const [toolUsage, setToolUsage] = useState<ToolUsageEvent[]>([]);
   const [institutionalProfiles, setInstitutionalProfiles] = useState<InstitutionalProfile[]>([]);
   const [contentDNAs, setContentDNAs] = useState<ContentDNAAnalysis[]>([]);
+  const [allTenants, setAllTenants] = useState<TenantInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSavingRoles, setIsSavingRoles] = useState(false);
+  const [isChangingTenant, setIsChangingTenant] = useState(false);
+  const [showTenantChange, setShowTenantChange] = useState(false);
+  const [tenantChangeMode, setTenantChangeMode] = useState<'existing' | 'new'>('existing');
+  const [selectedTenantId, setSelectedTenantId] = useState<string>('');
+  const [newTenantName, setNewTenantName] = useState('');
+  const [newTenantType, setNewTenantType] = useState<'university' | 'agency'>('agency');
   const [activeTab, setActiveTab] = useState('overview');
 
   const fetchData = async () => {
@@ -141,10 +154,17 @@ export default function UserDetailPage() {
       // Fetch tenant info
       const { data: tenantData } = await supabase
         .from('tenants')
-        .select('id, institution_name')
+        .select('id, institution_name, tenant_type')
         .eq('id', userData.tenant_id)
         .maybeSingle();
-      setTenant(tenantData);
+      setTenant(tenantData as TenantInfo | null);
+
+      // Fetch all tenants for tenant change dropdown (super admin only)
+      const { data: allTenantsData } = await supabase
+        .from('tenants')
+        .select('id, institution_name, tenant_type')
+        .order('institution_name');
+      setAllTenants((allTenantsData || []) as TenantInfo[]);
 
       // Fetch user roles
       const { data: rolesData } = await supabase
@@ -301,6 +321,68 @@ export default function UserDetailPage() {
       });
     } finally {
       setIsSavingRoles(false);
+    }
+  };
+
+  const handleChangeTenant = async () => {
+    if (!id || !user) return;
+    
+    setIsChangingTenant(true);
+    try {
+      const payload: any = {
+        action: 'change_user_tenant',
+        userId: id,
+      };
+
+      if (tenantChangeMode === 'new') {
+        if (!newTenantName.trim()) {
+          toast({ title: 'Please enter a name for the new organization', variant: 'destructive' });
+          setIsChangingTenant(false);
+          return;
+        }
+        payload.createNewTenant = true;
+        payload.newTenantName = newTenantName.trim();
+        payload.newTenantType = newTenantType;
+      } else {
+        if (!selectedTenantId) {
+          toast({ title: 'Please select a target organization', variant: 'destructive' });
+          setIsChangingTenant(false);
+          return;
+        }
+        payload.newTenantId = selectedTenantId;
+      }
+
+      const { data, error } = await supabase.functions.invoke('admin-users', {
+        body: payload,
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast({
+        title: 'Organization Changed',
+        description: tenantChangeMode === 'new' 
+          ? `Created new ${newTenantType} "${newTenantName}" and moved ${user.first_name} ${user.last_name} to it.`
+          : `${user.first_name} ${user.last_name} has been moved to a new organization.`,
+      });
+      
+      // Reset form state
+      setShowTenantChange(false);
+      setTenantChangeMode('existing');
+      setSelectedTenantId('');
+      setNewTenantName('');
+      setNewTenantType('agency');
+      
+      // Refresh to get updated data
+      fetchData();
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to change organization',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsChangingTenant(false);
     }
   };
 
@@ -877,6 +959,139 @@ export default function UserDetailPage() {
                           Save Permissions
                         </Button>
                       </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Tenant Management Card */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="font-serif flex items-center gap-2">
+                        <ArrowRightLeft className="w-5 h-5" />
+                        Organization Assignment
+                      </CardTitle>
+                      <CardDescription>
+                        Change which organization this user belongs to
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                        <div>
+                          <p className="text-xs text-muted-foreground uppercase">Current Organization</p>
+                          <p className="font-medium flex items-center gap-2">
+                            {tenant?.tenant_type === 'agency' ? (
+                              <Briefcase className="w-4 h-4 text-purple-500" />
+                            ) : (
+                              <GraduationCap className="w-4 h-4 text-primary" />
+                            )}
+                            {tenant?.institution_name || 'Unknown'}
+                          </p>
+                          <Badge variant="outline" className="mt-1 text-xs capitalize">
+                            {tenant?.tenant_type || 'university'}
+                          </Badge>
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setShowTenantChange(!showTenantChange)}
+                        >
+                          {showTenantChange ? 'Cancel' : 'Change'}
+                        </Button>
+                      </div>
+
+                      {showTenantChange && (
+                        <div className="space-y-4 p-4 border rounded-lg">
+                          <RadioGroup 
+                            value={tenantChangeMode} 
+                            onValueChange={(v) => setTenantChangeMode(v as 'existing' | 'new')}
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="existing" id="existing" />
+                              <Label htmlFor="existing">Move to existing organization</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="new" id="new" />
+                              <Label htmlFor="new">Create new organization</Label>
+                            </div>
+                          </RadioGroup>
+
+                          {tenantChangeMode === 'existing' ? (
+                            <div className="space-y-2">
+                              <Label>Select Organization</Label>
+                              <Select value={selectedTenantId} onValueChange={setSelectedTenantId}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Choose an organization..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {allTenants
+                                    .filter(t => t.id !== tenant?.id)
+                                    .map(t => (
+                                      <SelectItem key={t.id} value={t.id}>
+                                        <span className="flex items-center gap-2">
+                                          {t.tenant_type === 'agency' ? (
+                                            <Briefcase className="w-3 h-3 text-purple-500" />
+                                          ) : (
+                                            <GraduationCap className="w-3 h-3" />
+                                          )}
+                                          {t.institution_name}
+                                          <span className="text-xs text-muted-foreground">
+                                            ({t.tenant_type})
+                                          </span>
+                                        </span>
+                                      </SelectItem>
+                                    ))
+                                  }
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          ) : (
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <Label>Organization Name</Label>
+                                <Input 
+                                  placeholder="e.g., McFadden Consulting" 
+                                  value={newTenantName}
+                                  onChange={(e) => setNewTenantName(e.target.value)}
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label>Organization Type</Label>
+                                <Select value={newTenantType} onValueChange={(v) => setNewTenantType(v as 'university' | 'agency')}>
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="agency">
+                                      <span className="flex items-center gap-2">
+                                        <Briefcase className="w-3 h-3 text-purple-500" />
+                                        Agency
+                                      </span>
+                                    </SelectItem>
+                                    <SelectItem value="university">
+                                      <span className="flex items-center gap-2">
+                                        <GraduationCap className="w-3 h-3" />
+                                        University
+                                      </span>
+                                    </SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                          )}
+
+                          <Button 
+                            onClick={handleChangeTenant} 
+                            disabled={isChangingTenant}
+                            className="w-full gap-2"
+                          >
+                            {isChangingTenant ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <ArrowRightLeft className="w-4 h-4" />
+                            )}
+                            {tenantChangeMode === 'new' ? 'Create & Move User' : 'Move User'}
+                          </Button>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
 
