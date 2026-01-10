@@ -185,6 +185,11 @@ export function MyDraftsCard() {
           const draftData = draft.draft_data as Record<string, unknown>;
           const contextInfo = draftData?.context as Record<string, unknown> | undefined;
           const selectedChannels = (draftData?.selectedChannels as Channel[]) || [];
+          const selectedMode = draftData?.mode as string | undefined;
+          const selectedProfileName = draftData?.profileName as string | undefined;
+          const selectedMoment = contextInfo?.moment as string | undefined;
+          const selectedAudience = contextInfo?.audience as string | undefined;
+          const selectedGoal = contextInfo?.goal as string | undefined;
           
           return (
             <Link 
@@ -193,78 +198,115 @@ export function MyDraftsCard() {
               state={{ resumeDraftId: draft.id }}
               className="block"
             >
-              <div className="flex items-center gap-3 p-3 rounded-lg border border-border/50 hover:border-primary/30 hover:bg-accent/30 transition-all group">
-                <div className={`icon-container icon-container-sm shrink-0 ${
-                  draft.draft_type === 'message' 
-                    ? 'bg-pillar-cognitive/10' 
-                    : draft.draft_type === 'journey'
-                    ? 'bg-pillar-consensus/10'
-                    : 'bg-cyan-500/10'
-                }`}>
-                  <Icon className={`w-4 h-4 ${
+              <div className="p-3 rounded-lg border border-border/50 hover:border-primary/30 hover:bg-accent/30 transition-all group">
+                {/* Top row: Icon, Title, Type badge, Delete button */}
+                <div className="flex items-start gap-3">
+                  <div className={`icon-container icon-container-sm shrink-0 mt-0.5 ${
                     draft.draft_type === 'message' 
-                      ? 'text-pillar-cognitive' 
+                      ? 'bg-pillar-cognitive/10' 
                       : draft.draft_type === 'journey'
-                      ? 'text-pillar-consensus'
-                      : 'text-cyan-600'
-                  }`} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm truncate">
-                      {draft.title || `Untitled ${draft.draft_type}`}
-                    </span>
-                    <Badge variant="outline" className="text-[10px] shrink-0">
-                      {draft.draft_type}
-                    </Badge>
+                      ? 'bg-pillar-consensus/10'
+                      : 'bg-cyan-500/10'
+                  }`}>
+                    <Icon className={`w-4 h-4 ${
+                      draft.draft_type === 'message' 
+                        ? 'text-pillar-cognitive' 
+                        : draft.draft_type === 'journey'
+                        ? 'text-pillar-consensus'
+                        : 'text-cyan-600'
+                    }`} />
                   </div>
-                  {/* Channel badges for message drafts */}
-                  {draft.draft_type === 'message' && selectedChannels.length > 0 && (
-                    <div className="flex items-center gap-1 mt-1 flex-wrap">
-                      {selectedChannels.slice(0, 3).map((channel) => {
-                        const ChannelIcon = channelIcons[channel] || FileText;
-                        return (
-                          <Badge 
-                            key={channel} 
-                            variant="secondary" 
-                            className="text-[10px] px-1.5 py-0 h-5 bg-primary/5 text-primary/80"
-                          >
-                            <ChannelIcon className="w-3 h-3 mr-1" />
-                            {channelLabels[channel] || channel}
-                          </Badge>
-                        );
-                      })}
-                      {selectedChannels.length > 3 && (
-                        <Badge 
-                          variant="secondary" 
-                          className="text-[10px] px-1.5 py-0 h-5 bg-muted text-muted-foreground"
-                        >
-                          +{selectedChannels.length - 3}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="font-medium text-sm truncate">
+                          {draft.title || `Untitled ${draft.draft_type}`}
+                        </span>
+                        <Badge variant="outline" className="text-[10px] shrink-0">
+                          {draft.draft_type}
                         </Badge>
-                      )}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                        onClick={(e) => handleDelete(e, draft.id)}
+                      >
+                        <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                      </Button>
                     </div>
-                  )}
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap mt-1">
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {formatDistanceToNow(new Date(draft.updated_at), { addSuffix: true })}
-                    </div>
-                    {contextInfo?.audience && (
-                      <>
-                        <span>•</span>
-                        <span className="truncate">{String(contextInfo.audience)}</span>
-                      </>
+                    
+                    {/* Channel badges for message drafts */}
+                    {draft.draft_type === 'message' && selectedChannels.length > 0 && (
+                      <div className="flex items-center gap-1 mt-1.5 flex-wrap">
+                        {selectedChannels.slice(0, 3).map((channel) => {
+                          const ChannelIcon = channelIcons[channel] || FileText;
+                          return (
+                            <Badge 
+                              key={channel} 
+                              variant="secondary" 
+                              className="text-[10px] px-1.5 py-0 h-5 bg-primary/5 text-primary/80"
+                            >
+                              <ChannelIcon className="w-3 h-3 mr-1" />
+                              {channelLabels[channel] || channel}
+                            </Badge>
+                          );
+                        })}
+                        {selectedChannels.length > 3 && (
+                          <Badge 
+                            variant="secondary" 
+                            className="text-[10px] px-1.5 py-0 h-5 bg-muted text-muted-foreground"
+                          >
+                            +{selectedChannels.length - 3}
+                          </Badge>
+                        )}
+                      </div>
                     )}
+                    
+                    {/* Metadata row - spread left and right */}
+                    <div className="flex items-center justify-between gap-4 mt-2 text-xs text-muted-foreground">
+                      {/* Left side: Audience, Moment, Goal */}
+                      <div className="flex items-center gap-2 flex-wrap min-w-0">
+                        {selectedAudience && (
+                          <div className="flex items-center gap-1">
+                            <User className="w-3 h-3 shrink-0" />
+                            <span className="truncate max-w-[100px]">{selectedAudience}</span>
+                          </div>
+                        )}
+                        {selectedMoment && (
+                          <>
+                            <span className="text-border">•</span>
+                            <span className="truncate max-w-[80px] capitalize">{selectedMoment.replace(/-/g, ' ')}</span>
+                          </>
+                        )}
+                        {selectedGoal && (
+                          <>
+                            <span className="text-border">•</span>
+                            <span className="truncate max-w-[80px] capitalize">{String(selectedGoal).replace(/-/g, ' ')}</span>
+                          </>
+                        )}
+                      </div>
+                      
+                      {/* Right side: Mode, Profile, Time */}
+                      <div className="flex items-center gap-2 shrink-0">
+                        {selectedMode && (
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 capitalize">
+                            {selectedMode}
+                          </Badge>
+                        )}
+                        {selectedProfileName && (
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5 bg-accent/50 max-w-[80px] truncate">
+                            {selectedProfileName}
+                          </Badge>
+                        )}
+                        <div className="flex items-center gap-1 text-muted-foreground/70">
+                          <Clock className="w-3 h-3" />
+                          <span className="whitespace-nowrap">{formatDistanceToNow(new Date(draft.updated_at), { addSuffix: true })}</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                  onClick={(e) => handleDelete(e, draft.id)}
-                >
-                  <Trash2 className="w-3.5 h-3.5 text-destructive" />
-                </Button>
               </div>
             </Link>
           );
