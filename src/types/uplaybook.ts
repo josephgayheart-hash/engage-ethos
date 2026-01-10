@@ -516,7 +516,9 @@ export interface InstitutionalConfig {
   // Visual Branding
   logoUrl?: string;              // Profile-specific logo
   primaryColor?: string;         // Primary brand color (hex)
-  accentColor?: string;          // Accent/secondary color (hex)
+  secondaryColor?: string;       // Secondary brand color (hex)
+  tertiaryColor?: string;        // Tertiary brand color (hex)
+  accentColor?: string;          // Accent color (hex) - legacy, use secondaryColor
   
   // Unit/College/Division-Specific Leadership (conditional fields)
   unitType?: ProfileType;        // Type of organizational unit

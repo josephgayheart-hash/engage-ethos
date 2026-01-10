@@ -111,7 +111,9 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
     slogans: [],
     logoUrl: '',
     primaryColor: '#1F2A44',
-    accentColor: '#2C7A7B',
+    secondaryColor: '#2C7A7B',
+    tertiaryColor: '#D4AF37',
+    accentColor: '#2C7A7B', // Legacy - keep for backward compatibility
     emailDomain: '',
     primaryContactEmail: '',
     primaryContactPhone: '',
@@ -405,54 +407,95 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <Label htmlFor="primaryColor" className="text-sm font-medium">
-                  {isAgency ? 'Client Primary Color' : 'Primary Color'}
-                </Label>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="color"
-                    id="primaryColor"
-                    value={config.primaryColor || '#1F2A44'}
-                    onChange={(e) => updateConfig({ primaryColor: e.target.value })}
-                    className="w-12 h-12 rounded-lg border border-border cursor-pointer"
-                  />
-                  <div className="flex-1">
-                    <Input
+            <div className="space-y-4">
+              <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Brand Colors</h4>
+              <p className="text-xs text-muted-foreground">
+                {isAgency 
+                  ? 'Define the university\'s official brand colors. These will be used in all message outputs, PDFs, and exports.'
+                  : 'Define your institution\'s official brand colors. These will be used in all message outputs, PDFs, and exports.'
+                }
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Primary Color */}
+                <div className="space-y-3">
+                  <Label htmlFor="primaryColor" className="text-sm font-medium">
+                    Primary Color <span className="text-destructive">*</span>
+                  </Label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="color"
+                      id="primaryColor"
                       value={config.primaryColor || '#1F2A44'}
                       onChange={(e) => updateConfig({ primaryColor: e.target.value })}
-                      placeholder="#1F2A44"
+                      className="w-12 h-12 rounded-lg border border-border cursor-pointer"
                     />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {isAgency ? 'University\'s main brand color' : 'Main brand color for headers and buttons'}
-                    </p>
+                    <div className="flex-1">
+                      <Input
+                        value={config.primaryColor || '#1F2A44'}
+                        onChange={(e) => updateConfig({ primaryColor: e.target.value })}
+                        placeholder="#1F2A44"
+                        className="font-mono text-sm"
+                      />
+                    </div>
                   </div>
+                  <p className="text-xs text-muted-foreground">
+                    Main brand color for headers, buttons, and key elements
+                  </p>
                 </div>
-              </div>
 
-              <div className="space-y-3">
-                <Label htmlFor="accentColor" className="text-sm font-medium">
-                  {isAgency ? 'Client Accent Color' : 'Accent Color'}
-                </Label>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="color"
-                    id="accentColor"
-                    value={config.accentColor || '#2C7A7B'}
-                    onChange={(e) => updateConfig({ accentColor: e.target.value })}
-                    className="w-12 h-12 rounded-lg border border-border cursor-pointer"
-                  />
-                  <div className="flex-1">
-                    <Input
-                      value={config.accentColor || '#2C7A7B'}
-                      onChange={(e) => updateConfig({ accentColor: e.target.value })}
-                      placeholder="#2C7A7B"
+                {/* Secondary Color */}
+                <div className="space-y-3">
+                  <Label htmlFor="secondaryColor" className="text-sm font-medium">
+                    Secondary Color
+                  </Label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="color"
+                      id="secondaryColor"
+                      value={config.secondaryColor || config.accentColor || '#2C7A7B'}
+                      onChange={(e) => updateConfig({ secondaryColor: e.target.value, accentColor: e.target.value })}
+                      className="w-12 h-12 rounded-lg border border-border cursor-pointer"
                     />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {isAgency ? 'University\'s accent color for highlights' : 'Secondary color for highlights and links'}
-                    </p>
+                    <div className="flex-1">
+                      <Input
+                        value={config.secondaryColor || config.accentColor || '#2C7A7B'}
+                        onChange={(e) => updateConfig({ secondaryColor: e.target.value, accentColor: e.target.value })}
+                        placeholder="#2C7A7B"
+                        className="font-mono text-sm"
+                      />
+                    </div>
                   </div>
+                  <p className="text-xs text-muted-foreground">
+                    Supporting color for highlights, links, and accents
+                  </p>
+                </div>
+
+                {/* Tertiary Color */}
+                <div className="space-y-3">
+                  <Label htmlFor="tertiaryColor" className="text-sm font-medium">
+                    Tertiary Color
+                  </Label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="color"
+                      id="tertiaryColor"
+                      value={config.tertiaryColor || '#D4AF37'}
+                      onChange={(e) => updateConfig({ tertiaryColor: e.target.value })}
+                      className="w-12 h-12 rounded-lg border border-border cursor-pointer"
+                    />
+                    <div className="flex-1">
+                      <Input
+                        value={config.tertiaryColor || '#D4AF37'}
+                        onChange={(e) => updateConfig({ tertiaryColor: e.target.value })}
+                        placeholder="#D4AF37"
+                        className="font-mono text-sm"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Accent color for special elements and emphasis
+                  </p>
                 </div>
               </div>
             </div>
@@ -462,7 +505,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">Brand Preview</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
                 <div className="flex items-center gap-4">
                   {config.logoUrl ? (
                     <img
@@ -487,11 +530,31 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
                     </h3>
                     <p
                       className="text-sm"
-                      style={{ color: config.accentColor || '#2C7A7B' }}
+                      style={{ color: config.secondaryColor || config.accentColor || '#2C7A7B' }}
                     >
                       {config.mascot ? `${config.mascot} • ` : ''}{config.institutionAbbreviation || 'Abbrev'}
                     </p>
                   </div>
+                </div>
+                
+                {/* Color Swatches */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground mr-2">Color Palette:</span>
+                  <div 
+                    className="w-8 h-8 rounded border border-border" 
+                    style={{ backgroundColor: config.primaryColor || '#1F2A44' }}
+                    title="Primary"
+                  />
+                  <div 
+                    className="w-8 h-8 rounded border border-border" 
+                    style={{ backgroundColor: config.secondaryColor || config.accentColor || '#2C7A7B' }}
+                    title="Secondary"
+                  />
+                  <div 
+                    className="w-8 h-8 rounded border border-border" 
+                    style={{ backgroundColor: config.tertiaryColor || '#D4AF37' }}
+                    title="Tertiary"
+                  />
                 </div>
               </CardContent>
             </Card>
