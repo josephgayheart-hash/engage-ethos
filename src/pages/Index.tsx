@@ -211,8 +211,8 @@ const Index = () => {
             <div className="absolute inset-0 -mx-4 px-4 bg-zone-warm rounded-2xl -z-10 opacity-50" />
             
             <div className="mb-6 pt-4">
-              <h2 className="section-header mb-1">How It Works</h2>
-              <p className="section-subheader">Follow these steps to get the most out of CampusVoice</p>
+              <h2 className="section-header mb-1">Your Workflow</h2>
+              <p className="section-subheader">Everything you need to create, analyze, and strategize</p>
             </div>
             
             <div className="grid md:grid-cols-4 gap-4 pb-4">
