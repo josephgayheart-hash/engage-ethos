@@ -66,6 +66,7 @@ export function MyDraftsCard() {
 
   const messageDrafts = drafts.filter(d => d.draft_type === 'message');
   const journeyDrafts = drafts.filter(d => d.draft_type === 'journey');
+  const analysisDrafts = drafts.filter(d => d.draft_type === 'analysis');
   
   const INITIAL_DISPLAY_COUNT = 5;
   const displayedDrafts = showAll ? drafts : drafts.slice(0, INITIAL_DISPLAY_COUNT);
@@ -78,11 +79,17 @@ export function MyDraftsCard() {
   };
 
   const getDraftLink = (draft: UserDraft) => {
-    return draft.draft_type === 'message' ? '/build' : '/strategy';
+    if (draft.draft_type === 'message') return '/build';
+    if (draft.draft_type === 'journey') return '/strategy';
+    if (draft.draft_type === 'analysis') return '/web-analyzer';
+    return '/build';
   };
 
   const getDraftIcon = (type: string) => {
-    return type === 'message' ? PenTool : Map;
+    if (type === 'message') return PenTool;
+    if (type === 'journey') return Map;
+    if (type === 'analysis') return Search;
+    return PenTool;
   };
 
   if (loading) {
@@ -163,6 +170,12 @@ export function MyDraftsCard() {
                 {journeyDrafts.length}
               </Badge>
             )}
+            {analysisDrafts.length > 0 && (
+              <Badge variant="secondary" className="text-xs bg-cyan-500/10 text-cyan-600">
+                <Search className="w-3 h-3 mr-1" />
+                {analysisDrafts.length}
+              </Badge>
+            )}
           </div>
         </div>
       </CardHeader>
@@ -184,12 +197,16 @@ export function MyDraftsCard() {
                 <div className={`icon-container icon-container-sm shrink-0 ${
                   draft.draft_type === 'message' 
                     ? 'bg-pillar-cognitive/10' 
-                    : 'bg-pillar-consensus/10'
+                    : draft.draft_type === 'journey'
+                    ? 'bg-pillar-consensus/10'
+                    : 'bg-cyan-500/10'
                 }`}>
                   <Icon className={`w-4 h-4 ${
                     draft.draft_type === 'message' 
                       ? 'text-pillar-cognitive' 
-                      : 'text-pillar-consensus'
+                      : draft.draft_type === 'journey'
+                      ? 'text-pillar-consensus'
+                      : 'text-cyan-600'
                   }`} />
                 </div>
                 <div className="flex-1 min-w-0">

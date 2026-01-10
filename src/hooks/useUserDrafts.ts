@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { Json } from '@/integrations/supabase/types';
 
-export type DraftType = 'message' | 'journey';
+export type DraftType = 'message' | 'journey' | 'analysis';
 
 export interface UserDraft {
   id: string;

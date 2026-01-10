@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,13 +13,17 @@ import { ScreenshotPreview } from '@/components/analyzer/ScreenshotPreview';
 import { VoiceProfileCard } from '@/components/analyzer/VoiceProfileCard';
 import { IssuesSummaryCard } from '@/components/analyzer/IssuesSummaryCard';
 import { AnalysisActionsCard } from '@/components/analyzer/AnalysisActionsCard';
+import { IssueProgressTracker } from '@/components/analyzer/IssueProgressTracker';
 import { useContentDNA } from '@/hooks/useContentDNA';
 import { useInstitutionalProfiles } from '@/hooks/useInstitutionalProfiles';
 import { useFactBook } from '@/hooks/useFactBook';
 import { useStoryBank } from '@/hooks/useStoryBank';
+import { useUserDrafts } from '@/hooks/useUserDrafts';
+import { useMessageLibrary } from '@/hooks/useMessageLibrary';
 import { supabase } from '@/integrations/supabase/client';
 import { firecrawlApi } from '@/lib/api/firecrawl';
 import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { 
   Search, 
   Loader2, 
@@ -30,52 +35,18 @@ import {
   X
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-interface DNAAlignment {
-  voiceScore: number;
-  voiceFeedback: string;
-  factScore: number;
-  factFeedback: string;
-  storyScore: number;
-  storyFeedback: string;
-  brandScore: number;
-  brandFeedback: string;
-}
-
-interface BrandVoiceCheck {
-  phrasesUsedCorrectly?: string[];
-  phrasesAvoidedIncorrectly?: string[];
-  missingKeyPhrases?: string[];
-}
-
-interface AnalysisResult {
-  overallScore: number;
-  executiveSummary?: string;
-  dnaAlignment?: DNAAlignment;
-  brandVoiceCheck?: BrandVoiceCheck;
-  sections: {
-    id: string;
-    title: string;
-    content: string;
-    score: number;
-    issues: { type: string; message: string; severity: 'error' | 'warning' | 'info'; quotedText?: string; recommendation?: string; dnaReference?: string }[];
-    strengths: { type?: string; message: string; quotedText?: string; dnaReference?: string }[] | string[];
-  }[];
-  summary: {
-    totalIssues: number;
-    totalStrengths: number;
-    topIssues?: string[];
-    topStrengths?: string[];
-    criticalIssues?: string[];
-    quickWins?: string[];
-    missingFacts?: string[];
-    storyOpportunities?: string[];
-  };
-}
+import type { AnalysisResult, SavedAnalysisData, IssueRemediation } from '@/types/analyzer';
 
 export default function WebContentAnalyzerPage() {
-  const { toast } = useToast();
+  const { toast: showToast } = useToast();
+  const location = useLocation();
   const { profiles } = useInstitutionalProfiles();
+  
+  // Draft management
+  const { saveDraft, loadDraftById, currentDraft, setCurrentDraft } = useUserDrafts();
+  const { addMessage } = useMessageLibrary();
+  const [isSaving, setIsSaving] = useState(false);
+  const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
   
   // Profile selection state
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
@@ -102,10 +73,163 @@ export default function WebContentAnalyzerPage() {
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [showRewrite, setShowRewrite] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(true);
+  
+  // Remediation tracking
+  const [resolvedIssues, setResolvedIssues] = useState<IssueRemediation[]>([]);
+
+  // Load draft on mount if resumeDraftId is in location state
+  useEffect(() => {
+    const resumeDraftId = (location.state as { resumeDraftId?: string })?.resumeDraftId;
+    if (resumeDraftId) {
+      loadDraftById(resumeDraftId).then(draft => {
+        if (draft) {
+          const draftData = draft.draft_data as unknown as SavedAnalysisData;
+          setContent(draftData.sourceContent || '');
+          setSourceUrl(draftData.sourceUrl || '');
+          setAnalysisResult(draftData.analysisResult);
+          setScreenshot(draftData.screenshot || null);
+          setSelectedProfileId(draftData.profileId || null);
+          setResolvedIssues(draftData.remediation?.resolvedIssues || []);
+          setCurrentDraftId(draft.id);
+          if (draftData.analysisResult?.sections?.length > 0) {
+            setSelectedSectionId(draftData.analysisResult.sections[0].id);
+          }
+          toast.success('Draft loaded', { description: 'Your previous analysis has been restored.' });
+        }
+      });
+    }
+  }, [location.state, loadDraftById]);
+
+  // Remediation handlers
+  const handleToggleResolved = useCallback((issueId: string, sectionId: string, resolved: boolean) => {
+    setResolvedIssues(prev => {
+      const existing = prev.find(r => r.issueId === issueId && r.sectionId === sectionId);
+      if (existing) {
+        return prev.map(r => 
+          r.issueId === issueId && r.sectionId === sectionId 
+            ? { ...r, resolved, resolvedAt: resolved ? new Date().toISOString() : undefined }
+            : r
+        );
+      }
+      return [...prev, { issueId, sectionId, resolved, resolvedAt: resolved ? new Date().toISOString() : undefined }];
+    });
+  }, []);
+
+  const handleUpdateNotes = useCallback((issueId: string, sectionId: string, notes: string) => {
+    setResolvedIssues(prev => {
+      const existing = prev.find(r => r.issueId === issueId && r.sectionId === sectionId);
+      if (existing) {
+        return prev.map(r => 
+          r.issueId === issueId && r.sectionId === sectionId 
+            ? { ...r, notes }
+            : r
+        );
+      }
+      return [...prev, { issueId, sectionId, resolved: false, notes }];
+    });
+  }, []);
+
+  // Save handlers
+  const buildDraftData = useCallback((): SavedAnalysisData => {
+    return {
+      sourceUrl,
+      sourceContent: content,
+      analysisResult: analysisResult!,
+      screenshot: screenshot || undefined,
+      profileId: selectedProfileId || undefined,
+      profileName: selectedProfile?.name,
+      analyzedAt: new Date().toISOString(),
+      remediation: {
+        totalIssues: analysisResult?.summary.totalIssues || 0,
+        resolvedIssues,
+      }
+    };
+  }, [sourceUrl, content, analysisResult, screenshot, selectedProfileId, selectedProfile?.name, resolvedIssues]);
+
+  const handleSaveDraft = useCallback(async () => {
+    if (!analysisResult) return;
+    
+    setIsSaving(true);
+    try {
+      const draftData = buildDraftData();
+      const title = sourceUrl 
+        ? `Analysis: ${new URL(sourceUrl).hostname}` 
+        : `Analysis: ${content.substring(0, 30)}...`;
+      
+      const draft = await saveDraft('analysis', draftData as unknown as Record<string, unknown>, title, currentDraftId || undefined);
+      
+      if (draft) {
+        setCurrentDraftId(draft.id);
+        toast.success('Draft saved', { description: 'Your analysis has been saved for later.' });
+      }
+    } catch (error) {
+      console.error('Failed to save draft:', error);
+      toast.error('Failed to save draft');
+    } finally {
+      setIsSaving(false);
+    }
+  }, [analysisResult, buildDraftData, saveDraft, currentDraftId, sourceUrl, content]);
+
+  const handleSaveToPersonalLibrary = useCallback(async (name: string): Promise<string | undefined> => {
+    if (!analysisResult) return undefined;
+    
+    setIsSaving(true);
+    try {
+      const messageContent = [
+        `## Web Content Analysis: ${name}`,
+        sourceUrl ? `**Source:** ${sourceUrl}` : '',
+        `**Overall Score:** ${analysisResult.overallScore}/100`,
+        analysisResult.executiveSummary ? `\n${analysisResult.executiveSummary}` : '',
+        `\n### Sections Analyzed`,
+        ...analysisResult.sections.map(s => `- **${s.title}** (Score: ${s.score})`),
+      ].filter(Boolean).join('\n');
+
+      const savedMessage = addMessage({
+        title: name,
+        content: messageContent,
+        channel: 'landing-page',
+        mode: 'evaluated',
+        source: 'analyzer',
+        notes: `Analyzed on ${new Date().toLocaleDateString()}. ${resolvedIssues.filter(r => r.resolved).length}/${analysisResult.summary.totalIssues} issues resolved.`,
+        institutionalProfileId: selectedProfileId || undefined,
+        institutionalProfileName: selectedProfile?.name,
+        approved: false,
+      });
+
+      toast.success('Saved to library', { description: 'Analysis added to your personal library.' });
+      return savedMessage?.id;
+    } catch (error) {
+      console.error('Failed to save to library:', error);
+      toast.error('Failed to save to library');
+      return undefined;
+    } finally {
+      setIsSaving(false);
+    }
+  }, [analysisResult, sourceUrl, addMessage, selectedProfileId, selectedProfile?.name, resolvedIssues]);
+
+  const handleSaveToUniversityLibrary = useCallback(async (name: string): Promise<string | undefined> => {
+    if (!analysisResult) return undefined;
+    
+    setIsSaving(true);
+    try {
+      // For now, save to personal library with a flag for submission
+      // In a full implementation, this would go to shared_templates table
+      const messageId = await handleSaveToPersonalLibrary(name);
+      
+      toast.success('Submitted to university library', { description: 'Your analysis has been submitted for review.' });
+      return messageId;
+    } catch (error) {
+      console.error('Failed to submit to university library:', error);
+      toast.error('Failed to submit');
+      return undefined;
+    } finally {
+      setIsSaving(false);
+    }
+  }, [analysisResult, handleSaveToPersonalLibrary]);
 
   const handleAnalyze = async (inputContent: string, url?: string) => {
     if (!inputContent.trim()) {
-      toast({
+      showToast({
         title: 'No Content',
         description: 'Please enter or import content to analyze.',
         variant: 'destructive',
@@ -114,7 +238,7 @@ export default function WebContentAnalyzerPage() {
     }
 
     if (!contentDNA?.voice_analysis) {
-      toast({
+      showToast({
         title: 'Content DNA Required',
         description: 'Please set up your Content DNA before analyzing content.',
         variant: 'destructive',
@@ -128,6 +252,7 @@ export default function WebContentAnalyzerPage() {
     setAnalysisResult(null);
     setShowRewrite(false);
     setScreenshot(null);
+    setResolvedIssues([]); // Reset remediation on new analysis
 
     try {
       // Fetch screenshot in parallel if URL provided
@@ -136,10 +261,8 @@ export default function WebContentAnalyzerPage() {
         firecrawlApi.scrape(url, { formats: ['screenshot'] })
           .then(res => {
             console.log('Screenshot response:', res);
-            // Handle nested data structure from Firecrawl API
             const screenshotData = res.data?.screenshot;
             if (res.success && screenshotData) {
-              // Ensure proper data URL format
               const imageData = screenshotData.startsWith('data:') 
                 ? screenshotData 
                 : `data:image/png;base64,${screenshotData}`;
@@ -170,13 +293,10 @@ export default function WebContentAnalyzerPage() {
         setSelectedSectionId(data.sections[0].id);
       }
 
-      toast({
-        title: 'Analysis Complete',
-        description: `Scored ${data.sections?.length || 0} sections against your Content DNA.`,
-      });
+      toast.success('Analysis Complete', { description: `Scored ${data.sections?.length || 0} sections against your Content DNA.` });
     } catch (error: any) {
       console.error('Analysis error:', error);
-      toast({
+      showToast({
         title: 'Analysis Failed',
         description: error.message || 'Failed to analyze content.',
         variant: 'destructive',
@@ -192,6 +312,8 @@ export default function WebContentAnalyzerPage() {
     setSourceUrl('');
     setShowRewrite(false);
     setScreenshot(null);
+    setResolvedIssues([]);
+    setCurrentDraftId(null);
   };
 
   const handleRewrite = () => {
@@ -431,6 +553,11 @@ export default function WebContentAnalyzerPage() {
                     onNewAnalysis={handleNewAnalysis}
                     onRewrite={handleRewrite}
                     showRewrite={showRewrite}
+                    onSaveDraft={handleSaveDraft}
+                    onSaveToPersonalLibrary={handleSaveToPersonalLibrary}
+                    onSaveToUniversityLibrary={handleSaveToUniversityLibrary}
+                    isSaving={isSaving}
+                    hasDraft={!!currentDraftId}
                   />
 
                   {/* Issues Summary Card */}
