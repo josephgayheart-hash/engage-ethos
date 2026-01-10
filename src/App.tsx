@@ -1,4 +1,5 @@
 import { Toaster } from "@/components/ui/toaster";
+import AgencyAnalyticsPage from "@/pages/agency/AgencyAnalyticsPage";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -227,6 +228,7 @@ const AppRoutes = () => (
     <Route path="/agency/onboarding" element={<RequireAuth><AgencyOnboardingPage /></RequireAuth>} />
     <Route path="/agency/dashboard" element={<RequireAuth><AgencyDashboardPage /></RequireAuth>} />
     <Route path="/agency/clients" element={<RequireAuth><AgencyClientsPage /></RequireAuth>} />
+    <Route path="/agency/analytics" element={<RequireAuth><AgencyAnalyticsPage /></RequireAuth>} />
     
     {/* Approver routes */}
     <Route path="/approvals" element={<RequireAuth><RequireApprover><ApprovalsPage /></RequireApprover></RequireAuth>} />

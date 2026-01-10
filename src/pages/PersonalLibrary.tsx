@@ -13,6 +13,7 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAgencyMode } from "@/hooks/useAgencyMode";
 import { CreateTemplateDialog } from "@/components/library/CreateTemplateDialog";
 import { SourceBadge } from "@/components/library/SourceBadge";
 import type { SavedMessage, LibraryFilters, SortOption } from "@/types/library";
@@ -51,6 +52,7 @@ const PersonalLibrary = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { isAdmin, isApprover } = useAuth();
+  const { isAgency, labels } = useAgencyMode();
   const { messages, deleteMessage, duplicateMessage, exportMessage, filterMessages, updateMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
   const { getProfileHierarchy } = useInstitutionalProfiles();
@@ -114,8 +116,8 @@ const PersonalLibrary = () => {
     toast({
       title: (isAdmin || isApprover) ? "Template published" : "Template submitted",
       description: (isAdmin || isApprover) 
-        ? "Your message has been published to the University Library."
-        : "Your message has been submitted to the University Library for review.",
+        ? `Your message has been published to the ${isAgency ? 'Template' : 'University'} Library.`
+        : `Your message has been submitted to the ${isAgency ? 'Template' : 'University'} Library for review.`,
     });
     setMessageToSubmit(null);
   };
@@ -360,7 +362,7 @@ const PersonalLibrary = () => {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => handleSubmitToShared(message, e)} title="Submit to University Library">
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => handleSubmitToShared(message, e)} title={`Submit to ${isAgency ? 'Template' : 'University'} Library`}>
                             <Library className="w-4 h-4" />
                           </Button>
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => handleDuplicate(message.id, e)} title="Duplicate">

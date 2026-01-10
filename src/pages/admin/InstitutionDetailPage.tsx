@@ -47,6 +47,10 @@ interface TenantInfo {
   accent_color: string | null;
   logo_url: string | null;
   created_at: string;
+  tenant_type: 'university' | 'agency' | null;
+  client_limit: number | null;
+  agency_website: string | null;
+  agency_contact_email: string | null;
 }
 
 interface UserProfile {
@@ -87,6 +91,7 @@ interface InstitutionalProfile {
   name: string;
   config: Record<string, any> | null;
   created_at: string;
+  client_status: string | null;
 }
 
 // Comprehensive list of all institutional config fields
@@ -307,10 +312,35 @@ export default function InstitutionDetailPage() {
                       <Badge variant={tenant.status === 'active' ? 'default' : 'secondary'}>
                         {tenant.status}
                       </Badge>
+                      {tenant.tenant_type && (
+                        <Badge variant="outline" className={tenant.tenant_type === 'agency' ? 'bg-purple-50 text-purple-700 border-purple-200' : ''}>
+                          {tenant.tenant_type === 'agency' ? 'Agency' : 'University'}
+                        </Badge>
+                      )}
                       <span className="text-sm text-muted-foreground">
                         Created {formatDate(tenant.created_at)}
                       </span>
                     </div>
+                    {/* Agency-specific info */}
+                    {tenant.tenant_type === 'agency' && (
+                      <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                        {tenant.agency_website && (
+                          <a href={tenant.agency_website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-foreground">
+                            <Globe className="w-3 h-3" />
+                            Website
+                          </a>
+                        )}
+                        {tenant.agency_contact_email && (
+                          <span className="flex items-center gap-1">
+                            <Mail className="w-3 h-3" />
+                            {tenant.agency_contact_email}
+                          </span>
+                        )}
+                        {tenant.client_limit && (
+                          <span>Client limit: {tenant.client_limit}</span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <Button variant="outline" onClick={fetchData} className="gap-2">

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Library, FolderOpen, Settings, Home, LogOut, User, CheckCircle, UserPlus, Building2, PenTool, Route, ChevronDown, Sparkles, FileEdit } from "lucide-react";
+import { Library, FolderOpen, Settings, Home, LogOut, User, CheckCircle, UserPlus, Building2, PenTool, Route, ChevronDown, Sparkles, FileEdit, Briefcase, BarChart3 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAgencyMode } from "@/hooks/useAgencyMode";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -21,6 +22,7 @@ const MAX_LOGO_WIDTH = 120;
 
 export function Header() {
   const { user, profile, tenant, isAdmin, isSuperAdmin, isApprover, logout } = useAuth();
+  const { isAgency, labels } = useAgencyMode();
   const navigate = useNavigate();
   const location = useLocation();
   const [referDialogOpen, setReferDialogOpen] = useState(false);
@@ -163,7 +165,7 @@ export function Header() {
                   <DropdownMenuItem asChild>
                     <Link to="/shared-library" className="flex items-center gap-2 cursor-pointer">
                       <Library className="w-4 h-4" />
-                      University Library
+                      {isAgency ? 'Templates' : 'University Library'}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -204,12 +206,29 @@ export function Header() {
                         Admin Console
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/university-settings" className="flex items-center gap-2 cursor-pointer">
-                        <Building2 className="w-4 h-4" />
-                        University Settings
-                      </Link>
-                    </DropdownMenuItem>
+                    {isAgency ? (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link to="/agency/clients" className="flex items-center gap-2 cursor-pointer">
+                            <Briefcase className="w-4 h-4" />
+                            {labels.settings}
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/agency/analytics" className="flex items-center gap-2 cursor-pointer">
+                            <BarChart3 className="w-4 h-4" />
+                            Analytics
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    ) : (
+                      <DropdownMenuItem asChild>
+                        <Link to="/university-settings" className="flex items-center gap-2 cursor-pointer">
+                          <Building2 className="w-4 h-4" />
+                          University Settings
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem asChild>
                       <Link to="/admin/content-dna" className="flex items-center gap-2 cursor-pointer">
                         <Sparkles className="w-4 h-4" />
@@ -255,9 +274,9 @@ export function Header() {
                 {isAdmin && (
                   <>
                     <DropdownMenuItem asChild>
-                      <Link to="/university-settings" className="flex items-center gap-2 cursor-pointer">
-                        <Building2 className="w-4 h-4" />
-                        University Settings
+                      <Link to={isAgency ? "/agency/clients" : "/university-settings"} className="flex items-center gap-2 cursor-pointer">
+                        {isAgency ? <Briefcase className="w-4 h-4" /> : <Building2 className="w-4 h-4" />}
+                        {isAgency ? labels.settings : "University Settings"}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
