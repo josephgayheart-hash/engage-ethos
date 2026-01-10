@@ -459,6 +459,12 @@ export default function LandingPage() {
               © 2026 CampusVoice.AI
             </span>
           </div>
+          <Link 
+            to="/for-agencies" 
+            className="text-sm text-primary-foreground/50 hover:text-primary-foreground/80 transition-colors"
+          >
+            Agency Partner Program
+          </Link>
           <p className="text-sm text-primary-foreground/60">
             Research-grounded messaging intelligence for higher education.
           </p>

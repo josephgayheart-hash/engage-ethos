@@ -56,6 +56,11 @@ import EvaluateFeaturePage from "./pages/features/EvaluateFeaturePage";
 import LibraryFeaturePage from "./pages/features/LibraryFeaturePage";
 import OGPreviewPage from "./pages/OGPreviewPage";
 import WebContentAnalyzerPage from "./pages/WebContentAnalyzerPage";
+import ForAgenciesPage from "./pages/agency/ForAgenciesPage";
+import AgencyRequestAccessPage from "./pages/agency/AgencyRequestAccessPage";
+import AgencyOnboardingPage from "./pages/agency/AgencyOnboardingPage";
+import AgencyDashboardPage from "./pages/agency/AgencyDashboardPage";
+import AgencyClientsPage from "./pages/agency/AgencyClientsPage";
 
 const queryClient = new QueryClient();
 
@@ -181,6 +186,10 @@ const AppRoutes = () => (
     <Route path="/change-password" element={<ChangePasswordPage />} />
     <Route path="/setup" element={<InitialSetupPage />} />
     
+    {/* Agency public routes */}
+    <Route path="/for-agencies" element={<ForAgenciesPage />} />
+    <Route path="/agency/request-access" element={<AgencyRequestAccessPage />} />
+    
     {/* Feature marketing pages */}
     <Route path="/features/content-dna" element={<ContentDNAFeaturePage />} />
     <Route path="/features/message-builder" element={<MessageBuilderFeaturePage />} />
@@ -213,6 +222,11 @@ const AppRoutes = () => (
     <Route path="/settings" element={<Navigate to="/university-settings" replace />} />
     <Route path="/university-settings" element={<RequireAuth><UniversitySettingsPage /></RequireAuth>} />
     <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
+    
+    {/* Agency protected routes */}
+    <Route path="/agency/onboarding" element={<RequireAuth><AgencyOnboardingPage /></RequireAuth>} />
+    <Route path="/agency/dashboard" element={<RequireAuth><AgencyDashboardPage /></RequireAuth>} />
+    <Route path="/agency/clients" element={<RequireAuth><AgencyClientsPage /></RequireAuth>} />
     
     {/* Approver routes */}
     <Route path="/approvals" element={<RequireAuth><RequireApprover><ApprovalsPage /></RequireApprover></RequireAuth>} />

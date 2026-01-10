@@ -110,7 +110,6 @@ export default function AgencyRequestAccessPage() {
         <SEOHead
           title="Application Submitted | CampusVoice.AI"
           description="Thank you for applying to the CampusVoice Agency Partner Program."
-          path="/agency/request-access"
         />
         <div className="min-h-screen bg-background flex items-center justify-center p-4">
           <Card className="max-w-md w-full">
@@ -144,7 +143,6 @@ export default function AgencyRequestAccessPage() {
       <SEOHead
         title="Become a Partner | CampusVoice.AI"
         description="Apply to become a CampusVoice Agency Partner. Manage multiple university clients from one platform."
-        path="/agency/request-access"
       />
 
       <div className="min-h-screen bg-background">

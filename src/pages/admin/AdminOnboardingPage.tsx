@@ -38,7 +38,10 @@ import {
   ChevronLeft,
   Home,
   Clock,
-  Building2
+  Building2,
+  Briefcase,
+  Globe,
+  Users
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -55,11 +58,16 @@ interface OnboardingRequest {
   submitted_at: string;
   reviewed_at: string | null;
   notes: string | null;
+  request_type?: string;
+  agency_name?: string | null;
+  agency_website?: string | null;
+  estimated_client_count?: number | null;
 }
 
 interface Tenant {
   id: string;
   institution_name: string;
+  tenant_type?: string;
 }
 
 export default function AdminOnboardingPage() {
@@ -272,6 +280,16 @@ export default function AdminOnboardingPage() {
     toast({ title: 'Copied to clipboard' });
   };
 
+  // Filter by request type
+  const universityRequests = requests.filter(r => r.request_type !== 'agency');
+  const agencyRequests = requests.filter(r => r.request_type === 'agency');
+  
+  const pendingUniversityRequests = universityRequests.filter(r => r.request_status === 'submitted');
+  const processedUniversityRequests = universityRequests.filter(r => r.request_status !== 'submitted');
+  
+  const pendingAgencyRequests = agencyRequests.filter(r => r.request_status === 'submitted');
+  const processedAgencyRequests = agencyRequests.filter(r => r.request_status !== 'submitted');
+  
   const pendingRequests = requests.filter(r => r.request_status === 'submitted');
   const processedRequests = requests.filter(r => r.request_status !== 'submitted');
 
@@ -318,7 +336,11 @@ export default function AdminOnboardingPage() {
               <TabsList className="mb-4">
                 <TabsTrigger value="pending" className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />
-                  Pending ({pendingRequests.length})
+                  Universities ({pendingUniversityRequests.length})
+                </TabsTrigger>
+                <TabsTrigger value="agencies" className="flex items-center gap-2">
+                  <Briefcase className="w-4 h-4" />
+                  Agencies ({pendingAgencyRequests.length})
                 </TabsTrigger>
                 <TabsTrigger value="processed">
                   Processed ({processedRequests.length})
@@ -330,10 +352,10 @@ export default function AdminOnboardingPage() {
                   <div className="flex items-center justify-center py-12">
                     <Loader2 className="w-6 h-6 animate-spin text-[hsl(220,14%,46%)]" />
                   </div>
-                ) : pendingRequests.length === 0 ? (
+                ) : pendingUniversityRequests.length === 0 ? (
                   <div className="text-center py-12 text-[hsl(220,14%,46%)]">
                     <UserPlus className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No pending requests</p>
+                    <p>No pending university requests</p>
                   </div>
                 ) : (
                   <Table>
@@ -348,7 +370,7 @@ export default function AdminOnboardingPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {pendingRequests.map((request) => (
+                      {pendingUniversityRequests.map((request) => (
                         <TableRow key={request.id}>
                           <TableCell className="font-medium">
                             {request.first_name} {request.last_name}
@@ -364,6 +386,103 @@ export default function AdminOnboardingPage() {
                             </span>
                           </TableCell>
                           <TableCell>{request.department || '—'}</TableCell>
+                          <TableCell className="text-sm text-[hsl(220,14%,46%)]">
+                            {format(new Date(request.submitted_at), 'MMM d, yyyy')}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-red-600 border-red-200 hover:bg-red-50"
+                                onClick={() => {
+                                  setSelectedRequest(request);
+                                  setShowRejectDialog(true);
+                                }}
+                              >
+                                <XCircle className="w-4 h-4 mr-1" />
+                                Reject
+                              </Button>
+                              <Button
+                                size="sm"
+                                className="bg-[hsl(158,64%,42%)] hover:bg-[hsl(158,64%,38%)]"
+                                onClick={() => {
+                                  setSelectedRequest(request);
+                                  setShowApproveDialog(true);
+                                }}
+                              >
+                                <CheckCircle2 className="w-4 h-4 mr-1" />
+                                Approve
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </TabsContent>
+
+              <TabsContent value="agencies">
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="w-6 h-6 animate-spin text-[hsl(220,14%,46%)]" />
+                  </div>
+                ) : pendingAgencyRequests.length === 0 ? (
+                  <div className="text-center py-12 text-[hsl(220,14%,46%)]">
+                    <Briefcase className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>No pending agency applications</p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Contact</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Agency</TableHead>
+                        <TableHead>Website</TableHead>
+                        <TableHead>Est. Clients</TableHead>
+                        <TableHead>Submitted</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {pendingAgencyRequests.map((request) => (
+                        <TableRow key={request.id}>
+                          <TableCell className="font-medium">
+                            {request.first_name} {request.last_name}
+                            {request.title && (
+                              <span className="block text-xs text-[hsl(220,14%,46%)]">{request.title}</span>
+                            )}
+                          </TableCell>
+                          <TableCell>{request.email}</TableCell>
+                          <TableCell>
+                            <span className="flex items-center gap-1">
+                              <Briefcase className="w-3 h-3" />
+                              {request.agency_name || request.institution_name_input || '—'}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            {request.agency_website ? (
+                              <a 
+                                href={request.agency_website} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 text-primary hover:underline"
+                              >
+                                <Globe className="w-3 h-3" />
+                                Visit
+                              </a>
+                            ) : '—'}
+                          </TableCell>
+                          <TableCell>
+                            {request.estimated_client_count ? (
+                              <span className="flex items-center gap-1">
+                                <Users className="w-3 h-3" />
+                                {request.estimated_client_count}
+                              </span>
+                            ) : '—'}
+                          </TableCell>
                           <TableCell className="text-sm text-[hsl(220,14%,46%)]">
                             {format(new Date(request.submitted_at), 'MMM d, yyyy')}
                           </TableCell>

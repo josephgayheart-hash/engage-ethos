@@ -83,7 +83,6 @@ export default function AgencyOnboardingPage() {
       <SEOHead
         title="Agency Setup | CampusVoice.AI"
         description="Set up your agency account and add your first university client."
-        path="/agency/onboarding"
       />
 
       <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background flex flex-col">
