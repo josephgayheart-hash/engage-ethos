@@ -866,6 +866,47 @@ export type Database = {
           },
         ]
       }
+      outreach_history: {
+        Row: {
+          body: string
+          created_at: string | null
+          created_by_user_id: string | null
+          id: string
+          prospect_id: string | null
+          sent_at: string | null
+          subject: string | null
+          type: string
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          created_by_user_id?: string | null
+          id?: string
+          prospect_id?: string | null
+          sent_at?: string | null
+          subject?: string | null
+          type: string
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          created_by_user_id?: string | null
+          id?: string
+          prospect_id?: string | null
+          sent_at?: string | null
+          subject?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outreach_history_prospect_id_fkey"
+            columns: ["prospect_id"]
+            isOneToOne: false
+            referencedRelation: "sales_prospects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       personal_messages: {
         Row: {
           approved: boolean | null
@@ -1164,10 +1205,13 @@ export type Database = {
           brand_launch_date: string | null
           contact_email: string | null
           contact_name: string | null
+          contact_phone: string | null
           contact_title: string | null
           created_by_user_id: string | null
           discovered_at: string | null
+          extracted_contacts: Json | null
           id: string
+          linkedin_url: string | null
           notes: string | null
           source_article_title: string | null
           source_article_url: string | null
@@ -1180,10 +1224,13 @@ export type Database = {
           brand_launch_date?: string | null
           contact_email?: string | null
           contact_name?: string | null
+          contact_phone?: string | null
           contact_title?: string | null
           created_by_user_id?: string | null
           discovered_at?: string | null
+          extracted_contacts?: Json | null
           id?: string
+          linkedin_url?: string | null
           notes?: string | null
           source_article_title?: string | null
           source_article_url?: string | null
@@ -1196,10 +1243,13 @@ export type Database = {
           brand_launch_date?: string | null
           contact_email?: string | null
           contact_name?: string | null
+          contact_phone?: string | null
           contact_title?: string | null
           created_by_user_id?: string | null
           discovered_at?: string | null
+          extracted_contacts?: Json | null
           id?: string
+          linkedin_url?: string | null
           notes?: string | null
           source_article_title?: string | null
           source_article_url?: string | null

@@ -27,6 +27,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -45,12 +52,16 @@ import {
   Mail,
   User,
   FileText,
-  Calendar,
-  CheckCircle2,
-  Phone,
-  XCircle,
-  Clock,
   Sparkles,
+  Linkedin,
+  MessageSquare,
+  Send,
+  Copy,
+  Check,
+  Phone,
+  MoreHorizontal,
+  UserSearch,
+  Wand2,
 } from "lucide-react";
 
 interface SearchResult {
@@ -58,6 +69,14 @@ interface SearchResult {
   title: string;
   description?: string;
   markdown?: string;
+}
+
+interface ExtractedContact {
+  name: string;
+  title: string;
+  email?: string;
+  phone?: string;
+  role?: string;
 }
 
 interface SalesProspect {
@@ -69,6 +88,15 @@ interface SalesProspect {
   contact_name: string | null;
   contact_email: string | null;
   contact_title: string | null;
+  contact_phone: string | null;
+  linkedin_url: string | null;
+  extracted_contacts: unknown;
+  notes: string | null;
+  status: string;
+  brand_launch_date: string | null;
+  discovered_at: string;
+  created_by_user_id: string | null;
+}
   notes: string | null;
   status: string;
   brand_launch_date: string | null;
@@ -119,6 +147,24 @@ export const BrandRadarTab = () => {
   const [selectedResult, setSelectedResult] = useState<SearchResult | null>(null);
   const [editingProspect, setEditingProspect] = useState<SalesProspect | null>(null);
   
+  // Extraction state
+  const [extractingContacts, setExtractingContacts] = useState<string | null>(null);
+  const [extractedContacts, setExtractedContacts] = useState<ExtractedContact[]>([]);
+  
+  // LinkedIn lookup state
+  const [findingLinkedIn, setFindingLinkedIn] = useState<string | null>(null);
+  
+  // Outreach state
+  const [outreachDialogOpen, setOutreachDialogOpen] = useState(false);
+  const [outreachProspect, setOutreachProspect] = useState<SalesProspect | null>(null);
+  const [outreachType, setOutreachType] = useState<'linkedin_dm' | 'email'>('email');
+  const [generatingOutreach, setGeneratingOutreach] = useState(false);
+  const [outreachContent, setOutreachContent] = useState({ subject: '', body: '', call_to_action: '' });
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+  
+  // Email sending state
+  const [sendingEmail, setSendingEmail] = useState(false);
+  
   const [formData, setFormData] = useState({
     university_name: "",
     url: "",
@@ -127,6 +173,8 @@ export const BrandRadarTab = () => {
     contact_name: "",
     contact_email: "",
     contact_title: "",
+    contact_phone: "",
+    linkedin_url: "",
     notes: "",
     status: "new",
     brand_launch_date: "",
@@ -142,7 +190,7 @@ export const BrandRadarTab = () => {
         .order('discovered_at', { ascending: false });
 
       if (error) throw error;
-      setProspects(data || []);
+      setProspects((data || []) as unknown as SalesProspect[]);
     } catch (error) {
       console.error('Error fetching prospects:', error);
       toast({
@@ -196,9 +244,223 @@ export const BrandRadarTab = () => {
     }
   };
 
+  // Extract contacts from article
+  const handleExtractContacts = async (result: SearchResult) => {
+    setExtractingContacts(result.url);
+    setExtractedContacts([]);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('extract-article-contacts', {
+        body: { 
+          markdown: result.markdown || result.description,
+          title: result.title,
+          url: result.url
+        }
+      });
+
+      if (error) throw error;
+      
+      if (data?.success && data.data) {
+        const contacts = data.data.contacts || [];
+        setExtractedContacts(contacts);
+        
+        // Pre-fill form with extracted data
+        setSelectedResult(result);
+        setFormData({
+          university_name: data.data.university_name || extractUniversityName(result.title || ""),
+          url: extractDomainUrl(result.url),
+          source_article_url: result.url,
+          source_article_title: result.title || "",
+          contact_name: contacts[0]?.name || "",
+          contact_email: contacts[0]?.email || "",
+          contact_title: contacts[0]?.title || "",
+          contact_phone: contacts[0]?.phone || "",
+          linkedin_url: "",
+          notes: result.description || "",
+          status: "new",
+          brand_launch_date: data.data.brand_launch_date || "",
+        });
+        setAddDialogOpen(true);
+        
+        toast({
+          title: contacts.length > 0 ? `Found ${contacts.length} contact(s)` : "No contacts found",
+          description: contacts.length > 0 
+            ? `Extracted: ${contacts.map((c: ExtractedContact) => c.name).join(', ')}`
+            : "You can add contact info manually",
+        });
+      } else {
+        throw new Error(data?.error || 'Extraction failed');
+      }
+    } catch (error) {
+      console.error('Extraction error:', error);
+      toast({
+        title: "Extraction failed",
+        description: error instanceof Error ? error.message : "Could not extract contacts",
+        variant: "destructive",
+      });
+      // Fall back to manual add
+      handleAddFromResult(result);
+    } finally {
+      setExtractingContacts(null);
+    }
+  };
+
+  // Find LinkedIn profile
+  const handleFindLinkedIn = async (prospect: SalesProspect) => {
+    if (!prospect.contact_name) {
+      toast({
+        title: "Contact name required",
+        description: "Add a contact name first to search for their LinkedIn profile",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setFindingLinkedIn(prospect.id);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('find-linkedin-profile', {
+        body: { 
+          name: prospect.contact_name,
+          title: prospect.contact_title,
+          institution: prospect.university_name
+        }
+      });
+
+      if (error) throw error;
+      
+      if (data?.success && data.data?.linkedin_url) {
+        // Update the prospect with LinkedIn URL
+        const { error: updateError } = await supabase
+          .from('sales_prospects')
+          .update({ linkedin_url: data.data.linkedin_url })
+          .eq('id', prospect.id);
+          
+        if (updateError) throw updateError;
+        
+        toast({
+          title: "LinkedIn profile found",
+          description: `Confidence: ${data.data.confidence}`,
+        });
+        
+        fetchProspects();
+      } else {
+        toast({
+          title: "No LinkedIn profile found",
+          description: "Try searching manually or check the contact name",
+        });
+      }
+    } catch (error) {
+      console.error('LinkedIn search error:', error);
+      toast({
+        title: "LinkedIn search failed",
+        description: error instanceof Error ? error.message : "Could not find profile",
+        variant: "destructive",
+      });
+    } finally {
+      setFindingLinkedIn(null);
+    }
+  };
+
+  // Generate outreach message
+  const handleGenerateOutreach = async (prospect: SalesProspect, type: 'linkedin_dm' | 'email') => {
+    setOutreachProspect(prospect);
+    setOutreachType(type);
+    setOutreachDialogOpen(true);
+    setGeneratingOutreach(true);
+    setOutreachContent({ subject: '', body: '', call_to_action: '' });
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-outreach-message', {
+        body: { 
+          contact_name: prospect.contact_name || 'there',
+          contact_title: prospect.contact_title,
+          university_name: prospect.university_name,
+          brand_launch_date: prospect.brand_launch_date,
+          source_article_title: prospect.source_article_title,
+          message_type: type
+        }
+      });
+
+      if (error) throw error;
+      
+      if (data?.success && data.data) {
+        setOutreachContent(data.data);
+      } else {
+        throw new Error(data?.error || 'Generation failed');
+      }
+    } catch (error) {
+      console.error('Outreach generation error:', error);
+      toast({
+        title: "Generation failed",
+        description: error instanceof Error ? error.message : "Could not generate message",
+        variant: "destructive",
+      });
+    } finally {
+      setGeneratingOutreach(false);
+    }
+  };
+
+  // Send email
+  const handleSendEmail = async () => {
+    if (!outreachProspect?.contact_email) {
+      toast({
+        title: "Email required",
+        description: "Add an email address to the prospect first",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setSendingEmail(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('send-prospect-email', {
+        body: { 
+          prospect_id: outreachProspect.id,
+          to_email: outreachProspect.contact_email,
+          to_name: outreachProspect.contact_name || '',
+          subject: outreachContent.subject,
+          body: outreachContent.body,
+        }
+      });
+
+      if (error) throw error;
+      
+      if (data?.success) {
+        toast({
+          title: "Email sent!",
+          description: `Message sent to ${outreachProspect.contact_email}`,
+        });
+        setOutreachDialogOpen(false);
+        fetchProspects();
+      } else {
+        throw new Error(data?.error || 'Failed to send email');
+      }
+    } catch (error) {
+      console.error('Email send error:', error);
+      toast({
+        title: "Failed to send email",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
+  // Copy to clipboard
+  const handleCopy = async (text: string, field: string) => {
+    await navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
+    toast({ title: "Copied to clipboard" });
+  };
+
   // Open add dialog with result data
   const handleAddFromResult = (result: SearchResult) => {
     setSelectedResult(result);
+    setExtractedContacts([]);
     setFormData({
       university_name: extractUniversityName(result.title || ""),
       url: extractDomainUrl(result.url),
@@ -207,6 +469,8 @@ export const BrandRadarTab = () => {
       contact_name: "",
       contact_email: "",
       contact_title: "",
+      contact_phone: "",
+      linkedin_url: "",
       notes: result.description || "",
       status: "new",
       brand_launch_date: "",
@@ -216,7 +480,6 @@ export const BrandRadarTab = () => {
 
   // Extract university name from title
   const extractUniversityName = (title: string): string => {
-    // Common patterns: "University of X", "X University", "X College"
     const patterns = [
       /^([\w\s]+(?:University|College|Institute))/i,
       /(University of [\w\s]+)/i,
@@ -228,7 +491,6 @@ export const BrandRadarTab = () => {
       if (match) return match[1].trim();
     }
     
-    // Fallback: first part before common separators
     return title.split(/[-–—|:]/).filter(part => part.trim())[0]?.trim() || title;
   };
 
@@ -254,19 +516,26 @@ export const BrandRadarTab = () => {
     }
 
     try {
+      const insertData: Record<string, unknown> = {
+        university_name: formData.university_name,
+        url: formData.url,
+        source_article_url: formData.source_article_url || null,
+        source_article_title: formData.source_article_title || null,
+        contact_name: formData.contact_name || null,
+        contact_email: formData.contact_email || null,
+        contact_title: formData.contact_title || null,
+        contact_phone: formData.contact_phone || null,
+        linkedin_url: formData.linkedin_url || null,
+        notes: formData.notes || null,
+        status: formData.status,
+        brand_launch_date: formData.brand_launch_date || null,
+        extracted_contacts: extractedContacts.length > 0 ? extractedContacts : null,
+        created_by_user_id: user?.id || null,
+      };
+      
       const { error } = await supabase
         .from('sales_prospects')
-        .insert({
-          ...formData,
-          source_article_url: formData.source_article_url || null,
-          source_article_title: formData.source_article_title || null,
-          contact_name: formData.contact_name || null,
-          contact_email: formData.contact_email || null,
-          contact_title: formData.contact_title || null,
-          notes: formData.notes || null,
-          brand_launch_date: formData.brand_launch_date || null,
-          created_by_user_id: user?.id || null,
-        });
+        .insert(insertData as never);
 
       if (error) throw error;
 
@@ -276,6 +545,7 @@ export const BrandRadarTab = () => {
       });
       
       setAddDialogOpen(false);
+      setExtractedContacts([]);
       fetchProspects();
     } catch (error) {
       console.error('Error saving prospect:', error);
@@ -298,6 +568,8 @@ export const BrandRadarTab = () => {
       contact_name: prospect.contact_name || "",
       contact_email: prospect.contact_email || "",
       contact_title: prospect.contact_title || "",
+      contact_phone: prospect.contact_phone || "",
+      linkedin_url: prospect.linkedin_url || "",
       notes: prospect.notes || "",
       status: prospect.status,
       brand_launch_date: prospect.brand_launch_date || "",
@@ -313,13 +585,17 @@ export const BrandRadarTab = () => {
       const { error } = await supabase
         .from('sales_prospects')
         .update({
-          ...formData,
+          university_name: formData.university_name,
+          url: formData.url,
           source_article_url: formData.source_article_url || null,
           source_article_title: formData.source_article_title || null,
           contact_name: formData.contact_name || null,
           contact_email: formData.contact_email || null,
           contact_title: formData.contact_title || null,
+          contact_phone: formData.contact_phone || null,
+          linkedin_url: formData.linkedin_url || null,
           notes: formData.notes || null,
+          status: formData.status,
           brand_launch_date: formData.brand_launch_date || null,
         })
         .eq('id', editingProspect.id);
@@ -475,15 +751,31 @@ export const BrandRadarTab = () => {
                             {result.url}
                           </p>
                         </div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="gap-1 flex-shrink-0"
-                          onClick={() => handleAddFromResult(result)}
-                        >
-                          <Plus className="w-3 h-3" />
-                          Save
-                        </Button>
+                        <div className="flex gap-2 flex-shrink-0">
+                          <Button
+                            size="sm"
+                            variant="default"
+                            className="gap-1"
+                            disabled={extractingContacts === result.url}
+                            onClick={() => handleExtractContacts(result)}
+                          >
+                            {extractingContacts === result.url ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <UserSearch className="w-3 h-3" />
+                            )}
+                            Extract & Save
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="gap-1"
+                            onClick={() => handleAddFromResult(result)}
+                          >
+                            <Plus className="w-3 h-3" />
+                            Manual
+                          </Button>
+                        </div>
                       </div>
                     </Card>
                   ))}
@@ -529,7 +821,7 @@ export const BrandRadarTab = () => {
               <p className="text-sm">Search above to find universities with recent rebrands</p>
             </div>
           ) : (
-            <ScrollArea className="max-h-[400px]">
+            <ScrollArea className="max-h-[500px]">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -564,22 +856,49 @@ export const BrandRadarTab = () => {
                               Source: {prospect.source_article_title}
                             </a>
                           )}
+                          {prospect.brand_launch_date && (
+                            <span className="text-[10px] text-muted-foreground block">
+                              Launch: {prospect.brand_launch_date}
+                            </span>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>{getStatusBadge(prospect.status)}</TableCell>
                       <TableCell>
                         {prospect.contact_name ? (
                           <div className="text-sm">
-                            <p className="font-medium">{prospect.contact_name}</p>
+                            <div className="flex items-center gap-1">
+                              <p className="font-medium">{prospect.contact_name}</p>
+                              {prospect.linkedin_url && (
+                                <a
+                                  href={prospect.linkedin_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-[#0077B5] hover:opacity-80"
+                                >
+                                  <Linkedin className="w-3 h-3" />
+                                </a>
+                              )}
+                            </div>
                             {prospect.contact_title && (
                               <p className="text-[10px] text-muted-foreground">{prospect.contact_title}</p>
                             )}
                             {prospect.contact_email && (
                               <a
                                 href={`mailto:${prospect.contact_email}`}
-                                className="text-[10px] text-primary hover:underline"
+                                className="text-[10px] text-primary hover:underline flex items-center gap-1"
                               >
+                                <Mail className="w-2.5 h-2.5" />
                                 {prospect.contact_email}
+                              </a>
+                            )}
+                            {prospect.contact_phone && (
+                              <a
+                                href={`tel:${prospect.contact_phone}`}
+                                className="text-[10px] text-primary hover:underline flex items-center gap-1"
+                              >
+                                <Phone className="w-2.5 h-2.5" />
+                                {prospect.contact_phone}
                               </a>
                             )}
                           </div>
@@ -592,20 +911,58 @@ export const BrandRadarTab = () => {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(prospect)}
-                          >
-                            <Edit3 className="w-3 h-3" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(prospect)}
-                          >
-                            <Trash2 className="w-3 h-3 text-destructive" />
-                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleEdit(prospect)}>
+                                <Edit3 className="w-3 h-3 mr-2" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              {!prospect.linkedin_url && prospect.contact_name && (
+                                <DropdownMenuItem 
+                                  onClick={() => handleFindLinkedIn(prospect)}
+                                  disabled={findingLinkedIn === prospect.id}
+                                >
+                                  {findingLinkedIn === prospect.id ? (
+                                    <Loader2 className="w-3 h-3 mr-2 animate-spin" />
+                                  ) : (
+                                    <Linkedin className="w-3 h-3 mr-2" />
+                                  )}
+                                  Find LinkedIn
+                                </DropdownMenuItem>
+                              )}
+                              {prospect.linkedin_url && (
+                                <DropdownMenuItem asChild>
+                                  <a href={prospect.linkedin_url} target="_blank" rel="noopener noreferrer">
+                                    <Linkedin className="w-3 h-3 mr-2" />
+                                    View LinkedIn
+                                  </a>
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handleGenerateOutreach(prospect, 'linkedin_dm')}>
+                                <MessageSquare className="w-3 h-3 mr-2" />
+                                Draft LinkedIn DM
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleGenerateOutreach(prospect, 'email')}>
+                                <Mail className="w-3 h-3 mr-2" />
+                                Draft Email
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem 
+                                onClick={() => handleDelete(prospect)}
+                                className="text-destructive focus:text-destructive"
+                              >
+                                <Trash2 className="w-3 h-3 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -619,24 +976,58 @@ export const BrandRadarTab = () => {
 
       {/* Add/Edit Dialog */}
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Plus className="w-4 h-4" />
               Add Prospect
             </DialogTitle>
           </DialogHeader>
+          
+          {/* Show extracted contacts if any */}
+          {extractedContacts.length > 1 && (
+            <div className="bg-muted/50 p-3 rounded-md mb-4">
+              <p className="text-xs font-medium mb-2">Multiple contacts found - select one:</p>
+              <div className="space-y-2">
+                {extractedContacts.map((contact, idx) => (
+                  <Button
+                    key={idx}
+                    variant={formData.contact_name === contact.name ? "default" : "outline"}
+                    size="sm"
+                    className="w-full justify-start text-left"
+                    onClick={() => setFormData({
+                      ...formData,
+                      contact_name: contact.name,
+                      contact_title: contact.title || '',
+                      contact_email: contact.email || '',
+                      contact_phone: contact.phone || '',
+                    })}
+                  >
+                    <User className="w-3 h-3 mr-2 flex-shrink-0" />
+                    <div className="truncate">
+                      <span className="font-medium">{contact.name}</span>
+                      {contact.title && <span className="text-muted-foreground"> - {contact.title}</span>}
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+          
           <ProspectForm
             formData={formData}
             setFormData={setFormData}
             onSave={handleSaveProspect}
-            onCancel={() => setAddDialogOpen(false)}
+            onCancel={() => {
+              setAddDialogOpen(false);
+              setExtractedContacts([]);
+            }}
           />
         </DialogContent>
       </Dialog>
 
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Edit3 className="w-4 h-4" />
@@ -652,31 +1043,142 @@ export const BrandRadarTab = () => {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Outreach Dialog */}
+      <Dialog open={outreachDialogOpen} onOpenChange={setOutreachDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {outreachType === 'linkedin_dm' ? (
+                <>
+                  <Linkedin className="w-4 h-4 text-[#0077B5]" />
+                  LinkedIn Message for {outreachProspect?.contact_name || outreachProspect?.university_name}
+                </>
+              ) : (
+                <>
+                  <Mail className="w-4 h-4" />
+                  Email for {outreachProspect?.contact_name || outreachProspect?.university_name}
+                </>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          
+          {generatingOutreach ? (
+            <div className="flex flex-col items-center justify-center py-12 gap-3">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground">Generating personalized message...</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {outreachType === 'email' && (
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <Label>Subject Line</Label>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleCopy(outreachContent.subject, 'subject')}
+                    >
+                      {copiedField === 'subject' ? (
+                        <Check className="w-3 h-3" />
+                      ) : (
+                        <Copy className="w-3 h-3" />
+                      )}
+                    </Button>
+                  </div>
+                  <Input
+                    value={outreachContent.subject}
+                    onChange={(e) => setOutreachContent({ ...outreachContent, subject: e.target.value })}
+                  />
+                </div>
+              )}
+              
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <Label>Message</Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleCopy(outreachContent.body, 'body')}
+                  >
+                    {copiedField === 'body' ? (
+                      <Check className="w-3 h-3" />
+                    ) : (
+                      <Copy className="w-3 h-3" />
+                    )}
+                  </Button>
+                </div>
+                <Textarea
+                  value={outreachContent.body}
+                  onChange={(e) => setOutreachContent({ ...outreachContent, body: e.target.value })}
+                  rows={10}
+                  className="font-mono text-sm"
+                />
+              </div>
+              
+              <DialogFooter className="gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => handleCopy(
+                    outreachType === 'email' 
+                      ? `Subject: ${outreachContent.subject}\n\n${outreachContent.body}`
+                      : outreachContent.body,
+                    'all'
+                  )}
+                >
+                  {copiedField === 'all' ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+                  Copy All
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => handleGenerateOutreach(outreachProspect!, outreachType)}
+                >
+                  <Wand2 className="w-4 h-4 mr-2" />
+                  Regenerate
+                </Button>
+                {outreachType === 'email' && outreachProspect?.contact_email && (
+                  <Button
+                    onClick={handleSendEmail}
+                    disabled={sendingEmail}
+                  >
+                    {sendingEmail ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Send className="w-4 h-4 mr-2" />
+                    )}
+                    Send Email
+                  </Button>
+                )}
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
 // Reusable form component
 interface ProspectFormProps {
-  formData: typeof initialFormData;
-  setFormData: React.Dispatch<React.SetStateAction<typeof initialFormData>>;
+  formData: {
+    university_name: string;
+    url: string;
+    source_article_url: string;
+    source_article_title: string;
+    contact_name: string;
+    contact_email: string;
+    contact_title: string;
+    contact_phone: string;
+    linkedin_url: string;
+    notes: string;
+    status: string;
+    brand_launch_date: string;
+  };
+  setFormData: React.Dispatch<React.SetStateAction<ProspectFormProps['formData']>>;
   onSave: () => void;
   onCancel: () => void;
   isEdit?: boolean;
 }
-
-const initialFormData = {
-  university_name: "",
-  url: "",
-  source_article_url: "",
-  source_article_title: "",
-  contact_name: "",
-  contact_email: "",
-  contact_title: "",
-  notes: "",
-  status: "new",
-  brand_launch_date: "",
-};
 
 const ProspectForm = ({ formData, setFormData, onSave, onCancel, isEdit }: ProspectFormProps) => {
   return (
@@ -753,7 +1255,7 @@ const ProspectForm = ({ formData, setFormData, onSave, onCancel, isEdit }: Prosp
               placeholder="VP of Marketing"
             />
           </div>
-          <div className="col-span-2">
+          <div>
             <Label htmlFor="contact_email">Email</Label>
             <Input
               id="contact_email"
@@ -761,6 +1263,25 @@ const ProspectForm = ({ formData, setFormData, onSave, onCancel, isEdit }: Prosp
               value={formData.contact_email}
               onChange={(e) => setFormData({ ...formData, contact_email: e.target.value })}
               placeholder="jsmith@university.edu"
+            />
+          </div>
+          <div>
+            <Label htmlFor="contact_phone">Phone</Label>
+            <Input
+              id="contact_phone"
+              type="tel"
+              value={formData.contact_phone}
+              onChange={(e) => setFormData({ ...formData, contact_phone: e.target.value })}
+              placeholder="(555) 123-4567"
+            />
+          </div>
+          <div className="col-span-2">
+            <Label htmlFor="linkedin_url">LinkedIn URL</Label>
+            <Input
+              id="linkedin_url"
+              value={formData.linkedin_url}
+              onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
+              placeholder="https://linkedin.com/in/username"
             />
           </div>
         </div>
