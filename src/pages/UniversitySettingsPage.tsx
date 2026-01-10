@@ -568,22 +568,25 @@ export default function UniversitySettingsPage() {
               </TabsTrigger>
               <TabsTrigger value="branding" className="flex items-center gap-2">
                 <Palette className="w-4 h-4" />
-                Branding
+                {isAgency ? 'Agency Branding' : 'Branding'}
               </TabsTrigger>
             </TabsList>
 
             {/* Branding Tab */}
             <TabsContent value="branding" className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Institution Name */}
+                {/* Name */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
-                      <Building2 className="w-5 h-5" />
-                      Institution Name
+                      {isAgency ? <Users className="w-5 h-5" /> : <Building2 className="w-5 h-5" />}
+                      {isAgency ? 'Agency Name' : 'Institution Name'}
                     </CardTitle>
                     <CardDescription>
-                      The primary name of your institution displayed throughout the app
+                      {isAgency 
+                        ? 'The name of your agency displayed throughout the platform'
+                        : 'The primary name of your institution displayed throughout the app'
+                      }
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -592,7 +595,7 @@ export default function UniversitySettingsPage() {
                         <Input
                           value={institutionName}
                           onChange={(e) => setInstitutionName(e.target.value)}
-                          placeholder="Enter institution name"
+                          placeholder={isAgency ? 'Enter agency name' : 'Enter institution name'}
                         />
                         <div className="flex gap-2">
                           <Button onClick={handleSaveInstitution} disabled={isSavingInstitution} size="sm">
@@ -624,10 +627,13 @@ export default function UniversitySettingsPage() {
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
                       <Image className="w-5 h-5" />
-                      Institution Logo
+                      {isAgency ? 'Agency Logo' : 'Institution Logo'}
                     </CardTitle>
                     <CardDescription>
-                      Upload your institution's logo (PNG, JPG, max 2MB)
+                      {isAgency 
+                        ? 'Upload your agency logo (PNG, JPG, max 2MB)'
+                        : 'Upload your institution\'s logo (PNG, JPG, max 2MB)'
+                      }
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -677,10 +683,13 @@ export default function UniversitySettingsPage() {
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
                       <Palette className="w-5 h-5" />
-                      Brand Colors
+                      {isAgency ? 'Agency Brand Colors' : 'Brand Colors'}
                     </CardTitle>
                     <CardDescription>
-                      Set your institution's primary and accent colors
+                      {isAgency 
+                        ? 'Set your agency\'s primary and accent colors'
+                        : 'Set your institution\'s primary and accent colors'
+                      }
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -732,10 +741,10 @@ export default function UniversitySettingsPage() {
                       <p className="text-sm text-muted-foreground mb-3">Preview:</p>
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded flex items-center justify-center text-white font-bold" style={{ backgroundColor: primaryColorInput }}>
-                          {tenant?.institution_name?.charAt(0) || 'U'}
+                          {tenant?.institution_name?.charAt(0) || (isAgency ? 'A' : 'U')}
                         </div>
                         <div>
-                          <p className="font-medium" style={{ color: primaryColorInput }}>{tenant?.institution_name || 'Your University'}</p>
+                          <p className="font-medium" style={{ color: primaryColorInput }}>{tenant?.institution_name || (isAgency ? 'Your Agency' : 'Your University')}</p>
                           <p className="text-sm" style={{ color: accentColorInput }}>Welcome message with accent color</p>
                         </div>
                       </div>

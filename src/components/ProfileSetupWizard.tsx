@@ -265,17 +265,20 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
           <div className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="institutionName" className="text-sm font-medium">
-                Institution Name <span className="text-destructive">*</span>
+                {isAgency ? 'University Name' : 'Institution Name'} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="institutionName"
-                placeholder="e.g., Lakewood University"
+                placeholder={isAgency ? 'e.g., State University of New York' : 'e.g., Lakewood University'}
                 value={config.institutionName || ''}
                 onChange={(e) => updateConfig({ institutionName: e.target.value })}
                 className="text-lg"
               />
               <p className="text-xs text-muted-foreground">
-                The full official name of your institution
+                {isAgency 
+                  ? 'The full official name of the university client you are adding'
+                  : 'The full official name of your institution'
+                }
               </p>
             </div>
 
@@ -337,7 +340,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
         return (
           <div className="space-y-6">
             <div className="space-y-3">
-              <Label className="text-sm font-medium">Institution Logo</Label>
+              <Label className="text-sm font-medium">{isAgency ? 'Client University Logo' : 'Institution Logo'}</Label>
               <div className="flex items-start gap-4">
                 {config.logoUrl ? (
                   <div className="relative">
@@ -405,7 +408,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-3">
                 <Label htmlFor="primaryColor" className="text-sm font-medium">
-                  Primary Color
+                  {isAgency ? 'Client Primary Color' : 'Primary Color'}
                 </Label>
                 <div className="flex items-center gap-3">
                   <input
@@ -422,7 +425,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
                       placeholder="#1F2A44"
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      Main brand color for headers and buttons
+                      {isAgency ? 'University\'s main brand color' : 'Main brand color for headers and buttons'}
                     </p>
                   </div>
                 </div>
@@ -430,7 +433,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
 
               <div className="space-y-3">
                 <Label htmlFor="accentColor" className="text-sm font-medium">
-                  Accent Color
+                  {isAgency ? 'Client Accent Color' : 'Accent Color'}
                 </Label>
                 <div className="flex items-center gap-3">
                   <input
@@ -447,7 +450,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
                       placeholder="#2C7A7B"
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      Secondary color for highlights and links
+                      {isAgency ? 'University\'s accent color for highlights' : 'Secondary color for highlights and links'}
                     </p>
                   </div>
                 </div>

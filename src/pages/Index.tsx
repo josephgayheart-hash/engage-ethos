@@ -8,6 +8,7 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAgencyMode } from "@/hooks/useAgencyMode";
 import { supabase } from "@/integrations/supabase/client";
 import { ResearchFoundation } from "@/components/ResearchFoundation";
 import { MyDraftsCard } from "@/components/MyDraftsCard";
@@ -45,7 +46,8 @@ import {
   Building2,
   User,
   Search,
-  Globe
+  Globe,
+  Users
 } from "lucide-react";
 
 const Index = () => {
@@ -53,6 +55,7 @@ const Index = () => {
   const { templates } = useSharedLibrary();
   const { profiles: institutionalProfiles } = useInstitutionalProfiles();
   const { isAdmin, isSuperAdmin, profile, tenant } = useAuth();
+  const { isAgency, labels } = useAgencyMode();
 
   const recentMessages = messages.slice(0, 3);
   const publishedTemplates = templates.filter(t => t.status === 'published').slice(0, 3);
@@ -216,8 +219,8 @@ const Index = () => {
             </div>
             
             <div className="grid md:grid-cols-4 gap-4 pb-4">
-              {/* Step 1: Setup/Manage Institution */}
-              <Link to="/university-settings">
+              {/* Step 1: Setup/Manage Institution or Clients */}
+              <Link to={isAgency ? "/agency/clients" : "/university-settings"}>
                 <Card className="h-full cursor-pointer card-workflow card-workflow-primary group">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-4">
@@ -230,21 +233,29 @@ const Index = () => {
                     </div>
                     <div className="icon-container icon-container-lg bg-primary/10 mb-4">
                       {hasInstitutionalProfiles ? (
-                        <Building2 className="w-6 h-6 text-primary" />
+                        isAgency ? <Users className="w-6 h-6 text-primary" /> : <Building2 className="w-6 h-6 text-primary" />
                       ) : (
                         <Settings className="w-6 h-6 text-primary" />
                       )}
                     </div>
                     <h3 className="font-serif font-semibold text-lg mb-2">
                       {hasInstitutionalProfiles 
-                        ? `Manage My Institution${institutionalProfiles.length > 1 ? 's' : ''}`
-                        : 'Setup Your Institution'
+                        ? isAgency 
+                          ? `Manage Client${institutionalProfiles.length > 1 ? 's' : ''}`
+                          : `Manage My Institution${institutionalProfiles.length > 1 ? 's' : ''}`
+                        : isAgency
+                          ? 'Add University Clients'
+                          : 'Setup Your Institution'
                       }
                     </h3>
                     <p className="text-sm text-muted-foreground mb-3">
                       {hasInstitutionalProfiles
-                        ? 'View and edit your institutional profiles, brand settings, and Content DNA.'
-                        : 'Build your institution profile. Subunits inherit brand elements with clear hierarchy and control.'
+                        ? isAgency
+                          ? 'View and manage your university clients, their brands, and Content DNA.'
+                          : 'View and edit your institutional profiles, brand settings, and Content DNA.'
+                        : isAgency
+                          ? 'Add university clients with their brand identity. Each client has unique branding and voice.'
+                          : 'Build your institution profile. Subunits inherit brand elements with clear hierarchy and control.'
                       }
                     </p>
                     {/* Profile tags */}
@@ -267,7 +278,10 @@ const Index = () => {
                       </div>
                     )}
                     <div className="flex items-center text-sm text-primary font-medium group-hover:gap-2 transition-all">
-                      {hasInstitutionalProfiles ? 'Manage Profiles' : 'Configure Settings'}
+                      {hasInstitutionalProfiles 
+                        ? isAgency ? 'Manage Clients' : 'Manage Profiles' 
+                        : isAgency ? 'Add Clients' : 'Configure Settings'
+                      }
                       <ArrowRight className="w-4 h-4 ml-1" />
                     </div>
                   </CardContent>
