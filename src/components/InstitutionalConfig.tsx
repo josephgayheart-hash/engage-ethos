@@ -431,6 +431,108 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
             </div>
           </div>
 
+          {/* Brand Colors Section */}
+          <div className="p-4 bg-muted/50 rounded-lg">
+            <h4 className="font-medium text-sm flex items-center gap-2 mb-3">
+              <span className="w-4 h-4 rounded-full bg-gradient-to-r from-primary to-accent" />
+              Brand Colors
+            </h4>
+            <p className="text-xs text-muted-foreground mb-4">
+              Define your institution's official brand colors. These will be used in all message outputs, PDFs, and exports.
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Primary Color */}
+              <div className="space-y-2">
+                <Label htmlFor="primaryColor" className="text-sm font-medium">
+                  Primary Color
+                </Label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    id="primaryColor"
+                    value={config.primaryColor || '#1F2A44'}
+                    onChange={(e) => onChange({ ...config, primaryColor: e.target.value })}
+                    className="w-10 h-10 rounded-lg border border-border cursor-pointer"
+                  />
+                  <Input
+                    value={config.primaryColor || '#1F2A44'}
+                    onChange={(e) => onChange({ ...config, primaryColor: e.target.value })}
+                    placeholder="#1F2A44"
+                    className="font-mono text-sm flex-1"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">Main brand color for headers</p>
+              </div>
+
+              {/* Secondary Color */}
+              <div className="space-y-2">
+                <Label htmlFor="secondaryColor" className="text-sm font-medium">
+                  Secondary Color
+                </Label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    id="secondaryColor"
+                    value={config.secondaryColor || config.accentColor || '#2C7A7B'}
+                    onChange={(e) => onChange({ ...config, secondaryColor: e.target.value, accentColor: e.target.value })}
+                    className="w-10 h-10 rounded-lg border border-border cursor-pointer"
+                  />
+                  <Input
+                    value={config.secondaryColor || config.accentColor || '#2C7A7B'}
+                    onChange={(e) => onChange({ ...config, secondaryColor: e.target.value, accentColor: e.target.value })}
+                    placeholder="#2C7A7B"
+                    className="font-mono text-sm flex-1"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">Supporting color for accents</p>
+              </div>
+
+              {/* Tertiary Color */}
+              <div className="space-y-2">
+                <Label htmlFor="tertiaryColor" className="text-sm font-medium">
+                  Tertiary Color
+                </Label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    id="tertiaryColor"
+                    value={config.tertiaryColor || '#D4AF37'}
+                    onChange={(e) => onChange({ ...config, tertiaryColor: e.target.value })}
+                    className="w-10 h-10 rounded-lg border border-border cursor-pointer"
+                  />
+                  <Input
+                    value={config.tertiaryColor || '#D4AF37'}
+                    onChange={(e) => onChange({ ...config, tertiaryColor: e.target.value })}
+                    placeholder="#D4AF37"
+                    className="font-mono text-sm flex-1"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">Accent for special elements</p>
+              </div>
+            </div>
+            
+            {/* Color Preview */}
+            <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border">
+              <span className="text-xs text-muted-foreground">Preview:</span>
+              <div 
+                className="w-8 h-8 rounded border border-border" 
+                style={{ backgroundColor: config.primaryColor || '#1F2A44' }}
+                title="Primary"
+              />
+              <div 
+                className="w-8 h-8 rounded border border-border" 
+                style={{ backgroundColor: config.secondaryColor || config.accentColor || '#2C7A7B' }}
+                title="Secondary"
+              />
+              <div 
+                className="w-8 h-8 rounded border border-border" 
+                style={{ backgroundColor: config.tertiaryColor || '#D4AF37' }}
+                title="Tertiary"
+              />
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {renderTextField('Institution Name', 'institutionName', 'e.g., Lakewood University')}
             {renderTextField('Abbreviation', 'institutionAbbreviation', 'e.g., LU, LWU')}
