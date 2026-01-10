@@ -123,6 +123,11 @@ export default function WebContentAnalyzerPage() {
   const [isRewritingContent, setIsRewritingContent] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(true);
   
+  // Derived: get selected section for BrandScorePanel
+  const selectedSection = analysisResult?.sections.find(s => s.id === selectedSectionId) 
+    || analysisResult?.sections[0] 
+    || null;
+  
   // Ref for scrolling to results
   const resultsRef = useRef<HTMLDivElement>(null);
   
@@ -531,7 +536,7 @@ export default function WebContentAnalyzerPage() {
     setIsRewritingContent(rewriting);
   }, []);
 
-  const selectedSection = analysisResult?.sections.find(s => s.id === selectedSectionId);
+  
 
   return (
     <div className="min-h-screen bg-background">
@@ -676,11 +681,10 @@ export default function WebContentAnalyzerPage() {
               <div className="flex items-center gap-4">
                 <InstitutionalProfileSelector
                   selectedProfileId={selectedProfileId}
-                  onProfileChange={setSelectedProfileId}
-                  className="w-64"
+                  onProfileChange={(id, config, name) => setSelectedProfileId(id || '')}
                 />
                 {selectedProfileId && contentDNA && (
-                  <ContentDNAActiveBadge showScore dnaAnalysis={contentDNA} />
+                  <ContentDNAActiveBadge profileId={selectedProfileId} />
                 )}
               </div>
 
@@ -689,7 +693,6 @@ export default function WebContentAnalyzerPage() {
                 onAnalyze={handleAnalyze}
                 isAnalyzing={isAnalyzing}
                 isComplete={isAnalysisComplete}
-                hasExistingResult={!!analysisResult}
               />
 
               {/* Results Section */}
@@ -698,11 +701,10 @@ export default function WebContentAnalyzerPage() {
                   {/* Rewrite Panel - show at top when active */}
                   {showRewrite && (
                     <RewritePanel
-                      sections={analysisResult.sections}
+                      content={content}
+                      analysisResult={analysisResult}
                       voiceAnalysis={contentDNA?.voice_analysis}
                       brandPlatform={contentDNA?.brand_platform}
-                      facts={facts}
-                      stories={stories}
                       onClose={() => setShowRewrite(false)}
                       onRewriteStateChange={handleRewriteStateChange}
                     />
@@ -731,10 +733,7 @@ export default function WebContentAnalyzerPage() {
                         key={section.id}
                         section={section}
                         isSelected={section.id === selectedSectionId}
-                        onSelect={() => setSelectedSectionId(section.id)}
-                        resolvedIssues={resolvedIssues.filter(r => r.sectionId === section.id)}
-                        onToggleResolved={(issueId, resolved) => handleToggleResolved(issueId, section.id, resolved)}
-                        onUpdateNotes={(issueId, notes) => handleUpdateNotes(issueId, section.id, notes)}
+                        onClick={() => setSelectedSectionId(section.id)}
                       />
                     ))}
                   </div>
@@ -765,28 +764,21 @@ export default function WebContentAnalyzerPage() {
                 </Card>
               )}
 
-              {analysisResult && (
+              {analysisResult && selectedSection && (
                 <>
                   <BrandScorePanel
-                    overallScore={analysisResult.overallScore}
-                    executiveSummary={analysisResult.executiveSummary}
-                    institutionMismatchDetected={analysisResult.institutionMismatchDetected}
-                    wrongInstitutionFound={analysisResult.wrongInstitutionFound}
-                    summary={analysisResult.summary}
-                    resolvedCount={resolvedIssues.filter(r => r.resolved).length}
+                    section={selectedSection}
+                    voiceAnalysis={contentDNA?.voice_analysis}
                   />
 
                   <AnalysisActionsCard
-                    analysisResult={analysisResult}
-                    sourceUrl={sourceUrl}
                     isSaving={isSaving}
                     isRewriting={isRewritingContent}
                     onSaveDraft={handleSaveDraft}
-                    onSaveToLibrary={handleSaveToPersonalLibrary}
-                    onSubmitToUniversity={handleSaveToUniversityLibrary}
+                    onSaveToPersonalLibrary={handleSaveToPersonalLibrary}
+                    onSaveToUniversityLibrary={handleSaveToUniversityLibrary}
                     onRewrite={handleRewrite}
                     onNewAnalysis={handleNewAnalysis}
-                    onClearDraft={clearDraftAfterSave}
                     showRewrite={showRewrite}
                   />
                 </>
