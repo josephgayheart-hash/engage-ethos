@@ -155,14 +155,14 @@ export default function WebContentAnalyzerPage() {
       : `Analysis: ${content.substring(0, 30)}...`;
 
     const saveTimeout = setTimeout(async () => {
-      // Use silent mode for background auto-save (no refetch, no toast)
-      const draft = await saveDraft('analysis', draftData as unknown as Record<string, unknown>, title, currentDraftId || undefined, true);
+      // Auto-save draft (refetch list so MyDraftsCard updates)
+      const draft = await saveDraft('analysis', draftData as unknown as Record<string, unknown>, title, currentDraftId || undefined);
       if (draft) {
         setCurrentDraftId(draft.id);
+        setDraftSavedRecently(true);
+        // Reset the indicator after 3 seconds
+        setTimeout(() => setDraftSavedRecently(false), 3000);
       }
-      setDraftSavedRecently(true);
-      // Reset the indicator after 3 seconds
-      setTimeout(() => setDraftSavedRecently(false), 3000);
     }, 3000); // Auto-save after 3 seconds of inactivity
 
     return () => clearTimeout(saveTimeout);
