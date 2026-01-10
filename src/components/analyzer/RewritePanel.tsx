@@ -45,6 +45,8 @@ interface RewritePanelProps {
   voiceAnalysis?: any;
   brandPlatform?: any;
   onClose: () => void;
+  onRewriteStateChange?: (isRewriting: boolean) => void;
+  autoStart?: boolean;
 }
 
 interface RewrittenSection {
@@ -70,7 +72,9 @@ export function RewritePanel({
   analysisResult, 
   voiceAnalysis, 
   brandPlatform,
-  onClose 
+  onClose,
+  onRewriteStateChange,
+  autoStart = true
 }: RewritePanelProps) {
   const { toast } = useToast();
   const [isRewriting, setIsRewriting] = useState(false);
@@ -80,6 +84,23 @@ export function RewritePanel({
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [processingPhase, setProcessingPhase] = useState<ProcessingPhase>('idle');
   const [progress, setProgress] = useState(0);
+  const [hasAutoStarted, setHasAutoStarted] = useState(false);
+
+  // Notify parent of rewriting state changes
+  useEffect(() => {
+    onRewriteStateChange?.(isRewriting);
+  }, [isRewriting, onRewriteStateChange]);
+
+  // Auto-start rewrite when panel opens
+  useEffect(() => {
+    if (autoStart && !hasAutoStarted && rewrittenSections.length === 0 && !isRewriting) {
+      setHasAutoStarted(true);
+      // Small delay to let the panel render first
+      setTimeout(() => {
+        handleRewriteAll();
+      }, 300);
+    }
+  }, [autoStart, hasAutoStarted, rewrittenSections.length, isRewriting]);
 
   // Animate progress during processing
   useEffect(() => {

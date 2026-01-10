@@ -97,6 +97,7 @@ export default function WebContentAnalyzerPage() {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [showRewrite, setShowRewrite] = useState(false);
+  const [isRewritingContent, setIsRewritingContent] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(true);
   
   // Ref for scrolling to results
@@ -347,6 +348,11 @@ export default function WebContentAnalyzerPage() {
   const handleRewrite = () => {
     setShowRewrite(true);
   };
+
+  // Callback for RewritePanel to communicate rewriting state
+  const handleRewriteStateChange = useCallback((rewriting: boolean) => {
+    setIsRewritingContent(rewriting);
+  }, []);
 
   const selectedSection = analysisResult?.sections.find(s => s.id === selectedSectionId);
 
@@ -614,6 +620,8 @@ export default function WebContentAnalyzerPage() {
                       voiceAnalysis={contentDNA?.voice_analysis}
                       brandPlatform={contentDNA?.brand_platform}
                       onClose={() => setShowRewrite(false)}
+                      onRewriteStateChange={handleRewriteStateChange}
+                      autoStart={true}
                     />
                   ) : (
                     <div className="space-y-4">
@@ -673,6 +681,7 @@ export default function WebContentAnalyzerPage() {
                   onNewAnalysis={handleNewAnalysis}
                   onRewrite={handleRewrite}
                   showRewrite={showRewrite}
+                  isRewriting={isRewritingContent}
                   onSaveDraft={handleSaveDraft}
                   onSaveToPersonalLibrary={handleSaveToPersonalLibrary}
                   onSaveToUniversityLibrary={handleSaveToUniversityLibrary}

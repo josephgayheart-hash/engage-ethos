@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Progress } from '@/components/ui/progress';
 import { 
   RefreshCw, 
   Sparkles, 
@@ -10,7 +11,8 @@ import {
   BookOpen, 
   Building2,
   Check,
-  Loader2
+  Loader2,
+  Wand2
 } from 'lucide-react';
 import { SaveToLibraryDialog } from '@/components/library/SaveToLibraryDialog';
 
@@ -18,6 +20,7 @@ interface AnalysisActionsCardProps {
   onNewAnalysis: () => void;
   onRewrite: () => void;
   showRewrite: boolean;
+  isRewriting?: boolean;
   isDisabled?: boolean;
   onSaveDraft: () => Promise<void>;
   onSaveToPersonalLibrary: (name: string) => Promise<string | undefined>;
@@ -30,6 +33,7 @@ export function AnalysisActionsCard({
   onNewAnalysis, 
   onRewrite, 
   showRewrite,
+  isRewriting,
   isDisabled,
   onSaveDraft,
   onSaveToPersonalLibrary,
@@ -75,19 +79,54 @@ export function AnalysisActionsCard({
             variant="outline"
             className="w-full justify-start"
             onClick={onNewAnalysis}
+            disabled={isRewriting}
           >
             <RefreshCw className="w-4 h-4 mr-2" />
             New Analysis
           </Button>
           
+          {/* Rewrite Button with Loading State */}
           <Button
-            className="w-full justify-start bg-[hsl(270_70%_55%)] hover:bg-[hsl(270_70%_50%)]"
+            className="w-full justify-start bg-[hsl(270_70%_55%)] hover:bg-[hsl(270_70%_50%)] transition-all"
             onClick={onRewrite}
-            disabled={showRewrite || isDisabled}
+            disabled={showRewrite || isDisabled || isRewriting}
           >
-            <Sparkles className="w-4 h-4 mr-2" />
-            Rewrite for Brand
+            {isRewriting ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <span className="flex-1 text-left">Rewriting Content...</span>
+              </>
+            ) : showRewrite ? (
+              <>
+                <Wand2 className="w-4 h-4 mr-2" />
+                <span className="flex-1 text-left">Rewrite Panel Open</span>
+                <Check className="w-4 h-4 text-white/70" />
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4 mr-2" />
+                Rewrite for Brand
+              </>
+            )}
           </Button>
+
+          {/* Rewriting Progress Indicator */}
+          {isRewriting && (
+            <div className="p-3 rounded-lg bg-[hsl(270_70%_55%)]/10 border border-[hsl(270_70%_55%)]/20 space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <div className="w-2 h-2 rounded-full bg-[hsl(270_70%_55%)] animate-pulse" />
+                </div>
+                <span className="text-xs font-medium text-[hsl(270_70%_45%)]">
+                  AI is transforming your content...
+                </span>
+              </div>
+              <Progress value={undefined} className="h-1 [&>div]:animate-pulse" />
+              <p className="text-[10px] text-muted-foreground">
+                Applying brand voice and fixing issues
+              </p>
+            </div>
+          )}
 
           <Separator className="my-3" />
 
@@ -98,7 +137,7 @@ export function AnalysisActionsCard({
             variant="outline"
             className="w-full justify-start"
             onClick={handleSaveDraft}
-            disabled={isSaving}
+            disabled={isSaving || isRewriting}
           >
             {isSaving ? (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -114,7 +153,7 @@ export function AnalysisActionsCard({
             variant="outline"
             className="w-full justify-start"
             onClick={() => handleOpenSaveDialog('personal')}
-            disabled={isSaving}
+            disabled={isSaving || isRewriting}
           >
             <BookOpen className="w-4 h-4 mr-2" />
             Save to My Library
@@ -124,7 +163,7 @@ export function AnalysisActionsCard({
             variant="outline"
             className="w-full justify-start"
             onClick={() => handleOpenSaveDialog('shared')}
-            disabled={isSaving}
+            disabled={isSaving || isRewriting}
           >
             <Building2 className="w-4 h-4 mr-2" />
             Submit to University Library
