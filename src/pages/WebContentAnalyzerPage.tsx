@@ -398,15 +398,8 @@ export default function WebContentAnalyzerPage() {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Left Column - Input & Results */}
             <div className="lg:col-span-3 space-y-6">
-              {/* Voice Profile Selector - always at top */}
-              <VoiceProfileCard
-                selectedProfileId={selectedProfileId}
-                onProfileChange={setSelectedProfileId}
-                hasDNA={!!contentDNA?.last_analyzed_at}
-              />
-
               {/* Content Input */}
-              <AnalyzerInput 
+              <AnalyzerInput
                 onAnalyze={handleAnalyze} 
                 isAnalyzing={isAnalyzing}
                 disabled={!contentDNA?.voice_analysis}
@@ -419,7 +412,7 @@ export default function WebContentAnalyzerPage() {
                   <Card>
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
-                        <div>
+                        <div className="flex-1">
                           <CardTitle className="flex items-center gap-2">
                             <FileText className="w-5 h-5 text-primary" />
                             Analysis Results
@@ -441,6 +434,13 @@ export default function WebContentAnalyzerPage() {
                           <div className="text-xs text-muted-foreground">Overall Score</div>
                         </div>
                       </div>
+                      
+                      {/* Voice Profile - inline with matching font size */}
+                      <VoiceProfileCard
+                        selectedProfileId={selectedProfileId}
+                        onProfileChange={setSelectedProfileId}
+                        hasDNA={!!contentDNA?.last_analyzed_at}
+                      />
                     </CardHeader>
                     <CardContent className="space-y-4">
                       {/* Executive Summary */}
