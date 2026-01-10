@@ -14,7 +14,7 @@ import {
   Zap,
   Clock,
   DollarSign,
-  Quote,
+  
   Calendar,
 } from "lucide-react";
 import campusvoiceLogo from "@/assets/campusvoice-logo-new.png";
@@ -73,12 +73,6 @@ const agencyBenefits = [
   },
 ];
 
-const agencyTestimonial = {
-  quote:
-    "Before CampusVoice, switching between university clients meant mental gymnastics. Now I flip between brands in seconds and every draft is already on-voice. We've doubled our client capacity without adding staff.",
-  author: "Sarah Chen",
-  role: "VP of Client Services, Meridian Higher Ed",
-};
 
 export default function ForAgenciesPage() {
   return (
@@ -283,27 +277,6 @@ export default function ForAgenciesPage() {
           </div>
         </section>
 
-        {/* Testimonial Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background">
-          <div className="max-w-3xl mx-auto">
-            <Card className="border-0 shadow-xl bg-gradient-to-br from-primary/5 via-background to-accent/5">
-              <CardContent className="p-10 sm:p-12 text-center">
-                <Quote className="h-12 w-12 text-primary/30 mx-auto mb-6" />
-                <blockquote className="text-xl sm:text-2xl font-serif italic text-foreground mb-8 leading-relaxed">
-                  "{agencyTestimonial.quote}"
-                </blockquote>
-                <div>
-                  <p className="font-semibold text-lg text-foreground">
-                    {agencyTestimonial.author}
-                  </p>
-                  <p className="text-muted-foreground">
-                    {agencyTestimonial.role}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
 
         {/* How It Works - Quick Overview */}
         <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/20">
