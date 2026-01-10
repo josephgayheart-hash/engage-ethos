@@ -146,7 +146,7 @@ export default function InitialSetupPage() {
                   id="firstName"
                   value={formData.firstName}
                   onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                  placeholder="Joseph"
+                  placeholder="Jane"
                   required
                 />
               </div>
@@ -156,7 +156,7 @@ export default function InitialSetupPage() {
                   id="lastName"
                   value={formData.lastName}
                   onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                  placeholder="Gayheart"
+                  placeholder="Smith"
                   required
                 />
               </div>
@@ -169,7 +169,7 @@ export default function InitialSetupPage() {
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="josephgayheart@gmail.com"
+                placeholder="you@institution.edu"
                 required
               />
             </div>

@@ -475,12 +475,20 @@ export default function ForAgenciesPage() {
                 © 2026 CampusVoice.AI
               </span>
             </div>
-            <Link
-              to="/"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              For Universities →
-            </Link>
+            <div className="flex items-center gap-4">
+              <a
+                href="mailto:sales@campusvoice.ai"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Partner inquiries: sales@campusvoice.ai
+              </a>
+              <Link
+                to="/"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                For Universities →
+              </Link>
+            </div>
           </div>
         </footer>
       </div>

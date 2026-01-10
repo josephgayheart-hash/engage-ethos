@@ -729,6 +729,12 @@ const Index = () => {
             <p className="text-sm text-muted-foreground">
               CampusVoice — Your Voice for Student Success
             </p>
+            <a 
+              href="mailto:support@campusvoice.ai" 
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Need help? support@campusvoice.ai
+            </a>
             <p className="text-xs text-muted-foreground">
               Research-grounded messaging intelligence for higher education
             </p>
