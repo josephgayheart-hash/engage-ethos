@@ -692,7 +692,7 @@ const Index = () => {
             <div>
               <h4 className="font-semibold text-sm mb-3">Core Tools</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link to="/settings" className="hover:text-foreground transition-colors">Institutional Settings</Link></li>
+                <li><Link to="/university-settings" className="hover:text-foreground transition-colors">Institutional Settings</Link></li>
                 <li><Link to="/build" className="hover:text-foreground transition-colors">Build Message</Link></li>
                 <li><Link to="/evaluate" className="hover:text-foreground transition-colors">Evaluate Message</Link></li>
                 <li><Link to="/strategy" className="hover:text-foreground transition-colors">Journey Designer</Link></li>
