@@ -28,11 +28,13 @@ import {
   ArrowLeft,
   AlertTriangle,
   FileText,
+  FileEdit,
   Dna,
   X,
   Building2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 import type { AnalysisResult, SavedAnalysisData, IssueRemediation } from '@/types/analyzer';
 
 export default function WebContentAnalyzerPage() {
@@ -42,10 +44,11 @@ export default function WebContentAnalyzerPage() {
   const { lastUsedProfileId, setLastUsedProfileId, isLoaded: profilePrefLoaded } = useLastUsedProfile();
   
   // Draft management
-  const { saveDraft, loadDraftById, currentDraft, setCurrentDraft } = useUserDrafts();
+  const { saveDraft, loadDraftById, currentDraft, setCurrentDraft, deleteDraft } = useUserDrafts('analysis');
   const { addMessage } = useMessageLibrary();
   const [isSaving, setIsSaving] = useState(false);
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
+  const [draftSavedRecently, setDraftSavedRecently] = useState(false);
   
   // Profile selection state - initialized from last used profile
   const [selectedProfileId, setSelectedProfileIdLocal] = useState<string | null>(null);
@@ -127,6 +130,51 @@ export default function WebContentAnalyzerPage() {
       });
     }
   }, [location.state, loadDraftById]);
+
+  // Auto-save draft periodically
+  useEffect(() => {
+    // Only auto-save if there's meaningful content (analysis result exists)
+    if (!analysisResult) return;
+
+    const draftData: SavedAnalysisData = {
+      sourceUrl,
+      sourceContent: content,
+      analysisResult,
+      profileId: selectedProfileId || undefined,
+      profileName: selectedProfile?.name,
+      analyzedAt: new Date().toISOString(),
+      remediation: {
+        totalIssues: analysisResult.summary.totalIssues || 0,
+        resolvedIssues,
+      }
+    };
+
+    // Generate title from source URL or content
+    const title = sourceUrl 
+      ? `Analysis: ${new URL(sourceUrl).hostname}` 
+      : `Analysis: ${content.substring(0, 30)}...`;
+
+    const saveTimeout = setTimeout(async () => {
+      // Use silent mode for background auto-save (no refetch, no toast)
+      const draft = await saveDraft('analysis', draftData as unknown as Record<string, unknown>, title, currentDraftId || undefined, true);
+      if (draft) {
+        setCurrentDraftId(draft.id);
+      }
+      setDraftSavedRecently(true);
+      // Reset the indicator after 3 seconds
+      setTimeout(() => setDraftSavedRecently(false), 3000);
+    }, 3000); // Auto-save after 3 seconds of inactivity
+
+    return () => clearTimeout(saveTimeout);
+  }, [analysisResult, sourceUrl, content, selectedProfileId, selectedProfile?.name, resolvedIssues, currentDraftId, saveDraft]);
+
+  // Clear draft when saving to library
+  const clearDraftAfterSave = useCallback(async () => {
+    if (currentDraftId) {
+      await deleteDraft(currentDraftId);
+      setCurrentDraftId(null);
+    }
+  }, [currentDraftId, deleteDraft]);
 
   // Remediation handlers
   const handleToggleResolved = useCallback((issueId: string, sectionId: string, resolved: boolean) => {
@@ -433,6 +481,23 @@ export default function WebContentAnalyzerPage() {
                 </div>
               </CardContent>
             </Card>
+          )}
+
+          {/* Auto-save Draft Indicator */}
+          {(currentDraftId || draftSavedRecently) && (
+            <div className={cn(
+              "flex items-center gap-2 text-sm px-3 py-2 rounded-lg transition-all mb-4",
+              draftSavedRecently 
+                ? "bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20" 
+                : "bg-muted/50 text-muted-foreground"
+            )}>
+              <FileEdit className="w-4 h-4" />
+              <span>{draftSavedRecently ? '✓ Saved to My Drafts' : 'Draft auto-saved'}</span>
+              <span className="text-xs">•</span>
+              <span className="text-xs truncate">
+                {sourceUrl ? new URL(sourceUrl).hostname : 'Analysis in progress'}
+              </span>
+            </div>
           )}
 
           {/* DNA Status Warning */}
