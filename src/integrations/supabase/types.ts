@@ -696,6 +696,7 @@ export type Database = {
       }
       institutional_profiles: {
         Row: {
+          client_status: string | null
           config: Json
           created_at: string
           created_by_user_id: string | null
@@ -707,6 +708,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          client_status?: string | null
           config?: Json
           created_at?: string
           created_by_user_id?: string | null
@@ -718,6 +720,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          client_status?: string | null
           config?: Json
           created_at?: string
           created_by_user_id?: string | null
@@ -791,8 +794,11 @@ export type Database = {
       }
       onboarding_requests: {
         Row: {
+          agency_name: string | null
+          agency_website: string | null
           department: string | null
           email: string
+          estimated_client_count: number | null
           first_name: string
           id: string
           institution_name_input: string | null
@@ -801,6 +807,7 @@ export type Database = {
           phone: string | null
           referral_source: string | null
           request_status: Database["public"]["Enums"]["onboarding_status"]
+          request_type: string
           reviewed_at: string | null
           reviewed_by_admin_user_id: string | null
           submitted_at: string
@@ -808,8 +815,11 @@ export type Database = {
           title: string | null
         }
         Insert: {
+          agency_name?: string | null
+          agency_website?: string | null
           department?: string | null
           email: string
+          estimated_client_count?: number | null
           first_name: string
           id?: string
           institution_name_input?: string | null
@@ -818,6 +828,7 @@ export type Database = {
           phone?: string | null
           referral_source?: string | null
           request_status?: Database["public"]["Enums"]["onboarding_status"]
+          request_type?: string
           reviewed_at?: string | null
           reviewed_by_admin_user_id?: string | null
           submitted_at?: string
@@ -825,8 +836,11 @@ export type Database = {
           title?: string | null
         }
         Update: {
+          agency_name?: string | null
+          agency_website?: string | null
           department?: string | null
           email?: string
+          estimated_client_count?: number | null
           first_name?: string
           id?: string
           institution_name_input?: string | null
@@ -835,6 +849,7 @@ export type Database = {
           phone?: string | null
           referral_source?: string | null
           request_status?: Database["public"]["Enums"]["onboarding_status"]
+          request_type?: string
           reviewed_at?: string | null
           reviewed_by_admin_user_id?: string | null
           submitted_at?: string
@@ -1392,32 +1407,44 @@ export type Database = {
       tenants: {
         Row: {
           accent_color: string | null
+          agency_contact_email: string | null
+          agency_website: string | null
+          client_limit: number | null
           created_at: string
           id: string
           institution_name: string
           logo_url: string | null
           primary_color: string | null
           status: Database["public"]["Enums"]["tenant_status"]
+          tenant_type: Database["public"]["Enums"]["tenant_type"]
           updated_at: string
         }
         Insert: {
           accent_color?: string | null
+          agency_contact_email?: string | null
+          agency_website?: string | null
+          client_limit?: number | null
           created_at?: string
           id?: string
           institution_name: string
           logo_url?: string | null
           primary_color?: string | null
           status?: Database["public"]["Enums"]["tenant_status"]
+          tenant_type?: Database["public"]["Enums"]["tenant_type"]
           updated_at?: string
         }
         Update: {
           accent_color?: string | null
+          agency_contact_email?: string | null
+          agency_website?: string | null
+          client_limit?: number | null
           created_at?: string
           id?: string
           institution_name?: string
           logo_url?: string | null
           primary_color?: string | null
           status?: Database["public"]["Enums"]["tenant_status"]
+          tenant_type?: Database["public"]["Enums"]["tenant_type"]
           updated_at?: string
         }
         Relationships: []
@@ -1466,6 +1493,7 @@ export type Database = {
           draft_data: Json
           draft_type: string
           id: string
+          institutional_profile_id: string | null
           tenant_id: string
           title: string | null
           updated_at: string
@@ -1476,6 +1504,7 @@ export type Database = {
           draft_data?: Json
           draft_type: string
           id?: string
+          institutional_profile_id?: string | null
           tenant_id: string
           title?: string | null
           updated_at?: string
@@ -1486,12 +1515,20 @@ export type Database = {
           draft_data?: Json
           draft_type?: string
           id?: string
+          institutional_profile_id?: string | null
           tenant_id?: string
           title?: string | null
           updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_drafts_institutional_profile_id_fkey"
+            columns: ["institutional_profile_id"]
+            isOneToOne: false
+            referencedRelation: "institutional_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_drafts_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -1580,6 +1617,7 @@ export type Database = {
       app_role: "admin" | "user" | "approver" | "super_admin"
       onboarding_status: "submitted" | "approved" | "rejected"
       tenant_status: "active" | "inactive"
+      tenant_type: "university" | "agency"
       user_status: "invited" | "pending" | "active" | "locked" | "disabled"
     }
     CompositeTypes: {
@@ -1711,6 +1749,7 @@ export const Constants = {
       app_role: ["admin", "user", "approver", "super_admin"],
       onboarding_status: ["submitted", "approved", "rejected"],
       tenant_status: ["active", "inactive"],
+      tenant_type: ["university", "agency"],
       user_status: ["invited", "pending", "active", "locked", "disabled"],
     },
   },
