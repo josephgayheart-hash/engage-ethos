@@ -28,6 +28,7 @@ import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useToolTracking } from "@/hooks/useToolTracking";
 import { useUserDrafts } from "@/hooks/useUserDrafts";
+import { useLastUsedProfile } from "@/hooks/useLastUsedProfile";
 import { BrandLayerSelector, BrandLayerActiveBadge, BrandLayerSelection } from "@/components/BrandLayerSelector";
 import { BrandAdherenceScore } from "@/components/BrandAdherenceScore";
 
@@ -146,6 +147,7 @@ const BuildPage = () => {
   const { trackToolUse } = useToolTracking();
   const { profiles } = useInstitutionalProfiles();
   const { saveDraft, currentDraft, setCurrentDraft, deleteDraft, loadDraftById } = useUserDrafts('message');
+  const { lastUsedProfileId, setLastUsedProfileId, isLoaded: profilePrefLoaded } = useLastUsedProfile();
   
   // Check for profileId from URL params (from Content DNA page navigation)
   const profileIdFromUrl = searchParams.get('profileId');
@@ -171,12 +173,44 @@ const BuildPage = () => {
   // Find profile name from URL param if needed
   const profileFromUrl = profileIdFromUrl ? profiles.find(p => p.id === profileIdFromUrl) : null;
 
-  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(
+  const [selectedProfileId, setSelectedProfileIdLocal] = useState<string | null>(
     profileIdFromUrl || remixState?.institutionalProfileId || null
   );
   const [selectedProfileName, setSelectedProfileName] = useState<string | undefined>(
     profileFromUrl?.name || remixState?.institutionalProfileName
   );
+  
+  // Wrapper to persist profile selection
+  const setSelectedProfileId = useCallback((id: string | null) => {
+    setSelectedProfileIdLocal(id);
+    if (id) {
+      setLastUsedProfileId(id);
+    }
+  }, [setLastUsedProfileId]);
+  
+  // Initialize from last used profile when there's no URL param or remix state
+  useEffect(() => {
+    if (!profilePrefLoaded || !profiles?.length) return;
+    if (profileIdFromUrl || remixState?.institutionalProfileId) return; // Already set from URL/remix
+    if (selectedProfileId) return; // Already set
+    
+    // Check if last used profile exists
+    if (lastUsedProfileId) {
+      const found = profiles.find(p => p.id === lastUsedProfileId);
+      if (found) {
+        setSelectedProfileIdLocal(lastUsedProfileId);
+        setSelectedProfileName(found.name);
+        return;
+      }
+    }
+    
+    // Fall back to first profile
+    if (profiles[0]) {
+      setSelectedProfileIdLocal(profiles[0].id);
+      setSelectedProfileName(profiles[0].name);
+      setLastUsedProfileId(profiles[0].id);
+    }
+  }, [profiles, profilePrefLoaded, lastUsedProfileId, selectedProfileId, profileIdFromUrl, remixState?.institutionalProfileId, setLastUsedProfileId]);
   
   // Update profile name when profiles load and we have a URL param
   useEffect(() => {
