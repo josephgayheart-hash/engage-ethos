@@ -70,7 +70,6 @@ export default function ForAgenciesPage() {
       <SEOHead
         title="For Agencies | CampusVoice.AI"
         description="Manage multiple university clients from one platform. Per-client Content DNA, unified templates, and client-tagged workflows for higher ed marketing agencies."
-        path="/for-agencies"
       />
 
       <div className="min-h-screen bg-background">
@@ -293,11 +292,6 @@ export default function ForAgenciesPage() {
             </Link>
           </div>
         </footer>
-
-        <RequestDemoDialog
-          open={showDemoDialog}
-          onOpenChange={setShowDemoDialog}
-        />
       </div>
     </>
   );

@@ -348,7 +348,6 @@ export default function AgencyClientsPage() {
       <SEOHead
         title="Clients | CampusVoice.AI"
         description="Manage your university clients."
-        path="/agency/clients"
       />
 
       <div className="min-h-screen bg-background">
