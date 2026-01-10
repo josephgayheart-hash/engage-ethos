@@ -47,6 +47,13 @@ export interface SearchResult {
   title: string;
   description?: string;
   markdown?: string;
+  publishedDate?: string;
+  metadata?: {
+    title?: string;
+    description?: string;
+    publishedDate?: string;
+    sourceURL?: string;
+  };
 }
 
 export const firecrawlApi = {
