@@ -277,6 +277,99 @@ export default function ForAgenciesPage() {
           </div>
         </section>
 
+        {/* Client Portfolio Showcase */}
+        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl font-serif font-bold text-foreground mb-4">
+                Manage Your Entire Portfolio
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Switch between university clients instantly. Each institution gets 
+                dedicated Content DNA, messaging history, and brand settings.
+              </p>
+            </div>
+
+            {/* Mock Client Dashboard */}
+            <Card className="border-2 overflow-hidden">
+              <div className="bg-muted/50 border-b px-6 py-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Briefcase className="h-5 w-5 text-primary" />
+                  <span className="font-semibold">Your University Clients</span>
+                  <Badge variant="secondary" className="ml-2">24 Active</Badge>
+                </div>
+                <Button size="sm" variant="outline" className="gap-2">
+                  <Users className="h-4 w-4" />
+                  Add Client
+                </Button>
+              </div>
+              <div className="divide-y max-h-[400px] overflow-y-auto">
+                {[
+                  { name: "Ohio State University", status: "active", messages: 847, dna: true },
+                  { name: "University of Michigan", status: "active", messages: 632, dna: true },
+                  { name: "Penn State University", status: "active", messages: 521, dna: true },
+                  { name: "University of Texas at Austin", status: "active", messages: 489, dna: true },
+                  { name: "University of Florida", status: "active", messages: 456, dna: true },
+                  { name: "UCLA", status: "active", messages: 423, dna: true },
+                  { name: "University of Wisconsin-Madison", status: "active", messages: 398, dna: true },
+                  { name: "University of Georgia", status: "active", messages: 367, dna: true },
+                  { name: "Arizona State University", status: "active", messages: 345, dna: true },
+                  { name: "University of North Carolina", status: "active", messages: 334, dna: true },
+                  { name: "Indiana University", status: "active", messages: 312, dna: true },
+                  { name: "University of Minnesota", status: "active", messages: 298, dna: true },
+                  { name: "Michigan State University", status: "active", messages: 287, dna: true },
+                  { name: "University of Maryland", status: "active", messages: 276, dna: false },
+                  { name: "Purdue University", status: "active", messages: 265, dna: true },
+                  { name: "University of Virginia", status: "active", messages: 254, dna: true },
+                  { name: "University of Iowa", status: "active", messages: 243, dna: true },
+                  { name: "University of Colorado Boulder", status: "active", messages: 232, dna: true },
+                  { name: "University of Pittsburgh", status: "active", messages: 221, dna: false },
+                  { name: "Rutgers University", status: "active", messages: 210, dna: true },
+                  { name: "University of Illinois", status: "active", messages: 198, dna: true },
+                  { name: "University of Washington", status: "active", messages: 187, dna: true },
+                  { name: "Boston University", status: "active", messages: 176, dna: true },
+                  { name: "Syracuse University", status: "active", messages: 165, dna: false },
+                ].map((client, index) => (
+                  <div 
+                    key={client.name}
+                    className="px-6 py-4 flex items-center justify-between hover:bg-muted/30 transition-colors cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm">
+                        {client.name.split(' ').slice(0, 2).map(w => w[0]).join('')}
+                      </div>
+                      <div>
+                        <p className="font-medium text-foreground group-hover:text-primary transition-colors">
+                          {client.name}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {client.messages.toLocaleString()} messages generated
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {client.dna ? (
+                        <Badge variant="outline" className="text-xs border-primary/30 text-primary">
+                          <Sparkles className="h-3 w-3 mr-1" />
+                          DNA Active
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-xs text-muted-foreground">
+                          Setup Needed
+                        </Badge>
+                      )}
+                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            <p className="text-center text-sm text-muted-foreground mt-6">
+              Each client workspace includes Content DNA, message library, templates, and analytics—completely isolated from other clients.
+            </p>
+          </div>
+        </section>
 
         {/* How It Works - Quick Overview */}
         <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/20">
@@ -342,8 +435,8 @@ export default function ForAgenciesPage() {
                 trigger={
                   <Button
                     size="lg"
-                    variant="outline"
-                    className="gap-2 text-base px-10 py-6 text-lg border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+                    variant="secondary"
+                    className="gap-2 text-base px-10 py-6 text-lg"
                   >
                     <Calendar className="h-4 w-4" />
                     Schedule a Demo
