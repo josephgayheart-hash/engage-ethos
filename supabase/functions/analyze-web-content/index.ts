@@ -32,6 +32,7 @@ serve(async (req) => {
     } = body;
 
     console.log('analyze-web-content called with mode:', mode || 'analyze');
+    console.log('Content length:', content?.length || 0, 'chars');
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
@@ -60,7 +61,10 @@ serve(async (req) => {
   }
 });
 
-async function callLovableAI(messages: { role: string; content: string }[], apiKey: string) {
+// Helper to call AI with JSON response_format for reliable JSON output
+async function callLovableAIWithJSON(messages: { role: string; content: string }[], apiKey: string) {
+  console.log('Calling Lovable AI with JSON mode...');
+  
   const response = await fetch(LOVABLE_API_URL, {
     method: 'POST',
     headers: {
@@ -70,6 +74,7 @@ async function callLovableAI(messages: { role: string; content: string }[], apiK
     body: JSON.stringify({
       model: 'google/gemini-2.5-flash',
       messages,
+      response_format: { type: "json_object" },
     }),
   });
 
@@ -90,10 +95,22 @@ async function callLovableAI(messages: { role: string; content: string }[], apiK
   const content = data.choices?.[0]?.message?.content;
 
   if (!content) {
+    console.error('No content in AI response:', JSON.stringify(data).slice(0, 500));
     throw new Error('No response from AI');
   }
 
-  return content;
+  console.log('AI response length:', content.length, 'chars');
+
+  // With response_format: json_object, try direct parse first
+  try {
+    return JSON.parse(content);
+  } catch (parseError) {
+    console.error('Direct JSON parse failed, attempting extraction...');
+    console.error('First 500 chars of response:', content.slice(0, 500));
+    
+    // Fallback to extraction for edge cases
+    return extractJSON(content);
+  }
 }
 
 function extractJSON(text: string): any {
@@ -250,6 +267,8 @@ async function handleAnalyze(
   stories: any[] | undefined,
   apiKey: string
 ) {
+  console.log('Starting analysis mode...');
+  
   // Truncate content for analysis
   const maxChars = 15000;
   const truncatedContent = content.length > maxChars 
@@ -364,7 +383,9 @@ ${JSON.stringify(profileConfig || {}, null, 2)}
 4. **Story Connection** - References institutional narratives
 5. **Compelling Value Prop** - Clear, differentiated messaging
 6. **Audience Targeting** - Speaks directly to target audience
-7. **Emotional Resonance** - Creates connection with reader`;
+7. **Emotional Resonance** - Creates connection with reader
+
+IMPORTANT: You MUST return valid JSON only. No markdown, no extra text.`;
 
   const userPrompt = `FIRST: Scan this content for any institution names that don't match "${institutionName}". If found, this is a CRITICAL failure and score must be capped at 25.
 
@@ -435,12 +456,11 @@ REMEMBER: If you detect ANY institution name other than "${institutionName}", th
 
 Return ONLY valid JSON. Be thorough and specific in your analysis.`;
 
-  const responseText = await callLovableAI([
+  const analysis = await callLovableAIWithJSON([
     { role: 'system', content: systemPrompt },
     { role: 'user', content: userPrompt }
   ], apiKey);
 
-  const analysis = extractJSON(responseText);
   console.log('Analysis complete, sections:', analysis.sections?.length, 'overall score:', analysis.overallScore);
 
   return new Response(
@@ -457,6 +477,8 @@ async function handleRewriteAll(
   stories: any[] | undefined,
   apiKey: string
 ) {
+  console.log('Starting rewrite-all mode...');
+  
   const factsContext = formatFactsContext(facts || []);
   const storiesContext = formatStoriesContext(stories || []);
 
@@ -483,7 +505,9 @@ GUIDELINES:
 - Reference stories/testimonials when appropriate
 - Make content more engaging and distinctive
 - Keep the same approximate length
-- Be specific about what you changed and why`;
+- Be specific about what you changed and why
+
+IMPORTANT: You MUST return valid JSON only. No markdown, no extra text.`;
 
   // Only rewrite sections that have issues - don't skip any!
   const sectionsWithIssues = sections.filter((s: any) => s.issues && s.issues.length > 0);
@@ -528,12 +552,10 @@ Return a JSON response with exactly ${sectionsWithIssues.length} rewritten secti
 
 You MUST return exactly ${sectionsWithIssues.length} sections. Return ONLY the JSON.`;
 
-  const responseText = await callLovableAI([
+  const result = await callLovableAIWithJSON([
     { role: 'system', content: systemPrompt },
     { role: 'user', content: userPrompt }
   ], apiKey);
-
-  const result = extractJSON(responseText);
   
   // Map the rewritten sections back to original IDs if AI didn't preserve them
   result.rewrittenSections = result.rewrittenSections?.map((r: any, i: number) => ({
@@ -559,6 +581,8 @@ async function handleRewriteSection(
   stories: any[] | undefined,
   apiKey: string
 ) {
+  console.log('Starting rewrite-section mode...');
+  
   const factsContext = formatFactsContext(facts || []);
   const storiesContext = formatStoriesContext(stories || []);
 
@@ -583,7 +607,9 @@ GUIDELINES:
 - Use key phrases and brand language where appropriate
 - Incorporate relevant facts if they strengthen the message
 - Make content more engaging and distinctive
-- Keep the same approximate length`;
+- Keep the same approximate length
+
+IMPORTANT: You MUST return valid JSON only. No markdown, no extra text.`;
 
   const userPrompt = `Rewrite this section (${sectionTitle}) to align with the brand voice:
 
@@ -607,12 +633,11 @@ Return a JSON response:
 
 Return ONLY the JSON.`;
 
-  const responseText = await callLovableAI([
+  const result = await callLovableAIWithJSON([
     { role: 'system', content: systemPrompt },
     { role: 'user', content: userPrompt }
   ], apiKey);
 
-  const result = extractJSON(responseText);
   console.log('Section rewrite complete');
 
   return new Response(
