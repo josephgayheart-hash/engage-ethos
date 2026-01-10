@@ -35,17 +35,33 @@ serve(async (req) => {
       );
     }
 
-    // Build search query for LinkedIn
-    const searchParts = [`site:linkedin.com/in`];
-    searchParts.push(`"${name}"`);
-    if (title) {
-      // Simplify title for better search results
-      const simplifiedTitle = title.replace(/VP|Vice President/i, 'Vice President');
-      searchParts.push(`"${simplifiedTitle}"`);
-    }
-    searchParts.push(`"${institution}"`);
+    // Build search query for LinkedIn - use flexible matching
+    // Extract key title words instead of using full title (which often fails)
+    const extractKeyTitleWords = (fullTitle: string): string[] => {
+      const keyRoles = ['president', 'vp', 'director', 'chief', 'dean', 'provost', 'chancellor', 'cmo', 'cco', 'marketing', 'communications', 'enrollment', 'admissions'];
+      const words = fullTitle.toLowerCase().split(/\s+/);
+      return words.filter(w => keyRoles.some(role => w.includes(role))).slice(0, 2);
+    };
     
-    const searchQuery = searchParts.join(' ');
+    // Simplify institution name - remove common suffixes
+    const simplifyInstitution = (inst: string): string => {
+      return inst
+        .replace(/\s*\(.*?\)\s*/g, '') // Remove parentheticals like (WGU)
+        .replace(/university of /i, '')
+        .replace(/ university$/i, '')
+        .replace(/ college$/i, '')
+        .trim();
+    };
+    
+    const institutionSimple = simplifyInstitution(institution);
+    const titleKeywords = title ? extractKeyTitleWords(title) : [];
+    
+    // Build query: site filter + name (required) + institution + optional title keywords
+    // Don't use quotes around everything - more flexible matching
+    let searchQuery = `site:linkedin.com/in ${name} ${institutionSimple}`;
+    if (titleKeywords.length > 0) {
+      searchQuery += ` ${titleKeywords.join(' ')}`;
+    }
     console.log('LinkedIn search query:', searchQuery);
 
     const response = await fetch('https://api.firecrawl.dev/v1/search', {
