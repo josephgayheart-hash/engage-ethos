@@ -3,17 +3,13 @@ import { useLocation } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { AnalyzerInput } from '@/components/analyzer/AnalyzerInput';
 import { BrandScorePanel } from '@/components/analyzer/BrandScorePanel';
 import { ContentSectionCard } from '@/components/analyzer/ContentSectionCard';
 import { RewritePanel } from '@/components/analyzer/RewritePanel';
 import { DNAAlignmentPanel } from '@/components/analyzer/DNAAlignmentPanel';
-import { ScreenshotPreview } from '@/components/analyzer/ScreenshotPreview';
 import { VoiceProfileCard } from '@/components/analyzer/VoiceProfileCard';
-import { IssuesSummaryCard } from '@/components/analyzer/IssuesSummaryCard';
 import { AnalysisActionsCard } from '@/components/analyzer/AnalysisActionsCard';
-import { IssueProgressTracker } from '@/components/analyzer/IssueProgressTracker';
 import { useContentDNA } from '@/hooks/useContentDNA';
 import { useInstitutionalProfiles } from '@/hooks/useInstitutionalProfiles';
 import { useFactBook } from '@/hooks/useFactBook';
@@ -21,7 +17,6 @@ import { useStoryBank } from '@/hooks/useStoryBank';
 import { useUserDrafts } from '@/hooks/useUserDrafts';
 import { useMessageLibrary } from '@/hooks/useMessageLibrary';
 import { supabase } from '@/integrations/supabase/client';
-import { firecrawlApi } from '@/lib/api/firecrawl';
 import { useToast } from '@/hooks/use-toast';
 import { toast } from 'sonner';
 import { 
@@ -66,8 +61,6 @@ export default function WebContentAnalyzerPage() {
   
   const [content, setContent] = useState('');
   const [sourceUrl, setSourceUrl] = useState('');
-  const [screenshot, setScreenshot] = useState<string | null>(null);
-  const [screenshotLoading, setScreenshotLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
@@ -87,7 +80,6 @@ export default function WebContentAnalyzerPage() {
           setContent(draftData.sourceContent || '');
           setSourceUrl(draftData.sourceUrl || '');
           setAnalysisResult(draftData.analysisResult);
-          setScreenshot(draftData.screenshot || null);
           setSelectedProfileId(draftData.profileId || null);
           setResolvedIssues(draftData.remediation?.resolvedIssues || []);
           setCurrentDraftId(draft.id);
@@ -135,7 +127,6 @@ export default function WebContentAnalyzerPage() {
       sourceUrl,
       sourceContent: content,
       analysisResult: analysisResult!,
-      screenshot: screenshot || undefined,
       profileId: selectedProfileId || undefined,
       profileName: selectedProfile?.name,
       analyzedAt: new Date().toISOString(),
@@ -144,7 +135,7 @@ export default function WebContentAnalyzerPage() {
         resolvedIssues,
       }
     };
-  }, [sourceUrl, content, analysisResult, screenshot, selectedProfileId, selectedProfile?.name, resolvedIssues]);
+  }, [sourceUrl, content, analysisResult, selectedProfileId, selectedProfile?.name, resolvedIssues]);
 
   const handleSaveDraft = useCallback(async () => {
     if (!analysisResult) return;
@@ -251,28 +242,9 @@ export default function WebContentAnalyzerPage() {
     setIsAnalyzing(true);
     setAnalysisResult(null);
     setShowRewrite(false);
-    setScreenshot(null);
     setResolvedIssues([]); // Reset remediation on new analysis
 
     try {
-      // Fetch screenshot in parallel if URL provided
-      if (url) {
-        setScreenshotLoading(true);
-        firecrawlApi.scrape(url, { formats: ['screenshot'] })
-          .then(res => {
-            console.log('Screenshot response:', res);
-            const screenshotData = res.data?.screenshot;
-            if (res.success && screenshotData) {
-              const imageData = screenshotData.startsWith('data:') 
-                ? screenshotData 
-                : `data:image/png;base64,${screenshotData}`;
-              setScreenshot(imageData);
-            }
-          })
-          .catch(err => console.log('Screenshot capture skipped:', err))
-          .finally(() => setScreenshotLoading(false));
-      }
-
       const { data, error } = await supabase.functions.invoke('analyze-web-content', {
         body: {
           content: inputContent,
@@ -311,7 +283,6 @@ export default function WebContentAnalyzerPage() {
     setContent('');
     setSourceUrl('');
     setShowRewrite(false);
-    setScreenshot(null);
     setResolvedIssues([]);
     setCurrentDraftId(null);
   };
@@ -425,9 +396,16 @@ export default function WebContentAnalyzerPage() {
 
           {/* Main Content */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Left Column - Section Selector (always visible) */}
+            {/* Left Column - Input & Results */}
             <div className="lg:col-span-3 space-y-6">
-              {/* Section Selector */}
+              {/* Voice Profile Selector - always at top */}
+              <VoiceProfileCard
+                selectedProfileId={selectedProfileId}
+                onProfileChange={setSelectedProfileId}
+                hasDNA={!!contentDNA?.last_analyzed_at}
+              />
+
+              {/* Content Input */}
               <AnalyzerInput 
                 onAnalyze={handleAnalyze} 
                 isAnalyzing={isAnalyzing}
@@ -437,7 +415,7 @@ export default function WebContentAnalyzerPage() {
               {/* Analysis Results */}
               {analysisResult && (
                 <div className="space-y-6">
-                  {/* Results Header with Score */}
+                  {/* Results Header with Score and Summary Stats */}
                   <Card>
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
@@ -464,13 +442,71 @@ export default function WebContentAnalyzerPage() {
                         </div>
                       </div>
                     </CardHeader>
-                    {analysisResult.executiveSummary && (
-                      <CardContent className="pt-0">
+                    <CardContent className="space-y-4">
+                      {/* Executive Summary */}
+                      {analysisResult.executiveSummary && (
                         <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
                           <p className="text-sm text-foreground">{analysisResult.executiveSummary}</p>
                         </div>
-                      </CardContent>
-                    )}
+                      )}
+                      
+                      {/* Quick Stats Grid */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div className="p-3 rounded-lg bg-muted/50 text-center">
+                          <div className="text-2xl font-bold text-foreground">{analysisResult.sections.length}</div>
+                          <div className="text-xs text-muted-foreground">Sections</div>
+                        </div>
+                        <div className="p-3 rounded-lg bg-red-500/10 text-center">
+                          <div className="text-2xl font-bold text-red-600">{analysisResult.summary.totalIssues}</div>
+                          <div className="text-xs text-muted-foreground">Issues Found</div>
+                        </div>
+                        <div className="p-3 rounded-lg bg-green-500/10 text-center">
+                          <div className="text-2xl font-bold text-green-600">{analysisResult.summary.totalStrengths}</div>
+                          <div className="text-xs text-muted-foreground">Strengths</div>
+                        </div>
+                        <div className="p-3 rounded-lg bg-amber-500/10 text-center">
+                          <div className="text-2xl font-bold text-amber-600">{analysisResult.summary.criticalIssues?.length || 0}</div>
+                          <div className="text-xs text-muted-foreground">Critical</div>
+                        </div>
+                      </div>
+
+                      {/* Critical Issues Highlight */}
+                      {analysisResult.summary.criticalIssues && analysisResult.summary.criticalIssues.length > 0 && (
+                        <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/5">
+                          <p className="text-xs font-medium text-red-600 mb-2">Critical Issues to Address:</p>
+                          <ul className="space-y-1">
+                            {analysisResult.summary.criticalIssues.slice(0, 3).map((issue, idx) => (
+                              <li key={idx} className="text-sm text-foreground flex items-start gap-2">
+                                <span className="text-red-500 mt-0.5">•</span>
+                                {issue}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Quick Wins */}
+                      {analysisResult.summary.quickWins && analysisResult.summary.quickWins.length > 0 && (
+                        <div className="p-3 rounded-lg border border-green-500/30 bg-green-500/5">
+                          <p className="text-xs font-medium text-green-600 mb-2">Quick Wins:</p>
+                          <ul className="space-y-1">
+                            {analysisResult.summary.quickWins.slice(0, 3).map((win, idx) => (
+                              <li key={idx} className="text-sm text-foreground flex items-start gap-2">
+                                <span className="text-green-500 mt-0.5">✓</span>
+                                {win}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Scroll indicator */}
+                      <div className="text-center pt-2 border-t">
+                        <p className="text-xs text-muted-foreground">
+                          ↓ Scroll down for detailed section analysis
+                        </p>
+                      </div>
+                    </CardContent>
                   </Card>
 
                   {/* DNA Alignment Panel */}
@@ -523,15 +559,8 @@ export default function WebContentAnalyzerPage() {
               )}
             </div>
 
-            {/* Right Column - Controls & Details */}
+            {/* Right Column - Actions only (when results exist) */}
             <div className="space-y-6">
-              {/* Voice Profile Card */}
-              <VoiceProfileCard
-                selectedProfileId={selectedProfileId}
-                onProfileChange={setSelectedProfileId}
-                hasDNA={!!contentDNA?.last_analyzed_at}
-              />
-
               {/* Loading State */}
               {isAnalyzing && (
                 <Card>
@@ -558,21 +587,6 @@ export default function WebContentAnalyzerPage() {
                     onSaveToUniversityLibrary={handleSaveToUniversityLibrary}
                     isSaving={isSaving}
                     hasDraft={!!currentDraftId}
-                  />
-
-                  {/* Issues Summary Card */}
-                  <IssuesSummaryCard
-                    totalIssues={analysisResult.summary.totalIssues}
-                    totalStrengths={analysisResult.summary.totalStrengths}
-                    criticalIssues={analysisResult.summary.criticalIssues}
-                    topStrengths={analysisResult.summary.topStrengths}
-                  />
-
-                  {/* Screenshot Preview */}
-                  <ScreenshotPreview
-                    screenshot={screenshot || undefined}
-                    sourceUrl={sourceUrl}
-                    isLoading={screenshotLoading}
                   />
 
                   {/* Selected Section Details */}

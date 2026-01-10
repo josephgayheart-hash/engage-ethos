@@ -391,7 +391,7 @@ export function AnalyzerInput({ onAnalyze, isAnalyzing, disabled }: AnalyzerInpu
         )}
 
         {/* Fallback: Show scraped content if no sections parsed */}
-        {scrapedContent && sections.length === 0 && (
+        {scrapedContent && sections.length === 0 && !isScraping && !isParsing && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div>
@@ -403,7 +403,7 @@ export function AnalyzerInput({ onAnalyze, isAnalyzing, disabled }: AnalyzerInpu
                 </p>
               </div>
               <Badge variant="outline" className="text-green-600 border-green-500/30">
-                Ready to Analyze
+                Content Ready
               </Badge>
             </div>
             <div className="p-3 rounded-lg border bg-muted/30 max-h-[150px] overflow-y-auto">
@@ -415,27 +415,29 @@ export function AnalyzerInput({ onAnalyze, isAnalyzing, disabled }: AnalyzerInpu
           </div>
         )}
 
-        {/* Analyze Button */}
-        <div className="pt-4 border-t">
-          <Button
-            onClick={handleAnalyzeClick}
-            disabled={!hasContent || isAnalyzing || disabled}
-            className="w-full bg-primary hover:bg-primary/90"
-            size="lg"
-          >
-            {isAnalyzing ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                Analyzing Content...
-              </>
-            ) : (
-              <>
-                Analyze Against Content DNA
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </>
-            )}
-          </Button>
-        </div>
+        {/* Analyze Button - only show when sections are loaded and selected */}
+        {(sections.length > 0 || (scrapedContent && !isScraping && !isParsing)) && (
+          <div className="pt-4 border-t">
+            <Button
+              onClick={handleAnalyzeClick}
+              disabled={!hasContent || isAnalyzing || disabled}
+              className="w-full bg-primary hover:bg-primary/90"
+              size="lg"
+            >
+              {isAnalyzing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  Analyzing Content...
+                </>
+              ) : (
+                <>
+                  Analyze {selectedIds.size > 0 ? `${selectedIds.size} Sections` : 'Content'} Against DNA
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
