@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -28,6 +27,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useInstitutionalProfiles, type InstitutionalProfile, type ProfileType } from "@/hooks/useInstitutionalProfiles";
+import { ProfileSetupWizard } from "@/components/ProfileSetupWizard";
+import { SubUnitSetupWizard } from "@/components/SubUnitSetupWizard";
+import { InstitutionalConfig } from "@/components/InstitutionalConfig";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Plus,
@@ -43,311 +46,373 @@ import {
   Search,
   CheckCircle,
   Palette,
+  GraduationCap,
+  Layers,
+  Building,
+  Briefcase,
+  ChevronDown,
+  ChevronRight,
+  Dna,
+  Settings,
+  Copy,
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { SEOHead } from "@/components/SEOHead";
+import type { InstitutionalConfig as InstitutionalConfigType, ProfileType as ConfigProfileType } from "@/types/uplaybook";
 
-interface ClientProfile {
-  id: string;
-  name: string;
-  profile_type: string;
-  client_status: string;
-  config: {
-    primaryColor?: string;
-    logoUrl?: string;
-  };
-  created_at: string;
-  updated_at: string;
-  messageCount?: number;
-  hasDNA?: boolean;
-}
+const PROFILE_TYPE_ICONS: Record<ProfileType, React.ReactNode> = {
+  university: <Building2 className="w-4 h-4" />,
+  college: <GraduationCap className="w-4 h-4" />,
+  division: <Layers className="w-4 h-4" />,
+  unit: <Building className="w-4 h-4" />,
+  department: <Briefcase className="w-4 h-4" />,
+};
+
+const PROFILE_TYPE_LABELS: Record<ProfileType, string> = {
+  university: 'University Client',
+  college: 'College',
+  division: 'Division',
+  unit: 'Unit',
+  department: 'Department',
+};
 
 export default function AgencyClientsPage() {
-  const { tenant, profile } = useAuth();
+  const { tenant, profile: userProfile } = useAuth();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
-  const [clients, setClients] = useState<ClientProfile[]>([]);
-  const [filteredClients, setFilteredClients] = useState<ClientProfile[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { 
+    profiles, 
+    createProfile, 
+    updateProfile, 
+    deleteProfile, 
+    duplicateProfile,
+    getChildProfiles, 
+    getRootProfiles,
+    refreshProfiles,
+    isLoading 
+  } = useInstitutionalProfiles();
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [selectedClient, setSelectedClient] = useState<ClientProfile | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    primaryColor: "#1F2A44",
-  });
+  
+  // Wizard states
+  const [showWizard, setShowWizard] = useState(false);
+  const [showSubUnitWizard, setShowSubUnitWizard] = useState(false);
+  const [subUnitParent, setSubUnitParent] = useState<InstitutionalProfile | null>(null);
+  
+  // Editing/Config states
+  const [editingProfile, setEditingProfile] = useState<InstitutionalProfile | null>(null);
+  const [showConfigDialog, setShowConfigDialog] = useState(false);
+  
+  // Delete/Duplicate dialogs
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [profileToDelete, setProfileToDelete] = useState<InstitutionalProfile | null>(null);
+  const [duplicateName, setDuplicateName] = useState("");
+  const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
+  const [profileToDuplicate, setProfileToDuplicate] = useState<InstitutionalProfile | null>(null);
+  
+  // Expanded state for hierarchy view
+  const [expandedProfiles, setExpandedProfiles] = useState<Set<string>>(new Set());
+  
+  // DNA stats
+  const [dnaStats, setDnaStats] = useState<Record<string, { samples: number; hasAnalysis: boolean }>>({});
+  const [messageCounts, setMessageCounts] = useState<Record<string, number>>({});
 
+  // Fetch DNA stats and message counts
   useEffect(() => {
-    if (tenant?.id) {
-      fetchClients();
-    }
-  }, [tenant?.id]);
+    const fetchStats = async () => {
+      if (!tenant?.id || profiles.length === 0) return;
 
-  useEffect(() => {
-    let result = clients;
+      // Fetch DNA stats
+      const { data: dnaData } = await supabase
+        .from('content_dna_analysis')
+        .select('profile_id')
+        .eq('tenant_id', tenant.id);
 
-    if (searchQuery) {
-      result = result.filter((c) =>
-        c.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
+      const { data: samplesData } = await supabase
+        .from('content_dna_samples')
+        .select('profile_id')
+        .eq('tenant_id', tenant.id);
 
-    if (statusFilter !== "all") {
-      result = result.filter((c) => c.client_status === statusFilter);
-    }
+      const stats: Record<string, { samples: number; hasAnalysis: boolean }> = {};
+      
+      profiles.forEach(p => {
+        stats[p.id] = { samples: 0, hasAnalysis: false };
+      });
 
-    setFilteredClients(result);
-  }, [clients, searchQuery, statusFilter]);
+      dnaData?.forEach(d => {
+        if (d.profile_id && stats[d.profile_id]) {
+          stats[d.profile_id].hasAnalysis = true;
+        }
+      });
 
-  const fetchClients = async () => {
-    try {
-      const { data: profilesData, error: profilesError } = await supabase
-        .from("institutional_profiles")
-        .select("*")
-        .eq("tenant_id", tenant?.id)
-        .order("name", { ascending: true });
+      samplesData?.forEach(s => {
+        if (s.profile_id && stats[s.profile_id]) {
+          stats[s.profile_id].samples++;
+        }
+      });
 
-      if (profilesError) throw profilesError;
+      setDnaStats(stats);
 
       // Fetch message counts
       const { data: messagesData } = await supabase
-        .from("personal_messages")
-        .select("institutional_profile_id")
-        .eq("tenant_id", tenant?.id);
+        .from('personal_messages')
+        .select('institutional_profile_id')
+        .eq('tenant_id', tenant.id);
 
-      // Fetch DNA configurations
-      const { data: dnaData } = await supabase
-        .from("content_dna_analysis")
-        .select("profile_id")
-        .eq("tenant_id", tenant?.id);
-
-      const messageCounts: Record<string, number> = {};
-      const dnaProfiles = new Set<string>();
-
-      messagesData?.forEach((msg) => {
+      const counts: Record<string, number> = {};
+      messagesData?.forEach(msg => {
         if (msg.institutional_profile_id) {
-          messageCounts[msg.institutional_profile_id] =
-            (messageCounts[msg.institutional_profile_id] || 0) + 1;
+          counts[msg.institutional_profile_id] = (counts[msg.institutional_profile_id] || 0) + 1;
         }
       });
+      setMessageCounts(counts);
+    };
 
-      dnaData?.forEach((dna) => {
-        if (dna.profile_id) {
-          dnaProfiles.add(dna.profile_id);
-        }
+    fetchStats();
+  }, [tenant?.id, profiles]);
+
+  // Filter root profiles
+  const rootProfiles = getRootProfiles();
+  const filteredProfiles = rootProfiles.filter(profile => {
+    const matchesSearch = profile.name.toLowerCase().includes(searchQuery.toLowerCase());
+    // For now we don't have client_status on profiles, so skip status filter
+    return matchesSearch;
+  });
+
+  // Handlers
+  const handleCreateClient = async (name: string, config: InstitutionalConfigType) => {
+    const profile = await createProfile(name, config, null, 'university');
+    setShowWizard(false);
+    if (profile) {
+      toast({ 
+        title: "Client added", 
+        description: `${profile.name} has been added to your client roster.` 
       });
+    }
+  };
 
-      const enrichedClients: ClientProfile[] = (profilesData || []).map((p) => ({
-        id: p.id,
-        name: p.name,
-        profile_type: p.profile_type,
-        client_status: p.client_status || "active",
-        config: p.config as ClientProfile["config"],
-        created_at: p.created_at,
-        updated_at: p.updated_at,
-        messageCount: messageCounts[p.id] || 0,
-        hasDNA: dnaProfiles.has(p.id),
-      }));
+  const handleCreateSubUnit = async (name: string, config: InstitutionalConfigType, profileType: ConfigProfileType) => {
+    if (!subUnitParent) return;
+    const profile = await createProfile(name, config, subUnitParent.id, profileType as ProfileType);
+    setShowSubUnitWizard(false);
+    setSubUnitParent(null);
+    if (profile) {
+      setExpandedProfiles(prev => new Set([...prev, subUnitParent.id]));
+      toast({ 
+        title: `${PROFILE_TYPE_LABELS[profileType as ProfileType]} created`, 
+        description: `"${name}" is now part of ${subUnitParent.name}.` 
+      });
+    }
+  };
 
-      setClients(enrichedClients);
-    } catch (error) {
-      console.error("Error fetching clients:", error);
+  const handleUpdateConfig = async (config: InstitutionalConfigType) => {
+    if (!editingProfile) return;
+    await updateProfile(editingProfile.id, { config });
+    setEditingProfile({ ...editingProfile, config });
+    toast({ title: "Client updated", description: "Configuration has been saved." });
+  };
+
+  const handleDeleteProfile = async () => {
+    if (!profileToDelete) return;
+    
+    try {
+      // Delete associated Content DNA
+      await supabase.from('content_dna_samples').delete().eq('profile_id', profileToDelete.id);
+      await supabase.from('content_dna_analysis').delete().eq('profile_id', profileToDelete.id);
+      await supabase.from('content_dna_adjustments').delete().eq('profile_id', profileToDelete.id);
+      
+      await deleteProfile(profileToDelete.id);
+      
+      if (editingProfile?.id === profileToDelete.id) {
+        setEditingProfile(null);
+        setShowConfigDialog(false);
+      }
+      
+      toast({ title: "Client deleted", description: "Client and all associated data have been removed." });
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message || "Failed to delete client", variant: "destructive" });
     } finally {
-      setIsLoading(false);
+      setDeleteDialogOpen(false);
+      setProfileToDelete(null);
     }
   };
 
-  const handleAddClient = async () => {
-    if (!formData.name.trim()) {
-      toast({
-        title: "Name required",
-        description: "Please enter a client name.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      const { error } = await supabase.from("institutional_profiles").insert({
-        tenant_id: tenant?.id,
-        created_by_user_id: profile?.id,
-        name: formData.name,
-        profile_type: "university",
-        client_status: "active",
-        config: {
-          primaryColor: formData.primaryColor,
-        },
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Client added",
-        description: `${formData.name} has been added to your clients.`,
-      });
-
-      setShowAddDialog(false);
-      setFormData({ name: "", primaryColor: "#1F2A44" });
-      fetchClients();
-    } catch (error: any) {
-      console.error("Error adding client:", error);
-      toast({
-        title: "Error",
-        description: "Failed to add client. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
+  const handleDuplicateProfile = async () => {
+    if (!profileToDuplicate || !duplicateName.trim()) return;
+    const newProfile = await duplicateProfile(profileToDuplicate.id, duplicateName.trim());
+    setDuplicateDialogOpen(false);
+    setProfileToDuplicate(null);
+    setDuplicateName("");
+    if (newProfile) {
+      toast({ title: "Client duplicated", description: `"${newProfile.name}" created.` });
     }
   };
 
-  const handleEditClient = async () => {
-    if (!selectedClient || !formData.name.trim()) return;
-
-    setIsSubmitting(true);
-    try {
-      const { error } = await supabase
-        .from("institutional_profiles")
-        .update({
-          name: formData.name,
-          config: {
-            ...selectedClient.config,
-            primaryColor: formData.primaryColor,
-          },
-        })
-        .eq("id", selectedClient.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Client updated",
-        description: `${formData.name} has been updated.`,
-      });
-
-      setShowEditDialog(false);
-      setSelectedClient(null);
-      setFormData({ name: "", primaryColor: "#1F2A44" });
-      fetchClients();
-    } catch (error: any) {
-      console.error("Error updating client:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update client. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleStatusChange = async (
-    clientId: string,
-    newStatus: string,
-    clientName: string
-  ) => {
-    try {
-      const { error } = await supabase
-        .from("institutional_profiles")
-        .update({ client_status: newStatus })
-        .eq("id", clientId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Status updated",
-        description: `${clientName} is now ${newStatus}.`,
-      });
-
-      fetchClients();
-    } catch (error: any) {
-      console.error("Error updating status:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update status.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleDeleteClient = async (clientId: string, clientName: string) => {
-    if (
-      !confirm(
-        `Are you sure you want to delete ${clientName}? This cannot be undone.`
-      )
-    ) {
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from("institutional_profiles")
-        .delete()
-        .eq("id", clientId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Client deleted",
-        description: `${clientName} has been removed.`,
-      });
-
-      fetchClients();
-    } catch (error: any) {
-      console.error("Error deleting client:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete client. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const openEditDialog = (client: ClientProfile) => {
-    setSelectedClient(client);
-    setFormData({
-      name: client.name,
-      primaryColor: client.config?.primaryColor || "#1F2A44",
+  const toggleExpand = (profileId: string) => {
+    setExpandedProfiles(prev => {
+      const next = new Set(prev);
+      if (next.has(profileId)) {
+        next.delete(profileId);
+      } else {
+        next.add(profileId);
+      }
+      return next;
     });
-    setShowEditDialog(true);
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "active":
-        return (
-          <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
-            <CheckCircle className="h-3 w-3 mr-1" />
-            Active
-          </Badge>
-        );
-      case "paused":
-        return (
-          <Badge variant="outline" className="border-yellow-500/30 text-yellow-600">
-            <PauseCircle className="h-3 w-3 mr-1" />
-            Paused
-          </Badge>
-        );
-      case "archived":
-        return (
-          <Badge variant="secondary">
-            <Archive className="h-3 w-3 mr-1" />
-            Archived
-          </Badge>
-        );
-      default:
-        return null;
-    }
+  // Recursive profile tree renderer
+  const renderProfileTree = (profile: InstitutionalProfile, depth: number = 0) => {
+    const children = getChildProfiles(profile.id);
+    const hasChildren = children.length > 0;
+    const isExpanded = expandedProfiles.has(profile.id);
+    const stats = dnaStats[profile.id] || { samples: 0, hasAnalysis: false };
+    const msgCount = messageCounts[profile.id] || 0;
+
+    return (
+      <div key={profile.id}>
+        <Card 
+          className={`hover:border-primary/30 transition-colors cursor-pointer ${
+            editingProfile?.id === profile.id ? 'border-primary ring-1 ring-primary' : ''
+          }`}
+          style={{ marginLeft: depth * 24 }}
+          onClick={() => {
+            setEditingProfile(profile);
+            setShowConfigDialog(true);
+          }}
+        >
+          <CardContent className="py-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                {hasChildren && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 flex-shrink-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleExpand(profile.id);
+                    }}
+                  >
+                    {isExpanded ? (
+                      <ChevronDown className="h-4 w-4" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4" />
+                    )}
+                  </Button>
+                )}
+                {!hasChildren && <div className="w-6" />}
+                
+                {profile.config?.logoUrl ? (
+                  <img
+                    src={profile.config.logoUrl}
+                    alt={profile.name}
+                    className="w-10 h-10 object-contain rounded-lg border bg-white p-1 flex-shrink-0"
+                  />
+                ) : (
+                  <div
+                    className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: profile.config?.primaryColor || "#1F2A44" }}
+                  >
+                    {PROFILE_TYPE_ICONS[profile.profileType]}
+                    <span className="sr-only">{PROFILE_TYPE_LABELS[profile.profileType]}</span>
+                  </div>
+                )}
+                
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-medium text-foreground truncate">{profile.name}</h3>
+                    {profile.profileType !== 'university' && (
+                      <Badge variant="outline" className="text-xs">
+                        {PROFILE_TYPE_LABELS[profile.profileType]}
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <MessageSquare className="h-3 w-3" />
+                      {msgCount} messages
+                    </span>
+                    {stats.hasAnalysis && (
+                      <span className="flex items-center gap-1 text-primary">
+                        <Dna className="h-3 w-3" />
+                        DNA
+                      </span>
+                    )}
+                    {hasChildren && (
+                      <span className="flex items-center gap-1">
+                        <Layers className="h-3 w-3" />
+                        {children.length} sub-units
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                  <Button variant="ghost" size="icon">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={(e) => {
+                    e.stopPropagation();
+                    setEditingProfile(profile);
+                    setShowConfigDialog(true);
+                  }}>
+                    <Settings className="h-4 w-4 mr-2" />
+                    Configure
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={(e) => {
+                    e.stopPropagation();
+                    setSubUnitParent(profile);
+                    setShowSubUnitWizard(true);
+                  }}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Sub-unit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={(e) => {
+                    e.stopPropagation();
+                    setProfileToDuplicate(profile);
+                    setDuplicateName(`${profile.name} (Copy)`);
+                    setDuplicateDialogOpen(true);
+                  }}>
+                    <Copy className="h-4 w-4 mr-2" />
+                    Duplicate
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setProfileToDelete(profile);
+                      setDeleteDialogOpen(true);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </CardContent>
+        </Card>
+        
+        {isExpanded && children.length > 0 && (
+          <div className="mt-2 space-y-2">
+            {children.map(child => renderProfileTree(child, depth + 1))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
     <>
       <SEOHead
-        title="Clients | CampusVoice.AI"
-        description="Manage your university clients."
+        title="Client Management | CampusVoice.AI"
+        description="Manage your university clients and their content."
       />
 
       <div className="min-h-screen bg-background">
@@ -358,75 +423,15 @@ export default function AgencyClientsPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
               <div>
-                <h1 className="text-3xl font-bold text-foreground">Clients</h1>
+                <h1 className="text-3xl font-bold text-foreground">Client Management</h1>
                 <p className="text-muted-foreground mt-1">
-                  Manage your university clients and their content
+                  Manage your university clients, their branding, and organizational structure
                 </p>
               </div>
-              <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-                <DialogTrigger asChild>
-                  <Button className="gap-2">
-                    <Plus className="h-4 w-4" />
-                    Add Client
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Add New Client</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4 pt-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">University Name *</Label>
-                      <div className="relative">
-                        <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="name"
-                          className="pl-10"
-                          value={formData.name}
-                          onChange={(e) =>
-                            setFormData({ ...formData, name: e.target.value })
-                          }
-                          placeholder="e.g., State University"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="color">Primary Brand Color</Label>
-                      <div className="flex items-center gap-3">
-                        <div className="relative">
-                          <Palette className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            id="color"
-                            className="pl-10 w-32"
-                            value={formData.primaryColor}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                primaryColor: e.target.value,
-                              })
-                            }
-                          />
-                        </div>
-                        <div
-                          className="w-10 h-10 rounded-md border"
-                          style={{ backgroundColor: formData.primaryColor }}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex justify-end gap-3 pt-4">
-                      <Button
-                        variant="outline"
-                        onClick={() => setShowAddDialog(false)}
-                      >
-                        Cancel
-                      </Button>
-                      <Button onClick={handleAddClient} disabled={isSubmitting}>
-                        {isSubmitting ? "Adding..." : "Add Client"}
-                      </Button>
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
+              <Button onClick={() => setShowWizard(true)} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Add University Client
+              </Button>
             </div>
 
             {/* Filters */}
@@ -442,45 +447,29 @@ export default function AgencyClientsPage() {
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
                   </div>
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-40">
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="paused">Paused</SelectItem>
-                      <SelectItem value="archived">Archived</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Clients Grid */}
+            {/* Clients List */}
             {isLoading ? (
               <div className="text-center py-12 text-muted-foreground">
                 Loading clients...
               </div>
-            ) : filteredClients.length === 0 ? (
+            ) : filteredProfiles.length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">
                   <Building2 className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
                   <h3 className="font-medium text-foreground mb-2">
-                    {searchQuery || statusFilter !== "all"
-                      ? "No matching clients"
-                      : "No clients yet"}
+                    {searchQuery ? "No matching clients" : "No clients yet"}
                   </h3>
                   <p className="text-muted-foreground mb-4">
-                    {searchQuery || statusFilter !== "all"
-                      ? "Try adjusting your filters."
-                      : "Add your first university client to get started."}
+                    {searchQuery
+                      ? "Try adjusting your search."
+                      : "Add your first university client to get started. You'll be able to configure their branding, structure, and Content DNA."}
                   </p>
-                  {!searchQuery && statusFilter === "all" && (
-                    <Button
-                      onClick={() => setShowAddDialog(true)}
-                      className="gap-2"
-                    >
+                  {!searchQuery && (
+                    <Button onClick={() => setShowWizard(true)} className="gap-2">
                       <Plus className="h-4 w-4" />
                       Add First Client
                     </Button>
@@ -488,176 +477,123 @@ export default function AgencyClientsPage() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredClients.map((client) => (
-                  <Card
-                    key={client.id}
-                    className="hover:border-primary/30 transition-colors"
-                  >
-                    <CardContent className="pt-6">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-start gap-4 flex-1 min-w-0">
-                          <div
-                            className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
-                            style={{
-                              backgroundColor:
-                                client.config?.primaryColor || "#1F2A44",
-                            }}
-                          >
-                            <Building2 className="h-6 w-6 text-white" />
-                          </div>
-                          <div className="min-w-0">
-                            <h3 className="font-medium text-foreground truncate">
-                              {client.name}
-                            </h3>
-                            <div className="mt-1">
-                              {getStatusBadge(client.client_status)}
-                            </div>
-                          </div>
-                        </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => openEditDialog(client)}
-                            >
-                              <Pencil className="h-4 w-4 mr-2" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            {client.client_status !== "active" && (
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  handleStatusChange(
-                                    client.id,
-                                    "active",
-                                    client.name
-                                  )
-                                }
-                              >
-                                <PlayCircle className="h-4 w-4 mr-2" />
-                                Set Active
-                              </DropdownMenuItem>
-                            )}
-                            {client.client_status !== "paused" && (
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  handleStatusChange(
-                                    client.id,
-                                    "paused",
-                                    client.name
-                                  )
-                                }
-                              >
-                                <PauseCircle className="h-4 w-4 mr-2" />
-                                Pause
-                              </DropdownMenuItem>
-                            )}
-                            {client.client_status !== "archived" && (
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  handleStatusChange(
-                                    client.id,
-                                    "archived",
-                                    client.name
-                                  )
-                                }
-                              >
-                                <Archive className="h-4 w-4 mr-2" />
-                                Archive
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={() =>
-                                handleDeleteClient(client.id, client.name)
-                              }
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-
-                      <div className="flex items-center gap-4 mt-4 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <MessageSquare className="h-3.5 w-3.5" />
-                          {client.messageCount} messages
-                        </span>
-                        {client.hasDNA && (
-                          <span className="flex items-center gap-1">
-                            <Sparkles className="h-3.5 w-3.5" />
-                            DNA
-                          </span>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+              <div className="space-y-3">
+                {filteredProfiles.map(profile => renderProfileTree(profile))}
               </div>
             )}
           </div>
         </main>
 
-        {/* Edit Dialog */}
-        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        {/* Profile Setup Wizard - Full wizard for new clients */}
+        {showWizard && (
+          <Dialog open={showWizard} onOpenChange={setShowWizard}>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
+              <ProfileSetupWizard
+                onComplete={handleCreateClient}
+                onCancel={() => setShowWizard(false)}
+              />
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* Sub-Unit Setup Wizard */}
+        {showSubUnitWizard && subUnitParent && (
+          <Dialog open={showSubUnitWizard} onOpenChange={(open) => {
+            setShowSubUnitWizard(open);
+            if (!open) setSubUnitParent(null);
+          }}>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
+              <SubUnitSetupWizard
+                parentProfile={subUnitParent}
+                onComplete={handleCreateSubUnit}
+                onCancel={() => {
+                  setShowSubUnitWizard(false);
+                  setSubUnitParent(null);
+                }}
+              />
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* Configuration Dialog */}
+        {showConfigDialog && editingProfile && (
+          <Dialog open={showConfigDialog} onOpenChange={(open) => {
+            setShowConfigDialog(open);
+            if (!open) setEditingProfile(null);
+          }}>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  {editingProfile.config?.logoUrl ? (
+                    <img
+                      src={editingProfile.config.logoUrl}
+                      alt=""
+                      className="w-8 h-8 object-contain rounded border bg-white p-0.5"
+                    />
+                  ) : (
+                    <div
+                      className="w-8 h-8 rounded flex items-center justify-center"
+                      style={{ backgroundColor: editingProfile.config?.primaryColor || '#1F2A44' }}
+                    >
+                      {PROFILE_TYPE_ICONS[editingProfile.profileType]}
+                    </div>
+                  )}
+                  Configure: {editingProfile.name}
+                </DialogTitle>
+              </DialogHeader>
+              <InstitutionalConfig
+                config={editingProfile.config}
+                onChange={handleUpdateConfig}
+                profileId={editingProfile.id}
+              />
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Edit Client</DialogTitle>
+              <DialogTitle>Delete Client</DialogTitle>
+            </DialogHeader>
+            <p className="text-muted-foreground">
+              Are you sure you want to delete <strong>{profileToDelete?.name}</strong>? 
+              This will also delete all associated Content DNA, messages, and sub-units. This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleDeleteProfile}>
+                Delete Client
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Duplicate Dialog */}
+        <Dialog open={duplicateDialogOpen} onOpenChange={setDuplicateDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Duplicate Client</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-4">
               <div className="space-y-2">
-                <Label htmlFor="edit-name">University Name *</Label>
-                <div className="relative">
-                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="edit-name"
-                    className="pl-10"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                  />
-                </div>
+                <Label htmlFor="duplicate-name">New Client Name</Label>
+                <Input
+                  id="duplicate-name"
+                  value={duplicateName}
+                  onChange={(e) => setDuplicateName(e.target.value)}
+                  placeholder="Enter new client name"
+                />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-color">Primary Brand Color</Label>
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <Palette className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="edit-color"
-                      className="pl-10 w-32"
-                      value={formData.primaryColor}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          primaryColor: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  <div
-                    className="w-10 h-10 rounded-md border"
-                    style={{ backgroundColor: formData.primaryColor }}
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end gap-3 pt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowEditDialog(false)}
-                >
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setDuplicateDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button onClick={handleEditClient} disabled={isSubmitting}>
-                  {isSubmitting ? "Saving..." : "Save Changes"}
+                <Button onClick={handleDuplicateProfile} disabled={!duplicateName.trim()}>
+                  <Copy className="h-4 w-4 mr-2" />
+                  Duplicate
                 </Button>
               </div>
             </div>
