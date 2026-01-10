@@ -24,8 +24,8 @@ interface AgencyModeResult {
 export function useAgencyMode(): AgencyModeResult {
   const { tenant } = useAuth();
   
-  // Type assertion since tenant_type is new and may not be in types yet
-  const tenantType = (tenant as any)?.tenant_type as 'university' | 'agency' | null;
+  // tenant_type is now in the DB types
+  const tenantType = tenant?.tenant_type as 'university' | 'agency' | null;
   const isAgency = tenantType === 'agency';
   const isUniversity = tenantType === 'university' || !tenantType;
 

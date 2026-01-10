@@ -81,6 +81,8 @@ import {
   Zap,
   ArrowRight,
   Radar,
+  Briefcase,
+  Filter,
 } from "lucide-react";
 
 // Types
@@ -115,6 +117,7 @@ interface TenantWithStats {
   id: string;
   institution_name: string;
   status: string;
+  tenant_type: 'university' | 'agency';
   userCount: number;
   contentDNACount: number;
   personalMessagesCount: number;
@@ -219,6 +222,7 @@ const AdminPanel = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sendEmailOpen, setSendEmailOpen] = useState(false);
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+  const [tenantTypeFilter, setTenantTypeFilter] = useState<'all' | 'university' | 'agency'>('all');
 
   // Fetch all data
   const fetchData = async () => {
@@ -379,6 +383,7 @@ const AdminPanel = () => {
           id: t.id,
           institution_name: t.institution_name,
           status: t.status,
+          tenant_type: (t as any).tenant_type || 'university',
           userCount: tenantUsers.length,
           contentDNACount: tenantContentDNA.length,
           personalMessagesCount: tenantPersonalMessages.length,
@@ -568,6 +573,13 @@ const AdminPanel = () => {
   const totalAnalyses = contentDNAAnalyses.length;
   const totalEmails = emailNudges.length;
   const totalReferrals = referrals.length;
+  const universityCount = tenants.filter(t => t.tenant_type === 'university').length;
+  const agencyCount = tenants.filter(t => t.tenant_type === 'agency').length;
+
+  // Filter tenants by type
+  const filteredTenants = tenants.filter(t => 
+    tenantTypeFilter === 'all' || t.tenant_type === tenantTypeFilter
+  );
 
   // Filter data based on search
   const filteredNudges = emailNudges.filter(n => 
@@ -649,7 +661,7 @@ const AdminPanel = () => {
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-3">
             <Card>
               <CardContent className="p-3">
                 <div className="flex items-center gap-2">
@@ -657,8 +669,21 @@ const AdminPanel = () => {
                     <GraduationCap className="w-4 h-4 text-primary" />
                   </div>
                   <div>
-                    <p className="text-xl font-bold">{isLoading ? '...' : tenants.length}</p>
-                    <p className="text-[10px] text-muted-foreground">Institutions</p>
+                    <p className="text-xl font-bold">{isLoading ? '...' : universityCount}</p>
+                    <p className="text-[10px] text-muted-foreground">Universities</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded bg-purple-500/10">
+                    <Briefcase className="w-4 h-4 text-purple-600" />
+                  </div>
+                  <div>
+                    <p className="text-xl font-bold">{isLoading ? '...' : agencyCount}</p>
+                    <p className="text-[10px] text-muted-foreground">Agencies</p>
                   </div>
                 </div>
               </CardContent>
