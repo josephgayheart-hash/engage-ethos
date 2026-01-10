@@ -3,7 +3,7 @@ import type { Channel, AudienceType, MessageDomain, CommunicationMoment, Primary
 export type LibraryEntryStatus = 'draft' | 'submitted' | 'approved' | 'published';
 
 // Source of where the message/template was created
-export type LibrarySource = 'builder' | 'journey' | 'copywriter' | 'byoc' | 'evaluate' | 'import' | 'other';
+export type LibrarySource = 'builder' | 'journey' | 'copywriter' | 'byoc' | 'evaluate' | 'import' | 'analyzer' | 'other';
 
 export interface SavedMessage {
   id: string;

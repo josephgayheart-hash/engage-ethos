@@ -46,6 +46,11 @@ const sourceConfig: Record<LibrarySource, { label: string; icon: typeof PenTool;
     icon: Download, 
     className: "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-950/30 dark:text-slate-400 dark:border-slate-800" 
   },
+  analyzer: { 
+    label: "Analyzer", 
+    icon: ClipboardCheck, 
+    className: "bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-950/30 dark:text-cyan-400 dark:border-cyan-800" 
+  },
   other: { 
     label: "Other", 
     icon: MoreHorizontal, 
