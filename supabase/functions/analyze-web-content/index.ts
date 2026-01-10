@@ -376,21 +376,37 @@ GUIDELINES:
 - Keep the same approximate length
 - Be specific about what you changed and why`;
 
-  const sectionsToRewrite = sections.slice(0, 5);
+  // Only rewrite sections that have issues - don't skip any!
+  const sectionsWithIssues = sections.filter((s: any) => s.issues && s.issues.length > 0);
   
-  const userPrompt = `Rewrite these content sections to better align with the brand voice and incorporate DNA elements:
+  if (sectionsWithIssues.length === 0) {
+    console.log('No sections with issues to rewrite');
+    return new Response(
+      JSON.stringify({ rewrittenSections: [] }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
 
-${sectionsToRewrite.map((s, i) => `Section ${i + 1} (${s.title}):
-Issues: ${s.issues?.map((is: any) => is.message).join('; ') || 'None identified'}
+  console.log(`Rewriting ${sectionsWithIssues.length} sections with issues out of ${sections.length} total`);
+
+  // Truncate content per section to fit context limits, but process ALL sections with issues
+  const maxContentPerSection = Math.min(800, Math.floor(12000 / sectionsWithIssues.length));
+  
+  const userPrompt = `Rewrite ALL of the following ${sectionsWithIssues.length} content sections to better align with the brand voice and incorporate DNA elements.
+
+IMPORTANT: You MUST rewrite every section listed below. Do not skip any.
+
+${sectionsWithIssues.map((s: any, i: number) => `Section ${i + 1} - ID: "${s.id}" (${s.title}):
+Issues to fix: ${s.issues?.map((is: any) => is.message).join('; ') || 'General alignment needed'}
 Original content:
-${s.content.slice(0, 800)}
+${s.content.slice(0, maxContentPerSection)}
 `).join('\n---\n')}
 
-Return a JSON response:
+Return a JSON response with exactly ${sectionsWithIssues.length} rewritten sections:
 {
   "rewrittenSections": [
     {
-      "id": "<section id>",
+      "id": "<MUST match the section ID exactly>",
       "original": "<original content>",
       "rewritten": "<improved brand-aligned content>",
       "improvements": ["<specific change made and why>"],
@@ -401,7 +417,7 @@ Return a JSON response:
   ]
 }
 
-Return ONLY the JSON.`;
+You MUST return exactly ${sectionsWithIssues.length} sections. Return ONLY the JSON.`;
 
   const responseText = await callLovableAI([
     { role: 'system', content: systemPrompt },
@@ -410,12 +426,13 @@ Return ONLY the JSON.`;
 
   const result = extractJSON(responseText);
   
+  // Map the rewritten sections back to original IDs if AI didn't preserve them
   result.rewrittenSections = result.rewrittenSections?.map((r: any, i: number) => ({
     ...r,
-    id: sectionsToRewrite[i]?.id || `section-${i}`
+    id: r.id || sectionsWithIssues[i]?.id || `section-${i}`
   })) || [];
 
-  console.log('Rewrite complete, sections:', result.rewrittenSections?.length);
+  console.log(`Rewrite complete: ${result.rewrittenSections?.length} sections rewritten (expected ${sectionsWithIssues.length})`);
 
   return new Response(
     JSON.stringify(result),
