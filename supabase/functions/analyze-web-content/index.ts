@@ -168,7 +168,37 @@ async function handleAnalyze(
     values: brandPlatform?.coreValues || []
   };
 
+  // Extract institution name for critical red flag detection
+  const institutionName = profileConfig?.institutionName || 
+    profileConfig?.name || 
+    brandPlatform?.institutionName || 
+    '';
+  
   const systemPrompt = `You are an expert brand content analyst for higher education institutions. You perform DEEP, SPECIFIC analysis of web content against institutional Content DNA.
+
+## CRITICAL RED FLAG DETECTION - CHECK FIRST!
+Before ANY other analysis, you MUST check for these DISQUALIFYING red flags:
+
+### INSTITUTION NAME MISMATCH (CRITICAL - Score cap: 25 max)
+The content is being evaluated for: "${institutionName}"
+
+You MUST scan for ANY reference to different institutions:
+- Different university names (e.g., if analyzing for "Ohio State", any mention of "Kentucky", "Michigan", "Penn State", etc.)
+- Different college names within universities
+- Competitor institution names, mottos, mascots, or athletics references
+- Different location references that don't match the target institution
+
+If the content mentions ANY institution name OTHER than "${institutionName}" (or variations thereof):
+- This is a CRITICAL FAILURE
+- Overall score MUST be capped at 25 maximum
+- Add a critical issue: "INSTITUTION MISMATCH: Content references [found institution] but should represent [target institution]"
+- Flag with severity: "error" and type: "Institution Mismatch"
+
+### OTHER RED FLAGS (Score penalty: -20 points each)
+- Competitor slogans or taglines
+- Wrong mascot or team names
+- Wrong city/state references
+- Wrong institutional statistics (enrollment, rankings, founding date from another school)
 
 Your analysis must be SPECIFIC and ACTIONABLE, not generic. You should:
 1. Quote exact phrases from the content that are problematic or exemplary
@@ -201,19 +231,22 @@ ${factsContext}
 ${storiesContext}
 
 ## INSTITUTIONAL CONTEXT:
+Institution Name: ${institutionName}
 ${JSON.stringify(profileConfig || {}, null, 2)}
 
-## ISSUE CATEGORIES:
-1. **Voice Mismatch** - Tone doesn't match brand (cite the specific words/phrases)
-2. **Off-Brand Language** - Uses phrases to avoid (quote them)
-3. **Missing Brand Elements** - Could incorporate brand pillars, values, or key phrases
-4. **Factual Opportunity** - Could include specific institutional facts
-5. **Story Integration** - Could reference institutional stories/testimonials
-6. **Generic Messaging** - Content is bland/unmemorable (suggest specific improvements)
-7. **Consistency Issue** - Contradicts other brand messaging
-8. **Audience Mismatch** - Wrong tone for target audience
-9. **Clarity Issue** - Confusing or overly complex language
-10. **CTA Weakness** - Call-to-action could be stronger/more brand-aligned
+## ISSUE CATEGORIES (in priority order):
+1. **Institution Mismatch** - CRITICAL: Content references a different university/college (automatic score cap at 25)
+2. **Competitor Reference** - References to competing institutions, mascots, or slogans
+3. **Voice Mismatch** - Tone doesn't match brand (cite the specific words/phrases)
+4. **Off-Brand Language** - Uses phrases to avoid (quote them)
+5. **Missing Brand Elements** - Could incorporate brand pillars, values, or key phrases
+6. **Factual Opportunity** - Could include specific institutional facts
+7. **Story Integration** - Could reference institutional stories/testimonials
+8. **Generic Messaging** - Content is bland/unmemorable (suggest specific improvements)
+9. **Consistency Issue** - Contradicts other brand messaging
+10. **Audience Mismatch** - Wrong tone for target audience
+11. **Clarity Issue** - Confusing or overly complex language
+12. **CTA Weakness** - Call-to-action could be stronger/more brand-aligned
 
 ## STRENGTH CATEGORIES:
 1. **Strong Voice Alignment** - Matches brand tone perfectly (cite examples)
@@ -224,15 +257,19 @@ ${JSON.stringify(profileConfig || {}, null, 2)}
 6. **Audience Targeting** - Speaks directly to target audience
 7. **Emotional Resonance** - Creates connection with reader`;
 
-  const userPrompt = `Analyze this web content for brand alignment. Be SPECIFIC - quote exact phrases and reference exact DNA elements.
+  const userPrompt = `FIRST: Scan this content for any institution names that don't match "${institutionName}". If found, this is a CRITICAL failure and score must be capped at 25.
+
+Analyze this web content for brand alignment. Be SPECIFIC - quote exact phrases and reference exact DNA elements.
 
 ${sourceUrl ? `Source URL: ${sourceUrl}\n\n` : ''}CONTENT TO ANALYZE:
 ${truncatedContent}
 
 Provide a detailed JSON response:
 {
-  "overallScore": <0-100, be rigorous>,
-  "executiveSummary": "<2-3 sentence summary of brand alignment status>",
+  "overallScore": <0-100, BUT cap at 25 if institution mismatch detected>,
+  "institutionMismatchDetected": <true/false>,
+  "wrongInstitutionFound": "<name of wrong institution if detected, or null>",
+  "executiveSummary": "<2-3 sentence summary - MUST mention institution mismatch first if detected>",
   "dnaAlignment": {
     "voiceScore": <0-100>,
     "voiceFeedback": "<specific feedback on voice/tone alignment with quoted examples>",
@@ -248,7 +285,7 @@ Provide a detailed JSON response:
       "id": "<unique-id>",
       "title": "<section title or first few words>",
       "content": "<the section text>",
-      "score": <0-100>,
+      "score": <0-100, cap at 25 if contains wrong institution>,
       "issues": [
         {
           "type": "<issue category from list above>",
@@ -272,6 +309,7 @@ Provide a detailed JSON response:
   "summary": {
     "totalIssues": <number>,
     "totalStrengths": <number>,
+    "criticalRedFlags": ["<INSTITUTION MISMATCH or other critical issues>"],
     "criticalIssues": ["<most important issues to fix first>"],
     "quickWins": ["<easy improvements that would boost score>"],
     "missingFacts": ["<specific institutional facts that could be added>"],
@@ -283,6 +321,8 @@ Provide a detailed JSON response:
     "missingKeyPhrases": ["<key phrases that should be added>"]
   }
 }
+
+REMEMBER: If you detect ANY institution name other than "${institutionName}", the overallScore MUST be 25 or lower, and institutionMismatchDetected MUST be true.
 
 Return ONLY valid JSON. Be thorough and specific in your analysis.`;
 
