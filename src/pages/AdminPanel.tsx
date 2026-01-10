@@ -1807,7 +1807,7 @@ const AdminPanel = () => {
                     <Button variant="outline" className="w-full justify-start" size="sm" asChild>
                       <Link to="/admin/qa">
                         <Shield className="w-4 h-4 mr-2" />
-                        QA Diagnostics
+                        Security & QA
                         <ChevronRight className="w-4 h-4 ml-auto" />
                       </Link>
                     </Button>

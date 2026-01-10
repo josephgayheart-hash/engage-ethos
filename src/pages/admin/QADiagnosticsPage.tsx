@@ -70,7 +70,7 @@ export default function QADiagnosticsPage() {
   const [stats, setStats] = useState({ total: 0, passed: 0, failed: 0, warnings: 0 });
   const [betaFeedback, setBetaFeedback] = useState<BetaFeedback[]>([]);
   const [isLoadingFeedback, setIsLoadingFeedback] = useState(true);
-  const [activeTab, setActiveTab] = useState('tests');
+  const [activeTab, setActiveTab] = useState('security');
 
   const appVersion = '1.0.0-beta';
   const environment = 'Production';
@@ -409,15 +409,15 @@ export default function QADiagnosticsPage() {
               Super Admin Panel
             </Link>
             <span>/</span>
-            <span className="text-foreground">QA Diagnostics</span>
+            <span className="text-foreground">Security & QA</span>
           </div>
 
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
-              <h1 className="font-serif text-2xl font-bold mb-2">QA Diagnostics Dashboard</h1>
+              <h1 className="font-serif text-2xl font-bold mb-2">Security & QA Dashboard</h1>
               <p className="text-muted-foreground">
-                Automated testing and beta readiness verification
+                Security monitoring, rate limits, and automated testing
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -515,6 +515,10 @@ export default function QADiagnosticsPage() {
           {/* Main Tabs - Tests and Feedback */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
             <TabsList>
+              <TabsTrigger value="security" className="flex items-center gap-1">
+                <Shield className="w-4 h-4" />
+                Security Events
+              </TabsTrigger>
               <TabsTrigger value="tests">Test Suites</TabsTrigger>
               <TabsTrigger value="feedback" className="flex items-center gap-1">
                 <MessageSquarePlus className="w-4 h-4" />
@@ -526,6 +530,35 @@ export default function QADiagnosticsPage() {
                 )}
               </TabsTrigger>
             </TabsList>
+
+            {/* Security Events Tab */}
+            <TabsContent value="security">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-red-500" />
+                        Security Events
+                      </CardTitle>
+                      <CardDescription>
+                        Rate limit events and security incidents
+                      </CardDescription>
+                    </div>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link to="/admin/security-events">
+                        View Full Log
+                      </Link>
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground text-center py-8">
+                    View the full security events log for detailed rate limit monitoring and security incident tracking.
+                  </p>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
             {/* Test Suites Tab */}
             <TabsContent value="tests">
