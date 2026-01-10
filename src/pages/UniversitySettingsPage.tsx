@@ -6,6 +6,7 @@ import { ProfileSetupWizard } from "@/components/ProfileSetupWizard";
 import { SubUnitSetupWizard } from "@/components/SubUnitSetupWizard";
 import { useInstitutionalProfiles, type InstitutionalProfile, type ProfileType } from "@/hooks/useInstitutionalProfiles";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAgencyMode } from "@/hooks/useAgencyMode";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -61,6 +62,7 @@ import {
   ExternalLink,
   Settings,
   AlertCircle,
+  Users,
 } from "lucide-react";
 import type { InstitutionalConfig as InstitutionalConfigType, ProfileType as ConfigProfileType } from "@/types/uplaybook";
 
@@ -87,6 +89,7 @@ export default function UniversitySettingsPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { tenant, refreshProfile, isAdmin, isSuperAdmin } = useAuth();
+  const { isAgency, labels } = useAgencyMode();
   const { profiles, createProfile, updateProfile, deleteProfile, duplicateProfile, getChildProfiles, getRootProfiles, getParentProfile, refreshProfiles } = useInstitutionalProfiles();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -502,7 +505,7 @@ export default function UniversitySettingsPage() {
                   Home
                 </Link>
                 <span>/</span>
-                <span className="text-foreground">University Settings</span>
+                <span className="text-foreground">{labels.settingsPageTitle}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <Link 
@@ -525,17 +528,28 @@ export default function UniversitySettingsPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${isAgency ? 'bg-amber-500/10' : 'bg-primary/10'}`}>
                   {logoUrl ? (
                     <img src={logoUrl} alt={tenant?.institution_name || ''} className="w-10 h-10 object-contain rounded" />
+                  ) : isAgency ? (
+                    <Users className="w-6 h-6 text-amber-600" />
                   ) : (
                     <Building2 className="w-6 h-6 text-primary" />
                   )}
                 </div>
                 <div>
-                  <h1 className="font-serif text-2xl md:text-3xl font-bold">{tenant?.institution_name || 'University Settings'}</h1>
+                  <div className="flex items-center gap-2">
+                    <h1 className="font-serif text-2xl md:text-3xl font-bold">
+                      {isAgency ? labels.settingsPageTitle : tenant?.institution_name || 'University Settings'}
+                    </h1>
+                    {isAgency && (
+                      <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400">
+                        Agency
+                      </Badge>
+                    )}
+                  </div>
                   <p className="text-muted-foreground text-sm">
-                    Manage your institution's branding, profiles, and Content DNA
+                    {labels.settingsPageDescription}
                   </p>
                 </div>
               </div>
@@ -549,8 +563,8 @@ export default function UniversitySettingsPage() {
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-6">
               <TabsTrigger value="profiles" className="flex items-center gap-2">
-                <Building2 className="w-4 h-4" />
-                Profiles ({profiles.length})
+                {isAgency ? <Users className="w-4 h-4" /> : <Building2 className="w-4 h-4" />}
+                {isAgency ? 'Client Accounts' : 'Profiles'} ({profiles.length})
               </TabsTrigger>
               <TabsTrigger value="branding" className="flex items-center gap-2">
                 <Palette className="w-4 h-4" />

@@ -20,11 +20,13 @@ import {
   GraduationCap,
   Layers,
   Building,
-  Briefcase
+  Briefcase,
+  Users
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useInstitutionalProfiles, type InstitutionalProfile, type ProfileType } from "@/hooks/useInstitutionalProfiles";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAgencyMode } from "@/hooks/useAgencyMode";
 import type { InstitutionalConfig } from "@/types/uplaybook";
 
 interface InstitutionalProfileSelectorProps {
@@ -48,6 +50,7 @@ export function InstitutionalProfileSelector({
 }: InstitutionalProfileSelectorProps) {
   const { profiles, getProfile, getRootProfiles, getChildProfiles } = useInstitutionalProfiles();
   const { tenant } = useAuth();
+  const { isAgency, labels } = useAgencyMode();
   
   const handleChange = (value: string) => {
     if (value === 'none') {
@@ -75,16 +78,16 @@ export function InstitutionalProfileSelector({
   if (profiles.length === 0) {
     return (
       <div className={`flex items-center gap-3 p-3 rounded-lg border border-dashed border-border bg-muted/30 ${compact ? 'p-2' : ''}`}>
-        <Building2 className="w-4 h-4 text-muted-foreground" />
+        {isAgency ? <Users className="w-4 h-4 text-muted-foreground" /> : <Building2 className="w-4 h-4 text-muted-foreground" />}
         <div className="flex-1">
           <p className="text-sm text-muted-foreground">
-            No institutional profiles configured
+            {labels.selectorEmptyState}
           </p>
         </div>
         <Button variant="outline" size="sm" asChild>
-          <Link to="/university-settings" className="flex items-center gap-1">
+          <Link to={labels.settingsPath} className="flex items-center gap-1">
             <Settings className="w-3 h-3" />
-            Create Profile
+            {labels.createProfileButton}
           </Link>
         </Button>
       </div>
@@ -120,11 +123,11 @@ export function InstitutionalProfileSelector({
       {!compact && (
         <div className="flex items-center justify-between">
           <Label className="text-sm font-medium flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-secondary" />
-            Generate As
+            {isAgency ? <Users className="w-4 h-4 text-secondary" /> : <Building2 className="w-4 h-4 text-secondary" />}
+            {labels.selectorLabel}
           </Label>
           <Button variant="ghost" size="sm" className="h-6 px-2 text-xs" asChild>
-            <Link to="/university-settings" className="flex items-center gap-1">
+            <Link to={labels.settingsPath} className="flex items-center gap-1">
               Manage
               <ChevronRight className="w-3 h-3" />
             </Link>
@@ -134,7 +137,7 @@ export function InstitutionalProfileSelector({
       
       <Select value={selectedProfileId || 'none'} onValueChange={handleChange}>
         <SelectTrigger className={`${compact ? 'h-9' : ''} ${selectedProfile ? 'border-secondary/50 bg-secondary/5' : ''}`}>
-          <SelectValue placeholder="Select institutional profile..." />
+          <SelectValue placeholder={labels.selectorPlaceholder} />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="none">

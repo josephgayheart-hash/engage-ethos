@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Library, FolderOpen, Settings, Home, LogOut, User, CheckCircle, UserPlus, Building2, PenTool, Route, ChevronDown, Sparkles, FileEdit, Briefcase, BarChart3 } from "lucide-react";
+import { Library, FolderOpen, Settings, Home, LogOut, User, CheckCircle, UserPlus, Building2, PenTool, Route, ChevronDown, Sparkles, FileEdit, Briefcase, BarChart3, Users } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAgencyMode } from "@/hooks/useAgencyMode";
 import { Button } from "@/components/ui/button";
@@ -59,7 +59,7 @@ export function Header() {
             <img src={campusvoiceLogo} alt="CampusVoice.AI" className="h-8 sm:h-10 w-auto max-w-[180px] sm:max-w-[220px] object-contain" />
             <BetaBanner variant="badge" />
           </Link>
-          {tenant && (
+        {tenant && (
             <>
               <div className="h-8 w-px bg-border hidden sm:block" />
               <div className="hidden sm:flex items-center gap-2">
@@ -77,6 +77,12 @@ export function Header() {
                 <span className="text-lg font-semibold text-foreground">
                   {tenant.institution_name}
                 </span>
+                {isAgency && (
+                  <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                    <Users className="h-3 w-3" />
+                    Agency
+                  </Badge>
+                )}
               </div>
             </>
           )}
@@ -255,14 +261,21 @@ export function Header() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <div className="px-2 py-1.5">
+              <div className="px-2 py-1.5">
                   <p className="text-sm font-medium">{profile.first_name} {profile.last_name}</p>
                   <p className="text-xs text-muted-foreground">{profile.email}</p>
-                  {tenant && (
-                    <Badge variant="outline" className="mt-1 text-xs">
-                      {tenant.institution_name}
-                    </Badge>
-                  )}
+                  <div className="flex items-center gap-1.5 mt-1">
+                    {tenant && (
+                      <Badge variant="outline" className="text-xs">
+                        {tenant.institution_name}
+                      </Badge>
+                    )}
+                    {isAgency && (
+                      <Badge variant="outline" className="text-xs border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400">
+                        Agency
+                      </Badge>
+                    )}
+                  </div>
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAgencyMode } from '@/hooks/useAgencyMode';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,11 +18,13 @@ import {
   Save,
   Loader2,
   Home,
-  ChevronLeft
+  ChevronLeft,
+  Users
 } from 'lucide-react';
 
 export default function ProfilePage() {
   const { profile, tenant, role, refreshProfile } = useAuth();
+  const { isAgency, labels } = useAgencyMode();
   const { toast } = useToast();
   
   const [isEditing, setIsEditing] = useState(false);
@@ -118,13 +121,13 @@ export default function ProfilePage() {
                   {profile.first_name} {profile.last_name}
                 </h2>
                 <p className="text-[hsl(220,14%,46%)]">{profile.email}</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <Badge variant="outline" className="flex items-center gap-1">
-                    <Building2 className="w-3 h-3" />
-                    {tenant?.institution_name || 'Loading...'}
+                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                  <Badge variant="outline" className={`flex items-center gap-1 ${isAgency ? 'border-amber-500/30 bg-amber-500/10 text-amber-700' : ''}`}>
+                    {isAgency ? <Users className="w-3 h-3" /> : <Building2 className="w-3 h-3" />}
+                    {isAgency ? 'Agency Partner' : tenant?.institution_name || 'Loading...'}
                   </Badge>
                   <Badge className={role === 'admin' ? 'bg-[hsl(222,47%,14%)]' : 'bg-[hsl(173,58%,39%)]'}>
-                    {role === 'admin' ? 'Admin' : 'User'}
+                    {role === 'admin' ? 'Admin' : role === 'agency_admin' ? 'Agency Admin' : role === 'agency_user' ? 'Agency User' : 'User'}
                   </Badge>
                 </div>
               </div>
@@ -170,12 +173,25 @@ export default function ProfilePage() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-[hsl(220,14%,46%)]">Institution / University</Label>
+              <Label className="text-[hsl(220,14%,46%)]">Account Type</Label>
+              <div className={`flex items-center gap-2 px-3 py-2 rounded-md ${isAgency ? 'bg-amber-50 border border-amber-200' : 'bg-[hsl(210,20%,94%)]'}`}>
+                {isAgency ? <Users className="w-4 h-4 text-amber-600" /> : <Building2 className="w-4 h-4 text-[hsl(220,14%,46%)]" />}
+                <span className={isAgency ? 'text-amber-700 font-medium' : 'text-[hsl(222,47%,11%)] font-medium'}>
+                  {labels.accountType}
+                </span>
+                <Badge variant="outline" className={isAgency ? 'border-amber-500/30 bg-amber-500/10 text-amber-700 ml-auto' : 'ml-auto'}>
+                  {labels.accountTypeLabel}
+                </Badge>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-[hsl(220,14%,46%)]">{isAgency ? 'Agency Name' : 'Institution / University'}</Label>
               <div className="flex items-center gap-2 px-3 py-2 bg-[hsl(210,20%,94%)] rounded-md">
-                <Building2 className="w-4 h-4 text-[hsl(220,14%,46%)]" />
+                {isAgency ? <Briefcase className="w-4 h-4 text-[hsl(220,14%,46%)]" /> : <Building2 className="w-4 h-4 text-[hsl(220,14%,46%)]" />}
                 <span className="text-[hsl(222,47%,11%)] font-medium">{tenant?.institution_name || 'Loading...'}</span>
               </div>
-              <p className="text-xs text-[hsl(220,14%,46%)]">Contact your administrator to change your institution</p>
+              <p className="text-xs text-[hsl(220,14%,46%)]">Contact your administrator to change your {isAgency ? 'agency' : 'institution'}</p>
             </div>
 
             <div className="space-y-2">
