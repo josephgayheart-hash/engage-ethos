@@ -9,7 +9,9 @@ import { ContentSectionCard } from '@/components/analyzer/ContentSectionCard';
 import { RewritePanel } from '@/components/analyzer/RewritePanel';
 import { DNAAlignmentPanel } from '@/components/analyzer/DNAAlignmentPanel';
 import { ScreenshotPreview } from '@/components/analyzer/ScreenshotPreview';
-import { InstitutionalProfileSelector } from '@/components/InstitutionalProfileSelector';
+import { VoiceProfileCard } from '@/components/analyzer/VoiceProfileCard';
+import { IssuesSummaryCard } from '@/components/analyzer/IssuesSummaryCard';
+import { AnalysisActionsCard } from '@/components/analyzer/AnalysisActionsCard';
 import { useContentDNA } from '@/hooks/useContentDNA';
 import { useInstitutionalProfiles } from '@/hooks/useInstitutionalProfiles';
 import { useFactBook } from '@/hooks/useFactBook';
@@ -23,12 +25,8 @@ import {
   Sparkles, 
   ArrowLeft,
   AlertTriangle,
-  CheckCircle2,
-  RefreshCw,
   FileText,
-  Target,
-  Dna,
-  Camera
+  Dna
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -97,6 +95,7 @@ export default function WebContentAnalyzerPage() {
   const [content, setContent] = useState('');
   const [sourceUrl, setSourceUrl] = useState('');
   const [screenshot, setScreenshot] = useState<string | null>(null);
+  const [screenshotLoading, setScreenshotLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
@@ -131,13 +130,22 @@ export default function WebContentAnalyzerPage() {
     try {
       // Fetch screenshot in parallel if URL provided
       if (url) {
+        setScreenshotLoading(true);
         firecrawlApi.scrape(url, { formats: ['screenshot'] })
           .then(res => {
-            if (res.success && res.data?.screenshot) {
-              setScreenshot(res.data.screenshot);
+            console.log('Screenshot response:', res);
+            // Handle nested data structure from Firecrawl API
+            const screenshotData = res.data?.screenshot;
+            if (res.success && screenshotData) {
+              // Ensure proper data URL format
+              const imageData = screenshotData.startsWith('data:') 
+                ? screenshotData 
+                : `data:image/png;base64,${screenshotData}`;
+              setScreenshot(imageData);
             }
           })
-          .catch(err => console.log('Screenshot capture skipped:', err));
+          .catch(err => console.log('Screenshot capture skipped:', err))
+          .finally(() => setScreenshotLoading(false));
       }
 
       const { data, error } = await supabase.functions.invoke('analyze-web-content', {
@@ -147,8 +155,8 @@ export default function WebContentAnalyzerPage() {
           voiceAnalysis: contentDNA.voice_analysis,
           brandPlatform: contentDNA.brand_platform,
           profileConfig: selectedProfile?.config,
-          facts: facts?.slice(0, 20), // Send top 20 facts for context
-          stories: stories?.slice(0, 10), // Send top 10 stories for context
+          facts: facts?.slice(0, 20),
+          stories: stories?.slice(0, 10),
         },
       });
 
@@ -176,6 +184,14 @@ export default function WebContentAnalyzerPage() {
     }
   };
 
+  const handleNewAnalysis = () => {
+    setAnalysisResult(null);
+    setContent('');
+    setSourceUrl('');
+    setShowRewrite(false);
+    setScreenshot(null);
+  };
+
   const handleRewrite = () => {
     setShowRewrite(true);
   };
@@ -187,7 +203,7 @@ export default function WebContentAnalyzerPage() {
       <Header />
       
       <main className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
@@ -207,37 +223,10 @@ export default function WebContentAnalyzerPage() {
               </h1>
             </div>
             <p className="text-muted-foreground max-w-2xl">
-              Check how well your web content aligns with your brand voice. Paste text or import a URL, 
+              Check how well your web content aligns with your brand voice. Import a URL, 
               and we'll score it against your Content DNA—then help you rewrite any sections that need improvement.
             </p>
           </div>
-
-          {/* Brand Voice Profile Selector */}
-          <Card className="mb-6 border-primary/20 overflow-hidden">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <Target className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-medium text-foreground">Voice Profile Match</span>
-                </div>
-                
-                <div className="flex-1">
-                  <InstitutionalProfileSelector
-                    selectedProfileId={selectedProfileId}
-                    onProfileChange={setSelectedProfileId}
-                    compact
-                  />
-                </div>
-                
-                {contentDNA?.last_analyzed_at && (
-                  <Badge className="bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-500/15">
-                    <Sparkles className="w-3 h-3 mr-1" />
-                    DNA Active
-                  </Badge>
-                )}
-              </div>
-            </CardContent>
-          </Card>
 
           {/* DNA Status Warning */}
           {!dnaLoading && !contentDNA?.voice_analysis && (
@@ -262,20 +251,20 @@ export default function WebContentAnalyzerPage() {
           )}
 
           {/* Main Content */}
-          <div className="space-y-6">
-            {/* Section Selector - Always Visible */}
-            <AnalyzerInput 
-              onAnalyze={handleAnalyze} 
-              isAnalyzing={isAnalyzing}
-              disabled={!contentDNA?.voice_analysis}
-            />
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Left Column - Section Selector (always visible) */}
+            <div className="lg:col-span-3 space-y-6">
+              {/* Section Selector */}
+              <AnalyzerInput 
+                onAnalyze={handleAnalyze} 
+                isAnalyzing={isAnalyzing}
+                disabled={!contentDNA?.voice_analysis}
+              />
 
-            {/* Analysis Results */}
-            {analysisResult && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left Panel - Results */}
-                <div className="lg:col-span-2 space-y-6">
-                  {/* Results Header */}
+              {/* Analysis Results */}
+              {analysisResult && (
+                <div className="space-y-6">
+                  {/* Results Header with Score */}
                   <Card>
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
@@ -290,36 +279,8 @@ export default function WebContentAnalyzerPage() {
                             </CardDescription>
                           )}
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setAnalysisResult(null);
-                              setContent('');
-                              setSourceUrl('');
-                              setShowRewrite(false);
-                            }}
-                          >
-                            <RefreshCw className="w-4 h-4 mr-2" />
-                            New Analysis
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={handleRewrite}
-                            disabled={showRewrite}
-                            className="bg-[hsl(270_70%_55%)] hover:bg-[hsl(270_70%_50%)]"
-                          >
-                            <Sparkles className="w-4 h-4 mr-2" />
-                            Rewrite for Brand
-                          </Button>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center gap-6">
                         <div className="text-center">
-                          <div className={`text-3xl font-bold ${
+                          <div className={`text-4xl font-bold ${
                             analysisResult.overallScore >= 80 ? 'text-green-500' :
                             analysisResult.overallScore >= 60 ? 'text-amber-500' :
                             'text-red-500'
@@ -328,32 +289,16 @@ export default function WebContentAnalyzerPage() {
                           </div>
                           <div className="text-xs text-muted-foreground">Overall Score</div>
                         </div>
-                        <div className="flex-1 grid grid-cols-2 gap-4">
-                          <div className="flex items-center gap-2">
-                            <AlertTriangle className="w-4 h-4 text-amber-500" />
-                            <span className="text-sm">
-                              <span className="font-medium">{analysisResult.summary.totalIssues}</span> issues found
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <CheckCircle2 className="w-4 h-4 text-green-500" />
-                            <span className="text-sm">
-                              <span className="font-medium">{analysisResult.summary.totalStrengths}</span> strengths
-                            </span>
-                          </div>
-                        </div>
                       </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Executive Summary */}
-                  {analysisResult.executiveSummary && (
-                    <Card className="border-primary/20 bg-primary/5">
-                      <CardContent className="py-4">
-                        <p className="text-sm text-foreground">{analysisResult.executiveSummary}</p>
+                    </CardHeader>
+                    {analysisResult.executiveSummary && (
+                      <CardContent className="pt-0">
+                        <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+                          <p className="text-sm text-foreground">{analysisResult.executiveSummary}</p>
+                        </div>
                       </CardContent>
-                    </Card>
-                  )}
+                    )}
+                  </Card>
 
                   {/* DNA Alignment Panel */}
                   {analysisResult.dnaAlignment && (
@@ -381,9 +326,12 @@ export default function WebContentAnalyzerPage() {
                   ) : (
                     <Card>
                       <CardHeader className="pb-3">
-                        <CardTitle className="text-lg">Content Sections</CardTitle>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <Dna className="w-5 h-5 text-primary" />
+                          Content Sections
+                        </CardTitle>
                         <CardDescription>
-                          Click on a section to see detailed analysis
+                          Click on a section to expand and see detailed analysis
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-3">
@@ -399,73 +347,103 @@ export default function WebContentAnalyzerPage() {
                     </Card>
                   )}
                 </div>
+              )}
 
-                {/* Right Panel - Score Details & Screenshot */}
-                <div className="space-y-6">
+              {/* How It Works - Only show when no results */}
+              {!analysisResult && !isAnalyzing && (
+                <Card className="border-dashed max-w-md">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                      How It Works
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3">
+                      <div className="flex gap-3">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">1</div>
+                        <div>
+                          <p className="text-sm font-medium">Import Content</p>
+                          <p className="text-xs text-muted-foreground">Fetch content from a URL to analyze</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">2</div>
+                        <div>
+                          <p className="text-sm font-medium">AI Analysis</p>
+                          <p className="text-xs text-muted-foreground">We score each section against your Content DNA</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">3</div>
+                        <div>
+                          <p className="text-sm font-medium">Improve</p>
+                          <p className="text-xs text-muted-foreground">Use AI Rewrite to align content with your brand</p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Right Column - Controls & Details */}
+            <div className="space-y-6">
+              {/* Voice Profile Card */}
+              <VoiceProfileCard
+                selectedProfileId={selectedProfileId}
+                onProfileChange={setSelectedProfileId}
+                hasDNA={!!contentDNA?.last_analyzed_at}
+              />
+
+              {/* Loading State */}
+              {isAnalyzing && (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+                    <p className="font-medium">Analyzing content...</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Checking against your Content DNA
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Results-specific right column items */}
+              {analysisResult && (
+                <>
+                  {/* Actions Card */}
+                  <AnalysisActionsCard
+                    onNewAnalysis={handleNewAnalysis}
+                    onRewrite={handleRewrite}
+                    showRewrite={showRewrite}
+                  />
+
+                  {/* Issues Summary Card */}
+                  <IssuesSummaryCard
+                    totalIssues={analysisResult.summary.totalIssues}
+                    totalStrengths={analysisResult.summary.totalStrengths}
+                    criticalIssues={analysisResult.summary.criticalIssues}
+                    topStrengths={analysisResult.summary.topStrengths}
+                  />
+
                   {/* Screenshot Preview */}
-                  {screenshot && (
-                    <ScreenshotPreview
-                      screenshot={screenshot}
-                      sourceUrl={sourceUrl}
-                    />
-                  )}
+                  <ScreenshotPreview
+                    screenshot={screenshot || undefined}
+                    sourceUrl={sourceUrl}
+                    isLoading={screenshotLoading}
+                  />
 
-                  {isAnalyzing ? (
-                    <Card>
-                      <CardContent className="py-12 text-center">
-                        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
-                        <p className="font-medium">Analyzing content...</p>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Checking against your Content DNA
-                        </p>
-                      </CardContent>
-                    </Card>
-                  ) : selectedSection ? (
+                  {/* Selected Section Details */}
+                  {selectedSection && !showRewrite && (
                     <BrandScorePanel
                       section={selectedSection}
                       voiceAnalysis={contentDNA?.voice_analysis}
                     />
-                  ) : null}
-                </div>
-              </div>
-            )}
-
-            {/* How It Works - Only show when no results */}
-            {!analysisResult && !isAnalyzing && (
-              <Card className="border-dashed max-w-md">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-primary" />
-                    How It Works
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex gap-3">
-                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">1</div>
-                      <div>
-                        <p className="text-sm font-medium">Import Content</p>
-                        <p className="text-xs text-muted-foreground">Fetch content from a URL to analyze</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-3">
-                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">2</div>
-                      <div>
-                        <p className="text-sm font-medium">AI Analysis</p>
-                        <p className="text-xs text-muted-foreground">We score each section against your Content DNA</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-3">
-                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">3</div>
-                      <div>
-                        <p className="text-sm font-medium">Improve</p>
-                        <p className="text-xs text-muted-foreground">Use AI Rewrite to align content with your brand</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                  )}
+                </>
+              )}
+            </div>
           </div>
         </div>
       </main>
