@@ -16,7 +16,20 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { mode, content, sections, sectionContent, sectionTitle, issues, sourceUrl, voiceAnalysis, brandPlatform, profileConfig } = body;
+    const { 
+      mode, 
+      content, 
+      sections, 
+      sectionContent, 
+      sectionTitle, 
+      issues, 
+      sourceUrl, 
+      voiceAnalysis, 
+      brandPlatform, 
+      profileConfig,
+      facts,
+      stories
+    } = body;
 
     console.log('analyze-web-content called with mode:', mode || 'analyze');
 
@@ -27,15 +40,15 @@ serve(async (req) => {
 
     // Handle rewrite modes
     if (mode === 'rewrite') {
-      return await handleRewriteAll(sections, voiceAnalysis, brandPlatform, LOVABLE_API_KEY);
+      return await handleRewriteAll(sections, voiceAnalysis, brandPlatform, facts, stories, LOVABLE_API_KEY);
     }
 
     if (mode === 'rewrite-section') {
-      return await handleRewriteSection(sectionContent, sectionTitle, issues, voiceAnalysis, brandPlatform, LOVABLE_API_KEY);
+      return await handleRewriteSection(sectionContent, sectionTitle, issues, voiceAnalysis, brandPlatform, facts, stories, LOVABLE_API_KEY);
     }
 
     // Default: analyze mode
-    return await handleAnalyze(content, sourceUrl, voiceAnalysis, brandPlatform, profileConfig, LOVABLE_API_KEY);
+    return await handleAnalyze(content, sourceUrl, voiceAnalysis, brandPlatform, profileConfig, facts, stories, LOVABLE_API_KEY);
 
   } catch (error: unknown) {
     console.error('Error in analyze-web-content:', error);
@@ -90,81 +103,188 @@ function extractJSON(text: string): any {
   return JSON.parse(jsonText);
 }
 
+// Format facts for AI context
+function formatFactsContext(facts: any[]): string {
+  if (!facts || facts.length === 0) return 'No institutional facts available.';
+  
+  const grouped = facts.reduce((acc: any, fact: any) => {
+    const cat = fact.category || 'general';
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(`${fact.label}: ${fact.value}${fact.context ? ` (${fact.context})` : ''}`);
+    return acc;
+  }, {});
+  
+  return Object.entries(grouped)
+    .map(([category, items]) => `**${category.charAt(0).toUpperCase() + category.slice(1)}:**\n${(items as string[]).join('\n')}`)
+    .join('\n\n');
+}
+
+// Format stories for AI context
+function formatStoriesContext(stories: any[]): string {
+  if (!stories || stories.length === 0) return 'No institutional stories available.';
+  
+  return stories.slice(0, 10).map((story: any) => {
+    return `**${story.title}** (${story.story_type}):
+${story.pull_quote ? `"${story.pull_quote}"` : ''}
+Themes: ${story.themes?.join(', ') || 'None'}
+Subject: ${story.subject_name || 'Anonymous'}${story.subject_role ? `, ${story.subject_role}` : ''}`;
+  }).join('\n\n');
+}
+
 async function handleAnalyze(
   content: string, 
   sourceUrl: string | undefined,
   voiceAnalysis: any,
   brandPlatform: any,
   profileConfig: any,
+  facts: any[] | undefined,
+  stories: any[] | undefined,
   apiKey: string
 ) {
   // Truncate content for analysis
-  const maxChars = 12000;
+  const maxChars = 15000;
   const truncatedContent = content.length > maxChars 
     ? content.slice(0, maxChars) + '\n\n[Content truncated for analysis...]'
     : content;
 
-  const systemPrompt = `You are a brand content analyst specializing in higher education communications.
-You analyze web content against a university's Content DNA (voice analysis) and brand platform.
+  const factsContext = formatFactsContext(facts || []);
+  const storiesContext = formatStoriesContext(stories || []);
+  
+  // Extract key voice elements
+  const voiceElements = {
+    primaryTone: voiceAnalysis?.overallTone || voiceAnalysis?.primaryTone || 'professional',
+    secondaryTones: voiceAnalysis?.secondaryTones || [],
+    keyPhrases: voiceAnalysis?.keyPhrases || voiceAnalysis?.phrases_to_use || [],
+    avoidPhrases: voiceAnalysis?.phrasesToAvoid || voiceAnalysis?.phrases_to_avoid || [],
+    vocabularyLevel: voiceAnalysis?.vocabularyLevel || 'accessible',
+    characteristics: voiceAnalysis?.characteristics || []
+  };
 
-Your task:
-1. Parse the content into logical sections (paragraphs, headings, or thematic blocks)
-2. Score each section (0-100) based on brand alignment
-3. Identify specific issues and strengths for each section
+  // Extract brand platform elements
+  const brandElements = {
+    promise: brandPlatform?.brandPromise || '',
+    pillars: brandPlatform?.pillars || [],
+    position: brandPlatform?.positioningStatement || '',
+    values: brandPlatform?.coreValues || []
+  };
 
-Voice Analysis to check against:
-${JSON.stringify(voiceAnalysis || {}, null, 2)}
+  const systemPrompt = `You are an expert brand content analyst for higher education institutions. You perform DEEP, SPECIFIC analysis of web content against institutional Content DNA.
 
-Brand Platform elements:
-${JSON.stringify(brandPlatform || {}, null, 2)}
+Your analysis must be SPECIFIC and ACTIONABLE, not generic. You should:
+1. Quote exact phrases from the content that are problematic or exemplary
+2. Reference specific facts, stories, or voice elements when evaluating alignment
+3. Provide concrete recommendations with examples of improved text
 
-Institutional context:
+## VOICE ANALYSIS TO MATCH:
+Primary Tone: ${voiceElements.primaryTone}
+Secondary Tones: ${voiceElements.secondaryTones.join(', ') || 'None specified'}
+Vocabulary Level: ${voiceElements.vocabularyLevel}
+Key Characteristics: ${voiceElements.characteristics.join(', ') || 'None specified'}
+
+Key Phrases TO USE:
+${voiceElements.keyPhrases.slice(0, 15).map((p: string) => `• "${p}"`).join('\n') || '• None specified'}
+
+Phrases TO AVOID:
+${voiceElements.avoidPhrases.slice(0, 15).map((p: string) => `• "${p}"`).join('\n') || '• None specified'}
+
+## BRAND PLATFORM:
+Brand Promise: ${brandElements.promise || 'Not defined'}
+Positioning: ${brandElements.position || 'Not defined'}
+Core Values: ${brandElements.values.join(', ') || 'Not defined'}
+Brand Pillars:
+${brandElements.pillars.map((p: any) => `• ${p.name}: ${p.description || ''}`).join('\n') || '• None defined'}
+
+## INSTITUTIONAL FACTS (for accuracy checking):
+${factsContext}
+
+## INSTITUTIONAL STORIES (for narrative alignment):
+${storiesContext}
+
+## INSTITUTIONAL CONTEXT:
 ${JSON.stringify(profileConfig || {}, null, 2)}
 
-Issue types to look for:
-- "Tone Mismatch" - Voice doesn't match the brand tone
-- "Prohibited Language" - Uses words/phrases to avoid
-- "Missing Brand Elements" - Could incorporate brand pillars or messaging
-- "Jargon Overload" - Too technical or unclear
-- "Passive Voice" - Could be more direct and engaging
-- "Generic Messaging" - Not distinctive or memorable
-- "Accessibility" - Complex sentences or unclear structure
+## ISSUE CATEGORIES:
+1. **Voice Mismatch** - Tone doesn't match brand (cite the specific words/phrases)
+2. **Off-Brand Language** - Uses phrases to avoid (quote them)
+3. **Missing Brand Elements** - Could incorporate brand pillars, values, or key phrases
+4. **Factual Opportunity** - Could include specific institutional facts
+5. **Story Integration** - Could reference institutional stories/testimonials
+6. **Generic Messaging** - Content is bland/unmemorable (suggest specific improvements)
+7. **Consistency Issue** - Contradicts other brand messaging
+8. **Audience Mismatch** - Wrong tone for target audience
+9. **Clarity Issue** - Confusing or overly complex language
+10. **CTA Weakness** - Call-to-action could be stronger/more brand-aligned
 
-Strength types to identify:
-- Strong brand voice alignment
-- Effective use of key phrases
-- Clear and engaging tone
-- Good storytelling elements
-- Proper audience targeting`;
+## STRENGTH CATEGORIES:
+1. **Strong Voice Alignment** - Matches brand tone perfectly (cite examples)
+2. **Effective Brand Language** - Uses key phrases well
+3. **Fact Integration** - Incorporates institutional data effectively
+4. **Story Connection** - References institutional narratives
+5. **Compelling Value Prop** - Clear, differentiated messaging
+6. **Audience Targeting** - Speaks directly to target audience
+7. **Emotional Resonance** - Creates connection with reader`;
 
-  const userPrompt = `Analyze this content for brand alignment:
+  const userPrompt = `Analyze this web content for brand alignment. Be SPECIFIC - quote exact phrases and reference exact DNA elements.
 
-${sourceUrl ? `Source URL: ${sourceUrl}\n\n` : ''}${truncatedContent}
+${sourceUrl ? `Source URL: ${sourceUrl}\n\n` : ''}CONTENT TO ANALYZE:
+${truncatedContent}
 
-Return a JSON response with this exact structure:
+Provide a detailed JSON response:
 {
-  "overallScore": <number 0-100>,
+  "overallScore": <0-100, be rigorous>,
+  "executiveSummary": "<2-3 sentence summary of brand alignment status>",
+  "dnaAlignment": {
+    "voiceScore": <0-100>,
+    "voiceFeedback": "<specific feedback on voice/tone alignment with quoted examples>",
+    "factScore": <0-100>,
+    "factFeedback": "<specific feedback on use of institutional facts>",
+    "storyScore": <0-100>,
+    "storyFeedback": "<specific feedback on narrative/story alignment>",
+    "brandScore": <0-100>,
+    "brandFeedback": "<specific feedback on brand platform alignment>"
+  },
   "sections": [
     {
       "id": "<unique-id>",
       "title": "<section title or first few words>",
       "content": "<the section text>",
-      "score": <number 0-100>,
+      "score": <0-100>,
       "issues": [
-        {"type": "<issue type>", "message": "<specific issue description>", "severity": "error|warning|info"}
+        {
+          "type": "<issue category from list above>",
+          "severity": "error|warning|info",
+          "message": "<specific issue with quoted text>",
+          "quotedText": "<exact problematic phrase from content>",
+          "recommendation": "<specific fix with example replacement text>",
+          "dnaReference": "<which DNA element this relates to, e.g., 'Key phrase: Transform your future'>"
+        }
       ],
-      "strengths": ["<strength description>"]
+      "strengths": [
+        {
+          "type": "<strength category from list above>",
+          "message": "<specific strength with quoted text>",
+          "quotedText": "<exact exemplary phrase from content>",
+          "dnaReference": "<which DNA element this aligns with>"
+        }
+      ]
     }
   ],
   "summary": {
     "totalIssues": <number>,
     "totalStrengths": <number>,
-    "topIssues": ["<most important issue descriptions>"],
-    "topStrengths": ["<most notable strength descriptions>"]
+    "criticalIssues": ["<most important issues to fix first>"],
+    "quickWins": ["<easy improvements that would boost score>"],
+    "missingFacts": ["<specific institutional facts that could be added>"],
+    "storyOpportunities": ["<ways to incorporate institutional stories>"]
+  },
+  "brandVoiceCheck": {
+    "phrasesUsedCorrectly": ["<key phrases found in content>"],
+    "phrasesAvoidedIncorrectly": ["<avoided phrases found in content>"],
+    "missingKeyPhrases": ["<key phrases that should be added>"]
   }
 }
 
-Return ONLY the JSON, no additional text.`;
+Return ONLY valid JSON. Be thorough and specific in your analysis.`;
 
   const responseText = await callLovableAI([
     { role: 'system', content: systemPrompt },
@@ -172,7 +292,7 @@ Return ONLY the JSON, no additional text.`;
   ], apiKey);
 
   const analysis = extractJSON(responseText);
-  console.log('Analysis complete, sections:', analysis.sections?.length);
+  console.log('Analysis complete, sections:', analysis.sections?.length, 'overall score:', analysis.overallScore);
 
   return new Response(
     JSON.stringify(analysis),
@@ -184,47 +304,64 @@ async function handleRewriteAll(
   sections: any[],
   voiceAnalysis: any,
   brandPlatform: any,
+  facts: any[] | undefined,
+  stories: any[] | undefined,
   apiKey: string
 ) {
+  const factsContext = formatFactsContext(facts || []);
+  const storiesContext = formatStoriesContext(stories || []);
+
   const systemPrompt = `You are a brand content writer specializing in higher education communications.
 Your task is to rewrite content to better align with the university's brand voice and guidelines.
 
-Voice Analysis to match:
+VOICE ANALYSIS TO MATCH:
 ${JSON.stringify(voiceAnalysis || {}, null, 2)}
 
-Brand Platform elements to incorporate:
+BRAND PLATFORM ELEMENTS:
 ${JSON.stringify(brandPlatform || {}, null, 2)}
 
-Guidelines:
-- Maintain the core message and meaning
-- Apply the brand's tone and voice
-- Use key phrases and brand language where appropriate
-- Make content more engaging and distinctive
-- Keep the same approximate length`;
+INSTITUTIONAL FACTS TO INCORPORATE:
+${factsContext}
 
-  const sectionsToRewrite = sections.slice(0, 5); // Limit to 5 sections
+INSTITUTIONAL STORIES TO REFERENCE:
+${storiesContext}
+
+GUIDELINES:
+- Maintain the core message and meaning
+- Apply the brand's tone and voice consistently
+- Use key phrases and brand language where appropriate
+- Incorporate relevant institutional facts when they strengthen the message
+- Reference stories/testimonials when appropriate
+- Make content more engaging and distinctive
+- Keep the same approximate length
+- Be specific about what you changed and why`;
+
+  const sectionsToRewrite = sections.slice(0, 5);
   
-  const userPrompt = `Rewrite these content sections to better align with the brand voice:
+  const userPrompt = `Rewrite these content sections to better align with the brand voice and incorporate DNA elements:
 
 ${sectionsToRewrite.map((s, i) => `Section ${i + 1} (${s.title}):
-Issues: ${s.issues?.map((is: any) => is.message).join(', ') || 'None identified'}
+Issues: ${s.issues?.map((is: any) => is.message).join('; ') || 'None identified'}
 Original content:
-${s.content.slice(0, 500)}
+${s.content.slice(0, 800)}
 `).join('\n---\n')}
 
-Return a JSON response with this structure:
+Return a JSON response:
 {
   "rewrittenSections": [
     {
-      "id": "<section id from input>",
+      "id": "<section id>",
       "original": "<original content>",
       "rewritten": "<improved brand-aligned content>",
-      "improvements": ["<what was improved>"]
+      "improvements": ["<specific change made and why>"],
+      "factsAdded": ["<any facts incorporated>"],
+      "phrasesUsed": ["<brand phrases incorporated>"],
+      "scoreImprovement": "<estimated score improvement>"
     }
   ]
 }
 
-Return ONLY the JSON, no additional text.`;
+Return ONLY the JSON.`;
 
   const responseText = await callLovableAI([
     { role: 'system', content: systemPrompt },
@@ -233,7 +370,6 @@ Return ONLY the JSON, no additional text.`;
 
   const result = extractJSON(responseText);
   
-  // Map section IDs back
   result.rewrittenSections = result.rewrittenSections?.map((r: any, i: number) => ({
     ...r,
     id: sectionsToRewrite[i]?.id || `section-${i}`
@@ -253,41 +389,57 @@ async function handleRewriteSection(
   issues: any[],
   voiceAnalysis: any,
   brandPlatform: any,
+  facts: any[] | undefined,
+  stories: any[] | undefined,
   apiKey: string
 ) {
+  const factsContext = formatFactsContext(facts || []);
+  const storiesContext = formatStoriesContext(stories || []);
+
   const systemPrompt = `You are a brand content writer specializing in higher education communications.
 Your task is to rewrite a single content section to better align with the university's brand voice.
 
-Voice Analysis to match:
+VOICE ANALYSIS TO MATCH:
 ${JSON.stringify(voiceAnalysis || {}, null, 2)}
 
-Brand Platform elements to incorporate:
+BRAND PLATFORM ELEMENTS:
 ${JSON.stringify(brandPlatform || {}, null, 2)}
 
-Guidelines:
-- Fix the identified issues
+INSTITUTIONAL FACTS AVAILABLE:
+${factsContext}
+
+INSTITUTIONAL STORIES AVAILABLE:
+${storiesContext}
+
+GUIDELINES:
+- Fix all identified issues specifically
 - Apply the brand's tone and voice
 - Use key phrases and brand language where appropriate
+- Incorporate relevant facts if they strengthen the message
 - Make content more engaging and distinctive
 - Keep the same approximate length`;
 
   const userPrompt = `Rewrite this section (${sectionTitle}) to align with the brand voice:
 
-Issues to fix: ${issues?.map((is: any) => is.message).join(', ') || 'General brand alignment needed'}
+Issues to fix: 
+${issues?.map((is: any) => `• ${is.type}: ${is.message}${is.recommendation ? ` → ${is.recommendation}` : ''}`).join('\n') || 'General brand alignment needed'}
 
 Original content:
 ${sectionContent}
 
-Return a JSON response with this structure:
+Return a JSON response:
 {
   "rewrittenSection": {
     "original": "<original content>",
     "rewritten": "<improved brand-aligned content>",
-    "improvements": ["<what was improved>"]
+    "improvements": ["<specific change made and why>"],
+    "issuesFixed": ["<which issues were addressed>"],
+    "factsAdded": ["<any facts incorporated>"],
+    "phrasesUsed": ["<brand phrases incorporated>"]
   }
 }
 
-Return ONLY the JSON, no additional text.`;
+Return ONLY the JSON.`;
 
   const responseText = await callLovableAI([
     { role: 'system', content: systemPrompt },

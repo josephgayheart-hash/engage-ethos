@@ -25,14 +25,14 @@ interface AnalysisResult {
     title: string;
     content: string;
     score: number;
-    issues: { type: string; message: string; severity: 'error' | 'warning' | 'info' }[];
-    strengths: string[];
+    issues: { type: string; message: string; severity: 'error' | 'warning' | 'info'; quotedText?: string; recommendation?: string; dnaReference?: string }[];
+    strengths: ({ type?: string; message: string; quotedText?: string; dnaReference?: string } | string)[];
   }[];
   summary: {
     totalIssues: number;
     totalStrengths: number;
-    topIssues: string[];
-    topStrengths: string[];
+    topIssues?: string[];
+    topStrengths?: string[];
   };
 }
 
