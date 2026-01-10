@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -93,10 +93,14 @@ export default function WebContentAnalyzerPage() {
   const [content, setContent] = useState('');
   const [sourceUrl, setSourceUrl] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isAnalysisComplete, setIsAnalysisComplete] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [showRewrite, setShowRewrite] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(true);
+  
+  // Ref for scrolling to results
+  const resultsRef = useRef<HTMLDivElement>(null);
   
   // Remediation tracking
   const [resolvedIssues, setResolvedIssues] = useState<IssueRemediation[]>([]);
@@ -273,6 +277,7 @@ export default function WebContentAnalyzerPage() {
     setContent(inputContent);
     if (url) setSourceUrl(url);
     setIsAnalyzing(true);
+    setIsAnalysisComplete(false);
     setAnalysisResult(null);
     setShowRewrite(false);
     setResolvedIssues([]); // Reset remediation on new analysis
@@ -292,13 +297,31 @@ export default function WebContentAnalyzerPage() {
 
       if (error) throw error;
 
-      setAnalysisResult(data);
+      // Show completion state briefly before showing results
+      setIsAnalyzing(false);
+      setIsAnalysisComplete(true);
       
-      if (data.sections?.length > 0) {
-        setSelectedSectionId(data.sections[0].id);
-      }
+      // Small delay to show the checkmark, then show results and scroll
+      setTimeout(() => {
+        setAnalysisResult(data);
+        
+        if (data.sections?.length > 0) {
+          setSelectedSectionId(data.sections[0].id);
+        }
 
-      toast.success('Analysis Complete', { description: `Scored ${data.sections?.length || 0} sections against your Content DNA.` });
+        toast.success('Analysis Complete', { description: `Scored ${data.sections?.length || 0} sections against your Content DNA.` });
+        
+        // Scroll to results after a brief moment
+        setTimeout(() => {
+          resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+        
+        // Reset complete state after scroll
+        setTimeout(() => {
+          setIsAnalysisComplete(false);
+        }, 2000);
+      }, 800);
+      
     } catch (error: any) {
       console.error('Analysis error:', error);
       showToast({
@@ -306,8 +329,8 @@ export default function WebContentAnalyzerPage() {
         description: error.message || 'Failed to analyze content.',
         variant: 'destructive',
       });
-    } finally {
       setIsAnalyzing(false);
+      setIsAnalysisComplete(false);
     }
   };
 
@@ -318,6 +341,7 @@ export default function WebContentAnalyzerPage() {
     setShowRewrite(false);
     setResolvedIssues([]);
     setCurrentDraftId(null);
+    setIsAnalysisComplete(false);
   };
 
   const handleRewrite = () => {
@@ -467,12 +491,13 @@ export default function WebContentAnalyzerPage() {
               <AnalyzerInput
                 onAnalyze={handleAnalyze} 
                 isAnalyzing={isAnalyzing}
+                isComplete={isAnalysisComplete}
                 disabled={!contentDNA?.voice_analysis}
               />
 
               {/* Analysis Results */}
               {analysisResult && (
-                <div className="space-y-6">
+                <div ref={resultsRef} className="space-y-6 animate-fade-in">
                   {/* Results Header with Score and Summary Stats */}
                   <Card>
                     <CardHeader className="pb-3">

@@ -52,6 +52,7 @@ interface DiscoveredPage {
 interface AnalyzerInputProps {
   onAnalyze: (content: string, url?: string) => void;
   isAnalyzing: boolean;
+  isComplete?: boolean;
   disabled?: boolean;
 }
 
@@ -71,7 +72,7 @@ const SECTION_TYPE_CONFIG: Record<string, { label: string; icon: React.ElementTy
   'general': { label: 'General', icon: FileText, color: 'text-muted-foreground' },
 };
 
-export function AnalyzerInput({ onAnalyze, isAnalyzing, disabled }: AnalyzerInputProps) {
+export function AnalyzerInput({ onAnalyze, isAnalyzing, isComplete, disabled }: AnalyzerInputProps) {
   const { toast } = useToast();
   const [url, setUrl] = useState('');
   const [isScraping, setIsScraping] = useState(false);
@@ -420,11 +421,20 @@ export function AnalyzerInput({ onAnalyze, isAnalyzing, disabled }: AnalyzerInpu
           <div className="pt-4 border-t">
             <Button
               onClick={handleAnalyzeClick}
-              disabled={!hasContent || isAnalyzing || disabled}
-              className="w-full bg-primary hover:bg-primary/90"
+              disabled={!hasContent || isAnalyzing || isComplete || disabled}
+              className={`w-full transition-all duration-300 ${
+                isComplete 
+                  ? 'bg-green-500 hover:bg-green-500' 
+                  : 'bg-primary hover:bg-primary/90'
+              }`}
               size="lg"
             >
-              {isAnalyzing ? (
+              {isComplete ? (
+                <div className="flex items-center gap-2 animate-scale-in">
+                  <CheckCircle2 className="w-5 h-5" />
+                  Analysis Complete
+                </div>
+              ) : isAnalyzing ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
                   Analyzing Content...
