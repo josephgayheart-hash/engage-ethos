@@ -191,6 +191,21 @@ export function MyDraftsCard() {
           const selectedAudience = contextInfo?.audience as string | undefined;
           const selectedGoal = contextInfo?.goal as string | undefined;
           
+          // Analysis-specific metadata
+          const analysisStatus = draftData?.status as string | undefined;
+          const analysisSourceUrl = draftData?.sourceUrl as string | undefined;
+          const analysisScore = (draftData?.analysisResult as Record<string, unknown>)?.overallScore as number | undefined;
+          
+          // Extract hostname from source URL for analysis drafts
+          let analysisHostname: string | undefined;
+          if (draft.draft_type === 'analysis' && analysisSourceUrl) {
+            try {
+              analysisHostname = new URL(analysisSourceUrl).hostname;
+            } catch {
+              analysisHostname = analysisSourceUrl.substring(0, 30);
+            }
+          }
+          
           return (
             <Link 
               key={draft.id} 
@@ -225,6 +240,25 @@ export function MyDraftsCard() {
                         <Badge variant="outline" className="text-[10px] shrink-0">
                           {draft.draft_type}
                         </Badge>
+                        {/* Analysis status badge */}
+                        {draft.draft_type === 'analysis' && analysisStatus && (
+                          <Badge 
+                            variant="secondary" 
+                            className={`text-[10px] shrink-0 ${
+                              analysisStatus === 'complete' 
+                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                : analysisStatus === 'failed'
+                                ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                : analysisStatus === 'analyzing'
+                                ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                : 'bg-muted text-muted-foreground'
+                            }`}
+                          >
+                            {analysisStatus === 'complete' ? 'Done' : 
+                             analysisStatus === 'failed' ? 'Failed' :
+                             analysisStatus === 'analyzing' ? 'In Progress' : 'Draft'}
+                          </Badge>
+                        )}
                       </div>
                       <Button
                         variant="ghost"
@@ -258,6 +292,31 @@ export function MyDraftsCard() {
                             className="text-[10px] px-1.5 py-0 h-5 bg-muted text-muted-foreground"
                           >
                             +{selectedChannels.length - 3}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Analysis-specific metadata */}
+                    {draft.draft_type === 'analysis' && (analysisHostname || typeof analysisScore === 'number') && (
+                      <div className="flex items-center gap-2 mt-1.5 text-xs">
+                        {analysisHostname && (
+                          <span className="text-muted-foreground truncate max-w-[150px]">
+                            {analysisHostname}
+                          </span>
+                        )}
+                        {typeof analysisScore === 'number' && (
+                          <Badge 
+                            variant="secondary" 
+                            className={`text-[10px] px-1.5 py-0 h-5 ${
+                              analysisScore >= 70 
+                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                : analysisScore >= 40
+                                ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                            }`}
+                          >
+                            Score: {analysisScore}
                           </Badge>
                         )}
                       </div>

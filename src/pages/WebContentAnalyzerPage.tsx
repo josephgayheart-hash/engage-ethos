@@ -31,11 +31,30 @@ import {
   FileEdit,
   Dna,
   X,
-  Building2
+  Building2,
+  Save
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import type { AnalysisResult, SavedAnalysisData, IssueRemediation } from '@/types/analyzer';
+
+// Draft status types for tracking progress
+type DraftStatus = 'drafting' | 'analyzing' | 'complete' | 'failed';
+
+interface AnalysisDraftData {
+  sourceUrl?: string;
+  sourceContent?: string;
+  analysisResult?: AnalysisResult;
+  profileId?: string;
+  profileName?: string;
+  analyzedAt?: string;
+  remediation?: {
+    totalIssues: number;
+    resolvedIssues: IssueRemediation[];
+  };
+  status?: DraftStatus;
+  errorMessage?: string;
+}
 
 export default function WebContentAnalyzerPage() {
   const { toast: showToast } = useToast();
@@ -49,6 +68,7 @@ export default function WebContentAnalyzerPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
   const [draftSavedRecently, setDraftSavedRecently] = useState(false);
+  const [draftSaveError, setDraftSaveError] = useState(false);
   
   // Profile selection state - initialized from last used profile
   const [selectedProfileId, setSelectedProfileIdLocal] = useState<string | null>(null);
@@ -109,77 +129,119 @@ export default function WebContentAnalyzerPage() {
   // Remediation tracking
   const [resolvedIssues, setResolvedIssues] = useState<IssueRemediation[]>([]);
 
+  // Helper to generate draft title safely
+  const generateDraftTitle = useCallback((url: string, contentText: string): string => {
+    try {
+      if (url) {
+        return `Analysis: ${new URL(url).hostname}`;
+      }
+    } catch {
+      // Invalid URL, fall through
+    }
+    if (url) {
+      return `Analysis: ${url.substring(0, 30)}...`;
+    }
+    if (contentText) {
+      return `Analysis: ${contentText.substring(0, 30)}...`;
+    }
+    return 'Analysis Draft';
+  }, []);
+
+  // Helper to save draft with status
+  const saveDraftWithStatus = useCallback(async (
+    status: DraftStatus, 
+    errorMessage?: string,
+    silent: boolean = false
+  ): Promise<string | null> => {
+    const draftData: AnalysisDraftData = {
+      sourceUrl,
+      sourceContent: content,
+      analysisResult: analysisResult || undefined,
+      profileId: selectedProfileId || undefined,
+      profileName: selectedProfile?.name,
+      analyzedAt: analysisResult ? new Date().toISOString() : undefined,
+      remediation: analysisResult ? {
+        totalIssues: analysisResult.summary?.totalIssues || 0,
+        resolvedIssues,
+      } : undefined,
+      status,
+      errorMessage,
+    };
+
+    const title = generateDraftTitle(sourceUrl, content);
+
+    try {
+      const draft = await saveDraft(
+        'analysis', 
+        draftData as unknown as Record<string, unknown>, 
+        title, 
+        currentDraftId || undefined,
+        silent
+      );
+      
+      if (draft) {
+        setCurrentDraftId(draft.id);
+        setDraftSaveError(false);
+        if (!silent) {
+          setDraftSavedRecently(true);
+          setTimeout(() => setDraftSavedRecently(false), 3000);
+        }
+        return draft.id;
+      }
+      return null;
+    } catch (error) {
+      console.error('Failed to save draft:', error);
+      setDraftSaveError(true);
+      return null;
+    }
+  }, [sourceUrl, content, analysisResult, selectedProfileId, selectedProfile?.name, resolvedIssues, currentDraftId, saveDraft, generateDraftTitle]);
+
   // Load draft on mount if resumeDraftId is in location state
   useEffect(() => {
     const resumeDraftId = (location.state as { resumeDraftId?: string })?.resumeDraftId;
     if (resumeDraftId) {
       loadDraftById(resumeDraftId).then(draft => {
         if (draft) {
-          const draftData = draft.draft_data as unknown as SavedAnalysisData;
+          const draftData = draft.draft_data as unknown as AnalysisDraftData;
           setContent(draftData.sourceContent || '');
           setSourceUrl(draftData.sourceUrl || '');
-          setAnalysisResult(draftData.analysisResult);
+          setAnalysisResult(draftData.analysisResult || null);
           setSelectedProfileId(draftData.profileId || null);
           setResolvedIssues(draftData.remediation?.resolvedIssues || []);
           setCurrentDraftId(draft.id);
           if (draftData.analysisResult?.sections?.length > 0) {
             setSelectedSectionId(draftData.analysisResult.sections[0].id);
           }
-          toast.success('Draft loaded', { description: 'Your previous analysis has been restored.' });
+          
+          // Show appropriate toast based on status
+          if (draftData.status === 'failed') {
+            toast.info('Draft loaded', { description: 'Previous analysis failed. You can retry.' });
+          } else if (draftData.status === 'analyzing') {
+            toast.info('Draft loaded', { description: 'Analysis was interrupted. You can retry.' });
+          } else {
+            toast.success('Draft loaded', { description: 'Your previous analysis has been restored.' });
+          }
         }
       });
     }
   }, [location.state, loadDraftById]);
 
-  // Auto-save draft periodically
+  // Auto-save draft periodically when there's meaningful content
   useEffect(() => {
-    // Only auto-save if there's meaningful content (analysis result exists)
-    if (!analysisResult) return;
-
-    const draftData: SavedAnalysisData = {
-      sourceUrl,
-      sourceContent: content,
-      analysisResult,
-      profileId: selectedProfileId || undefined,
-      profileName: selectedProfile?.name,
-      analyzedAt: new Date().toISOString(),
-      remediation: {
-        totalIssues: analysisResult.summary.totalIssues || 0,
-        resolvedIssues,
-      }
-    };
-
-    // Generate title from source URL or content (safely handle invalid URLs)
-    let title = 'Analysis Draft';
-    try {
-      if (sourceUrl) {
-        title = `Analysis: ${new URL(sourceUrl).hostname}`;
-      } else if (content) {
-        title = `Analysis: ${content.substring(0, 30)}...`;
-      }
-    } catch {
-      title = sourceUrl ? `Analysis: ${sourceUrl.substring(0, 30)}...` : 'Analysis Draft';
-    }
+    // Only auto-save if there's meaningful content (URL or content exists)
+    if (!sourceUrl && !content) return;
+    
+    // Don't auto-save while actively analyzing
+    if (isAnalyzing) return;
 
     const saveTimeout = setTimeout(async () => {
-      try {
-        // Auto-save draft (refetch list so MyDraftsCard updates)
-        console.log('Auto-saving analysis draft...', { title, hasResult: !!analysisResult });
-        const draft = await saveDraft('analysis', draftData as unknown as Record<string, unknown>, title, currentDraftId || undefined);
-        if (draft) {
-          console.log('Analysis draft saved:', draft.id);
-          setCurrentDraftId(draft.id);
-          setDraftSavedRecently(true);
-          // Reset the indicator after 3 seconds
-          setTimeout(() => setDraftSavedRecently(false), 3000);
-        }
-      } catch (error) {
-        console.error('Failed to auto-save analysis draft:', error);
-      }
-    }, 3000); // Auto-save after 3 seconds of inactivity
+      const status: DraftStatus = analysisResult ? 'complete' : 'drafting';
+      console.log('Auto-saving analysis draft...', { status, hasUrl: !!sourceUrl, hasContent: !!content, hasResult: !!analysisResult });
+      await saveDraftWithStatus(status, undefined, true);
+    }, 3000);
 
     return () => clearTimeout(saveTimeout);
-  }, [analysisResult, sourceUrl, content, selectedProfileId, selectedProfile?.name, resolvedIssues, currentDraftId, saveDraft]);
+  }, [analysisResult, sourceUrl, content, selectedProfileId, resolvedIssues, isAnalyzing, saveDraftWithStatus]);
 
   // Clear draft when saving to library
   const clearDraftAfterSave = useCallback(async () => {
@@ -235,19 +297,14 @@ export default function WebContentAnalyzerPage() {
   }, [sourceUrl, content, analysisResult, selectedProfileId, selectedProfile?.name, resolvedIssues]);
 
   const handleSaveDraft = useCallback(async () => {
-    if (!analysisResult) return;
+    if (!sourceUrl && !content && !analysisResult) return;
     
     setIsSaving(true);
     try {
-      const draftData = buildDraftData();
-      const title = sourceUrl 
-        ? `Analysis: ${new URL(sourceUrl).hostname}` 
-        : `Analysis: ${content.substring(0, 30)}...`;
+      const status: DraftStatus = analysisResult ? 'complete' : 'drafting';
+      const draftId = await saveDraftWithStatus(status);
       
-      const draft = await saveDraft('analysis', draftData as unknown as Record<string, unknown>, title, currentDraftId || undefined);
-      
-      if (draft) {
-        setCurrentDraftId(draft.id);
+      if (draftId) {
         toast.success('Draft saved', { description: 'Your analysis has been saved for later.' });
       } else {
         toast.error('Failed to save draft', { description: 'Please ensure you are logged in.' });
@@ -258,7 +315,7 @@ export default function WebContentAnalyzerPage() {
     } finally {
       setIsSaving(false);
     }
-  }, [analysisResult, buildDraftData, saveDraft, currentDraftId, sourceUrl, content]);
+  }, [sourceUrl, content, analysisResult, saveDraftWithStatus]);
 
   const handleSaveToPersonalLibrary = useCallback(async (name: string): Promise<string | undefined> => {
     if (!analysisResult) return undefined;
@@ -336,13 +393,45 @@ export default function WebContentAnalyzerPage() {
       return;
     }
 
+    // Update state
     setContent(inputContent);
     if (url) setSourceUrl(url);
     setIsAnalyzing(true);
     setIsAnalysisComplete(false);
     setAnalysisResult(null);
     setShowRewrite(false);
-    setResolvedIssues([]); // Reset remediation on new analysis
+    setResolvedIssues([]);
+
+    // Save draft immediately with "analyzing" status
+    const tempSourceUrl = url || sourceUrl;
+    const tempContent = inputContent;
+    
+    // Create a temporary draft data object for immediate save
+    const analyzingDraftData: AnalysisDraftData = {
+      sourceUrl: tempSourceUrl,
+      sourceContent: tempContent,
+      profileId: selectedProfileId || undefined,
+      profileName: selectedProfile?.name,
+      status: 'analyzing',
+    };
+    
+    const title = generateDraftTitle(tempSourceUrl, tempContent);
+    
+    try {
+      const draft = await saveDraft(
+        'analysis', 
+        analyzingDraftData as unknown as Record<string, unknown>, 
+        title, 
+        currentDraftId || undefined,
+        true
+      );
+      if (draft) {
+        setCurrentDraftId(draft.id);
+        console.log('Saved analyzing draft:', draft.id);
+      }
+    } catch (e) {
+      console.error('Failed to save analyzing draft:', e);
+    }
 
     try {
       const { data, error } = await supabase.functions.invoke('analyze-web-content', {
@@ -386,9 +475,36 @@ export default function WebContentAnalyzerPage() {
       
     } catch (error: any) {
       console.error('Analysis error:', error);
+      
+      // Save draft with failed status
+      const failedDraftData: AnalysisDraftData = {
+        sourceUrl: url || sourceUrl,
+        sourceContent: inputContent,
+        profileId: selectedProfileId || undefined,
+        profileName: selectedProfile?.name,
+        status: 'failed',
+        errorMessage: error.message || 'Analysis failed',
+      };
+      
+      try {
+        const draft = await saveDraft(
+          'analysis', 
+          failedDraftData as unknown as Record<string, unknown>, 
+          title, 
+          currentDraftId || undefined,
+          true
+        );
+        if (draft) {
+          setCurrentDraftId(draft.id);
+          console.log('Saved failed draft:', draft.id);
+        }
+      } catch (e) {
+        console.error('Failed to save failed draft:', e);
+      }
+      
       showToast({
         title: 'Analysis Failed',
-        description: error.message || 'Failed to analyze content.',
+        description: error.message || 'Failed to analyze content. Your progress has been saved.',
         variant: 'destructive',
       });
       setIsAnalyzing(false);
@@ -451,42 +567,55 @@ export default function WebContentAnalyzerPage() {
           {showHowItWorks && !analysisResult && (
             <Card className="mb-6 border-dashed border-primary/30 bg-primary/5">
               <CardContent className="py-4">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-primary shrink-0" />
-                    <span className="text-sm font-medium text-foreground">How It Works</span>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                      <span className="font-medium text-sm">How It Works</span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                      <div className="flex items-start gap-2">
+                        <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                          <span className="text-xs font-medium text-primary">1</span>
+                        </div>
+                        <div>
+                          <span className="font-medium">Import</span>
+                          <p className="text-muted-foreground text-xs">Paste a URL or content</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                          <span className="text-xs font-medium text-primary">2</span>
+                        </div>
+                        <div>
+                          <span className="font-medium">Analyze</span>
+                          <p className="text-muted-foreground text-xs">AI scores against DNA</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                          <span className="text-xs font-medium text-primary">3</span>
+                        </div>
+                        <div>
+                          <span className="font-medium">Review</span>
+                          <p className="text-muted-foreground text-xs">See issues & strengths</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                          <span className="text-xs font-medium text-primary">4</span>
+                        </div>
+                        <div>
+                          <span className="font-medium">Rewrite</span>
+                          <p className="text-muted-foreground text-xs">Get brand-aligned copy</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  
-                  <div className="flex-1 flex items-center justify-center gap-8">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">1</div>
-                      <div>
-                        <p className="text-sm font-medium">Import Content</p>
-                        <p className="text-xs text-muted-foreground">Fetch from URL</p>
-                      </div>
-                    </div>
-                    <div className="h-px w-8 bg-border" />
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">2</div>
-                      <div>
-                        <p className="text-sm font-medium">AI Analysis</p>
-                        <p className="text-xs text-muted-foreground">Score vs Content DNA</p>
-                      </div>
-                    </div>
-                    <div className="h-px w-8 bg-border" />
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">3</div>
-                      <div>
-                        <p className="text-sm font-medium">Improve</p>
-                        <p className="text-xs text-muted-foreground">AI Rewrite for brand</p>
-                      </div>
-                    </div>
-                  </div>
-                  
                   <Button 
                     variant="ghost" 
-                    size="sm" 
-                    className="h-7 w-7 p-0 shrink-0"
+                    size="icon" 
+                    className="shrink-0 h-6 w-6"
                     onClick={() => setShowHowItWorks(false)}
                   >
                     <X className="w-4 h-4" />
@@ -496,310 +625,171 @@ export default function WebContentAnalyzerPage() {
             </Card>
           )}
 
-          {/* Auto-save Draft Indicator */}
-          {(currentDraftId || draftSavedRecently) && (
-            <div className={cn(
-              "flex items-center gap-2 text-sm px-3 py-2 rounded-lg transition-all mb-4",
-              draftSavedRecently 
-                ? "bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20" 
-                : "bg-muted/50 text-muted-foreground"
-            )}>
-              <FileEdit className="w-4 h-4" />
-              <span>{draftSavedRecently ? '✓ Saved to My Drafts' : 'Draft auto-saved'}</span>
-              <span className="text-xs">•</span>
-              <span className="text-xs truncate">
-                {sourceUrl ? new URL(sourceUrl).hostname : 'Analysis in progress'}
-              </span>
+          {/* Auto-saved indicator */}
+          {(currentDraftId || draftSavedRecently) && !analysisResult && (
+            <div className="mb-4 flex items-center gap-2 text-xs text-muted-foreground">
+              <Save className="w-3 h-3" />
+              {draftSavedRecently ? (
+                <span className="text-green-600">Draft saved</span>
+              ) : (
+                <span>Draft auto-saved</span>
+              )}
             </div>
           )}
 
-          {/* DNA Status Warning */}
+          {/* Draft save error indicator */}
+          {draftSaveError && (
+            <div className="mb-4 flex items-center gap-2 text-xs text-destructive">
+              <AlertTriangle className="w-3 h-3" />
+              <span>Failed to save draft</span>
+            </div>
+          )}
+
+          {/* DNA Warning */}
           {!dnaLoading && !contentDNA?.voice_analysis && (
-            <Card className="mb-6 border-amber-500/30 bg-amber-500/5">
+            <Card className="mb-6 border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30">
               <CardContent className="py-4">
-                <div className="flex items-center gap-3">
-                  <AlertTriangle className="w-5 h-5 text-amber-500" />
-                  <div className="flex-1">
-                    <p className="font-medium text-foreground">Content DNA Not Configured</p>
-                    <p className="text-sm text-muted-foreground">
-                      Set up your Content DNA to enable brand adherence analysis.
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-amber-900 dark:text-amber-100">Content DNA not configured</p>
+                    <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                      Set up your Content DNA to enable analysis. The analyzer needs your brand voice and platform data to evaluate content.
                     </p>
-                  </div>
-                  <Link to="/content-dna">
-                    <Button variant="outline" size="sm">
-                      Configure DNA
+                    <Button variant="outline" size="sm" className="mt-3" asChild>
+                      <Link to="/settings/content-dna">
+                        <Dna className="w-4 h-4 mr-2" />
+                        Configure Content DNA
+                      </Link>
                     </Button>
-                  </Link>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           )}
 
-          {/* Main Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column - Input & Results */}
-            <div className="lg:col-span-3 space-y-6">
-              {/* Profile Selection - Prominent placement before analysis */}
-              <Card>
-                <CardContent className="py-4">
-                  <div className="flex items-center gap-4 flex-wrap">
-                    <div className="flex items-center gap-2 shrink-0">
-                      <Building2 className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Voice Profile:</span>
-                    </div>
-                    <div className="flex-1 min-w-[200px]">
-                      <InstitutionalProfileSelector
-                        selectedProfileId={selectedProfileId}
-                        onProfileChange={(id, _config, name) => {
-                          setSelectedProfileId(id);
-                          if (name) setSelectedProfileName(name);
-                        }}
-                      />
-                    </div>
-                    {contentDNA?.last_analyzed_at && (
-                      <ContentDNAActiveBadge />
-                    )}
-                    {!contentDNA?.last_analyzed_at && selectedProfileId && !dnaLoading && (
-                      <Link to={`/content-dna?profileId=${selectedProfileId}`}>
-                        <Button variant="outline" size="sm" className="gap-1.5">
-                          <Dna className="w-3.5 h-3.5" />
-                          Setup DNA
-                        </Button>
-                      </Link>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Content Input - Collapsed when rewrite is active */}
-              {showRewrite ? (
-                <Card className="border-primary/20 bg-primary/5">
-                  <CardContent className="py-3">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="p-2 rounded-lg bg-primary/10">
-                          <Search className="w-4 h-4 text-primary" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium truncate">
-                            {sourceUrl ? new URL(sourceUrl).hostname : 'Content Analyzed'}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {analysisResult?.sections.length || 0} sections • Score: {analysisResult?.overallScore}/100
-                          </p>
-                        </div>
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowRewrite(false)}
-                        className="shrink-0"
-                      >
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back to Analysis
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                <AnalyzerInput
-                  onAnalyze={handleAnalyze} 
-                  isAnalyzing={isAnalyzing}
-                  isComplete={isAnalysisComplete}
-                  disabled={!contentDNA?.voice_analysis}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Profile Selector */}
+              <div className="flex items-center gap-4">
+                <InstitutionalProfileSelector
+                  selectedProfileId={selectedProfileId}
+                  onProfileChange={setSelectedProfileId}
+                  className="w-64"
                 />
-              )}
+                {selectedProfileId && contentDNA && (
+                  <ContentDNAActiveBadge showScore dnaAnalysis={contentDNA} />
+                )}
+              </div>
 
-              {/* Analysis Results */}
+              {/* Input Section */}
+              <AnalyzerInput
+                onAnalyze={handleAnalyze}
+                isAnalyzing={isAnalyzing}
+                isComplete={isAnalysisComplete}
+                hasExistingResult={!!analysisResult}
+              />
+
+              {/* Results Section */}
               {analysisResult && (
-                <div ref={resultsRef} className="space-y-6 animate-fade-in">
-                  {/* AI Rewrite Panel - Shows at TOP when active */}
+                <div ref={resultsRef} className="space-y-6">
+                  {/* Rewrite Panel - show at top when active */}
                   {showRewrite && (
                     <RewritePanel
-                      content={content}
-                      analysisResult={analysisResult}
+                      sections={analysisResult.sections}
                       voiceAnalysis={contentDNA?.voice_analysis}
                       brandPlatform={contentDNA?.brand_platform}
+                      facts={facts}
+                      stories={stories}
                       onClose={() => setShowRewrite(false)}
                       onRewriteStateChange={handleRewriteStateChange}
-                      autoStart={true}
                     />
                   )}
 
-                  {/* Results Header with Score and Summary Stats */}
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <CardTitle className="flex items-center gap-2">
-                            <FileText className="w-5 h-5 text-primary" />
-                            Analysis Results
-                          </CardTitle>
-                          {sourceUrl && (
-                            <CardDescription className="text-xs mt-1 truncate max-w-md">
-                              Source: {sourceUrl}
-                            </CardDescription>
-                          )}
-                        </div>
-                        <div className="text-center">
-                          <div className={`text-4xl font-bold ${
-                            analysisResult.overallScore >= 80 ? 'text-green-500' :
-                            analysisResult.overallScore >= 60 ? 'text-amber-500' :
-                            'text-red-500'
-                          }`}>
-                            {analysisResult.overallScore}
-                          </div>
-                          <div className="text-xs text-muted-foreground">Overall Score</div>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {/* Executive Summary */}
-                      {analysisResult.executiveSummary && (
-                        <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
-                          <p className="text-sm text-foreground">{analysisResult.executiveSummary}</p>
-                        </div>
-                      )}
-                      
-                      {/* Quick Stats Grid */}
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <div className="p-3 rounded-lg bg-muted/50 text-center">
-                          <div className="text-2xl font-bold text-foreground">{analysisResult.sections.length}</div>
-                          <div className="text-xs text-muted-foreground">Sections</div>
-                        </div>
-                        <div className="p-3 rounded-lg bg-red-500/10 text-center">
-                          <div className="text-2xl font-bold text-red-600">{analysisResult.summary.totalIssues}</div>
-                          <div className="text-xs text-muted-foreground">Issues Found</div>
-                        </div>
-                        <div className="p-3 rounded-lg bg-green-500/10 text-center">
-                          <div className="text-2xl font-bold text-green-600">{analysisResult.summary.totalStrengths}</div>
-                          <div className="text-xs text-muted-foreground">Strengths</div>
-                        </div>
-                        <div className="p-3 rounded-lg bg-amber-500/10 text-center">
-                          <div className="text-2xl font-bold text-amber-600">{analysisResult.summary.criticalIssues?.length || 0}</div>
-                          <div className="text-xs text-muted-foreground">Critical</div>
-                        </div>
-                      </div>
+                  {/* DNA Alignment */}
+                  <DNAAlignmentPanel 
+                    dnaAlignment={analysisResult.dnaAlignment} 
+                    brandVoiceCheck={analysisResult.brandVoiceCheck}
+                  />
 
-                      {/* Critical Issues Highlight */}
-                      {analysisResult.summary.criticalIssues && analysisResult.summary.criticalIssues.length > 0 && (
-                        <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/5">
-                          <p className="text-xs font-medium text-red-600 mb-2">Critical Issues to Address:</p>
-                          <ul className="space-y-1">
-                            {analysisResult.summary.criticalIssues.slice(0, 3).map((issue, idx) => (
-                              <li key={idx} className="text-sm text-foreground flex items-start gap-2">
-                                <span className="text-red-500 mt-0.5">•</span>
-                                {issue}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-
-                      {/* Quick Wins */}
-                      {analysisResult.summary.quickWins && analysisResult.summary.quickWins.length > 0 && (
-                        <div className="p-3 rounded-lg border border-green-500/30 bg-green-500/5">
-                          <p className="text-xs font-medium text-green-600 mb-2">Quick Wins:</p>
-                          <ul className="space-y-1">
-                            {analysisResult.summary.quickWins.slice(0, 3).map((win, idx) => (
-                              <li key={idx} className="text-sm text-foreground flex items-start gap-2">
-                                <span className="text-green-500 mt-0.5">✓</span>
-                                {win}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-
-                      {/* Scroll indicator */}
-                      <div className="text-center pt-2 border-t">
-                        <p className="text-xs text-muted-foreground">
-                          ↓ Scroll down for detailed section analysis
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* DNA Alignment Panel */}
-                  {analysisResult.dnaAlignment && !showRewrite && (
-                    <DNAAlignmentPanel
-                      dnaAlignment={analysisResult.dnaAlignment}
-                      brandVoiceCheck={analysisResult.brandVoiceCheck}
-                      summary={{
-                        quickWins: analysisResult.summary.quickWins,
-                        missingFacts: analysisResult.summary.missingFacts,
-                        storyOpportunities: analysisResult.summary.storyOpportunities,
-                        criticalIssues: analysisResult.summary.criticalIssues,
-                      }}
-                    />
-                  )}
-
-                  {/* Content Sections - Only show when not rewriting */}
-                  {!showRewrite && (
-                    <div className="space-y-4">
-                      <Card>
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-lg flex items-center gap-2">
-                            <Dna className="w-5 h-5 text-primary" />
-                            Content Sections
-                          </CardTitle>
-                          <CardDescription>
-                            Click on a section to see detailed voice analysis
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                          {analysisResult.sections.map((section) => (
-                            <ContentSectionCard
-                              key={section.id}
-                              section={section}
-                              isSelected={section.id === selectedSectionId}
-                              onClick={() => setSelectedSectionId(section.id)}
-                            />
-                          ))}
-                        </CardContent>
-                      </Card>
-
-                      {/* Voice Profile Match - Inline below sections */}
-                      {selectedSection && (
-                        <BrandScorePanel
-                          section={selectedSection}
-                          voiceAnalysis={contentDNA?.voice_analysis}
-                        />
-                      )}
+                  {/* Content Sections */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-semibold flex items-center gap-2">
+                        <FileText className="w-5 h-5 text-primary" />
+                        Content Sections
+                      </h2>
+                      <span className="text-sm text-muted-foreground">
+                        {analysisResult.sections.length} sections analyzed
+                      </span>
                     </div>
-                  )}
+                    
+                    {analysisResult.sections.map((section) => (
+                      <ContentSectionCard
+                        key={section.id}
+                        section={section}
+                        isSelected={section.id === selectedSectionId}
+                        onSelect={() => setSelectedSectionId(section.id)}
+                        resolvedIssues={resolvedIssues.filter(r => r.sectionId === section.id)}
+                        onToggleResolved={(issueId, resolved) => handleToggleResolved(issueId, section.id, resolved)}
+                        onUpdateNotes={(issueId, notes) => handleUpdateNotes(issueId, section.id, notes)}
+                      />
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* Right Column - Actions only (when results exist) */}
+            {/* Right Column - Score & Actions */}
             <div className="space-y-6">
-              {/* Loading State */}
               {isAnalyzing && (
-                <Card>
-                  <CardContent className="py-12 text-center">
-                    <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
-                    <p className="font-medium">Analyzing content...</p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Checking against your Content DNA
-                    </p>
+                <Card className="border-primary/20">
+                  <CardContent className="py-8">
+                    <div className="flex flex-col items-center justify-center text-center space-y-4">
+                      <div className="relative">
+                        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                        </div>
+                        <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-pulse" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Analyzing Content</p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Scoring against your Content DNA...
+                        </p>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               )}
 
-              {/* Results-specific right column items */}
               {analysisResult && (
-                <AnalysisActionsCard
-                  onNewAnalysis={handleNewAnalysis}
-                  onRewrite={handleRewrite}
-                  showRewrite={showRewrite}
-                  isRewriting={isRewritingContent}
-                  onSaveDraft={handleSaveDraft}
-                  onSaveToPersonalLibrary={handleSaveToPersonalLibrary}
-                  onSaveToUniversityLibrary={handleSaveToUniversityLibrary}
-                  isSaving={isSaving}
-                  hasDraft={!!currentDraftId}
-                />
+                <>
+                  <BrandScorePanel
+                    overallScore={analysisResult.overallScore}
+                    executiveSummary={analysisResult.executiveSummary}
+                    institutionMismatchDetected={analysisResult.institutionMismatchDetected}
+                    wrongInstitutionFound={analysisResult.wrongInstitutionFound}
+                    summary={analysisResult.summary}
+                    resolvedCount={resolvedIssues.filter(r => r.resolved).length}
+                  />
+
+                  <AnalysisActionsCard
+                    analysisResult={analysisResult}
+                    sourceUrl={sourceUrl}
+                    isSaving={isSaving}
+                    isRewriting={isRewritingContent}
+                    onSaveDraft={handleSaveDraft}
+                    onSaveToLibrary={handleSaveToPersonalLibrary}
+                    onSubmitToUniversity={handleSaveToUniversityLibrary}
+                    onRewrite={handleRewrite}
+                    onNewAnalysis={handleNewAnalysis}
+                    onClearDraft={clearDraftAfterSave}
+                    showRewrite={showRewrite}
+                  />
+                </>
               )}
             </div>
           </div>
