@@ -62,8 +62,15 @@ serve(async (req) => {
     }
 
     console.log('Search successful, found', data.data?.length || 0, 'results');
+    
+    // Map results to include publishedDate from metadata
+    const resultsWithDates = (data.data || []).map((item: any) => ({
+      ...item,
+      publishedDate: item.metadata?.publishedDate || item.publishedDate || item.date || null,
+    }));
+    
     return new Response(
-      JSON.stringify({ success: true, data: data.data || [], credits: data.creditsUsed }),
+      JSON.stringify({ success: true, data: resultsWithDates, credits: data.creditsUsed }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {

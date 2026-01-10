@@ -62,13 +62,16 @@ import {
   MoreHorizontal,
   UserSearch,
   Wand2,
+  Calendar,
 } from "lucide-react";
+import { format, parseISO, isValid } from "date-fns";
 
 interface SearchResult {
   url: string;
   title: string;
   description?: string;
   markdown?: string;
+  publishedDate?: string;
 }
 
 interface ExtractedContact {
@@ -741,6 +744,19 @@ export const BrandRadarTab = () => {
                             {result.title || result.url}
                             <ExternalLink className="w-3 h-3 flex-shrink-0" />
                           </a>
+                          {result.publishedDate && (
+                            <span className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                              <Calendar className="w-3 h-3" />
+                              {(() => {
+                                try {
+                                  const date = parseISO(result.publishedDate);
+                                  return isValid(date) ? format(date, 'MMM d, yyyy') : result.publishedDate;
+                                } catch {
+                                  return result.publishedDate;
+                                }
+                              })()}
+                            </span>
+                          )}
                           <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                             {result.description || 'No description available'}
                           </p>
