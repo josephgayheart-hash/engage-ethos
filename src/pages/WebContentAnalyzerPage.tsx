@@ -26,7 +26,8 @@ import {
   ArrowLeft,
   AlertTriangle,
   FileText,
-  Dna
+  Dna,
+  X
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -100,6 +101,7 @@ export default function WebContentAnalyzerPage() {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [showRewrite, setShowRewrite] = useState(false);
+  const [showHowItWorks, setShowHowItWorks] = useState(true);
 
   const handleAnalyze = async (inputContent: string, url?: string) => {
     if (!inputContent.trim()) {
@@ -228,6 +230,55 @@ export default function WebContentAnalyzerPage() {
             </p>
           </div>
 
+          {/* How It Works - Horizontal, Closeable */}
+          {showHowItWorks && !analysisResult && (
+            <Card className="mb-6 border-dashed border-primary/30 bg-primary/5">
+              <CardContent className="py-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-primary shrink-0" />
+                    <span className="text-sm font-medium text-foreground">How It Works</span>
+                  </div>
+                  
+                  <div className="flex-1 flex items-center justify-center gap-8">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">1</div>
+                      <div>
+                        <p className="text-sm font-medium">Import Content</p>
+                        <p className="text-xs text-muted-foreground">Fetch from URL</p>
+                      </div>
+                    </div>
+                    <div className="h-px w-8 bg-border" />
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">2</div>
+                      <div>
+                        <p className="text-sm font-medium">AI Analysis</p>
+                        <p className="text-xs text-muted-foreground">Score vs Content DNA</p>
+                      </div>
+                    </div>
+                    <div className="h-px w-8 bg-border" />
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">3</div>
+                      <div>
+                        <p className="text-sm font-medium">Improve</p>
+                        <p className="text-xs text-muted-foreground">AI Rewrite for brand</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-7 w-7 p-0 shrink-0"
+                    onClick={() => setShowHowItWorks(false)}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* DNA Status Warning */}
           {!dnaLoading && !contentDNA?.voice_analysis && (
             <Card className="mb-6 border-amber-500/30 bg-amber-500/5">
@@ -347,43 +398,6 @@ export default function WebContentAnalyzerPage() {
                     </Card>
                   )}
                 </div>
-              )}
-
-              {/* How It Works - Only show when no results */}
-              {!analysisResult && !isAnalyzing && (
-                <Card className="border-dashed max-w-md">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-primary" />
-                      How It Works
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-3">
-                      <div className="flex gap-3">
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">1</div>
-                        <div>
-                          <p className="text-sm font-medium">Import Content</p>
-                          <p className="text-xs text-muted-foreground">Fetch content from a URL to analyze</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-3">
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">2</div>
-                        <div>
-                          <p className="text-sm font-medium">AI Analysis</p>
-                          <p className="text-xs text-muted-foreground">We score each section against your Content DNA</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-3">
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">3</div>
-                        <div>
-                          <p className="text-sm font-medium">Improve</p>
-                          <p className="text-xs text-muted-foreground">Use AI Rewrite to align content with your brand</p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
               )}
             </div>
 
