@@ -59,3 +59,6 @@ verify_jwt = true
 
 [functions.parse-fact-book]
 verify_jwt = true
+
+[functions.firecrawl-search]
+verify_jwt = false

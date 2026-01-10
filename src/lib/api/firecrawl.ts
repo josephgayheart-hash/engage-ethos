@@ -18,6 +18,13 @@ type MapOptions = {
   includeSubdomains?: boolean;
 };
 
+type SearchOptions = {
+  limit?: number;
+  tbs?: string; // Time filter: 'qdr:d' (day), 'qdr:w' (week), 'qdr:m' (month), 'qdr:y' (year)
+  lang?: string;
+  country?: string;
+};
+
 export interface ScrapeResult {
   markdown?: string;
   html?: string;
@@ -35,7 +42,30 @@ export interface MapResult {
   links: string[];
 }
 
+export interface SearchResult {
+  url: string;
+  title: string;
+  description?: string;
+  markdown?: string;
+}
+
 export const firecrawlApi = {
+  // Search the web
+  async search(query: string, options?: SearchOptions): Promise<FirecrawlResponse<SearchResult[]>> {
+    const { data, error } = await supabase.functions.invoke('firecrawl-search', {
+      body: { query, options },
+    });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { 
+      success: data?.success !== false, 
+      data: data?.data || [],
+      error: data?.error 
+    };
+  },
+
   // Scrape a single URL
   async scrape(url: string, options?: ScrapeOptions): Promise<FirecrawlResponse<ScrapeResult>> {
     const { data, error } = await supabase.functions.invoke('firecrawl-scrape', {
