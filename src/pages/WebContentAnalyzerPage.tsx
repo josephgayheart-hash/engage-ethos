@@ -346,6 +346,29 @@ export default function WebContentAnalyzerPage() {
                     </CardContent>
                   </Card>
 
+                  {/* Executive Summary */}
+                  {analysisResult.executiveSummary && (
+                    <Card className="border-primary/20 bg-primary/5">
+                      <CardContent className="py-4">
+                        <p className="text-sm text-foreground">{analysisResult.executiveSummary}</p>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* DNA Alignment Panel */}
+                  {analysisResult.dnaAlignment && (
+                    <DNAAlignmentPanel
+                      dnaAlignment={analysisResult.dnaAlignment}
+                      brandVoiceCheck={analysisResult.brandVoiceCheck}
+                      summary={{
+                        quickWins: analysisResult.summary.quickWins,
+                        missingFacts: analysisResult.summary.missingFacts,
+                        storyOpportunities: analysisResult.summary.storyOpportunities,
+                        criticalIssues: analysisResult.summary.criticalIssues,
+                      }}
+                    />
+                  )}
+
                   {/* Sections or Rewrite */}
                   {showRewrite ? (
                     <RewritePanel
@@ -377,8 +400,16 @@ export default function WebContentAnalyzerPage() {
                   )}
                 </div>
 
-                {/* Right Panel - Score Details */}
+                {/* Right Panel - Score Details & Screenshot */}
                 <div className="space-y-6">
+                  {/* Screenshot Preview */}
+                  {screenshot && (
+                    <ScreenshotPreview
+                      screenshot={screenshot}
+                      sourceUrl={sourceUrl}
+                    />
+                  )}
+
                   {isAnalyzing ? (
                     <Card>
                       <CardContent className="py-12 text-center">
