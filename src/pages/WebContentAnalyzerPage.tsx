@@ -152,6 +152,8 @@ export default function WebContentAnalyzerPage() {
       if (draft) {
         setCurrentDraftId(draft.id);
         toast.success('Draft saved', { description: 'Your analysis has been saved for later.' });
+      } else {
+        toast.error('Failed to save draft', { description: 'Please ensure you are logged in.' });
       }
     } catch (error) {
       console.error('Failed to save draft:', error);
