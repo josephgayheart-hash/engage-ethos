@@ -7,7 +7,7 @@ type FirecrawlResponse<T = any> = {
 };
 
 type ScrapeOptions = {
-  formats?: ('markdown' | 'html' | 'rawHtml' | 'links')[];
+  formats?: ('markdown' | 'html' | 'rawHtml' | 'links' | 'screenshot')[];
   onlyMainContent?: boolean;
   waitFor?: number;
 };
@@ -21,6 +21,7 @@ type MapOptions = {
 export interface ScrapeResult {
   markdown?: string;
   html?: string;
+  screenshot?: string; // Base64 encoded screenshot
   metadata?: {
     title?: string;
     description?: string;

@@ -7,10 +7,15 @@ import { AnalyzerInput } from '@/components/analyzer/AnalyzerInput';
 import { BrandScorePanel } from '@/components/analyzer/BrandScorePanel';
 import { ContentSectionCard } from '@/components/analyzer/ContentSectionCard';
 import { RewritePanel } from '@/components/analyzer/RewritePanel';
+import { DNAAlignmentPanel } from '@/components/analyzer/DNAAlignmentPanel';
+import { ScreenshotPreview } from '@/components/analyzer/ScreenshotPreview';
 import { InstitutionalProfileSelector } from '@/components/InstitutionalProfileSelector';
 import { useContentDNA } from '@/hooks/useContentDNA';
 import { useInstitutionalProfiles } from '@/hooks/useInstitutionalProfiles';
+import { useFactBook } from '@/hooks/useFactBook';
+import { useStoryBank } from '@/hooks/useStoryBank';
 import { supabase } from '@/integrations/supabase/client';
+import { firecrawlApi } from '@/lib/api/firecrawl';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Search, 
@@ -21,25 +26,51 @@ import {
   CheckCircle2,
   RefreshCw,
   FileText,
-  Target
+  Target,
+  Dna,
+  Camera
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+interface DNAAlignment {
+  voiceScore: number;
+  voiceFeedback: string;
+  factScore: number;
+  factFeedback: string;
+  storyScore: number;
+  storyFeedback: string;
+  brandScore: number;
+  brandFeedback: string;
+}
+
+interface BrandVoiceCheck {
+  phrasesUsedCorrectly?: string[];
+  phrasesAvoidedIncorrectly?: string[];
+  missingKeyPhrases?: string[];
+}
+
 interface AnalysisResult {
   overallScore: number;
+  executiveSummary?: string;
+  dnaAlignment?: DNAAlignment;
+  brandVoiceCheck?: BrandVoiceCheck;
   sections: {
     id: string;
     title: string;
     content: string;
     score: number;
-    issues: { type: string; message: string; severity: 'error' | 'warning' | 'info' }[];
-    strengths: string[];
+    issues: { type: string; message: string; severity: 'error' | 'warning' | 'info'; quotedText?: string; recommendation?: string; dnaReference?: string }[];
+    strengths: { type?: string; message: string; quotedText?: string; dnaReference?: string }[] | string[];
   }[];
   summary: {
     totalIssues: number;
     totalStrengths: number;
-    topIssues: string[];
-    topStrengths: string[];
+    topIssues?: string[];
+    topStrengths?: string[];
+    criticalIssues?: string[];
+    quickWins?: string[];
+    missingFacts?: string[];
+    storyOpportunities?: string[];
   };
 }
 
@@ -52,6 +83,8 @@ export default function WebContentAnalyzerPage() {
   
   // Use Content DNA for the selected profile
   const { analysis: contentDNA, isLoading: dnaLoading } = useContentDNA({ profileId: selectedProfileId });
+  const { facts } = useFactBook({ profileId: selectedProfileId });
+  const { stories } = useStoryBank({ profileId: selectedProfileId });
   const selectedProfile = profiles?.find(p => p.id === selectedProfileId) || profiles?.[0];
   
   // Set initial profile when profiles load
@@ -63,6 +96,7 @@ export default function WebContentAnalyzerPage() {
   
   const [content, setContent] = useState('');
   const [sourceUrl, setSourceUrl] = useState('');
+  const [screenshot, setScreenshot] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
@@ -92,8 +126,20 @@ export default function WebContentAnalyzerPage() {
     setIsAnalyzing(true);
     setAnalysisResult(null);
     setShowRewrite(false);
+    setScreenshot(null);
 
     try {
+      // Fetch screenshot in parallel if URL provided
+      if (url) {
+        firecrawlApi.scrape(url, { formats: ['screenshot'] })
+          .then(res => {
+            if (res.success && res.data?.screenshot) {
+              setScreenshot(res.data.screenshot);
+            }
+          })
+          .catch(err => console.log('Screenshot capture skipped:', err));
+      }
+
       const { data, error } = await supabase.functions.invoke('analyze-web-content', {
         body: {
           content: inputContent,
@@ -101,6 +147,8 @@ export default function WebContentAnalyzerPage() {
           voiceAnalysis: contentDNA.voice_analysis,
           brandPlatform: contentDNA.brand_platform,
           profileConfig: selectedProfile?.config,
+          facts: facts?.slice(0, 20), // Send top 20 facts for context
+          stories: stories?.slice(0, 10), // Send top 10 stories for context
         },
       });
 

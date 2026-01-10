@@ -13,8 +13,8 @@ interface ContentSection {
   title: string;
   content: string;
   score: number;
-  issues: { type: string; message: string; severity: 'error' | 'warning' | 'info' }[];
-  strengths: string[];
+  issues: { type: string; message: string; severity: 'error' | 'warning' | 'info'; quotedText?: string; recommendation?: string; dnaReference?: string }[];
+  strengths: ({ type?: string; message: string; quotedText?: string; dnaReference?: string } | string)[];
 }
 
 interface ContentSectionCardProps {

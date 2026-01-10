@@ -12,13 +12,29 @@ import {
   Target
 } from 'lucide-react';
 
+interface IssueDetail {
+  type: string;
+  message: string;
+  severity: 'error' | 'warning' | 'info';
+  quotedText?: string;
+  recommendation?: string;
+  dnaReference?: string;
+}
+
+interface StrengthDetail {
+  type?: string;
+  message: string;
+  quotedText?: string;
+  dnaReference?: string;
+}
+
 interface ContentSection {
   id: string;
   title: string;
   content: string;
   score: number;
-  issues: { type: string; message: string; severity: 'error' | 'warning' | 'info' }[];
-  strengths: string[];
+  issues: (IssueDetail | { type: string; message: string; severity: 'error' | 'warning' | 'info' })[];
+  strengths: (StrengthDetail | string)[];
 }
 
 interface VoiceAnalysis {
@@ -112,26 +128,45 @@ export function BrandScorePanel({ section, voiceAnalysis }: BrandScorePanelProps
               <AlertTriangle className="w-4 h-4 text-amber-500" />
               Issues Found ({section.issues.length})
             </div>
-            <div className="max-h-[180px] overflow-y-auto space-y-2 pr-1">
-              {section.issues.map((issue, i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    "p-2 rounded-lg border text-sm",
-                    getSeverityBg(issue.severity)
-                  )}
-                >
-                  <div className="flex items-start gap-2">
-                    {getSeverityIcon(issue.severity)}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-xs">{issue.type}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {issue.message}
-                      </p>
+            <div className="max-h-[250px] overflow-y-auto space-y-2 pr-1">
+              {section.issues.map((issue, i) => {
+                const issueDetail = issue as IssueDetail;
+                return (
+                  <div
+                    key={i}
+                    className={cn(
+                      "p-2.5 rounded-lg border text-sm",
+                      getSeverityBg(issue.severity)
+                    )}
+                  >
+                    <div className="flex items-start gap-2">
+                      {getSeverityIcon(issue.severity)}
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <p className="font-medium text-xs">{issue.type}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {issue.message}
+                        </p>
+                        {issueDetail.quotedText && (
+                          <p className="text-xs italic bg-background/50 p-1.5 rounded border-l-2 border-current">
+                            "{issueDetail.quotedText}"
+                          </p>
+                        )}
+                        {issueDetail.recommendation && (
+                          <div className="text-xs mt-1 p-1.5 bg-primary/5 rounded">
+                            <span className="font-medium text-primary">Fix: </span>
+                            {issueDetail.recommendation}
+                          </div>
+                        )}
+                        {issueDetail.dnaReference && (
+                          <p className="text-[10px] text-muted-foreground">
+                            DNA: {issueDetail.dnaReference}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -143,18 +178,37 @@ export function BrandScorePanel({ section, voiceAnalysis }: BrandScorePanelProps
               <CheckCircle2 className="w-4 h-4 text-green-500" />
               Strengths ({section.strengths.length})
             </div>
-            <div className="max-h-[120px] overflow-y-auto space-y-2 pr-1">
-              {section.strengths.map((strength, i) => (
-                <div
-                  key={i}
-                  className="p-2 rounded-lg border bg-green-500/10 border-green-500/20 text-sm"
-                >
-                  <div className="flex items-start gap-2">
-                    <Sparkles className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-                    <p className="text-xs">{strength}</p>
+            <div className="max-h-[180px] overflow-y-auto space-y-2 pr-1">
+              {section.strengths.map((strength, i) => {
+                const isString = typeof strength === 'string';
+                const strengthDetail = isString ? { message: strength } : strength as StrengthDetail;
+                return (
+                  <div
+                    key={i}
+                    className="p-2.5 rounded-lg border bg-green-500/10 border-green-500/20 text-sm"
+                  >
+                    <div className="flex items-start gap-2">
+                      <Sparkles className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0 space-y-1">
+                        {strengthDetail.type && (
+                          <p className="font-medium text-xs text-green-600">{strengthDetail.type}</p>
+                        )}
+                        <p className="text-xs">{strengthDetail.message}</p>
+                        {strengthDetail.quotedText && (
+                          <p className="text-xs italic bg-background/50 p-1.5 rounded border-l-2 border-green-500">
+                            "{strengthDetail.quotedText}"
+                          </p>
+                        )}
+                        {strengthDetail.dnaReference && (
+                          <p className="text-[10px] text-muted-foreground">
+                            DNA: {strengthDetail.dnaReference}
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
