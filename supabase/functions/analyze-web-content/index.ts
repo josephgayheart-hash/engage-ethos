@@ -99,8 +99,50 @@ async function callLovableAI(messages: { role: string; content: string }[], apiK
 function extractJSON(text: string): any {
   // Try to extract JSON from the response (may be wrapped in markdown code blocks)
   const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-  const jsonText = jsonMatch ? jsonMatch[1].trim() : text.trim();
-  return JSON.parse(jsonText);
+  let jsonText = jsonMatch ? jsonMatch[1].trim() : text.trim();
+  
+  // Clean up common JSON issues from AI responses
+  // Fix unescaped newlines in strings
+  jsonText = jsonText.replace(/(?<!\\)\n(?=(?:[^"]*"[^"]*")*[^"]*"[^"]*$)/g, '\\n');
+  
+  // Fix control characters
+  jsonText = jsonText.replace(/[\x00-\x1F\x7F]/g, (char) => {
+    if (char === '\n' || char === '\r' || char === '\t') return char;
+    return '';
+  });
+  
+  try {
+    return JSON.parse(jsonText);
+  } catch (firstError) {
+    console.error('First JSON parse attempt failed:', firstError);
+    
+    // Try more aggressive cleanup
+    try {
+      // Remove any text before the first { or [
+      const startBrace = jsonText.indexOf('{');
+      const startBracket = jsonText.indexOf('[');
+      const start = startBrace === -1 ? startBracket : (startBracket === -1 ? startBrace : Math.min(startBrace, startBracket));
+      
+      if (start > 0) {
+        jsonText = jsonText.substring(start);
+      }
+      
+      // Remove any text after the last } or ]
+      const endBrace = jsonText.lastIndexOf('}');
+      const endBracket = jsonText.lastIndexOf(']');
+      const end = Math.max(endBrace, endBracket);
+      
+      if (end > 0 && end < jsonText.length - 1) {
+        jsonText = jsonText.substring(0, end + 1);
+      }
+      
+      return JSON.parse(jsonText);
+    } catch (secondError) {
+      console.error('Second JSON parse attempt failed:', secondError);
+      console.error('Raw text (first 1000 chars):', jsonText.substring(0, 1000));
+      throw new Error('Failed to parse AI response as JSON. Please try again.');
+    }
+  }
 }
 
 // Format facts for AI context
