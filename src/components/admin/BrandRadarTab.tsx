@@ -97,12 +97,6 @@ interface SalesProspect {
   discovered_at: string;
   created_by_user_id: string | null;
 }
-  notes: string | null;
-  status: string;
-  brand_launch_date: string | null;
-  discovered_at: string;
-  created_by_user_id: string | null;
-}
 
 const SUGGESTED_QUERIES = [
   "university rebrand announcement 2025",
@@ -119,7 +113,10 @@ const TIME_FILTERS = [
   { value: "qdr:w", label: "Past week" },
   { value: "qdr:m", label: "Past month" },
   { value: "qdr:m3", label: "Past 3 months" },
+  { value: "qdr:m6", label: "Past 6 months" },
   { value: "qdr:y", label: "Past year" },
+  { value: "qdr:y2", label: "Past 2 years" },
+  { value: "qdr:y3", label: "Past 3 years" },
 ];
 
 const STATUS_OPTIONS = [
