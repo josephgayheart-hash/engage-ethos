@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAgencyMode } from '@/hooks/useAgencyMode';
-import type { InstitutionalConfig } from '@/types/uplaybook';
+import type { InstitutionalConfig } from '@/types/campusvoice';
 import {
   Building2,
   Palette,

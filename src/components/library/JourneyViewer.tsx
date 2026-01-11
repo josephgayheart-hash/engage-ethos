@@ -39,7 +39,7 @@ import {
   Mic,
   Heart
 } from "lucide-react";
-import type { StrategyJourney, Channel, StrategyPhase, JourneyTouchpoint, MessageContext, InstitutionalConfig } from "@/types/uplaybook";
+import type { StrategyJourney, Channel, StrategyPhase, JourneyTouchpoint, MessageContext, InstitutionalConfig } from "@/types/campusvoice";
 
 // Metadata stored with saved journeys
 interface JourneyMetadata {

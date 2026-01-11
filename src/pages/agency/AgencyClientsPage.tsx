@@ -58,7 +58,7 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { SEOHead } from "@/components/SEOHead";
-import type { InstitutionalConfig as InstitutionalConfigType, ProfileType as ConfigProfileType } from "@/types/uplaybook";
+import type { InstitutionalConfig as InstitutionalConfigType, ProfileType as ConfigProfileType } from "@/types/campusvoice";
 
 const PROFILE_TYPE_ICONS: Record<ProfileType, React.ReactNode> = {
   university: <Building2 className="w-4 h-4" />,

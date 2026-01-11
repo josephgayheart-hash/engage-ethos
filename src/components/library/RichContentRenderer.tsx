@@ -32,7 +32,7 @@ import type {
   TalkingPointsDraft,
   NewsArticleDraft,
   CaseForCareDraft
-} from "@/types/uplaybook";
+} from "@/types/campusvoice";
 
 interface RichContentRendererProps {
   content: string;

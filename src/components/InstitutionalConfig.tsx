@@ -46,7 +46,7 @@ import {
   AlertCircle,
   Image as ImageIcon
 } from "lucide-react";
-import type { InstitutionalConfig as InstitutionalConfigType, VoiceAnalysis } from "@/types/uplaybook";
+import type { InstitutionalConfig as InstitutionalConfigType, VoiceAnalysis } from "@/types/campusvoice";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface InstitutionalConfigProps {

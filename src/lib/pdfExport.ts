@@ -1,5 +1,5 @@
 import jsPDF from "jspdf";
-import type { TalkingPointsDraft, CaseForCareDraft } from "@/types/uplaybook";
+import type { TalkingPointsDraft, CaseForCareDraft } from "@/types/campusvoice";
 
 export interface BrandingOptions {
   primaryColor?: string;

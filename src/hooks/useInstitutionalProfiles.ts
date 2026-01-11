@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import type { InstitutionalConfig } from '@/types/uplaybook';
+import type { InstitutionalConfig } from '@/types/campusvoice';
 import type { Json } from '@/integrations/supabase/types';
 
 export type ProfileType = 'university' | 'college' | 'division' | 'unit' | 'department';

@@ -73,7 +73,7 @@ import {
 } from "lucide-react";
 import { buildMessage } from "@/lib/evaluateMessage";
 import { useAuth } from "@/contexts/AuthContext";
-import type { MessageContext, BuilderResult, InstitutionalConfig, Channel, ChannelDrafts } from "@/types/uplaybook";
+import type { MessageContext, BuilderResult, InstitutionalConfig, Channel, ChannelDrafts } from "@/types/campusvoice";
 import type { Story } from "@/hooks/useStoryBank";
 import type { Fact } from "@/hooks/useFactBook";
 

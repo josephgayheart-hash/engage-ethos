@@ -26,7 +26,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuCheckboxItem,
 } from '@/components/ui/dropdown-menu';
-import type { StrategyJourney, JourneyTouchpoint, MessageContext } from '@/types/uplaybook';
+import type { StrategyJourney, JourneyTouchpoint, MessageContext } from '@/types/campusvoice';
 
 interface UniversityBranding {
   institutionName?: string;

@@ -975,7 +975,7 @@ export default function UserDetailPage() {
                           />
                           <div className="grid gap-1.5 leading-none">
                             <Label htmlFor="role-super-admin" className="text-sm font-medium cursor-pointer">
-                              UPlaybook Super Admin
+                              CampusVoice Super Admin
                             </Label>
                             <p className="text-xs text-muted-foreground">
                               Full access to all institutions and system-wide settings

@@ -26,7 +26,7 @@ import {
   X,
   Check
 } from 'lucide-react';
-import type { BrandPlatform, BrandPillar } from '@/types/uplaybook';
+import type { BrandPlatform, BrandPillar } from '@/types/campusvoice';
 
 // Selected brand elements for generation
 export interface BrandLayerSelection {

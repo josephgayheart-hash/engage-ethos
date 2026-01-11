@@ -15,7 +15,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import type { InstitutionalConfig, ProfileType } from '@/types/uplaybook';
+import type { InstitutionalConfig, ProfileType } from '@/types/campusvoice';
 import type { InstitutionalProfile } from '@/hooks/useInstitutionalProfiles';
 import {
   Building2,

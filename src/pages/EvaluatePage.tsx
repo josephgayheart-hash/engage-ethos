@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 import { ArrowLeft, ArrowRight, FileText, AlertCircle, Save, RefreshCw, CalendarIcon, Clock, Building2, Target, Users } from "lucide-react";
 import { evaluateMessage } from "@/lib/evaluateMessage";
 import { useAuth } from "@/contexts/AuthContext";
-import type { MessageContext, EvaluationResult, InstitutionalConfig } from "@/types/uplaybook";
+import type { MessageContext, EvaluationResult, InstitutionalConfig } from "@/types/campusvoice";
 
 const EvaluatePage = () => {
   const { toast } = useToast();

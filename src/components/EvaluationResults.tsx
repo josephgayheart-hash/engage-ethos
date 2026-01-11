@@ -16,7 +16,7 @@ import {
   Lightbulb
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { EvaluationResult, PillarEvaluation, Rating } from "@/types/uplaybook";
+import type { EvaluationResult, PillarEvaluation, Rating } from "@/types/campusvoice";
 
 interface EvaluationResultsProps {
   result: EvaluationResult;

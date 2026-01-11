@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Check, ExternalLink, FolderPlus, Library } from "lucide-react";
-import type { Channel } from "@/types/uplaybook";
+import type { Channel } from "@/types/campusvoice";
 
 type LibraryType = "personal" | "shared";
 

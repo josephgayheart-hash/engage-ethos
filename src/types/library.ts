@@ -1,4 +1,4 @@
-import type { Channel, AudienceType, MessageDomain, CommunicationMoment, PrimaryGoal, TonePreference, CohortContext, ChannelDrafts } from './uplaybook';
+import type { Channel, AudienceType, MessageDomain, CommunicationMoment, PrimaryGoal, TonePreference, CohortContext, ChannelDrafts } from './campusvoice';
 
 export type LibraryEntryStatus = 'draft' | 'submitted' | 'approved' | 'published';
 

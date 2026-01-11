@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import type { SharedTemplate } from "@/types/library";
-import type { InstitutionalConfig } from "@/types/uplaybook";
+import type { InstitutionalConfig } from "@/types/campusvoice";
 import { JourneyViewer, isJourneyContent, parseJourneyContent } from "./JourneyViewer";
 import { SalesforceCredentialsDialog } from "@/components/SalesforceCredentialsDialog";
 import { Copy, Download, CheckCircle, AlertTriangle, Users, Lightbulb, ShieldCheck, Edit3, Map, Cloud } from "lucide-react";

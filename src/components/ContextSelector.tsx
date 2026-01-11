@@ -22,7 +22,7 @@ import type {
   TonePreference,
   OperationMode,
   Department
-} from "@/types/uplaybook";
+} from "@/types/campusvoice";
 
 interface ContextSelectorProps {
   context: MessageContext;

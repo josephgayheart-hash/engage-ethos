@@ -7,7 +7,7 @@ import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useAuth } from "@/contexts/AuthContext";
-import type { Channel } from "@/types/uplaybook";
+import type { Channel } from "@/types/campusvoice";
 
 interface MessageActionsProps {
   content: string;

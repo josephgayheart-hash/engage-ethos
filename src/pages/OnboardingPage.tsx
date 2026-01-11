@@ -18,7 +18,7 @@ import {
   CheckCircle2
 } from "lucide-react";
 import campusvoiceLogo from "@/assets/campusvoice-logo.png";
-import type { Department, DepartmentInfo } from "@/types/uplaybook";
+import type { Department, DepartmentInfo } from "@/types/campusvoice";
 
 const departments: DepartmentInfo[] = [
   {
