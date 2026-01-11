@@ -17,7 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import { JourneyViewer, isJourneyContent, parseJourneyContent } from "@/components/library/JourneyViewer";
 import { RichContentRenderer } from "@/components/library/RichContentRenderer";
-import type { InstitutionalConfig } from "@/types/uplaybook";
+import type { InstitutionalConfig } from "@/types/campusvoice";
 import { 
   ChevronRight, 
   ArrowLeft, 

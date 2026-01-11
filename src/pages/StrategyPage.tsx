@@ -38,7 +38,7 @@ import { cn } from "@/lib/utils";
 import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target, Users, UserCheck, Mail, FileDown, MessageSquare, Globe, Phone, FileText, Search, Megaphone, Building2, FileEdit, Smartphone, LayoutTemplate, Send, Mic, Newspaper, Heart, type LucideIcon } from "lucide-react";
 import { mapMessages } from "@/lib/evaluateMessage";
 import { useAuth } from "@/contexts/AuthContext";
-import type { MessageContext, MapperResult, Channel, InstitutionalConfig } from "@/types/uplaybook";
+import type { MessageContext, MapperResult, Channel, InstitutionalConfig } from "@/types/campusvoice";
 import type { Story } from "@/hooks/useStoryBank";
 import type { Fact } from "@/hooks/useFactBook";
 

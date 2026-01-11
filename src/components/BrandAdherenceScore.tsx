@@ -18,7 +18,7 @@ import {
   Lightbulb
 } from 'lucide-react';
 import { useState } from 'react';
-import type { BrandAdherenceResult, BrandElementScore } from '@/types/uplaybook';
+import type { BrandAdherenceResult, BrandElementScore } from '@/types/campusvoice';
 
 interface BrandAdherenceScoreProps {
   adherence: BrandAdherenceResult;

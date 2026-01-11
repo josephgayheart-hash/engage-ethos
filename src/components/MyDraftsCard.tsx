@@ -27,7 +27,7 @@ import {
   Newspaper,
   Heart
 } from "lucide-react";
-import type { Channel } from "@/types/uplaybook";
+import type { Channel } from "@/types/campusvoice";
 
 const channelLabels: Record<string, string> = {
   'email': 'Email',

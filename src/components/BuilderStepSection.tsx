@@ -34,7 +34,7 @@ export function BuilderStepSection({
     <div className={cn("space-y-4", className)}>
       {/* Step Header */}
       <div className="flex items-start gap-4">
-        {/* Step Number Badge - Soft UPlaybook Brand Style */}
+        {/* Step Number Badge - Soft CampusVoice Brand Style */}
         <div className="flex-shrink-0 w-9 h-9 rounded-2xl bg-gradient-to-br from-accent/15 via-primary/10 to-accent/5 border border-accent/25 text-accent flex items-center justify-center text-sm font-semibold shadow-sm">
           {stepNumber}
         </div>

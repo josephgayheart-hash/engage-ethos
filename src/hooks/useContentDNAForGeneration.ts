@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import type { BrandPlatform } from '@/types/uplaybook';
+import type { BrandPlatform } from '@/types/campusvoice';
 import type { VoiceDimension, SectionFeedback, OverrideRule } from '@/hooks/useContentDNA';
 
 export interface DNAAdjustmentsForGeneration {

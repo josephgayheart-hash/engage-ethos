@@ -50,7 +50,7 @@ import type {
   NewsArticleDraft,
   CaseForCareDraft,
   Channel 
-} from "@/types/uplaybook";
+} from "@/types/campusvoice";
 
 interface ChannelPreviewProps {
   channel: Channel;

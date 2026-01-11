@@ -19,7 +19,7 @@ import { JourneyViewer, isJourneyContent, parseJourneyContent } from "@/componen
 import { ChannelPreview } from "@/components/ChannelPreview";
 import { openInGoogleDocs, formatForGoogleDocs } from "@/lib/googleDocsExport";
 import type { LibraryEntryStatus } from "@/types/library";
-import type { InstitutionalConfig, Channel, ChannelDrafts } from "@/types/uplaybook";
+import type { InstitutionalConfig, Channel, ChannelDrafts } from "@/types/campusvoice";
 import { useAuth } from "@/contexts/AuthContext";
 import { 
   ChevronRight, 

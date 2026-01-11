@@ -36,7 +36,7 @@ import {
   Sparkles
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import type { MessageContext, EvaluationResult } from "@/types/uplaybook";
+import type { MessageContext, EvaluationResult } from "@/types/campusvoice";
 
 const BYOCPage = () => {
   const { toast } = useToast();

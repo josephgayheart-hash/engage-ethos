@@ -43,7 +43,7 @@ import {
   XCircle,
   HelpCircle
 } from "lucide-react";
-import type { AudienceType, CommunicationMoment, MessageDomain, PrimaryGoal, TonePreference, InstitutionalConfig } from "@/types/uplaybook";
+import type { AudienceType, CommunicationMoment, MessageDomain, PrimaryGoal, TonePreference, InstitutionalConfig } from "@/types/campusvoice";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface CallScript {

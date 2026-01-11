@@ -1,7 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
-const STORAGE_KEY = 'uplaybook_last_used_profile';
+const STORAGE_KEY = 'campusvoice_last_used_profile';
+
+// Migrate old key if present
+const OLD_STORAGE_KEY = 'uplaybook_last_used_profile';
+if (typeof window !== 'undefined') {
+  const oldValue = localStorage.getItem(OLD_STORAGE_KEY);
+  if (oldValue && !localStorage.getItem(STORAGE_KEY)) {
+    localStorage.setItem(STORAGE_KEY, oldValue);
+    localStorage.removeItem(OLD_STORAGE_KEY);
+  }
+}
 
 interface LastUsedProfileData {
   tenantId: string;

@@ -27,7 +27,7 @@ import { Link } from "react-router-dom";
 import { useInstitutionalProfiles, type InstitutionalProfile, type ProfileType } from "@/hooks/useInstitutionalProfiles";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAgencyMode } from "@/hooks/useAgencyMode";
-import type { InstitutionalConfig } from "@/types/uplaybook";
+import type { InstitutionalConfig } from "@/types/campusvoice";
 
 interface InstitutionalProfileSelectorProps {
   selectedProfileId: string | null;

@@ -5,7 +5,7 @@ import type {
   BuilderResult, 
   MapperResult,
   InstitutionalConfig
-} from "@/types/uplaybook";
+} from "@/types/campusvoice";
 
 export async function evaluateMessage(
   content: string, 

@@ -55,7 +55,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
-import type { InstitutionalConfig as InstitutionalConfigType, ProfileType as ConfigProfileType } from "@/types/uplaybook";
+import type { InstitutionalConfig as InstitutionalConfigType, ProfileType as ConfigProfileType } from "@/types/campusvoice";
 
 const PROFILE_TYPE_ICONS: Record<ProfileType, React.ReactNode> = {
   university: <Building2 className="w-4 h-4" />,
