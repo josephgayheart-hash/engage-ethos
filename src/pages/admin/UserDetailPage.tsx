@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -104,7 +105,7 @@ interface ContentDNAAnalysis {
   profile_name?: string;
 }
 
-type RoleType = 'admin' | 'user' | 'approver' | 'super_admin';
+type RoleType = 'admin' | 'user' | 'approver' | 'super_admin' | 'agency_admin' | 'agency_user';
 
 export default function UserDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -927,6 +928,44 @@ export default function UserDetailPage() {
                             </p>
                           </div>
                         </div>
+
+                        <Separator className="my-2" />
+                        
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Agency Roles</p>
+
+                        <div className="flex items-start space-x-3">
+                          <Checkbox 
+                            id="role-agency-user" 
+                            checked={userRoles.includes('agency_user')} 
+                            onCheckedChange={() => toggleRole('agency_user')}
+                          />
+                          <div className="grid gap-1.5 leading-none">
+                            <Label htmlFor="role-agency-user" className="text-sm font-medium cursor-pointer">
+                              Agency User
+                            </Label>
+                            <p className="text-xs text-muted-foreground">
+                              Can create and evaluate messages for agency clients
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start space-x-3">
+                          <Checkbox 
+                            id="role-agency-admin" 
+                            checked={userRoles.includes('agency_admin')} 
+                            onCheckedChange={() => toggleRole('agency_admin')}
+                          />
+                          <div className="grid gap-1.5 leading-none">
+                            <Label htmlFor="role-agency-admin" className="text-sm font-medium cursor-pointer">
+                              Agency Admin
+                            </Label>
+                            <p className="text-xs text-muted-foreground">
+                              Full access to manage agency clients, their Content DNA, and create messages on their behalf
+                            </p>
+                          </div>
+                        </div>
+
+                        <Separator className="my-2" />
 
                         <div className="flex items-start space-x-3">
                           <Checkbox 
