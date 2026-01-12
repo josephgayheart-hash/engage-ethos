@@ -51,6 +51,8 @@ interface AuthContextType {
   isLoading: boolean;
   isAdmin: boolean;
   isSuperAdmin: boolean;
+  isAgencyAdmin: boolean;
+  isAgencyMember: boolean;
   isApprover: boolean;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -333,6 +335,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const isSuperAdmin = roles.includes('super_admin');
   const isAgencyAdmin = roles.includes('agency_admin');
+  const isAgencyMember = isAgencyAdmin || roles.includes('agency_user');
   const isAdmin = roles.includes('admin') || isAgencyAdmin || isSuperAdmin;
   const isApprover = roles.includes('approver') || roles.includes('admin') || isAgencyAdmin || isSuperAdmin;
   const role = roles.length > 0 ? roles[0] : null;
@@ -348,6 +351,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isLoading, 
       isAdmin,
       isSuperAdmin,
+      isAgencyAdmin,
+      isAgencyMember,
       isApprover,
       logout,
       refreshProfile,
