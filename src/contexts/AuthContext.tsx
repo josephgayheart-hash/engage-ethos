@@ -63,7 +63,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const IMPERSONATION_STORAGE_KEY = 'uplaybook_impersonation';
+const IMPERSONATION_STORAGE_KEY = 'campusvoice_impersonation';
 
 export function useAuth() {
   const context = useContext(AuthContext);
@@ -332,8 +332,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const isSuperAdmin = roles.includes('super_admin');
-  const isAdmin = roles.includes('admin') || isSuperAdmin;
-  const isApprover = roles.includes('approver') || roles.includes('admin') || isSuperAdmin;
+  const isAgencyAdmin = roles.includes('agency_admin');
+  const isAdmin = roles.includes('admin') || isAgencyAdmin || isSuperAdmin;
+  const isApprover = roles.includes('approver') || roles.includes('admin') || isAgencyAdmin || isSuperAdmin;
   const role = roles.length > 0 ? roles[0] : null;
 
   return (
