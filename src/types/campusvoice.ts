@@ -539,6 +539,8 @@ export interface InstitutionalConfig {
   executiveAssistantEmail?: string;
   
   // Development/Advancement Leadership
+  supportGoal?: string;            // Campaign support goal (e.g., "$50 million")
+  supportGoalDescription?: string; // Brief description of what the goal supports
   developmentDirectorName?: string;
   developmentDirectorTitle?: string;
   developmentDirectorEmail?: string;

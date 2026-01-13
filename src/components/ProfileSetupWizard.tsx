@@ -28,7 +28,8 @@ import {
   GraduationCap,
   Dna,
   Users,
-  Heart
+  Heart,
+  Target
 } from 'lucide-react';
 
 interface ProfileSetupWizardProps {
@@ -657,6 +658,44 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
               <p className="text-sm text-muted-foreground">
                 Development and advancement contacts for Case for Support documents and donor communications.
               </p>
+            </div>
+
+            {/* Support Goal - Featured Section */}
+            <div className="space-y-4 p-5 border-2 border-primary/30 rounded-lg bg-primary/5">
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Target className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-primary">Campaign Support Goal</h4>
+                  <p className="text-xs text-muted-foreground">Required for Case for Support documents</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="supportGoal" className="flex items-center gap-1">
+                    Goal Amount <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="supportGoal"
+                    placeholder="e.g., $50 million"
+                    value={config.supportGoal || ''}
+                    onChange={(e) => updateConfig({ supportGoal: e.target.value })}
+                    className="border-primary/30 focus:border-primary"
+                  />
+                  <p className="text-xs text-muted-foreground">The fundraising target for your campaign</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="supportGoalDescription">Goal Description</Label>
+                  <Input
+                    id="supportGoalDescription"
+                    placeholder="e.g., Transforming student success"
+                    value={config.supportGoalDescription || ''}
+                    onChange={(e) => updateConfig({ supportGoalDescription: e.target.value })}
+                  />
+                  <p className="text-xs text-muted-foreground">Brief description of what this goal supports</p>
+                </div>
+              </div>
             </div>
 
             {/* Development Director */}
