@@ -32,7 +32,8 @@ import {
   Briefcase,
   Building,
   Layers,
-  Heart
+  Heart,
+  Target
 } from 'lucide-react';
 
 interface SubUnitSetupWizardProps {
@@ -590,6 +591,44 @@ export function SubUnitSetupWizard({ parentProfile, onComplete, onCancel }: SubU
                     value={config.executiveAssistantEmail || ''}
                     onChange={(e) => updateConfig({ executiveAssistantEmail: e.target.value })}
                   />
+                </div>
+              </div>
+            </div>
+
+            {/* Support Goal - Featured Section */}
+            <div className="space-y-4 p-5 border-2 border-primary/30 rounded-lg bg-primary/5">
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Target className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-primary">Campaign Support Goal</h4>
+                  <p className="text-xs text-muted-foreground">Required for Case for Support documents</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="unitSupportGoal" className="flex items-center gap-1">
+                    Goal Amount <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="unitSupportGoal"
+                    placeholder="e.g., $10 million"
+                    value={config.supportGoal || ''}
+                    onChange={(e) => updateConfig({ supportGoal: e.target.value })}
+                    className="border-primary/30 focus:border-primary"
+                  />
+                  <p className="text-xs text-muted-foreground">The fundraising target for this unit</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="unitSupportGoalDescription">Goal Description</Label>
+                  <Input
+                    id="unitSupportGoalDescription"
+                    placeholder="e.g., Advancing research excellence"
+                    value={config.supportGoalDescription || ''}
+                    onChange={(e) => updateConfig({ supportGoalDescription: e.target.value })}
+                  />
+                  <p className="text-xs text-muted-foreground">Brief description of what this goal supports</p>
                 </div>
               </div>
             </div>

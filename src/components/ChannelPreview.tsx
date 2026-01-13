@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -37,7 +38,9 @@ import {
   GraduationCap,
   Building2,
   Sparkles,
-  FileDown
+  FileDown,
+  AlertCircle,
+  Settings
 } from "lucide-react";
 import type { 
   ChannelDrafts, 
@@ -1427,10 +1430,29 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
             {cfc.campaignName && (
               <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30">{cfc.campaignName}</Badge>
             )}
-            {cfc.targetAmount && (
+            {cfc.targetAmount ? (
               <Badge className="bg-white text-foreground hover:bg-white/90 font-bold">{cfc.targetAmount} Goal</Badge>
+            ) : (
+              <Badge className="bg-amber-500/90 text-white border-amber-300 hover:bg-amber-500 animate-pulse">
+                <AlertCircle className="w-3 h-3 mr-1" />
+                Add Support Goal
+              </Badge>
             )}
           </div>
+          {!cfc.targetAmount && (
+            <div className="mt-4 bg-white/10 rounded-lg p-3 backdrop-blur-sm">
+              <p className="text-xs text-white/80 flex items-center gap-2">
+                <Settings className="w-3 h-3" />
+                Set your Support Goal in{' '}
+                <Link 
+                  to="/university-settings" 
+                  className="underline hover:text-white font-medium"
+                >
+                  University Settings → Advancement
+                </Link>
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -1713,6 +1735,44 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
       {cfc.closingStatement && (
         <div className="border-t-2 border-dashed border-muted pt-6 text-center">
           <p className="text-base italic text-muted-foreground font-serif">{cfc.closingStatement}</p>
+        </div>
+      )}
+
+      {/* Missing Information Hints */}
+      {(!cfc.contactInfo || !cfc.targetAmount) && (
+        <div className="mt-6 p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+            <div className="space-y-2 text-sm">
+              <p className="font-medium text-amber-800 dark:text-amber-200">
+                Complete your profile for a polished Case for Support
+              </p>
+              <ul className="space-y-1.5 text-amber-700 dark:text-amber-300">
+                {!cfc.targetAmount && (
+                  <li className="flex items-center gap-2">
+                    <Target className="w-4 h-4" />
+                    <span>
+                      <strong>Support Goal</strong> — Add your campaign target in{' '}
+                      <Link to="/university-settings" className="underline hover:text-amber-900 dark:hover:text-amber-100 font-medium">
+                        University Settings → Advancement
+                      </Link>
+                    </span>
+                  </li>
+                )}
+                {!cfc.contactInfo && (
+                  <li className="flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    <span>
+                      <strong>Development Contact</strong> — Add advancement contact details in{' '}
+                      <Link to="/university-settings" className="underline hover:text-amber-900 dark:hover:text-amber-100 font-medium">
+                        University Settings → Advancement
+                      </Link>
+                    </span>
+                  </li>
+                )}
+              </ul>
+            </div>
+          </div>
         </div>
       )}
     </div>
