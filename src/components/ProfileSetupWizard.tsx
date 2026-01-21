@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAgencyMode } from '@/hooks/useAgencyMode';
-import type { InstitutionalConfig } from '@/types/campusvoice';
+import type { InstitutionalConfig, InstitutionType } from '@/types/campusvoice';
 import {
   Building2,
   Palette,
@@ -29,7 +30,10 @@ import {
   Dna,
   Users,
   Heart,
-  Target
+  Target,
+  Briefcase,
+  School,
+  BookOpen
 } from 'lucide-react';
 
 interface ProfileSetupWizardProps {
@@ -48,6 +52,14 @@ interface WizardStep {
 }
 
 const STEPS: WizardStep[] = [
+  {
+    id: 'type',
+    title: 'Institution Type',
+    agencyTitle: 'Client Type',
+    description: 'What type of institution is this?',
+    agencyDescription: 'What type of institution is this client?',
+    icon: <School className="w-5 h-5" />,
+  },
   {
     id: 'identity',
     title: 'Institution Identity',
@@ -252,7 +264,9 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
 
   const canProceed = () => {
     switch (currentStep) {
-      case 0: // Identity
+      case 0: // Institution Type
+        return config.institutionType;
+      case 1: // Identity
         return config.institutionName?.trim();
       default:
         return true;
@@ -261,9 +275,85 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
 
   const progress = ((currentStep + 1) / STEPS.length) * 100;
 
+  const institutionTypeOptions: { value: InstitutionType; label: string; description: string; icon: React.ReactNode }[] = [
+    {
+      value: 'four-year-university',
+      label: 'Four-Year University',
+      description: 'Research universities, liberal arts colleges, comprehensive universities',
+      icon: <GraduationCap className="w-6 h-6" />,
+    },
+    {
+      value: 'community-college',
+      label: 'Community College',
+      description: 'Two-year programs, workforce development, adult learners',
+      icon: <Users className="w-6 h-6" />,
+    },
+    {
+      value: 'technical-college',
+      label: 'Technical / Trade College',
+      description: 'Career-focused vocational and technical programs',
+      icon: <Briefcase className="w-6 h-6" />,
+    },
+    {
+      value: 'graduate-school',
+      label: 'Graduate / Professional School',
+      description: 'Law schools, medical schools, graduate programs',
+      icon: <BookOpen className="w-6 h-6" />,
+    },
+  ];
+
   const renderStepContent = () => {
     switch (currentStep) {
-      case 0: // Identity
+      case 0: // Institution Type
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <h3 className="text-lg font-semibold mb-2">
+                {isAgency ? 'What type of institution is this client?' : 'What type of institution are you?'}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                This helps us personalize your experience and show relevant playbook kits.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {institutionTypeOptions.map((option) => (
+                <Card
+                  key={option.value}
+                  className={cn(
+                    "cursor-pointer transition-all hover:shadow-md hover:border-primary/50",
+                    config.institutionType === option.value && "ring-2 ring-primary border-primary bg-primary/5"
+                  )}
+                  onClick={() => updateConfig({ institutionType: option.value })}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className={cn(
+                        "w-12 h-12 rounded-lg flex items-center justify-center shrink-0",
+                        config.institutionType === option.value 
+                          ? "bg-primary text-primary-foreground" 
+                          : "bg-muted text-muted-foreground"
+                      )}>
+                        {option.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-sm mb-1">{option.label}</h4>
+                        <p className="text-xs text-muted-foreground line-clamp-2">
+                          {option.description}
+                        </p>
+                      </div>
+                      {config.institutionType === option.value && (
+                        <Check className="w-5 h-5 text-primary shrink-0" />
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 1: // Identity
         return (
           <div className="space-y-6">
             <div className="space-y-2">

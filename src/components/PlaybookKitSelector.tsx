@@ -24,6 +24,8 @@ interface PlaybookKitSelectorProps {
   onSelectKit: (kit: PlaybookKit) => void;
   selectedKitKey?: string;
   institutionType?: string;
+  showAllKits?: boolean;
+  onToggleShowAll?: (showAll: boolean) => void;
 }
 
 const categoryIcons: Record<string, React.ElementType> = {
@@ -50,10 +52,26 @@ const categoryColors: Record<string, string> = {
 export function PlaybookKitSelector({ 
   onSelectKit, 
   selectedKitKey,
-  institutionType = 'community-college' 
+  institutionType,
+  showAllKits = false,
+  onToggleShowAll,
 }: PlaybookKitSelectorProps) {
-  const { kits, isLoading, error } = usePlaybookKits(institutionType);
+  // Map institution types to playbook kit institution_types values
+  const kitInstitutionType = institutionType === 'community-college' || institutionType === 'technical-college'
+    ? 'community-college'
+    : institutionType || 'community-college';
+    
+  const { kits: allKits, isLoading, error } = usePlaybookKits(kitInstitutionType);
   const [activeCategory, setActiveCategory] = useState<string>('all');
+  
+  // Filter kits based on institution type unless showAllKits is true
+  const kits = showAllKits 
+    ? allKits 
+    : allKits.filter(kit => 
+        !kit.institution_types || 
+        kit.institution_types.length === 0 ||
+        kit.institution_types.includes(kitInstitutionType)
+      );
 
   if (isLoading) {
     return (
@@ -89,16 +107,28 @@ export function PlaybookKitSelector({
   return (
     <Card>
       <CardHeader className="pb-3">
-        <div className="flex items-center gap-2">
-          <div className="icon-container icon-container-md bg-primary/10">
-            <BookOpen className="w-5 h-5 text-primary" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="icon-container icon-container-md bg-primary/10">
+              <BookOpen className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">Start from a Playbook</CardTitle>
+              <CardDescription>
+                Research-backed journey templates based on Lumina Foundation best practices
+              </CardDescription>
+            </div>
           </div>
-          <div>
-            <CardTitle className="text-lg">Start from a Playbook</CardTitle>
-            <CardDescription>
-              Research-backed journey templates based on Lumina Foundation best practices
-            </CardDescription>
-          </div>
+          {onToggleShowAll && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onToggleShowAll(!showAllKits)}
+              className="text-xs"
+            >
+              {showAllKits ? 'Show Relevant' : 'Show All Kits'}
+            </Button>
+          )}
         </div>
       </CardHeader>
       <CardContent>
