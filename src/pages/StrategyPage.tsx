@@ -337,7 +337,10 @@ const StrategyPage = () => {
     }
   };
 
-  const canProcess = context.audience && context.moment && selectedChannels.length > 0;
+  // When a playbook kit is selected, audience/moment are pre-configured
+  const canProcess = selectedPlaybookKit 
+    ? selectedChannels.length > 0 
+    : (context.audience && context.moment && selectedChannels.length > 0);
 
   const toggleChannel = (channel: Channel) => {
     setSelectedChannels(prev => 
