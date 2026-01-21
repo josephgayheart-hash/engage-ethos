@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Library, FolderOpen, Settings, Home, LogOut, User, CheckCircle, UserPlus, Building2, PenTool, Route, ChevronDown, Sparkles, FileEdit, Briefcase, BarChart3, Users } from "lucide-react";
+import { Library, FolderOpen, Settings, Home, LogOut, User, CheckCircle, UserPlus, Building2, PenTool, Route, ChevronDown, Sparkles, FileEdit, Briefcase, BarChart3, Users, Layers } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAgencyMode } from "@/hooks/useAgencyMode";
 import { Button } from "@/components/ui/button";
@@ -239,6 +239,13 @@ export function Header() {
                       <Link to="/admin/content-dna" className="flex items-center gap-2 cursor-pointer">
                         <Sparkles className="w-4 h-4" />
                         Content DNA Studio
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/brand-audit" className="flex items-center gap-2 cursor-pointer">
+                        <Layers className="w-4 h-4" />
+                        Brand Consistency Audit
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
