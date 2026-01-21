@@ -57,6 +57,7 @@ import EvaluateFeaturePage from "./pages/features/EvaluateFeaturePage";
 import LibraryFeaturePage from "./pages/features/LibraryFeaturePage";
 import OGPreviewPage from "./pages/OGPreviewPage";
 import WebContentAnalyzerPage from "./pages/WebContentAnalyzerPage";
+import BrandAuditPage from "./pages/BrandAuditPage";
 import ForAgenciesPage from "./pages/agency/ForAgenciesPage";
 import AgencyRequestAccessPage from "./pages/agency/AgencyRequestAccessPage";
 import AgencyOnboardingPage from "./pages/agency/AgencyOnboardingPage";
@@ -220,6 +221,7 @@ const AppRoutes = () => (
     <Route path="/benchmarks" element={<RequireAuth><PerformanceBenchmarks /></RequireAuth>} />
     <Route path="/translate" element={<RequireAuth><TranslationTool /></RequireAuth>} />
     <Route path="/web-analyzer" element={<RequireAuth><WebContentAnalyzerPage /></RequireAuth>} />
+    <Route path="/brand-audit" element={<RequireAuth><BrandAuditPage /></RequireAuth>} />
     <Route path="/settings" element={<Navigate to="/university-settings" replace />} />
     <Route path="/university-settings" element={<RequireAuth><UniversitySettingsPage /></RequireAuth>} />
     <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
