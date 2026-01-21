@@ -5,6 +5,7 @@ import { format, differenceInWeeks, addWeeks } from "date-fns";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { Header } from "@/components/Header";
+import { PlaybookKitSelector } from "@/components/PlaybookKitSelector";
 import { ContextSelector } from "@/components/ContextSelector";
 import { StrategyJourneyDisplay } from "@/components/StrategyJourney";
 import { JourneyFlowDiagram } from "@/components/JourneyFlowDiagram";
@@ -35,12 +36,13 @@ import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useToolTracking } from "@/hooks/useToolTracking";
 import { useUserDrafts } from "@/hooks/useUserDrafts";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target, Users, UserCheck, Mail, FileDown, MessageSquare, Globe, Phone, FileText, Search, Megaphone, Building2, FileEdit, Smartphone, LayoutTemplate, Send, Mic, Newspaper, Heart, type LucideIcon } from "lucide-react";
+import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target, Users, UserCheck, Mail, FileDown, MessageSquare, Globe, Phone, FileText, Search, Megaphone, Building2, FileEdit, Smartphone, LayoutTemplate, Send, Mic, Newspaper, Heart, BookOpen, type LucideIcon } from "lucide-react";
 import { mapMessages } from "@/lib/evaluateMessage";
 import { useAuth } from "@/contexts/AuthContext";
 import type { MessageContext, MapperResult, Channel, InstitutionalConfig } from "@/types/campusvoice";
 import type { Story } from "@/hooks/useStoryBank";
 import type { Fact } from "@/hooks/useFactBook";
+import type { PlaybookKit } from "@/types/playbook";
 
 const channelIcons: Record<Channel, LucideIcon> = {
   'email': Mail,
@@ -147,6 +149,9 @@ const StrategyPage = () => {
   const [editMode, setEditMode] = useState<'new' | 'edit' | 'remix'>('new');
   const [editingJourneyId, setEditingJourneyId] = useState<string | null>(null);
   const [remixedFrom, setRemixedFrom] = useState<{ title: string; id?: string; source: 'personal' | 'university' } | null>(null);
+  
+  // Playbook kit state
+  const [selectedPlaybookKit, setSelectedPlaybookKit] = useState<PlaybookKit | null>(null);
 
   // Load journey data from navigation state (for edit/remix/resume)
   useEffect(() => {
@@ -857,6 +862,28 @@ const StrategyPage = () => {
 
           {/* Library Navigation */}
           <LibraryNav mode="journeys" />
+
+          {/* Playbook Kit Selector - Start from pre-built templates */}
+          {editMode === 'new' && !mapperResult && (
+            <PlaybookKitSelector
+              onSelectKit={(kit) => {
+                setSelectedPlaybookKit(kit);
+                // Pre-populate context from kit
+                if (kit.target_audiences && kit.target_audiences.length > 0) {
+                  setContext(prev => ({ ...prev, audience: kit.target_audiences![0] as MessageContext['audience'] }));
+                }
+                if (kit.target_cohorts && kit.target_cohorts.length > 0) {
+                  setContext(prev => ({ ...prev, cohort: kit.target_cohorts![0] as MessageContext['cohort'] }));
+                }
+                toast({
+                  title: "Playbook Selected",
+                  description: `Using "${kit.name}" as your starting template.`,
+                });
+              }}
+              selectedKitKey={selectedPlaybookKit?.kit_key}
+              institutionType="community-college"
+            />
+          )}
 
           {/* Context Card */}
           <Card>
