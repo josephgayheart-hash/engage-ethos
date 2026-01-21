@@ -6,6 +6,7 @@ import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { Header } from "@/components/Header";
 import { PlaybookKitSelector } from "@/components/PlaybookKitSelector";
+import { PlaybookKitGuidance } from "@/components/PlaybookKitGuidance";
 import { ContextSelector } from "@/components/ContextSelector";
 import { StrategyJourneyDisplay } from "@/components/StrategyJourney";
 import { JourneyFlowDiagram } from "@/components/JourneyFlowDiagram";
@@ -863,26 +864,41 @@ const StrategyPage = () => {
           {/* Library Navigation */}
           <LibraryNav mode="journeys" />
 
-          {/* Playbook Kit Selector - Start from pre-built templates */}
+          {/* Playbook Kit Selector or Active Kit Guidance */}
           {editMode === 'new' && !mapperResult && (
-            <PlaybookKitSelector
-              onSelectKit={(kit) => {
-                setSelectedPlaybookKit(kit);
-                // Pre-populate context from kit
-                if (kit.target_audiences && kit.target_audiences.length > 0) {
-                  setContext(prev => ({ ...prev, audience: kit.target_audiences![0] as MessageContext['audience'] }));
-                }
-                if (kit.target_cohorts && kit.target_cohorts.length > 0) {
-                  setContext(prev => ({ ...prev, cohort: kit.target_cohorts![0] as MessageContext['cohort'] }));
-                }
-                toast({
-                  title: "Playbook Selected",
-                  description: `Using "${kit.name}" as your starting template.`,
-                });
-              }}
-              selectedKitKey={selectedPlaybookKit?.kit_key}
-              institutionType="community-college"
-            />
+            selectedPlaybookKit ? (
+              <PlaybookKitGuidance
+                kit={selectedPlaybookKit}
+                onClearKit={() => {
+                  setSelectedPlaybookKit(null);
+                  // Reset context when clearing kit
+                  setContext(prev => ({ ...prev, audience: undefined, cohort: undefined }));
+                  toast({
+                    title: "Playbook Cleared",
+                    description: "You can now configure your journey manually or select a different playbook.",
+                  });
+                }}
+              />
+            ) : (
+              <PlaybookKitSelector
+                onSelectKit={(kit) => {
+                  setSelectedPlaybookKit(kit);
+                  // Pre-populate context from kit
+                  if (kit.target_audiences && kit.target_audiences.length > 0) {
+                    setContext(prev => ({ ...prev, audience: kit.target_audiences![0] as MessageContext['audience'] }));
+                  }
+                  if (kit.target_cohorts && kit.target_cohorts.length > 0) {
+                    setContext(prev => ({ ...prev, cohort: kit.target_cohorts![0] as MessageContext['cohort'] }));
+                  }
+                  toast({
+                    title: "Playbook Selected",
+                    description: `Using "${kit.name}" as your starting template. Scroll down to customize timeline and channels.`,
+                  });
+                }}
+                selectedKitKey={selectedPlaybookKit?.kit_key}
+                institutionType="community-college"
+              />
+            )
           )}
 
           {/* Context Card */}
@@ -973,11 +989,24 @@ const StrategyPage = () => {
               <BuilderStepSection
                 stepNumber={4}
                 title="Define Your Audience"
-                description="Who are you communicating with and what's the situation?"
+                description={selectedPlaybookKit 
+                  ? "Pre-configured by your selected playbook. Clear the playbook above to customize."
+                  : "Who are you communicating with and what's the situation?"
+                }
                 helpText="Select the primary audience type, their specific cohort characteristics, and the communication moment. These selections help the AI generate contextually appropriate touchpoints throughout the journey."
                 icon={<Users className="w-4 h-4" />}
               >
-                <ContextSelector context={context} onChange={setContext} mode="mapper" />
+                <div className={cn(
+                  "transition-all",
+                  selectedPlaybookKit && "opacity-50 pointer-events-none"
+                )}>
+                  <ContextSelector context={context} onChange={setContext} mode="mapper" />
+                  {selectedPlaybookKit && (
+                    <p className="text-xs text-muted-foreground mt-2 italic">
+                      Audience settings are pre-configured by the "{selectedPlaybookKit.name}" playbook.
+                    </p>
+                  )}
+                </div>
               </BuilderStepSection>
 
               {/* Step 5: Channel Selection */}
