@@ -111,6 +111,135 @@ export type Database = {
           },
         ]
       }
+      brand_audit_reports: {
+        Row: {
+          created_at: string | null
+          id: string
+          overall_consistency_score: number | null
+          profile_id: string | null
+          recommendations: Json | null
+          report_date: string | null
+          tenant_id: string
+          top_issues: Json | null
+          touchpoint_breakdown: Json | null
+          touchpoints_audited: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          overall_consistency_score?: number | null
+          profile_id?: string | null
+          recommendations?: Json | null
+          report_date?: string | null
+          tenant_id: string
+          top_issues?: Json | null
+          touchpoint_breakdown?: Json | null
+          touchpoints_audited?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          overall_consistency_score?: number | null
+          profile_id?: string | null
+          recommendations?: Json | null
+          report_date?: string | null
+          tenant_id?: string
+          top_issues?: Json | null
+          touchpoint_breakdown?: Json | null
+          touchpoints_audited?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_audit_reports_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "institutional_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brand_audit_reports_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      brand_audit_touchpoints: {
+        Row: {
+          analysis_result: Json | null
+          brand_score: number | null
+          content_sample: string | null
+          created_at: string | null
+          id: string
+          profile_id: string | null
+          remediation_notes: string | null
+          status: string | null
+          tenant_id: string
+          terminology_issues: Json | null
+          touchpoint_category: string | null
+          touchpoint_name: string
+          touchpoint_type: string
+          updated_at: string | null
+          user_id: string
+          voice_score: number | null
+        }
+        Insert: {
+          analysis_result?: Json | null
+          brand_score?: number | null
+          content_sample?: string | null
+          created_at?: string | null
+          id?: string
+          profile_id?: string | null
+          remediation_notes?: string | null
+          status?: string | null
+          tenant_id: string
+          terminology_issues?: Json | null
+          touchpoint_category?: string | null
+          touchpoint_name: string
+          touchpoint_type: string
+          updated_at?: string | null
+          user_id: string
+          voice_score?: number | null
+        }
+        Update: {
+          analysis_result?: Json | null
+          brand_score?: number | null
+          content_sample?: string | null
+          created_at?: string | null
+          id?: string
+          profile_id?: string | null
+          remediation_notes?: string | null
+          status?: string | null
+          tenant_id?: string
+          terminology_issues?: Json | null
+          touchpoint_category?: string | null
+          touchpoint_name?: string
+          touchpoint_type?: string
+          updated_at?: string | null
+          user_id?: string
+          voice_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_audit_touchpoints_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "institutional_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brand_audit_touchpoints_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       byoc_uploads: {
         Row: {
           content_text: string | null
@@ -987,6 +1116,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      playbook_kits: {
+        Row: {
+          best_practices: string[] | null
+          category: string
+          created_at: string | null
+          description: string | null
+          id: string
+          institution_types: string[] | null
+          is_active: boolean | null
+          journey_template: Json | null
+          kit_key: string
+          message_templates: Json | null
+          name: string
+          research_notes: string | null
+          target_audiences: string[] | null
+          target_cohorts: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          best_practices?: string[] | null
+          category: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          institution_types?: string[] | null
+          is_active?: boolean | null
+          journey_template?: Json | null
+          kit_key: string
+          message_templates?: Json | null
+          name: string
+          research_notes?: string | null
+          target_audiences?: string[] | null
+          target_cohorts?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          best_practices?: string[] | null
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          institution_types?: string[] | null
+          is_active?: boolean | null
+          journey_template?: Json | null
+          kit_key?: string
+          message_templates?: Json | null
+          name?: string
+          research_notes?: string | null
+          target_audiences?: string[] | null
+          target_cohorts?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       playground_conversations: {
         Row: {
