@@ -8,7 +8,8 @@ import {
   Library,
   ChevronRight,
   FileEdit,
-  Sparkles
+  Sparkles,
+  Layers
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useUserDrafts } from '@/hooks/useUserDrafts';
@@ -23,6 +24,7 @@ const mainNavItems = [
   { path: '/strategy', label: 'Journey Designer', icon: Route },
   { path: '/evaluate', label: 'Evaluator', icon: ClipboardCheck },
   { path: '/library', label: 'My Library', icon: Library },
+  { path: '/brand-audit', label: 'Brand Audit', icon: Layers },
 ];
 
 export function AppNavigation({ className }: AppNavigationProps) {
