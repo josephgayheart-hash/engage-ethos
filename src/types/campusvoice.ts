@@ -512,7 +512,17 @@ export interface MapperResult {
 
 export type ProfileType = 'university' | 'college' | 'division' | 'unit' | 'department';
 
+// Institution classification for filtering playbook kits and contextualizing UI
+export type InstitutionType = 
+  | 'four-year-university'
+  | 'community-college'
+  | 'technical-college'
+  | 'graduate-school'
+  | 'professional-school';
+
 export interface InstitutionalConfig {
+  // Institution Classification
+  institutionType?: InstitutionType;
   // Visual Branding
   logoUrl?: string;              // Profile-specific logo
   primaryColor?: string;         // Primary brand color (hex)

@@ -153,6 +153,7 @@ const StrategyPage = () => {
   
   // Playbook kit state
   const [selectedPlaybookKit, setSelectedPlaybookKit] = useState<PlaybookKit | null>(null);
+  const [showAllPlaybookKits, setShowAllPlaybookKits] = useState(false);
 
   // Load journey data from navigation state (for edit/remix/resume)
   useEffect(() => {
@@ -899,7 +900,9 @@ const StrategyPage = () => {
                   });
                 }}
                 selectedKitKey={selectedPlaybookKit?.kit_key}
-                institutionType="community-college"
+                institutionType={institutionalConfig?.institutionType}
+                showAllKits={showAllPlaybookKits}
+                onToggleShowAll={setShowAllPlaybookKits}
               />
             )
           )}
