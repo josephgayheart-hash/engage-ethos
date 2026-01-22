@@ -114,57 +114,67 @@ export function WorkflowHero({ context }: WorkflowHeroProps) {
               )}
             </div>
 
-            {/* Stats Row */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 animate-fade-in" style={{ animationDelay: '200ms' }}>
-              {/* Personal Stats */}
-              <StatCard 
-                icon={FileText}
-                label="Drafts"
-                value={personalStats.draftsInProgress}
-                color="primary"
-              />
-              <StatCard 
-                icon={Map}
-                label="Journeys"
-                value={personalStats.journeysDesigned}
-                color="consensus"
-              />
-              <StatCard 
-                icon={PenTool}
-                label="Messages"
-                value={personalStats.messagesCreated}
-                color="cognitive"
-              />
-
-              {/* Admin Stats */}
-              {isAdmin && institutionalStats && (
-                <StatCard 
-                  icon={TrendingUp}
-                  label="Health Score"
-                  value={`${institutionalStats.healthScore}%`}
-                  color="accent"
-                  subtitle={`${institutionalStats.activeUsers}/${institutionalStats.totalUsers} active`}
-                />
+            {/* Actionable Stats Row - only meaningful, clickable items */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 animate-fade-in" style={{ animationDelay: '200ms' }}>
+              {/* Drafts - links to library */}
+              {personalStats.draftsInProgress > 0 && (
+                <Link to="/library" className="group">
+                  <ActionableStatCard 
+                    icon={FileText}
+                    label="Drafts in Progress"
+                    value={personalStats.draftsInProgress}
+                    color="primary"
+                    actionHint="View all →"
+                  />
+                </Link>
               )}
 
-              {/* Platform Insight */}
-              {platformInsight && (
-                <div className="col-span-2 md:col-span-1 lg:col-span-1 bg-card/60 backdrop-blur-sm border border-border/50 rounded-lg p-3 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center shrink-0">
-                    <Lightbulb className="w-4 h-4 text-secondary" />
-                  </div>
-                  <p className="text-xs text-muted-foreground line-clamp-2">
-                    {platformInsight.message}
-                  </p>
-                </div>
+              {/* Messages Created - links to library */}
+              {personalStats.messagesCreated > 0 && (
+                <Link to="/library" className="group">
+                  <ActionableStatCard 
+                    icon={PenTool}
+                    label="Messages Created"
+                    value={personalStats.messagesCreated}
+                    color="cognitive"
+                    actionHint="View library →"
+                  />
+                </Link>
+              )}
+
+              {/* Journeys - links to strategy */}
+              {personalStats.journeysDesigned > 0 && (
+                <Link to="/strategy" className="group">
+                  <ActionableStatCard 
+                    icon={Map}
+                    label="Journeys Designed"
+                    value={personalStats.journeysDesigned}
+                    color="consensus"
+                    actionHint="Design more →"
+                  />
+                </Link>
+              )}
+
+              {/* Admin: Team Activity - links to admin users */}
+              {isAdmin && institutionalStats && institutionalStats.activeUsers > 0 && (
+                <Link to="/admin/users" className="group">
+                  <ActionableStatCard 
+                    icon={Users}
+                    label="Active Team Members"
+                    value={`${institutionalStats.activeUsers}/${institutionalStats.totalUsers}`}
+                    color="accent"
+                    actionHint="Manage team →"
+                  />
+                </Link>
               )}
             </div>
 
-            {/* Last Active */}
-            {personalStats.lastActiveDate && (
-              <p className="text-xs text-muted-foreground/70 mt-3 text-center md:text-left animate-fade-in" style={{ animationDelay: '300ms' }}>
-                Last active: {personalStats.lastToolUsed} • {formatDistanceToNow(personalStats.lastActiveDate, { addSuffix: true })}
-              </p>
+            {/* Platform Insight as subtle tip */}
+            {platformInsight && (
+              <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground/80 animate-fade-in" style={{ animationDelay: '300ms' }}>
+                <Lightbulb className="w-3.5 h-3.5 text-secondary/70" />
+                <span>{platformInsight.message}</span>
+              </div>
             )}
           </div>
         </div>
@@ -189,15 +199,15 @@ export function WorkflowHero({ context }: WorkflowHeroProps) {
   );
 }
 
-interface StatCardProps {
+interface ActionableStatCardProps {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   value: string | number;
   color: 'primary' | 'cognitive' | 'consensus' | 'accent' | 'authority';
-  subtitle?: string;
+  actionHint: string;
 }
 
-function StatCard({ icon: Icon, label, value, color, subtitle }: StatCardProps) {
+function ActionableStatCard({ icon: Icon, label, value, color, actionHint }: ActionableStatCardProps) {
   const colorClasses = {
     primary: 'bg-primary/10 text-primary',
     cognitive: 'bg-pillar-cognitive/10 text-pillar-cognitive',
@@ -207,14 +217,14 @@ function StatCard({ icon: Icon, label, value, color, subtitle }: StatCardProps) 
   };
 
   return (
-    <div className="bg-card/60 backdrop-blur-sm border border-border/50 rounded-lg p-3 flex items-center gap-3">
+    <div className="bg-card/60 backdrop-blur-sm border border-border/50 rounded-lg p-3 flex items-center gap-3 transition-all group-hover:border-primary/30 group-hover:shadow-sm">
       <div className={`w-8 h-8 rounded-lg ${colorClasses[color]} flex items-center justify-center shrink-0`}>
         <Icon className="w-4 h-4" />
       </div>
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <p className="text-lg font-bold text-foreground leading-none">{value}</p>
         <p className="text-xs text-muted-foreground truncate">{label}</p>
-        {subtitle && <p className="text-[10px] text-muted-foreground/70 truncate">{subtitle}</p>}
+        <p className="text-[10px] text-primary/70 opacity-0 group-hover:opacity-100 transition-opacity truncate">{actionHint}</p>
       </div>
     </div>
   );
