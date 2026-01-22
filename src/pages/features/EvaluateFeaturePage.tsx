@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import campusvoiceLogo from "@/assets/campusvoice-logo.png";
 import { FeatureNavigation } from "@/components/FeatureNavigation";
-import { SEOHead } from "@/components/SEOHead";
+import { SEOHead, getSoftwareApplicationSchema, getWebPageSchema } from "@/components/SEOHead";
 import { FeatureBreadcrumbs } from "@/components/FeatureBreadcrumbs";
 import { MobileNav } from "@/components/MobileNav";
 
@@ -98,6 +98,23 @@ export default function EvaluateFeaturePage() {
         title="Message Evaluator - Five-Pillar Analysis | CampusVoice.AI"
         description="Score your messages against five persuasion pillars: Authority, Relevance, Emotional Appeal, Clarity, and Social Proof. AI-powered feedback for higher education."
         keywords={['message evaluation', 'persuasion scoring', 'content analysis', 'higher education copywriting', 'brand alignment']}
+        jsonLd={[
+          getWebPageSchema(
+            'Message Evaluator',
+            'Five-pillar persuasion analysis for higher education communications',
+            'https://engage-ethos.lovable.app/features/evaluate'
+          ),
+          getSoftwareApplicationSchema(
+            'Message Evaluator',
+            'AI-powered scoring against five persuasion pillars: Authority, Relevance, Emotional Appeal, Clarity, and Social Proof.',
+            ['Authority Scoring', 'Relevance Analysis', 'Emotional Appeal Metrics', 'Clarity Assessment', 'Social Proof Detection']
+          )
+        ]}
+        faqItems={[
+          { question: 'What are the five persuasion pillars?', answer: 'The five pillars are Authority (credibility), Relevance (audience fit), Emotional Appeal (connection), Clarity (readability), and Social Proof (validation through others).' },
+          { question: 'How is my message scored?', answer: 'Each pillar receives a score from 0-100 based on AI analysis, with specific feedback on how to improve each dimension.' },
+          { question: 'Can I evaluate any type of content?', answer: 'Yes, the evaluator works with emails, landing pages, social posts, speeches, and any text-based communication.' }
+        ]}
       />
       
       {/* Navigation */}

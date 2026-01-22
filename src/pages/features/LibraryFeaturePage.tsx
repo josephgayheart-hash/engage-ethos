@@ -71,6 +71,29 @@ export default function LibraryFeaturePage() {
         title="University Library - Content Governance | CampusVoice.AI"
         description="Two-tiered content library with approval workflows. Personal drafts for experimentation, shared templates for brand-approved messaging."
         keywords={['content library', 'brand governance', 'approval workflow', 'higher education templates', 'message templates']}
+        jsonLd={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'WebPage',
+            name: 'University Library',
+            description: 'Content governance and approval workflows for higher education',
+            url: 'https://engage-ethos.lovable.app/features/library'
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'SoftwareApplication',
+            name: 'University Library',
+            description: 'Two-tiered content library with approval workflows for brand-approved messaging.',
+            applicationCategory: 'BusinessApplication',
+            operatingSystem: 'Web',
+            featureList: ['Personal Library', 'University Library', 'Approval Workflows', 'Template Management', 'Brand Governance']
+          }
+        ]}
+        faqItems={[
+          { question: 'What is the difference between personal and university libraries?', answer: 'Personal libraries are private spaces for drafts and experimentation. University libraries contain brand-approved templates that have gone through the approval workflow.' },
+          { question: 'How does the approval workflow work?', answer: 'Users submit content for review, admins can approve or request changes, and approved content becomes available in the university library for all team members.' },
+          { question: 'Can I filter library content?', answer: 'Yes, you can filter by channel, audience, journey stage, and other metadata to quickly find relevant templates.' }
+        ]}
       />
       
       {/* Navigation */}

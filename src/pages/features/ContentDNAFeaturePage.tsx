@@ -23,7 +23,7 @@ import {
 import campusvoiceLogo from "@/assets/campusvoice-logo.png";
 import { FeatureNavigation } from "@/components/FeatureNavigation";
 import DNATuningDiagram from "@/components/DNATuningDiagram";
-import { SEOHead } from "@/components/SEOHead";
+import { SEOHead, getSoftwareApplicationSchema, getWebPageSchema } from "@/components/SEOHead";
 import { FeatureBreadcrumbs } from "@/components/FeatureBreadcrumbs";
 import { MobileNav } from "@/components/MobileNav";
 import { MultiLevelProfileShowcase } from "@/components/MultiLevelProfileShowcase";
@@ -82,6 +82,23 @@ export default function ContentDNAFeaturePage() {
         title="Content DNA Studio - AI Voice Analysis | CampusVoice.AI"
         description="Upload content samples or scrape your website to build your institution's unique Content DNA. AI-powered voice analysis for consistent, on-brand messaging."
         keywords={['content DNA', 'voice analysis', 'AI brand voice', 'higher education messaging', 'institutional voice']}
+        jsonLd={[
+          getWebPageSchema(
+            'Content DNA Studio',
+            'AI-powered voice analysis for higher education institutions',
+            'https://engage-ethos.lovable.app/features/content-dna'
+          ),
+          getSoftwareApplicationSchema(
+            'Content DNA Studio',
+            'Upload content samples or scrape your website to build your institution\'s unique Content DNA.',
+            ['Voice Analysis', 'Web Content Import', 'Brand Platform Integration', 'Profile-Specific DNA']
+          )
+        ]}
+        faqItems={[
+          { question: 'What is Content DNA?', answer: 'Content DNA is an AI-powered analysis of your institution\'s unique communication style, extracted from your existing content samples and website.' },
+          { question: 'What file types can I upload?', answer: 'Content DNA Studio supports PDF, Word documents, and plain text files for voice analysis.' },
+          { question: 'Can I import content from my website?', answer: 'Yes, our web crawl feature can automatically extract and analyze content from your institution\'s website.' }
+        ]}
       />
       
       {/* Navigation */}
