@@ -12,6 +12,7 @@ import { useAgencyMode } from "@/hooks/useAgencyMode";
 import { supabase } from "@/integrations/supabase/client";
 import { ResearchFoundation } from "@/components/ResearchFoundation";
 import { MyDraftsCard } from "@/components/MyDraftsCard";
+import { DashboardHero } from "@/components/dashboard";
 import { 
   Shield, 
   Brain, 
@@ -157,53 +158,8 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      {/* Hero Section - Matching Landing Page Aesthetic */}
-      <section className="relative overflow-hidden">
-        {/* Soft gradient background like landing page */}
-        <div className="absolute inset-0 bg-zone-hero" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(200_70%_90%_/_0.3),_transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_hsl(173_58%_85%_/_0.2),_transparent_50%)]" />
-        
-        {/* Subtle lens flares */}
-        <div className="absolute top-12 right-[15%] w-24 h-24 bg-[hsl(270_70%_60%_/_0.1)] rounded-full blur-2xl" />
-        <div className="absolute bottom-8 left-[10%] w-32 h-32 bg-[hsl(82_85%_55%_/_0.08)] rounded-full blur-3xl" />
-        
-        <div className="relative py-10 md:py-12">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center">
-              <div className="mb-3 animate-fade-in">
-                <Badge className="bg-[hsl(200_100%_50%_/_0.15)] text-[hsl(200_100%_40%)] border-[hsl(200_100%_50%_/_0.3)] hover:bg-[hsl(200_100%_50%_/_0.2)]">
-                  Beta Release — We welcome your feedback
-                </Badge>
-              </div>
-              <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-2 animate-fade-in">
-                <span className="text-[hsl(82_85%_45%)]">Plan.</span>{' '}
-                <span className="text-[hsl(270_70%_55%)]">Strategize.</span>{' '}
-                <span className="text-[hsl(200_100%_45%)]">Execute.</span>
-              </h1>
-              <p className="text-base text-muted-foreground animate-fade-in" style={{ animationDelay: '100ms' }}>
-                Your digital playbook for higher ed. Craft meaningful, research-driven, brand-informed messaging at scale.
-              </p>
-            </div>
-          </div>
-        </div>
-        
-        {/* Subtle wave divider */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg 
-            viewBox="0 0 1440 60" 
-            fill="none" 
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-full h-auto"
-            preserveAspectRatio="none"
-          >
-            <path 
-              d="M0 60L60 52C120 44 240 28 360 24C480 20 600 28 720 32C840 36 960 36 1080 32C1200 28 1320 20 1380 16L1440 12V60H1380C1320 60 1200 60 1080 60C960 60 840 60 720 60C600 60 480 60 360 60C240 60 120 60 60 60H0Z" 
-              fill="hsl(var(--background))"
-            />
-          </svg>
-        </div>
-      </section>
+      {/* Dynamic Hero Section - Personalized based on user state */}
+      <DashboardHero />
 
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto space-y-10">
