@@ -192,13 +192,15 @@ export default function QADiagnosticsPage() {
         profilesResult,
         rolesResult,
         configResult,
-        auditResult
+        auditResult,
+        feedbackResult
       ] = await Promise.all([
         supabase.from('tenants').select('id, institution_name').limit(1),
         supabase.from('profiles').select('id, tenant_id, status').limit(1),
         supabase.from('user_roles').select('id, user_id, role, tenant_id').limit(1),
         supabase.from('institutional_config').select('id, tenant_id').limit(1),
         supabase.from('audit_log').select('id, tenant_id').limit(1),
+        supabase.from('beta_feedback').select('id', { count: 'exact', head: true }),
       ]);
 
       // Simulate test execution with actual checks
@@ -270,8 +272,15 @@ export default function QADiagnosticsPage() {
             message = 'Beta messaging implemented';
           }
           if (test.id === 'br-5') {
-            status = 'warning';
-            message = 'Feedback mechanism recommended for beta';
+            const feedbackCount = feedbackResult.count ?? 0;
+            const feedbackTableAccessible = !feedbackResult.error;
+            if (feedbackTableAccessible) {
+              status = 'pass';
+              message = `Feedback mechanism active (beta_feedback table accessible, ${feedbackCount} submissions)`;
+            } else {
+              status = 'fail';
+              message = `Feedback table error: ${feedbackResult.error?.message}`;
+            }
           }
 
           // Database integrity tests
