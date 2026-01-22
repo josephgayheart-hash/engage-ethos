@@ -175,6 +175,29 @@ export default function JourneyDesignerFeaturePage() {
         title="Journey Flow Builder - Communication Planning | CampusVoice.AI"
         description="Map multi-channel communication strategies with duration, intensity, and ramp-up controls. Visual journey planning for higher education enrollment."
         keywords={['journey planning', 'communication cadence', 'enrollment funnel', 'student journey', 'higher ed marketing']}
+        jsonLd={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'WebPage',
+            name: 'Journey Flow Builder',
+            description: 'Visual journey planning for higher education enrollment',
+            url: 'https://engage-ethos.lovable.app/features/journey-designer'
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'SoftwareApplication',
+            name: 'Journey Flow Builder',
+            description: 'Map multi-channel communication strategies with duration, intensity, and ramp-up controls.',
+            applicationCategory: 'BusinessApplication',
+            operatingSystem: 'Web',
+            featureList: ['Visual Flow Designer', 'Multi-Channel Orchestration', 'Cadence Controls', 'Duration Planning', 'Intensity Settings']
+          }
+        ]}
+        faqItems={[
+          { question: 'What is a communication journey?', answer: 'A communication journey is a planned sequence of touchpoints across multiple channels designed to guide students through enrollment or engagement goals.' },
+          { question: 'Can I control message frequency?', answer: 'Yes, the Journey Builder includes cadence controls for duration, intensity, and ramp-up patterns to optimize engagement without overwhelming recipients.' },
+          { question: 'What channels can I include in a journey?', answer: 'Journeys support email, SMS, phone calls, direct mail, and digital ads, all coordinated in a visual timeline.' }
+        ]}
       />
       
       {/* Navigation */}

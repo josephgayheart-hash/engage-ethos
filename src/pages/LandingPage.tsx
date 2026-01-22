@@ -20,8 +20,36 @@ import {
 } from 'lucide-react';
 import campusvoiceLogo from '@/assets/campusvoice-logo-new.png';
 import HowItWorksSection from '@/components/landing/HowItWorksSection';
-import { SEOHead } from '@/components/SEOHead';
+import { SEOHead, getOrganizationSchema, getSoftwareApplicationSchema } from '@/components/SEOHead';
 import { RequestDemoDialog } from '@/components/landing/RequestDemoDialog';
+
+// JSON-LD schemas for landing page
+const landingPageSchemas = [
+  getOrganizationSchema(),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'CampusVoice.AI',
+    url: 'https://engage-ethos.lovable.app',
+    description: 'Strategic Messaging Intelligence for Higher Education',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: 'https://engage-ethos.lovable.app/search?q={search_term_string}',
+      'query-input': 'required name=search_term_string'
+    }
+  },
+  getSoftwareApplicationSchema(
+    'CampusVoice.AI',
+    'AI-powered strategic messaging intelligence platform for higher education. Plan, strategize, and execute brand-aligned communications at scale.',
+    [
+      'AI Message Builder',
+      'Content DNA Studio',
+      'Journey Flow Planner',
+      'Message Evaluator',
+      'University Library'
+    ]
+  )
+];
 
 const features = [
   {
@@ -106,6 +134,7 @@ export default function LandingPage() {
         title="CampusVoice.AI - Strategic Messaging Intelligence for Higher Education"
         description="Plan, strategize, and execute brand-aligned communications at scale. Research-driven messaging intelligence built for higher education."
         keywords={['higher education communications', 'enrollment marketing', 'brand messaging AI', 'university marketing', 'college admissions']}
+        jsonLd={landingPageSchemas}
       />
       {/* Hero Section */}
       <header className="relative overflow-hidden">

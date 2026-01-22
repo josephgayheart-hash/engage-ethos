@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import campusvoiceLogo from "@/assets/campusvoice-logo.png";
 import { FeatureNavigation } from "@/components/FeatureNavigation";
-import { SEOHead } from "@/components/SEOHead";
+import { SEOHead, getSoftwareApplicationSchema, getWebPageSchema } from "@/components/SEOHead";
 import { FeatureBreadcrumbs } from "@/components/FeatureBreadcrumbs";
 import { MobileNav } from "@/components/MobileNav";
 import { BuilderStepsShowcase } from "@/components/BuilderStepsShowcase";
@@ -82,6 +82,23 @@ export default function MessageBuilderFeaturePage() {
         title="AI Message Builder - Multi-Channel Content | CampusVoice.AI"
         description="Generate brand-aligned content across 8 channels including email, SMS, landing pages, and call scripts. AI-powered messaging for higher education."
         keywords={['AI message builder', 'higher education marketing', 'multi-channel messaging', 'enrollment communications']}
+        jsonLd={[
+          getWebPageSchema(
+            'AI Message Builder',
+            'Multi-channel content generation for higher education',
+            'https://engage-ethos.lovable.app/features/message-builder'
+          ),
+          getSoftwareApplicationSchema(
+            'AI Message Builder',
+            'Generate brand-aligned content across 9 channels including email, SMS, landing pages, and call scripts.',
+            ['Email', 'SMS/Text', 'Landing Pages', 'Call Scripts', 'Search Ads', 'Social Ads', 'Direct Mail', 'Talking Points', 'News Articles']
+          )
+        ]}
+        faqItems={[
+          { question: 'How many channels does the Message Builder support?', answer: 'The Message Builder supports 9 channels: Email, SMS/Text, Landing Pages, Call Scripts, Search Ads, Social Ads, Direct Mail, Talking Points, and News Articles.' },
+          { question: 'Can I customize messages for different audiences?', answer: 'Yes, the builder supports 12 audience types from prospective students to donors and policy makers, with context-aware messaging for each.' },
+          { question: 'Is the content aligned with my brand?', answer: 'Every message is generated using your Content DNA and brand platform, ensuring consistent voice and messaging.' }
+        ]}
       />
       
       {/* Navigation */}
