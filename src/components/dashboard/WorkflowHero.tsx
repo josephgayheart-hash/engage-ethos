@@ -116,17 +116,17 @@ export function WorkflowHero({ context }: WorkflowHeroProps) {
 
             {/* Actionable Stats Row - only meaningful, clickable items */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 animate-fade-in" style={{ animationDelay: '200ms' }}>
-              {/* Drafts - links to library */}
+              {/* Drafts - scrolls to drafts section on dashboard */}
               {personalStats.draftsInProgress > 0 && (
-                <Link to="/library" className="group">
+                <a href="#my-drafts" className="group">
                   <ActionableStatCard 
                     icon={FileText}
                     label="Drafts in Progress"
                     value={personalStats.draftsInProgress}
                     color="primary"
-                    actionHint="View all →"
+                    actionHint="View drafts →"
                   />
-                </Link>
+                </a>
               )}
 
               {/* Messages Created - links to library */}

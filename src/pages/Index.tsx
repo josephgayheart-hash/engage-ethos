@@ -400,7 +400,7 @@ const Index = () => {
           </section>
 
           {/* My Drafts Section */}
-          <section>
+          <section id="my-drafts">
             <MyDraftsCard />
           </section>
 
