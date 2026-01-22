@@ -63,7 +63,7 @@ import AgencyRequestAccessPage from "./pages/agency/AgencyRequestAccessPage";
 import AgencyOnboardingPage from "./pages/agency/AgencyOnboardingPage";
 import AgencyDashboardPage from "./pages/agency/AgencyDashboardPage";
 import AgencyClientsPage from "./pages/agency/AgencyClientsPage";
-
+import UniversityDashboardPage from "./pages/UniversityDashboardPage";
 const queryClient = new QueryClient();
 
 // Component to track page views
@@ -252,6 +252,7 @@ const AppRoutes = () => (
     <Route path="/admin/console" element={<RequireAuth><RequireAdmin><AdminConsolePage /></RequireAdmin></RequireAuth>} />
     <Route path="/admin/users" element={<RequireAuth><RequireAdmin><AdminUsersPage /></RequireAdmin></RequireAuth>} />
     <Route path="/admin/content-dna" element={<RequireAuth><ContentDNAPage /></RequireAuth>} />
+    <Route path="/institution-dashboard" element={<RequireAuth><RequireAdmin><UniversityDashboardPage /></RequireAdmin></RequireAuth>} />
     
     {/* Catch-all */}
     <Route path="*" element={<NotFound />} />
