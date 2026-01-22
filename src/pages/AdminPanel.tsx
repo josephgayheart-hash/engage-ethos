@@ -39,6 +39,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { SendEmailDialog } from "@/components/admin/SendEmailDialog";
 import { EmailTemplatesTab } from "@/components/admin/EmailTemplatesTab";
 import { BrandRadarTab } from "@/components/admin/BrandRadarTab";
+import { useAdminAnalytics } from "@/hooks/useAdminAnalytics";
+import {
+  AnalyticsKPICards,
+  UsageTrendChart,
+  EngagementFunnelCard,
+  FeatureAdoptionCard,
+  TenantHealthTable,
+  AlertsInsightsCard,
+  ToolUsageBreakdownCard
+} from "@/components/admin/analytics";
 import { 
   ArrowLeft,
   Users, 
@@ -83,6 +93,7 @@ import {
   Radar,
   Briefcase,
   Filter,
+  LayoutDashboard,
 } from "lucide-react";
 
 // Types
@@ -206,7 +217,7 @@ const AdminPanel = () => {
   const { templates, clearAllTemplates, resetToDefaults } = useSharedLibrary();
   const { messages, clearAllMessages } = useMessageLibrary();
   
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("command-center");
   const [users, setUsers] = useState<RealUser[]>([]);
   const [tenants, setTenants] = useState<TenantWithStats[]>([]);
   const [institutionalProfiles, setInstitutionalProfiles] = useState<InstitutionalProfile[]>([]);
@@ -223,6 +234,9 @@ const AdminPanel = () => {
   const [sendEmailOpen, setSendEmailOpen] = useState(false);
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
   const [tenantTypeFilter, setTenantTypeFilter] = useState<'all' | 'university' | 'agency'>('all');
+
+  // Analytics hook for new Command Center
+  const { data: analytics, isLoading: analyticsLoading, refetch: refetchAnalytics } = useAdminAnalytics();
 
   // Fetch all data
   const fetchData = async () => {
@@ -783,21 +797,62 @@ const AdminPanel = () => {
 
           {/* Main Content Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid grid-cols-5 md:grid-cols-10 w-full">
+            <TabsList className="grid grid-cols-4 md:grid-cols-8 w-full">
+              <TabsTrigger value="command-center" className="gap-1">
+                <LayoutDashboard className="w-3 h-3 hidden md:block" />
+                Command
+              </TabsTrigger>
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="institutions">Institutions</TabsTrigger>
-              <TabsTrigger value="content-dna">Content DNA</TabsTrigger>
-              <TabsTrigger value="brand">Brand Layer</TabsTrigger>
               <TabsTrigger value="emails">Email Activity</TabsTrigger>
               <TabsTrigger value="templates">Templates</TabsTrigger>
-              <TabsTrigger value="sharing">Sharing</TabsTrigger>
-              <TabsTrigger value="libraries">Libraries</TabsTrigger>
               <TabsTrigger value="radar" className="gap-1">
                 <Radar className="w-3 h-3" />
                 Radar
               </TabsTrigger>
+              <TabsTrigger value="libraries">Libraries</TabsTrigger>
               <TabsTrigger value="admin">Admin</TabsTrigger>
             </TabsList>
+
+            {/* NEW: Command Center Tab - Analytics Dashboard */}
+            <TabsContent value="command-center" className="space-y-6 mt-4">
+              {/* KPI Cards */}
+              {analytics && <AnalyticsKPICards data={analytics} isLoading={analyticsLoading} />}
+
+              {/* Main Grid */}
+              <div className="grid lg:grid-cols-3 gap-6">
+                {/* Left Column - Trends */}
+                <div className="lg:col-span-2 space-y-6">
+                  <UsageTrendChart data={analytics?.dailyUsage || []} isLoading={analyticsLoading} />
+                  
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <FeatureAdoptionCard data={analytics?.featureAdoption || []} isLoading={analyticsLoading} />
+                    <ToolUsageBreakdownCard data={analytics?.toolUsage || []} isLoading={analyticsLoading} />
+                  </div>
+                </div>
+
+                {/* Right Column - Health & Alerts */}
+                <div className="space-y-6">
+                  <AlertsInsightsCard 
+                    atRiskTenants={analytics?.atRiskTenants || []}
+                    noDNATenants={analytics?.noDNATenants || []}
+                    inactiveUsers={analytics?.inactiveUsers || 0}
+                    totalUsers={analytics?.totalUsers || 0}
+                    isLoading={analyticsLoading}
+                  />
+                  {analytics?.engagementFunnel && (
+                    <EngagementFunnelCard data={analytics.engagementFunnel} isLoading={analyticsLoading} />
+                  )}
+                </div>
+              </div>
+
+              {/* Tenant Health Overview */}
+              <TenantHealthTable 
+                data={analytics?.tenantHealth || []} 
+                isLoading={analyticsLoading} 
+                maxItems={5}
+              />
+            </TabsContent>
 
             {/* Overview Tab */}
             <TabsContent value="overview" className="space-y-4 mt-4">
