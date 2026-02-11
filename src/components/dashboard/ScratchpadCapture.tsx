@@ -261,7 +261,7 @@ export function ScratchpadCapture() {
             className="flex items-center gap-2 text-sm font-semibold text-foreground hover:text-primary transition-colors"
           >
             <Sparkles className="h-4 w-4 text-secondary" />
-            <span>Quick Capture</span>
+            <span>Quick Brief</span>
             {isExpanded ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
           </button>
 
@@ -281,7 +281,7 @@ export function ScratchpadCapture() {
             className="cursor-text rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-muted-foreground hover:border-primary/40 transition-colors"
             onClick={() => setIsExpanded(true)}
           >
-            {rawText || "Drop your meeting notes, ideas, or rough thoughts here..."}
+            {rawText || "Drop your meeting notes, talking points, or rough ideas here..."}
           </div>
         )}
 
@@ -291,7 +291,7 @@ export function ScratchpadCapture() {
             <Textarea
               value={rawText}
               onChange={(e) => handleTextChange(e.target.value)}
-              placeholder="Drop your meeting notes, ideas, or rough thoughts here... e.g. 'Need to reach admitted students who haven't enrolled. Dean wants a 3-touch sequence by next week. Financial aid angle might work.'"
+              placeholder="Drop your meeting notes, talking points, or rough ideas here... e.g. 'Need to reach admitted students who haven't enrolled. Dean wants a 3-touch sequence by next week. Financial aid angle might work.'"
               className="min-h-[100px] resize-none border-border/60 bg-background/50 text-sm leading-relaxed focus:border-primary/50 transition-colors"
               autoFocus
             />
