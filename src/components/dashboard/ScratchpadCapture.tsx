@@ -346,10 +346,9 @@ export function ScratchpadCapture() {
 
         {/* Results panel */}
         {showResults && organizedText && (
-           <div className="animate-in fade-in-0 slide-in-from-bottom-3 duration-500 pt-2 pl-3 border-t border-border/40">
+          <div className="animate-in fade-in-0 slide-in-from-bottom-3 duration-500 pt-3 pl-3 border-t border-border/40 space-y-1">
             <div className="prose prose-sm max-w-none text-foreground
-              prose-headings:text-foreground prose-headings:font-semibold prose-headings:mt-4 prose-headings:mb-2
-              prose-h3:text-sm prose-h3:text-primary
+              prose-headings:text-foreground prose-headings:font-semibold
               prose-p:text-sm prose-p:leading-relaxed prose-p:text-foreground/90
               prose-strong:text-foreground prose-strong:font-semibold
               prose-li:text-sm prose-li:text-foreground/90
@@ -357,62 +356,90 @@ export function ScratchpadCapture() {
             ">
               <ReactMarkdown
                 components={{
-                  // Render tool badges inline
-                  strong: ({ children }) => {
-                    const text = String(children);
-                    if (text === "Tool:") {
-                      return <strong className="text-accent">{children}</strong>;
-                    }
-                    if (text === "Why:") {
-                      return <strong className="text-muted-foreground">{children}</strong>;
-                    }
-                    return <strong>{children}</strong>;
-                  },
-                  // Make h3 recommendation headers clickable-looking
+                  // Section headers with separator
+                  h2: ({ children }) => (
+                    <div className="mt-5 first:mt-0">
+                      <div className="h-px bg-border/50 mb-3" />
+                      <h2 className="flex items-center gap-2 text-base font-bold text-foreground mb-2">
+                        <Sparkles className="h-4 w-4 text-primary flex-shrink-0" />
+                        {children}
+                      </h2>
+                    </div>
+                  ),
+                  // Recommendation sub-headers
                   h3: ({ children }) => {
+                    const text = String(children).toLowerCase();
+                    // Check if the heading mentions a tool name
+                    for (const [key, route] of Object.entries(toolRoutes)) {
+                      if (text.includes(key) || text.includes(route.label.toLowerCase())) {
+                        const ToolIcon = route.icon;
+                        return (
+                          <h3 className="flex items-center gap-2 text-sm font-semibold text-primary mt-4 mb-1.5">
+                            <ToolIcon className="h-4 w-4 text-accent flex-shrink-0" />
+                            {children}
+                          </h3>
+                        );
+                      }
+                    }
                     return (
-                      <h3 className="flex items-center gap-1.5 text-sm font-semibold text-primary mt-4 mb-1">
+                      <h3 className="flex items-center gap-2 text-sm font-semibold text-primary mt-4 mb-1.5">
                         <ArrowRight className="h-3.5 w-3.5 text-secondary flex-shrink-0" />
                         {children}
                       </h3>
                     );
                   },
+                  // Bold labels with contextual styling
+                  strong: ({ children }) => {
+                    const text = String(children);
+                    if (text === "Tool:" || text === "Recommended Tool:") {
+                      return <strong className="text-accent font-semibold">{children}</strong>;
+                    }
+                    if (text === "Why:") {
+                      return <strong className="text-muted-foreground font-medium">{children}</strong>;
+                    }
+                    return <strong className="font-semibold">{children}</strong>;
+                  },
                   // Enhance list items with field icons
                   li: ({ children }) => {
                     const text = String(children);
-                    // Check for extracted field patterns like "Audience: ..."
                     for (const [field, IconComp] of Object.entries(fieldIcons)) {
                       const regex = new RegExp(`^${field}:`, "i");
                       if (regex.test(text.trim())) {
                         return (
-                          <li className="flex items-start gap-2 text-sm text-foreground/90 list-none -ml-4">
+                          <li className="flex items-start gap-2 text-sm text-foreground/90 list-none -ml-4 py-0.5">
                             <IconComp className="h-3.5 w-3.5 mt-0.5 text-accent flex-shrink-0" />
                             <span>{children}</span>
                           </li>
                         );
                       }
                     }
-                    return <li className="text-sm text-foreground/90">{children}</li>;
+                    return <li className="text-sm text-foreground/90 py-0.5">{children}</li>;
                   },
+                  // Paragraphs — detect tool references and render as linked chips with icons
                   p: ({ children }) => {
                     const text = String(children);
-                    // Parse "**Tool:** toolkey" lines into linked action buttons with icons
-                    const toolMatch = text.match(/^Tool:\s*(builder|evaluator|journey|copywriter|analyzer|content-dna|profiles)$/i);
+                    const toolMatch = text.match(/^(?:Tool|Recommended Tool):\s*(builder|evaluator|journey|copywriter|analyzer|content-dna|profiles)$/i);
                     if (toolMatch) {
                       const toolKey = toolMatch[1].toLowerCase();
                       const route = toolRoutes[toolKey];
                       if (route) {
                         const ToolIcon = route.icon;
                         return (
-                          <div className="my-2">
+                          <div className="my-2.5 rounded-lg border border-primary/15 bg-primary/5 p-2.5 flex items-center gap-3">
+                            <div className="flex items-center justify-center h-8 w-8 rounded-md bg-primary/10 flex-shrink-0">
+                              <ToolIcon className="h-4 w-4 text-primary" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <span className="text-xs font-medium text-muted-foreground">Recommended Tool</span>
+                              <p className="text-sm font-semibold text-foreground -mt-0.5">{route.label}</p>
+                            </div>
                             <Link to={route.path}>
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="gap-1.5 text-xs border-primary/20 hover:bg-primary/5 hover:border-primary/40"
+                                className="gap-1.5 text-xs border-primary/20 hover:bg-primary hover:text-primary-foreground transition-all flex-shrink-0"
                               >
-                                <ToolIcon className="h-3 w-3" />
-                                Open {route.label}
+                                Open
                                 <ArrowRight className="h-3 w-3" />
                               </Button>
                             </Link>
@@ -422,6 +449,8 @@ export function ScratchpadCapture() {
                     }
                     return <p className="text-sm leading-relaxed text-foreground/90">{children}</p>;
                   },
+                  // Horizontal rules as styled separators
+                  hr: () => <div className="h-px bg-border/40 my-4" />,
                 }}
               >
                 {organizedText}
@@ -430,25 +459,28 @@ export function ScratchpadCapture() {
 
             {/* Quick action buttons extracted from recommendations */}
             {!isOrganizing && organizedText.includes("**Tool:**") && (
-              <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-border/30 animate-in fade-in-0 duration-500 delay-300">
-                {Object.entries(toolRoutes).map(([key, route]) => {
-                  if (organizedText.toLowerCase().includes(`tool:** ${key}`) || organizedText.toLowerCase().includes(`tool: ${key}`)) {
-                    const ToolIcon = route.icon;
-                    return (
-                      <Link key={key} to={route.path}>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="gap-1.5 text-xs border-primary/20 hover:bg-primary hover:text-primary-foreground transition-all"
-                        >
-                          <ToolIcon className="h-3 w-3" />
-                          {route.label}
-                        </Button>
-                      </Link>
-                    );
-                  }
-                  return null;
-                })}
+              <div className="mt-4 pt-3 border-t border-border/30 animate-in fade-in-0 duration-500 delay-300">
+                <p className="text-xs font-medium text-muted-foreground mb-2">Quick Actions</p>
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(toolRoutes).map(([key, route]) => {
+                    if (organizedText.toLowerCase().includes(`tool:** ${key}`) || organizedText.toLowerCase().includes(`tool: ${key}`)) {
+                      const ToolIcon = route.icon;
+                      return (
+                        <Link key={key} to={route.path}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="gap-1.5 text-xs border-primary/20 hover:bg-primary hover:text-primary-foreground transition-all"
+                          >
+                            <ToolIcon className="h-3.5 w-3.5" />
+                            {route.label}
+                          </Button>
+                        </Link>
+                      );
+                    }
+                    return null;
+                  })}
+                </div>
               </div>
             )}
           </div>
