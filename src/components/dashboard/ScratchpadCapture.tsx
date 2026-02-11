@@ -387,22 +387,21 @@ export function ScratchpadCapture() {
                   // Bold labels
                   strong: ({ children }) => {
                     const text = String(children).trim();
-                    // Check if it's a tool name reference like "Tool: builder" or "Recommended Tool: evaluator"
-                    const toolLabelMatch = text.match(/^(?:Tool|Recommended Tool):\s*(.+)$/i);
-                    if (toolLabelMatch) {
-                      const toolKey = toolLabelMatch[1].trim().toLowerCase();
-                      const route = toolRoutes[toolKey];
-                      if (route) {
+                    const lower = text.toLowerCase();
+                    // Match standalone tool key words and render as inline button-links
+                    for (const [key, route] of Object.entries(toolRoutes)) {
+                      if (lower === key || lower === route.label.toLowerCase()) {
                         const ToolIcon = route.icon;
                         return (
-                          <Link to={route.path} className="inline-flex items-center gap-1.5 text-primary font-semibold hover:underline">
-                            <ToolIcon className="h-3.5 w-3.5" />
+                          <Link to={route.path} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-primary font-semibold text-xs hover:bg-primary/20 transition-colors align-middle">
+                            <ToolIcon className="h-3 w-3" />
                             {route.label}
                           </Link>
                         );
                       }
                     }
-                    if (text === "Tool:" || text === "Recommended Tool:") {
+                    // "Tool:" / "Recommended Tool:" label
+                    if (/^(Recommended\s+)?Tool:$/i.test(text)) {
                       return <strong className="text-primary font-bold">{children}</strong>;
                     }
                     if (text === "Why:") {
