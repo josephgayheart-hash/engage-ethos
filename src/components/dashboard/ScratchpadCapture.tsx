@@ -388,7 +388,8 @@ export function ScratchpadCapture() {
                   strong: ({ children }) => {
                     const text = String(children).trim();
                     const lower = text.toLowerCase();
-                    // Match standalone tool key words and render as inline button-links
+
+                    // Standalone tool name match
                     for (const [key, route] of Object.entries(toolRoutes)) {
                       if (lower === key || lower === route.label.toLowerCase()) {
                         const ToolIcon = route.icon;
@@ -400,11 +401,38 @@ export function ScratchpadCapture() {
                         );
                       }
                     }
-                    // "Tool:" / "Recommended Tool:" label
+
+                    // Pattern: "Tool: <toolname> Why: ..." or "Recommended Tool: <toolname> Why: ..."
+                    const compoundMatch = text.match(/^(?:Recommended\s+)?Tool:\s*(\S+)(?:\s+Why:\s*(.*))?$/i);
+                    if (compoundMatch) {
+                      const toolKey = compoundMatch[1].toLowerCase();
+                      const whyText = compoundMatch[2] || "";
+                      const route = toolRoutes[toolKey];
+                      if (route) {
+                        const ToolIcon = route.icon;
+                        return (
+                          <span className="inline-flex items-center gap-1.5 flex-wrap">
+                            <span className="text-primary font-bold">Tool:</span>
+                            <Link to={route.path} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-primary font-semibold text-xs hover:bg-primary/20 transition-colors align-middle">
+                              <ToolIcon className="h-3 w-3" />
+                              {route.label}
+                            </Link>
+                            {whyText && (
+                              <>
+                                <span className="text-accent font-bold">Why:</span>
+                                <span className="font-semibold">{whyText}</span>
+                              </>
+                            )}
+                          </span>
+                        );
+                      }
+                    }
+
+                    // "Tool:" / "Recommended Tool:" label alone
                     if (/^(Recommended\s+)?Tool:$/i.test(text)) {
                       return <strong className="text-primary font-bold">{children}</strong>;
                     }
-                    if (text === "Why:") {
+                    if (/^Why:$/i.test(text)) {
                       return <strong className="text-accent font-bold">{children}</strong>;
                     }
                     return <strong className="font-semibold">{children}</strong>;
