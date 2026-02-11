@@ -8,14 +8,12 @@ import {
   Shield, 
   ArrowRight,
   Sparkles,
-  Users,
   Target,
   Brain,
   Zap,
   CheckCircle2,
   GraduationCap,
   Globe,
-  Quote,
   Calendar
 } from 'lucide-react';
 import campusvoiceLogo from '@/assets/campusvoice-logo-new.png';
@@ -81,24 +79,6 @@ const features = [
     title: 'University Library',
     description: 'Governed content with approval workflows. Personal drafts for experimentation. Shared libraries for approved, on-brand plays.',
     link: '/features/library',
-  },
-];
-
-const testimonials = [
-  {
-    quote: "Finally, a way to protect our brand across every college without being in every meeting.",
-    role: "Chief Marketing Officer",
-    institution: "Research University",
-  },
-  {
-    quote: "The journey planner changed how we think about enrollment communications.",
-    role: "Director of Admissions",
-    institution: "Liberal Arts College",
-  },
-  {
-    quote: "Our team went from 3 days to 3 hours for campaign creation.",
-    role: "Communications Manager",
-    institution: "Community College",
   },
 ];
 
@@ -435,42 +415,6 @@ export default function LandingPage() {
                 </Button>
               }
             />
-          </div>
-        </div>
-      </section>
-
-      {/* Social Proof Section */}
-      <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-[hsl(270_60%_50%)]">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-10">
-            <Badge className="mb-3 bg-white/20 text-white border-white/30">
-              <Users className="w-3 h-3 mr-1" />
-              Trusted by Higher Ed Leaders
-            </Badge>
-            <h3 className="text-xl sm:text-2xl text-white font-serif">
-              What CCOs Are Saying
-            </h3>
-          </div>
-          <div className="grid sm:grid-cols-3 gap-6">
-            {testimonials.map((testimonial, index) => (
-              <div 
-                key={index}
-                className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20"
-              >
-                <Quote className="w-8 h-8 text-[hsl(82_85%_60%)] mb-4 opacity-80" />
-                <p className="text-white/90 italic mb-4 text-sm leading-relaxed">
-                  "{testimonial.quote}"
-                </p>
-                <div className="border-t border-white/20 pt-3">
-                  <p className="text-white/70 text-xs">
-                    {testimonial.role}
-                  </p>
-                  <p className="text-white/50 text-xs">
-                    {testimonial.institution}
-                  </p>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
