@@ -4,10 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAgencyMode } from "@/hooks/useAgencyMode";
-import { Building2, ArrowRight, Users, Settings } from "lucide-react";
+import { Building2, ArrowRight, Users, Settings, Palette } from "lucide-react";
 
 interface InstitutionStatus {
   profileCount: number;
@@ -51,9 +52,12 @@ export function InstitutionManagementCard() {
   const settingsHref = isAgency ? "/agency/clients" : "/university-settings";
   const entityLabel = isAgency ? labels.profileTerm : "Institution";
 
+  const primaryColor = tenant?.primary_color || "hsl(var(--primary))";
+  const accentColor = tenant?.accent_color || "hsl(var(--accent))";
+
   if (loading) {
     return (
-      <Card>
+      <Card className="overflow-hidden">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Building2 className="w-5 h-5 text-primary" />
@@ -61,14 +65,22 @@ export function InstitutionManagementCard() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Skeleton className="h-20 w-full" />
+          <Skeleton className="h-24 w-full" />
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card>
+    <Card className="overflow-hidden">
+      {/* Brand color accent strip */}
+      <div
+        className="h-1.5 w-full"
+        style={{
+          background: `linear-gradient(90deg, ${primaryColor}, ${accentColor})`,
+        }}
+      />
+
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
@@ -96,9 +108,46 @@ export function InstitutionManagementCard() {
           </div>
         ) : (
           <>
-            {status.primaryName && (
-              <p className="text-sm font-medium truncate">{status.primaryName}</p>
-            )}
+            {/* Logo + institution name row */}
+            <div className="flex items-center gap-3">
+              <Avatar className="h-10 w-10 rounded-lg border">
+                {tenant?.logo_url ? (
+                  <AvatarImage
+                    src={tenant.logo_url}
+                    alt={status.primaryName || "Logo"}
+                    className="object-contain p-0.5"
+                  />
+                ) : null}
+                <AvatarFallback className="rounded-lg bg-muted">
+                  <Building2 className="w-5 h-5 text-muted-foreground" />
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                {status.primaryName && (
+                  <p
+                    className="text-sm font-semibold truncate"
+                    style={{ color: primaryColor }}
+                  >
+                    {status.primaryName}
+                  </p>
+                )}
+                {/* Color swatches */}
+                <div className="flex items-center gap-1.5 mt-1">
+                  <Palette className="w-3 h-3 text-muted-foreground" />
+                  <div
+                    className="w-4 h-4 rounded-full border border-border"
+                    style={{ backgroundColor: primaryColor }}
+                    title="Primary color"
+                  />
+                  <div
+                    className="w-4 h-4 rounded-full border border-border"
+                    style={{ backgroundColor: accentColor }}
+                    title="Accent color"
+                  />
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
               <div className="text-center p-2 rounded-md bg-muted/50">
                 <p className="text-2xl font-bold font-serif">{status.subUnitCount}</p>
