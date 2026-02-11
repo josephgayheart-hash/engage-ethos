@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { useUserDrafts, UserDraft } from "@/hooks/useUserDrafts";
 import { useAuth } from "@/contexts/AuthContext";
 import { format, formatDistanceToNow } from "date-fns";
@@ -25,7 +26,10 @@ import {
   Users,
   Megaphone,
   Newspaper,
-  Heart
+  Heart,
+  ChevronDown,
+  LayoutGrid,
+  List,
 } from "lucide-react";
 import type { Channel } from "@/types/campusvoice";
 
@@ -63,6 +67,15 @@ export function MyDraftsCard() {
   const { drafts, loading, deleteDraft } = useUserDrafts();
   const { profile } = useAuth();
   const [showAll, setShowAll] = useState(false);
+  const [compact, setCompact] = useState(() => {
+    try { return localStorage.getItem('campusvoice_drafts_compact') === 'true'; } catch { return false; }
+  });
+
+  const toggleCompact = () => {
+    const next = !compact;
+    setCompact(next);
+    try { localStorage.setItem('campusvoice_drafts_compact', String(next)); } catch {}
+  };
 
   const messageDrafts = drafts.filter(d => d.draft_type === 'message');
   const journeyDrafts = drafts.filter(d => d.draft_type === 'journey');
@@ -157,29 +170,80 @@ export function MyDraftsCard() {
             </CardTitle>
             <p className="text-xs text-muted-foreground mt-0.5">Pick up where you left off</p>
           </div>
-          <div className="flex gap-1.5">
-            {messageDrafts.length > 0 && (
-              <Badge variant="secondary" className="text-xs bg-pillar-cognitive/10 text-pillar-cognitive">
-                <PenTool className="w-3 h-3 mr-1" />
-                {messageDrafts.length}
-              </Badge>
-            )}
-            {journeyDrafts.length > 0 && (
-              <Badge variant="secondary" className="text-xs bg-pillar-consensus/10 text-pillar-consensus">
-                <Map className="w-3 h-3 mr-1" />
-                {journeyDrafts.length}
-              </Badge>
-            )}
-            {analysisDrafts.length > 0 && (
-              <Badge variant="secondary" className="text-xs bg-cyan-500/10 text-cyan-600">
-                <Search className="w-3 h-3 mr-1" />
-                {analysisDrafts.length}
-              </Badge>
-            )}
+          <div className="flex items-center gap-2">
+            <div className="flex gap-1.5">
+              {messageDrafts.length > 0 && (
+                <Badge variant="secondary" className="text-xs bg-accent/10 text-accent">
+                  <PenTool className="w-3 h-3 mr-1" />
+                  {messageDrafts.length}
+                </Badge>
+              )}
+              {journeyDrafts.length > 0 && (
+                <Badge variant="secondary" className="text-xs bg-secondary/10 text-secondary-foreground">
+                  <Map className="w-3 h-3 mr-1" />
+                  {journeyDrafts.length}
+                </Badge>
+              )}
+              {analysisDrafts.length > 0 && (
+                <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
+                  <Search className="w-3 h-3 mr-1" />
+                  {analysisDrafts.length}
+                </Badge>
+              )}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleCompact}
+              className="text-xs text-muted-foreground hover:text-foreground gap-1 h-7"
+            >
+              {compact ? <LayoutGrid className="w-3.5 h-3.5" /> : <List className="w-3.5 h-3.5" />}
+              {compact ? "Detailed" : "Compact"}
+            </Button>
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-2">
+        {compact ? (
+          /* Compact view: dense single-line rows */
+          <div className="space-y-0.5">
+            {displayedDrafts.map((draft) => {
+              const Icon = getDraftIcon(draft.draft_type);
+              return (
+                <Link
+                  key={draft.id}
+                  to={getDraftLink(draft)}
+                  state={{ resumeDraftId: draft.id }}
+                  className="block"
+                >
+                  <div className="flex items-center gap-2.5 p-1.5 rounded-md hover:bg-muted/50 transition-colors group">
+                    <Icon className={cn("w-3.5 h-3.5 shrink-0",
+                      draft.draft_type === 'message' ? 'text-accent' :
+                      draft.draft_type === 'journey' ? 'text-secondary' : 'text-primary'
+                    )} />
+                    <span className="text-sm truncate flex-1">
+                      {draft.title || `Untitled ${draft.draft_type}`}
+                    </span>
+                    <Badge variant="outline" className="text-[10px] shrink-0">{draft.draft_type}</Badge>
+                    <span className="text-[11px] text-muted-foreground shrink-0">
+                      {formatDistanceToNow(new Date(draft.updated_at), { addSuffix: true })}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                      onClick={(e) => handleDelete(e, draft.id)}
+                    >
+                      <Trash2 className="w-3 h-3 text-destructive" />
+                    </Button>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        ) : (
+          /* Detailed view: existing rich cards */
+          <div className="space-y-2">
         {displayedDrafts.map((draft) => {
           const Icon = getDraftIcon(draft.draft_type);
           const draftData = draft.draft_data as Record<string, unknown>;
@@ -370,6 +434,8 @@ export function MyDraftsCard() {
             </Link>
           );
         })}
+          </div>
+        )}
         
         {hasMore && !showAll && (
           <Button 
