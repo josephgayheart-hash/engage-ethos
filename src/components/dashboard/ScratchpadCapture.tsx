@@ -346,7 +346,7 @@ export function ScratchpadCapture() {
 
         {/* Results panel */}
         {showResults && organizedText && (
-          <div className="animate-in fade-in-0 slide-in-from-bottom-3 duration-500 pt-2 border-t border-border/40">
+           <div className="animate-in fade-in-0 slide-in-from-bottom-3 duration-500 pt-2 pl-3 border-t border-border/40">
             <div className="prose prose-sm max-w-none text-foreground
               prose-headings:text-foreground prose-headings:font-semibold prose-headings:mt-4 prose-headings:mb-2
               prose-h3:text-sm prose-h3:text-primary
