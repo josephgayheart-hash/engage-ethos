@@ -64,6 +64,7 @@ import AgencyOnboardingPage from "./pages/agency/AgencyOnboardingPage";
 import AgencyDashboardPage from "./pages/agency/AgencyDashboardPage";
 import AgencyClientsPage from "./pages/agency/AgencyClientsPage";
 import UniversityDashboardPage from "./pages/UniversityDashboardPage";
+import ToolsPage from "./pages/ToolsPage";
 const queryClient = new QueryClient();
 
 // Component to track page views
@@ -221,6 +222,7 @@ const AppRoutes = () => (
     <Route path="/benchmarks" element={<RequireAuth><PerformanceBenchmarks /></RequireAuth>} />
     <Route path="/translate" element={<RequireAuth><TranslationTool /></RequireAuth>} />
     <Route path="/web-analyzer" element={<RequireAuth><WebContentAnalyzerPage /></RequireAuth>} />
+    <Route path="/tools" element={<RequireAuth><ToolsPage /></RequireAuth>} />
     <Route path="/brand-audit" element={<RequireAuth><BrandAuditPage /></RequireAuth>} />
     <Route path="/settings" element={<Navigate to="/university-settings" replace />} />
     <Route path="/university-settings" element={<RequireAuth><UniversitySettingsPage /></RequireAuth>} />
