@@ -5,6 +5,7 @@ import { QuickActionsPanel } from "@/components/dashboard/QuickActionsPanel";
 import { MyDraftsCard } from "@/components/MyDraftsCard";
 import { RecentMessagesPanel } from "@/components/dashboard/RecentMessagesPanel";
 import { ContentDNAStatusCard } from "@/components/dashboard/ContentDNAStatusCard";
+import { InstitutionManagementCard } from "@/components/dashboard/InstitutionManagementCard";
 import { AdminTeamOverview } from "@/components/dashboard/AdminTeamOverview";
 import { QuickLaunchBar } from "@/components/dashboard/QuickLaunchBar";
 
@@ -30,12 +31,13 @@ const Index = () => {
             <MyDraftsCard />
           </section>
 
-          {/* Recent Messages + Content DNA Status */}
+          {/* Recent Messages + Management Panel */}
           <section className="grid md:grid-cols-3 gap-6">
             <div className="md:col-span-2">
               <RecentMessagesPanel />
             </div>
-            <div>
+            <div className="space-y-6">
+              <InstitutionManagementCard />
               <ContentDNAStatusCard />
             </div>
           </section>
