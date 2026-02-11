@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ResearchFoundation } from "@/components/ResearchFoundation";
 import { MyDraftsCard } from "@/components/MyDraftsCard";
 import { DashboardHero } from "@/components/dashboard";
+import { ResumeWorkCard } from "@/components/dashboard/ResumeWorkCard";
 import { 
   Shield, 
   Brain, 
@@ -163,6 +164,9 @@ const Index = () => {
 
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto space-y-10">
+
+          {/* Resume Where You Left Off */}
+          <ResumeWorkCard />
           
           {/* Getting Started Workflow */}
           <section className="relative">

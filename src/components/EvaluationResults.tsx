@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { RefinedMessages } from "./RefinedMessages";
+import { NextStepsBar } from "./NextStepsBar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -16,6 +17,7 @@ import {
   Lightbulb
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PenTool, Map, FolderPlus } from "lucide-react";
 import type { EvaluationResult, PillarEvaluation, Rating } from "@/types/campusvoice";
 
 interface EvaluationResultsProps {
@@ -149,6 +151,15 @@ export function EvaluationResults({ result }: EvaluationResultsProps) {
         refinedMessage={result.refinedMessage}
         reducedLoadMessage={result.reducedLoadMessage}
         changeExplanation={result.changeExplanation}
+      />
+
+      <NextStepsBar
+        message="Evaluation complete — keep the momentum going."
+        steps={[
+          { label: "Build a New Message", href: "/build", icon: PenTool },
+          { label: "Design a Journey", href: "/strategy", icon: Map },
+          { label: "Save to Library", href: "/library", icon: FolderPlus },
+        ]}
       />
     </div>
   );

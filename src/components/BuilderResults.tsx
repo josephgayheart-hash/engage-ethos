@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Copy, Check, PenTool, User, FileText, Ruler, FolderPlus, Library, RefreshCw, Sparkles, ExternalLink } from "lucide-react";
+import { Copy, Check, PenTool, User, FileText, Ruler, FolderPlus, Library, RefreshCw, Sparkles, ExternalLink, Map } from "lucide-react";
 import { EvaluationResults } from "./EvaluationResults";
+import { NextStepsBar } from "./NextStepsBar";
 import { AIBadge } from "@/components/ui/ai-indicator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -249,6 +250,13 @@ export function BuilderResults({
         </CardContent>
       </Card>
 
+      <NextStepsBar
+        message="Message generated — what would you like to do next?"
+        steps={[
+          { label: "Evaluate This Message", href: "/evaluate", icon: FileText },
+          { label: "Design a Journey", href: "/strategy", icon: Map },
+        ]}
+      />
     </div>
   );
 }
