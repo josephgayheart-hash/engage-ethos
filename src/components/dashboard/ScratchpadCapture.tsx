@@ -5,7 +5,10 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Sparkles, ChevronDown, ChevronUp, X, Mail, MessageSquare,
   Map, Search, Lightbulb, Clipboard, ArrowRight, Loader2,
+  PenTool, FileText, MessageCircle, Globe, Dna, Building2,
+  Users, Target, Radio, Clock, Palette,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useContentDNA } from "@/hooks/useContentDNA";
 import { useUserDrafts } from "@/hooks/useUserDrafts";
@@ -28,14 +31,23 @@ const iconMap: Record<string, React.ElementType> = {
 };
 
 // Tool routing
-const toolRoutes: Record<string, { path: string; label: string; color: string }> = {
-  builder: { path: "/build", label: "Message Builder", color: "bg-primary text-primary-foreground" },
-  evaluator: { path: "/evaluate", label: "Evaluator", color: "bg-accent text-accent-foreground" },
-  journey: { path: "/strategy", label: "Journey Designer", color: "bg-secondary text-secondary-foreground" },
-  copywriter: { path: "/playground", label: "AI Copywriter", color: "bg-primary text-primary-foreground" },
-  analyzer: { path: "/web-content-analyzer", label: "Content Analyzer", color: "bg-accent text-accent-foreground" },
-  "content-dna": { path: "/admin/content-dna", label: "Content DNA Studio", color: "bg-accent text-accent-foreground" },
-  profiles: { path: "/settings", label: "Institutional Profiles", color: "bg-primary text-primary-foreground" },
+const toolRoutes: Record<string, { path: string; label: string; color: string; icon: React.ElementType }> = {
+  builder: { path: "/build", label: "Message Builder", color: "bg-primary text-primary-foreground", icon: PenTool },
+  evaluator: { path: "/evaluate", label: "Evaluator", color: "bg-accent text-accent-foreground", icon: FileText },
+  journey: { path: "/strategy", label: "Journey Designer", color: "bg-secondary text-secondary-foreground", icon: Map },
+  copywriter: { path: "/playground", label: "AI Copywriter", color: "bg-primary text-primary-foreground", icon: MessageCircle },
+  analyzer: { path: "/web-content-analyzer", label: "Content Analyzer", color: "bg-accent text-accent-foreground", icon: Globe },
+  "content-dna": { path: "/admin/content-dna", label: "Content DNA Studio", color: "bg-accent text-accent-foreground", icon: Dna },
+  profiles: { path: "/settings", label: "Institutional Profiles", color: "bg-primary text-primary-foreground", icon: Building2 },
+};
+
+// Icons for extracted field labels
+const fieldIcons: Record<string, React.ElementType> = {
+  audience: Users,
+  goal: Target,
+  channel: Radio,
+  timing: Clock,
+  tone: Palette,
 };
 
 interface ClassifyResult {
@@ -348,7 +360,6 @@ export function ScratchpadCapture() {
                   // Render tool badges inline
                   strong: ({ children }) => {
                     const text = String(children);
-                    // Check if this is a "Tool:" line
                     if (text === "Tool:") {
                       return <strong className="text-accent">{children}</strong>;
                     }
@@ -366,25 +377,45 @@ export function ScratchpadCapture() {
                       </h3>
                     );
                   },
+                  // Enhance list items with field icons
+                  li: ({ children }) => {
+                    const text = String(children);
+                    // Check for extracted field patterns like "Audience: ..."
+                    for (const [field, IconComp] of Object.entries(fieldIcons)) {
+                      const regex = new RegExp(`^${field}:`, "i");
+                      if (regex.test(text.trim())) {
+                        return (
+                          <li className="flex items-start gap-2 text-sm text-foreground/90 list-none -ml-4">
+                            <IconComp className="h-3.5 w-3.5 mt-0.5 text-accent flex-shrink-0" />
+                            <span>{children}</span>
+                          </li>
+                        );
+                      }
+                    }
+                    return <li className="text-sm text-foreground/90">{children}</li>;
+                  },
                   p: ({ children }) => {
                     const text = String(children);
-                    // Parse "**Tool:** builder" lines into action buttons
-                    const toolMatch = text.match(/^Tool:\s*(builder|evaluator|journey|copywriter|analyzer)$/i);
+                    // Parse "**Tool:** toolkey" lines into linked action buttons with icons
+                    const toolMatch = text.match(/^Tool:\s*(builder|evaluator|journey|copywriter|analyzer|content-dna|profiles)$/i);
                     if (toolMatch) {
                       const toolKey = toolMatch[1].toLowerCase();
                       const route = toolRoutes[toolKey];
                       if (route) {
+                        const ToolIcon = route.icon;
                         return (
                           <div className="my-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleToolClick(toolKey)}
-                              className="gap-1.5 text-xs border-primary/20 hover:bg-primary/5 hover:border-primary/40"
-                            >
-                              <ArrowRight className="h-3 w-3" />
-                              Open in {route.label}
-                            </Button>
+                            <Link to={route.path}>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="gap-1.5 text-xs border-primary/20 hover:bg-primary/5 hover:border-primary/40"
+                              >
+                                <ToolIcon className="h-3 w-3" />
+                                Open {route.label}
+                                <ArrowRight className="h-3 w-3" />
+                              </Button>
+                            </Link>
                           </div>
                         );
                       }
@@ -402,17 +433,18 @@ export function ScratchpadCapture() {
               <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-border/30 animate-in fade-in-0 duration-500 delay-300">
                 {Object.entries(toolRoutes).map(([key, route]) => {
                   if (organizedText.toLowerCase().includes(`tool:** ${key}`) || organizedText.toLowerCase().includes(`tool: ${key}`)) {
+                    const ToolIcon = route.icon;
                     return (
-                      <Button
-                        key={key}
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleToolClick(key)}
-                        className="gap-1.5 text-xs border-primary/20 hover:bg-primary hover:text-primary-foreground transition-all"
-                      >
-                        <ArrowRight className="h-3 w-3" />
-                        {route.label}
-                      </Button>
+                      <Link key={key} to={route.path}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1.5 text-xs border-primary/20 hover:bg-primary hover:text-primary-foreground transition-all"
+                        >
+                          <ToolIcon className="h-3 w-3" />
+                          {route.label}
+                        </Button>
+                      </Link>
                     );
                   }
                   return null;
