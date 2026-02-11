@@ -1,8 +1,9 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   PenTool,
   FileText,
@@ -20,8 +21,10 @@ import {
   Languages,
   Search,
   Globe,
-  Settings,
-  Sparkles,
+  ArrowRight,
+  LayoutGrid,
+  List,
+  ChevronDown,
 } from "lucide-react";
 
 interface ToolItem {
@@ -56,45 +59,83 @@ const utilityTools: ToolItem[] = [
   { id: 'playground', title: 'AI Copywriter', description: 'AI-powered messaging playground', icon: MessageCircle, href: '/playground' },
 ];
 
-function ToolGrid({ tools, label }: { tools: ToolItem[]; label: string }) {
+function ToolGrid({ tools, label, compact }: { tools: ToolItem[]; label: string; compact: boolean }) {
   return (
     <section>
       <h2 className="section-header mb-4">{label}</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-        {tools.map((tool) => {
-          const Icon = tool.icon;
-          return (
-            <Link key={tool.id} to={tool.href}>
-              <Card className="h-full cursor-pointer card-interactive group">
-                <CardContent className="p-4">
-                  <div className="icon-container icon-container-md bg-muted mb-3 group-hover:bg-primary/10 transition-colors">
-                    <Icon className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                  </div>
-                  <h3 className="font-medium text-sm mb-1">{tool.title}</h3>
-                  <p className="text-xs text-muted-foreground line-clamp-2">{tool.description}</p>
-                </CardContent>
-              </Card>
-            </Link>
-          );
-        })}
-      </div>
+      {compact ? (
+        <div className="flex flex-wrap gap-2">
+          {tools.map((tool) => {
+            const Icon = tool.icon;
+            return (
+              <Button key={tool.id} variant="outline" size="sm" asChild className="gap-1.5">
+                <Link to={tool.href}>
+                  <Icon className="w-4 h-4" />
+                  {tool.title}
+                  <ArrowRight className="w-3 h-3" />
+                </Link>
+              </Button>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {tools.map((tool) => {
+            const Icon = tool.icon;
+            return (
+              <Link key={tool.id} to={tool.href}>
+                <Card className="h-full cursor-pointer card-interactive group">
+                  <CardContent className="p-4">
+                    <div className="icon-container icon-container-md bg-muted mb-3 group-hover:bg-primary/10 transition-colors">
+                      <Icon className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                    </div>
+                    <h3 className="font-medium text-sm mb-1">{tool.title}</h3>
+                    <p className="text-xs text-muted-foreground line-clamp-2">{tool.description}</p>
+                  </CardContent>
+                </Card>
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </section>
   );
 }
 
 const ToolsPage = () => {
+  const [compact, setCompact] = useState(() => {
+    try { return localStorage.getItem('campusvoice_tools_compact') === 'true'; } catch { return false; }
+  });
+
+  const toggleCompact = () => {
+    const next = !compact;
+    setCompact(next);
+    try { localStorage.setItem('campusvoice_tools_compact', String(next)); } catch {}
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto space-y-10">
-          <div>
-            <h1 className="font-serif text-2xl font-bold mb-1">All Tools</h1>
-            <p className="text-sm text-muted-foreground">Everything you need to create, analyze, and optimize communications.</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="font-serif text-2xl font-bold mb-1">All Tools</h1>
+              <p className="text-sm text-muted-foreground">Everything you need to create, analyze, and optimize communications.</p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleCompact}
+              className="text-xs text-muted-foreground hover:text-foreground gap-1 h-7"
+            >
+              {compact ? <LayoutGrid className="w-3.5 h-3.5" /> : <List className="w-3.5 h-3.5" />}
+              {compact ? "Detailed" : "Compact"}
+            </Button>
           </div>
-          <ToolGrid tools={coreTools} label="Core Tools" />
-          <ToolGrid tools={analysisTools} label="Analysis Tools" />
-          <ToolGrid tools={utilityTools} label="Utility Tools" />
+          <ToolGrid tools={coreTools} label="Core Tools" compact={compact} />
+          <ToolGrid tools={analysisTools} label="Analysis Tools" compact={compact} />
+          <ToolGrid tools={utilityTools} label="Utility Tools" compact={compact} />
         </div>
       </main>
     </div>
