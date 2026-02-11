@@ -1,42 +1,85 @@
 
 
-## Enhance Institution Management and Content DNA Dashboard Cards
+# Scratchpad -- Enhanced with Modern LLM Techniques
 
-### 1. Institution Management Card -- Branding and Logo
+## Magic-Feel Enhancements
 
-**Current state:** Plain card with Building2 icon, institution name, sub-unit/profile counts, and Manage/Team buttons.
+### 1. Streaming Progressive Reveal
 
-**Enhancements:**
-- Display the institution's **logo** (from `tenant.logo_url`) as an avatar/image next to or above the institution name, with a fallback to a Building2 icon if no logo is set
-- Add a **brand color accent strip** at the top of the card using `tenant.primary_color` (similar to the QuickActionsPanel gradient strips)
-- Show a small **color swatch row** displaying the primary and accent colors from the tenant record, giving a visual brand identity hint
-- Display the institution name with slightly more prominence (larger font, styled with the primary color)
+Instead of a loading spinner followed by a wall of results, **stream the organized output token-by-token** (like the Copywriter chat already does). But go further -- structure it as a **staged reveal**:
 
-**Data source:** `tenant` object from `useAuth()` already contains `logo_url`, `primary_color`, and `accent_color` -- no new queries needed.
+- First, a one-line summary fades in ("Sounds like a yield campaign targeting admitted students...")
+- Then extracted fields animate in as chips/badges (Audience, Channel, Timing)
+- Finally, recommendation cards slide up one by one
+
+This uses the same SSE streaming pattern already in `playground-chat` but with a structured system prompt that outputs sections in order.
+
+### 2. Live Intent Detection While Typing (Debounced)
+
+Use `google/gemini-2.5-flash-lite` (the fastest/cheapest model) for a **lightweight debounced call** as the user types. After 1.5s of inactivity with 30+ characters, fire a quick classification call that returns:
+
+- A subtle inline hint like "Looks like a yield campaign idea" or "Meeting notes about financial aid outreach"
+- A tiny contextual icon that shifts based on detected intent (mail icon for email ideas, map icon for journey plans, etc.)
+
+This makes the scratchpad feel alive and aware before the user even clicks "Organize."
+
+### 3. Multi-Model Pipeline
+
+Chain two models for speed + depth:
+
+- **Stage 1** (`gemini-2.5-flash-lite`): Instant classification and field extraction (~200ms) -- show results immediately
+- **Stage 2** (`gemini-3-flash-preview`): Deep recommendations with research-grounded reasoning, streamed in after
+
+The user sees something useful almost instantly, then richer recommendations stream in. This removes the "waiting" feeling entirely.
+
+### 4. Context-Aware Recommendations
+
+Pull the user's **active Content DNA voice profile** and **recent drafts** into the system prompt so recommendations reference their actual institutional voice and in-progress work. For example:
+
+- "You have a draft yield email from 2 days ago -- this could extend it into a 3-touch journey"
+- "Your DNA voice is warm and conversational -- a text-first approach would match well"
+
+This uses data already available via `useContentDNA` and `useUserDrafts` hooks.
+
+### 5. Tool-Calling for Structured Output
+
+Instead of asking the LLM to return JSON in prose (fragile), use the **tool-calling API** to force structured output. Define a `organize_notes` tool schema that guarantees clean typed fields every time -- no parsing errors, no malformed JSON.
 
 ---
 
-### 2. Content DNA Status Card -- Richer Metadata
+## Revised Technical Architecture
 
-**Current state:** Shows active/total profile counts and last analyzed date.
+### Edge Function: `organize-scratchpad`
 
-**Enhancements:**
-- Fetch additional fields from `content_dna_analysis`: `sample_count`, `voice_analysis` (to extract `overallTone`), `brand_platform` (to extract pillar count), `custom_instructions` (to show presence), and `profile_id` (to join with profile names)
-- Display a **voice tone summary** line (e.g., "Tone: Warm, authoritative, and approachable") extracted from the voice_analysis JSON
-- Show **sample count** (e.g., "12 content samples analyzed")
-- Show **brand platform status** -- whether pillars have been extracted (e.g., "3 Brand Pillars defined")
-- Show **custom instructions** indicator -- a small badge if custom instructions are configured
-- Join with `institutional_profiles` to show **which profiles** have DNA configured (e.g., list profile names with checkmarks)
-- Keep the existing Active badge, last analyzed date, and Manage DNA Studio button
+A single edge function with a `stage` parameter:
 
-**Data source:** Expand the existing Supabase query in ContentDNAStatusCard to include `sample_count`, `voice_analysis`, `brand_platform`, `custom_instructions`, and join profile names.
+- `stage: "classify"` -- Uses `gemini-2.5-flash-lite`, returns `{ intent, hint_text, icon }` in ~200ms via tool-calling (non-streaming)
+- `stage: "organize"` -- Uses `gemini-3-flash-preview`, streams full organized output with recommendations via SSE
 
----
+Both stages receive optional Content DNA context and recent draft titles for personalization.
 
-### Technical Details
+### Component: `ScratchpadCapture`
 
-**Files to modify:**
-- `src/components/dashboard/InstitutionManagementCard.tsx` -- add logo rendering, brand color accent, color swatches
-- `src/components/dashboard/ContentDNAStatusCard.tsx` -- expand query, parse JSON fields, render additional metadata rows
+- **Debounced classify call**: 1.5s after typing stops (30+ char minimum), fires classify stage, shows subtle inline hint
+- **Organize button**: Fires the full organize stage with SSE streaming
+- **Progressive UI**: Results render in stages using CSS transitions -- summary first, then fields, then recommendation cards
+- **Persist in localStorage**: Raw text saved on every keystroke so nothing is lost
 
-**No new dependencies or database changes required.** All data is already available in existing tables and the auth context.
+### Config
+
+Add to `supabase/config.toml`:
+```
+[functions.organize-scratchpad]
+verify_jwt = false
+```
+
+### Files
+
+| File | Action |
+|------|--------|
+| `supabase/functions/organize-scratchpad/index.ts` | Create -- multi-stage edge function with classify + organize |
+| `src/components/dashboard/ScratchpadCapture.tsx` | Create -- component with debounced hints, streaming results, progressive reveal |
+| `src/pages/Index.tsx` | Modify -- add ScratchpadCapture above ResumeWorkCard |
+
+No database changes required.
+
