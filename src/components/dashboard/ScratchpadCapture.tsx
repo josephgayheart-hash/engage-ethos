@@ -455,12 +455,13 @@ export function ScratchpadCapture() {
                   },
                   ul: ({ children }) => <ul className="my-1.5 pl-2 space-y-0.5 list-none">{children}</ul>,
                   ol: ({ children }) => <ol className="my-1.5 pl-2 space-y-0.5 list-decimal list-inside">{children}</ol>,
-                  // Tool recommendation cards
+                  // Tool recommendation cards + inline tool mentions
                   p: ({ children }) => {
                     const text = String(children);
-                    const toolMatch = text.match(/^(?:Tool|Recommended Tool):\s*(builder|evaluator|journey|copywriter|analyzer|content-dna|profiles)$/i);
-                    if (toolMatch) {
-                      const toolKey = toolMatch[1].toLowerCase();
+                    // Exact standalone: "Tool: copywriter"
+                    const exactToolMatch = text.match(/^(?:Tool|Recommended Tool):\s*(builder|evaluator|journey|copywriter|analyzer|content-dna|profiles)$/i);
+                    if (exactToolMatch) {
+                      const toolKey = exactToolMatch[1].toLowerCase();
                       const route = toolRoutes[toolKey];
                       if (route) {
                         const ToolIcon = route.icon;
@@ -484,6 +485,37 @@ export function ScratchpadCapture() {
                               </Button>
                             </Link>
                           </div>
+                        );
+                      }
+                    }
+                    // Inline pattern: "Tool: copywriter Why: ..." within a paragraph
+                    const inlineToolMatch = text.match(/(?:Tool|Recommended Tool):\s*(builder|evaluator|journey|copywriter|analyzer|content-dna|profiles)\b/i);
+                    if (inlineToolMatch) {
+                      const toolKey = inlineToolMatch[1].toLowerCase();
+                      const route = toolRoutes[toolKey];
+                      if (route) {
+                        const ToolIcon = route.icon;
+                        const before = text.slice(0, inlineToolMatch.index);
+                        const after = text.slice((inlineToolMatch.index || 0) + inlineToolMatch[0].length);
+                        // Split "Why: ..." from the remainder
+                        const whyMatch = after.match(/^\s*Why:\s*(.*)/i);
+                        return (
+                          <p className="text-sm leading-relaxed text-foreground/80 my-1.5 flex items-center flex-wrap gap-1">
+                            {before && <span>{before}</span>}
+                            <span className="text-primary font-bold">Tool:</span>
+                            <Link to={route.path} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-primary font-semibold text-xs hover:bg-primary/20 transition-colors">
+                              <ToolIcon className="h-3 w-3" />
+                              {route.label}
+                            </Link>
+                            {whyMatch ? (
+                              <>
+                                <span className="text-accent font-bold">Why:</span>
+                                <span>{whyMatch[1]}</span>
+                              </>
+                            ) : after.trim() ? (
+                              <span>{after}</span>
+                            ) : null}
+                          </p>
                         );
                       }
                     }
