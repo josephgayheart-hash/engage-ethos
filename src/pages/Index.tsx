@@ -1,6 +1,7 @@
 import { Header } from "@/components/Header";
 import { DashboardHero } from "@/components/dashboard";
 import { ResumeWorkCard } from "@/components/dashboard/ResumeWorkCard";
+import { QuickActionsPanel } from "@/components/dashboard/QuickActionsPanel";
 import { MyDraftsCard } from "@/components/MyDraftsCard";
 import { RecentMessagesPanel } from "@/components/dashboard/RecentMessagesPanel";
 import { ContentDNAStatusCard } from "@/components/dashboard/ContentDNAStatusCard";
@@ -20,6 +21,9 @@ const Index = () => {
 
           {/* Resume Where You Left Off */}
           <ResumeWorkCard />
+
+          {/* Core Actions — prominent for new users, dismissible */}
+          <QuickActionsPanel />
           
           {/* My Drafts - Promoted to full width */}
           <section id="my-drafts">
