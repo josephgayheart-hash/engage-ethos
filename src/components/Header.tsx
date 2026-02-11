@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Library, FolderOpen, Settings, Home, LogOut, User, CheckCircle, UserPlus, Building2, PenTool, Route, ChevronDown, Sparkles, FileEdit, Briefcase, BarChart3, Users, Layers } from "lucide-react";
+import { Library, FolderOpen, Settings, Home, LogOut, User, CheckCircle, UserPlus, Building2, PenTool, Route, ChevronDown, Sparkles, FileEdit, Briefcase, BarChart3, Users, Layers, Wrench } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAgencyMode } from "@/hooks/useAgencyMode";
 import { Button } from "@/components/ui/button";
@@ -150,6 +150,15 @@ export function Header() {
               >
                 <Route className="w-4 h-4" />
                 <span className="hidden sm:inline">Strategy</span>
+              </Link>
+
+              {/* Tools */}
+              <Link
+                to="/tools" 
+                className={linkStyles('/tools')}
+              >
+                <Wrench className="w-4 h-4" />
+                <span className="hidden sm:inline">Tools</span>
               </Link>
 
               {/* Libraries Dropdown */}
