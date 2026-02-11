@@ -77,3 +77,6 @@ verify_jwt = false
 
 [functions.send-test-email]
 verify_jwt = false
+
+[functions.organize-scratchpad]
+verify_jwt = false
