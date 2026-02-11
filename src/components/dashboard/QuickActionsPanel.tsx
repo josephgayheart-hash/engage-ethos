@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   PenTool,
@@ -9,57 +8,64 @@ import {
   FolderOpen,
   Sparkles,
   ArrowRight,
-  X,
+  ChevronDown,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-const DISMISSED_KEY = "campusvoice_quick_actions_compact";
+const COMPACT_KEY = "campusvoice_quick_actions_compact";
 
 const coreActions = [
   {
-    label: "Build a Message",
+    label: "Build",
     description: "Create on-brand communications guided by your Content DNA and institutional voice.",
     href: "/build",
     icon: PenTool,
+    gradient: "from-primary/90 to-primary",
   },
   {
-    label: "Evaluate Content",
+    label: "Evaluate",
     description: "Score existing messages for brand alignment, reading level, and tone consistency.",
     href: "/evaluate",
     icon: FileText,
+    gradient: "from-accent/90 to-accent",
   },
   {
-    label: "Design a Journey",
+    label: "Journey",
     description: "Map multi-touch communication sequences for key student lifecycle moments.",
     href: "/strategy",
     icon: Map,
+    gradient: "from-[hsl(var(--cyber-purple))]/90 to-[hsl(var(--cyber-purple))]",
   },
   {
-    label: "Browse Library",
+    label: "Library",
     description: "Access your saved messages, shared templates, and approved content.",
     href: "/library",
     icon: FolderOpen,
+    gradient: "from-secondary/90 to-secondary",
   },
   {
     label: "DNA Studio",
-    description: "Train and refine your institution's Content DNA for better AI-generated results.",
+    description: "Train and refine your Content DNA for better AI-generated results.",
     href: "/admin/content-dna",
     icon: Sparkles,
+    gradient: "from-[hsl(var(--cyber-lime))]/80 to-[hsl(var(--cyber-lime))]",
   },
 ];
 
 export function QuickActionsPanel() {
   const [compact, setCompact] = useState(() => {
     try {
-      return localStorage.getItem(DISMISSED_KEY) === "true";
+      return localStorage.getItem(COMPACT_KEY) === "true";
     } catch {
       return false;
     }
   });
 
-  const handleCompact = () => {
-    setCompact(true);
+  const handleToggle = () => {
+    const next = !compact;
+    setCompact(next);
     try {
-      localStorage.setItem(DISMISSED_KEY, "true");
+      localStorage.setItem(COMPACT_KEY, String(next));
     } catch {
       // ignore
     }
@@ -67,65 +73,73 @@ export function QuickActionsPanel() {
 
   return (
     <section className="space-y-3">
-      {!compact && (
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-foreground tracking-wide uppercase">
-            Get Started
-          </h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleCompact}
-            className="text-xs text-muted-foreground hover:text-foreground gap-1 h-7"
-          >
-            <X className="w-3.5 h-3.5" />
-            I know my way around
-          </Button>
-        </div>
-      )}
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-foreground tracking-wide uppercase">
+          {compact ? "Quick Actions" : "Get Started"}
+        </h2>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleToggle}
+          className="text-xs text-muted-foreground hover:text-foreground gap-1 h-7"
+        >
+          <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", compact && "-rotate-180")} />
+          {compact ? "Show details" : "Compact view"}
+        </Button>
+      </div>
 
-      {compact ? (
-        <div className="flex flex-wrap items-center gap-2">
-          {coreActions.map((action) => {
-            const Icon = action.icon;
+      <div className={cn(
+        "grid gap-3 transition-all",
+        compact
+          ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
+          : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
+      )}>
+        {coreActions.map((action) => {
+          const Icon = action.icon;
+
+          if (compact) {
             return (
-              <Button key={action.href} variant="outline" size="sm" asChild className="gap-1.5">
-                <Link to={action.href}>
-                  <Icon className="w-4 h-4" />
-                  {action.label}
-                  <ArrowRight className="w-3 h-3" />
-                </Link>
-              </Button>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
-          {coreActions.map((action) => {
-            const Icon = action.icon;
-            return (
-              <Link key={action.href} to={action.href} className="group">
-                <Card className="h-full border-border/60 bg-card hover:border-primary/40 hover:shadow-md transition-all duration-200">
-                  <CardContent className="p-4 flex flex-col gap-2.5">
-                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-                      <Icon className="w-4.5 h-4.5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground flex items-center gap-1">
-                        {action.label}
-                        <ArrowRight className="w-3 h-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                        {action.description}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+              <Link
+                key={action.href}
+                to={action.href}
+                className="group relative overflow-hidden rounded-xl p-3 flex items-center gap-2.5 bg-card border border-border/60 hover:border-primary/40 hover:shadow-md transition-all"
+              >
+                <div className={cn("w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center shrink-0", action.gradient)}>
+                  <Icon className="w-4 h-4 text-white" />
+                </div>
+                <span className="text-sm font-medium text-foreground">{action.label}</span>
+                <ArrowRight className="w-3.5 h-3.5 ml-auto text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
               </Link>
             );
-          })}
-        </div>
-      )}
+          }
+
+          return (
+            <Link key={action.href} to={action.href} className="group">
+              <div className="relative h-full overflow-hidden rounded-xl border border-border/60 bg-card hover:border-primary/30 hover:shadow-lg transition-all duration-300">
+                {/* Gradient accent strip */}
+                <div className={cn("h-1.5 w-full bg-gradient-to-r", action.gradient)} />
+                <div className="p-5 flex flex-col gap-3">
+                  <div className={cn(
+                    "w-11 h-11 rounded-xl bg-gradient-to-br flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform",
+                    action.gradient
+                  )}>
+                    <Icon className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-base font-semibold text-foreground flex items-center gap-1.5">
+                      {action.label}
+                      <ArrowRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                      {action.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
     </section>
   );
 }
