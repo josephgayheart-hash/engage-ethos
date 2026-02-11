@@ -346,60 +346,56 @@ export function ScratchpadCapture() {
 
         {/* Results panel */}
         {showResults && organizedText && (
-          <div className="animate-in fade-in-0 slide-in-from-bottom-3 duration-500 pt-3 pl-3 border-t border-border/40 space-y-1">
-            <div className="prose prose-sm max-w-none text-foreground
-              prose-headings:text-foreground prose-headings:font-semibold
-              prose-p:text-sm prose-p:leading-relaxed prose-p:text-foreground/90
-              prose-strong:text-foreground prose-strong:font-semibold
-              prose-li:text-sm prose-li:text-foreground/90
-              prose-ul:my-1 prose-ol:my-1
-            ">
+          <div className="animate-in fade-in-0 slide-in-from-bottom-3 duration-500 pt-3 pl-3 space-y-0">
+            <div className="max-w-none text-foreground">
               <ReactMarkdown
                 components={{
-                  // Section headers with separator
+                  // H1 — top-level output title (rarely used but just in case)
+                  h1: ({ children }) => (
+                    <h1 className="text-base font-bold text-foreground mb-3 mt-1">{children}</h1>
+                  ),
+                  // H2 — major section titles: "Summary", "Extracted Fields", "Recommendations"
                   h2: ({ children }) => (
-                    <div className="mt-5 first:mt-0">
-                      <div className="h-px bg-border/50 mb-3" />
-                      <h2 className="flex items-center gap-2 text-base font-bold text-foreground mb-2">
-                        <Sparkles className="h-4 w-4 text-primary flex-shrink-0" />
+                    <div className="mt-1 first:mt-0">
+                      <div className="h-px bg-border/50 my-3" />
+                      <h2 className="text-[13px] font-bold uppercase tracking-wide text-muted-foreground mb-2">
                         {children}
                       </h2>
                     </div>
                   ),
-                  // Recommendation sub-headers
+                  // H3 — sub-items under a section (individual recommendations, etc.)
                   h3: ({ children }) => {
                     const text = String(children).toLowerCase();
-                    // Check if the heading mentions a tool name
                     for (const [key, route] of Object.entries(toolRoutes)) {
                       if (text.includes(key) || text.includes(route.label.toLowerCase())) {
                         const ToolIcon = route.icon;
                         return (
-                          <h3 className="flex items-center gap-2 text-sm font-semibold text-primary mt-4 mb-1.5">
-                            <ToolIcon className="h-4 w-4 text-accent flex-shrink-0" />
+                          <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground mt-3 mb-1">
+                            <ToolIcon className="h-3.5 w-3.5 text-primary flex-shrink-0" />
                             {children}
                           </h3>
                         );
                       }
                     }
                     return (
-                      <h3 className="flex items-center gap-2 text-sm font-semibold text-primary mt-4 mb-1.5">
-                        <ArrowRight className="h-3.5 w-3.5 text-secondary flex-shrink-0" />
+                      <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground mt-3 mb-1">
+                        <ArrowRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                         {children}
                       </h3>
                     );
                   },
-                  // Bold labels with contextual styling
+                  // Bold labels
                   strong: ({ children }) => {
                     const text = String(children);
                     if (text === "Tool:" || text === "Recommended Tool:") {
-                      return <strong className="text-accent font-semibold">{children}</strong>;
+                      return <strong className="text-primary font-semibold">{children}</strong>;
                     }
                     if (text === "Why:") {
                       return <strong className="text-muted-foreground font-medium">{children}</strong>;
                     }
                     return <strong className="font-semibold">{children}</strong>;
                   },
-                  // Enhance list items with field icons
+                  // List items with field icons
                   li: ({ children }) => {
                     const text = String(children);
                     for (const [field, IconComp] of Object.entries(fieldIcons)) {
@@ -413,9 +409,11 @@ export function ScratchpadCapture() {
                         );
                       }
                     }
-                    return <li className="text-sm text-foreground/90 py-0.5">{children}</li>;
+                    return <li className="text-sm text-foreground/90 py-0.5 ml-0">{children}</li>;
                   },
-                  // Paragraphs — detect tool references and render as linked chips with icons
+                  ul: ({ children }) => <ul className="my-1.5 space-y-0.5 list-disc list-inside">{children}</ul>,
+                  ol: ({ children }) => <ol className="my-1.5 space-y-0.5 list-decimal list-inside">{children}</ol>,
+                  // Tool recommendation cards
                   p: ({ children }) => {
                     const text = String(children);
                     const toolMatch = text.match(/^(?:Tool|Recommended Tool):\s*(builder|evaluator|journey|copywriter|analyzer|content-dna|profiles)$/i);
@@ -425,13 +423,13 @@ export function ScratchpadCapture() {
                       if (route) {
                         const ToolIcon = route.icon;
                         return (
-                          <div className="my-2.5 rounded-lg border border-primary/15 bg-primary/5 p-2.5 flex items-center gap-3">
+                          <div className="my-2 rounded-lg border border-primary/15 bg-primary/5 p-2.5 flex items-center gap-3">
                             <div className="flex items-center justify-center h-8 w-8 rounded-md bg-primary/10 flex-shrink-0">
                               <ToolIcon className="h-4 w-4 text-primary" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <span className="text-xs font-medium text-muted-foreground">Recommended Tool</span>
-                              <p className="text-sm font-semibold text-foreground -mt-0.5">{route.label}</p>
+                              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Recommended Tool</span>
+                              <p className="text-sm font-semibold text-foreground leading-tight">{route.label}</p>
                             </div>
                             <Link to={route.path}>
                               <Button
@@ -447,9 +445,8 @@ export function ScratchpadCapture() {
                         );
                       }
                     }
-                    return <p className="text-sm leading-relaxed text-foreground/90">{children}</p>;
+                    return <p className="text-sm leading-relaxed text-foreground/80 my-1.5">{children}</p>;
                   },
-                  // Horizontal rules as styled separators
                   hr: () => <div className="h-px bg-border/40 my-4" />,
                 }}
               >
