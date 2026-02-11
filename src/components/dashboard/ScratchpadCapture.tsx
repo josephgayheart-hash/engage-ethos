@@ -357,8 +357,8 @@ export function ScratchpadCapture() {
                   // H2 — major section titles: "Summary", "Extracted Fields", "Recommendations"
                   h2: ({ children }) => (
                     <div className="mt-1 first:mt-0">
-                      <div className="h-px bg-border/50 my-3" />
-                      <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground mb-2">
+                      <div className="h-px bg-border/40 my-4" />
+                      <h2 className="text-base font-bold text-foreground mb-2">
                         {children}
                       </h2>
                     </div>
@@ -386,12 +386,27 @@ export function ScratchpadCapture() {
                   },
                   // Bold labels
                   strong: ({ children }) => {
-                    const text = String(children);
+                    const text = String(children).trim();
+                    // Check if it's a tool name reference like "Tool: builder" or "Recommended Tool: evaluator"
+                    const toolLabelMatch = text.match(/^(?:Tool|Recommended Tool):\s*(.+)$/i);
+                    if (toolLabelMatch) {
+                      const toolKey = toolLabelMatch[1].trim().toLowerCase();
+                      const route = toolRoutes[toolKey];
+                      if (route) {
+                        const ToolIcon = route.icon;
+                        return (
+                          <Link to={route.path} className="inline-flex items-center gap-1.5 text-primary font-semibold hover:underline">
+                            <ToolIcon className="h-3.5 w-3.5" />
+                            {route.label}
+                          </Link>
+                        );
+                      }
+                    }
                     if (text === "Tool:" || text === "Recommended Tool:") {
-                      return <strong className="text-primary font-semibold">{children}</strong>;
+                      return <strong className="text-primary font-bold">{children}</strong>;
                     }
                     if (text === "Why:") {
-                      return <strong className="text-muted-foreground font-medium">{children}</strong>;
+                      return <strong className="text-accent font-bold">{children}</strong>;
                     }
                     return <strong className="font-semibold">{children}</strong>;
                   },
