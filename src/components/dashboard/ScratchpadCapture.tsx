@@ -9,6 +9,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useContentDNA } from "@/hooks/useContentDNA";
 import { useUserDrafts } from "@/hooks/useUserDrafts";
+import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
@@ -33,6 +34,8 @@ const toolRoutes: Record<string, { path: string; label: string; color: string }>
   journey: { path: "/strategy", label: "Journey Designer", color: "bg-secondary text-secondary-foreground" },
   copywriter: { path: "/playground", label: "AI Copywriter", color: "bg-primary text-primary-foreground" },
   analyzer: { path: "/web-content-analyzer", label: "Content Analyzer", color: "bg-accent text-accent-foreground" },
+  "content-dna": { path: "/admin/content-dna", label: "Content DNA Studio", color: "bg-accent text-accent-foreground" },
+  profiles: { path: "/settings", label: "Institutional Profiles", color: "bg-primary text-primary-foreground" },
 };
 
 interface ClassifyResult {
@@ -46,6 +49,7 @@ export function ScratchpadCapture() {
   const navigate = useNavigate();
   const { analysis } = useContentDNA();
   const { drafts } = useUserDrafts();
+  const { profiles } = useInstitutionalProfiles();
 
   const [rawText, setRawText] = useState(() => {
     try { return localStorage.getItem(STORAGE_KEY) || ""; } catch { return ""; }
@@ -125,7 +129,9 @@ export function ScratchpadCapture() {
       .slice(0, 5)
       .map((d) => d.title || `Untitled ${d.draft_type}`)
       .filter(Boolean);
-    return { contentDNASummary, recentDraftTitles };
+    const primaryProfile = profiles.find(p => p.profileType === "university") || profiles[0];
+    const institutionalProfileName = primaryProfile?.name || "";
+    return { contentDNASummary, recentDraftTitles, institutionalProfileName };
   };
 
   // Organize with streaming
@@ -136,7 +142,7 @@ export function ScratchpadCapture() {
     setShowResults(true);
 
     abortRef.current = new AbortController();
-    const { contentDNASummary, recentDraftTitles } = buildContext();
+    const { contentDNASummary, recentDraftTitles, institutionalProfileName } = buildContext();
 
     try {
       const resp = await fetch(
@@ -152,6 +158,7 @@ export function ScratchpadCapture() {
             rawText,
             contentDNASummary: contentDNASummary || undefined,
             recentDraftTitles: recentDraftTitles.length ? recentDraftTitles : undefined,
+            institutionalProfileName: institutionalProfileName || undefined,
           }),
           signal: abortRef.current.signal,
         }
