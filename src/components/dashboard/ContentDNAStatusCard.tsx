@@ -224,7 +224,7 @@ export function ContentDNAStatusCard() {
             </div>
 
             {/* Profile names with DNA */}
-            {status.profileNames.length > 0 && (
+            {(status.profileNames?.length ?? 0) > 0 && (
               <div className="space-y-1">
                 <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
                   Profiles with DNA
