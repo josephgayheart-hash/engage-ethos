@@ -164,31 +164,17 @@ const SharedLibrary = () => {
                   Brand-governed content with approval workflows
                 </p>
               </div>
-              <div className="flex gap-2 flex-wrap">
-                {pendingCount > 0 && (
-                  <Button 
-                    variant={adminViewMode === 'admin' ? 'default' : 'outline'}
-                    onClick={() => setAdminViewMode(adminViewMode === 'admin' ? 'browse' : 'admin')}
-                    className="flex items-center gap-2"
-                  >
-                    <ShieldCheck className="w-4 h-4" />
-                    <span className="hidden sm:inline">Admin Review</span>
-                    <Badge variant="destructive" className="ml-1">{pendingCount}</Badge>
-                  </Button>
-                )}
-                <Button variant="outline" onClick={() => navigate('/strategy')} className="flex items-center gap-2">
-                  <Route className="w-4 h-4" />
-                  <span className="hidden sm:inline">Design Journey</span>
+              {pendingCount > 0 && (
+                <Button 
+                  variant={adminViewMode === 'admin' ? 'default' : 'outline'}
+                  onClick={() => setAdminViewMode(adminViewMode === 'admin' ? 'browse' : 'admin')}
+                  className="flex items-center gap-2"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  <span className="hidden sm:inline">Admin Review</span>
+                  <Badge variant="destructive" className="ml-1">{pendingCount}</Badge>
                 </Button>
-                <Button variant="outline" onClick={() => navigate('/build')} className="flex items-center gap-2">
-                  <Pencil className="w-4 h-4" />
-                  <span className="hidden sm:inline">Build Message</span>
-                </Button>
-                <Button variant="outline" onClick={() => navigate('/evaluate')} className="flex items-center gap-2">
-                  <ClipboardCheck className="w-4 h-4" />
-                  <span className="hidden sm:inline">Evaluate</span>
-                </Button>
-              </div>
+              )}
             </div>
           </div>
         </div>
