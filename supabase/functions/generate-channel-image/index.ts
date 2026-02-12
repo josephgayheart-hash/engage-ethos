@@ -466,6 +466,62 @@ CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
 
     console.log("Generating channel image for:", channel, "content:", contentSummary.substring(0, 100));
 
+    // Fetch campus reference photos for visual training
+    let campusPhotoUrls: string[] = [];
+    try {
+      const photoQuery = supabaseAdmin
+        .from("campus_photo_samples")
+        .select("file_url, photo_category")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+
+      if (profileId) {
+        photoQuery.eq("profile_id", profileId);
+      } else if (tenantId) {
+        photoQuery.eq("tenant_id", tenantId);
+      }
+
+      const { data: campusPhotos } = await photoQuery.limit(8);
+
+      if (campusPhotos && campusPhotos.length > 0) {
+        // Smart selection: prefer photos matching prompt context
+        const lowerPrompt = (contentSummary + " " + (audience || "") + " " + (moment || "")).toLowerCase();
+        const categoryPriority: Record<string, string[]> = {
+          "architecture": ["architecture", "building", "campus", "hall", "center", "library"],
+          "campus-life": ["student", "campus life", "community", "event", "club"],
+          "landscape": ["outdoor", "quad", "garden", "nature", "scenic"],
+          "athletics": ["athletic", "sport", "game", "team", "stadium"],
+          "traditions": ["tradition", "ceremony", "homecoming", "commencement", "graduation"],
+          "aerial": ["aerial", "overview", "campus view", "panoramic"],
+        };
+
+        // Score each photo by relevance
+        const scored = campusPhotos.map(p => {
+          const keywords = categoryPriority[p.photo_category] || [];
+          const score = keywords.some(kw => lowerPrompt.includes(kw)) ? 2 : 1;
+          return { ...p, score };
+        });
+
+        scored.sort((a, b) => b.score - a.score);
+        campusPhotoUrls = scored.slice(0, 3).map(p => p.file_url);
+        console.log(`Using ${campusPhotoUrls.length} campus reference photos`);
+      }
+    } catch (e) {
+      console.warn("Could not fetch campus photos:", e);
+    }
+
+    // Build message content - either simple string or multimodal array
+    let messageContent: any;
+    if (campusPhotoUrls.length > 0) {
+      messageContent = [
+        { type: "text", text: prompt },
+        { type: "text", text: "REFERENCE CAMPUS PHOTOGRAPHY — match the architectural style, lighting, environment, and photographic tone of these real campus images:" },
+        ...campusPhotoUrls.map(url => ({ type: "image_url", image_url: { url } })),
+      ];
+    } else {
+      messageContent = prompt;
+    }
+
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -474,7 +530,7 @@ CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
       },
       body: JSON.stringify({
         model: "google/gemini-3-pro-image-preview",
-        messages: [{ role: "user", content: prompt }],
+        messages: [{ role: "user", content: messageContent }],
         modalities: ["image", "text"],
       }),
     });

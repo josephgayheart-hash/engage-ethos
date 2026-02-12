@@ -127,6 +127,60 @@ Requirements:
 - Should feel like a high-quality university marketing photo
 - Candid, natural poses if people are present — no staged or artificial groupings`;
 
+    // Fetch campus reference photos for visual training
+    let campusPhotoUrls: string[] = [];
+    try {
+      const photoQuery = supabaseAdmin
+        .from("campus_photo_samples")
+        .select("file_url, photo_category")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+
+      if (profileId) {
+        photoQuery.eq("profile_id", profileId);
+      } else if (tenantId) {
+        photoQuery.eq("tenant_id", tenantId);
+      }
+
+      const { data: campusPhotos } = await photoQuery.limit(8);
+
+      if (campusPhotos && campusPhotos.length > 0) {
+        const lowerPrompt = (title + " " + (audience || "") + " " + (moment || "")).toLowerCase();
+        const categoryPriority: Record<string, string[]> = {
+          "architecture": ["architecture", "building", "campus", "hall", "center", "library"],
+          "campus-life": ["student", "campus life", "community", "event", "club"],
+          "landscape": ["outdoor", "quad", "garden", "nature", "scenic"],
+          "athletics": ["athletic", "sport", "game", "team", "stadium"],
+          "traditions": ["tradition", "ceremony", "homecoming", "commencement", "graduation"],
+          "aerial": ["aerial", "overview", "campus view", "panoramic"],
+        };
+
+        const scored = campusPhotos.map(p => {
+          const keywords = categoryPriority[p.photo_category] || [];
+          const score = keywords.some(kw => lowerPrompt.includes(kw)) ? 2 : 1;
+          return { ...p, score };
+        });
+
+        scored.sort((a, b) => b.score - a.score);
+        campusPhotoUrls = scored.slice(0, 3).map(p => p.file_url);
+        console.log(`Using ${campusPhotoUrls.length} campus reference photos for cover`);
+      }
+    } catch (e) {
+      console.warn("Could not fetch campus photos:", e);
+    }
+
+    // Build message content
+    let messageContent: any;
+    if (campusPhotoUrls.length > 0) {
+      messageContent = [
+        { type: "text", text: prompt },
+        { type: "text", text: "REFERENCE CAMPUS PHOTOGRAPHY — match the architectural style, lighting, environment, and photographic tone of these real campus images:" },
+        ...campusPhotoUrls.map(url => ({ type: "image_url", image_url: { url } })),
+      ];
+    } else {
+      messageContent = prompt;
+    }
+
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -135,7 +189,7 @@ Requirements:
       },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash-image",
-        messages: [{ role: "user", content: prompt }],
+        messages: [{ role: "user", content: messageContent }],
         modalities: ["image", "text"],
       }),
     });
