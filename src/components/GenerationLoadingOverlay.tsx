@@ -118,7 +118,6 @@ function buildPhases(ctx: GenerationContext): (PhaseItem & { key: string })[] {
       { key: "profile", message: "Loading institutional profile…", completedMessage: "Institutional profile loaded", detail: profileDetail, icon: Building2, proofItems: buildProofItems(ctx, "profile") },
       { key: "dna", message: "Analyzing Content DNA & voice patterns…", completedMessage: "Content DNA & voice patterns analyzed", detail: ctx.useContentDNA ? "Tone, vocabulary, sentence style" : "Skipped — DNA off", icon: Dna, proofItems: buildProofItems(ctx, "dna") },
       { key: "brand", message: "Mapping brand pillars to journey arcs…", completedMessage: "Brand pillars mapped to journey arcs", detail: ctx.brandPillarCount ? `${ctx.brandPillarCount} pillar${ctx.brandPillarCount > 1 ? "s" : ""} selected` : undefined, icon: Target, proofItems: buildProofItems(ctx, "brand") },
-      { key: "research", message: "Applying behavioral science research…", completedMessage: "Behavioral science research applied", detail: "Cialdini, Petty & Cacioppo, Kaptein", icon: Brain, proofItems: [] },
       { key: "flow", message: "Designing multi-channel touchpoint flow…", completedMessage: "Multi-channel touchpoint flow designed", detail: ctx.journeyWeeks ? `${ctx.journeyWeeks}-week timeline` : undefined, icon: Map, proofItems: [] },
       { key: "stories", message: "Weaving in stories & proof points…", completedMessage: "Stories & proof points woven in", detail: ctx.hasStories || ctx.hasFacts ? `${ctx.storyCount || 0} stories, ${ctx.factCount || 0} facts` : "No stories/facts selected", icon: BookMarked, proofItems: buildProofItems(ctx, "stories") },
       { key: "generate", message: "Generating on-brand journey content…", completedMessage: "On-brand journey content generated", detail: `${ctx.channels?.length || 0} channels`, icon: Mail, proofItems: [] },
@@ -130,7 +129,6 @@ function buildPhases(ctx: GenerationContext): (PhaseItem & { key: string })[] {
     { key: "profile", message: "Loading institutional profile…", completedMessage: "Institutional profile loaded", detail: profileDetail, icon: Building2, proofItems: buildProofItems(ctx, "profile") },
     { key: "dna", message: "Analyzing Content DNA & voice patterns…", completedMessage: "Content DNA & voice patterns analyzed", detail: ctx.useContentDNA ? "Tone, vocabulary, sentence style" : "Skipped — DNA off", icon: Dna, proofItems: buildProofItems(ctx, "dna") },
     { key: "brand", message: "Applying brand pillars & proof points…", completedMessage: "Brand pillars & proof points applied", detail: ctx.brandPillarCount ? `${ctx.brandPillarCount} pillar${ctx.brandPillarCount > 1 ? "s" : ""} selected` : undefined, icon: Target, proofItems: buildProofItems(ctx, "brand") },
-    { key: "research", message: "Matching audience psychology & research…", completedMessage: "Audience psychology & research matched", detail: "Cialdini, Petty & Cacioppo, Kaptein", icon: Brain, proofItems: [] },
     { key: "stories", message: "Weaving in stories & data points…", completedMessage: "Stories & data points woven in", detail: ctx.hasStories || ctx.hasFacts ? `${ctx.storyCount || 0} stories, ${ctx.factCount || 0} facts` : "No stories/facts selected", icon: BookMarked, proofItems: buildProofItems(ctx, "stories") },
     { key: "generate", message: "Generating on-brand drafts per channel…", completedMessage: "On-brand drafts generated per channel", detail: `${ctx.channels?.length || 0} channel${(ctx.channels?.length || 0) > 1 ? "s" : ""}`, icon: Mail, proofItems: [] },
     { key: "score", message: "Scoring brand adherence & finalizing…", completedMessage: "Brand adherence scored & finalized", detail: undefined, icon: Sparkles, proofItems: [] },
@@ -141,8 +139,8 @@ export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadi
   const [phase, setPhase] = useState(0);
   const [showTags, setShowTags] = useState(false);
   const [revealedPhases, setRevealedPhases] = useState<number[]>([]);
-  // Track which proof items within a phase have been revealed (by phase index)
   const [revealedProofByPhase, setRevealedProofByPhase] = useState<Record<number, number>>({});
+  const [allDone, setAllDone] = useState(false);
 
   const phases = useMemo(() => buildPhases(context), [context]);
   const maxPhase = phases.length - 1;
@@ -153,6 +151,7 @@ export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadi
       setShowTags(false);
       setRevealedPhases([]);
       setRevealedProofByPhase({});
+      setAllDone(false);
       return;
     }
     setRevealedPhases([0]);
@@ -160,7 +159,12 @@ export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadi
 
     const interval = setInterval(() => {
       setPhase(prev => {
-        const next = prev < maxPhase ? prev + 1 : prev;
+        if (prev >= maxPhase) {
+          clearInterval(interval);
+          setTimeout(() => setAllDone(true), 600);
+          return prev;
+        }
+        const next = prev + 1;
         setRevealedPhases(r => r.includes(next) ? r : [...r, next]);
         return next;
       });
@@ -384,17 +388,26 @@ export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadi
           <div className="h-1.5 bg-muted rounded-full overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-primary/80 to-primary rounded-full transition-all duration-1000 ease-out"
-              style={{ width: `${Math.min(8 + (phase / maxPhase) * 90, 95)}%` }}
+              style={{ width: allDone ? "100%" : `${Math.min(8 + (phase / maxPhase) * 90, 95)}%` }}
             />
           </div>
         </div>
 
-        {/* Estimated time */}
-        <p className="text-xs text-muted-foreground">
-          {context.mode === "journey"
-            ? "Building your strategy — typically 30–60 seconds"
-            : "Crafting your messages — typically 15–30 seconds"}
-        </p>
+        {/* Completion pop or estimated time */}
+        {allDone ? (
+          <div className="flex flex-col items-center gap-2" style={{ animation: "completionPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards" }}>
+            <div className="w-10 h-10 rounded-full bg-green-500/15 flex items-center justify-center border-2 border-green-500/30">
+              <Check className="w-5 h-5 text-green-500" />
+            </div>
+            <p className="text-sm font-semibold text-foreground">Ready!</p>
+          </div>
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            {context.mode === "journey"
+              ? "Building your strategy — typically 30–60 seconds"
+              : "Crafting your messages — typically 15–30 seconds"}
+          </p>
+        )}
       </div>
 
       {/* Keyframe animations */}
@@ -435,6 +448,22 @@ export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadi
           100% {
             opacity: 1;
             transform: translateY(0);
+          }
+        }
+        @keyframes completionPop {
+          0% {
+            opacity: 0;
+            transform: scale(0);
+          }
+          50% {
+            transform: scale(1.3);
+          }
+          70% {
+            transform: scale(0.9);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1);
           }
         }
         @keyframes proofFlashIn {
