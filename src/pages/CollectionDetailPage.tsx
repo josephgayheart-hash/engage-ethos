@@ -45,7 +45,7 @@ const CollectionDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { collections, getCollectionItems, addItemToCollection, removeItemFromCollection, updateCollection, deleteCollection } = useLibraryCollections();
+  const { collections, getCollectionItems, addItemToCollection, removeItemFromCollection, updateCollection, deleteCollection, refreshCollections } = useLibraryCollections();
   const { getTemplateById } = useSharedLibrary();
   const [items, setItems] = useState<CollectionItem[]>([]);
   const [isLoadingItems, setIsLoadingItems] = useState(true);
@@ -59,6 +59,17 @@ const CollectionDetailPage = () => {
   const [editDescription, setEditDescription] = useState('');
 
   const collection = collections.find(c => c.id === id);
+
+  // Poll for cover image if it's missing (AI generation happens in background)
+  useEffect(() => {
+    if (!collection || collection.coverImageUrl) return;
+    const interval = setInterval(() => {
+      refreshCollections();
+    }, 3000);
+    // Stop polling after 60s
+    const timeout = setTimeout(() => clearInterval(interval), 60000);
+    return () => { clearInterval(interval); clearTimeout(timeout); };
+  }, [collection?.coverImageUrl, collection, refreshCollections]);
 
   const loadItems = useCallback(async () => {
     if (!id) return;
