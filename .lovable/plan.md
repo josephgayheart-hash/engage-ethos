@@ -1,116 +1,127 @@
 
 
-# Library Production-Ready Implementation Plan
+# Campaign Collections and Asset Previews for the Library
 
-## Overview
-This plan addresses two combined objectives: (1) closing the feature gaps identified in the library (tagging, real usage tracking, robust metadata), and (2) making both libraries fully production-ready with proper database persistence, tenant isolation, and agency terminology support.
+## What You're Describing
 
----
-
-## Phase 1: Database Schema Enhancements
-
-### 1a. Add missing columns to `shared_templates`
-- Add `institutional_profile_id` (uuid, nullable) for profile association
-- Add `college_name` and `department_name` (text, nullable) for organizational context
-- Add `change_history` (jsonb, default `'[]'`) for version tracking
-- Add `created_by_name` (text, nullable) for creator attribution display
-- Add `source` (text, nullable) for tracking origin (builder, journey, etc.)
-- Add `tags` (text array, nullable) for free-form labeling/tagging
-
-### 1b. Add missing columns to `personal_messages`
-- Add `tags` (text array, nullable) for free-form labels
-- Add `channels` (text array, nullable) for multi-channel messages
-- Add `channel_drafts` (jsonb, nullable) for per-channel content
-- Add `cohort` (jsonb, nullable) for cohort context
-- Add `source` (text, nullable) -- already in metadata, but explicit column is cleaner
-- Add `versions` (jsonb, default `'[]'`) for version history
-- Add `submitted_to_library` (boolean, default false)
-- Add `submitted_at` (timestamptz, nullable)
-- Add `created_by_name` (text, nullable) for attribution
-- Add `remixed_from` (jsonb, nullable) for remix tracking
-
-### 1c. Create `library_usage_events` table (replaces mocked analytics)
-- `id` (uuid, PK)
-- `tenant_id` (uuid, not null)
-- `user_id` (uuid, not null)
-- `template_id` (uuid, nullable) -- for shared templates
-- `message_id` (uuid, nullable) -- for personal messages
-- `action` (text: 'view', 'copy', 'remix', 'export', 'pull')
-- `metadata` (jsonb)
-- `created_at` (timestamptz)
-- RLS: users can insert their own; admins can view tenant-wide; super admins can view all
+A way to group library items (messages, journeys, templates, and linked assets) under a campaign, initiative, or program -- creating a "container" that holds everything associated with that effort. Plus, visual thumbnails and previews for linked artwork and graphics.
 
 ---
 
-## Phase 2: Rewrite `useSharedLibrary` Hook (Database-First)
+## Part 1: Campaign/Initiative/Program Collections
 
-Replace the current localStorage-based implementation with full database persistence:
+### New Database Table: `library_collections`
 
-- **Load**: Query `shared_templates` table filtered by `tenant_id = get_user_tenant_id(auth.uid())`
-- **Add**: Insert into `shared_templates` with `tenant_id`, `created_by_user_id`, and `created_by_name` from auth context
-- **Update status**: Update record in DB (admin/approver only, enforced by RLS)
-- **Delete**: Delete from DB (admin only, enforced by RLS)
-- **Filter**: All filtering happens client-side on the fetched dataset (same logic, just sourced from DB)
-- **Remove**: All `localStorage` references for `persist_shared_library`
-- **Remove**: Hardcoded `DEFAULT_TEMPLATES` array (seed data should come from DB if needed)
+A lightweight grouping mechanism that acts as a named container:
 
----
+```text
+library_collections
+  id           uuid (PK)
+  tenant_id    uuid (not null)
+  created_by   uuid (not null)
+  name         text (e.g., "Fall 2026 Enrollment Campaign")
+  description  text (optional summary)
+  collection_type  text ("campaign" | "initiative" | "program" | "custom")
+  cover_image_url  text (optional -- a hero image or logo for the collection)
+  tags         text[] (additional labels)
+  status       text ("active" | "archived")
+  created_at   timestamptz
+  updated_at   timestamptz
+```
 
-## Phase 3: Rewrite `useMessageLibrary` Hook (Database-First)
+### Linking Table: `library_collection_items`
 
-Replace the localStorage-primary approach with database as source of truth:
+Associates any library item or external asset with a collection:
 
-- **Load**: Query `personal_messages` filtered by `user_id = auth.uid()`
-- **Add**: Insert into `personal_messages` with all fields including `versions`, `tags`, `created_by_name`
-- **Update**: Update record in DB
-- **Delete**: Delete from DB
-- **Duplicate**: Insert a new record cloned from original
-- **Export**: Read from state (already loaded from DB)
-- **Remove**: `STORAGE_KEY` and `SYNCED_DB_MESSAGES_KEY` localStorage logic
-- **Remove**: The sync-from-DB-to-localStorage bridge pattern
+```text
+library_collection_items
+  id              uuid (PK)
+  collection_id   uuid (FK to library_collections)
+  tenant_id       uuid (not null)
+  item_type       text ("template" | "message" | "external_asset")
+  template_id     uuid (nullable -- for shared_templates)
+  message_id      uuid (nullable -- for personal_messages)
+  external_asset  jsonb (nullable -- for linked assets not yet in a library item)
+  sort_order      integer (for manual ordering)
+  added_by        uuid
+  added_at        timestamptz
+```
 
----
+RLS on both tables: tenant-scoped read/write, admin delete.
 
-## Phase 4: Agency Terminology in Shared Library
+### What This Enables
 
-Update `SharedLibrary.tsx` to use `useAgencyMode()`:
-
-- Page title: "University Library" becomes dynamic (`isAgency ? 'Template Library' : 'University Library'`)
-- Breadcrumb text adapts
-- "Submit to University Library" button label adapts
-- Admin review panel labels adapt
-- Empty state messaging adapts
-
----
-
-## Phase 5: Tagging System
-
-Add a free-form tagging UI to both libraries:
-
-- **Tag input component**: Inline chip-style input allowing users to add/remove tags when saving or editing messages/templates
-- **Filter by tag**: Add a tag filter dropdown to both library pages, populated from existing tags in the dataset
-- **Display**: Show tags as colored badges on library cards and list rows
-- **Persistence**: Tags stored as text arrays in both `personal_messages.tags` and `shared_templates.tags`
+- Create a collection called "Spring 2026 Open House" and tag messages, journeys, Canva graphics, and templates to it
+- Browse the library filtered by collection
+- See a collection detail page showing all associated assets in one place
+- Archive collections when a campaign ends (items remain in the library)
 
 ---
 
-## Phase 6: Real Usage Tracking
+## Part 2: Thumbnail Previews for External Assets
 
-Replace mocked analytics in `TemplateDetailPage.tsx`:
+### How Thumbnails Work (No File Storage Needed)
 
-- When a user views, copies, remixes, or exports a template/message, insert a record into `library_usage_events`
-- On the template detail page, query `library_usage_events` for that template to show real usage history (who used it, when, what action)
-- Display usage count on library cards
+For linked external assets, we generate preview thumbnails using URL-based approaches:
+
+| Platform | Thumbnail Method |
+|----------|-----------------|
+| Canva | Canva share links render an Open Graph image -- we extract the `og:image` meta tag |
+| Google Drive | Google Drive API provides thumbnail URLs for shared files |
+| Figma | Figma share links include an `og:image` with a preview of the design |
+| Brandfolder / Bynder | DAM platforms expose thumbnail URLs in their share links |
+| Generic URLs | Use the page's `og:image` or a favicon + domain placeholder |
+| Direct image URLs (.png, .jpg, .svg) | Display the URL directly as an `<img>` tag |
+
+### Implementation
+
+- **`ExternalAsset` type update**: Add optional `thumbnail_url` field
+- **Auto-detection on paste**: When a user pastes a URL, attempt to infer the platform and construct a thumbnail URL (client-side heuristics based on domain)
+- **Manual override**: Users can paste a direct image URL as the thumbnail if auto-detection doesn't work
+- **Display**: Asset cards show a 16:9 thumbnail preview with the platform icon overlaid in the corner, plus the label and notes below
+
+### New Component: `AssetCard`
+
+A reusable card that renders:
+- Thumbnail image (with fallback to a platform-branded placeholder)
+- Platform icon badge (Canva, Figma, Google Drive, etc.)
+- Asset label and optional notes
+- "Open in [Platform]" link
+- Collection badges showing which campaigns/initiatives the asset belongs to
 
 ---
 
-## Phase 7: Enhanced Author & Notes Metadata
+## Part 3: Collection UI
 
-Ensure complete author information flows through:
+### Collection Browser (New tab on SharedLibrary page)
 
-- On save (both personal and shared), capture `created_by_name` from the user's profile (`profile.first_name + ' ' + profile.last_name`)
-- Display creator name prominently in card view, list view, and detail pages
-- Notes field is editable on detail pages and persisted to DB
+- Add a "Collections" tab alongside "All Playbooks" in the library
+- Shows collection cards with: name, description, cover image, item count, status badge
+- Click into a collection to see all its items (messages, templates, assets) in a detail view
+
+### Collection Detail Page
+
+- Hero section with collection name, description, type badge, cover image
+- Tabbed view: "Messages & Journeys" | "Assets & Creative" | "All Items"
+- Add items to collection via a search/select dialog
+- Add external asset links directly from the collection detail page
+- Remove items from collection (doesn't delete the item itself)
+
+### Adding Items to Collections
+
+From any template or message detail page:
+- "Add to Collection" button opens a dropdown of existing collections (or create new)
+- From the collection detail page: "Add Item" button to search and link existing library items or paste new external asset URLs
+
+---
+
+## Part 4: External Assets Column on Existing Tables
+
+As previously planned, add `external_assets` (jsonb, default `[]`) to:
+- `shared_templates`
+- `personal_messages`
+
+This allows individual library items to carry their own linked assets even outside of a collection context.
 
 ---
 
@@ -118,22 +129,26 @@ Ensure complete author information flows through:
 
 | File | Action |
 |------|--------|
-| Migration SQL | Create -- schema changes for all three tables |
-| `src/hooks/useSharedLibrary.ts` | Rewrite -- database-first with tenant isolation |
-| `src/hooks/useMessageLibrary.ts` | Rewrite -- database-first, remove localStorage |
-| `src/pages/SharedLibrary.tsx` | Modify -- agency mode labels, tag filter, usage counts |
-| `src/pages/PersonalLibrary.tsx` | Modify -- tag display, tag filter |
-| `src/pages/TemplateDetailPage.tsx` | Modify -- real usage tracking, tag display |
-| `src/pages/MessageDetailPage.tsx` | Modify -- tag editing, usage tracking |
-| `src/components/library/TagInput.tsx` | Create -- reusable tag input component |
-| `src/hooks/useLibraryUsageTracking.ts` | Create -- hook for recording and querying usage events |
+| Migration SQL | Create `library_collections`, `library_collection_items` tables; add `external_assets` to `shared_templates` and `personal_messages` |
+| `src/types/library.ts` | Add `ExternalAsset`, `LibraryCollection`, `CollectionItem` interfaces |
+| `src/hooks/useLibraryCollections.ts` | New hook -- CRUD for collections and collection items |
+| `src/hooks/useSharedLibrary.ts` | Map `external_assets` field |
+| `src/hooks/useMessageLibrary.ts` | Map `external_assets` field |
+| `src/components/library/AssetCard.tsx` | New -- thumbnail preview card for external assets |
+| `src/components/library/AssetLinkForm.tsx` | New -- form to add external asset links with URL, label, platform, thumbnail |
+| `src/components/library/CollectionCard.tsx` | New -- card for browsing collections |
+| `src/components/library/AddToCollectionDialog.tsx` | New -- dialog for adding items to collections |
+| `src/pages/SharedLibrary.tsx` | Add "Collections" tab, collection filter |
+| `src/pages/CollectionDetailPage.tsx` | New -- detail view for a collection |
+| `src/pages/TemplateDetailPage.tsx` | Add "Assets" tab, "Add to Collection" button |
+| `src/App.tsx` | Add route for `/collections/:id` |
 
 ---
 
-## Security Considerations
+## What This Does NOT Do
 
-- All existing RLS policies on `shared_templates` and `personal_messages` already enforce tenant isolation -- no changes needed
-- New `library_usage_events` table gets tenant-scoped RLS
-- Agency partners see only their own tenant's library content (same RLS, different label)
-- Super admins retain cross-tenant visibility per existing policies
+- Does not store files in the database (links and thumbnails only)
+- Does not integrate with Canva/DAM APIs (just links to them)
+- Does not replace existing campaign dashboard -- collections are a library-level organizational concept
+- Does not require users to create collections -- they're optional grouping
 
