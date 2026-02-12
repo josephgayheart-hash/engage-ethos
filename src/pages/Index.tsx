@@ -9,6 +9,7 @@ import { ContentDNAStatusCard } from "@/components/dashboard/ContentDNAStatusCar
 import { InstitutionManagementCard } from "@/components/dashboard/InstitutionManagementCard";
 import { AdminTeamOverview } from "@/components/dashboard/AdminTeamOverview";
 import { QuickLaunchBar } from "@/components/dashboard/QuickLaunchBar";
+import { LibraryOverviewPanel } from "@/components/dashboard/LibraryOverviewPanel";
 
 const Index = () => {
   return (
@@ -34,6 +35,9 @@ const Index = () => {
           <section id="my-drafts">
             <MyDraftsCard />
           </section>
+
+          {/* Library & Collections Overview */}
+          <LibraryOverviewPanel />
 
           {/* Recent Messages + Management Panel */}
           <section className="grid md:grid-cols-3 gap-6">

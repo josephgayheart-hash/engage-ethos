@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { WaveBackground } from "@/components/WaveBackground";
 import { Button } from "@/components/ui/button";
@@ -59,6 +59,7 @@ const statusConfig: Record<LibraryEntryStatus, { label: string; icon: typeof Che
 const SharedLibrary = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { isAdmin, isApprover } = useAuth();
   const { isAgency } = useAgencyMode();
   const { templates, filterTemplates, getPlaybooks, getAllTags, addTemplate, updateTemplateStatus } = useSharedLibrary();
@@ -70,7 +71,9 @@ const SharedLibrary = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
   const [adminViewMode, setAdminViewMode] = useState<'browse' | 'admin'>('browse');
-  const [topLevelTab, setTopLevelTab] = useState<'playbooks' | 'collections'>('playbooks');
+  const [topLevelTab, setTopLevelTab] = useState<'playbooks' | 'collections'>(() => {
+    return searchParams.get('tab') === 'collections' ? 'collections' : 'playbooks';
+  });
   
   // View mode state (persisted in localStorage)
   const [viewMode, setViewMode] = useState<'card' | 'list'>(() => {
