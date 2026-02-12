@@ -32,6 +32,7 @@ interface GenerationLoadingOverlayProps {
 
 interface PhaseItem {
   message: string;
+  completedMessage: string;
   detail?: string;
   icon: typeof Building2;
 }
@@ -41,31 +42,33 @@ function buildPhases(ctx: GenerationContext): PhaseItem[] {
 
   if (ctx.mode === "journey") {
     return [
-      { message: "Loading institutional profile…", detail: profileDetail, icon: Building2 },
-      { message: "Analyzing Content DNA & voice patterns…", detail: ctx.useContentDNA ? "Tone, vocabulary, sentence style" : "Skipped — DNA off", icon: Dna },
-      { message: "Mapping brand pillars to journey arcs…", detail: ctx.brandPillarCount ? `${ctx.brandPillarCount} pillar${ctx.brandPillarCount > 1 ? "s" : ""} selected` : undefined, icon: Target },
-      { message: "Applying behavioral science research…", detail: "Cialdini, Petty & Cacioppo, Kaptein", icon: Brain },
-      { message: "Designing multi-channel touchpoint flow…", detail: ctx.journeyWeeks ? `${ctx.journeyWeeks}-week timeline` : undefined, icon: Map },
-      { message: "Weaving in stories & proof points…", detail: ctx.hasStories || ctx.hasFacts ? `${ctx.storyCount || 0} stories, ${ctx.factCount || 0} facts` : "No stories/facts selected", icon: BookMarked },
-      { message: "Generating on-brand journey content…", detail: `${ctx.channels?.length || 0} channels`, icon: Mail },
-      { message: "Scoring brand adherence & finalizing…", detail: undefined, icon: Sparkles },
+      { message: "Loading institutional profile…", completedMessage: "Institutional profile loaded", detail: profileDetail, icon: Building2 },
+      { message: "Analyzing Content DNA & voice patterns…", completedMessage: "Content DNA & voice patterns analyzed", detail: ctx.useContentDNA ? "Tone, vocabulary, sentence style" : "Skipped — DNA off", icon: Dna },
+      { message: "Mapping brand pillars to journey arcs…", completedMessage: "Brand pillars mapped to journey arcs", detail: ctx.brandPillarCount ? `${ctx.brandPillarCount} pillar${ctx.brandPillarCount > 1 ? "s" : ""} selected` : undefined, icon: Target },
+      { message: "Applying behavioral science research…", completedMessage: "Behavioral science research applied", detail: "Cialdini, Petty & Cacioppo, Kaptein", icon: Brain },
+      { message: "Designing multi-channel touchpoint flow…", completedMessage: "Multi-channel touchpoint flow designed", detail: ctx.journeyWeeks ? `${ctx.journeyWeeks}-week timeline` : undefined, icon: Map },
+      { message: "Weaving in stories & proof points…", completedMessage: "Stories & proof points woven in", detail: ctx.hasStories || ctx.hasFacts ? `${ctx.storyCount || 0} stories, ${ctx.factCount || 0} facts` : "No stories/facts selected", icon: BookMarked },
+      { message: "Generating on-brand journey content…", completedMessage: "On-brand journey content generated", detail: `${ctx.channels?.length || 0} channels`, icon: Mail },
+      { message: "Scoring brand adherence & finalizing…", completedMessage: "Brand adherence scored & finalized", detail: undefined, icon: Sparkles },
     ];
   }
 
   return [
-    { message: "Loading institutional profile…", detail: profileDetail, icon: Building2 },
-    { message: "Analyzing Content DNA & voice patterns…", detail: ctx.useContentDNA ? "Tone, vocabulary, sentence style" : "Skipped — DNA off", icon: Dna },
-    { message: "Applying brand pillars & proof points…", detail: ctx.brandPillarCount ? `${ctx.brandPillarCount} pillar${ctx.brandPillarCount > 1 ? "s" : ""} selected` : undefined, icon: Target },
-    { message: "Matching audience psychology & research…", detail: "Cialdini, Petty & Cacioppo, Kaptein", icon: Brain },
-    { message: "Weaving in stories & data points…", detail: ctx.hasStories || ctx.hasFacts ? `${ctx.storyCount || 0} stories, ${ctx.factCount || 0} facts` : "No stories/facts selected", icon: BookMarked },
-    { message: "Generating on-brand drafts per channel…", detail: `${ctx.channels?.length || 0} channel${(ctx.channels?.length || 0) > 1 ? "s" : ""}`, icon: Mail },
-    { message: "Scoring brand adherence & finalizing…", detail: undefined, icon: Sparkles },
+    { message: "Loading institutional profile…", completedMessage: "Institutional profile loaded", detail: profileDetail, icon: Building2 },
+    { message: "Analyzing Content DNA & voice patterns…", completedMessage: "Content DNA & voice patterns analyzed", detail: ctx.useContentDNA ? "Tone, vocabulary, sentence style" : "Skipped — DNA off", icon: Dna },
+    { message: "Applying brand pillars & proof points…", completedMessage: "Brand pillars & proof points applied", detail: ctx.brandPillarCount ? `${ctx.brandPillarCount} pillar${ctx.brandPillarCount > 1 ? "s" : ""} selected` : undefined, icon: Target },
+    { message: "Matching audience psychology & research…", completedMessage: "Audience psychology & research matched", detail: "Cialdini, Petty & Cacioppo, Kaptein", icon: Brain },
+    { message: "Weaving in stories & data points…", completedMessage: "Stories & data points woven in", detail: ctx.hasStories || ctx.hasFacts ? `${ctx.storyCount || 0} stories, ${ctx.factCount || 0} facts` : "No stories/facts selected", icon: BookMarked },
+    { message: "Generating on-brand drafts per channel…", completedMessage: "On-brand drafts generated per channel", detail: `${ctx.channels?.length || 0} channel${(ctx.channels?.length || 0) > 1 ? "s" : ""}`, icon: Mail },
+    { message: "Scoring brand adherence & finalizing…", completedMessage: "Brand adherence scored & finalized", detail: undefined, icon: Sparkles },
   ];
 }
 
 export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadingOverlayProps) {
   const [phase, setPhase] = useState(0);
   const [showTags, setShowTags] = useState(false);
+  // Track which phases have been "revealed" so they stay visible
+  const [revealedPhases, setRevealedPhases] = useState<number[]>([]);
 
   const phases = useMemo(() => buildPhases(context), [context]);
   const maxPhase = phases.length - 1;
@@ -74,13 +77,22 @@ export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadi
     if (!isVisible) {
       setPhase(0);
       setShowTags(false);
+      setRevealedPhases([]);
       return;
     }
-    // Show tags after a short delay
+    // Reveal phase 0 immediately
+    setRevealedPhases([0]);
     const tagTimer = setTimeout(() => setShowTags(true), 600);
+
     const interval = setInterval(() => {
-      setPhase(prev => (prev < maxPhase ? prev + 1 : prev));
+      setPhase(prev => {
+        const next = prev < maxPhase ? prev + 1 : prev;
+        // Add to revealed list
+        setRevealedPhases(r => r.includes(next) ? r : [...r, next]);
+        return next;
+      });
     }, context.mode === "journey" ? 3500 : 2200);
+
     return () => {
       clearInterval(interval);
       clearTimeout(tagTimer);
@@ -109,7 +121,7 @@ export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadi
   }
 
   return (
-    <div className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/[0.03] to-card p-8 animate-fade-in shadow-sm">
+    <div className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/[0.03] to-card p-8 shadow-sm overflow-hidden">
       <div className="flex flex-col items-center gap-5">
 
         {/* Brand color swatches */}
@@ -128,65 +140,80 @@ export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadi
           </div>
         )}
 
-        {/* Checklist — each phase appears as it completes */}
-        <div className="w-full max-w-md space-y-1">
+        {/* Phase list — slides each item in one at a time, all stay visible */}
+        <div className="w-full max-w-md space-y-0">
           {phases.map((p, i) => {
+            const isRevealed = revealedPhases.includes(i);
             const isComplete = i < phase;
             const isCurrent = i === phase;
-            const isFuture = i > phase;
             const PhaseIcon = p.icon;
+
+            if (!isRevealed) return null;
 
             return (
               <div
                 key={i}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-500 ${
-                  isCurrent
-                    ? "bg-primary/[0.07] border border-primary/20"
-                    : isComplete
-                      ? "opacity-70"
-                      : "opacity-0 h-0 py-0 overflow-hidden"
-                }`}
+                className="overflow-hidden"
                 style={{
-                  transitionDelay: isFuture ? "0ms" : `${i * 50}ms`,
+                  animation: "slideInPhase 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+                  animationDelay: i === 0 ? "0ms" : "0ms",
                 }}
               >
-                {/* Status icon */}
-                <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-500 ${
-                  isComplete
-                    ? "bg-primary/15 text-primary"
-                    : isCurrent
-                      ? "bg-primary/10 text-primary"
-                      : "bg-muted text-muted-foreground"
-                }`}>
-                  {isComplete ? (
-                    <Check className="w-3.5 h-3.5" />
-                  ) : isCurrent ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <PhaseIcon className="w-3 h-3" />
-                  )}
-                </div>
+                <div
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-400 ${
+                    isCurrent
+                      ? "bg-primary/[0.07] border border-primary/20 shadow-sm"
+                      : isComplete
+                        ? "border border-transparent"
+                        : ""
+                  }`}
+                >
+                  {/* Status icon with animated transition */}
+                  <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-all duration-500 ${
+                    isComplete
+                      ? "bg-primary/15 text-primary scale-100"
+                      : isCurrent
+                        ? "bg-primary/10 text-primary scale-110"
+                        : "bg-muted text-muted-foreground"
+                  }`}
+                  style={{
+                    transition: "all 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
+                  }}
+                  >
+                    {isComplete ? (
+                      <Check className="w-3.5 h-3.5" style={{ animation: "popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards" }} />
+                    ) : isCurrent ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <PhaseIcon className="w-3.5 h-3.5" />
+                    )}
+                  </div>
 
-                {/* Message */}
-                <div className="flex-1 min-w-0">
-                  <p className={`text-sm leading-tight transition-colors duration-300 ${
-                    isCurrent ? "font-semibold text-foreground" : "font-medium text-muted-foreground"
-                  }`}>
-                    {isComplete ? p.message.replace("…", "") : p.message}
-                  </p>
-                  {p.detail && (isComplete || isCurrent) && (
-                    <p className={`text-[11px] mt-0.5 transition-all duration-500 ${
-                      isCurrent ? "text-primary/70" : "text-muted-foreground/60"
+                  {/* Message text */}
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm leading-tight transition-all duration-300 ${
+                      isCurrent ? "font-semibold text-foreground" : isComplete ? "font-medium text-foreground/70" : "font-medium text-muted-foreground"
                     }`}>
-                      {p.detail}
+                      {isComplete ? p.completedMessage : p.message}
                     </p>
+                    {p.detail && (
+                      <p className={`text-[11px] mt-0.5 transition-all duration-500 ${
+                        isCurrent ? "text-primary/70 font-medium" : "text-muted-foreground/50"
+                      }`}>
+                        {p.detail}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Completion check */}
+                  {isComplete && (
+                    <div className="flex-shrink-0" style={{ animation: "popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards" }}>
+                      <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Check className="w-3 h-3 text-primary" />
+                      </div>
+                    </div>
                   )}
                 </div>
-
-                {/* Completion indicator */}
-                {isComplete && (
-                  <span className="text-[10px] text-primary/50 font-medium">✓</span>
-                )}
               </div>
             );
           })}
@@ -200,8 +227,13 @@ export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadi
               <Badge
                 key={i}
                 variant="outline"
-                className="text-[10px] gap-1 animate-fade-in border-primary/20"
-                style={{ animationDelay: `${i * 80}ms` }}
+                className="text-[10px] gap-1 border-primary/20"
+                style={{
+                  animation: "slideInTag 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+                  animationDelay: `${300 + i * 100}ms`,
+                  opacity: 0,
+                  transform: "translateY(8px)",
+                }}
               >
                 <TagIcon className="w-3 h-3 text-primary/60" />
                 {tag.label}
@@ -227,6 +259,48 @@ export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadi
             : "Crafting your messages — typically 15–30 seconds"}
         </p>
       </div>
+
+      {/* Keyframe animations */}
+      <style>{`
+        @keyframes slideInPhase {
+          0% {
+            opacity: 0;
+            transform: translateY(16px);
+            max-height: 0;
+          }
+          30% {
+            max-height: 80px;
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 80px;
+          }
+        }
+        @keyframes popIn {
+          0% {
+            opacity: 0;
+            transform: scale(0);
+          }
+          60% {
+            transform: scale(1.2);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        @keyframes slideInTag {
+          0% {
+            opacity: 0;
+            transform: translateY(8px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }
