@@ -10,6 +10,7 @@ interface SetupProgress {
   hasProfile: boolean;
   hasInstitution: boolean;
   hasDNA: boolean;
+  hasCampusPhotos: boolean;
   completionPercent: number;
 }
 
@@ -93,6 +94,7 @@ export function useUserDashboardContext(): UserDashboardContext {
   const [institutionalStats, setInstitutionalStats] = useState<InstitutionalStats | null>(null);
   const [platformInsight, setPlatformInsight] = useState<PlatformInsight | null>(null);
   const [hasDNA, setHasDNA] = useState(false);
+  const [hasCampusPhotos, setHasCampusPhotos] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   // Fetch personal stats from tool_usage_events
@@ -188,16 +190,30 @@ export function useUserDashboardContext(): UserDashboardContext {
       ).length;
 
       // Get DNA completeness
-      const { data: dnaData } = await supabase
-        .from('content_dna_analysis')
-        .select('id, voice_analysis, brand_platform')
-        .eq('tenant_id', tenant.id);
+      const [dnaResult, campusPhotosResult] = await Promise.all([
+        supabase
+          .from('content_dna_analysis')
+          .select('id, voice_analysis, brand_platform')
+          .eq('tenant_id', tenant.id),
+        supabase
+          .from('campus_photo_samples')
+          .select('id', { count: 'exact', head: true })
+          .eq('tenant_id', tenant.id)
+          .eq('is_active', true)
+      ]);
+
+      const dnaData = dnaResult.data;
+      const campusPhotoCount = campusPhotosResult.count || 0;
 
       let dnaCompleteness = 0;
       if (dnaData && dnaData.length > 0) {
-        const completed = dnaData.filter(d => d.voice_analysis && d.brand_platform).length;
-        dnaCompleteness = Math.round((completed / dnaData.length) * 100);
+        const hasAnalysis = dnaData.some(d => d.voice_analysis);
+        const hasBrandPlatform = dnaData.some(d => d.brand_platform);
+        if (hasAnalysis) dnaCompleteness += 30;
+        if (hasBrandPlatform) dnaCompleteness += 25;
+        dnaCompleteness += 25; // has DNA records = has samples
       }
+      if (campusPhotoCount > 0) dnaCompleteness += 20;
 
       // Calculate health score (simplified)
       const adoptionRate = totalUsers ? Math.round((activeUsers / totalUsers) * 100) : 0;
@@ -269,18 +285,26 @@ export function useUserDashboardContext(): UserDashboardContext {
     }
   }, []);
 
-  // Check if DNA is active
+  // Check if DNA is active and if campus photos exist
   const checkDNA = useCallback(async () => {
     if (!tenant?.id) return;
 
-    const { data } = await supabase
-      .from('content_dna_analysis')
-      .select('id')
-      .eq('tenant_id', tenant.id)
-      .not('last_analyzed_at', 'is', null)
-      .limit(1);
+    const [dnaResult, photosResult] = await Promise.all([
+      supabase
+        .from('content_dna_analysis')
+        .select('id')
+        .eq('tenant_id', tenant.id)
+        .not('last_analyzed_at', 'is', null)
+        .limit(1),
+      supabase
+        .from('campus_photo_samples')
+        .select('id', { count: 'exact', head: true })
+        .eq('tenant_id', tenant.id)
+        .eq('is_active', true)
+    ]);
 
-    setHasDNA(!!data && data.length > 0);
+    setHasDNA(!!dnaResult.data && dnaResult.data.length > 0);
+    setHasCampusPhotos((photosResult.count || 0) > 0);
   }, [tenant?.id]);
 
   // Fetch all data
@@ -312,14 +336,16 @@ export function useUserDashboardContext(): UserDashboardContext {
     if (hasProfile) completedSteps++;
     if (hasInstitution) completedSteps++;
     if (hasDNA) completedSteps++;
+    if (hasCampusPhotos) completedSteps++;
 
     return {
       hasProfile,
       hasInstitution,
       hasDNA,
-      completionPercent: Math.round((completedSteps / 3) * 100),
+      hasCampusPhotos,
+      completionPercent: Math.round((completedSteps / 4) * 100),
     };
-  }, [profile, institutionalProfiles, hasDNA]);
+  }, [profile, institutionalProfiles, hasDNA, hasCampusPhotos]);
 
   // Calculate total usage for mode detection
   const totalUsage = useMemo(() => {

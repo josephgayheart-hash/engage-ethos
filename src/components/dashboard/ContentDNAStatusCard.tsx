@@ -13,6 +13,7 @@ import {
   Layers,
   SlidersHorizontal,
   CheckCircle2,
+  Camera,
 } from "lucide-react";
 
 interface DNARecord {
@@ -34,6 +35,7 @@ interface DNAStatus {
   pillarCount: number;
   hasCustomInstructions: boolean;
   profileNames: string[];
+  campusPhotoCount: number;
 }
 
 export function ContentDNAStatusCard() {
@@ -96,21 +98,27 @@ export function ContentDNAStatusCard() {
         (r) => r.custom_instructions && r.custom_instructions.trim().length > 0
       );
 
-      // Fetch profile names for records that have profile_id
+      // Fetch profile names and campus photo count in parallel
       const profileIds = records
         .map((r) => r.profile_id)
         .filter((id): id is string => id !== null);
 
+      const [profilesResult, photosResult] = await Promise.all([
+        profileIds.length > 0
+          ? supabase.from("institutional_profiles").select("id, name").in("id", profileIds)
+          : Promise.resolve({ data: [] }),
+        supabase
+          .from("campus_photo_samples")
+          .select("id", { count: "exact", head: true })
+          .eq("tenant_id", tenant.id)
+          .eq("is_active", true)
+      ]);
+
       let profileNames: string[] = [];
-      if (profileIds.length > 0) {
-        const { data: profiles } = await supabase
-          .from("institutional_profiles")
-          .select("id, name")
-          .in("id", profileIds);
-        if (profiles) {
-          profileNames = profiles.map((p) => p.name);
-        }
+      if (profilesResult.data) {
+        profileNames = profilesResult.data.map((p: any) => p.name);
       }
+      const campusPhotoCount = photosResult.count || 0;
 
       setStatus({
         totalProfiles: records.length,
@@ -121,6 +129,7 @@ export function ContentDNAStatusCard() {
         pillarCount,
         hasCustomInstructions,
         profileNames,
+        campusPhotoCount,
       });
 
       setLoading(false);
@@ -219,6 +228,20 @@ export function ContentDNAStatusCard() {
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Layers className="w-3 h-3" />
                   <span>{status.pillarCount} Brand Pillar{status.pillarCount !== 1 ? "s" : ""} defined</span>
+                </div>
+              )}
+              {(status?.campusPhotoCount ?? 0) > 0 && (
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Camera className="w-3 h-3" />
+                  <span>{status!.campusPhotoCount} campus photo{status!.campusPhotoCount !== 1 ? "s" : ""} for AI training</span>
+                </div>
+              )}
+              {(status?.campusPhotoCount ?? 0) === 0 && (
+                <div className="flex items-center gap-1.5 text-xs text-amber-600">
+                  <Camera className="w-3 h-3" />
+                  <Link to="/admin/content-dna" className="hover:underline">
+                    Add campus photos for better visuals →
+                  </Link>
                 </div>
               )}
             </div>

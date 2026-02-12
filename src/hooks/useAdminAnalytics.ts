@@ -110,7 +110,8 @@ export const useAdminAnalytics = (tenantId?: string) => {
         dnaAnalysesResult,
         messagesResult,
         journeysResult,
-        templatesResult
+        templatesResult,
+        campusPhotosResult
       ] = await Promise.all([
         // Users
         supabase
@@ -144,7 +145,10 @@ export const useAdminAnalytics = (tenantId?: string) => {
         supabase.from('user_drafts').select('id, tenant_id, draft_type, created_at').eq('draft_type', 'journey'),
         
         // Shared templates
-        supabase.from('shared_templates').select('id, tenant_id, created_at')
+        supabase.from('shared_templates').select('id, tenant_id, created_at'),
+        
+        // Campus photos
+        supabase.from('campus_photo_samples').select('id, tenant_id, profile_id, is_active').eq('is_active', true)
       ]);
 
       const users = usersResult.data || [];
@@ -155,6 +159,7 @@ export const useAdminAnalytics = (tenantId?: string) => {
       const messages = messagesResult.data || [];
       const journeys = journeysResult.data || [];
       const templates = templatesResult.data || [];
+      const campusPhotos = campusPhotosResult.data || [];
 
       // Filter by tenant if not global view
       const filteredUsers = isGlobalView ? users : users.filter(u => u.tenant_id === targetTenantId);
@@ -252,11 +257,13 @@ export const useAdminAnalytics = (tenantId?: string) => {
           ? Math.round((tenantActiveUsers.length / tenantUsers.length) * 100) 
           : 0;
 
-        // DNA completeness: has samples (30%) + has analysis (40%) + has brand platform (30%)
+        // DNA completeness: samples (25%) + analysis (30%) + brand platform (25%) + campus photos (20%)
+        const tenantCampusPhotos = campusPhotos.filter(p => p.tenant_id === tenant.id);
         let dnaCompleteness = 0;
-        if (tenantDNASamples.length > 0) dnaCompleteness += 30;
-        if (tenantDNAAnalysis?.voice_analysis) dnaCompleteness += 40;
-        if (tenantDNAAnalysis?.brand_platform) dnaCompleteness += 30;
+        if (tenantDNASamples.length > 0) dnaCompleteness += 25;
+        if (tenantDNAAnalysis?.voice_analysis) dnaCompleteness += 30;
+        if (tenantDNAAnalysis?.brand_platform) dnaCompleteness += 25;
+        if (tenantCampusPhotos.length > 0) dnaCompleteness += 20;
 
         // Overall health score calculation
         // User engagement: 25%, DNA setup: 25%, Feature usage: 25%, Recent activity: 25%
