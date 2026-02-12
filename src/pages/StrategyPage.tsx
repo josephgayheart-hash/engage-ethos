@@ -35,6 +35,7 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useToolTracking } from "@/hooks/useToolTracking";
+import { useLibraryCollections } from "@/hooks/useLibraryCollections";
 import { useUserDrafts } from "@/hooks/useUserDrafts";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target, Users, UserCheck, Mail, FileDown, MessageSquare, Globe, Phone, FileText, Search, Megaphone, Building2, FileEdit, Smartphone, LayoutTemplate, Send, Mic, Newspaper, Heart, BookOpen, type LucideIcon } from "lucide-react";
@@ -110,6 +111,7 @@ const StrategyPage = () => {
   const { addMessage, updateMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
   const { trackToolUse } = useToolTracking();
+  const { createCollection, addItemToCollection } = useLibraryCollections();
   const { saveDraft, currentDraft, setCurrentDraft, deleteDraft, loadDraftById } = useUserDrafts('journey');
   const location = useLocation();
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -549,6 +551,29 @@ const StrategyPage = () => {
     if (editMode === 'remix') {
       setEditMode('new');
       setRemixedFrom(null);
+    }
+
+    // Auto-create a collection when saving from a playbook kit
+    if (selectedPlaybookKit && savedMessage?.id) {
+      try {
+        const collectionResult = await createCollection({
+          name: `${selectedPlaybookKit.name} — ${name}`,
+          description: `Auto-created from the "${selectedPlaybookKit.name}" playbook kit.`,
+          collectionType: 'campaign',
+        });
+        if (collectionResult) {
+          await addItemToCollection(collectionResult.id, {
+            itemType: 'message',
+            messageId: savedMessage.id,
+          });
+          toast({
+            title: "Collection created",
+            description: `"${collectionResult.name}" was auto-created from the playbook kit with your journey added.`,
+          });
+        }
+      } catch (err) {
+        console.error('Failed to auto-create collection from kit:', err);
+      }
     }
 
     // Clear the draft after saving to library

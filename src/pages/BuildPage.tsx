@@ -33,6 +33,8 @@ import { BrandLayerSelector, BrandLayerActiveBadge, BrandLayerSelection } from "
 import { BrandAdherenceScore } from "@/components/BrandAdherenceScore";
 
 import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
+import { AddToCollectionDialog } from "@/components/library/AddToCollectionDialog";
+import { useLibraryCollections } from "@/hooks/useLibraryCollections";
 import { cn } from "@/lib/utils";
 import { 
   ArrowLeft, 
@@ -69,7 +71,8 @@ import {
   Newspaper,
   Heart,
   BookMarked,
-  type LucideIcon
+  type LucideIcon,
+  Folder
 } from "lucide-react";
 import { buildMessage } from "@/lib/evaluateMessage";
 import { useAuth } from "@/contexts/AuthContext";
@@ -144,6 +147,7 @@ const BuildPage = () => {
   const [searchParams] = useSearchParams();
   const { addMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
+  const { collections, addItemToCollection, createCollection } = useLibraryCollections();
   const { trackToolUse } = useToolTracking();
   const { profiles } = useInstitutionalProfiles();
   const { saveDraft, currentDraft, setCurrentDraft, deleteDraft, loadDraftById } = useUserDrafts('message');
@@ -249,6 +253,8 @@ const BuildPage = () => {
   const [saveToLibraryOpen, setSaveToLibraryOpen] = useState(false);
   const [saveToLibraryChannel, setSaveToLibraryChannel] = useState<Channel | null>(null);
   const [saveToLibraryType, setSaveToLibraryType] = useState<'personal' | 'shared'>('personal');
+  const [showCollectionDialog, setShowCollectionDialog] = useState(false);
+  const [lastSavedMessageId, setLastSavedMessageId] = useState<string | null>(null);
   const [useContentDNA, setUseContentDNA] = useState(true);
   const [brandSelection, setBrandSelection] = useState<BrandLayerSelection>({
     pillars: [],
@@ -579,6 +585,11 @@ const BuildPage = () => {
       createdByUserId: profile?.id,
       createdByName: profile ? `${profile.first_name} ${profile.last_name}` : undefined,
     });
+
+    // Track the saved message ID for "Add to Collection"
+    if (savedMessage?.id) {
+      setLastSavedMessageId(savedMessage.id);
+    }
 
     // Clear the draft after saving to library
     clearDraftAfterSave();
@@ -1156,7 +1167,7 @@ const BuildPage = () => {
                   </div>
 
                   {/* Save Actions */}
-                  <div className="flex gap-2 mt-4 pt-4 border-t border-border">
+                  <div className="flex gap-2 mt-4 pt-4 border-t border-border flex-wrap">
                     <Button onClick={handleSaveToLibraryClick} variant="outline" className="flex-1">
                       <FolderPlus className="w-4 h-4 mr-2" />
                       Save to My Library
@@ -1165,6 +1176,12 @@ const BuildPage = () => {
                       <Library className="w-4 h-4 mr-2" />
                       Submit to University Library
                     </Button>
+                    {lastSavedMessageId && (
+                      <Button onClick={() => setShowCollectionDialog(true)} variant="outline" size="sm">
+                        <Folder className="w-4 h-4 mr-2" />
+                        Add to Collection
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -1255,6 +1272,34 @@ const BuildPage = () => {
             : `${audienceLabels[context.audience || ''] || 'Message'} Kit - ${selectedChannels.join(', ')}`
         }
         contentType={saveToLibraryChannel ? "message" : "message kit"}
+      />
+
+      {/* Add to Collection Dialog */}
+      <AddToCollectionDialog
+        open={showCollectionDialog}
+        onOpenChange={setShowCollectionDialog}
+        collections={collections}
+        onAddToExisting={async (collectionId) => {
+          if (!lastSavedMessageId) return;
+          const success = await addItemToCollection(collectionId, {
+            itemType: 'message',
+            messageId: lastSavedMessageId,
+          });
+          if (success) {
+            toast({ title: "Added to collection" });
+          }
+        }}
+        onCreateAndAdd={async (input) => {
+          if (!lastSavedMessageId) return;
+          const result = await createCollection(input);
+          if (result) {
+            await addItemToCollection(result.id, {
+              itemType: 'message',
+              messageId: lastSavedMessageId,
+            });
+            toast({ title: "Collection created & item added" });
+          }
+        }}
       />
     </div>
   );
