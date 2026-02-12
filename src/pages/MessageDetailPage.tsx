@@ -13,6 +13,8 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useJourneyExport } from "@/hooks/useJourneyExport";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
+import { useLibraryCollections } from "@/hooks/useLibraryCollections";
+import { AddToCollectionDialog } from "@/components/library/AddToCollectionDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import { JourneyViewer, isJourneyContent, parseJourneyContent } from "@/components/library/JourneyViewer";
@@ -40,7 +42,8 @@ import {
   Check,
   Pencil,
   MoreHorizontal,
-  X
+  X,
+  Folder
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -81,10 +84,12 @@ const MessageDetailPage = () => {
   const { messages, deleteMessage, updateMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
   const { getProfile } = useInstitutionalProfiles();
+  const { collections, addItemToCollection, createCollection } = useLibraryCollections();
   const [copied, setCopied] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState("");
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
+  const [showCollectionDialog, setShowCollectionDialog] = useState(false);
   const journeyContentRef = useRef<HTMLDivElement>(null);
   const [profileConfig, setProfileConfig] = useState<InstitutionalConfig | null>(null);
 
@@ -371,6 +376,11 @@ const MessageDetailPage = () => {
                   </Button>
                 )}
 
+                <Button onClick={() => setShowCollectionDialog(true)} variant="outline" size="sm">
+                  <Folder className="w-4 h-4 mr-2" />
+                  Add to Collection
+                </Button>
+
                 <Button onClick={handleCopy} variant="outline" size="sm">
                   <Copy className="w-4 h-4 mr-2" />
                   {copied ? "Copied!" : "Copy"}
@@ -442,6 +452,32 @@ const MessageDetailPage = () => {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+
+          {/* Add to Collection Dialog */}
+          <AddToCollectionDialog
+            open={showCollectionDialog}
+            onOpenChange={setShowCollectionDialog}
+            collections={collections}
+            onAddToExisting={async (collectionId) => {
+              const success = await addItemToCollection(collectionId, {
+                itemType: 'message',
+                messageId: message.id,
+              });
+              if (success) {
+                toast({ title: "Added to collection" });
+              }
+            }}
+            onCreateAndAdd={async (input) => {
+              const result = await createCollection(input);
+              if (result) {
+                await addItemToCollection(result.id, {
+                  itemType: 'message',
+                  messageId: message.id,
+                });
+                toast({ title: "Collection created & item added" });
+              }
+            }}
+          />
 
           {/* Content Tabs */}
           <Tabs defaultValue="content" className="space-y-6">
