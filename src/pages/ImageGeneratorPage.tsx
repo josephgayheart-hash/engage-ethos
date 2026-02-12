@@ -58,6 +58,7 @@ const ImageGeneratorPage = () => {
   const [style, setStyle] = useState("photorealistic");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generationPhase, setGenerationPhase] = useState(0);
 
   const handleGenerate = useCallback(async () => {
     if (!contentDescription.trim()) {
@@ -66,6 +67,10 @@ const ImageGeneratorPage = () => {
     }
     setIsGenerating(true);
     setImageUrl(null);
+    setGenerationPhase(0);
+    const phaseInterval = setInterval(() => {
+      setGenerationPhase(prev => prev < 4 ? prev + 1 : prev);
+    }, engine === "premium" ? 8000 : 5000);
     try {
       const { data, error } = await supabase.functions.invoke("generate-channel-image", {
         body: {
@@ -91,6 +96,7 @@ const ImageGeneratorPage = () => {
       console.error("Image generation failed:", err);
       toast.error(err?.message || "Failed to generate image. Try again.");
     } finally {
+      clearInterval(phaseInterval);
       setIsGenerating(false);
     }
   }, [contentDescription, channel, audience, tenantId, selectedProfileId, goal, tone, engine, style]);
@@ -309,14 +315,32 @@ const ImageGeneratorPage = () => {
               </CardHeader>
               <CardContent>
                 {isGenerating ? (
-                  <div className="aspect-square bg-muted rounded-lg flex flex-col items-center justify-center gap-3">
-                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                    <p className="text-sm text-muted-foreground">
-                      Generating campus photography...
-                    </p>
-                    <p className="text-xs text-muted-foreground/60">
-                      Using your institutional brand colors & campus details
-                    </p>
+                  <div className="aspect-square bg-muted rounded-lg flex flex-col items-center justify-center gap-4 px-6">
+                    <Loader2 className="w-10 h-10 animate-spin text-primary" />
+                    <div className="text-center space-y-2">
+                      <p className="text-sm font-medium">
+                        {[
+                          "Analyzing your brand profile…",
+                          "Composing campus scene & color palette…",
+                          "Rendering image with AI…",
+                          "Applying brand colors & campus details…",
+                          "Finalizing & uploading…",
+                        ][generationPhase]}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {engine === "premium"
+                          ? "Premium engine — this may take 30–60 seconds"
+                          : "This may take 15–30 seconds"}
+                      </p>
+                    </div>
+                    <div className="w-full max-w-48">
+                      <div className="h-1.5 bg-muted-foreground/10 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-primary rounded-full transition-all duration-1000 ease-out"
+                          style={{ width: `${Math.min(20 + generationPhase * 20, 95)}%` }}
+                        />
+                      </div>
+                    </div>
                   </div>
                 ) : imageUrl ? (
                   <div className="space-y-3">
