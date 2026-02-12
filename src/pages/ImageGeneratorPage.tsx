@@ -71,7 +71,7 @@ const ImageGeneratorPage = () => {
     setGenerationPhase(0);
     const phaseInterval = setInterval(() => {
       setGenerationPhase(prev => prev < 4 ? prev + 1 : prev);
-    }, engine === "premium" ? 8000 : 5000);
+    }, engine === "premium" ? 6000 : 1200);
     try {
       const { data, error } = await supabase.functions.invoke("generate-channel-image", {
         body: {
@@ -395,7 +395,7 @@ const ImageGeneratorPage = () => {
                     </div>
 
                     {/* Selection readback — scrolling tags */}
-                    <div className={`flex flex-wrap items-center justify-center gap-1.5 mt-2 max-w-full transition-all duration-500 ${generationPhase >= 2 ? 'opacity-100' : 'opacity-0'}`}>
+                    <div className={`flex flex-wrap items-center justify-center gap-1.5 mt-2 max-w-full transition-all duration-500 ${engine === "fast" || generationPhase >= 1 ? 'opacity-100' : 'opacity-0'}`}>
                       <Badge variant="outline" className="text-[10px] gap-1 animate-fade-in">
                         <Camera className="w-3 h-3" /> {selectedChannelLabel}
                       </Badge>
@@ -423,7 +423,7 @@ const ImageGeneratorPage = () => {
                     </div>
 
                     {/* Scene description readback */}
-                    <div className={`text-center max-w-xs transition-all duration-700 ${generationPhase >= 3 ? 'opacity-100' : 'opacity-0'}`}>
+                    <div className={`text-center max-w-xs transition-all duration-700 ${engine === "fast" || generationPhase >= 2 ? 'opacity-100' : 'opacity-0'}`}>
                       <p className="text-[11px] text-muted-foreground italic leading-relaxed">
                         "{contentDescription.slice(0, 120)}{contentDescription.length > 120 ? '…' : ''}"
                       </p>
