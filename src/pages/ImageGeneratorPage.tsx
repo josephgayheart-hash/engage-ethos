@@ -154,11 +154,44 @@ const ImageGeneratorPage = () => {
                   <div className="space-y-2">
                     <Label>Institutional Profile</Label>
                     <Select value={selectedProfileId} onValueChange={setSelectedProfileId}>
-                      <SelectTrigger><SelectValue placeholder="Select profile..." /></SelectTrigger>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select profile...">
+                          {selectedProfileId && profiles?.find(p => p.id === selectedProfileId) && (() => {
+                            const selected = profiles.find(p => p.id === selectedProfileId)!;
+                            const logoUrl = (selected.config as any)?.logoUrl;
+                            return (
+                              <span className="flex items-center gap-2">
+                                {logoUrl ? (
+                                  <img src={logoUrl} alt="" className="w-5 h-5 rounded object-contain flex-shrink-0" />
+                                ) : (
+                                  <span className="w-5 h-5 rounded bg-muted flex items-center justify-center text-[10px] font-bold text-muted-foreground flex-shrink-0">
+                                    {selected.name.charAt(0)}
+                                  </span>
+                                )}
+                                <span className="truncate">{selected.name}</span>
+                              </span>
+                            );
+                          })()}
+                        </SelectValue>
+                      </SelectTrigger>
                       <SelectContent>
-                        {profiles?.map((p) => (
-                          <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                        ))}
+                        {profiles?.map((p) => {
+                          const logoUrl = (p.config as any)?.logoUrl;
+                          return (
+                            <SelectItem key={p.id} value={p.id}>
+                              <span className="flex items-center gap-2">
+                                {logoUrl ? (
+                                  <img src={logoUrl} alt="" className="w-5 h-5 rounded object-contain flex-shrink-0" />
+                                ) : (
+                                  <span className="w-5 h-5 rounded bg-muted flex items-center justify-center text-[10px] font-bold text-muted-foreground flex-shrink-0">
+                                    {p.name.charAt(0)}
+                                  </span>
+                                )}
+                                <span className="truncate">{p.name}</span>
+                              </span>
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                   </div>
