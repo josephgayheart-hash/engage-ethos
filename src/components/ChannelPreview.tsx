@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -38,6 +40,8 @@ import {
   GraduationCap,
   Building2,
   Sparkles,
+  ImageIcon,
+  RefreshCw,
   FileDown,
   AlertCircle,
   Settings
@@ -63,6 +67,10 @@ interface ChannelPreviewProps {
   onSaveToLibrary?: (channel: Channel, content: ChannelDrafts[keyof ChannelDrafts], contentText: string) => void | (() => void);
   institutionName?: string;
   branding?: BrandingOptions;
+  tenantId?: string;
+  profileId?: string;
+  audience?: string;
+  contentSummary?: string;
 }
 
 const channelIcons: Record<Channel, React.ReactNode> = {
@@ -95,12 +103,53 @@ const channelLabels: Record<Channel, string> = {
   'case-for-care': 'Case for Support',
 };
 
-export function ChannelPreview({ channel, content, onCopy, onContentChange, onSaveToLibrary, institutionName, branding }: ChannelPreviewProps) {
+export function ChannelPreview({ channel, content, onCopy, onContentChange, onSaveToLibrary, institutionName, branding, tenantId, profileId, audience, contentSummary }: ChannelPreviewProps) {
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState<ChannelDrafts[keyof ChannelDrafts]>(content);
   const [sfmcDialogOpen, setSfmcDialogOpen] = useState(false);
+  const [channelImageUrl, setChannelImageUrl] = useState<string | null>(null);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const { toast } = useToast();
+
+  // Channels that support AI image generation
+  const visualChannels: Channel[] = ['social-media', 'digital-ad-social', 'email', 'landing-page', 'direct-mail', 'news-article'];
+  const isVisualChannel = visualChannels.includes(channel);
+
+  // Auto-generate image for visual channels when content arrives
+  useEffect(() => {
+    if (!isVisualChannel || !contentSummary || channelImageUrl || isGeneratingImage) return;
+    generateChannelImage();
+  }, [contentSummary, channel]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const generateChannelImage = useCallback(async () => {
+    if (!contentSummary) return;
+    setIsGeneratingImage(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-channel-image', {
+        body: {
+          channel,
+          contentSummary,
+          audience,
+          tenantId,
+          profileId,
+        },
+      });
+      if (error) throw error;
+      if (data?.imageUrl) {
+        setChannelImageUrl(data.imageUrl);
+      }
+    } catch (err) {
+      console.warn('Channel image generation failed:', err);
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  }, [channel, contentSummary, audience, tenantId, profileId]);
+
+  const handleRegenerateImage = () => {
+    setChannelImageUrl(null);
+    generateChannelImage();
+  };
 
   // Sync editedContent with parent content when it changes
   useEffect(() => {
@@ -851,6 +900,26 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
             </div>
           </div>
         </div>
+        {/* AI-Generated Email Hero */}
+        {channelImageUrl && (
+          <div className="relative group">
+            <img src={channelImageUrl} alt="Email hero" className="w-full h-40 object-cover" />
+            <Button
+              variant="secondary"
+              size="sm"
+              className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-xs h-7"
+              onClick={(e) => { e.stopPropagation(); handleRegenerateImage(); }}
+            >
+              <RefreshCw className="w-3 h-3 mr-1" /> Regenerate
+            </Button>
+          </div>
+        )}
+        {isGeneratingImage && !channelImageUrl && (
+          <div className="h-32 flex flex-col items-center justify-center gap-2 bg-muted/30">
+            <Sparkles className="w-5 h-5 text-primary animate-pulse" />
+            <p className="text-xs text-muted-foreground">Generating email hero...</p>
+          </div>
+        )}
         <div className="bg-card p-4">
           <p className="text-sm whitespace-pre-wrap">{email.body}</p>
         </div>
@@ -897,6 +966,36 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
           </div>
         </div>
         <p className="text-sm whitespace-pre-wrap">{post}</p>
+        {/* AI-Generated Social Image */}
+        {(channelImageUrl || isGeneratingImage || isVisualChannel) && (
+          <div className="mt-3 rounded-lg overflow-hidden border border-border relative">
+            {channelImageUrl ? (
+              <div className="relative group">
+                <img src={channelImageUrl} alt="Social post" className="w-full aspect-square object-cover" />
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-xs h-7"
+                  onClick={(e) => { e.stopPropagation(); handleRegenerateImage(); }}
+                >
+                  <RefreshCw className="w-3 h-3 mr-1" /> Regenerate
+                </Button>
+              </div>
+            ) : isGeneratingImage ? (
+              <div className="aspect-square flex flex-col items-center justify-center gap-2 bg-muted/50">
+                <Sparkles className="w-6 h-6 text-primary animate-pulse" />
+                <p className="text-xs text-muted-foreground">Generating on-brand image...</p>
+              </div>
+            ) : (
+              <div className="aspect-square flex flex-col items-center justify-center gap-2 bg-muted/30">
+                <ImageIcon className="w-8 h-8 text-muted-foreground/40" />
+                <Button variant="ghost" size="sm" className="text-xs" onClick={generateChannelImage}>
+                  <Sparkles className="w-3 h-3 mr-1" /> Generate Image
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
         <p className="text-xs text-muted-foreground mt-2">{post.length}/280 characters</p>
       </div>
     );
@@ -1074,12 +1173,34 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
             <p className="text-sm whitespace-pre-wrap">{ad.primaryText}</p>
           </div>
           
-          {/* Image placeholder */}
-          <div className="bg-muted/50 h-48 flex items-center justify-center border-y border-border">
-            <div className="text-center text-muted-foreground">
-              <Megaphone className="w-8 h-8 mx-auto mb-2 opacity-50" />
-              <p className="text-xs">Image uploaded separately</p>
-            </div>
+          {/* AI-Generated Image */}
+          <div className="bg-muted/50 border-y border-border overflow-hidden relative">
+            {channelImageUrl ? (
+              <div className="relative group">
+                <img src={channelImageUrl} alt="Ad creative" className="w-full h-48 object-cover" />
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-xs h-7"
+                  onClick={(e) => { e.stopPropagation(); handleRegenerateImage(); }}
+                >
+                  <RefreshCw className="w-3 h-3 mr-1" /> Regenerate
+                </Button>
+              </div>
+            ) : isGeneratingImage ? (
+              <div className="h-48 flex flex-col items-center justify-center gap-2">
+                <Skeleton className="w-full h-full absolute inset-0" />
+                <Sparkles className="w-6 h-6 text-primary animate-pulse relative z-10" />
+                <p className="text-xs text-muted-foreground relative z-10">Generating on-brand image...</p>
+              </div>
+            ) : (
+              <div className="h-48 flex flex-col items-center justify-center gap-2">
+                <ImageIcon className="w-8 h-8 text-muted-foreground/50" />
+                <Button variant="ghost" size="sm" className="text-xs" onClick={generateChannelImage}>
+                  <Sparkles className="w-3 h-3 mr-1" /> Generate Image
+                </Button>
+              </div>
+            )}
           </div>
           
           {/* Link preview */}
@@ -1101,7 +1222,7 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
           </div>
         </div>
         <p className="text-xs text-muted-foreground italic">
-          Note: Upload your creative assets directly in Meta/LinkedIn Ads Manager
+          AI-generated on-brand creative included above. Download and upload to your ads manager.
         </p>
       </div>
     );
