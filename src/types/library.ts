@@ -41,6 +41,8 @@ export interface SavedMessage {
   // Creator information
   createdByUserId?: string;
   createdByName?: string;
+  // Tags for organization
+  tags?: string[];
 }
 
 export interface MessageVersion {
@@ -82,6 +84,11 @@ export interface SharedTemplate {
   institutionalProfileName?: string;
   // Source of where the template was created
   source?: LibrarySource;
+  // Tags for organization
+  tags?: string[];
+  // Creator information
+  createdByUserId?: string;
+  createdByName?: string;
 }
 
 export interface TemplatePlaceholder {
@@ -115,6 +122,7 @@ export interface LibraryFilters {
   moment?: string;
   status?: LibraryEntryStatus;
   playbook?: string;
+  tag?: string;
 }
 
 export type SortOption = 'newest' | 'oldest' | 'most-used' | 'recently-viewed';

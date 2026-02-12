@@ -921,6 +921,64 @@ export type Database = {
           },
         ]
       }
+      library_usage_events: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          message_id: string | null
+          metadata: Json | null
+          template_id: string | null
+          tenant_id: string
+          user_id: string
+          user_name: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          metadata?: Json | null
+          template_id?: string | null
+          tenant_id: string
+          user_id: string
+          user_name?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          metadata?: Json | null
+          template_id?: string | null
+          tenant_id?: string
+          user_id?: string
+          user_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_usage_events_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "personal_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_usage_events_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "shared_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_usage_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       onboarding_requests: {
         Row: {
           agency_name: string | null
@@ -1041,8 +1099,12 @@ export type Database = {
           approved: boolean | null
           audience: string | null
           channel: string
+          channel_drafts: Json | null
+          channels: string[] | null
+          cohort: Json | null
           content: string
           created_at: string
+          created_by_name: string | null
           domain: string | null
           goal: string | null
           id: string
@@ -1051,19 +1113,29 @@ export type Database = {
           mode: string | null
           moment: string | null
           notes: string | null
+          remixed_from: Json | null
           sender_recommendation: string | null
+          source: string | null
+          submitted_at: string | null
+          submitted_to_library: boolean
+          tags: string[] | null
           tenant_id: string
           title: string
           tone: string | null
           updated_at: string
           user_id: string
+          versions: Json
         }
         Insert: {
           approved?: boolean | null
           audience?: string | null
           channel: string
+          channel_drafts?: Json | null
+          channels?: string[] | null
+          cohort?: Json | null
           content: string
           created_at?: string
+          created_by_name?: string | null
           domain?: string | null
           goal?: string | null
           id?: string
@@ -1072,19 +1144,29 @@ export type Database = {
           mode?: string | null
           moment?: string | null
           notes?: string | null
+          remixed_from?: Json | null
           sender_recommendation?: string | null
+          source?: string | null
+          submitted_at?: string | null
+          submitted_to_library?: boolean
+          tags?: string[] | null
           tenant_id: string
           title: string
           tone?: string | null
           updated_at?: string
           user_id: string
+          versions?: Json
         }
         Update: {
           approved?: boolean | null
           audience?: string | null
           channel?: string
+          channel_drafts?: Json | null
+          channels?: string[] | null
+          cohort?: Json | null
           content?: string
           created_at?: string
+          created_by_name?: string | null
           domain?: string | null
           goal?: string | null
           id?: string
@@ -1093,12 +1175,18 @@ export type Database = {
           mode?: string | null
           moment?: string | null
           notes?: string | null
+          remixed_from?: Json | null
           sender_recommendation?: string | null
+          source?: string | null
+          submitted_at?: string | null
+          submitted_to_library?: boolean
+          tags?: string[] | null
           tenant_id?: string
           title?: string
           tone?: string | null
           updated_at?: string
           user_id?: string
+          versions?: Json
         }
         Relationships: [
           {
@@ -1476,11 +1564,16 @@ export type Database = {
       shared_templates: {
         Row: {
           approval_notes: string | null
+          change_history: Json
+          college_name: string | null
           content: string
           created_at: string
+          created_by_name: string | null
           created_by_user_id: string | null
+          department_name: string | null
           ethical_guardrails: string[] | null
           id: string
+          institutional_profile_id: string | null
           intent_statement: string | null
           maintainer: string | null
           metadata: Json | null
@@ -1488,7 +1581,9 @@ export type Database = {
           placeholders: Json | null
           playbook: string | null
           required_fields: Json | null
+          source: string | null
           status: string
+          tags: string[] | null
           tenant_id: string
           title: string
           updated_at: string
@@ -1498,11 +1593,16 @@ export type Database = {
         }
         Insert: {
           approval_notes?: string | null
+          change_history?: Json
+          college_name?: string | null
           content: string
           created_at?: string
+          created_by_name?: string | null
           created_by_user_id?: string | null
+          department_name?: string | null
           ethical_guardrails?: string[] | null
           id?: string
+          institutional_profile_id?: string | null
           intent_statement?: string | null
           maintainer?: string | null
           metadata?: Json | null
@@ -1510,7 +1610,9 @@ export type Database = {
           placeholders?: Json | null
           playbook?: string | null
           required_fields?: Json | null
+          source?: string | null
           status?: string
+          tags?: string[] | null
           tenant_id: string
           title: string
           updated_at?: string
@@ -1520,11 +1622,16 @@ export type Database = {
         }
         Update: {
           approval_notes?: string | null
+          change_history?: Json
+          college_name?: string | null
           content?: string
           created_at?: string
+          created_by_name?: string | null
           created_by_user_id?: string | null
+          department_name?: string | null
           ethical_guardrails?: string[] | null
           id?: string
+          institutional_profile_id?: string | null
           intent_statement?: string | null
           maintainer?: string | null
           metadata?: Json | null
@@ -1532,7 +1639,9 @@ export type Database = {
           placeholders?: Json | null
           playbook?: string | null
           required_fields?: Json | null
+          source?: string | null
           status?: string
+          tags?: string[] | null
           tenant_id?: string
           title?: string
           updated_at?: string
@@ -1541,6 +1650,13 @@ export type Database = {
           version?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "shared_templates_institutional_profile_id_fkey"
+            columns: ["institutional_profile_id"]
+            isOneToOne: false
+            referencedRelation: "institutional_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "shared_templates_tenant_id_fkey"
             columns: ["tenant_id"]

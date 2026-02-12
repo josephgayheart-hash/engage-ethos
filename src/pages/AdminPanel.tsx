@@ -214,8 +214,8 @@ interface Referral {
 const AdminPanel = () => {
   const { toast } = useToast();
   const { isSuperAdmin } = useAuth();
-  const { templates, clearAllTemplates, resetToDefaults } = useSharedLibrary();
-  const { messages, clearAllMessages } = useMessageLibrary();
+  const { templates } = useSharedLibrary();
+  const { messages } = useMessageLibrary();
   
   const [activeTab, setActiveTab] = useState("command-center");
   const [users, setUsers] = useState<RealUser[]>([]);
@@ -455,15 +455,15 @@ const AdminPanel = () => {
   }, [isSuperAdmin]);
 
   const handleClearPersonalLibrary = () => {
-    clearAllMessages();
+    // No longer supported with DB-first approach - messages are in DB
     setClearPersonalOpen(false);
-    toast({ title: "Personal Library cleared" });
+    toast({ title: "Personal Library data is managed in the database" });
   };
 
   const handleClearSharedLibrary = () => {
-    clearAllTemplates();
+    // No longer supported with DB-first approach - templates are in DB
     setClearSharedOpen(false);
-    toast({ title: "Shared Library cleared" });
+    toast({ title: "Shared Library data is managed in the database" });
   };
 
   const formatTime = (date: string | null) => {
@@ -1848,13 +1848,10 @@ const AdminPanel = () => {
                     <Button 
                       variant="outline" 
                       className="w-full justify-start"
-                      onClick={() => {
-                        resetToDefaults();
-                        toast({ title: "Shared Library reset to defaults" });
-                      }}
+                      disabled
                     >
                       <RefreshCw className="w-4 h-4 mr-2" />
-                      Reset Shared Library to Defaults
+                      Reset Shared Library to Defaults (N/A - DB managed)
                     </Button>
                   </CardContent>
                 </Card>

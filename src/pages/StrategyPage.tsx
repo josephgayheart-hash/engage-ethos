@@ -463,7 +463,7 @@ const StrategyPage = () => {
     setSaveToLibraryOpen(true);
   };
 
-  const handleSaveToLibraryConfirm = (name: string): string | undefined => {
+  const handleSaveToLibraryConfirm = async (name: string): Promise<string | undefined> => {
     if (!mapperResult?.journey) return undefined;
 
     // Include journey data with metadata for diagram rendering AND profile/DNA info
@@ -522,7 +522,7 @@ const StrategyPage = () => {
     }
     
     // Create new journey (for new or remix mode)
-    const savedMessage = addMessage({
+    const savedMessage = await addMessage({
       title: name,
       content: journeyContent,
       channel: context.channel,
@@ -554,7 +554,7 @@ const StrategyPage = () => {
     // Clear the draft after saving to library
     clearDraftAfterSave();
 
-    return savedMessage.id;
+    return savedMessage?.id;
   };
 
   const handleShareToLibraryClick = () => {
@@ -563,7 +563,7 @@ const StrategyPage = () => {
     setSaveToLibraryOpen(true);
   };
 
-  const handleShareToLibraryConfirm = (name: string): string | undefined => {
+  const handleShareToLibraryConfirm = async (name: string): Promise<string | undefined> => {
     if (!mapperResult?.journey) return undefined;
 
     const journey = mapperResult.journey;
@@ -590,7 +590,7 @@ const StrategyPage = () => {
       }
     };
     
-    const savedTemplate = addTemplate({
+    const savedTemplate = await addTemplate({
       title: name,
       intentStatement: journey.overview,
       content: JSON.stringify(journeyWithMetadata, null, 2),
@@ -620,7 +620,7 @@ const StrategyPage = () => {
     // Clear the draft after saving to library
     clearDraftAfterSave();
 
-    return savedTemplate.id;
+    return savedTemplate?.id;
   };
 
   // PDF Export function
