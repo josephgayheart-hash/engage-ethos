@@ -80,3 +80,6 @@ verify_jwt = false
 
 [functions.organize-scratchpad]
 verify_jwt = false
+
+[functions.generate-collection-cover]
+verify_jwt = false
