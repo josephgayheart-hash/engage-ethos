@@ -51,6 +51,97 @@ const channelSpecs: Record<string, { aspect: string; width: number; height: numb
     style: "news article featured image",
     description: "Editorial-style featured image for a news/press article"
   },
+  "story": {
+    aspect: "9:16",
+    width: 1080,
+    height: 1920,
+    style: "Instagram/Facebook Story image",
+    description: "Vertical story image (9:16) for Instagram Stories, Facebook Stories, or Snapchat"
+  },
+  "digital-signage": {
+    aspect: "16:9",
+    width: 1920,
+    height: 1080,
+    style: "digital signage display image",
+    description: "Full-screen image for a campus digital sign or kiosk display"
+  },
+  "event-flyer": {
+    aspect: "4:5",
+    width: 1080,
+    height: 1350,
+    style: "event flyer or poster image",
+    description: "Portrait-oriented image for an event flyer, poster, or campus bulletin"
+  },
+  "presentation-slide": {
+    aspect: "16:9",
+    width: 1920,
+    height: 1080,
+    style: "presentation slide background image",
+    description: "Widescreen image for a PowerPoint or Google Slides presentation background"
+  },
+  "web-banner": {
+    aspect: "3:1",
+    width: 1500,
+    height: 500,
+    style: "website banner image",
+    description: "Wide, thin banner for a website header or announcement strip"
+  },
+  "mms": {
+    aspect: "1:1",
+    width: 640,
+    height: 640,
+    style: "MMS text message image",
+    description: "Square image optimized for MMS / text message delivery"
+  },
+  "linkedin-banner": {
+    aspect: "4:1",
+    width: 1584,
+    height: 396,
+    style: "LinkedIn profile or company page banner",
+    description: "Ultra-wide banner for a LinkedIn profile or company page header"
+  },
+  "facebook-cover": {
+    aspect: "2.63:1",
+    width: 820,
+    height: 312,
+    style: "Facebook page cover photo",
+    description: "Wide cover photo for a Facebook page or group"
+  },
+  "youtube-thumbnail": {
+    aspect: "16:9",
+    width: 1280,
+    height: 720,
+    style: "YouTube video thumbnail",
+    description: "Eye-catching thumbnail for a YouTube video — bold, high-contrast"
+  },
+  "print-ad": {
+    aspect: "8.5:11",
+    width: 1275,
+    height: 1650,
+    style: "print advertisement image",
+    description: "Portrait image for a print magazine or newspaper advertisement"
+  },
+  "viewbook": {
+    aspect: "4:3",
+    width: 1200,
+    height: 900,
+    style: "viewbook or brochure spread image",
+    description: "Landscape image for a university viewbook, brochure, or admissions piece"
+  },
+  "donor-report": {
+    aspect: "8.5:11",
+    width: 1275,
+    height: 1650,
+    style: "donor report or annual report cover image",
+    description: "Portrait image for a donor report, annual report, or stewardship publication cover"
+  },
+  "portal-banner": {
+    aspect: "3:1",
+    width: 1200,
+    height: 400,
+    style: "student portal or app banner image",
+    description: "Wide banner for a student portal dashboard, app home screen, or intranet header"
+  },
 };
 
 serve(async (req) => {
