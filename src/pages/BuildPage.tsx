@@ -1244,6 +1244,10 @@ const BuildPage = () => {
                           logoUrl: institutionalConfig?.logoUrl || tenant?.logo_url || undefined,
                         };
                       })()}
+                      tenantId={profile?.tenant_id}
+                      profileId={selectedProfileId || undefined}
+                      audience={context.audience || undefined}
+                      contentSummary={context.moment ? `${context.moment} message for ${context.audience || 'students'}` : undefined}
                     />
                   );
                 })}

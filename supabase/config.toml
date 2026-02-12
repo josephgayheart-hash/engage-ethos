@@ -83,3 +83,6 @@ verify_jwt = false
 
 [functions.generate-collection-cover]
 verify_jwt = false
+
+[functions.generate-channel-image]
+verify_jwt = false
