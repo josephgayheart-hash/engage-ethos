@@ -14,8 +14,11 @@ import {
   BookOpen, 
   Target, 
   Shield,
-  Sparkles
+  Sparkles,
+  Camera,
+  ExternalLink
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import type { PlaygroundMessage } from '@/hooks/usePlaygroundConversations';
 import { MessageActions } from './MessageActions';
 import { ModelSelector, type AIModel } from './ModelSelector';
@@ -33,6 +36,7 @@ interface ChatInterfaceProps {
   streamingContent?: string;
   selectedModel: AIModel;
   onModelChange: (model: AIModel) => void;
+  campusPhotoCount?: number;
 }
 
 const suggestedPrompts = [
@@ -70,7 +74,8 @@ export function ChatInterface({
   hasDNA,
   streamingContent,
   selectedModel,
-  onModelChange
+  onModelChange,
+  campusPhotoCount
 }: ChatInterfaceProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -267,6 +272,24 @@ export function ChatInterface({
                       <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                     </div>
                   </div>
+                  {/* Campus photo training indicator */}
+                  {campusPhotoCount !== undefined && (
+                    <div className="mt-2 text-[11px] text-muted-foreground">
+                      {campusPhotoCount > 0 ? (
+                        <span className="flex items-center gap-1">
+                          <Camera className="w-3 h-3 text-primary" />
+                          {campusPhotoCount} campus photo{campusPhotoCount > 1 ? "s" : ""} informing response
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1">
+                          No campus photos —{" "}
+                          <Link to="/admin/content-dna" className="text-primary hover:text-primary/80 inline-flex items-center gap-0.5 font-medium">
+                            add them <ExternalLink className="w-2.5 h-2.5" />
+                          </Link>
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             )}

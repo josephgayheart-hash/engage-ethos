@@ -33,6 +33,7 @@ import { useLastUsedProfile } from "@/hooks/useLastUsedProfile";
 import { BrandLayerSelector, BrandLayerActiveBadge, BrandLayerSelection } from "@/components/BrandLayerSelector";
 import { BrandAdherenceScore } from "@/components/BrandAdherenceScore";
 import { GenerationLoadingOverlay } from "@/components/GenerationLoadingOverlay";
+import { useCampusPhotoCount } from "@/hooks/useCampusPhotoCount";
 
 import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
 import { AddToCollectionDialog } from "@/components/library/AddToCollectionDialog";
@@ -227,6 +228,7 @@ const BuildPage = () => {
       }
     }
   }, [profileIdFromUrl, profiles, selectedProfileName]);
+  const { campusPhotoCount } = useCampusPhotoCount(selectedProfileId);
   const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfig | null>(null);
 
   // Ensure institutionalConfig is populated when restoring a draft / deep-linking.
@@ -1139,6 +1141,7 @@ const BuildPage = () => {
                   leadershipName: institutionalConfig.presidentName || institutionalConfig.deanName || institutionalConfig.directorName,
                   leadershipTitle: institutionalConfig.presidentTitle || institutionalConfig.deanTitle || institutionalConfig.directorTitle,
                 } : undefined,
+                campusPhotoCount,
               }}
             />
           )}

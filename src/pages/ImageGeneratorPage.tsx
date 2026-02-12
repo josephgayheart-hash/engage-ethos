@@ -10,8 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { supabase } from "@/integrations/supabase/client";
-import { ImageIcon, Download, RefreshCw, Loader2, Sparkles, Palette, Camera, Users, Target, Eye, Image } from "lucide-react";
+import { ImageIcon, Download, RefreshCw, Loader2, Sparkles, Palette, Camera, Users, Target, Eye, Image, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
 import { ChannelMockup } from "@/components/image-generator/ChannelMockup";
+import { useCampusPhotoCount } from "@/hooks/useCampusPhotoCount";
 import { toast } from "sonner";
 
 const channelOptions = [
@@ -84,6 +86,7 @@ const ImageGeneratorPage = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationPhase, setGenerationPhase] = useState(0);
   const [viewMode, setViewMode] = useState<"raw" | "mockup">("mockup");
+  const { campusPhotoCount } = useCampusPhotoCount(selectedProfileId || null);
 
   const handleGenerate = useCallback(async () => {
     if (!contentDescription.trim()) {
@@ -408,13 +411,31 @@ const ImageGeneratorPage = () => {
                         <p className="text-sm font-medium">
                           {[
                             "Reading your brand profile…",
-                            "Matching campus colors & architecture…",
+                            campusPhotoCount > 0
+                              ? `Training from ${campusPhotoCount} campus photo${campusPhotoCount > 1 ? "s" : ""}…`
+                              : "Matching campus colors & architecture…",
                             "Applying channel best practices…",
                             "Rendering with AI — optimized for this format…",
                             "Finalizing & uploading…",
                           ][generationPhase]}
                         </p>
                       </div>
+                      {/* Campus photo training indicator */}
+                      <p className="text-xs text-muted-foreground">
+                        {campusPhotoCount > 0 ? (
+                          <span className="flex items-center justify-center gap-1">
+                            <Camera className="w-3 h-3 text-primary" />
+                            {campusPhotoCount} campus photo{campusPhotoCount > 1 ? "s" : ""} guiding visual style
+                          </span>
+                        ) : (
+                          <span className="flex items-center justify-center gap-1">
+                            No campus photos uploaded —{" "}
+                            <Link to="/admin/content-dna" className="text-primary hover:text-primary/80 inline-flex items-center gap-0.5 font-medium">
+                              add them <ExternalLink className="w-2.5 h-2.5" />
+                            </Link>
+                          </span>
+                        )}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {engine === "premium"
                           ? "Premium engine — up to 60 seconds"
