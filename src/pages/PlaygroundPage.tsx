@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { usePlaygroundConversations } from "@/hooks/usePlaygroundConversations";
 import { useToolTracking } from "@/hooks/useToolTracking";
+import { useCampusPhotoCount } from "@/hooks/useCampusPhotoCount";
 import { supabase } from "@/integrations/supabase/client";
 import { ConversationList } from "@/components/playground/ConversationList";
 import { ChatInterface } from "@/components/playground/ChatInterface";
@@ -57,6 +58,7 @@ const PlaygroundPage = () => {
   const [selectedDNAId, setSelectedDNAId] = useState<string | null>(null);
   const [contentDNA, setContentDNA] = useState<ContentDNAData | null>(null);
   const [profileConfig, setProfileConfig] = useState<Record<string, unknown> | null>(null);
+  const { campusPhotoCount } = useCampusPhotoCount(selectedProfileId);
 
   // Sync context when conversation changes
   useEffect(() => {
@@ -425,6 +427,7 @@ const PlaygroundPage = () => {
               streamingContent={streamingContent}
               selectedModel={selectedModel}
               onModelChange={setSelectedModel}
+              campusPhotoCount={campusPhotoCount}
             />
           </div>
         </Card>

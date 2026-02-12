@@ -18,6 +18,7 @@ import { ContentDNAExplainer } from "@/components/ContentDNAExplainer";
 import { BrandLayerSelector, BrandLayerActiveBadge, BrandLayerSelection } from "@/components/BrandLayerSelector";
 import { CadenceSelector, CadenceFrequency, EscalationPattern } from "@/components/CadenceSelector";
 import { GenerationLoadingOverlay } from "@/components/GenerationLoadingOverlay";
+import { useCampusPhotoCount } from "@/hooks/useCampusPhotoCount";
 import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
 import { BuilderStepSection, BuilderStepDivider } from "@/components/BuilderStepSection";
 import { WaveBackground } from "@/components/WaveBackground";
@@ -147,6 +148,7 @@ const StrategyPage = () => {
   const [selectedStories, setSelectedStories] = useState<Story[]>([]);
   const [selectedFacts, setSelectedFacts] = useState<Fact[]>([]);
   const { contentDNA, isLoading: isContentDNALoading } = useContentDNAForGeneration({ profileId: selectedProfileId });
+  const { campusPhotoCount } = useCampusPhotoCount(selectedProfileId);
   const [saveToLibraryOpen, setSaveToLibraryOpen] = useState(false);
   const [saveToLibraryType, setSaveToLibraryType] = useState<'personal' | 'shared'>('personal');
   
@@ -1344,6 +1346,7 @@ const StrategyPage = () => {
                   leadershipName: institutionalConfig.presidentName || institutionalConfig.deanName || institutionalConfig.directorName,
                   leadershipTitle: institutionalConfig.presidentTitle || institutionalConfig.deanTitle || institutionalConfig.directorTitle,
                 } : undefined,
+                campusPhotoCount,
               }}
             />
           )}

@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 import {
   Loader2, Building2, Dna, Users, Target, BookMarked, Mail, Sparkles, Map,
   Check, Shield, Palette, MessageSquare, FileText, Brain, Zap, BarChart3,
-  Quote, Type, Gauge, Hash, Layers, GraduationCap
+  Quote, Type, Gauge, Hash, Layers, GraduationCap, Camera, ExternalLink
 } from "lucide-react";
 
 interface DNAStats {
@@ -49,6 +50,7 @@ interface GenerationContext {
   journeyWeeks?: number;
   dnaStats?: DNAStats;
   profileStats?: ProfileStats;
+  campusPhotoCount?: number;
 }
 
 interface GenerationLoadingOverlayProps {
@@ -107,6 +109,12 @@ function buildProofItems(ctx: GenerationContext, phaseKey: string): ProofItem[] 
     if (ctx.factCount) items.push({ label: "Proof points", value: `${ctx.factCount} data facts`, icon: Zap });
   }
 
+  if (phaseKey === "photos") {
+    if (ctx.campusPhotoCount && ctx.campusPhotoCount > 0) {
+      items.push({ label: "Reference photos", value: `${ctx.campusPhotoCount} active`, icon: Camera });
+    }
+  }
+
   return items;
 }
 
@@ -114,9 +122,25 @@ function buildPhases(ctx: GenerationContext): (PhaseItem & { key: string })[] {
   const profileDetail = ctx.profileName ? `for ${ctx.profileName}` : "";
 
   if (ctx.mode === "journey") {
+    const photoPhase = {
+      key: "photos",
+      message: ctx.campusPhotoCount && ctx.campusPhotoCount > 0
+        ? "Loading campus photography references…"
+        : "No campus photos uploaded — using general imagery",
+      completedMessage: ctx.campusPhotoCount && ctx.campusPhotoCount > 0
+        ? `${ctx.campusPhotoCount} campus photo${ctx.campusPhotoCount > 1 ? "s" : ""} loaded as visual reference`
+        : "No campus photos — add them in Content DNA Studio",
+      detail: ctx.campusPhotoCount && ctx.campusPhotoCount > 0
+        ? `${ctx.campusPhotoCount} reference image${ctx.campusPhotoCount > 1 ? "s" : ""} guiding visual style`
+        : undefined,
+      icon: Camera,
+      proofItems: buildProofItems(ctx, "photos"),
+      hasNoPhotos: !(ctx.campusPhotoCount && ctx.campusPhotoCount > 0),
+    };
     return [
       { key: "profile", message: "Loading institutional profile…", completedMessage: "Institutional profile loaded", detail: profileDetail, icon: Building2, proofItems: buildProofItems(ctx, "profile") },
       { key: "dna", message: "Analyzing Content DNA & voice patterns…", completedMessage: "Content DNA & voice patterns analyzed", detail: ctx.useContentDNA ? "Tone, vocabulary, sentence style" : "Skipped — DNA off", icon: Dna, proofItems: buildProofItems(ctx, "dna") },
+      photoPhase,
       { key: "brand", message: "Mapping brand pillars to journey arcs…", completedMessage: "Brand pillars mapped to journey arcs", detail: ctx.brandPillarCount ? `${ctx.brandPillarCount} pillar${ctx.brandPillarCount > 1 ? "s" : ""} selected` : undefined, icon: Target, proofItems: buildProofItems(ctx, "brand") },
       { key: "flow", message: "Designing multi-channel touchpoint flow…", completedMessage: "Multi-channel touchpoint flow designed", detail: ctx.journeyWeeks ? `${ctx.journeyWeeks}-week timeline` : undefined, icon: Map, proofItems: [] },
       { key: "stories", message: "Weaving in stories & proof points…", completedMessage: "Stories & proof points woven in", detail: ctx.hasStories || ctx.hasFacts ? `${ctx.storyCount || 0} stories, ${ctx.factCount || 0} facts` : "No stories/facts selected", icon: BookMarked, proofItems: buildProofItems(ctx, "stories") },
@@ -125,9 +149,26 @@ function buildPhases(ctx: GenerationContext): (PhaseItem & { key: string })[] {
     ];
   }
 
+  const photoPhase = {
+    key: "photos",
+    message: ctx.campusPhotoCount && ctx.campusPhotoCount > 0
+      ? "Loading campus photography references…"
+      : "No campus photos uploaded — using general imagery",
+    completedMessage: ctx.campusPhotoCount && ctx.campusPhotoCount > 0
+      ? `${ctx.campusPhotoCount} campus photo${ctx.campusPhotoCount > 1 ? "s" : ""} loaded as visual reference`
+      : "No campus photos — add them in Content DNA Studio",
+    detail: ctx.campusPhotoCount && ctx.campusPhotoCount > 0
+      ? `${ctx.campusPhotoCount} reference image${ctx.campusPhotoCount > 1 ? "s" : ""} guiding visual style`
+      : undefined,
+    icon: Camera,
+    proofItems: buildProofItems(ctx, "photos"),
+    hasNoPhotos: !(ctx.campusPhotoCount && ctx.campusPhotoCount > 0),
+  };
+
   return [
     { key: "profile", message: "Loading institutional profile…", completedMessage: "Institutional profile loaded", detail: profileDetail, icon: Building2, proofItems: buildProofItems(ctx, "profile") },
     { key: "dna", message: "Analyzing Content DNA & voice patterns…", completedMessage: "Content DNA & voice patterns analyzed", detail: ctx.useContentDNA ? "Tone, vocabulary, sentence style" : "Skipped — DNA off", icon: Dna, proofItems: buildProofItems(ctx, "dna") },
+    photoPhase,
     { key: "brand", message: "Applying brand pillars & proof points…", completedMessage: "Brand pillars & proof points applied", detail: ctx.brandPillarCount ? `${ctx.brandPillarCount} pillar${ctx.brandPillarCount > 1 ? "s" : ""} selected` : undefined, icon: Target, proofItems: buildProofItems(ctx, "brand") },
     { key: "stories", message: "Weaving in stories & data points…", completedMessage: "Stories & data points woven in", detail: ctx.hasStories || ctx.hasFacts ? `${ctx.storyCount || 0} stories, ${ctx.factCount || 0} facts` : "No stories/facts selected", icon: BookMarked, proofItems: buildProofItems(ctx, "stories") },
     { key: "generate", message: "Generating on-brand drafts per channel…", completedMessage: "On-brand drafts generated per channel", detail: `${ctx.channels?.length || 0} channel${(ctx.channels?.length || 0) > 1 ? "s" : ""}`, icon: Mail, proofItems: [] },
@@ -208,6 +249,9 @@ export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadi
   if (context.moment) readbackTags.push({ label: context.moment, icon: MessageSquare });
   if (context.hasStories) readbackTags.push({ label: `${context.storyCount || 0} Stories`, icon: FileText });
   if (context.hasFacts) readbackTags.push({ label: `${context.factCount || 0} Facts`, icon: Zap });
+  if (context.campusPhotoCount && context.campusPhotoCount > 0) {
+    readbackTags.push({ label: `${context.campusPhotoCount} Campus Photos`, icon: Camera });
+  }
   if (context.channels && context.channels.length > 0) {
     readbackTags.push({ label: `${context.channels.length} Channel${context.channels.length > 1 ? "s" : ""}`, icon: Mail });
   }
@@ -318,7 +362,16 @@ export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadi
                         {p.detail}
                       </p>
                     )}
-
+                    {/* No campus photos CTA */}
+                    {(p as any).hasNoPhotos && (isCurrent || isComplete) && (
+                      <Link
+                        to="/admin/content-dna"
+                        className="inline-flex items-center gap-1 text-[10px] text-primary hover:text-primary/80 font-medium mt-1 transition-colors"
+                      >
+                        <ExternalLink className="w-2.5 h-2.5" />
+                        Upload campus photos in Content DNA Studio →
+                      </Link>
+                    )}
                     {/* Proof items — flash in one by one */}
                     {proofItems.length > 0 && visibleProofCount > 0 && (
                       <div className="mt-1.5 flex flex-wrap gap-1">
