@@ -31,6 +31,7 @@ import { useUserDrafts } from "@/hooks/useUserDrafts";
 import { useLastUsedProfile } from "@/hooks/useLastUsedProfile";
 import { BrandLayerSelector, BrandLayerActiveBadge, BrandLayerSelection } from "@/components/BrandLayerSelector";
 import { BrandAdherenceScore } from "@/components/BrandAdherenceScore";
+import { GenerationLoadingOverlay } from "@/components/GenerationLoadingOverlay";
 
 import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
 import { AddToCollectionDialog } from "@/components/library/AddToCollectionDialog";
@@ -1080,6 +1081,23 @@ const BuildPage = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Generation Loading Overlay */}
+          {isProcessing && (
+            <GenerationLoadingOverlay
+              isVisible={isProcessing}
+              context={{
+                mode: "builder",
+                profileName: selectedProfileName,
+                useContentDNA,
+                hasBrandPlatform: !!(useContentDNA && contentDNA?.brandPlatform),
+                hasStories: selectedStories.length > 0,
+                hasFacts: selectedFacts.length > 0,
+                audience: context.audience ? audienceLabels[context.audience] || context.audience : undefined,
+                channels: selectedChannels,
+              }}
+            />
+          )}
 
           {/* Results */}
           {builderResult?.channelDrafts && (

@@ -16,6 +16,7 @@ import { ContentDNAIndicator, ContentDNAActiveBadge } from "@/components/Content
 import { ContentDNAExplainer } from "@/components/ContentDNAExplainer";
 import { BrandLayerSelector, BrandLayerActiveBadge, BrandLayerSelection } from "@/components/BrandLayerSelector";
 import { CadenceSelector, CadenceFrequency, EscalationPattern } from "@/components/CadenceSelector";
+import { GenerationLoadingOverlay } from "@/components/GenerationLoadingOverlay";
 import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
 import { BuilderStepSection, BuilderStepDivider } from "@/components/BuilderStepSection";
 import { WaveBackground } from "@/components/WaveBackground";
@@ -1282,6 +1283,23 @@ const StrategyPage = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Generation Loading Overlay */}
+          {isProcessing && (
+            <GenerationLoadingOverlay
+              isVisible={isProcessing}
+              context={{
+                mode: "journey",
+                profileName: selectedProfileName,
+                useContentDNA,
+                hasBrandPlatform: !!(useContentDNA && contentDNA?.brandPlatform),
+                hasStories: selectedStories.length > 0,
+                hasFacts: selectedFacts.length > 0,
+                audience: context.audience ? audienceLabels[context.audience] || context.audience : undefined,
+                channels: selectedChannels,
+              }}
+            />
+          )}
 
           {/* Results */}
           {mapperResult?.journey && (
