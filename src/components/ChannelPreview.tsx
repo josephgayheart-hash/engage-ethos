@@ -76,6 +76,8 @@ interface ChannelPreviewProps {
   moment?: string;
   cohort?: string;
   domain?: string;
+  imageEngine?: string;
+  imageStyle?: string;
 }
 
 const channelIcons: Record<Channel, React.ReactNode> = {
@@ -108,7 +110,7 @@ const channelLabels: Record<Channel, string> = {
   'case-for-care': 'Case for Support',
 };
 
-export function ChannelPreview({ channel, content, onCopy, onContentChange, onSaveToLibrary, institutionName, branding, tenantId, profileId, audience, contentSummary, goal, tone, moment, cohort, domain }: ChannelPreviewProps) {
+export function ChannelPreview({ channel, content, onCopy, onContentChange, onSaveToLibrary, institutionName, branding, tenantId, profileId, audience, contentSummary, goal, tone, moment, cohort, domain, imageEngine, imageStyle }: ChannelPreviewProps) {
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState<ChannelDrafts[keyof ChannelDrafts]>(content);
@@ -143,6 +145,8 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
           moment,
           cohort,
           domain,
+          engine: imageEngine || undefined,
+          imageStyle: imageStyle || undefined,
         },
       });
       if (error) throw error;
@@ -154,7 +158,7 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     } finally {
       setIsGeneratingImage(false);
     }
-  }, [channel, contentSummary, audience, tenantId, profileId, goal, tone, moment, cohort, domain]);
+  }, [channel, contentSummary, audience, tenantId, profileId, goal, tone, moment, cohort, domain, imageEngine, imageStyle]);
 
   const handleRegenerateImage = () => {
     setChannelImageUrl(null);

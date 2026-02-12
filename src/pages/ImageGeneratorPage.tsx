@@ -222,10 +222,7 @@ const ImageGeneratorPage = () => {
                       <SelectContent>
                         {engineOptions.map((opt) => (
                           <SelectItem key={opt.value} value={opt.value}>
-                            <span className="flex flex-col">
-                              <span>{opt.label}</span>
-                              <span className="text-xs text-muted-foreground">{opt.description}</span>
-                            </span>
+                            {opt.label} — <span className="text-muted-foreground">{opt.description}</span>
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -239,10 +236,7 @@ const ImageGeneratorPage = () => {
                       <SelectContent>
                         {styleOptions.map((opt) => (
                           <SelectItem key={opt.value} value={opt.value}>
-                            <span className="flex flex-col">
-                              <span>{opt.label}</span>
-                              <span className="text-xs text-muted-foreground">{opt.description}</span>
-                            </span>
+                            {opt.label} — <span className="text-muted-foreground">{opt.description}</span>
                           </SelectItem>
                         ))}
                       </SelectContent>
