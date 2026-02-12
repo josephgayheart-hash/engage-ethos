@@ -1,5 +1,5 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -188,35 +188,6 @@ const statusConfig: Record<LibraryEntryStatus, { label: string; icon: typeof Che
   published: { label: 'Published', icon: BookOpen, variant: 'default' },
 };
 
-// Mock usage data - in production this would come from database
-const generateMockUsage = (templateId: string) => {
-  const users = [
-    { name: 'Sarah Johnson', dept: 'Student Success' },
-    { name: 'Michael Chen', dept: 'Academic Affairs' },
-    { name: 'Emily Rodriguez', dept: 'Enrollment' },
-    { name: 'David Kim', dept: 'Advising' },
-    { name: 'Jessica Williams', dept: 'Financial Aid' },
-  ];
-  
-  const seed = templateId.charCodeAt(0);
-  const usageCount = 3 + (seed % 5);
-  
-  return Array.from({ length: usageCount }, (_, i) => {
-    const user = users[(seed + i) % users.length];
-    const daysAgo = i * 3 + (seed % 7);
-    const date = new Date();
-    date.setDate(date.getDate() - daysAgo);
-    
-    return {
-      id: `usage-${i}`,
-      userName: user.name,
-      department: user.dept,
-      date: date.toISOString(),
-      action: i === 0 ? 'pulled' : (i % 2 === 0 ? 'pulled' : 'copied'),
-    };
-  });
-};
-
 const TemplateDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -231,11 +202,34 @@ const TemplateDetailPage = () => {
   const [profileConfig, setProfileConfig] = useState<InstitutionalConfig | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState<string>('');
+  const [usageHistory, setUsageHistory] = useState<Array<{ id: string; userName: string; action: string; date: string }>>([]);
 
   const template = getTemplateById(id || '');
   const isJourney = useMemo(() => template ? isJourneyContent(template.content) : false, [template]);
   const journeyData = useMemo(() => isJourney && template ? parseJourneyContent(template.content) : null, [template, isJourney]);
-  const usageHistory = useMemo(() => template ? generateMockUsage(template.id) : [], [template]);
+
+  // Load real usage history
+  useEffect(() => {
+    if (!template) return;
+    import('@/hooks/useLibraryUsageTracking').then(async ({ useLibraryUsageTracking: _ }) => {
+      // Use supabase directly for simplicity since we can't call hooks conditionally
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data } = await supabase
+        .from('library_usage_events')
+        .select('*')
+        .eq('template_id', template.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (data) {
+        setUsageHistory(data.map(row => ({
+          id: row.id,
+          userName: (row as any).user_name || 'Unknown',
+          action: row.action,
+          date: row.created_at,
+        })));
+      }
+    });
+  }, [template?.id]);
 
   const { isExporting, exportToPdf, printJourney } = useJourneyExport({
     title: template?.title || "Template Export",
@@ -739,7 +733,7 @@ const TemplateDetailPage = () => {
                             </div>
                             <div>
                               <p className="font-medium">{usage.userName}</p>
-                              <p className="text-sm text-muted-foreground">{usage.department}</p>
+                              <p className="text-sm text-muted-foreground capitalize">{usage.action}</p>
                             </div>
                           </div>
                           <div className="text-right">

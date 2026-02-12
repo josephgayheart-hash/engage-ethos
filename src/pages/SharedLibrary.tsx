@@ -14,6 +14,7 @@ import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAgencyMode } from "@/hooks/useAgencyMode";
 import { CreateTemplateDialog } from "@/components/library/CreateTemplateDialog";
 import { AdminApprovalPanel } from "@/components/library/AdminApprovalPanel";
 import { SourceBadge } from "@/components/library/SourceBadge";
@@ -54,7 +55,8 @@ const SharedLibrary = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { isAdmin, isApprover } = useAuth();
-  const { templates, filterTemplates, getPlaybooks, addTemplate, updateTemplateStatus } = useSharedLibrary();
+  const { isAgency } = useAgencyMode();
+  const { templates, filterTemplates, getPlaybooks, getAllTags, addTemplate, updateTemplateStatus } = useSharedLibrary();
   const { addMessage } = useMessageLibrary();
   const { getProfileHierarchy } = useInstitutionalProfiles();
   const [filters, setFilters] = useState<LibraryFilters>({ search: '' });
@@ -75,6 +77,7 @@ const SharedLibrary = () => {
   };
 
   const playbooks = getPlaybooks();
+  const allTags = getAllTags();
   const pendingCount = templates.filter(t => t.status === 'submitted').length;
   const filteredTemplates = filterTemplates({
     ...filters,
@@ -85,18 +88,18 @@ const SharedLibrary = () => {
     navigate(`/shared-library/${id}`);
   };
 
-  const handleCreateTemplate = (template: Omit<SharedTemplate, 'id' | 'createdAt' | 'updatedAt' | 'changeHistory'>) => {
-    // Auto-publish for admins and approvers
+  const handleCreateTemplate = async (template: Omit<SharedTemplate, 'id' | 'createdAt' | 'updatedAt' | 'changeHistory'>) => {
     const templateWithStatus = {
       ...template,
       status: (isAdmin || isApprover) ? 'published' as const : template.status,
     };
-    addTemplate(templateWithStatus);
+    await addTemplate(templateWithStatus);
+    const libraryLabel = isAgency ? 'Template Library' : 'University Library';
     toast({
       title: (isAdmin || isApprover) ? "Playbook published" : "Playbook submitted",
       description: (isAdmin || isApprover) 
-        ? "Your playbook has been published to the University Library."
-        : "Your playbook has been saved as a draft for review.",
+        ? `Your playbook has been published to the ${libraryLabel}.`
+        : `Your playbook has been saved as a draft for review.`,
     });
   };
 
@@ -135,7 +138,7 @@ const SharedLibrary = () => {
                 Home
               </Link>
               <span>/</span>
-              <span className="text-foreground">University Library</span>
+              <span className="text-foreground">{isAgency ? 'Template Library' : 'University Library'}</span>
             </div>
 
             {/* Header */}
@@ -145,7 +148,7 @@ const SharedLibrary = () => {
                   <div className="icon-container icon-container-lg bg-secondary/20">
                     <BookOpen className="w-6 h-6 text-secondary" />
                   </div>
-                  University Library
+                  {isAgency ? 'Template Library' : 'University Library'}
                 </h1>
                 <p className="text-muted-foreground mt-1 ml-14">
                   Brand-governed content with approval workflows

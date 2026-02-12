@@ -539,7 +539,7 @@ const BuildPage = () => {
     setSaveToLibraryOpen(true);
   };
 
-  const handleSaveToLibraryConfirm = (name: string): string | undefined => {
+  const handleSaveToLibraryConfirm = async (name: string): Promise<string | undefined> => {
     if (!builderResult?.channelDrafts) return undefined;
     
     // Serialize channel drafts to content for backwards compatibility
@@ -557,19 +557,21 @@ const BuildPage = () => {
       return '';
     }).filter(Boolean).join('\n\n---\n\n');
 
-    const savedMessage = addMessage({
+    const savedMessage = await addMessage({
       title: name,
       content: contentSummary,
-      channels: selectedChannels,
-      channelDrafts: builderResult.channelDrafts,
+      channel: selectedChannels[0],
+      channels: selectedChannels.length > 1 ? selectedChannels : undefined,
+      channelDrafts: builderResult?.channelDrafts,
       audience: context.audience,
+      cohort: context.cohort ? [context.cohort] : undefined,
       domain: context.domain,
       moment: context.moment,
       goal: context.goal,
       tone: context.tone,
-      senderRecommendation: builderResult.recommendedSender,
+      senderRecommendation: builderResult?.recommendedSender,
       approved: false,
-      mode: 'kit',
+      mode: 'generated',
       source: 'builder',
       institutionalProfileId: selectedProfileId || undefined,
       institutionalProfileName: selectedProfileName,
@@ -581,7 +583,7 @@ const BuildPage = () => {
     // Clear the draft after saving to library
     clearDraftAfterSave();
 
-    return savedMessage.id;
+    return savedMessage?.id;
   };
 
   const handleShareToLibraryClick = () => {
@@ -591,7 +593,7 @@ const BuildPage = () => {
     setSaveToLibraryOpen(true);
   };
 
-  const handleShareToLibraryConfirm = (name: string): string | undefined => {
+  const handleShareToLibraryConfirm = async (name: string): Promise<string | undefined> => {
     if (!builderResult?.channelDrafts) return undefined;
 
     // For multi-channel kits, store the first channel's content as JSON for proper rendering
@@ -622,7 +624,7 @@ const BuildPage = () => {
       }).filter(Boolean).join('\n\n---\n\n');
     }
 
-    const savedTemplate = addTemplate({
+    const savedTemplate = await addTemplate({
       title: name,
       intentStatement: `Multi-channel message kit for ${context.audience || 'students'} - ${context.moment || 'general'}`,
       content: contentToStore,
@@ -649,7 +651,7 @@ const BuildPage = () => {
       institutionalProfileName: selectedProfileName,
     });
 
-    return savedTemplate.id;
+    return savedTemplate?.id;
   };
 
   const handleContentChange = (channel: Channel, newContent: ChannelDrafts[keyof ChannelDrafts]) => {
@@ -668,7 +670,7 @@ const BuildPage = () => {
     setSaveToLibraryOpen(true);
   };
 
-  const handleSaveIndividualChannelConfirm = (name: string): string | undefined => {
+  const handleSaveIndividualChannelConfirm = async (name: string): Promise<string | undefined> => {
     if (!saveToLibraryChannel || !builderResult?.channelDrafts) return undefined;
     
     const content = builderResult.channelDrafts[saveToLibraryChannel];
@@ -682,7 +684,7 @@ const BuildPage = () => {
       else contentText = JSON.stringify(content, null, 2);
     }
 
-    const savedMessage = addMessage({
+    const savedMessage = await addMessage({
       title: name,
       content: contentText,
       channel: saveToLibraryChannel,
@@ -701,7 +703,7 @@ const BuildPage = () => {
       createdByName: profile ? `${profile.first_name} ${profile.last_name}` : undefined,
     });
 
-    return savedMessage.id;
+    return savedMessage?.id;
   };
 
   return (

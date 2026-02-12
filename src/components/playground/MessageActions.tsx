@@ -64,9 +64,9 @@ export function MessageActions({ content, messageId }: MessageActionsProps) {
     setSaveDialogOpen(true);
   };
 
-  const handleSaveToPersonal = (name: string, channel?: Channel): string | undefined => {
+  const handleSaveToPersonal = async (name: string, channel?: Channel): Promise<string | undefined> => {
     try {
-      const savedMessage = addMessage({
+      const savedMessage = await addMessage({
         title: name,
         content: content,
         channel: channel,
@@ -76,16 +76,16 @@ export function MessageActions({ content, messageId }: MessageActionsProps) {
         createdByUserId: profile?.id,
         createdByName: profile ? `${profile.first_name} ${profile.last_name}` : undefined,
       });
-      return savedMessage.id;
+      return savedMessage?.id;
     } catch (error) {
       console.error("Error saving to personal library:", error);
       return undefined;
     }
   };
 
-  const handleSaveToShared = (name: string, channel?: Channel): string | undefined => {
+  const handleSaveToShared = async (name: string, channel?: Channel): Promise<string | undefined> => {
     try {
-      const savedTemplate = addTemplate({
+      const savedTemplate = await addTemplate({
         title: name,
         intentStatement: "Generated from Copywriter",
         content: content,
@@ -107,17 +107,17 @@ export function MessageActions({ content, messageId }: MessageActionsProps) {
         placeholders: [],
         source: "copywriter",
       });
-      return savedTemplate.id;
+      return savedTemplate?.id;
     } catch (error) {
       console.error("Error saving to shared library:", error);
       return undefined;
     }
   };
 
-  const handleSave = (name: string, channel?: Channel): string | undefined => {
+  const handleSave = async (name: string, channel?: Channel): Promise<string | undefined> => {
     try {
       if (saveLibraryType === "personal") {
-        const id = handleSaveToPersonal(name, channel);
+        const id = await handleSaveToPersonal(name, channel);
         toast({
           title: "Saved!",
           description: "Message saved to My Library",

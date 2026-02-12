@@ -1,199 +1,223 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToolTracking } from '@/hooks/useToolTracking';
 import type { SavedMessage, LibraryFilters, SortOption } from '@/types/library';
-
-const STORAGE_KEY = 'uplaybook_message_library';
-const SYNCED_DB_MESSAGES_KEY = 'uplaybook_synced_db_messages';
 
 export function useMessageLibrary() {
   const [messages, setMessages] = useState<SavedMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { profile, user } = useAuth();
   const { trackToolUse } = useToolTracking();
 
-  // Check for database messages (like seeded samples) and sync them to localStorage
-  const syncDatabaseMessages = useCallback(async () => {
+  // Load messages from database
+  const loadMessages = useCallback(async () => {
+    if (!user) {
+      setMessages([]);
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Get list of already synced message IDs
-      const syncedIds = JSON.parse(localStorage.getItem(SYNCED_DB_MESSAGES_KEY) || '[]');
-
-      // Fetch messages from database that haven't been synced yet
-      const { data: dbMessages, error } = await supabase
+      const { data, error } = await supabase
         .from('personal_messages')
         .select('*')
         .eq('user_id', user.id)
-        .not('id', 'in', `(${syncedIds.length > 0 ? syncedIds.map((id: string) => `"${id}"`).join(',') : '""'})`);
+        .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Failed to fetch database messages:', error);
+        console.error('Failed to fetch personal messages:', error);
+        setIsLoading(false);
         return;
       }
 
-      if (dbMessages && dbMessages.length > 0) {
-        // Convert database messages to SavedMessage format
-        const newMessages: SavedMessage[] = dbMessages.map(dbMsg => ({
-          id: dbMsg.id,
-          title: dbMsg.title,
-          content: dbMsg.content,
-          channel: dbMsg.channel as any,
-          audience: dbMsg.audience as any,
-          domain: dbMsg.domain as any,
-          moment: dbMsg.moment as any,
-          goal: dbMsg.goal as any,
-          tone: dbMsg.tone as any,
-          senderRecommendation: dbMsg.sender_recommendation || undefined,
-          createdAt: dbMsg.created_at,
-          updatedAt: dbMsg.updated_at,
-          versions: [{
-            id: crypto.randomUUID(),
-            content: dbMsg.content,
-            createdAt: dbMsg.created_at,
-          }],
-          notes: dbMsg.notes || undefined,
-          approved: dbMsg.approved || false,
-          mode: (dbMsg.mode as 'evaluated' | 'generated' | 'kit') || 'generated',
-          institutionalProfileId: dbMsg.institutional_profile_id || undefined,
-          source: (dbMsg.metadata as any)?.source || 'other',
-        }));
+      const mapped: SavedMessage[] = (data || []).map(row => ({
+        id: row.id,
+        title: row.title,
+        content: row.content,
+        channel: row.channel as any,
+        channels: (row as any).channels as any,
+        channelDrafts: (row as any).channel_drafts as any,
+        audience: row.audience as any,
+        cohort: (row as any).cohort as any,
+        domain: row.domain as any,
+        moment: row.moment as any,
+        goal: row.goal as any,
+        tone: row.tone as any,
+        senderRecommendation: row.sender_recommendation || undefined,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        versions: ((row as any).versions as any[]) || [{
+          id: row.id,
+          content: row.content,
+          createdAt: row.created_at,
+        }],
+        notes: row.notes || undefined,
+        approved: row.approved || false,
+        mode: (row.mode as 'evaluated' | 'generated' | 'kit') || 'generated',
+        institutionalProfileId: row.institutional_profile_id || undefined,
+        source: ((row as any).source || (row.metadata as any)?.source || 'other') as any,
+        tags: (row as any).tags || [],
+        submittedToLibrary: (row as any).submitted_to_library || false,
+        submittedAt: (row as any).submitted_at || undefined,
+        createdByUserId: row.user_id,
+        createdByName: (row as any).created_by_name || undefined,
+        remixedFrom: (row as any).remixed_from as any,
+      }));
 
-        // Merge with existing localStorage messages
-        const stored = localStorage.getItem(STORAGE_KEY);
-        let existingMessages: SavedMessage[] = [];
-        if (stored) {
-          try {
-            existingMessages = JSON.parse(stored);
-          } catch (e) {
-            console.error('Failed to parse message library:', e);
-          }
-        }
-
-        // Add new messages to the beginning
-        const mergedMessages = [...newMessages, ...existingMessages];
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(mergedMessages));
-        setMessages(mergedMessages);
-
-        // Track synced IDs
-        const newSyncedIds = [...syncedIds, ...dbMessages.map(m => m.id)];
-        localStorage.setItem(SYNCED_DB_MESSAGES_KEY, JSON.stringify(newSyncedIds));
-
-        console.log(`Synced ${newMessages.length} messages from database to local library`);
-      }
+      setMessages(mapped);
     } catch (err) {
-      console.error('Error syncing database messages:', err);
+      console.error('Error loading personal messages:', err);
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        setMessages(JSON.parse(stored));
-      } catch (e) {
-        console.error('Failed to parse message library:', e);
-      }
-    }
-    setIsLoading(false);
+    loadMessages();
+  }, [loadMessages]);
 
-    // Sync database messages after loading local storage
-    syncDatabaseMessages();
-  }, [syncDatabaseMessages]);
+  const addMessage = useCallback(async (message: Omit<SavedMessage, 'id' | 'createdAt' | 'updatedAt' | 'versions'>) => {
+    if (!profile) return null;
 
-  const saveToStorage = useCallback((msgs: SavedMessage[]) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs));
-    setMessages(msgs);
-  }, []);
-
-  const addMessage = useCallback((message: Omit<SavedMessage, 'id' | 'createdAt' | 'updatedAt' | 'versions'>) => {
+    const createdByName = message.createdByName || `${profile.first_name} ${profile.last_name}`;
     const now = new Date().toISOString();
-    const newMessage: SavedMessage = {
-      ...message,
+    const versions = [{
       id: crypto.randomUUID(),
+      content: message.content,
       createdAt: now,
-      updatedAt: now,
-      versions: [{
-        id: crypto.randomUUID(),
+    }];
+
+    const { data, error } = await supabase
+      .from('personal_messages')
+      .insert({
+        tenant_id: profile.tenant_id,
+        user_id: profile.id,
+        title: message.title,
         content: message.content,
-        createdAt: now,
-      }],
-    };
-    const updated = [newMessage, ...messages];
-    saveToStorage(updated);
-    
-    // Track the save action
+        channel: message.channel || 'email',
+        audience: message.audience || null,
+        domain: message.domain || null,
+        moment: message.moment || null,
+        goal: message.goal || null,
+        tone: message.tone || null,
+        sender_recommendation: message.senderRecommendation || null,
+        notes: message.notes || null,
+        approved: message.approved || false,
+        mode: message.mode || 'generated',
+        institutional_profile_id: message.institutionalProfileId || null,
+        metadata: { source: message.source || 'other' },
+        source: message.source || 'other',
+        versions: versions as any,
+        tags: message.tags || [],
+        created_by_name: createdByName,
+        submitted_to_library: message.submittedToLibrary || false,
+        submitted_at: message.submittedAt || null,
+        remixed_from: message.remixedFrom ? (message.remixedFrom as any) : null,
+        channels: message.channels || null,
+        channel_drafts: message.channelDrafts ? (message.channelDrafts as any) : null,
+        cohort: message.cohort ? (message.cohort as any) : null,
+      } as any)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Failed to add message:', error);
+      return null;
+    }
+
     trackToolUse('personal_library', 'save', {
       channel: message.channel,
       audience: message.audience,
       source: message.source,
     });
-    
-    return newMessage;
-  }, [messages, saveToStorage, trackToolUse]);
 
-  const updateMessage = useCallback((id: string, updates: Partial<SavedMessage>, addVersion = false) => {
-    const now = new Date().toISOString();
-    const updated = messages.map(msg => {
-      if (msg.id !== id) return msg;
-      
-      const newMsg = { ...msg, ...updates, updatedAt: now };
-      
-      if (addVersion && updates.content && updates.content !== msg.content) {
-        newMsg.versions = [
-          {
-            id: crypto.randomUUID(),
-            content: updates.content,
-            createdAt: now,
-            changeNotes: updates.notes,
-          },
-          ...msg.versions,
-        ];
+    await loadMessages();
+    return data;
+  }, [profile, loadMessages, trackToolUse]);
+
+  const updateMessage = useCallback(async (id: string, updates: Partial<SavedMessage>, addVersion = false) => {
+    const updatePayload: Record<string, any> = {};
+
+    if (updates.title !== undefined) updatePayload.title = updates.title;
+    if (updates.content !== undefined) updatePayload.content = updates.content;
+    if (updates.channel !== undefined) updatePayload.channel = updates.channel;
+    if (updates.audience !== undefined) updatePayload.audience = updates.audience;
+    if (updates.domain !== undefined) updatePayload.domain = updates.domain;
+    if (updates.moment !== undefined) updatePayload.moment = updates.moment;
+    if (updates.goal !== undefined) updatePayload.goal = updates.goal;
+    if (updates.tone !== undefined) updatePayload.tone = updates.tone;
+    if (updates.notes !== undefined) updatePayload.notes = updates.notes;
+    if (updates.approved !== undefined) updatePayload.approved = updates.approved;
+    if (updates.tags !== undefined) updatePayload.tags = updates.tags;
+    if (updates.submittedToLibrary !== undefined) updatePayload.submitted_to_library = updates.submittedToLibrary;
+    if (updates.submittedAt !== undefined) updatePayload.submitted_at = updates.submittedAt;
+
+    // Handle version addition
+    if (addVersion && updates.content) {
+      const existing = messages.find(m => m.id === id);
+      if (existing) {
+        const newVersion = {
+          id: crypto.randomUUID(),
+          content: updates.content,
+          createdAt: new Date().toISOString(),
+          changeNotes: updates.notes,
+        };
+        updatePayload.versions = [newVersion, ...existing.versions] as any;
       }
-      
-      return newMsg;
-    });
-    saveToStorage(updated);
-  }, [messages, saveToStorage]);
+    }
 
-  const deleteMessage = useCallback((id: string) => {
-    const updated = messages.filter(msg => msg.id !== id);
-    saveToStorage(updated);
+    const { error } = await supabase
+      .from('personal_messages')
+      .update(updatePayload)
+      .eq('id', id);
+
+    if (error) {
+      console.error('Failed to update message:', error);
+      return;
+    }
+
+    await loadMessages();
+  }, [messages, loadMessages]);
+
+  const deleteMessage = useCallback(async (id: string) => {
+    const { error } = await supabase
+      .from('personal_messages')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Failed to delete message:', error);
+      return;
+    }
+
     trackToolUse('personal_library', 'delete');
-  }, [messages, saveToStorage, trackToolUse]);
+    await loadMessages();
+  }, [loadMessages, trackToolUse]);
 
-  const duplicateMessage = useCallback((id: string) => {
+  const duplicateMessage = useCallback(async (id: string) => {
     const original = messages.find(msg => msg.id === id);
-    if (!original) return null;
-    
-    const now = new Date().toISOString();
-    const duplicate: SavedMessage = {
+    if (!original || !profile) return null;
+
+    const result = await addMessage({
       ...original,
-      id: crypto.randomUUID(),
       title: `${original.title} (Copy)`,
-      createdAt: now,
-      updatedAt: now,
-      versions: [{
-        id: crypto.randomUUID(),
-        content: original.content,
-        createdAt: now,
-      }],
       approved: false,
-    };
-    const updated = [duplicate, ...messages];
-    saveToStorage(updated);
+    });
+
     trackToolUse('personal_library', 'duplicate');
-    return duplicate;
-  }, [messages, saveToStorage, trackToolUse]);
+    return result;
+  }, [messages, profile, addMessage, trackToolUse]);
 
   const filterMessages = useCallback((filters: LibraryFilters, sort: SortOption = 'newest'): SavedMessage[] => {
     let filtered = [...messages];
 
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
-      filtered = filtered.filter(msg => 
+      filtered = filtered.filter(msg =>
         msg.title.toLowerCase().includes(searchLower) ||
-        msg.content.toLowerCase().includes(searchLower)
+        msg.content.toLowerCase().includes(searchLower) ||
+        (msg.tags && msg.tags.some(tag => tag.toLowerCase().includes(searchLower)))
       );
     }
 
@@ -213,6 +237,10 @@ export function useMessageLibrary() {
       filtered = filtered.filter(msg => msg.moment === filters.moment);
     }
 
+    if (filters.tag) {
+      filtered = filtered.filter(msg => msg.tags && msg.tags.includes(filters.tag!));
+    }
+
     switch (sort) {
       case 'newest':
         filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -225,11 +253,18 @@ export function useMessageLibrary() {
     return filtered;
   }, [messages]);
 
+  const getAllTags = useCallback((): string[] => {
+    const tags = new Set<string>();
+    messages.forEach(m => {
+      if (m.tags) m.tags.forEach(tag => tags.add(tag));
+    });
+    return Array.from(tags).sort();
+  }, [messages]);
+
   const exportMessage = useCallback((id: string) => {
     const message = messages.find(msg => msg.id === id);
     if (!message) return null;
-    
-    // Format as readable text
+
     const textContent = `
 ${message.title}
 ${'='.repeat(message.title.length)}
@@ -249,6 +284,7 @@ ${message.tone ? `Tone: ${message.tone}` : ''}
 ${message.senderRecommendation ? `Sender: ${message.senderRecommendation}` : ''}
 Mode: ${message.mode}
 Approved: ${message.approved ? 'Yes' : 'No'}
+${message.tags && message.tags.length > 0 ? `Tags: ${message.tags.join(', ')}` : ''}
 
 DATES
 -----
@@ -258,7 +294,7 @@ Updated: ${new Date(message.updatedAt).toLocaleString()}
 ${message.notes ? `NOTES\n-----\n${message.notes}\n` : ''}
 ${message.versions.length > 1 ? `VERSION HISTORY\n---------------\n${message.versions.map((v, i) => `Version ${message.versions.length - i}: ${new Date(v.createdAt).toLocaleString()}${v.changeNotes ? ` - ${v.changeNotes}` : ''}`).join('\n')}` : ''}
 `.trim();
-    
+
     const blob = new Blob([textContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -266,16 +302,10 @@ ${message.versions.length > 1 ? `VERSION HISTORY\n---------------\n${message.ver
     a.download = `${message.title.replace(/[^a-z0-9]/gi, '_')}.txt`;
     a.click();
     URL.revokeObjectURL(url);
-    
+
     trackToolUse('personal_library', 'export', { channel: message.channel });
-    
     return message;
   }, [messages, trackToolUse]);
-
-  const clearAllMessages = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEY);
-    setMessages([]);
-  }, []);
 
   return {
     messages,
@@ -286,6 +316,7 @@ ${message.versions.length > 1 ? `VERSION HISTORY\n---------------\n${message.ver
     duplicateMessage,
     filterMessages,
     exportMessage,
-    clearAllMessages,
+    getAllTags,
+    refreshMessages: loadMessages,
   };
 }

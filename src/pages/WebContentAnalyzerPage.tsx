@@ -336,7 +336,7 @@ export default function WebContentAnalyzerPage() {
         ...analysisResult.sections.map(s => `- **${s.title}** (Score: ${s.score})`),
       ].filter(Boolean).join('\n');
 
-      const savedMessage = addMessage({
+      const savedMessage = await addMessage({
         title: name,
         content: messageContent,
         channel: 'landing-page',
