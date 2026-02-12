@@ -450,8 +450,15 @@ Photography/art direction — follow the style of real university marketing imag
 - Brand colors MUST appear on clothing items (t-shirts, hoodies, scarves), campus banners, pennants, or architectural details — use ONLY the exact hex values from the palette above, never approximate or invent new colors
 - Composition: use shallow depth of field, leading lines, rule of thirds — the hallmarks of editorial campus photography
 - CRITICAL — Aspect ratio and dimensions: This image MUST be exactly ${spec.aspect} aspect ratio (${spec.width}x${spec.height} pixels). ${spec.aspect === "1:1" ? "The image must be perfectly SQUARE — equal width and height." : spec.aspect === "16:9" ? "The image must be a WIDE horizontal rectangle — significantly wider than it is tall." : `The image must match ${spec.aspect} proportions exactly.`} Do NOT generate an image with the wrong aspect ratio.
-- No text, no words, no letters, no logos, no watermarks, no mascots, no cartoon characters, no animal mascot costumes or figures
-- Do NOT attempt to depict any school mascot — focus on real people and real campus environments
+
+CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
+- ABSOLUTELY NO TEXT of any kind in the image. No words, letters, numbers, symbols, abbreviations, or university names.
+- Do NOT put text on clothing — no "University", no school names, no abbreviations, no letters. Show PLAIN solid-color clothing in the brand palette instead.
+- Do NOT put text on banners, signs, buildings, flags, or any surface. All signage and banners should be BLANK or show only solid brand colors / abstract patterns.
+- Do NOT render any logos, crests, seals, emblems, or wordmarks. AI cannot accurately reproduce institutional logos — any attempt will look wrong and damage the brand.
+- Do NOT render any mascot, mascot costume, cartoon character, or animal figure.
+- If you feel the urge to add text anywhere — DON'T. A plain scarlet hoodie is better than one with garbled "Uhiversity" on it.
+- The institution's identity should come through via COLORS, ARCHITECTURE, and ENVIRONMENT — never through rendered text or logos.
 - Professional quality: sharp focus on subject, creamy bokeh backgrounds, rich color depth
 - Feel warm, authentic, and aspirational — like a spread in a top university's viewbook
 - Match the tone and energy of the communication moment${toneContext ? ` — the visual should feel ${tone}` : ''}
