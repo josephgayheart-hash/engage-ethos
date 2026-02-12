@@ -355,54 +355,53 @@ export function ScratchpadCapture() {
         {/* Results panel */}
         {showResults && organizedText && (
           <div className="animate-in fade-in-0 slide-in-from-bottom-3 duration-500 pt-3 pl-3 space-y-0">
-            <div className="max-w-none text-foreground">
+            <div className="max-w-none text-foreground space-y-1">
               <ReactMarkdown
                 components={{
-                  // H1 — top-level output title (rarely used but just in case)
                   h1: ({ children }) => (
-                    <h1 className="text-base font-bold text-foreground mb-3 mt-1">{children}</h1>
+                    <h1 className="text-base font-bold text-foreground mb-3 mt-2">{children}</h1>
                   ),
-                  // H2 — major section titles: "Summary", "Extracted Fields", "Recommendations"
                   h2: ({ children }) => (
-                    <div className="mt-1 first:mt-0">
-                      <div className="h-px bg-border/40 my-4" />
-                      <h2 className="text-base font-bold text-foreground mb-2">
+                    <div className="mt-5 first:mt-0">
+                      <div className="h-px bg-border/50 mb-4" />
+                      <h2 className="text-[13px] font-bold uppercase tracking-wider text-primary mb-2 flex items-center gap-2">
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary" />
                         {children}
                       </h2>
                     </div>
                   ),
-                  // H3 — sub-items under a section (individual recommendations, etc.)
                   h3: ({ children }) => {
                     const text = String(children).toLowerCase();
                     for (const [key, route] of Object.entries(toolRoutes)) {
                       if (text.includes(key) || text.includes(route.label.toLowerCase())) {
                         const ToolIcon = route.icon;
                         return (
-                          <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground mt-3 mb-1">
-                            <ToolIcon className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                          <h3 className="flex items-center gap-2 text-sm font-bold text-foreground mt-4 mb-1.5">
+                            <div className="h-5 w-5 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0">
+                              <ToolIcon className="h-3 w-3 text-primary" />
+                            </div>
                             {children}
                           </h3>
                         );
                       }
                     }
                     return (
-                      <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground mt-3 mb-1">
-                        <ArrowRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                      <h3 className="flex items-center gap-2 text-sm font-bold text-foreground mt-4 mb-1.5">
+                        <ArrowRight className="h-3.5 w-3.5 text-primary flex-shrink-0" />
                         {children}
                       </h3>
                     );
                   },
-                  // Bold labels
                   strong: ({ children }) => {
                     const text = String(children).trim();
-                    const lower = text.toLowerCase();
+                    const lower = text.toLowerCase().replace(/[:\s]+$/, "");
 
-                    // Standalone tool name match
+                    // Match tool names (exact or as part of "Tool: xxx")
                     for (const [key, route] of Object.entries(toolRoutes)) {
                       if (lower === key || lower === route.label.toLowerCase()) {
                         const ToolIcon = route.icon;
                         return (
-                          <Link to={route.path} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-primary font-semibold text-xs hover:bg-primary/20 transition-colors align-middle">
+                          <Link to={route.path} className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-xs hover:bg-primary/20 hover:shadow-sm transition-all align-middle border border-primary/15">
                             <ToolIcon className="h-3 w-3" />
                             {route.label}
                           </Link>
@@ -410,63 +409,50 @@ export function ScratchpadCapture() {
                       }
                     }
 
-                    // Pattern: "Tool: <toolname> Why: ..." or "Recommended Tool: <toolname> Why: ..."
-                    const compoundMatch = text.match(/^(?:Recommended\s+)?Tool:\s*(\S+)(?:\s+Why:\s*(.*))?$/i);
-                    if (compoundMatch) {
-                      const toolKey = compoundMatch[1].toLowerCase();
-                      const whyText = compoundMatch[2] || "";
-                      const route = toolRoutes[toolKey];
-                      if (route) {
-                        const ToolIcon = route.icon;
-                        return (
-                          <span className="inline-flex items-center gap-1.5 flex-wrap">
-                            <span className="text-primary font-bold">Tool:</span>
-                            <Link to={route.path} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-primary font-semibold text-xs hover:bg-primary/20 transition-colors align-middle">
-                              <ToolIcon className="h-3 w-3" />
-                              {route.label}
-                            </Link>
-                            {whyText && (
-                              <>
-                                <span className="text-accent font-bold">Why:</span>
-                                <span className="font-semibold">{whyText}</span>
-                              </>
-                            )}
-                          </span>
-                        );
+                    // "Tool:" or "Why:" labels
+                    if (/^(Recommended\s+)?Tool$/i.test(lower)) {
+                      return <span className="text-primary font-bold text-xs uppercase tracking-wide">{children}</span>;
+                    }
+                    if (/^Why$/i.test(lower)) {
+                      return <span className="text-accent-foreground font-bold text-xs uppercase tracking-wide">{children}</span>;
+                    }
+
+                    // Field labels like "Audience:", "Goal:", etc.
+                    for (const field of Object.keys(fieldIcons)) {
+                      if (lower === field) {
+                        return <strong className="font-bold text-foreground">{children}</strong>;
                       }
                     }
 
-                    // "Tool:" / "Recommended Tool:" label alone
-                    if (/^(Recommended\s+)?Tool:$/i.test(text)) {
-                      return <strong className="text-primary font-bold">{children}</strong>;
-                    }
-                    if (/^Why:$/i.test(text)) {
-                      return <strong className="text-accent font-bold">{children}</strong>;
-                    }
-                    return <strong className="font-semibold">{children}</strong>;
+                    return <strong className="font-semibold text-foreground">{children}</strong>;
                   },
-                  // List items with field icons
                   li: ({ children }) => {
                     const text = String(children);
                     for (const [field, IconComp] of Object.entries(fieldIcons)) {
                       const regex = new RegExp(`^${field}:`, "i");
                       if (regex.test(text.trim())) {
                         return (
-                          <li className="flex items-start gap-2 text-sm text-foreground/90 list-none ml-2 py-0.5">
-                            <IconComp className="h-3.5 w-3.5 mt-0.5 text-accent flex-shrink-0" />
-                            <span>{children}</span>
+                          <li className="flex items-start gap-2.5 text-sm text-foreground/90 list-none py-1 pl-1">
+                            <div className="h-5 w-5 rounded-md bg-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <IconComp className="h-3 w-3 text-accent-foreground" />
+                            </div>
+                            <span className="leading-relaxed">{children}</span>
                           </li>
                         );
                       }
                     }
-                    return <li className="text-sm text-foreground/90 py-0.5 ml-0">{children}</li>;
+                    return (
+                      <li className="text-sm text-foreground/85 py-1 ml-1 flex items-start gap-2 list-none">
+                        <span className="mt-2 h-1 w-1 rounded-full bg-muted-foreground/50 flex-shrink-0" />
+                        <span className="leading-relaxed">{children}</span>
+                      </li>
+                    );
                   },
-                  ul: ({ children }) => <ul className="my-1.5 pl-2 space-y-0.5 list-none">{children}</ul>,
-                  ol: ({ children }) => <ol className="my-1.5 pl-2 space-y-0.5 list-decimal list-inside">{children}</ol>,
-                  // Tool recommendation cards + inline tool mentions
+                  ul: ({ children }) => <ul className="my-2 space-y-0.5">{children}</ul>,
+                  ol: ({ children }) => <ol className="my-2 space-y-0.5 list-decimal list-inside">{children}</ol>,
                   p: ({ children }) => {
                     const text = String(children);
-                    // Exact standalone: "Tool: copywriter"
+                    // Tool recommendation card
                     const exactToolMatch = text.match(/^(?:Tool|Recommended Tool):\s*(builder|evaluator|journey|copywriter|analyzer|content-dna|profiles)$/i);
                     if (exactToolMatch) {
                       const toolKey = exactToolMatch[1].toLowerCase();
@@ -474,13 +460,13 @@ export function ScratchpadCapture() {
                       if (route) {
                         const ToolIcon = route.icon;
                         return (
-                          <div className="my-2 rounded-lg border border-primary/15 bg-primary/5 p-2.5 flex items-center gap-3">
-                            <div className="flex items-center justify-center h-8 w-8 rounded-md bg-primary/10 flex-shrink-0">
+                          <div className="my-2.5 rounded-lg border border-primary/15 bg-primary/5 p-3 flex items-center gap-3">
+                            <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary/10 flex-shrink-0">
                               <ToolIcon className="h-4 w-4 text-primary" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Recommended Tool</span>
-                              <p className="text-sm font-semibold text-foreground leading-tight">{route.label}</p>
+                              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Recommended Tool</span>
+                              <p className="text-sm font-bold text-foreground leading-tight">{route.label}</p>
                             </div>
                             <Link to={route.path}>
                               <Button
@@ -496,7 +482,7 @@ export function ScratchpadCapture() {
                         );
                       }
                     }
-                    // Inline pattern: "Tool: copywriter Why: ..." within a paragraph
+                    // Inline tool mention
                     const inlineToolMatch = text.match(/(?:Tool|Recommended Tool):\s*(builder|evaluator|journey|copywriter|analyzer|content-dna|profiles)\b/i);
                     if (inlineToolMatch) {
                       const toolKey = inlineToolMatch[1].toLowerCase();
@@ -505,31 +491,27 @@ export function ScratchpadCapture() {
                         const ToolIcon = route.icon;
                         const before = text.slice(0, inlineToolMatch.index);
                         const after = text.slice((inlineToolMatch.index || 0) + inlineToolMatch[0].length);
-                        // Split "Why: ..." from the remainder
                         const whyMatch = after.match(/^\s*Why:\s*(.*)/i);
                         return (
-                          <p className="text-sm leading-relaxed text-foreground/80 my-1.5 flex items-center flex-wrap gap-1">
+                          <div className="text-sm leading-relaxed text-foreground/85 my-2 flex items-start flex-wrap gap-1.5">
                             {before && <span>{before}</span>}
-                            <span className="text-primary font-bold">Tool:</span>
-                            <Link to={route.path} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-primary font-semibold text-xs hover:bg-primary/20 transition-colors">
+                            <span className="text-primary font-bold text-xs uppercase tracking-wide">Tool:</span>
+                            <Link to={route.path} className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-xs hover:bg-primary/20 hover:shadow-sm transition-all border border-primary/15">
                               <ToolIcon className="h-3 w-3" />
                               {route.label}
                             </Link>
                             {whyMatch ? (
-                              <>
-                                <span className="text-accent font-bold">Why:</span>
-                                <span>{whyMatch[1]}</span>
-                              </>
+                              <span className="block w-full mt-1 text-muted-foreground text-xs italic pl-0.5">{whyMatch[1]}</span>
                             ) : after.trim() ? (
                               <span>{after}</span>
                             ) : null}
-                          </p>
+                          </div>
                         );
                       }
                     }
-                    return <p className="text-sm leading-relaxed text-foreground/80 my-1.5">{children}</p>;
+                    return <p className="text-sm leading-relaxed text-foreground/85 my-2">{children}</p>;
                   },
-                  hr: () => <div className="h-px bg-border/40 my-4" />,
+                  hr: () => <div className="h-px bg-border/50 my-5" />,
                 }}
               >
                 {organizedText}
