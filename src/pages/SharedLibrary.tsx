@@ -5,6 +5,7 @@ import { WaveBackground } from "@/components/WaveBackground";
 import { Button } from "@/components/ui/button";
 import { useLibraryCollections } from "@/hooks/useLibraryCollections";
 import { CollectionCard } from "@/components/library/CollectionCard";
+import { CreateCollectionDialog } from "@/components/library/CreateCollectionDialog";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -63,7 +64,7 @@ const SharedLibrary = () => {
   const { templates, filterTemplates, getPlaybooks, getAllTags, addTemplate, updateTemplateStatus } = useSharedLibrary();
   const { addMessage } = useMessageLibrary();
   const { getProfileHierarchy } = useInstitutionalProfiles();
-  const { collections } = useLibraryCollections();
+  const { collections, createCollection } = useLibraryCollections();
   const [filters, setFilters] = useState<LibraryFilters>({ search: '' });
   const [createOpen, setCreateOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
@@ -317,6 +318,24 @@ const SharedLibrary = () => {
               {topLevelTab === 'collections' ? (
                 /* Collections View */
                 <div>
+                  <div className="flex justify-end mb-4">
+                    <CreateCollectionDialog
+                      onSubmit={async (data) => {
+                        const result = await createCollection(data);
+                        if (result) {
+                          toast({ title: 'Collection created', description: `"${data.name}" is ready to use.` });
+                          navigate(`/collections/${result.id}`);
+                        }
+                        return result;
+                      }}
+                      trigger={
+                        <Button className="flex items-center gap-2">
+                          <Plus className="w-4 h-4" />
+                          New Collection
+                        </Button>
+                      }
+                    />
+                  </div>
                   {collections.length === 0 ? (
                     <Card className="text-center py-12">
                       <CardContent>
@@ -325,6 +344,22 @@ const SharedLibrary = () => {
                         <p className="text-muted-foreground mb-4">
                           Group playbooks, messages, and creative assets by campaign, initiative, or program.
                         </p>
+                        <CreateCollectionDialog
+                          onSubmit={async (data) => {
+                            const result = await createCollection(data);
+                            if (result) {
+                              toast({ title: 'Collection created', description: `"${data.name}" is ready to use.` });
+                              navigate(`/collections/${result.id}`);
+                            }
+                            return result;
+                          }}
+                          trigger={
+                            <Button>
+                              <Plus className="w-4 h-4 mr-1" />
+                              Create Your First Collection
+                            </Button>
+                          }
+                        />
                       </CardContent>
                     </Card>
                   ) : (
