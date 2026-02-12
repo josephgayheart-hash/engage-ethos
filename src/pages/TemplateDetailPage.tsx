@@ -670,36 +670,51 @@ const TemplateDetailPage = () => {
             <TabsContent value="guidelines" className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <ShieldCheck className="w-5 h-5" />
-                    Ethical Guardrails
-                  </CardTitle>
+                  <CardTitle className="text-lg">Usage Guidelines</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ul className="space-y-3">
-                    {template.ethicalGuardrails.map((g, i) => (
-                      <li key={i} className="flex items-start gap-3 text-sm">
-                        <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-                        {g}
-                      </li>
-                    ))}
-                  </ul>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    Notes from the creator on how others in your organization should use this template.
+                  </p>
+                  <Textarea
+                    value={template.guidelines || ''}
+                    readOnly
+                    placeholder="No usage guidelines have been provided yet."
+                    className="min-h-[120px] text-sm"
+                  />
                 </CardContent>
               </Card>
 
+              {template.ethicalGuardrails && template.ethicalGuardrails.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <ShieldCheck className="w-5 h-5" />
+                      Ethical Guardrails
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-3">
+                      {template.ethicalGuardrails.map((g, i) => (
+                        <li key={i} className="flex items-start gap-3 text-sm">
+                          <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                          {g}
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
+
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Ownership & Maintenance</CardTitle>
+                  <CardTitle className="text-lg">Details</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid md:grid-cols-3 gap-6">
+                  <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground mb-1">Owner</p>
-                      <p className="text-sm">{template.owner}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground mb-1">Maintainer</p>
-                      <p className="text-sm">{template.maintainer}</p>
+                      <p className="text-sm font-medium text-muted-foreground mb-1">Created by</p>
+                      <p className="text-sm">{template.createdByName || 'Unknown'}</p>
                     </div>
                     <div>
                       <p className="text-sm font-medium text-muted-foreground mb-1">Version</p>
