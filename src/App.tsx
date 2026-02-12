@@ -49,6 +49,7 @@ import ApprovalsPage from "./pages/ApprovalsPage";
 import InitialSetupPage from "./pages/InitialSetupPage";
 import MessageDetailPage from "./pages/MessageDetailPage";
 import TemplateDetailPage from "./pages/TemplateDetailPage";
+import CollectionDetailPage from "./pages/CollectionDetailPage";
 import BetaFeedbackPage from "./pages/BetaFeedbackPage";
 import ContentDNAFeaturePage from "./pages/features/ContentDNAFeaturePage";
 import MessageBuilderFeaturePage from "./pages/features/MessageBuilderFeaturePage";
@@ -213,6 +214,7 @@ const AppRoutes = () => (
     <Route path="/library/:id" element={<RequireAuth><MessageDetailPage /></RequireAuth>} />
     <Route path="/shared-library" element={<RequireAuth><SharedLibrary /></RequireAuth>} />
     <Route path="/shared-library/:id" element={<RequireAuth><TemplateDetailPage /></RequireAuth>} />
+    <Route path="/collections/:id" element={<RequireAuth><CollectionDetailPage /></RequireAuth>} />
     <Route path="/campaign-dashboard" element={<RequireAuth><CampaignDashboard /></RequireAuth>} />
     <Route path="/calendar" element={<RequireAuth><CommunicationCalendar /></RequireAuth>} />
     <Route path="/subject-optimizer" element={<RequireAuth><SubjectLineOptimizer /></RequireAuth>} />

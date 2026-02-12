@@ -57,6 +57,7 @@ export function useSharedLibrary() {
         tags: (row as any).tags || [],
         createdByUserId: row.created_by_user_id || undefined,
         createdByName: (row as any).created_by_name || undefined,
+        externalAssets: ((row as any).external_assets as any[]) || [],
       }));
 
       setTemplates(mapped);
