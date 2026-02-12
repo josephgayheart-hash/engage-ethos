@@ -7,6 +7,7 @@ import { useInstitutionalProfiles } from '@/hooks/useInstitutionalProfiles';
 import { WebCrawlTab } from '@/components/dna/WebCrawlTab';
 import { StoryBankTab } from '@/components/dna/StoryBankTab';
 import { FactBookTab } from '@/components/dna/FactBookTab';
+import { CampusPhotographyTab } from '@/components/dna/CampusPhotographyTab';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -66,6 +67,7 @@ import {
   Pencil,
   PenTool,
   ArrowRight,
+  Camera,
 } from 'lucide-react';
 import { extractTextFromFile, getAcceptString } from '@/lib/documentParser';
 import { DNATuningControls, DNAAdjustments } from '@/components/DNATuningControls';
@@ -1126,6 +1128,10 @@ export default function ContentDNAPage() {
             <TabsTrigger value="instructions" className="flex items-center gap-2">
               <Settings className="w-4 h-4" />
               Instructions
+            </TabsTrigger>
+            <TabsTrigger value="campus-photos" className="flex items-center gap-2">
+              <Camera className="w-4 h-4" />
+              Campus Photos
             </TabsTrigger>
             <TabsTrigger value="library" className="flex items-center gap-2">
               <BookOpen className="w-4 h-4" />
@@ -2241,6 +2247,11 @@ export default function ContentDNAPage() {
               </CardContent>
             </Card>
 
+          </TabsContent>
+
+          {/* Campus Photography Tab */}
+          <TabsContent value="campus-photos">
+            <CampusPhotographyTab profileId={profileIdFromUrl} />
           </TabsContent>
 
           {/* Content Library Tab */}
