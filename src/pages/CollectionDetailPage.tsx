@@ -147,9 +147,17 @@ const CollectionDetailPage = () => {
                 {collection.description && (
                   <p className="text-muted-foreground mt-1">{collection.description}</p>
                 )}
-                <p className="text-xs text-muted-foreground mt-2">
-                  {items.length} item{items.length !== 1 ? 's' : ''} · Created {new Date(collection.createdAt).toLocaleDateString()}
-                </p>
+                <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-muted-foreground">
+                  <span>{items.length} item{items.length !== 1 ? 's' : ''}</span>
+                  <span>·</span>
+                  <span>Created {new Date(collection.createdAt).toLocaleDateString()}</span>
+                  {collection.createdByName && (
+                    <>
+                      <span>·</span>
+                      <span>by {collection.createdByName}</span>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
             <div className="flex gap-2">

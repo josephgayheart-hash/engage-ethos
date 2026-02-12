@@ -31,6 +31,7 @@ export function useLibraryCollections() {
         id: row.id,
         tenantId: row.tenant_id,
         createdBy: row.created_by,
+        createdByName: row.created_by_name || undefined,
         name: row.name,
         description: row.description || undefined,
         collectionType: row.collection_type as CollectionType,
@@ -63,11 +64,14 @@ export function useLibraryCollections() {
   }) => {
     if (!profile) return null;
 
+    const creatorName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || undefined;
+
     const { data, error } = await supabase
       .from('library_collections')
       .insert({
         tenant_id: profile.tenant_id,
         created_by: profile.id,
+        created_by_name: creatorName,
         name: input.name,
         description: input.description || null,
         collection_type: input.collectionType,
@@ -84,6 +88,24 @@ export function useLibraryCollections() {
     }
 
     await loadCollections();
+
+    // Trigger AI cover image generation in the background
+    if (data?.id) {
+      supabase.functions.invoke('generate-collection-cover', {
+        body: {
+          collectionId: data.id,
+          collectionName: input.name,
+          collectionType: input.collectionType,
+          description: input.description,
+        },
+      }).then(() => {
+        // Refresh to pick up the new cover image
+        loadCollections();
+      }).catch((err) => {
+        console.warn('Cover image generation failed:', err);
+      });
+    }
+
     return data;
   }, [profile, loadCollections]);
 

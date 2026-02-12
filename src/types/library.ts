@@ -158,6 +158,7 @@ export interface LibraryCollection {
   id: string;
   tenantId: string;
   createdBy: string;
+  createdByName?: string;
   name: string;
   description?: string;
   collectionType: CollectionType;
