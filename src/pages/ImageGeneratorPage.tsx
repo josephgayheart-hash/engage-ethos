@@ -9,7 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { supabase } from "@/integrations/supabase/client";
-import { ImageIcon, Download, RefreshCw, Loader2, Sparkles, Palette, Camera, Users, Target } from "lucide-react";
+import { ImageIcon, Download, RefreshCw, Loader2, Sparkles, Palette, Camera, Users, Target, Eye, Image } from "lucide-react";
+import { ChannelMockup } from "@/components/image-generator/ChannelMockup";
 import { toast } from "sonner";
 
 const channelOptions = [
@@ -60,6 +61,7 @@ const ImageGeneratorPage = () => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationPhase, setGenerationPhase] = useState(0);
+  const [viewMode, setViewMode] = useState<"raw" | "mockup">("mockup");
 
   const handleGenerate = useCallback(async () => {
     if (!contentDescription.trim()) {
@@ -432,23 +434,61 @@ const ImageGeneratorPage = () => {
                   );
                 })() : imageUrl ? (
                   <div className="space-y-3">
-                    <div className="relative group rounded-lg overflow-hidden">
-                      <img
-                        src={imageUrl}
-                        alt="Generated campus image"
-                        className="w-full rounded-lg"
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100">
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="secondary" onClick={handleDownload}>
-                            <Download className="w-4 h-4 mr-1" /> Download
-                          </Button>
-                          <Button size="sm" variant="secondary" onClick={handleGenerate}>
-                            <RefreshCw className="w-4 h-4 mr-1" /> Regenerate
-                          </Button>
-                        </div>
-                      </div>
+                    {/* View mode toggle */}
+                    <div className="flex items-center gap-1 p-1 bg-muted rounded-lg">
+                      <button
+                        onClick={() => setViewMode("mockup")}
+                        className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                          viewMode === "mockup"
+                            ? "bg-background text-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        In Context
+                      </button>
+                      <button
+                        onClick={() => setViewMode("raw")}
+                        className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                          viewMode === "raw"
+                            ? "bg-background text-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        <Image className="w-3.5 h-3.5" />
+                        Raw Image
+                      </button>
                     </div>
+
+                    {/* Preview content */}
+                    <div className="transition-all duration-300">
+                      {viewMode === "mockup" ? (
+                        <ChannelMockup
+                          channel={channel}
+                          imageUrl={imageUrl}
+                          profileName={profiles?.find(p => p.id === selectedProfileId)?.name}
+                        />
+                      ) : (
+                        <div className="relative group rounded-lg overflow-hidden">
+                          <img
+                            src={imageUrl}
+                            alt="Generated campus image"
+                            className="w-full rounded-lg"
+                          />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100">
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="secondary" onClick={handleDownload}>
+                                <Download className="w-4 h-4 mr-1" /> Download
+                              </Button>
+                              <Button size="sm" variant="secondary" onClick={handleGenerate}>
+                                <RefreshCw className="w-4 h-4 mr-1" /> Regenerate
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
                     <div className="flex gap-2">
                       <Button variant="outline" size="sm" className="flex-1" onClick={handleDownload}>
                         <Download className="w-4 h-4 mr-1" /> Download
