@@ -103,6 +103,8 @@ export default function AgencyClientsPage() {
   // Editing/Config states
   const [editingProfile, setEditingProfile] = useState<InstitutionalProfile | null>(null);
   const [showConfigDialog, setShowConfigDialog] = useState(false);
+  const [pendingConfig, setPendingConfig] = useState<InstitutionalConfigType | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   
   // Delete/Duplicate dialogs
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -206,11 +208,30 @@ export default function AgencyClientsPage() {
     }
   };
 
-  const handleUpdateConfig = async (config: InstitutionalConfigType) => {
-    if (!editingProfile) return;
-    await updateProfile(editingProfile.id, { config });
-    setEditingProfile({ ...editingProfile, config });
+  const handleConfigChange = (config: InstitutionalConfigType) => {
+    setPendingConfig(config);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleSaveConfig = async () => {
+    if (!editingProfile || !pendingConfig) return;
+    await updateProfile(editingProfile.id, { config: pendingConfig });
+    setEditingProfile({ ...editingProfile, config: pendingConfig });
+    setHasUnsavedChanges(false);
     toast({ title: "Client updated", description: "Configuration has been saved." });
+  };
+
+  const handleCloseConfigDialog = (open: boolean) => {
+    if (!open && hasUnsavedChanges && pendingConfig && editingProfile) {
+      // Auto-save on close
+      updateProfile(editingProfile.id, { config: pendingConfig });
+    }
+    setShowConfigDialog(open);
+    if (!open) {
+      setEditingProfile(null);
+      setPendingConfig(null);
+      setHasUnsavedChanges(false);
+    }
   };
 
   const handleDeleteProfile = async () => {
@@ -517,10 +538,7 @@ export default function AgencyClientsPage() {
 
         {/* Configuration Dialog */}
         {showConfigDialog && editingProfile && (
-          <Dialog open={showConfigDialog} onOpenChange={(open) => {
-            setShowConfigDialog(open);
-            if (!open) setEditingProfile(null);
-          }}>
+          <Dialog open={showConfigDialog} onOpenChange={handleCloseConfigDialog}>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
@@ -542,10 +560,19 @@ export default function AgencyClientsPage() {
                 </DialogTitle>
               </DialogHeader>
               <InstitutionalConfig
-                config={editingProfile.config}
-                onChange={handleUpdateConfig}
+                config={pendingConfig || editingProfile.config}
+                onChange={handleConfigChange}
                 profileId={editingProfile.id}
               />
+              <div className="flex justify-end gap-3 pt-4 border-t border-border">
+                <Button variant="outline" onClick={() => handleCloseConfigDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveConfig} disabled={!hasUnsavedChanges}>
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  {hasUnsavedChanges ? 'Save Changes' : 'Saved'}
+                </Button>
+              </div>
             </DialogContent>
           </Dialog>
         )}
