@@ -359,12 +359,18 @@ export function ScratchpadCapture() {
               <ReactMarkdown
                 components={{
                   h1: ({ children }) => (
-                    <h1 className="text-base font-bold text-foreground mb-3 mt-2">{children}</h1>
+                    <div className="mb-4 mt-1">
+                      <h1 className="text-lg font-bold text-foreground tracking-tight flex items-center gap-2">
+                        <div className="h-6 w-1 rounded-full bg-primary" />
+                        {children}
+                      </h1>
+                      <div className="h-px bg-gradient-to-r from-primary/30 via-border/50 to-transparent mt-2" />
+                    </div>
                   ),
                   h2: ({ children }) => (
-                    <div className="mt-5 first:mt-0">
-                      <div className="h-px bg-border/50 mb-4" />
-                      <h2 className="text-[13px] font-bold uppercase tracking-wider text-primary mb-2 flex items-center gap-2">
+                    <div className="mt-6 first:mt-0">
+                      <div className="h-px bg-border/40 mb-4" />
+                      <h2 className="text-[13px] font-bold uppercase tracking-widest text-primary mb-2.5 flex items-center gap-2">
                         <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary" />
                         {children}
                       </h2>
@@ -376,9 +382,9 @@ export function ScratchpadCapture() {
                       if (text.includes(key) || text.includes(route.label.toLowerCase())) {
                         const ToolIcon = route.icon;
                         return (
-                          <h3 className="flex items-center gap-2 text-sm font-bold text-foreground mt-4 mb-1.5">
-                            <div className="h-5 w-5 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0">
-                              <ToolIcon className="h-3 w-3 text-primary" />
+                          <h3 className="flex items-center gap-2 text-[12.5px] font-semibold text-foreground/90 mt-3.5 mb-1.5 pl-1 border-l-2 border-accent/40 ml-0.5">
+                            <div className="h-5 w-5 rounded-md bg-accent/10 flex items-center justify-center flex-shrink-0">
+                              <ToolIcon className="h-3 w-3 text-accent" />
                             </div>
                             {children}
                           </h3>
@@ -386,8 +392,8 @@ export function ScratchpadCapture() {
                       }
                     }
                     return (
-                      <h3 className="flex items-center gap-2 text-sm font-bold text-foreground mt-4 mb-1.5">
-                        <ArrowRight className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                      <h3 className="flex items-center gap-2 text-[12.5px] font-semibold text-foreground/90 mt-3.5 mb-1.5 pl-1 border-l-2 border-accent/40 ml-0.5">
+                        <ArrowRight className="h-3 w-3 text-accent flex-shrink-0" />
                         {children}
                       </h3>
                     );
