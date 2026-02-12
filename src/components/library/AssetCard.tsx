@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Image, FileText } from 'lucide-react';
+import { ExternalLink, Image, FileText, File, Download } from 'lucide-react';
 import type { ExternalAsset } from '@/types/library';
 import { getPlatformLabel, getPlatformColor, isDirectImageUrl } from '@/lib/assetPlatform';
 
@@ -11,10 +11,25 @@ interface AssetCardProps {
   compact?: boolean;
 }
 
+function formatFileSize(bytes?: number): string {
+  if (!bytes) return '';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function getFileIcon(fileType?: string) {
+  if (!fileType) return FileText;
+  if (fileType.startsWith('image/')) return Image;
+  if (fileType.includes('pdf')) return File;
+  return FileText;
+}
+
 export function AssetCard({ asset, onRemove, compact }: AssetCardProps) {
   const thumbnailSrc = asset.thumbnail_url || (isDirectImageUrl(asset.url) ? asset.url : null);
-  const platformLabel = getPlatformLabel(asset.type);
-  const platformColor = getPlatformColor(asset.type);
+  const platformLabel = asset.is_upload ? 'Uploaded' : getPlatformLabel(asset.type);
+  const platformColor = asset.is_upload ? 'bg-primary/10 text-primary' : getPlatformColor(asset.type);
+  const FileIcon = getFileIcon(asset.file_type);
 
   return (
     <Card className="overflow-hidden group hover:shadow-md transition-shadow">
@@ -32,11 +47,7 @@ export function AssetCard({ asset, onRemove, compact }: AssetCardProps) {
           />
         ) : null}
         <div className={`flex flex-col items-center gap-2 text-muted-foreground ${thumbnailSrc ? 'hidden' : ''}`}>
-          {isDirectImageUrl(asset.url) ? (
-            <Image className="w-8 h-8" />
-          ) : (
-            <FileText className="w-8 h-8" />
-          )}
+          <FileIcon className="w-8 h-8" />
           <span className="text-xs">{platformLabel}</span>
         </div>
 
@@ -48,6 +59,9 @@ export function AssetCard({ asset, onRemove, compact }: AssetCardProps) {
 
       <CardContent className="p-3">
         <p className="text-sm font-medium truncate">{asset.label}</p>
+        {asset.file_size && (
+          <p className="text-[11px] text-muted-foreground">{formatFileSize(asset.file_size)}</p>
+        )}
         {asset.notes && !compact && (
           <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{asset.notes}</p>
         )}
@@ -58,8 +72,11 @@ export function AssetCard({ asset, onRemove, compact }: AssetCardProps) {
             className="h-7 text-xs flex-1"
             onClick={() => window.open(asset.url, '_blank', 'noopener')}
           >
-            <ExternalLink className="w-3 h-3 mr-1" />
-            Open in {platformLabel}
+            {asset.is_upload ? (
+              <><Download className="w-3 h-3 mr-1" />Download</>
+            ) : (
+              <><ExternalLink className="w-3 h-3 mr-1" />Open in {getPlatformLabel(asset.type)}</>
+            )}
           </Button>
           {onRemove && (
             <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive" onClick={onRemove}>

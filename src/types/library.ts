@@ -142,6 +142,12 @@ export interface ExternalAsset {
   type: AssetPlatform;
   thumbnail_url?: string;
   notes?: string;
+  /** True when the asset was uploaded directly rather than linked */
+  is_upload?: boolean;
+  /** MIME type of the uploaded file */
+  file_type?: string;
+  /** File size in bytes */
+  file_size?: number;
 }
 
 // Collection types
