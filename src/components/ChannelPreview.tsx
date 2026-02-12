@@ -151,6 +151,25 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     generateChannelImage();
   };
 
+  const handleDownloadImage = async () => {
+    if (!channelImageUrl) return;
+    try {
+      const response = await fetch(channelImageUrl);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${channelLabels[channel].toLowerCase().replace(/[\s/()]+/g, '-')}-${new Date().toISOString().split('T')[0]}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch {
+      // Fallback: open in new tab
+      window.open(channelImageUrl, '_blank');
+    }
+  };
+
   // Sync editedContent with parent content when it changes
   useEffect(() => {
     setEditedContent(content);
@@ -904,14 +923,14 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
         {channelImageUrl && (
           <div className="relative group">
             <img src={channelImageUrl} alt="Email hero" className="w-full h-40 object-cover" />
-            <Button
-              variant="secondary"
-              size="sm"
-              className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-xs h-7"
-              onClick={(e) => { e.stopPropagation(); handleRegenerateImage(); }}
-            >
-              <RefreshCw className="w-3 h-3 mr-1" /> Regenerate
-            </Button>
+            <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button variant="secondary" size="sm" className="text-xs h-7" onClick={(e) => { e.stopPropagation(); handleDownloadImage(); }}>
+                <FileDown className="w-3 h-3 mr-1" /> Download
+              </Button>
+              <Button variant="secondary" size="sm" className="text-xs h-7" onClick={(e) => { e.stopPropagation(); handleRegenerateImage(); }}>
+                <RefreshCw className="w-3 h-3 mr-1" /> Regenerate
+              </Button>
+            </div>
           </div>
         )}
         {isGeneratingImage && !channelImageUrl && (
@@ -972,14 +991,14 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
             {channelImageUrl ? (
               <div className="relative group">
                 <img src={channelImageUrl} alt="Social post" className="w-full aspect-square object-cover" />
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-xs h-7"
-                  onClick={(e) => { e.stopPropagation(); handleRegenerateImage(); }}
-                >
-                  <RefreshCw className="w-3 h-3 mr-1" /> Regenerate
-                </Button>
+                <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button variant="secondary" size="sm" className="text-xs h-7" onClick={(e) => { e.stopPropagation(); handleDownloadImage(); }}>
+                    <FileDown className="w-3 h-3 mr-1" /> Download
+                  </Button>
+                  <Button variant="secondary" size="sm" className="text-xs h-7" onClick={(e) => { e.stopPropagation(); handleRegenerateImage(); }}>
+                    <RefreshCw className="w-3 h-3 mr-1" /> Regenerate
+                  </Button>
+                </div>
               </div>
             ) : isGeneratingImage ? (
               <div className="aspect-square flex flex-col items-center justify-center gap-2 bg-muted/50">
@@ -1178,14 +1197,14 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
             {channelImageUrl ? (
               <div className="relative group">
                 <img src={channelImageUrl} alt="Ad creative" className="w-full h-48 object-cover" />
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-xs h-7"
-                  onClick={(e) => { e.stopPropagation(); handleRegenerateImage(); }}
-                >
-                  <RefreshCw className="w-3 h-3 mr-1" /> Regenerate
-                </Button>
+                <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button variant="secondary" size="sm" className="text-xs h-7" onClick={(e) => { e.stopPropagation(); handleDownloadImage(); }}>
+                    <FileDown className="w-3 h-3 mr-1" /> Download
+                  </Button>
+                  <Button variant="secondary" size="sm" className="text-xs h-7" onClick={(e) => { e.stopPropagation(); handleRegenerateImage(); }}>
+                    <RefreshCw className="w-3 h-3 mr-1" /> Regenerate
+                  </Button>
+                </div>
               </div>
             ) : isGeneratingImage ? (
               <div className="h-48 flex flex-col items-center justify-center gap-2">
