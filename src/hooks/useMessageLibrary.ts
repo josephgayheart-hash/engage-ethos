@@ -64,6 +64,7 @@ export function useMessageLibrary() {
         createdByName: (row as any).created_by_name || undefined,
         remixedFrom: (row as any).remixed_from as any,
         externalAssets: ((row as any).external_assets as any[]) || [],
+        coverImageUrl: (row as any).cover_image_url || undefined,
       }));
 
       setMessages(mapped);

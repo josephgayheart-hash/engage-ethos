@@ -1224,6 +1224,7 @@ export type Database = {
           channels: string[] | null
           cohort: Json | null
           content: string
+          cover_image_url: string | null
           created_at: string
           created_by_name: string | null
           domain: string | null
@@ -1256,6 +1257,7 @@ export type Database = {
           channels?: string[] | null
           cohort?: Json | null
           content: string
+          cover_image_url?: string | null
           created_at?: string
           created_by_name?: string | null
           domain?: string | null
@@ -1288,6 +1290,7 @@ export type Database = {
           channels?: string[] | null
           cohort?: Json | null
           content?: string
+          cover_image_url?: string | null
           created_at?: string
           created_by_name?: string | null
           domain?: string | null
@@ -1968,6 +1971,7 @@ export type Database = {
       }
       user_drafts: {
         Row: {
+          cover_image_url: string | null
           created_at: string
           draft_data: Json
           draft_type: string
@@ -1979,6 +1983,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          cover_image_url?: string | null
           created_at?: string
           draft_data?: Json
           draft_type: string
@@ -1990,6 +1995,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          cover_image_url?: string | null
           created_at?: string
           draft_data?: Json
           draft_type?: string

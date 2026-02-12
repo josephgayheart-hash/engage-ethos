@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { Header } from "@/components/Header";
 import { ContextSelector } from "@/components/ContextSelector";
@@ -592,6 +593,20 @@ const BuildPage = () => {
     // Track the saved message ID for "Add to Collection"
     if (savedMessage?.id) {
       setLastSavedMessageId(savedMessage.id);
+      
+      // Fire-and-forget: generate AI cover image in the background
+      supabase.functions.invoke('generate-cover-image', {
+        body: {
+          messageId: savedMessage.id,
+          title: name,
+          audience: context.audience,
+          moment: context.moment,
+          channels: selectedChannels,
+          mode: 'builder',
+          tenantId: profile?.tenant_id,
+          profileId: selectedProfileId,
+        },
+      }).catch(err => console.warn('Cover image generation failed:', err));
     }
 
     // Clear the draft after saving to library

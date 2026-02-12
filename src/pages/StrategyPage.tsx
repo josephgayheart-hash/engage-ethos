@@ -1,6 +1,7 @@
 // Strategy Page - Journey Designer with PDF Export
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { format, differenceInWeeks, addWeeks } from "date-fns";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
@@ -575,6 +576,22 @@ const StrategyPage = () => {
       } catch (err) {
         console.error('Failed to auto-create collection from kit:', err);
       }
+    }
+
+    // Fire-and-forget: generate AI cover image in the background
+    if (savedMessage?.id) {
+      supabase.functions.invoke('generate-cover-image', {
+        body: {
+          messageId: savedMessage.id,
+          title: name,
+          audience: context.audience,
+          moment: context.moment,
+          channels: selectedChannels,
+          mode: 'journey',
+          tenantId: profile?.tenant_id,
+          profileId: selectedProfileId,
+        },
+      }).catch(err => console.warn('Cover image generation failed:', err));
     }
 
     // Clear the draft after saving to library

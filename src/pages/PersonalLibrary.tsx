@@ -384,10 +384,20 @@ const PersonalLibrary = () => {
               {filteredMessages.map((message) => (
                 <Card 
                   key={message.id} 
-                  className="card-elevated cursor-pointer hover:border-primary/50 transition-all hover:shadow-md group" 
+                  className="card-elevated cursor-pointer hover:border-primary/50 transition-all hover:shadow-md group overflow-hidden" 
                   onClick={() => handleCardClick(message.id)}
                 >
-                  <CardContent className="pt-6">
+                  {/* Cover image */}
+                  {message.coverImageUrl && (
+                    <div className="h-32 w-full overflow-hidden bg-muted">
+                      <img
+                        src={message.coverImageUrl}
+                        alt={message.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                  )}
+                  <CardContent className={message.coverImageUrl ? "pt-4" : "pt-6"}>
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
