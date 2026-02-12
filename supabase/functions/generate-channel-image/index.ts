@@ -462,7 +462,7 @@ Photography/art direction — follow the style of real university marketing imag
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: engine === "premium" ? "google/gemini-3-pro-image-preview" : "google/gemini-2.5-flash-image",
+        model: "google/gemini-3-pro-image-preview",
         messages: [{ role: "user", content: prompt }],
         modalities: ["image", "text"],
       }),
