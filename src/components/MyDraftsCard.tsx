@@ -278,33 +278,33 @@ export function MyDraftsCard() {
               className="block"
             >
               <div className="p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-accent/30 transition-all group overflow-hidden">
-                {/* Cover image thumbnail */}
-                {draft.cover_image_url && (
-                  <div className="h-24 w-full overflow-hidden rounded-md bg-muted mb-2 -mt-0.5">
-                    <img
-                      src={draft.cover_image_url}
-                      alt={draft.title || 'Draft'}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                )}
-                {/* Top row: Icon, Title, Type badge, Delete button */}
+                {/* Top row: Thumbnail/Icon, Title, Type badge, Delete button */}
                 <div className="flex items-start gap-3">
-                  <div className={`icon-container icon-container-sm shrink-0 mt-0.5 ${
-                    draft.draft_type === 'message' 
-                      ? 'bg-pillar-cognitive/10' 
-                      : draft.draft_type === 'journey'
-                      ? 'bg-pillar-consensus/10'
-                      : 'bg-cyan-500/10'
-                  }`}>
-                    <Icon className={`w-4 h-4 ${
+                  {draft.cover_image_url ? (
+                    <div className="w-9 h-9 rounded-md overflow-hidden bg-muted shrink-0 mt-0.5">
+                      <img
+                        src={draft.cover_image_url}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className={`icon-container icon-container-sm shrink-0 mt-0.5 ${
                       draft.draft_type === 'message' 
-                        ? 'text-pillar-cognitive' 
+                        ? 'bg-pillar-cognitive/10' 
                         : draft.draft_type === 'journey'
-                        ? 'text-pillar-consensus'
-                        : 'text-cyan-600'
-                    }`} />
-                  </div>
+                        ? 'bg-pillar-consensus/10'
+                        : 'bg-cyan-500/10'
+                    }`}>
+                      <Icon className={`w-4 h-4 ${
+                        draft.draft_type === 'message' 
+                          ? 'text-pillar-cognitive' 
+                          : draft.draft_type === 'journey'
+                          ? 'text-pillar-consensus'
+                          : 'text-cyan-600'
+                      }`} />
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">
