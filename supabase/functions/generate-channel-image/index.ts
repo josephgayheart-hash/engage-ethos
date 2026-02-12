@@ -47,7 +47,7 @@ serve(async (req) => {
   }
 
   try {
-    const { channel, contentSummary, audience, tenantId, profileId, messageId } = await req.json();
+    const { channel, contentSummary, audience, tenantId, profileId, messageId, goal, tone, moment, cohort, domain } = await req.json();
 
     if (!channel || !contentSummary) {
       return new Response(JSON.stringify({ error: "Missing channel or contentSummary" }), {
@@ -108,22 +108,35 @@ serve(async (req) => {
 
     const spec = channelSpecs[channel] || channelSpecs["social-media"];
     const audienceContext = audience ? `Target audience: ${audience}.` : "";
+    const goalContext = goal ? `Communication goal: ${goal}.` : "";
+    const toneContext = tone ? `Desired tone: ${tone}.` : "";
+    const momentContext = moment ? `Communication moment: ${moment}.` : "";
+    const cohortContext = cohort && cohort !== 'none' ? `Student cohort: ${cohort}.` : "";
+    const domainContext = domain ? `Content domain: ${domain}.` : "";
 
     const prompt = `Generate a professional ${spec.style} for a higher education institution.
 
 Context: ${contentSummary}
 ${audienceContext}
+${goalContext}
+${toneContext}
+${momentContext}
+${cohortContext}
+${domainContext}
 ${brandContext}
 
 Requirements:
 - This is a ${spec.description}
 - The imagery must directly relate to the content topic — show real-world scenes that match (students, campus, events, academics, etc.)
+- Naturally reflect the diversity of a modern college campus — include people of different races, ethnicities, genders, ages, and abilities in a way that feels authentic and organic, not staged or tokenizing
 - Subtly incorporate the institution's brand colors into the scene through color grading, lighting, clothing, or environmental elements
 - Use a polished, editorial photography style
 - Aspect ratio: ${spec.aspect}
 - No text, no words, no letters, no logos, no watermarks
 - Professional quality suitable for institutional marketing
-- Feel warm, authentic, and aspirational — like a top university marketing campaign`;
+- Feel warm, authentic, and aspirational — like a top university marketing campaign
+- Match the tone and energy of the communication moment${toneContext ? ` — the visual should feel ${tone}` : ''}
+- Imagery should resonate with the target audience${audienceContext ? ` (${audience})` : ''} and reflect their experience`;
 
     console.log("Generating channel image for:", channel, "content:", contentSummary.substring(0, 100));
 
