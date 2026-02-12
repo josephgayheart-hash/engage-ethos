@@ -1241,29 +1241,41 @@ const BuildPage = () => {
                 />
               )}
 
-              {/* Image Generation Settings */}
+              {/* AI Image Generation Settings */}
               {selectedChannels.some(ch => ['social-media', 'digital-ad-social', 'email', 'landing-page', 'direct-mail', 'news-article'].includes(ch)) && (
-                <div className="flex items-center gap-3 px-1">
-                  <Label className="text-xs text-muted-foreground whitespace-nowrap">Image:</Label>
-                  <select
-                    value={imageEngine}
-                    onChange={(e) => setImageEngine(e.target.value)}
-                    className="text-xs border rounded px-2 py-1 bg-background"
-                  >
-                    <option value="fast">Fast Engine</option>
-                    <option value="premium">Premium Engine</option>
-                  </select>
-                  <select
-                    value={imageStyle}
-                    onChange={(e) => setImageStyle(e.target.value)}
-                    className="text-xs border rounded px-2 py-1 bg-background"
-                  >
-                    <option value="photorealistic">Photorealistic</option>
-                    <option value="cinematic">Cinematic</option>
-                    <option value="illustrated">Illustrated</option>
-                    <option value="watercolor">Watercolor</option>
-                    <option value="minimal">Minimal / Flat</option>
-                  </select>
+                <div className="flex flex-col items-center gap-2 py-3 px-4 rounded-lg border border-border/60 bg-muted/30">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-3.5 h-3.5 text-primary" />
+                    <span className="text-xs font-semibold text-foreground tracking-wide">AI Image Generation</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex flex-col items-center gap-1">
+                      <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Engine</Label>
+                      <select
+                        value={imageEngine}
+                        onChange={(e) => setImageEngine(e.target.value)}
+                        className="text-xs border border-border rounded-md px-3 py-1.5 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
+                      >
+                        <option value="fast">⚡ Fast</option>
+                        <option value="premium">✨ Premium</option>
+                      </select>
+                    </div>
+                    <div className="w-px h-8 bg-border" />
+                    <div className="flex flex-col items-center gap-1">
+                      <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Style</Label>
+                      <select
+                        value={imageStyle}
+                        onChange={(e) => setImageStyle(e.target.value)}
+                        className="text-xs border border-border rounded-md px-3 py-1.5 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
+                      >
+                        <option value="photorealistic">📷 Photorealistic</option>
+                        <option value="cinematic">🎬 Cinematic</option>
+                        <option value="illustrated">🎨 Illustrated</option>
+                        <option value="watercolor">🖌️ Watercolor</option>
+                        <option value="minimal">◻️ Minimal / Flat</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
               )}
 
