@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
@@ -193,7 +194,7 @@ const TemplateDetailPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { profile, tenant } = useAuth();
-  const { templates, getTemplateById, deleteTemplate } = useSharedLibrary();
+  const { templates, getTemplateById, deleteTemplate, updateTemplateGuidelines } = useSharedLibrary();
   const { addMessage } = useMessageLibrary();
   const { getProfile } = useInstitutionalProfiles();
   const [copied, setCopied] = useState(false);
@@ -203,10 +204,13 @@ const TemplateDetailPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState<string>('');
   const [usageHistory, setUsageHistory] = useState<Array<{ id: string; userName: string; action: string; date: string }>>([]);
+  const [guidelinesContent, setGuidelinesContent] = useState<string>('');
+  const [isSavingGuidelines, setIsSavingGuidelines] = useState(false);
 
   const template = getTemplateById(id || '');
   const isJourney = useMemo(() => template ? isJourneyContent(template.content) : false, [template]);
   const journeyData = useMemo(() => isJourney && template ? parseJourneyContent(template.content) : null, [template, isJourney]);
+  const isAuthor = useMemo(() => !!(profile && template?.createdByUserId && profile.id === template.createdByUserId), [profile, template]);
 
   // Load real usage history
   useEffect(() => {
@@ -282,6 +286,7 @@ const TemplateDetailPage = () => {
   useEffect(() => {
     if (template) {
       setEditedContent(customizedContent);
+      setGuidelinesContent(template.guidelines || '');
     }
   }, [template, customizedContent]);
 
@@ -670,17 +675,40 @@ const TemplateDetailPage = () => {
             <TabsContent value="guidelines" className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Usage Guidelines</CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg">Usage Guidelines</CardTitle>
+                    {isAuthor && (
+                      <Button
+                        size="sm"
+                        disabled={isSavingGuidelines}
+                        onClick={async () => {
+                          setIsSavingGuidelines(true);
+                          const success = await updateTemplateGuidelines(template.id, guidelinesContent);
+                          setIsSavingGuidelines(false);
+                          if (success) {
+                            toast({ title: 'Guidelines saved' });
+                          } else {
+                            toast({ title: 'Failed to save guidelines', variant: 'destructive' });
+                          }
+                        }}
+                      >
+                        <Save className="w-4 h-4 mr-1" />
+                        {isSavingGuidelines ? 'Saving...' : 'Save'}
+                      </Button>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <p className="text-xs text-muted-foreground mb-2">
-                    Notes from the creator on how others in your organization should use this template.
+                    {isAuthor
+                      ? 'Add notes for how others in your organization should use this template.'
+                      : 'Notes from the creator on how others in your organization should use this template.'}
                   </p>
-                  <Textarea
-                    value={template.guidelines || ''}
-                    readOnly
-                    placeholder="No usage guidelines have been provided yet."
-                    className="min-h-[120px] text-sm"
+                  <RichTextEditor
+                    content={guidelinesContent}
+                    onChange={setGuidelinesContent}
+                    editable={isAuthor}
+                    placeholder="Add usage guidelines, tips, and notes for your team..."
                   />
                 </CardContent>
               </Card>
