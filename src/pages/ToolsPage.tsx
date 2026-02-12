@@ -40,7 +40,7 @@ const analysisTools: ToolItem[] = [
 ];
 
 const utilityTools: ToolItem[] = [
-  { id: 'image-generator', title: 'Image Generator', description: 'Create on-brand campus photography with AI', icon: ImageIcon, href: '/image-generator' },
+  { id: 'image-generator', title: 'Image Studio', description: 'Create on-brand campus photography with AI', icon: ImageIcon, href: '/image-generator' },
   { id: 'call-script', title: 'Call Scripts', description: 'Phone outreach scripts', icon: Phone, href: '/call-script' },
   { id: 'playground', title: 'AI Copywriter', description: 'AI-powered messaging playground', icon: MessageCircle, href: '/playground' },
 ];

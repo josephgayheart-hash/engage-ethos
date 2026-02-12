@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
 import { Header } from "@/components/Header";
+import { WaveBackground } from "@/components/WaveBackground";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -148,17 +149,25 @@ const ImageGeneratorPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-5xl mx-auto space-y-6">
-          <div>
+
+      {/* Wave header */}
+      <section className="relative pt-10 pb-8 overflow-hidden">
+        <WaveBackground variant="teal" />
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-5xl mx-auto">
             <h1 className="font-serif text-2xl font-bold mb-1 flex items-center gap-2">
-              <ImageIcon className="w-6 h-6 text-primary" />
-              Image Generator
+              <Palette className="w-6 h-6 text-primary" />
+              Image Studio
             </h1>
             <p className="text-sm text-muted-foreground">
               Create on-brand campus photography using your institution's colors, architecture, and identity.
             </p>
           </div>
+        </div>
+      </section>
+
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-5xl mx-auto space-y-6">
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Controls */}
