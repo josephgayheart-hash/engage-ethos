@@ -32,8 +32,16 @@ serve(async (req) => {
 
     // Generate the image using Lovable AI image generation
     const typeContext = collectionType || "campaign";
-    const descContext = description ? ` Description: ${description}.` : "";
-    const prompt = `Create a professional, visually appealing thumbnail cover image for a higher education ${typeContext} collection called "${collectionName}".${descContext} The image should be abstract, modern, and use a sophisticated color palette with blues, teals, and warm accents. Include subtle geometric patterns or organic shapes that evoke growth, community, and academic excellence. No text or words in the image. 16:9 aspect ratio. Ultra high resolution.`;
+    const descContext = description ? ` The collection is about: ${description}.` : "";
+    const prompt = `Generate a clean, professional cover image for a higher education communications collection titled "${collectionName}" (type: ${typeContext}).${descContext}
+
+Requirements:
+- The image must visually represent the SPECIFIC TOPIC of "${collectionName}" — show relevant imagery (e.g. for "Student Retention" show students on campus, mentoring, academic support; for "Fall Enrollment" show campus in autumn, welcome events, etc.)
+- Use a polished, editorial photography style with warm natural lighting
+- No text, no words, no letters, no watermarks
+- Composition suitable for a 16:9 thumbnail card
+- Professional color grading with institution-appropriate tones (navy, forest green, warm gold accents)
+- Should feel like a high-quality university marketing photo`;
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
