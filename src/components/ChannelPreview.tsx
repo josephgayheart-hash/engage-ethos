@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { ChannelMockup } from "@/components/image-generator/ChannelMockup";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -117,6 +118,7 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
   const [sfmcDialogOpen, setSfmcDialogOpen] = useState(false);
   const [channelImageUrl, setChannelImageUrl] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [showInContext, setShowInContext] = useState(false);
   const { toast } = useToast();
 
   // Channels that support AI image generation
@@ -2066,6 +2068,33 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
       </CardHeader>
       <CardContent>
         {isEditing ? renderEditContent() : renderContent()}
+
+        {/* In Context Mockup Preview */}
+        {isVisualChannel && channelImageUrl && (
+          <div className="mt-4 border-t border-border pt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowInContext(!showInContext)}
+              className="w-full gap-2 text-xs"
+            >
+              <Monitor className="w-3.5 h-3.5" />
+              {showInContext ? "Hide" : "View"} In Context Preview
+            </Button>
+            {showInContext && (
+              <div className="mt-4 py-4 px-2 bg-muted/30 rounded-lg border border-border/50">
+                <p className="text-[10px] text-center text-muted-foreground uppercase tracking-wider font-medium mb-3">
+                  {channelLabels[channel]} — Device Preview
+                </p>
+                <ChannelMockup
+                  channel={channel}
+                  imageUrl={channelImageUrl}
+                  profileName={institutionName}
+                />
+              </div>
+            )}
+          </div>
+        )}
       </CardContent>
 
       <SalesforceCredentialsDialog
