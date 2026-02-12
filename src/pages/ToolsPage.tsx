@@ -11,20 +11,12 @@ import {
   Upload,
   Phone,
   MessageCircle,
-  BarChart3,
-  Calendar,
-  Type,
-  Eye,
-  Mic,
-  Monitor,
-  TrendingUp,
-  Languages,
   Search,
-  Globe,
+  Mic,
   ArrowRight,
   LayoutGrid,
   List,
-  ChevronDown,
+  ImageIcon,
 } from "lucide-react";
 
 interface ToolItem {
@@ -45,16 +37,10 @@ const coreTools: ToolItem[] = [
 const analysisTools: ToolItem[] = [
   { id: 'web-analyzer', title: 'Web Content Analyzer', description: 'Scan & score web pages for brand alignment', icon: Search, href: '/web-analyzer' },
   { id: 'brand-voice', title: 'Content DNA Scorer', description: 'Check brand voice alignment of any text', icon: Mic, href: '/brand-voice' },
-  { id: 'benchmarks', title: 'Performance Benchmarks', description: 'Compare to higher-ed industry metrics', icon: TrendingUp, href: '/benchmarks' },
-  { id: 'email-preview', title: 'Email Preview', description: 'Preview across devices and clients', icon: Monitor, href: '/email-preview' },
 ];
 
 const utilityTools: ToolItem[] = [
-  { id: 'campaign-dashboard', title: 'Campaign Dashboard', description: 'Track campaign performance metrics', icon: BarChart3, href: '/campaign-dashboard' },
-  { id: 'calendar', title: 'Communication Calendar', description: 'Plan and schedule messaging timelines', icon: Calendar, href: '/calendar' },
-  { id: 'subject-optimizer', title: 'Subject Line Optimizer', description: 'Optimize email subject lines', icon: Type, href: '/subject-optimizer' },
-  { id: 'accessibility', title: 'Accessibility Checker', description: 'Verify accessibility compliance', icon: Eye, href: '/accessibility' },
-  { id: 'translate', title: 'Translation Tool', description: 'Multilingual messaging support', icon: Languages, href: '/translate' },
+  { id: 'image-generator', title: 'Image Generator', description: 'Create on-brand campus photography with AI', icon: ImageIcon, href: '/image-generator' },
   { id: 'call-script', title: 'Call Scripts', description: 'Phone outreach scripts', icon: Phone, href: '/call-script' },
   { id: 'playground', title: 'AI Copywriter', description: 'AI-powered messaging playground', icon: MessageCircle, href: '/playground' },
 ];
