@@ -4,7 +4,7 @@ import { ScratchpadCapture } from "@/components/dashboard/ScratchpadCapture";
 import { ResumeWorkCard } from "@/components/dashboard/ResumeWorkCard";
 import { QuickActionsPanel } from "@/components/dashboard/QuickActionsPanel";
 import { MyDraftsCard } from "@/components/MyDraftsCard";
-import { RecentMessagesPanel } from "@/components/dashboard/RecentMessagesPanel";
+
 import { ContentDNAStatusCard } from "@/components/dashboard/ContentDNAStatusCard";
 import { InstitutionManagementCard } from "@/components/dashboard/InstitutionManagementCard";
 import { AdminTeamOverview } from "@/components/dashboard/AdminTeamOverview";
@@ -39,15 +39,10 @@ const Index = () => {
           {/* Library & Collections Overview */}
           <LibraryOverviewPanel />
 
-          {/* Recent Messages + Management Panel */}
-          <section className="grid md:grid-cols-3 gap-6">
-            <div className="md:col-span-2">
-              <RecentMessagesPanel />
-            </div>
-            <div className="space-y-6">
-              <InstitutionManagementCard />
-              <ContentDNAStatusCard />
-            </div>
+          {/* Institution Management + Content DNA */}
+          <section className="grid md:grid-cols-2 gap-6">
+            <InstitutionManagementCard />
+            <ContentDNAStatusCard />
           </section>
 
           {/* Admin Team Overview - University Admins Only */}
