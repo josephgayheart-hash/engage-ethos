@@ -47,7 +47,7 @@ serve(async (req) => {
   }
 
   try {
-    const { channel, contentSummary, audience, tenantId, profileId, messageId, goal, tone, moment, cohort, domain } = await req.json();
+    const { channel, contentSummary, audience, tenantId, profileId, messageId, goal, tone, moment, cohort, domain, engine, imageStyle } = await req.json();
 
     if (!channel || !contentSummary) {
       return new Response(JSON.stringify({ error: "Missing channel or contentSummary" }), {
@@ -167,6 +167,16 @@ Rules:
     const cohortContext = cohort && cohort !== 'none' ? `Student cohort: ${cohort}.` : "";
     const domainContext = domain ? `Content domain: ${domain}.` : "";
 
+    // Style modifiers based on user selection
+    const styleDirections: Record<string, string> = {
+      photorealistic: "Photorealistic editorial campus photography — looks indistinguishable from a real photo taken by a professional university photographer.",
+      cinematic: "Cinematic film-like quality — dramatic lighting, shallow depth of field, anamorphic lens flare, color-graded like a movie still. Think widescreen film grain and moody atmosphere.",
+      illustrated: "Stylized digital illustration — clean vector-inspired lines, bold color blocking, modern graphic design aesthetic. NOT a photograph.",
+      watercolor: "Soft watercolor painting style — gentle washes of color, visible brush strokes, organic bleeding edges, artistic and dreamy. NOT a photograph.",
+      minimal: "Clean flat design illustration — minimal detail, geometric shapes, limited color palette, modern and sleek. Think tech company marketing aesthetic. NOT a photograph.",
+    };
+    const selectedStyle = styleDirections[imageStyle || "photorealistic"] || styleDirections.photorealistic;
+
     const prompt = `Generate a professional ${spec.style} for a higher education institution.
 
 Context: ${contentSummary}
@@ -182,7 +192,9 @@ ${campusContext}
 
 ${colorPaletteInstruction}
 
-Photography direction — follow the style of real university marketing photography (think viewbooks, campaign hero shots, alumni magazines):
+VISUAL STYLE: ${selectedStyle}
+
+Photography/art direction — follow the style of real university marketing imagery:
 - Capture candid, in-the-moment scenes: a student laughing mid-conversation on a quad, a professor gesturing at a whiteboard with 2-3 engaged students, a lone student studying under a tree, a small group collaborating around a laptop in a modern library
 - NEVER show people standing in a line, holding hands, linking arms, or posing symmetrically — these look artificial
 - NEVER generate twins, duplicates, or people who look identical — every person should be visually distinct
@@ -210,7 +222,7 @@ Photography direction — follow the style of real university marketing photogra
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image",
+        model: engine === "premium" ? "google/gemini-3-pro-image-preview" : "google/gemini-2.5-flash-image",
         messages: [{ role: "user", content: prompt }],
         modalities: ["image", "text"],
       }),

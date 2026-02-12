@@ -30,6 +30,19 @@ const audienceOptions = [
   "Alumni", "Donors", "Faculty & Staff", "Community",
 ];
 
+const engineOptions = [
+  { value: "fast", label: "Fast", description: "Quick generation, good quality" },
+  { value: "premium", label: "Premium", description: "Slower, highest quality & realism" },
+];
+
+const styleOptions = [
+  { value: "photorealistic", label: "Photorealistic", description: "Editorial campus photography" },
+  { value: "cinematic", label: "Cinematic", description: "Dramatic lighting, film-like depth" },
+  { value: "illustrated", label: "Illustrated", description: "Stylized graphic illustration" },
+  { value: "watercolor", label: "Watercolor", description: "Soft, artistic watercolor style" },
+  { value: "minimal", label: "Minimal / Flat", description: "Clean, modern flat design" },
+];
+
 const ImageGeneratorPage = () => {
   const { profile } = useAuth();
   const tenantId = profile?.tenant_id;
@@ -41,6 +54,8 @@ const ImageGeneratorPage = () => {
   const [audience, setAudience] = useState("");
   const [tone, setTone] = useState("");
   const [goal, setGoal] = useState("");
+  const [engine, setEngine] = useState("fast");
+  const [style, setStyle] = useState("photorealistic");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -61,6 +76,8 @@ const ImageGeneratorPage = () => {
           profileId: selectedProfileId || undefined,
           goal: goal || undefined,
           tone: tone || undefined,
+          engine: engine || "fast",
+          imageStyle: style || "photorealistic",
         },
       });
       if (error) throw error;
@@ -76,7 +93,7 @@ const ImageGeneratorPage = () => {
     } finally {
       setIsGenerating(false);
     }
-  }, [contentDescription, channel, audience, tenantId, selectedProfileId, goal, tone]);
+  }, [contentDescription, channel, audience, tenantId, selectedProfileId, goal, tone, engine, style]);
 
   const handleDownload = async () => {
     if (!imageUrl) return;
@@ -192,6 +209,42 @@ const ImageGeneratorPage = () => {
                             </SelectItem>
                           );
                         })}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label>Engine</Label>
+                    <Select value={engine} onValueChange={setEngine}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {engineOptions.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            <span className="flex flex-col">
+                              <span>{opt.label}</span>
+                              <span className="text-xs text-muted-foreground">{opt.description}</span>
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Style</Label>
+                    <Select value={style} onValueChange={setStyle}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {styleOptions.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            <span className="flex flex-col">
+                              <span>{opt.label}</span>
+                              <span className="text-xs text-muted-foreground">{opt.description}</span>
+                            </span>
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
