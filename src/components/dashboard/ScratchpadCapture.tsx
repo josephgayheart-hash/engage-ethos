@@ -19,6 +19,18 @@ import ReactMarkdown from "react-markdown";
 
 const STORAGE_KEY = "campusvoice_scratchpad_draft";
 
+// Safely extract plain text from React children (avoids [object Object])
+function extractText(node: React.ReactNode): string {
+  if (node == null) return '';
+  if (typeof node === 'string') return node;
+  if (typeof node === 'number' || typeof node === 'boolean') return String(node);
+  if (Array.isArray(node)) return node.map(extractText).join('');
+  if (typeof node === 'object' && 'props' in node) {
+    return extractText((node as React.ReactElement).props.children);
+  }
+  return '';
+}
+
 // Icon mapping from classify response
 const iconMap: Record<string, React.ElementType> = {
   mail: Mail,
@@ -377,7 +389,7 @@ export function ScratchpadCapture() {
                     </div>
                   ),
                   h3: ({ children }) => {
-                    const text = String(children).toLowerCase();
+                    const text = extractText(children).toLowerCase();
                     for (const [key, route] of Object.entries(toolRoutes)) {
                       if (text.includes(key) || text.includes(route.label.toLowerCase())) {
                         const ToolIcon = route.icon;
@@ -399,7 +411,7 @@ export function ScratchpadCapture() {
                     );
                   },
                   strong: ({ children }) => {
-                    const text = String(children).trim();
+                    const text = extractText(children).trim();
                     const lower = text.toLowerCase().replace(/[:\s]+$/, "");
 
                     // Match tool names — exact key, label, or common variations
@@ -434,7 +446,7 @@ export function ScratchpadCapture() {
                     return <strong className="font-semibold text-foreground">{children}</strong>;
                   },
                   li: ({ children }) => {
-                    const text = String(children);
+                    const text = extractText(children);
                     for (const [field, IconComp] of Object.entries(fieldIcons)) {
                       const regex = new RegExp(`^${field}:`, "i");
                       if (regex.test(text.trim())) {
@@ -458,7 +470,7 @@ export function ScratchpadCapture() {
                   ul: ({ children }) => <ul className="my-2 space-y-0.5">{children}</ul>,
                   ol: ({ children }) => <ol className="my-2 space-y-0.5 list-decimal list-inside">{children}</ol>,
                   p: ({ children }) => {
-                    const text = String(children);
+                    const text = extractText(children);
                     // Tool recommendation card
                     const exactToolMatch = text.match(/^(?:Tool|Recommended Tool):\s*(builder|evaluator|journey|copywriter|analyzer|content-dna|profiles)$/i);
                     if (exactToolMatch) {
