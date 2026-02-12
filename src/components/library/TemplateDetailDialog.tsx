@@ -12,11 +12,13 @@ import type { SharedTemplate } from "@/types/library";
 import type { InstitutionalConfig } from "@/types/campusvoice";
 import { JourneyViewer, isJourneyContent, parseJourneyContent } from "./JourneyViewer";
 import { SalesforceCredentialsDialog } from "@/components/SalesforceCredentialsDialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Copy, Download, CheckCircle, AlertTriangle, Users, Lightbulb, ShieldCheck, Edit3, Map, Cloud } from "lucide-react";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { Copy, Download, CheckCircle, AlertTriangle, Users, Lightbulb, ShieldCheck, Edit3, Map, Cloud, Save } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
+import { useSharedLibrary } from "@/hooks/useSharedLibrary";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface TemplateDetailDialogProps {
   template: SharedTemplate;
@@ -58,12 +60,18 @@ const generateMockUsage = (templateId: string) => {
 
 export function TemplateDetailDialog({ template, open, onOpenChange, onPull }: TemplateDetailDialogProps) {
   const { toast } = useToast();
+  const { profile } = useAuth();
   const { getProfile } = useInstitutionalProfiles();
+  const { updateTemplateGuidelines } = useSharedLibrary();
   const [copied, setCopied] = useState(false);
   const [placeholderValues, setPlaceholderValues] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState('template');
   const [profileConfig, setProfileConfig] = useState<InstitutionalConfig | null>(null);
   const [sfmcDialogOpen, setSfmcDialogOpen] = useState(false);
+  const [guidelinesContent, setGuidelinesContent] = useState<string>(template.guidelines || '');
+  const [isSavingGuidelines, setIsSavingGuidelines] = useState(false);
+
+  const isAuthor = useMemo(() => !!(profile && template?.createdByUserId && profile.id === template.createdByUserId), [profile, template]);
 
   // Fetch institutional profile config if the template has one
   useEffect(() => {
@@ -324,15 +332,38 @@ export function TemplateDetailDialog({ template, open, onOpenChange, onPull }: T
             <ScrollArea className="h-[400px]">
               <div className="space-y-4">
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">Usage Guidelines</Label>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="text-sm font-medium">Usage Guidelines</Label>
+                    {isAuthor && (
+                      <Button
+                        size="sm"
+                        disabled={isSavingGuidelines}
+                        onClick={async () => {
+                          setIsSavingGuidelines(true);
+                          const success = await updateTemplateGuidelines(template.id, guidelinesContent);
+                          setIsSavingGuidelines(false);
+                          if (success) {
+                            toast({ title: 'Guidelines saved' });
+                          } else {
+                            toast({ title: 'Failed to save guidelines', variant: 'destructive' });
+                          }
+                        }}
+                      >
+                        <Save className="w-3 h-3 mr-1" />
+                        {isSavingGuidelines ? 'Saving...' : 'Save'}
+                      </Button>
+                    )}
+                  </div>
                   <p className="text-xs text-muted-foreground mb-2">
-                    Notes from the creator on how others in your organization should use this template.
+                    {isAuthor
+                      ? 'Add notes for how others in your organization should use this template.'
+                      : 'Notes from the creator on how to use this template.'}
                   </p>
-                  <Textarea
-                    value={template.guidelines || ''}
-                    readOnly
-                    placeholder="No usage guidelines have been provided yet."
-                    className="min-h-[120px] text-sm"
+                  <RichTextEditor
+                    content={guidelinesContent}
+                    onChange={setGuidelinesContent}
+                    editable={isAuthor}
+                    placeholder="Add usage guidelines, tips, and notes for your team..."
                   />
                 </div>
 
@@ -359,7 +390,7 @@ export function TemplateDetailDialog({ template, open, onOpenChange, onPull }: T
 
                 <div className="text-sm space-y-1">
                   <p className="text-muted-foreground">
-                    <strong>Created by:</strong> {template.createdByName || template.owner || 'Unknown'}
+                    <strong>Created by:</strong> {template.createdByName || 'Unknown'}
                   </p>
                   <p className="text-muted-foreground">
                     <strong>Version:</strong> {template.version}

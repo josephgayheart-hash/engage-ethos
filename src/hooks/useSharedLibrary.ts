@@ -127,6 +127,21 @@ export function useSharedLibrary() {
     return templates.find(t => t.id === id);
   }, [templates]);
 
+  const updateTemplateGuidelines = useCallback(async (id: string, guidelines: string) => {
+    const { error } = await supabase
+      .from('shared_templates')
+      .update({ guidelines } as any)
+      .eq('id', id);
+
+    if (error) {
+      console.error('Failed to update template guidelines:', error);
+      return false;
+    }
+
+    await loadTemplates();
+    return true;
+  }, [loadTemplates]);
+
   const updateTemplateStatus = useCallback(async (id: string, status: LibraryEntryStatus, notes?: string) => {
     const { error } = await supabase
       .from('shared_templates')
@@ -213,6 +228,7 @@ export function useSharedLibrary() {
     getAllTags,
     getTemplateById,
     updateTemplateStatus,
+    updateTemplateGuidelines,
     addTemplate,
     deleteTemplate,
     refreshTemplates: loadTemplates,
