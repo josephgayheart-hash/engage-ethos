@@ -12,6 +12,7 @@ import type { SharedTemplate } from "@/types/library";
 import type { InstitutionalConfig } from "@/types/campusvoice";
 import { JourneyViewer, isJourneyContent, parseJourneyContent } from "./JourneyViewer";
 import { SalesforceCredentialsDialog } from "@/components/SalesforceCredentialsDialog";
+import { Textarea } from "@/components/ui/textarea";
 import { Copy, Download, CheckCircle, AlertTriangle, Users, Lightbulb, ShieldCheck, Edit3, Map, Cloud } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -321,35 +322,49 @@ export function TemplateDetailDialog({ template, open, onOpenChange, onPull }: T
 
           <TabsContent value="guidelines" className="mt-4">
             <ScrollArea className="h-[400px]">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4" />
-                    Ethical Guardrails
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {template.ethicalGuardrails.map((g, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm">
-                        <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                        {g}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Usage Guidelines</Label>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    Notes from the creator on how others in your organization should use this template.
+                  </p>
+                  <Textarea
+                    value={template.guidelines || ''}
+                    readOnly
+                    placeholder="No usage guidelines have been provided yet."
+                    className="min-h-[120px] text-sm"
+                  />
+                </div>
 
-              <div className="mt-4 text-sm">
-                <p className="text-muted-foreground">
-                  <strong>Owner:</strong> {template.owner}
-                </p>
-                <p className="text-muted-foreground">
-                  <strong>Maintainer:</strong> {template.maintainer}
-                </p>
-                <p className="text-muted-foreground">
-                  <strong>Version:</strong> {template.version}
-                </p>
+                {template.ethicalGuardrails && template.ethicalGuardrails.length > 0 && (
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium flex items-center gap-2">
+                        <ShieldCheck className="w-4 h-4" />
+                        Ethical Guardrails
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {template.ethicalGuardrails.map((g, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm">
+                            <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                            {g}
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                )}
+
+                <div className="text-sm space-y-1">
+                  <p className="text-muted-foreground">
+                    <strong>Created by:</strong> {template.createdByName || template.owner || 'Unknown'}
+                  </p>
+                  <p className="text-muted-foreground">
+                    <strong>Version:</strong> {template.version}
+                  </p>
+                </div>
               </div>
             </ScrollArea>
           </TabsContent>

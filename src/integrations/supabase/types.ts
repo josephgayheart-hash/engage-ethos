@@ -1572,6 +1572,7 @@ export type Database = {
           created_by_user_id: string | null
           department_name: string | null
           ethical_guardrails: string[] | null
+          guidelines: string | null
           id: string
           institutional_profile_id: string | null
           intent_statement: string | null
@@ -1601,6 +1602,7 @@ export type Database = {
           created_by_user_id?: string | null
           department_name?: string | null
           ethical_guardrails?: string[] | null
+          guidelines?: string | null
           id?: string
           institutional_profile_id?: string | null
           intent_statement?: string | null
@@ -1630,6 +1632,7 @@ export type Database = {
           created_by_user_id?: string | null
           department_name?: string | null
           ethical_guardrails?: string[] | null
+          guidelines?: string | null
           id?: string
           institutional_profile_id?: string | null
           intent_statement?: string | null
