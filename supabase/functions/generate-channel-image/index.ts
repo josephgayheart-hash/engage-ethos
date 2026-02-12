@@ -112,7 +112,7 @@ serve(async (req) => {
       for (const { data: profile } of results) {
         if (profile?.config) {
           const cfg = profile.config as Record<string, any>;
-          if (cfg.mascot && !brandContext.includes("Mascot")) brandContext += ` Mascot: ${cfg.mascot}.`;
+          // Do NOT include mascot in image prompts — AI can't reliably depict specific mascots
           if (cfg.slogans?.length && !brandContext.includes("Slogan")) brandContext += ` Slogan: "${cfg.slogans[0]}".`;
           if (cfg.institutionName && !brandContext.includes("Full name")) {
             brandContext += ` Full name: ${cfg.institutionName}.`;
@@ -194,7 +194,8 @@ Photography direction — follow the style of real university marketing photogra
 - Brand colors MUST appear on clothing items (t-shirts, hoodies, scarves), campus banners, pennants, or architectural details — use ONLY the exact hex values from the palette above, never approximate or invent new colors
 - Composition: use shallow depth of field, leading lines, rule of thirds — the hallmarks of editorial campus photography
 - Aspect ratio: ${spec.aspect}
-- No text, no words, no letters, no logos, no watermarks
+- No text, no words, no letters, no logos, no watermarks, no mascots, no cartoon characters, no animal mascot costumes or figures
+- Do NOT attempt to depict any school mascot — focus on real people and real campus environments
 - Professional quality: sharp focus on subject, creamy bokeh backgrounds, rich color depth
 - Feel warm, authentic, and aspirational — like a spread in a top university's viewbook
 - Match the tone and energy of the communication moment${toneContext ? ` — the visual should feel ${tone}` : ''}
