@@ -316,19 +316,23 @@ serve(async (req) => {
     };
 
     let brandContext = "";
-    let campusContext = ""; // For location-specific imagery
+    let campusContext = "";
+    let tenantInstitutionName = ""; // fallback only — profile institutionName takes priority
     const brandColors: string[] = [];
     try {
       if (tenantId) {
         const { data: tenant } = await supabaseAdmin
           .from("tenants")
-          .select("institution_name, primary_color, accent_color, logo_url")
+          .select("institution_name, primary_color, accent_color, logo_url, tenant_type")
           .eq("id", tenantId)
           .single();
 
         if (tenant) {
-          brandContext += `Institution: ${tenant.institution_name}.`;
-          campusContext += tenant.institution_name;
+          // For agency tenants, institution_name is the agency name — don't use it for campus context
+          if (tenant.tenant_type !== "agency") {
+            tenantInstitutionName = tenant.institution_name;
+            brandContext += `Institution: ${tenant.institution_name}.`;
+          }
           if (tenant.primary_color) addColor(brandColors, tenant.primary_color);
           if (tenant.accent_color) addColor(brandColors, tenant.accent_color);
         }
@@ -368,9 +372,9 @@ serve(async (req) => {
         }
       }
 
-      // Build campus-specific imagery instruction
-      if (universityName || campusContext) {
-        const schoolName = universityName || campusContext;
+      // Build campus-specific imagery instruction using profile institutionName (not agency tenant name)
+      const schoolName = universityName || tenantInstitutionName;
+      if (schoolName) {
         campusContext = `CAMPUS SETTING: This image should look like it was taken on the campus of ${schoolName}.`;
         campusContext += ` Use your knowledge of ${schoolName}'s real campus to depict recognizable architectural styles, building materials, landscaping, and iconic landmarks or gathering spots that are characteristic of that institution.`;
         campusContext += ` Think about what makes ${schoolName}'s campus visually distinctive — the types of buildings (Gothic, Brutalist, modern glass, red brick, limestone), signature quads, arches, clock towers, stadiums, or natural features.`;
