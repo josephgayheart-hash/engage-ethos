@@ -7,6 +7,7 @@ import {
   Map,
   FolderOpen,
   Sparkles,
+  Image,
   ArrowRight,
   ChevronDown,
 } from "lucide-react";
@@ -42,6 +43,13 @@ const coreActions = [
     href: "/library",
     icon: FolderOpen,
     gradient: "from-secondary/90 to-secondary",
+  },
+  {
+    label: "Image Studio",
+    description: "Generate on-brand campus visuals for social, email, and web channels.",
+    href: "/image-generator",
+    icon: Image,
+    gradient: "from-[hsl(var(--cyber-lime))]/80 to-[hsl(var(--cyber-purple))]/90",
   },
   {
     label: "DNA Studio",
@@ -91,8 +99,8 @@ export function QuickActionsPanel() {
       <div className={cn(
         "grid gap-3 transition-all",
         compact
-          ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
-          : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
+          ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6"
+          : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
       )}>
         {coreActions.map((action) => {
           const Icon = action.icon;
