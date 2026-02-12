@@ -125,18 +125,23 @@ ${cohortContext}
 ${domainContext}
 ${brandContext}
 
-Requirements:
-- This is a ${spec.description}
-- The imagery must directly relate to the content topic — show real-world scenes that match (students, campus, events, academics, etc.)
-- Naturally reflect the diversity of a modern college campus — include people of different races, ethnicities, genders, ages, and abilities in a way that feels authentic and organic, not staged or tokenizing
-- Subtly incorporate the institution's brand colors into the scene through color grading, lighting, clothing, or environmental elements
-- Use a polished, editorial photography style
+Photography direction — follow the style of real university marketing photography (think viewbooks, campaign hero shots, alumni magazines):
+- Capture candid, in-the-moment scenes: a student laughing mid-conversation on a quad, a professor gesturing at a whiteboard with 2-3 engaged students, a lone student studying under a tree, a small group collaborating around a laptop in a modern library
+- NEVER show people standing in a line, holding hands, linking arms, or posing symmetrically — these look artificial
+- NEVER generate twins, duplicates, or people who look identical — every person should be visually distinct
+- Vary body language, posture, and gaze direction — people should look naturally occupied, not aware of the camera
+- Show authentic campus environments: brick pathways, green lawns, modern labs, lecture halls, coffee shops, residence halls, athletic facilities
+- Use natural light — golden hour warmth, dappled shade under trees, soft overcast — avoid flat studio lighting
+- Include environmental storytelling: backpacks, laptops, coffee cups, notebooks, lab equipment, sports gear
+- People should be diverse in a way that feels organic to a real campus — different backgrounds, ages, body types, clothing styles — without appearing curated or posed as a diversity photo
+- Subtly incorporate the institution's brand colors through environmental elements (banners, architecture, clothing accents) rather than artificial color grading
+- Composition: use shallow depth of field, leading lines, rule of thirds — the hallmarks of editorial campus photography
 - Aspect ratio: ${spec.aspect}
 - No text, no words, no letters, no logos, no watermarks
-- Professional quality suitable for institutional marketing
-- Feel warm, authentic, and aspirational — like a top university marketing campaign
+- Professional quality: sharp focus on subject, creamy bokeh backgrounds, rich color depth
+- Feel warm, authentic, and aspirational — like a spread in a top university's viewbook
 - Match the tone and energy of the communication moment${toneContext ? ` — the visual should feel ${tone}` : ''}
-- Imagery should resonate with the target audience${audienceContext ? ` (${audience})` : ''} and reflect their experience`;
+- Imagery should resonate with the target audience${audienceContext ? ` (${audience})` : ''} and reflect their lived experience on campus`;
 
     console.log("Generating channel image for:", channel, "content:", contentSummary.substring(0, 100));
 
