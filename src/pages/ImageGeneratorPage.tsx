@@ -14,11 +14,32 @@ import { ChannelMockup } from "@/components/image-generator/ChannelMockup";
 import { toast } from "sonner";
 
 const channelOptions = [
+  // Social
+  { value: "_social", label: "── Social ──", disabled: true },
   { value: "social-media", label: "Social Media Post (1:1)" },
   { value: "digital-ad-social", label: "Social Ad (1:1)" },
+  { value: "story", label: "Story — IG / FB / Snapchat (9:16)" },
+  // Digital
+  { value: "_digital", label: "── Digital ──", disabled: true },
   { value: "email", label: "Email Header (16:9)" },
   { value: "landing-page", label: "Landing Page Hero (16:9)" },
-  { value: "direct-mail", label: "Direct Mail (4:3)" },
+  { value: "web-banner", label: "Web Banner (3:1)" },
+  { value: "digital-signage", label: "Digital Signage (16:9)" },
+  { value: "youtube-thumbnail", label: "YouTube Thumbnail (16:9)" },
+  { value: "linkedin-banner", label: "LinkedIn Banner (4:1)" },
+  { value: "facebook-cover", label: "Facebook Cover (2.63:1)" },
+  { value: "portal-banner", label: "Portal / App Banner (3:1)" },
+  { value: "presentation-slide", label: "Presentation Slide (16:9)" },
+  // Print
+  { value: "_print", label: "── Print ──", disabled: true },
+  { value: "direct-mail", label: "Direct Mail Postcard (4:3)" },
+  { value: "event-flyer", label: "Event Flyer / Poster (4:5)" },
+  { value: "print-ad", label: "Print Ad (8.5×11)" },
+  { value: "viewbook", label: "Viewbook / Brochure (4:3)" },
+  { value: "donor-report", label: "Donor / Annual Report (8.5×11)" },
+  // Messaging
+  { value: "_messaging", label: "── Messaging ──", disabled: true },
+  { value: "mms", label: "MMS / Text Message (1:1)" },
   { value: "news-article", label: "News Article Featured (16:9)" },
 ];
 
@@ -170,9 +191,15 @@ const ImageGeneratorPage = () => {
                     <Select value={channel} onValueChange={setChannel}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        {channelOptions.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                        ))}
+                        {channelOptions.map((opt) =>
+                          (opt as any).disabled ? (
+                            <div key={opt.value} className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider select-none">
+                              {opt.label.replace(/─/g, '').trim()}
+                            </div>
+                          ) : (
+                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                          )
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
