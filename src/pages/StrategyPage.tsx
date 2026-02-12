@@ -1305,6 +1305,7 @@ const StrategyPage = () => {
                 journeyWeeks,
                 primaryColor: institutionalConfig?.primaryColor || undefined,
                 accentColor: institutionalConfig?.accentColor || undefined,
+                logoUrl: institutionalConfig?.logoUrl || undefined,
                 dnaStats: useContentDNA && contentDNA ? {
                   overallTone: contentDNA.voiceAnalysis?.overallTone,
                   formalityLevel: contentDNA.voiceAnalysis?.formalityLevel,
