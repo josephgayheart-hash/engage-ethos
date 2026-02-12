@@ -439,7 +439,16 @@ const SharedLibrary = () => {
                           onClick={() => handleCardClick(template.id)}
                         >
                           <TableCell>
-                            <span className="font-medium truncate max-w-[200px] block">{template.title}</span>
+                            <div className="flex items-center gap-2">
+                              {template.coverImageUrl && (
+                                <img
+                                  src={template.coverImageUrl}
+                                  alt=""
+                                  className="w-8 h-8 rounded object-cover shrink-0"
+                                />
+                              )}
+                              <span className="font-medium truncate max-w-[200px] block">{template.title}</span>
+                            </div>
                           </TableCell>
                           <TableCell>
                             <SourceBadge source={template.source} />
@@ -464,10 +473,20 @@ const SharedLibrary = () => {
                   {filteredTemplates.map((template) => (
                     <Card 
                       key={template.id} 
-                      className="card-elevated cursor-pointer hover:border-primary/50 transition-all hover:shadow-md group"
+                      className="card-elevated cursor-pointer hover:border-primary/50 transition-all hover:shadow-md group overflow-hidden"
                       onClick={() => handleCardClick(template.id)}
                     >
-                      <CardContent className="pt-6">
+                      {/* AI-generated cover image */}
+                      {template.coverImageUrl && (
+                        <div className="h-32 w-full overflow-hidden bg-muted">
+                          <img
+                            src={template.coverImageUrl}
+                            alt={template.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        </div>
+                      )}
+                      <CardContent className={template.coverImageUrl ? "pt-4" : "pt-6"}>
                         <div className="flex items-start justify-between gap-4 mb-3">
                           <h3 className="font-serif font-semibold text-foreground">
                             {template.title}

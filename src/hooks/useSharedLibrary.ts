@@ -58,6 +58,7 @@ export function useSharedLibrary() {
         createdByUserId: row.created_by_user_id || undefined,
         createdByName: (row as any).created_by_name || undefined,
         externalAssets: ((row as any).external_assets as any[]) || [],
+        coverImageUrl: (row as any).cover_image_url || undefined,
       }));
 
       setTemplates(mapped);
@@ -203,6 +204,25 @@ export function useSharedLibrary() {
 
     trackToolUse('university_library', 'submit', { status: template.status });
     await loadTemplates();
+
+    // Fire-and-forget: generate AI cover image in the background
+    if (data?.id) {
+      supabase.functions.invoke('generate-cover-image', {
+        body: {
+          messageId: data.id,
+          tableName: 'shared_templates',
+          title: template.title,
+          audience: template.requiredFields?.audience?.[0],
+          channels: template.requiredFields?.channel,
+          mode: template.source === 'journey' ? 'journey' : 'builder',
+          tenantId: profile.tenant_id,
+          profileId: template.institutionalProfileId,
+        },
+      }).then(() => {
+        loadTemplates();
+      }).catch(err => console.warn('Cover image generation failed:', err));
+    }
+
     return data;
   }, [profile, loadTemplates, trackToolUse]);
 

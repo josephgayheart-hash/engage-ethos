@@ -15,6 +15,7 @@ export interface UserDraft {
   draft_data: Json;
   created_at: string;
   updated_at: string;
+  cover_image_url?: string | null;
 }
 
 export function useUserDrafts(draftType?: DraftType) {
@@ -113,6 +114,26 @@ export function useUserDrafts(draftType?: DraftType) {
         if (!silent) {
           await fetchDrafts();
         }
+
+        // Fire-and-forget: generate cover image for new drafts
+        if (draft.id && title) {
+          const contextData = data?.context as Record<string, unknown> | undefined;
+          supabase.functions.invoke('generate-cover-image', {
+            body: {
+              draftId: draft.id,
+              title: title,
+              audience: contextData?.audience,
+              moment: contextData?.moment,
+              channels: data?.selectedChannels,
+              mode: type === 'journey' ? 'journey' : 'builder',
+              tenantId: tenantId,
+              profileId: data?.selectedProfileId,
+            },
+          }).then(() => {
+            if (!silent) fetchDrafts();
+          }).catch(err => console.warn('Draft cover image generation failed:', err));
+        }
+
         return draft;
       }
     } catch (error) {

@@ -1,0 +1,1 @@
+ALTER TABLE public.shared_templates ADD COLUMN cover_image_url text;
