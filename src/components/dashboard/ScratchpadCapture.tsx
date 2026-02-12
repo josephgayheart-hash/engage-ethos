@@ -396,12 +396,13 @@ export function ScratchpadCapture() {
                     const text = String(children).trim();
                     const lower = text.toLowerCase().replace(/[:\s]+$/, "");
 
-                    // Match tool names (exact or as part of "Tool: xxx")
+                    // Match tool names — exact key, label, or common variations
                     for (const [key, route] of Object.entries(toolRoutes)) {
-                      if (lower === key || lower === route.label.toLowerCase()) {
+                      const labelLower = route.label.toLowerCase();
+                      if (lower === key || lower === labelLower || lower.includes(key) || lower.includes(labelLower) || labelLower.includes(lower)) {
                         const ToolIcon = route.icon;
                         return (
-                          <Link to={route.path} className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-xs hover:bg-primary/20 hover:shadow-sm transition-all align-middle border border-primary/15">
+                          <Link to={route.path} className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-xs hover:bg-primary/20 hover:shadow-sm transition-all align-middle border border-primary/15">
                             <ToolIcon className="h-3 w-3" />
                             {route.label}
                           </Link>
@@ -414,7 +415,7 @@ export function ScratchpadCapture() {
                       return <span className="text-primary font-bold text-xs uppercase tracking-wide">{children}</span>;
                     }
                     if (/^Why$/i.test(lower)) {
-                      return <span className="text-accent-foreground font-bold text-xs uppercase tracking-wide">{children}</span>;
+                      return <span className="text-accent font-semibold text-xs uppercase tracking-wide">{children}</span>;
                     }
 
                     // Field labels like "Audience:", "Goal:", etc.
@@ -434,7 +435,7 @@ export function ScratchpadCapture() {
                         return (
                           <li className="flex items-start gap-2.5 text-sm text-foreground/90 list-none py-1 pl-1">
                             <div className="h-5 w-5 rounded-md bg-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                              <IconComp className="h-3 w-3 text-accent-foreground" />
+                              <IconComp className="h-3 w-3 text-accent" />
                             </div>
                             <span className="leading-relaxed">{children}</span>
                           </li>
@@ -501,7 +502,7 @@ export function ScratchpadCapture() {
                               {route.label}
                             </Link>
                             {whyMatch ? (
-                              <span className="block w-full mt-1 text-muted-foreground text-xs italic pl-0.5">{whyMatch[1]}</span>
+                              <span className="block w-full mt-1 text-accent text-xs italic pl-0.5">{whyMatch[1]}</span>
                             ) : after.trim() ? (
                               <span>{after}</span>
                             ) : null}
