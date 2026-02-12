@@ -921,6 +921,124 @@ export type Database = {
           },
         ]
       }
+      library_collection_items: {
+        Row: {
+          added_at: string
+          added_by: string | null
+          collection_id: string
+          external_asset: Json | null
+          id: string
+          item_type: string
+          message_id: string | null
+          sort_order: number | null
+          template_id: string | null
+          tenant_id: string
+        }
+        Insert: {
+          added_at?: string
+          added_by?: string | null
+          collection_id: string
+          external_asset?: Json | null
+          id?: string
+          item_type: string
+          message_id?: string | null
+          sort_order?: number | null
+          template_id?: string | null
+          tenant_id: string
+        }
+        Update: {
+          added_at?: string
+          added_by?: string | null
+          collection_id?: string
+          external_asset?: Json | null
+          id?: string
+          item_type?: string
+          message_id?: string | null
+          sort_order?: number | null
+          template_id?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_collection_items_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "library_collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_collection_items_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "personal_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_collection_items_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "shared_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_collection_items_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      library_collections: {
+        Row: {
+          collection_type: string
+          cover_image_url: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          name: string
+          status: string
+          tags: string[] | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          collection_type?: string
+          cover_image_url?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          name: string
+          status?: string
+          tags?: string[] | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          collection_type?: string
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          name?: string
+          status?: string
+          tags?: string[] | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_collections_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       library_usage_events: {
         Row: {
           action: string
@@ -1106,6 +1224,7 @@ export type Database = {
           created_at: string
           created_by_name: string | null
           domain: string | null
+          external_assets: Json | null
           goal: string | null
           id: string
           institutional_profile_id: string | null
@@ -1137,6 +1256,7 @@ export type Database = {
           created_at?: string
           created_by_name?: string | null
           domain?: string | null
+          external_assets?: Json | null
           goal?: string | null
           id?: string
           institutional_profile_id?: string | null
@@ -1168,6 +1288,7 @@ export type Database = {
           created_at?: string
           created_by_name?: string | null
           domain?: string | null
+          external_assets?: Json | null
           goal?: string | null
           id?: string
           institutional_profile_id?: string | null
@@ -1572,6 +1693,7 @@ export type Database = {
           created_by_user_id: string | null
           department_name: string | null
           ethical_guardrails: string[] | null
+          external_assets: Json | null
           guidelines: string | null
           id: string
           institutional_profile_id: string | null
@@ -1602,6 +1724,7 @@ export type Database = {
           created_by_user_id?: string | null
           department_name?: string | null
           ethical_guardrails?: string[] | null
+          external_assets?: Json | null
           guidelines?: string | null
           id?: string
           institutional_profile_id?: string | null
@@ -1632,6 +1755,7 @@ export type Database = {
           created_by_user_id?: string | null
           department_name?: string | null
           ethical_guardrails?: string[] | null
+          external_assets?: Json | null
           guidelines?: string | null
           id?: string
           institutional_profile_id?: string | null

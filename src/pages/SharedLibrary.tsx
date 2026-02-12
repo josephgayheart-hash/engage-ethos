@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { WaveBackground } from "@/components/WaveBackground";
 import { Button } from "@/components/ui/button";
+import { useLibraryCollections } from "@/hooks/useLibraryCollections";
+import { CollectionCard } from "@/components/library/CollectionCard";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -41,7 +43,9 @@ import {
   Pencil,
   ClipboardCheck,
   LayoutGrid,
-  List
+  List,
+  Folder,
+  Plus
 } from "lucide-react";
 
 const statusConfig: Record<LibraryEntryStatus, { label: string; icon: typeof CheckCircle; variant: 'default' | 'secondary' | 'outline' }> = {
@@ -59,11 +63,13 @@ const SharedLibrary = () => {
   const { templates, filterTemplates, getPlaybooks, getAllTags, addTemplate, updateTemplateStatus } = useSharedLibrary();
   const { addMessage } = useMessageLibrary();
   const { getProfileHierarchy } = useInstitutionalProfiles();
+  const { collections } = useLibraryCollections();
   const [filters, setFilters] = useState<LibraryFilters>({ search: '' });
   const [createOpen, setCreateOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
   const [adminViewMode, setAdminViewMode] = useState<'browse' | 'admin'>('browse');
+  const [topLevelTab, setTopLevelTab] = useState<'playbooks' | 'collections'>('playbooks');
   
   // View mode state (persisted in localStorage)
   const [viewMode, setViewMode] = useState<'card' | 'list'>(() => {
@@ -291,6 +297,50 @@ const SharedLibrary = () => {
                 </CardContent>
               </Card>
 
+              {/* Top-level Playbooks / Collections toggle */}
+              <Tabs value={topLevelTab} onValueChange={(v) => setTopLevelTab(v as any)} className="mb-6">
+                <TabsList>
+                  <TabsTrigger value="playbooks" className="flex items-center gap-1">
+                    <BookOpen className="w-4 h-4" />
+                    Playbooks
+                  </TabsTrigger>
+                  <TabsTrigger value="collections" className="flex items-center gap-1">
+                    <Folder className="w-4 h-4" />
+                    Collections
+                    {collections.length > 0 && (
+                      <Badge variant="secondary" className="ml-1 text-[10px]">{collections.length}</Badge>
+                    )}
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+
+              {topLevelTab === 'collections' ? (
+                /* Collections View */
+                <div>
+                  {collections.length === 0 ? (
+                    <Card className="text-center py-12">
+                      <CardContent>
+                        <Folder className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                        <h3 className="font-serif text-lg font-semibold mb-2">No collections yet</h3>
+                        <p className="text-muted-foreground mb-4">
+                          Group playbooks, messages, and creative assets by campaign, initiative, or program.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {collections.map(collection => (
+                        <CollectionCard
+                          key={collection.id}
+                          collection={collection}
+                          onClick={() => navigate(`/collections/${collection.id}`)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+              <>
               {/* Playbook Tabs */}
               <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
                 <TabsList className="flex-wrap h-auto gap-1 p-1">
@@ -477,6 +527,8 @@ const SharedLibrary = () => {
                   ))}
                 </div>
               )}
+            </>
+            )}
             </>
           )}
         </div>

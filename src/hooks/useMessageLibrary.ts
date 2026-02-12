@@ -63,6 +63,7 @@ export function useMessageLibrary() {
         createdByUserId: row.user_id,
         createdByName: (row as any).created_by_name || undefined,
         remixedFrom: (row as any).remixed_from as any,
+        externalAssets: ((row as any).external_assets as any[]) || [],
       }));
 
       setMessages(mapped);

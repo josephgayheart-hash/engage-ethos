@@ -43,6 +43,8 @@ export interface SavedMessage {
   createdByName?: string;
   // Tags for organization
   tags?: string[];
+  // Linked external assets
+  externalAssets?: ExternalAsset[];
 }
 
 export interface MessageVersion {
@@ -90,6 +92,8 @@ export interface SharedTemplate {
   // Creator information
   createdByUserId?: string;
   createdByName?: string;
+  // Linked external assets
+  externalAssets?: ExternalAsset[];
 }
 
 export interface TemplatePlaceholder {
@@ -127,3 +131,47 @@ export interface LibraryFilters {
 }
 
 export type SortOption = 'newest' | 'oldest' | 'most-used' | 'recently-viewed';
+
+// External asset linked from Canva, DAMs, Google Drive, etc.
+export type AssetPlatform = 'canva' | 'brandfolder' | 'bynder' | 'google-drive' | 'figma' | 'dropbox' | 'other';
+
+export interface ExternalAsset {
+  id: string;
+  label: string;
+  url: string;
+  type: AssetPlatform;
+  thumbnail_url?: string;
+  notes?: string;
+}
+
+// Collection types
+export type CollectionType = 'campaign' | 'initiative' | 'program' | 'custom';
+export type CollectionStatus = 'active' | 'archived';
+
+export interface LibraryCollection {
+  id: string;
+  tenantId: string;
+  createdBy: string;
+  name: string;
+  description?: string;
+  collectionType: CollectionType;
+  coverImageUrl?: string;
+  tags: string[];
+  status: CollectionStatus;
+  createdAt: string;
+  updatedAt: string;
+  itemCount?: number;
+}
+
+export interface CollectionItem {
+  id: string;
+  collectionId: string;
+  tenantId: string;
+  itemType: 'template' | 'message' | 'external_asset';
+  templateId?: string;
+  messageId?: string;
+  externalAsset?: ExternalAsset;
+  sortOrder: number;
+  addedBy?: string;
+  addedAt: string;
+}

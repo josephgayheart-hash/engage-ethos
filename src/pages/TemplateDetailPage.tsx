@@ -19,8 +19,12 @@ import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { JourneyViewer, isJourneyContent, parseJourneyContent } from "@/components/library/JourneyViewer";
 import { ChannelPreview } from "@/components/ChannelPreview";
 import { openInGoogleDocs, formatForGoogleDocs } from "@/lib/googleDocsExport";
-import type { LibraryEntryStatus } from "@/types/library";
+import type { LibraryEntryStatus, ExternalAsset } from "@/types/library";
 import type { InstitutionalConfig, Channel, ChannelDrafts } from "@/types/campusvoice";
+import { useLibraryCollections } from "@/hooks/useLibraryCollections";
+import { AddToCollectionDialog } from "@/components/library/AddToCollectionDialog";
+import { AssetCard } from "@/components/library/AssetCard";
+import { AssetLinkForm } from "@/components/library/AssetLinkForm";
 import { useAuth } from "@/contexts/AuthContext";
 import { 
   ChevronRight, 
@@ -46,7 +50,10 @@ import {
   Pencil,
   X,
   Save,
-  Trash2
+  Trash2,
+  Folder,
+  Image,
+  Plus
 } from "lucide-react";
 import {
   AlertDialog,
@@ -197,6 +204,7 @@ const TemplateDetailPage = () => {
   const { templates, getTemplateById, deleteTemplate, updateTemplateGuidelines } = useSharedLibrary();
   const { addMessage } = useMessageLibrary();
   const { getProfile } = useInstitutionalProfiles();
+  const { collections, addItemToCollection, createCollection } = useLibraryCollections();
   const [copied, setCopied] = useState(false);
   const [placeholderValues, setPlaceholderValues] = useState<Record<string, string>>({});
   const journeyContentRef = useRef<HTMLDivElement>(null);
@@ -206,6 +214,8 @@ const TemplateDetailPage = () => {
   const [usageHistory, setUsageHistory] = useState<Array<{ id: string; userName: string; action: string; date: string }>>([]);
   const [guidelinesContent, setGuidelinesContent] = useState<string>('');
   const [isSavingGuidelines, setIsSavingGuidelines] = useState(false);
+  const [showCollectionDialog, setShowCollectionDialog] = useState(false);
+  const [showAssetForm, setShowAssetForm] = useState(false);
 
   const template = getTemplateById(id || '');
   const isJourney = useMemo(() => template ? isJourneyContent(template.content) : false, [template]);
@@ -510,6 +520,10 @@ const TemplateDetailPage = () => {
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
+                      <Button onClick={() => setShowCollectionDialog(true)} variant="outline" size="sm">
+                        <Folder className="w-4 h-4 mr-2" />
+                        Add to Collection
+                      </Button>
                       <Button onClick={handleRemix} variant="secondary" size="sm">
                         <GitBranch className="w-4 h-4 mr-2" />
                         Remix
@@ -555,6 +569,10 @@ const TemplateDetailPage = () => {
               <TabsTrigger value="usage" className="flex items-center gap-1">
                 <Users className="w-3 h-3 mr-1.5" />
                 Usage ({usageHistory.length})
+              </TabsTrigger>
+              <TabsTrigger value="assets" className="flex items-center gap-1">
+                <Image className="w-3 h-3 mr-1.5" />
+                Assets ({template.externalAssets?.length || 0})
               </TabsTrigger>
             </TabsList>
 
@@ -832,9 +850,86 @@ const TemplateDetailPage = () => {
                 </CardContent>
               </Card>
             </TabsContent>
+
+            {/* Assets Tab */}
+            <TabsContent value="assets" className="space-y-4">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <Image className="w-4 h-4" />
+                      Linked Assets
+                    </h3>
+                    {isAuthor && (
+                      <Button variant="outline" size="sm" onClick={() => setShowAssetForm(!showAssetForm)}>
+                        <Plus className="w-4 h-4 mr-1" />
+                        Link Asset
+                      </Button>
+                    )}
+                  </div>
+
+                  {showAssetForm && isAuthor && (
+                    <div className="mb-4">
+                      <AssetLinkForm
+                        onAdd={async (asset) => {
+                          // Save to template's external_assets via supabase
+                          const { supabase } = await import('@/integrations/supabase/client');
+                          const existing = template.externalAssets || [];
+                          const updated = [...existing, asset];
+                          await supabase
+                            .from('shared_templates')
+                            .update({ external_assets: updated as any })
+                            .eq('id', template.id);
+                          toast({ title: 'Asset linked', description: `${asset.label} added to this playbook.` });
+                          setShowAssetForm(false);
+                          // Refresh will happen on next load
+                          window.location.reload();
+                        }}
+                        onCancel={() => setShowAssetForm(false)}
+                      />
+                    </div>
+                  )}
+
+                  {(!template.externalAssets || template.externalAssets.length === 0) && !showAssetForm ? (
+                    <div className="text-center py-8">
+                      <Image className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+                      <p className="text-sm text-muted-foreground">No assets linked to this playbook yet.</p>
+                      {isAuthor && (
+                        <p className="text-xs text-muted-foreground mt-1">Link Canva designs, Figma files, or other creative assets.</p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                      {(template.externalAssets || []).map(asset => (
+                        <AssetCard key={asset.id} asset={asset} />
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
           </Tabs>
         </div>
       </main>
+      {/* Add to Collection Dialog */}
+      <AddToCollectionDialog
+        open={showCollectionDialog}
+        onOpenChange={setShowCollectionDialog}
+        collections={collections}
+        onAddToExisting={async (collectionId) => {
+          if (!id) return;
+          const success = await addItemToCollection(collectionId, { itemType: 'template', templateId: id });
+          if (success) toast({ title: 'Added to collection' });
+        }}
+        onCreateAndAdd={async (input) => {
+          if (!id) return;
+          const newCollection = await createCollection(input);
+          if (newCollection) {
+            await addItemToCollection((newCollection as any).id, { itemType: 'template', templateId: id });
+            toast({ title: 'Collection created and item added' });
+          }
+        }}
+      />
     </div>
   );
 };
