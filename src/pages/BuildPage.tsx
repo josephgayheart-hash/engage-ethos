@@ -1102,6 +1102,27 @@ const BuildPage = () => {
                 channels: selectedChannels,
                 primaryColor: institutionalConfig?.primaryColor || tenant?.primary_color || undefined,
                 accentColor: institutionalConfig?.accentColor || tenant?.accent_color || undefined,
+                dnaStats: useContentDNA && contentDNA ? {
+                  overallTone: contentDNA.voiceAnalysis?.overallTone,
+                  formalityLevel: contentDNA.voiceAnalysis?.formalityLevel,
+                  sentenceStyle: contentDNA.voiceAnalysis?.sentenceStyle,
+                  emotionalTone: contentDNA.voiceAnalysis?.emotionalTone,
+                  keyCharacteristics: contentDNA.voiceAnalysis?.keyCharacteristics,
+                  vocabularyPatterns: contentDNA.voiceAnalysis?.vocabularyPatterns,
+                  commonPhrases: contentDNA.voiceAnalysis?.commonPhrases,
+                  customInstructions: !!contentDNA.customInstructions,
+                  adjustmentCount: contentDNA.dnaAdjustments ? (
+                    (contentDNA.dnaAdjustments.dimensions?.length || 0) +
+                    (contentDNA.dnaAdjustments.sectionFeedback?.length || 0) +
+                    (contentDNA.dnaAdjustments.overrideRules?.length || 0)
+                  ) : 0,
+                } : undefined,
+                profileStats: institutionalConfig ? {
+                  institutionType: institutionalConfig.institutionType,
+                  tagline: institutionalConfig.slogans?.[0],
+                  leadershipName: institutionalConfig.presidentName || institutionalConfig.deanName || institutionalConfig.directorName,
+                  leadershipTitle: institutionalConfig.presidentTitle || institutionalConfig.deanTitle || institutionalConfig.directorTitle,
+                } : undefined,
               }}
             />
           )}
