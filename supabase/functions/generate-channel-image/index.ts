@@ -68,8 +68,9 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Fetch institutional branding
+    // Fetch institutional branding — build strict color palette
     let brandContext = "";
+    const brandColors: string[] = [];
     try {
       if (tenantId) {
         const { data: tenant } = await supabaseAdmin
@@ -80,8 +81,8 @@ serve(async (req) => {
 
         if (tenant) {
           brandContext += `Institution: ${tenant.institution_name}.`;
-          if (tenant.primary_color) brandContext += ` Primary brand color: ${tenant.primary_color}.`;
-          if (tenant.accent_color) brandContext += ` Accent brand color: ${tenant.accent_color}.`;
+          if (tenant.primary_color) brandColors.push(tenant.primary_color);
+          if (tenant.accent_color) brandColors.push(tenant.accent_color);
         }
       }
 
@@ -98,13 +99,20 @@ serve(async (req) => {
           if (cfg.mascot) brandContext += ` Mascot: ${cfg.mascot}.`;
           if (cfg.slogans?.length) brandContext += ` Slogan: "${cfg.slogans[0]}".`;
           if (cfg.institutionName) brandContext += ` Full name: ${cfg.institutionName}.`;
-          if (cfg.primaryColor) brandContext += ` Profile primary: ${cfg.primaryColor}.`;
-          if (cfg.accentColor) brandContext += ` Profile accent: ${cfg.accentColor}.`;
+          // Collect all profile colors into the palette
+          if (cfg.primaryColor && !brandColors.includes(cfg.primaryColor)) brandColors.push(cfg.primaryColor);
+          if (cfg.secondaryColor && !brandColors.includes(cfg.secondaryColor)) brandColors.push(cfg.secondaryColor);
+          if (cfg.accentColor && !brandColors.includes(cfg.accentColor)) brandColors.push(cfg.accentColor);
+          if (cfg.tertiaryColor && !brandColors.includes(cfg.tertiaryColor)) brandColors.push(cfg.tertiaryColor);
         }
       }
     } catch (e) {
       console.warn("Could not fetch branding:", e);
     }
+
+    const colorPaletteInstruction = brandColors.length > 0
+      ? `STRICT COLOR PALETTE — use ONLY these exact hex colors for all branded elements (shirts, banners, flags, scarves, pennants, building accents, signage, clothing): ${brandColors.join(", ")}. Do NOT invent, approximate, or deviate from these colors. Pick from this palette when coloring any clothing, accessories, or environmental branding elements.`
+      : "Use neutral, warm tones appropriate for higher education marketing.";
 
     const spec = channelSpecs[channel] || channelSpecs["social-media"];
     const audienceContext = audience ? `Target audience: ${audience}.` : "";
@@ -125,6 +133,8 @@ ${cohortContext}
 ${domainContext}
 ${brandContext}
 
+${colorPaletteInstruction}
+
 Photography direction — follow the style of real university marketing photography (think viewbooks, campaign hero shots, alumni magazines):
 - Capture candid, in-the-moment scenes: a student laughing mid-conversation on a quad, a professor gesturing at a whiteboard with 2-3 engaged students, a lone student studying under a tree, a small group collaborating around a laptop in a modern library
 - NEVER show people standing in a line, holding hands, linking arms, or posing symmetrically — these look artificial
@@ -134,7 +144,7 @@ Photography direction — follow the style of real university marketing photogra
 - Use natural light — golden hour warmth, dappled shade under trees, soft overcast — avoid flat studio lighting
 - Include environmental storytelling: backpacks, laptops, coffee cups, notebooks, lab equipment, sports gear
 - People should be diverse in a way that feels organic to a real campus — different backgrounds, ages, body types, clothing styles — without appearing curated or posed as a diversity photo
-- Subtly incorporate the institution's brand colors through environmental elements (banners, architecture, clothing accents) rather than artificial color grading
+- Brand colors MUST appear on clothing items (t-shirts, hoodies, scarves), campus banners, pennants, or architectural details — use ONLY the exact hex values from the palette above, never approximate or invent new colors
 - Composition: use shallow depth of field, leading lines, rule of thirds — the hallmarks of editorial campus photography
 - Aspect ratio: ${spec.aspect}
 - No text, no words, no letters, no logos, no watermarks
