@@ -261,88 +261,96 @@ export function ScratchpadCapture() {
   if (!profile) return null;
 
   return (
-    <Card className="relative overflow-hidden border-border/60 bg-card shadow-md transition-all duration-300">
-      {/* Subtle top accent gradient */}
-      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-accent to-secondary opacity-80" />
+    <div className="space-y-3">
+      {/* Prompt box — modern floating AI input style */}
+      <div className="relative rounded-2xl border border-border/60 bg-card shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-primary/20">
+        {/* Subtle top accent line */}
+        <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-primary/60 via-accent/40 to-secondary/60" />
 
-      <CardContent className="p-4 pt-5 space-y-3">
-        {/* Header row */}
-        <div className="flex items-center justify-between">
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center gap-2 text-sm font-semibold text-foreground hover:text-primary transition-colors"
-          >
-            <Sparkles className="h-4 w-4 text-secondary" />
-            <span>Quick Brief</span>
-            {isExpanded ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-          </button>
-
-          {rawText.length > 0 && (
+        <div className="p-3 pt-3.5">
+          {/* Header row */}
+          <div className="flex items-center justify-between mb-2">
             <button
-              onClick={handleClear}
-              className="text-xs text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="flex items-center gap-2 text-sm font-semibold text-foreground hover:text-primary transition-colors"
             >
-              <X className="h-3 w-3" /> Clear
-            </button>
-          )}
-        </div>
-
-        {/* Collapsed: single-line input */}
-        {!isExpanded && (
-          <div
-            className="cursor-text rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-muted-foreground hover:border-primary/40 transition-colors"
-            onClick={() => setIsExpanded(true)}
-          >
-            {rawText || "Drop your meeting notes, talking points, or rough ideas here..."}
-          </div>
-        )}
-
-        {/* Expanded: textarea + actions */}
-        {isExpanded && (
-          <div className="space-y-3 animate-in fade-in-0 slide-in-from-top-2 duration-200">
-            <Textarea
-              value={rawText}
-              onChange={(e) => handleTextChange(e.target.value)}
-              placeholder="Drop your meeting notes, talking points, or rough ideas here... e.g. 'Need to reach admitted students who haven't enrolled. Dean wants a 3-touch sequence by next week. Financial aid angle might work.'"
-              className="min-h-[100px] resize-none border-border/60 bg-background/50 text-sm leading-relaxed focus:border-primary/50 transition-colors"
-              autoFocus
-            />
-
-            {/* Live intent hint */}
-            {(classifyResult || isClassifying) && (
-              <div className="flex items-center gap-2 animate-in fade-in-0 duration-300">
-                {isClassifying ? (
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    <span>Reading your notes...</span>
-                  </div>
-                ) : classifyResult ? (
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <HintIcon className="h-3.5 w-3.5 text-accent" />
-                    <span className="italic">{classifyResult.hint_text}</span>
-                  </div>
-                ) : null}
+              <div className="h-6 w-6 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
               </div>
-            )}
+              <span>Quick Brief</span>
+              {isExpanded ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+            </button>
 
-            {/* Action row */}
-            <div className="flex items-center justify-end gap-2">
-              <Button
-                onClick={handleOrganize}
-                disabled={isOrganizing || rawText.trim().length < 10}
-                size="sm"
-                className="gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground"
+            {rawText.length > 0 && (
+              <button
+                onClick={handleClear}
+                className="text-xs text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1"
               >
-                {isOrganizing ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Sparkles className="h-3.5 w-3.5" />
-                )}
-                Organize My Thoughts
-              </Button>
-            </div>
+                <X className="h-3 w-3" /> Clear
+              </button>
+            )}
           </div>
-        )}
+
+          {/* Collapsed: clickable placeholder */}
+          {!isExpanded && (
+            <div
+              className="cursor-text rounded-xl bg-muted/40 px-4 py-3 text-sm text-muted-foreground hover:bg-muted/60 transition-colors"
+              onClick={() => setIsExpanded(true)}
+            >
+              {rawText || "Drop your notes, talking points, or rough ideas here..."}
+            </div>
+          )}
+
+          {/* Expanded: textarea with inline send */}
+          {isExpanded && (
+            <div className="animate-in fade-in-0 slide-in-from-top-1 duration-200">
+              <div className="relative rounded-xl bg-muted/30 border border-border/40 focus-within:border-primary/40 focus-within:bg-muted/20 transition-all">
+                <Textarea
+                  value={rawText}
+                  onChange={(e) => handleTextChange(e.target.value)}
+                  placeholder="Drop your notes, talking points, or rough ideas here... e.g. 'Need to reach admitted students who haven't enrolled. Dean wants a 3-touch sequence by next week.'"
+                  className="min-h-[80px] max-h-[160px] resize-none border-0 bg-transparent text-sm leading-relaxed focus-visible:ring-0 focus-visible:ring-offset-0 pb-12"
+                  autoFocus
+                />
+                {/* Bottom bar inside the textarea container */}
+                <div className="absolute bottom-0 inset-x-0 flex items-center justify-between px-3 py-2">
+                  {/* Live intent hint */}
+                  <div className="flex-1 min-w-0">
+                    {isClassifying ? (
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        <span>Reading...</span>
+                      </div>
+                    ) : classifyResult ? (
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground truncate">
+                        <HintIcon className="h-3 w-3 text-accent flex-shrink-0" />
+                        <span className="italic truncate">{classifyResult.hint_text}</span>
+                      </div>
+                    ) : null}
+                  </div>
+                  {/* Send button */}
+                  <Button
+                    onClick={handleOrganize}
+                    disabled={isOrganizing || rawText.trim().length < 10}
+                    size="sm"
+                    className={cn(
+                      "h-8 rounded-lg gap-1.5 transition-all",
+                      rawText.trim().length >= 10
+                        ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
+                        : "bg-muted text-muted-foreground"
+                    )}
+                  >
+                    {isOrganizing ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    )}
+                    <span className="hidden sm:inline text-xs">Organize</span>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
 
         {/* Results panel */}
         {showResults && organizedText && (
@@ -556,7 +564,8 @@ export function ScratchpadCapture() {
             )}
           </div>
         )}
-      </CardContent>
-    </Card>
+        </div>
+      </div>
+    </div>
   );
 }
