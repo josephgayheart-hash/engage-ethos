@@ -151,7 +151,7 @@ const ImageGeneratorPage = () => {
       <Header />
 
       {/* Wave header */}
-      <section className="relative pt-10 pb-8 overflow-hidden">
+      <section className="relative pt-10 pb-16 overflow-hidden">
         <WaveBackground variant="teal" />
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-5xl mx-auto">
