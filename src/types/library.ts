@@ -71,6 +71,7 @@ export interface SharedTemplate {
   ethicalGuardrails: string[];
   owner: string;
   maintainer: string;
+  guidelines?: string;
   collegeName?: string;
   departmentName?: string;
   status: LibraryEntryStatus;
