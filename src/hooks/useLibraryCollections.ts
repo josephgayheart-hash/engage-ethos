@@ -98,6 +98,7 @@ export function useLibraryCollections() {
           collectionType: input.collectionType,
           description: input.description,
           tenantId: profile.tenant_id,
+          profileId: (input as any).profileId || undefined,
         },
       }).then(() => {
         // Refresh to pick up the new cover image

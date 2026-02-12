@@ -48,7 +48,7 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Fetch institutional branding
+    // Fetch institutional branding + Content DNA
     let brandContext = "";
     if (tenantId || profileId) {
       try {
@@ -66,19 +66,43 @@ serve(async (req) => {
         }
 
         const profileQuery = profileId
-          ? supabaseAdmin.from("institutional_profiles").select("name, config").eq("id", profileId).single()
+          ? supabaseAdmin.from("institutional_profiles").select("id, name, config").eq("id", profileId).single()
           : tenantId
-          ? supabaseAdmin.from("institutional_profiles").select("name, config").eq("tenant_id", tenantId).eq("profile_type", "university").limit(1).single()
+          ? supabaseAdmin.from("institutional_profiles").select("id, name, config").eq("tenant_id", tenantId).eq("profile_type", "university").limit(1).single()
           : null;
 
+        let resolvedProfileId = profileId;
         if (profileQuery) {
           const { data: profile } = await profileQuery;
-          if (profile?.config) {
+          if (profile) {
+            if (!resolvedProfileId) resolvedProfileId = profile.id;
             const cfg = profile.config as Record<string, any>;
             if (cfg.mascot) brandContext += ` Mascot: ${cfg.mascot}.`;
             if (cfg.slogans?.length) brandContext += ` Slogan: "${cfg.slogans[0]}".`;
             if (cfg.primaryColor) brandContext += ` Brand primary: ${cfg.primaryColor}.`;
             if (cfg.accentColor) brandContext += ` Brand accent: ${cfg.accentColor}.`;
+          }
+        }
+
+        // Fetch Content DNA for voice/brand context
+        const dnaQuery = resolvedProfileId
+          ? supabaseAdmin.from("content_dna_analysis").select("voice_analysis, brand_platform").eq("profile_id", resolvedProfileId).order("updated_at", { ascending: false }).limit(1).single()
+          : tenantId
+          ? supabaseAdmin.from("content_dna_analysis").select("voice_analysis, brand_platform").eq("tenant_id", tenantId).order("updated_at", { ascending: false }).limit(1).single()
+          : null;
+
+        if (dnaQuery) {
+          const { data: dna } = await dnaQuery;
+          if (dna) {
+            const voice = dna.voice_analysis as Record<string, any>;
+            const brand = dna.brand_platform as Record<string, any>;
+            if (voice?.tone_descriptors?.length) brandContext += ` Voice tone: ${voice.tone_descriptors.slice(0, 3).join(", ")}.`;
+            if (voice?.personality_traits?.length) brandContext += ` Personality: ${voice.personality_traits.slice(0, 3).join(", ")}.`;
+            if (brand?.promise) brandContext += ` Brand promise: "${brand.promise}".`;
+            if (brand?.pillars?.length) {
+              const pillarNames = brand.pillars.map((p: any) => p.name || p).slice(0, 4);
+              brandContext += ` Brand pillars: ${pillarNames.join(", ")}.`;
+            }
           }
         }
       } catch (e) {
