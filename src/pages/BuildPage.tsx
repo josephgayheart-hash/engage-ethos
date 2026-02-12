@@ -1091,10 +1091,17 @@ const BuildPage = () => {
                 profileName: selectedProfileName,
                 useContentDNA,
                 hasBrandPlatform: !!(useContentDNA && contentDNA?.brandPlatform),
+                brandPillarCount: brandSelection.pillars.length || undefined,
                 hasStories: selectedStories.length > 0,
+                storyCount: selectedStories.length,
                 hasFacts: selectedFacts.length > 0,
+                factCount: selectedFacts.length,
                 audience: context.audience ? audienceLabels[context.audience] || context.audience : undefined,
+                cohort: context.cohort && context.cohort !== 'none' ? cohortLabels[context.cohort] || context.cohort : undefined,
+                moment: context.moment,
                 channels: selectedChannels,
+                primaryColor: institutionalConfig?.primaryColor || tenant?.primary_color || undefined,
+                accentColor: institutionalConfig?.accentColor || tenant?.accent_color || undefined,
               }}
             />
           )}
