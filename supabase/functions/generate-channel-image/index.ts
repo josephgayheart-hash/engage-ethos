@@ -69,6 +69,15 @@ serve(async (req) => {
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
     // Fetch institutional branding — build strict color palette
+    // Filter out app default colors that leak into profile configs
+    const APP_DEFAULT_COLORS = ["#1f2a44", "#2c7a7b"];
+    const addColor = (colors: string[], c: string) => {
+      const normalized = c.trim().toLowerCase();
+      if (c && !APP_DEFAULT_COLORS.includes(normalized) && !colors.some(x => x.toLowerCase() === normalized)) {
+        colors.push(c.trim().toUpperCase());
+      }
+    };
+
     let brandContext = "";
     const brandColors: string[] = [];
     try {
@@ -81,37 +90,48 @@ serve(async (req) => {
 
         if (tenant) {
           brandContext += `Institution: ${tenant.institution_name}.`;
-          if (tenant.primary_color) brandColors.push(tenant.primary_color);
-          if (tenant.accent_color) brandColors.push(tenant.accent_color);
+          if (tenant.primary_color) addColor(brandColors, tenant.primary_color);
+          if (tenant.accent_color) addColor(brandColors, tenant.accent_color);
         }
       }
 
-      const profileQuery = profileId
-        ? supabaseAdmin.from("institutional_profiles").select("name, config").eq("id", profileId).single()
-        : tenantId
-        ? supabaseAdmin.from("institutional_profiles").select("name, config").eq("tenant_id", tenantId).eq("profile_type", "university").limit(1).single()
-        : null;
+      // Fetch both the selected profile AND the master university profile for full color palette
+      const queries: Promise<any>[] = [];
+      if (profileId) {
+        queries.push(supabaseAdmin.from("institutional_profiles").select("name, config, parent_profile_id, profile_type").eq("id", profileId).single());
+      }
+      if (tenantId) {
+        queries.push(supabaseAdmin.from("institutional_profiles").select("name, config, parent_profile_id, profile_type").eq("tenant_id", tenantId).eq("profile_type", "university").limit(1).single());
+      }
 
-      if (profileQuery) {
-        const { data: profile } = await profileQuery;
+      const results = await Promise.all(queries);
+      for (const { data: profile } of results) {
         if (profile?.config) {
           const cfg = profile.config as Record<string, any>;
-          if (cfg.mascot) brandContext += ` Mascot: ${cfg.mascot}.`;
-          if (cfg.slogans?.length) brandContext += ` Slogan: "${cfg.slogans[0]}".`;
-          if (cfg.institutionName) brandContext += ` Full name: ${cfg.institutionName}.`;
-          // Collect all profile colors into the palette
-          if (cfg.primaryColor && !brandColors.includes(cfg.primaryColor)) brandColors.push(cfg.primaryColor);
-          if (cfg.secondaryColor && !brandColors.includes(cfg.secondaryColor)) brandColors.push(cfg.secondaryColor);
-          if (cfg.accentColor && !brandColors.includes(cfg.accentColor)) brandColors.push(cfg.accentColor);
-          if (cfg.tertiaryColor && !brandColors.includes(cfg.tertiaryColor)) brandColors.push(cfg.tertiaryColor);
+          if (cfg.mascot && !brandContext.includes("Mascot")) brandContext += ` Mascot: ${cfg.mascot}.`;
+          if (cfg.slogans?.length && !brandContext.includes("Slogan")) brandContext += ` Slogan: "${cfg.slogans[0]}".`;
+          if (cfg.institutionName && !brandContext.includes("Full name")) brandContext += ` Full name: ${cfg.institutionName}.`;
+          if (cfg.primaryColor) addColor(brandColors, cfg.primaryColor);
+          if (cfg.secondaryColor) addColor(brandColors, cfg.secondaryColor);
+          if (cfg.accentColor) addColor(brandColors, cfg.accentColor);
+          if (cfg.tertiaryColor) addColor(brandColors, cfg.tertiaryColor);
         }
       }
     } catch (e) {
       console.warn("Could not fetch branding:", e);
     }
 
+    console.log("Resolved brand color palette:", brandColors);
+
     const colorPaletteInstruction = brandColors.length > 0
-      ? `STRICT COLOR PALETTE — use ONLY these exact hex colors for all branded elements (shirts, banners, flags, scarves, pennants, building accents, signage, clothing): ${brandColors.join(", ")}. Do NOT invent, approximate, or deviate from these colors. Pick from this palette when coloring any clothing, accessories, or environmental branding elements.`
+      ? `STRICT COLOR PALETTE — you MUST use ONLY these exact hex colors for ALL branded visual elements. The institution's official colors are: ${brandColors.join(", ")}. 
+Rules:
+- Clothing (t-shirts, hoodies, jerseys, scarves, hats): MUST be one of these exact hex colors
+- Campus banners, flags, pennants, signage: MUST use these exact hex colors
+- Architectural accents, awnings, umbrellas: MUST use these exact hex colors
+- Do NOT use maroon, burgundy, crimson, navy, teal, or ANY other color unless it exactly matches one of the hex values above
+- Do NOT approximate or substitute similar-looking colors — use the exact hex values provided
+- White and neutral grays are acceptable for non-branded elements like buildings, sidewalks, sky`
       : "Use neutral, warm tones appropriate for higher education marketing.";
 
     const spec = channelSpecs[channel] || channelSpecs["social-media"];
