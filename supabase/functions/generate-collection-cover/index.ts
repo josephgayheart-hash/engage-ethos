@@ -34,7 +34,7 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Fetch institutional branding data
+    // Fetch institutional branding + Content DNA data
     let brandContext = "";
     if (tenantId || profileId) {
       try {
@@ -60,14 +60,40 @@ serve(async (req) => {
           ? supabaseAdmin.from("institutional_profiles").select("name, config").eq("tenant_id", tenantId).eq("profile_type", "university").limit(1).single()
           : null;
 
+        let resolvedProfileId = profileId;
         if (profileQuery) {
           const { data: profile } = await profileQuery;
-          if (profile?.config) {
+          if (profile) {
+            if (!resolvedProfileId && (profile as any).id) resolvedProfileId = (profile as any).id;
             const cfg = profile.config as Record<string, any>;
             if (cfg.mascot) brandContext += ` Mascot: ${cfg.mascot}.`;
             if (cfg.slogans?.length) brandContext += ` Slogan: "${cfg.slogans[0]}".`;
             if (cfg.primaryColor) brandContext += ` Brand primary: ${cfg.primaryColor}.`;
             if (cfg.accentColor) brandContext += ` Brand accent: ${cfg.accentColor}.`;
+            if (cfg.secondaryColor) brandContext += ` Brand secondary: ${cfg.secondaryColor}.`;
+            if (cfg.tertiaryColor) brandContext += ` Brand tertiary: ${cfg.tertiaryColor}.`;
+          }
+        }
+
+        // Fetch Content DNA voice analysis for richer context
+        const dnaQuery = resolvedProfileId
+          ? supabaseAdmin.from("content_dna_analysis").select("voice_analysis, brand_platform").eq("profile_id", resolvedProfileId).order("updated_at", { ascending: false }).limit(1).single()
+          : tenantId
+          ? supabaseAdmin.from("content_dna_analysis").select("voice_analysis, brand_platform").eq("tenant_id", tenantId).order("updated_at", { ascending: false }).limit(1).single()
+          : null;
+
+        if (dnaQuery) {
+          const { data: dna } = await dnaQuery;
+          if (dna) {
+            const voice = dna.voice_analysis as Record<string, any>;
+            const brand = dna.brand_platform as Record<string, any>;
+            if (voice?.tone_descriptors?.length) brandContext += ` Voice tone: ${voice.tone_descriptors.slice(0, 3).join(", ")}.`;
+            if (voice?.personality_traits?.length) brandContext += ` Personality: ${voice.personality_traits.slice(0, 3).join(", ")}.`;
+            if (brand?.promise) brandContext += ` Brand promise: "${brand.promise}".`;
+            if (brand?.pillars?.length) {
+              const pillarNames = brand.pillars.map((p: any) => p.name || p).slice(0, 4);
+              brandContext += ` Brand pillars: ${pillarNames.join(", ")}.`;
+            }
           }
         }
       } catch (e) {
