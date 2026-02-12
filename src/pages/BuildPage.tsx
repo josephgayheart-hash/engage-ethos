@@ -1247,7 +1247,12 @@ const BuildPage = () => {
                       tenantId={profile?.tenant_id}
                       profileId={selectedProfileId || undefined}
                       audience={context.audience || undefined}
-                      contentSummary={context.moment ? `${context.moment} message for ${context.audience || 'students'}` : undefined}
+                      goal={context.goal || undefined}
+                      tone={context.tone || undefined}
+                      moment={context.moment || undefined}
+                      cohort={context.cohort || undefined}
+                      domain={context.domain || undefined}
+                      contentSummary={context.moment ? `${context.moment} message for ${context.audience || 'students'}${context.goal ? `. Goal: ${context.goal}` : ''}${context.tone ? `. Tone: ${context.tone}` : ''}${context.cohort && context.cohort !== 'none' ? `. Cohort: ${context.cohort}` : ''}${context.domain ? `. Domain: ${context.domain}` : ''}` : undefined}
                     />
                   );
                 })}

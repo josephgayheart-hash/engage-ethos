@@ -71,6 +71,11 @@ interface ChannelPreviewProps {
   profileId?: string;
   audience?: string;
   contentSummary?: string;
+  goal?: string;
+  tone?: string;
+  moment?: string;
+  cohort?: string;
+  domain?: string;
 }
 
 const channelIcons: Record<Channel, React.ReactNode> = {
@@ -103,7 +108,7 @@ const channelLabels: Record<Channel, string> = {
   'case-for-care': 'Case for Support',
 };
 
-export function ChannelPreview({ channel, content, onCopy, onContentChange, onSaveToLibrary, institutionName, branding, tenantId, profileId, audience, contentSummary }: ChannelPreviewProps) {
+export function ChannelPreview({ channel, content, onCopy, onContentChange, onSaveToLibrary, institutionName, branding, tenantId, profileId, audience, contentSummary, goal, tone, moment, cohort, domain }: ChannelPreviewProps) {
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState<ChannelDrafts[keyof ChannelDrafts]>(content);
@@ -133,6 +138,11 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
           audience,
           tenantId,
           profileId,
+          goal,
+          tone,
+          moment,
+          cohort,
+          domain,
         },
       });
       if (error) throw error;
@@ -144,7 +154,7 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     } finally {
       setIsGeneratingImage(false);
     }
-  }, [channel, contentSummary, audience, tenantId, profileId]);
+  }, [channel, contentSummary, audience, tenantId, profileId, goal, tone, moment, cohort, domain]);
 
   const handleRegenerateImage = () => {
     setChannelImageUrl(null);
@@ -1049,13 +1059,50 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     
     return (
       <div className="bg-card rounded-lg border border-border overflow-hidden">
-        <div className="p-6 text-center" style={headerStyle}>
-          {logoUrl && (
-            <img src={logoUrl} alt="Logo" className="w-16 h-16 object-contain mx-auto mb-4" />
-          )}
-          <h2 className="text-xl font-bold mb-2">{lp.headline}</h2>
-          {lp.subheadline && (
-            <p className="text-sm text-muted-foreground">{lp.subheadline}</p>
+        {/* AI-Generated Landing Page Hero */}
+        <div className="relative">
+          {channelImageUrl ? (
+            <div className="relative group">
+              <img src={channelImageUrl} alt="Landing page hero" className="w-full h-48 object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 text-center">
+                {logoUrl && (
+                  <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain mx-auto mb-3 drop-shadow-lg" />
+                )}
+                <h2 className="text-xl font-bold mb-1 text-white drop-shadow-lg">{lp.headline}</h2>
+                {lp.subheadline && (
+                  <p className="text-sm text-white/80">{lp.subheadline}</p>
+                )}
+              </div>
+              <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button variant="secondary" size="sm" className="text-xs h-7" onClick={(e) => { e.stopPropagation(); handleDownloadImage(); }}>
+                  <FileDown className="w-3 h-3 mr-1" /> Download
+                </Button>
+                <Button variant="secondary" size="sm" className="text-xs h-7" onClick={(e) => { e.stopPropagation(); handleRegenerateImage(); }}>
+                  <RefreshCw className="w-3 h-3 mr-1" /> Regenerate
+                </Button>
+              </div>
+            </div>
+          ) : isGeneratingImage ? (
+            <div className="h-48 flex flex-col items-center justify-center gap-2 bg-muted/30" style={headerStyle}>
+              <Sparkles className="w-6 h-6 text-primary animate-pulse" />
+              <p className="text-xs text-muted-foreground">Generating hero image...</p>
+            </div>
+          ) : (
+            <div className="p-6 text-center" style={headerStyle}>
+              {logoUrl && (
+                <img src={logoUrl} alt="Logo" className="w-16 h-16 object-contain mx-auto mb-4" />
+              )}
+              <h2 className="text-xl font-bold mb-2">{lp.headline}</h2>
+              {lp.subheadline && (
+                <p className="text-sm text-muted-foreground">{lp.subheadline}</p>
+              )}
+              {isVisualChannel && (
+                <Button variant="ghost" size="sm" className="text-xs mt-2" onClick={generateChannelImage}>
+                  <Sparkles className="w-3 h-3 mr-1" /> Generate Hero Image
+                </Button>
+              )}
+            </div>
           )}
         </div>
         <div className="p-6">
