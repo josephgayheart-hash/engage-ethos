@@ -510,6 +510,43 @@ export function ScratchpadCapture() {
                         );
                       }
                     }
+                    // Auto-detect and hyperlink tool names in plain paragraph text
+                    const parts: React.ReactNode[] = [];
+                    const plainText = text;
+                    // Build a regex that matches any tool label or key
+                    const toolEntries = Object.entries(toolRoutes);
+                    const toolPatterns = toolEntries.flatMap(([key, route]) => [route.label, key]).sort((a, b) => b.length - a.length);
+                    const toolRegex = new RegExp(`\\b(${toolPatterns.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})\\b`, 'gi');
+                    let lastIndex = 0;
+                    let match: RegExpExecArray | null;
+                    let hasToolMatch = false;
+                    while ((match = toolRegex.exec(plainText)) !== null) {
+                      hasToolMatch = true;
+                      if (match.index > lastIndex) {
+                        parts.push(plainText.slice(lastIndex, match.index));
+                      }
+                      const matchedLower = match[1].toLowerCase();
+                      const foundEntry = toolEntries.find(([key, route]) => key === matchedLower || route.label.toLowerCase() === matchedLower);
+                      if (foundEntry) {
+                        const [, route] = foundEntry;
+                        const ToolIcon = route.icon;
+                        parts.push(
+                          <Link key={match.index} to={route.path} className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-xs hover:bg-primary/20 hover:shadow-sm transition-all align-middle border border-primary/15 mx-0.5">
+                            <ToolIcon className="h-3 w-3" />
+                            {route.label}
+                          </Link>
+                        );
+                      } else {
+                        parts.push(match[1]);
+                      }
+                      lastIndex = match.index + match[0].length;
+                    }
+                    if (hasToolMatch) {
+                      if (lastIndex < plainText.length) {
+                        parts.push(plainText.slice(lastIndex));
+                      }
+                      return <p className="text-sm leading-relaxed text-foreground/85 my-2">{parts}</p>;
+                    }
                     return <p className="text-sm leading-relaxed text-foreground/85 my-2">{children}</p>;
                   },
                   hr: () => <div className="h-px bg-border/50 my-5" />,
