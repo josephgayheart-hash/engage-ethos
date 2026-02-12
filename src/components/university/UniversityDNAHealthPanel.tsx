@@ -13,7 +13,8 @@ import {
   ExternalLink,
   FileText,
   Sparkles,
-  Palette
+  Palette,
+  Camera
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -44,6 +45,7 @@ export function UniversityDNAHealthPanel({
   const { tenant } = useAuth();
   const [profiles, setProfiles] = useState<ProfileDNAStatus[]>([]);
   const [loadingProfiles, setLoadingProfiles] = useState(true);
+  const [campusPhotoCount, setCampusPhotoCount] = useState(0);
 
   useEffect(() => {
     const fetchProfileDNA = async () => {
@@ -51,11 +53,21 @@ export function UniversityDNAHealthPanel({
       
       setLoadingProfiles(true);
       
-      // Fetch institutional profiles
-      const { data: profilesData } = await supabase
-        .from('institutional_profiles')
-        .select('id, name, profile_type')
-        .eq('tenant_id', tenant.id);
+      // Fetch institutional profiles and campus photo count in parallel
+      const [profilesResult, photosResult] = await Promise.all([
+        supabase
+          .from('institutional_profiles')
+          .select('id, name, profile_type')
+          .eq('tenant_id', tenant.id),
+        supabase
+          .from('campus_photo_samples')
+          .select('id', { count: 'exact', head: true })
+          .eq('tenant_id', tenant.id)
+          .eq('is_active', true)
+      ]);
+
+      setCampusPhotoCount(photosResult.count || 0);
+      const profilesData = profilesResult.data;
 
       if (!profilesData) {
         setLoadingProfiles(false);
@@ -121,7 +133,8 @@ export function UniversityDNAHealthPanel({
   const steps = [
     { label: 'Content Samples', done: dnaSamples > 0, icon: FileText },
     { label: 'Voice Analysis', done: hasAnalysis, icon: Sparkles },
-    { label: 'Brand Platform', done: dnaCompleteness >= 100, icon: Palette },
+    { label: 'Brand Platform', done: dnaCompleteness >= 80, icon: Palette },
+    { label: 'Campus Photography', done: campusPhotoCount > 0, icon: Camera },
   ];
 
   const getProfileStatus = (profile: ProfileDNAStatus) => {
