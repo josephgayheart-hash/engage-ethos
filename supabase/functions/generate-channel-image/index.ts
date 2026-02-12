@@ -79,6 +79,7 @@ serve(async (req) => {
     };
 
     let brandContext = "";
+    let campusContext = ""; // For location-specific imagery
     const brandColors: string[] = [];
     try {
       if (tenantId) {
@@ -90,6 +91,7 @@ serve(async (req) => {
 
         if (tenant) {
           brandContext += `Institution: ${tenant.institution_name}.`;
+          campusContext += tenant.institution_name;
           if (tenant.primary_color) addColor(brandColors, tenant.primary_color);
           if (tenant.accent_color) addColor(brandColors, tenant.accent_color);
         }
@@ -105,16 +107,38 @@ serve(async (req) => {
       }
 
       const results = await Promise.all(queries);
+      let unitName = "";
+      let universityName = "";
       for (const { data: profile } of results) {
         if (profile?.config) {
           const cfg = profile.config as Record<string, any>;
           if (cfg.mascot && !brandContext.includes("Mascot")) brandContext += ` Mascot: ${cfg.mascot}.`;
           if (cfg.slogans?.length && !brandContext.includes("Slogan")) brandContext += ` Slogan: "${cfg.slogans[0]}".`;
-          if (cfg.institutionName && !brandContext.includes("Full name")) brandContext += ` Full name: ${cfg.institutionName}.`;
+          if (cfg.institutionName && !brandContext.includes("Full name")) {
+            brandContext += ` Full name: ${cfg.institutionName}.`;
+            universityName = cfg.institutionName;
+          }
+          if (cfg.unitName) unitName = cfg.unitName;
+          if (cfg.unitWebsite) brandContext += ` Unit website: ${cfg.unitWebsite}.`;
           if (cfg.primaryColor) addColor(brandColors, cfg.primaryColor);
           if (cfg.secondaryColor) addColor(brandColors, cfg.secondaryColor);
           if (cfg.accentColor) addColor(brandColors, cfg.accentColor);
           if (cfg.tertiaryColor) addColor(brandColors, cfg.tertiaryColor);
+        }
+        // Use profile name as unit context if it's a sub-unit
+        if (profile && profile.profile_type !== "university" && profile.name) {
+          unitName = unitName || profile.name;
+        }
+      }
+
+      // Build campus-specific imagery instruction
+      if (universityName || campusContext) {
+        const schoolName = universityName || campusContext;
+        campusContext = `CAMPUS SETTING: This image should look like it was taken on the campus of ${schoolName}.`;
+        campusContext += ` Use your knowledge of ${schoolName}'s real campus to depict recognizable architectural styles, building materials, landscaping, and iconic landmarks or gathering spots that are characteristic of that institution.`;
+        campusContext += ` Think about what makes ${schoolName}'s campus visually distinctive — the types of buildings (Gothic, Brutalist, modern glass, red brick, limestone), signature quads, arches, clock towers, stadiums, or natural features.`;
+        if (unitName) {
+          campusContext += ` This content is specifically for the ${unitName}, so if that college/department has its own building or area on campus, reference that environment.`;
         }
       }
     } catch (e) {
@@ -122,6 +146,7 @@ serve(async (req) => {
     }
 
     console.log("Resolved brand color palette:", brandColors);
+    console.log("Campus context:", campusContext);
 
     const colorPaletteInstruction = brandColors.length > 0
       ? `STRICT COLOR PALETTE — you MUST use ONLY these exact hex colors for ALL branded visual elements. The institution's official colors are: ${brandColors.join(", ")}. 
@@ -152,6 +177,8 @@ ${momentContext}
 ${cohortContext}
 ${domainContext}
 ${brandContext}
+
+${campusContext}
 
 ${colorPaletteInstruction}
 
