@@ -1102,6 +1102,7 @@ const BuildPage = () => {
                 channels: selectedChannels,
                 primaryColor: institutionalConfig?.primaryColor || tenant?.primary_color || undefined,
                 accentColor: institutionalConfig?.accentColor || tenant?.accent_color || undefined,
+                logoUrl: institutionalConfig?.logoUrl || tenant?.logo_url || undefined,
                 dnaStats: useContentDNA && contentDNA ? {
                   overallTone: contentDNA.voiceAnalysis?.overallTone,
                   formalityLevel: contentDNA.voiceAnalysis?.formalityLevel,

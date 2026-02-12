@@ -44,6 +44,7 @@ interface GenerationContext {
   channelLabels?: string[];
   primaryColor?: string;
   accentColor?: string;
+  logoUrl?: string;
   mode: "builder" | "journey";
   journeyWeeks?: number;
   dnaStats?: DNAStats;
@@ -213,6 +214,27 @@ export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadi
   return (
     <div className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/[0.03] to-card p-8 shadow-sm overflow-hidden">
       <div className="flex flex-col items-center gap-5">
+
+        {/* Profile identity header */}
+        {(context.profileName || context.logoUrl) && (
+          <div className={`flex items-center gap-3 transition-all duration-700 ${showTags ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}>
+            {context.logoUrl && (
+              <img
+                src={context.logoUrl}
+                alt={context.profileName || "Institution logo"}
+                className="w-9 h-9 rounded-lg object-contain border border-border/50 bg-background p-0.5 shadow-sm"
+              />
+            )}
+            {context.profileName && (
+              <div className="flex flex-col">
+                <span className="text-sm font-semibold text-foreground leading-tight">{context.profileName}</span>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                  {context.mode === "journey" ? "Journey Generation" : "Message Generation"}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Brand color swatches */}
         {colors.length > 0 && (
