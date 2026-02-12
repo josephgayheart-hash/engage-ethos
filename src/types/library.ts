@@ -96,6 +96,8 @@ export interface SharedTemplate {
   createdByName?: string;
   // Linked external assets
   externalAssets?: ExternalAsset[];
+  // AI-generated cover image
+  coverImageUrl?: string;
 }
 
 export interface TemplatePlaceholder {

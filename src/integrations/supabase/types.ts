@@ -1694,6 +1694,7 @@ export type Database = {
           change_history: Json
           college_name: string | null
           content: string
+          cover_image_url: string | null
           created_at: string
           created_by_name: string | null
           created_by_user_id: string | null
@@ -1725,6 +1726,7 @@ export type Database = {
           change_history?: Json
           college_name?: string | null
           content: string
+          cover_image_url?: string | null
           created_at?: string
           created_by_name?: string | null
           created_by_user_id?: string | null
@@ -1756,6 +1758,7 @@ export type Database = {
           change_history?: Json
           college_name?: string | null
           content?: string
+          cover_image_url?: string | null
           created_at?: string
           created_by_name?: string | null
           created_by_user_id?: string | null

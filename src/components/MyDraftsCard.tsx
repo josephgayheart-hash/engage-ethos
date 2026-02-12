@@ -277,7 +277,17 @@ export function MyDraftsCard() {
               state={{ resumeDraftId: draft.id }}
               className="block"
             >
-              <div className="p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-accent/30 transition-all group">
+              <div className="p-2.5 rounded-lg border border-border hover:border-primary/50 hover:bg-accent/30 transition-all group overflow-hidden">
+                {/* Cover image thumbnail */}
+                {draft.cover_image_url && (
+                  <div className="h-24 w-full overflow-hidden rounded-md bg-muted mb-2 -mt-0.5">
+                    <img
+                      src={draft.cover_image_url}
+                      alt={draft.title || 'Draft'}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                )}
                 {/* Top row: Icon, Title, Type badge, Delete button */}
                 <div className="flex items-start gap-3">
                   <div className={`icon-container icon-container-sm shrink-0 mt-0.5 ${
