@@ -340,7 +340,7 @@ export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadi
                         : "bg-muted text-muted-foreground"
                   }`}>
                     {isComplete ? (
-                      <Check className="w-3.5 h-3.5" style={{ animation: "popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards" }} />
+                      <Check className="w-3.5 h-3.5" style={{ animation: "popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards" }} />
                     ) : isCurrent ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     ) : (
@@ -401,7 +401,7 @@ export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadi
 
                   {/* Completion check */}
                   {isComplete && (
-                    <div className="flex-shrink-0 mt-0.5" style={{ animation: "popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards" }}>
+                    <div className="flex-shrink-0 mt-0.5" style={{ animation: "popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards" }}>
                       <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
                         <Check className="w-3 h-3 text-primary" />
                       </div>
@@ -448,11 +448,11 @@ export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadi
 
         {/* Completion pop or estimated time */}
         {allDone ? (
-          <div className="flex flex-col items-center gap-2" style={{ animation: "completionPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards" }}>
-            <div className="w-10 h-10 rounded-full bg-green-500/15 flex items-center justify-center border-2 border-green-500/30">
-              <Check className="w-5 h-5 text-green-500" />
+          <div className="flex flex-col items-center gap-2" style={{ animation: "completionPop 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards" }}>
+            <div className="w-12 h-12 rounded-full bg-green-500/15 flex items-center justify-center border-2 border-green-500/30" style={{ animation: "completionRing 1.2s ease-out forwards" }}>
+              <Check className="w-6 h-6 text-green-500" style={{ animation: "completionCheck 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards", opacity: 0 }} />
             </div>
-            <p className="text-sm font-semibold text-foreground">Ready!</p>
+            <p className="text-sm font-semibold text-foreground animate-fade-in" style={{ animationDelay: '0.5s', opacity: 0, animationFillMode: 'forwards' }}>Ready!</p>
           </div>
         ) : (
           <p className="text-xs text-muted-foreground">
@@ -485,8 +485,15 @@ export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadi
             opacity: 0;
             transform: scale(0);
           }
-          60% {
-            transform: scale(1.2);
+          40% {
+            opacity: 1;
+            transform: scale(1.35);
+          }
+          65% {
+            transform: scale(0.9);
+          }
+          80% {
+            transform: scale(1.1);
           }
           100% {
             opacity: 1;
@@ -508,15 +515,50 @@ export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadi
             opacity: 0;
             transform: scale(0);
           }
-          50% {
-            transform: scale(1.3);
+          35% {
+            opacity: 1;
+            transform: scale(1.4);
+          }
+          55% {
+            transform: scale(0.85);
           }
           70% {
-            transform: scale(0.9);
+            transform: scale(1.15);
+          }
+          85% {
+            transform: scale(0.95);
           }
           100% {
             opacity: 1;
             transform: scale(1);
+          }
+        }
+        @keyframes completionRing {
+          0% {
+            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+          }
+          50% {
+            box-shadow: 0 0 0 12px rgba(34, 197, 94, 0);
+          }
+          100% {
+            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+          }
+        }
+        @keyframes completionCheck {
+          0% {
+            opacity: 0;
+            transform: scale(0) rotate(-45deg);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.3) rotate(0deg);
+          }
+          75% {
+            transform: scale(0.9) rotate(0deg);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
           }
         }
         @keyframes proofFlashIn {
