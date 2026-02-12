@@ -8,34 +8,46 @@ const corsHeaders = {
 };
 
 // Channel-specific image specs
-const channelSpecs: Record<string, { aspect: string; style: string; description: string }> = {
+const channelSpecs: Record<string, { aspect: string; width: number; height: number; style: string; description: string }> = {
   "social-media": {
     aspect: "1:1",
+    width: 1080,
+    height: 1080,
     style: "social media post graphic",
     description: "Square social media post image (Instagram, Facebook, LinkedIn)"
   },
   "digital-ad-social": {
     aspect: "1:1",
+    width: 1080,
+    height: 1080,
     style: "paid social media advertisement visual",
     description: "Social ad creative (Meta, LinkedIn) — eye-catching, conversion-focused"
   },
   "email": {
     aspect: "16:9",
+    width: 1200,
+    height: 675,
     style: "email header banner",
     description: "Wide email hero banner — clean, branded, professional"
   },
   "landing-page": {
     aspect: "16:9",
+    width: 1920,
+    height: 1080,
     style: "landing page hero image",
     description: "Full-width hero image for a landing page — immersive, aspirational"
   },
   "direct-mail": {
     aspect: "4:3",
+    width: 1200,
+    height: 900,
     style: "direct mail piece image",
     description: "Print-quality image for a direct mail piece"
   },
   "news-article": {
     aspect: "16:9",
+    width: 1200,
+    height: 675,
     style: "news article featured image",
     description: "Editorial-style featured image for a news/press article"
   },
@@ -205,7 +217,7 @@ Photography/art direction — follow the style of real university marketing imag
 - People should be diverse in a way that feels organic to a real campus — different backgrounds, ages, body types, clothing styles — without appearing curated or posed as a diversity photo
 - Brand colors MUST appear on clothing items (t-shirts, hoodies, scarves), campus banners, pennants, or architectural details — use ONLY the exact hex values from the palette above, never approximate or invent new colors
 - Composition: use shallow depth of field, leading lines, rule of thirds — the hallmarks of editorial campus photography
-- Aspect ratio: ${spec.aspect}
+- CRITICAL — Aspect ratio and dimensions: This image MUST be exactly ${spec.aspect} aspect ratio (${spec.width}x${spec.height} pixels). ${spec.aspect === "1:1" ? "The image must be perfectly SQUARE — equal width and height." : spec.aspect === "16:9" ? "The image must be a WIDE horizontal rectangle — significantly wider than it is tall." : "The image must be a horizontal rectangle with 4:3 proportions."} Do NOT generate a ${spec.aspect === "1:1" ? "rectangular" : "square"} image.
 - No text, no words, no letters, no logos, no watermarks, no mascots, no cartoon characters, no animal mascot costumes or figures
 - Do NOT attempt to depict any school mascot — focus on real people and real campus environments
 - Professional quality: sharp focus on subject, creamy bokeh backgrounds, rich color depth
