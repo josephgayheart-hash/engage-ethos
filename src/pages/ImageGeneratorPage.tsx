@@ -1,14 +1,15 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Header } from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { supabase } from "@/integrations/supabase/client";
-import { ImageIcon, Download, RefreshCw, Loader2, Sparkles } from "lucide-react";
+import { ImageIcon, Download, RefreshCw, Loader2, Sparkles, Palette, Camera, Users, Target } from "lucide-react";
 import { toast } from "sonner";
 
 const channelOptions = [
@@ -314,35 +315,122 @@ const ImageGeneratorPage = () => {
                 <CardTitle className="text-lg">Preview</CardTitle>
               </CardHeader>
               <CardContent>
-                {isGenerating ? (
-                  <div className="aspect-square bg-muted rounded-lg flex flex-col items-center justify-center gap-4 px-6">
-                    <Loader2 className="w-10 h-10 animate-spin text-primary" />
-                    <div className="text-center space-y-2">
-                      <p className="text-sm font-medium">
-                        {[
-                          "Analyzing your brand profile…",
-                          "Composing campus scene & color palette…",
-                          "Rendering image with AI…",
-                          "Applying brand colors & campus details…",
-                          "Finalizing & uploading…",
-                        ][generationPhase]}
-                      </p>
+                {isGenerating ? (() => {
+                  const selectedProfile = profiles?.find(p => p.id === selectedProfileId);
+                  const cfg = selectedProfile?.config as Record<string, any> | undefined;
+                  const logoUrl = cfg?.logoUrl;
+                  const profileName = selectedProfile?.name || cfg?.institutionName;
+                  const colors = [cfg?.primaryColor, cfg?.secondaryColor, cfg?.accentColor, cfg?.tertiaryColor].filter(Boolean) as string[];
+                  const selectedChannelLabel = channelOptions.find(c => c.value === channel)?.label || channel;
+                  const selectedStyleLabel = styleOptions.find(s => s.value === style)?.label || style;
+                  const selectedEngineLabel = engineOptions.find(e => e.value === engine)?.label || engine;
+
+                  return (
+                  <div className="aspect-square bg-muted rounded-lg flex flex-col items-center justify-center gap-3 px-6 py-8 overflow-hidden relative">
+                    {/* Animated color wash background */}
+                    {colors.length > 0 && (
+                      <div className="absolute inset-0 opacity-[0.07]" style={{
+                        background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1] || colors[0]} 50%, ${colors[2] || colors[0]} 100%)`,
+                      }} />
+                    )}
+
+                    {/* Phase 0-1: Logo & institution flash */}
+                    <div className={`flex flex-col items-center gap-2 transition-all duration-700 ${generationPhase <= 1 ? 'opacity-100 scale-100' : 'opacity-40 scale-95'}`}>
+                      {logoUrl ? (
+                        <img src={logoUrl} alt="" className="w-16 h-16 object-contain rounded-lg animate-fade-in" />
+                      ) : profileName ? (
+                        <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center animate-fade-in">
+                          <span className="text-2xl font-bold text-primary">{profileName.charAt(0)}</span>
+                        </div>
+                      ) : null}
+                      {profileName && (
+                        <p className="text-sm font-semibold text-foreground animate-fade-in">{profileName}</p>
+                      )}
+                    </div>
+
+                    {/* Brand colors display */}
+                    {colors.length > 0 && (
+                      <div className={`flex items-center gap-1.5 transition-all duration-700 ${generationPhase === 1 ? 'opacity-100 scale-100' : generationPhase > 1 ? 'opacity-60' : 'opacity-0 scale-90'}`}>
+                        <Palette className="w-3.5 h-3.5 text-muted-foreground" />
+                        {colors.map((color, i) => (
+                          <div
+                            key={i}
+                            className="w-6 h-6 rounded-full border-2 border-background shadow-sm animate-scale-in"
+                            style={{ backgroundColor: color, animationDelay: `${i * 150}ms` }}
+                            title={color}
+                          />
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Status message */}
+                    <div className="text-center space-y-1 mt-1">
+                      <div className="flex items-center justify-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                        <p className="text-sm font-medium">
+                          {[
+                            "Reading your brand profile…",
+                            "Matching campus colors & architecture…",
+                            "Composing your scene…",
+                            "Rendering with AI…",
+                            "Finalizing & uploading…",
+                          ][generationPhase]}
+                        </p>
+                      </div>
                       <p className="text-xs text-muted-foreground">
                         {engine === "premium"
-                          ? "Premium engine — this may take 30–60 seconds"
-                          : "This may take 15–30 seconds"}
+                          ? "Premium engine — up to 60 seconds"
+                          : "Estimated 15–30 seconds"}
                       </p>
                     </div>
-                    <div className="w-full max-w-48">
+
+                    {/* Progress bar */}
+                    <div className="w-full max-w-52">
                       <div className="h-1.5 bg-muted-foreground/10 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-primary rounded-full transition-all duration-1000 ease-out"
-                          style={{ width: `${Math.min(20 + generationPhase * 20, 95)}%` }}
+                          style={{ width: `${Math.min(15 + generationPhase * 20, 95)}%` }}
                         />
                       </div>
                     </div>
+
+                    {/* Selection readback — scrolling tags */}
+                    <div className={`flex flex-wrap items-center justify-center gap-1.5 mt-2 max-w-full transition-all duration-500 ${generationPhase >= 2 ? 'opacity-100' : 'opacity-0'}`}>
+                      <Badge variant="outline" className="text-[10px] gap-1 animate-fade-in">
+                        <Camera className="w-3 h-3" /> {selectedChannelLabel}
+                      </Badge>
+                      <Badge variant="outline" className="text-[10px] gap-1 animate-fade-in" style={{ animationDelay: '100ms' }}>
+                        {selectedStyleLabel}
+                      </Badge>
+                      <Badge variant="outline" className="text-[10px] gap-1 animate-fade-in" style={{ animationDelay: '200ms' }}>
+                        {selectedEngineLabel}
+                      </Badge>
+                      {audience && (
+                        <Badge variant="outline" className="text-[10px] gap-1 animate-fade-in" style={{ animationDelay: '300ms' }}>
+                          <Users className="w-3 h-3" /> {audience}
+                        </Badge>
+                      )}
+                      {tone && (
+                        <Badge variant="outline" className="text-[10px] gap-1 animate-fade-in" style={{ animationDelay: '400ms' }}>
+                          {tone}
+                        </Badge>
+                      )}
+                      {goal && (
+                        <Badge variant="outline" className="text-[10px] gap-1 animate-fade-in" style={{ animationDelay: '500ms' }}>
+                          <Target className="w-3 h-3" /> {goal.slice(0, 40)}{goal.length > 40 ? '…' : ''}
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* Scene description readback */}
+                    <div className={`text-center max-w-xs transition-all duration-700 ${generationPhase >= 3 ? 'opacity-100' : 'opacity-0'}`}>
+                      <p className="text-[11px] text-muted-foreground italic leading-relaxed">
+                        "{contentDescription.slice(0, 120)}{contentDescription.length > 120 ? '…' : ''}"
+                      </p>
+                    </div>
                   </div>
-                ) : imageUrl ? (
+                  );
+                })() : imageUrl ? (
                   <div className="space-y-3">
                     <div className="relative group rounded-lg overflow-hidden">
                       <img
