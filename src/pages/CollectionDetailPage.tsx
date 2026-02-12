@@ -4,7 +4,20 @@ import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useLibraryCollections } from '@/hooks/useLibraryCollections';
 import { useSharedLibrary } from '@/hooks/useSharedLibrary';
@@ -19,7 +32,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { ArrowLeft, ChevronRight, Folder, Plus, Archive, FileText, Image, ExternalLink } from 'lucide-react';
+import { ChevronRight, Folder, Plus, Archive, FileText, Image, Pencil, Trash2, Check, X } from 'lucide-react';
 
 const typeLabels: Record<string, string> = {
   campaign: 'Campaign',
@@ -32,12 +45,18 @@ const CollectionDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { collections, getCollectionItems, addItemToCollection, removeItemFromCollection, updateCollection } = useLibraryCollections();
+  const { collections, getCollectionItems, addItemToCollection, removeItemFromCollection, updateCollection, deleteCollection } = useLibraryCollections();
   const { getTemplateById } = useSharedLibrary();
   const [items, setItems] = useState<CollectionItem[]>([]);
   const [isLoadingItems, setIsLoadingItems] = useState(true);
   const [showAssetForm, setShowAssetForm] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
+
+  // Inline editing state
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editDescription, setEditDescription] = useState('');
 
   const collection = collections.find(c => c.id === id);
 
@@ -78,6 +97,45 @@ const CollectionDetailPage = () => {
     if (!id) return;
     await updateCollection(id, { status: collection?.status === 'archived' ? 'active' : 'archived' });
     toast({ title: collection?.status === 'archived' ? 'Collection reactivated' : 'Collection archived' });
+  };
+
+  const handleDelete = async () => {
+    if (!id) return;
+    const success = await deleteCollection(id);
+    if (success) {
+      toast({ title: 'Collection deleted' });
+      navigate('/shared-library?tab=collections');
+    } else {
+      toast({ title: 'Failed to delete collection', variant: 'destructive' });
+    }
+  };
+
+  const handleSaveName = async () => {
+    if (!id || !editName.trim()) return;
+    const success = await updateCollection(id, { name: editName.trim() });
+    if (success) {
+      toast({ title: 'Name updated' });
+      setIsEditingName(false);
+    }
+  };
+
+  const handleSaveDescription = async () => {
+    if (!id) return;
+    const success = await updateCollection(id, { description: editDescription.trim() || undefined });
+    if (success) {
+      toast({ title: 'Description updated' });
+      setIsEditingDescription(false);
+    }
+  };
+
+  const startEditName = () => {
+    setEditName(collection?.name || '');
+    setIsEditingName(true);
+  };
+
+  const startEditDescription = () => {
+    setEditDescription(collection?.description || '');
+    setIsEditingDescription(true);
   };
 
   const templateItems = items.filter(i => i.itemType === 'template');
@@ -130,7 +188,7 @@ const CollectionDetailPage = () => {
 
           {/* Hero */}
           <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
-            <div className="flex items-start gap-4">
+            <div className="flex items-start gap-4 flex-1 min-w-0">
               <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center flex-shrink-0">
                 {collection.coverImageUrl ? (
                   <img src={collection.coverImageUrl} alt="" className="w-full h-full object-cover rounded-lg" />
@@ -138,15 +196,83 @@ const CollectionDetailPage = () => {
                   <Folder className="w-8 h-8 text-primary/40" />
                 )}
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="font-serif text-2xl font-bold">{collection.name}</h1>
-                  <Badge variant="secondary">{typeLabels[collection.collectionType]}</Badge>
-                  {collection.status === 'archived' && <Badge variant="outline">Archived</Badge>}
-                </div>
-                {collection.description && (
-                  <p className="text-muted-foreground mt-1">{collection.description}</p>
+              <div className="flex-1 min-w-0">
+                {/* Editable name */}
+                {isEditingName ? (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      className="font-serif text-xl font-bold h-9"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveName();
+                        if (e.key === 'Escape') setIsEditingName(false);
+                      }}
+                    />
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleSaveName}>
+                      <Check className="w-4 h-4 text-primary" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditingName(false)}>
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 group">
+                    <h1 className="font-serif text-2xl font-bold truncate">{collection.name}</h1>
+                    <Badge variant="secondary">{typeLabels[collection.collectionType]}</Badge>
+                    {collection.status === 'archived' && <Badge variant="outline">Archived</Badge>}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={startEditName}
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
                 )}
+
+                {/* Editable description */}
+                {isEditingDescription ? (
+                  <div className="mt-2 space-y-2">
+                    <Textarea
+                      value={editDescription}
+                      onChange={(e) => setEditDescription(e.target.value)}
+                      placeholder="Add a description..."
+                      rows={2}
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') setIsEditingDescription(false);
+                      }}
+                    />
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={handleSaveDescription}>
+                        <Check className="w-3.5 h-3.5 mr-1" /> Save
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setIsEditingDescription(false)}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="group/desc mt-1 flex items-start gap-1">
+                    {collection.description ? (
+                      <p className="text-muted-foreground text-sm">{collection.description}</p>
+                    ) : (
+                      <p className="text-muted-foreground/50 text-sm italic">No description</p>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 opacity-0 group-hover/desc:opacity-100 transition-opacity flex-shrink-0"
+                      onClick={startEditDescription}
+                    >
+                      <Pencil className="w-3 h-3" />
+                    </Button>
+                  </div>
+                )}
+
                 <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-muted-foreground">
                   <span>{items.length} item{items.length !== 1 ? 's' : ''}</span>
                   <span>·</span>
@@ -165,6 +291,28 @@ const CollectionDetailPage = () => {
                 <Archive className="w-4 h-4 mr-1" />
                 {collection.status === 'archived' ? 'Reactivate' : 'Archive'}
               </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
+                    <Trash2 className="w-4 h-4 mr-1" />
+                    Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete "{collection.name}"?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete this collection and unlink all items. The items themselves won't be deleted.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                      Delete Collection
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
 
