@@ -133,6 +133,7 @@ const StrategyPage = () => {
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [mapperResult, setMapperResult] = useState<MapperResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showOverlay, setShowOverlay] = useState(false);
   const [buildDiagram, setBuildDiagram] = useState(true);
   const [cadence, setCadence] = useState<CadenceFrequency>('weekly');
   const [escalation, setEscalation] = useState<EscalationPattern>('none');
@@ -373,6 +374,7 @@ const StrategyPage = () => {
     }
     
     setIsProcessing(true);
+    setShowOverlay(true);
     setMapperResult(null);
     
     try {
@@ -1304,9 +1306,10 @@ const StrategyPage = () => {
           </Card>
 
           {/* Generation Loading Overlay */}
-          {isProcessing && (
+          {showOverlay && (
             <GenerationLoadingOverlay
-              isVisible={isProcessing}
+              isVisible={showOverlay}
+              onCompletionShown={() => setShowOverlay(false)}
               context={{
                 mode: "journey",
                 profileName: selectedProfileName,

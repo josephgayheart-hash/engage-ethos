@@ -163,7 +163,8 @@ const ImageGeneratorPage = () => {
               Image Studio
             </h1>
             <p className="text-sm text-muted-foreground">
-              Create on-brand campus photography using your institution's colors, architecture, and identity.
+              Generate on-brand campus imagery using your institution's profile, colors, architecture, and identity.
+              Images are always grounded in your institutional details — upload campus photos in Content DNA Studio for even greater visual accuracy.
             </p>
           </div>
         </div>
@@ -413,7 +414,7 @@ const ImageGeneratorPage = () => {
                             "Reading your brand profile…",
                             campusPhotoCount > 0
                               ? `Training from ${campusPhotoCount} campus photo${campusPhotoCount > 1 ? "s" : ""}…`
-                              : "Matching campus colors & architecture…",
+                              : "Matching your institutional profile & brand colors…",
                             "Applying channel best practices…",
                             "Rendering with AI — optimized for this format…",
                             "Finalizing & uploading…",
@@ -429,9 +430,9 @@ const ImageGeneratorPage = () => {
                           </span>
                         ) : (
                           <span className="flex items-center justify-center gap-1">
-                            No campus photos uploaded —{" "}
+                            No campus photos uploaded — imagery uses your profile &amp; brand details.{" "}
                             <Link to="/admin/content-dna" className="text-primary hover:text-primary/80 inline-flex items-center gap-0.5 font-medium">
-                              add them <ExternalLink className="w-2.5 h-2.5" />
+                              Add photos for even more accuracy <ExternalLink className="w-2.5 h-2.5" />
                             </Link>
                           </span>
                         )}
