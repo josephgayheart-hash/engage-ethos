@@ -56,6 +56,8 @@ interface GenerationContext {
 interface GenerationLoadingOverlayProps {
   isVisible: boolean;
   context: GenerationContext;
+  /** Called after the "Ready!" celebration has played; parent can then dismiss. */
+  onCompletionShown?: () => void;
 }
 
 interface PhaseItem {
@@ -126,10 +128,10 @@ function buildPhases(ctx: GenerationContext): (PhaseItem & { key: string })[] {
       key: "photos",
       message: ctx.campusPhotoCount && ctx.campusPhotoCount > 0
         ? "Loading campus photography references…"
-        : "No campus photos uploaded — using general imagery",
-      completedMessage: ctx.campusPhotoCount && ctx.campusPhotoCount > 0
-        ? `${ctx.campusPhotoCount} campus photo${ctx.campusPhotoCount > 1 ? "s" : ""} loaded as visual reference`
-        : "No campus photos — add them in Content DNA Studio",
+      : "No campus photos uploaded — imagery guided by profile details",
+    completedMessage: ctx.campusPhotoCount && ctx.campusPhotoCount > 0
+      ? `${ctx.campusPhotoCount} campus photo${ctx.campusPhotoCount > 1 ? "s" : ""} loaded as visual reference`
+      : "No campus photos — imagery uses your institutional profile & brand",
       detail: ctx.campusPhotoCount && ctx.campusPhotoCount > 0
         ? `${ctx.campusPhotoCount} reference image${ctx.campusPhotoCount > 1 ? "s" : ""} guiding visual style`
         : undefined,
@@ -153,10 +155,10 @@ function buildPhases(ctx: GenerationContext): (PhaseItem & { key: string })[] {
     key: "photos",
     message: ctx.campusPhotoCount && ctx.campusPhotoCount > 0
       ? "Loading campus photography references…"
-      : "No campus photos uploaded — using general imagery",
+      : "No campus photos uploaded — imagery guided by profile details",
     completedMessage: ctx.campusPhotoCount && ctx.campusPhotoCount > 0
       ? `${ctx.campusPhotoCount} campus photo${ctx.campusPhotoCount > 1 ? "s" : ""} loaded as visual reference`
-      : "No campus photos — add them in Content DNA Studio",
+      : "No campus photos — imagery uses your institutional profile & brand",
     detail: ctx.campusPhotoCount && ctx.campusPhotoCount > 0
       ? `${ctx.campusPhotoCount} reference image${ctx.campusPhotoCount > 1 ? "s" : ""} guiding visual style`
       : undefined,
@@ -176,12 +178,13 @@ function buildPhases(ctx: GenerationContext): (PhaseItem & { key: string })[] {
   ];
 }
 
-export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadingOverlayProps) {
+export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown }: GenerationLoadingOverlayProps) {
   const [phase, setPhase] = useState(0);
   const [showTags, setShowTags] = useState(false);
   const [revealedPhases, setRevealedPhases] = useState<number[]>([]);
   const [revealedProofByPhase, setRevealedProofByPhase] = useState<Record<number, number>>({});
   const [allDone, setAllDone] = useState(false);
+  const [showCompletion, setShowCompletion] = useState(false);
 
   const phases = useMemo(() => buildPhases(context), [context]);
   const maxPhase = phases.length - 1;
@@ -193,6 +196,7 @@ export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadi
       setRevealedPhases([]);
       setRevealedProofByPhase({});
       setAllDone(false);
+      setShowCompletion(false);
       return;
     }
     setRevealedPhases([0]);
@@ -234,6 +238,20 @@ export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadi
 
     return () => clearInterval(proofInterval);
   }, [phase, isVisible, phases]);
+
+  // When allDone fires, show completion celebration for 2.5s before notifying parent
+  useEffect(() => {
+    if (!allDone) return;
+    // Small delay so the pop animation is visible before we declare showCompletion
+    const showTimer = setTimeout(() => setShowCompletion(true), 100);
+    const doneTimer = setTimeout(() => {
+      onCompletionShown?.();
+    }, 2800);
+    return () => {
+      clearTimeout(showTimer);
+      clearTimeout(doneTimer);
+    };
+  }, [allDone, onCompletionShown]);
 
   if (!isVisible) return null;
 
@@ -364,13 +382,15 @@ export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadi
                     )}
                     {/* No campus photos CTA */}
                     {(p as any).hasNoPhotos && (isCurrent || isComplete) && (
-                      <Link
-                        to="/admin/content-dna"
-                        className="inline-flex items-center gap-1 text-[10px] text-primary hover:text-primary/80 font-medium mt-1 transition-colors"
-                      >
-                        <ExternalLink className="w-2.5 h-2.5" />
-                        Upload campus photos in Content DNA Studio →
-                      </Link>
+                      <p className="text-[10px] text-muted-foreground/70 mt-0.5">
+                        Imagery is guided by your institutional profile &amp; brand.{" "}
+                        <Link
+                          to="/admin/content-dna"
+                          className="inline-flex items-center gap-0.5 text-primary hover:text-primary/80 font-medium transition-colors"
+                        >
+                          Add photos for more accuracy <ExternalLink className="w-2.5 h-2.5" />
+                        </Link>
+                      </p>
                     )}
                     {/* Proof items — flash in one by one */}
                     {proofItems.length > 0 && visibleProofCount > 0 && (
@@ -447,12 +467,12 @@ export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadi
         </div>
 
         {/* Completion pop or estimated time */}
-        {allDone ? (
-          <div className="flex flex-col items-center gap-2" style={{ animation: "completionPop 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards" }}>
-            <div className="w-12 h-12 rounded-full bg-green-500/15 flex items-center justify-center border-2 border-green-500/30" style={{ animation: "completionRing 1.2s ease-out forwards" }}>
-              <Check className="w-6 h-6 text-green-500" style={{ animation: "completionCheck 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards", opacity: 0 }} />
+        {showCompletion ? (
+          <div className="flex flex-col items-center gap-3 py-2" style={{ animation: "completionPop 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards" }}>
+            <div className="w-14 h-14 rounded-full bg-primary/15 flex items-center justify-center border-2 border-primary/30 shadow-lg" style={{ animation: "completionRing 1.5s ease-out forwards" }}>
+              <Check className="w-7 h-7 text-primary" style={{ animation: "completionCheck 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards", opacity: 0 }} />
             </div>
-            <p className="text-sm font-semibold text-foreground animate-fade-in" style={{ animationDelay: '0.5s', opacity: 0, animationFillMode: 'forwards' }}>Ready!</p>
+            <p className="text-base font-bold text-foreground" style={{ animation: "completionPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.6s forwards", opacity: 0 }}>Ready!</p>
           </div>
         ) : (
           <p className="text-xs text-muted-foreground">
@@ -535,13 +555,13 @@ export function GenerationLoadingOverlay({ isVisible, context }: GenerationLoadi
         }
         @keyframes completionRing {
           0% {
-            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+            box-shadow: 0 0 0 0 hsl(var(--primary) / 0.5);
           }
-          50% {
-            box-shadow: 0 0 0 12px rgba(34, 197, 94, 0);
+          40% {
+            box-shadow: 0 0 0 16px hsl(var(--primary) / 0.15);
           }
           100% {
-            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+            box-shadow: 0 0 0 24px hsl(var(--primary) / 0);
           }
         }
         @keyframes completionCheck {

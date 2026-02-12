@@ -60,6 +60,8 @@ export function CampusPhotographyTab({ profileId }: CampusPhotographyTabProps) {
         <AlertDescription className="text-sm">
           Upload your best campus photography — building exteriors, quad shots, student life candids, iconic landmarks. 
           These teach the AI what your campus actually looks like, so generated images match your real aesthetic.
+          <strong className="block mt-1">Even without photos, all generated imagery uses your institutional profile, brand colors, and identity details.</strong>
+          Adding photos takes accuracy even further by grounding visuals in your actual campus environment.
         </AlertDescription>
       </Alert>
 
