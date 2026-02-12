@@ -400,8 +400,8 @@ const ImageGeneratorPage = () => {
                           {[
                             "Reading your brand profile…",
                             "Matching campus colors & architecture…",
-                            "Composing your scene…",
-                            "Rendering with AI…",
+                            "Applying channel best practices…",
+                            "Rendering with AI — optimized for this format…",
                             "Finalizing & uploading…",
                           ][generationPhase]}
                         </p>
