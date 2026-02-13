@@ -94,7 +94,7 @@ export const BrandOverlayCanvas = forwardRef<HTMLDivElement, BrandOverlayCanvasP
     const [isEditing, setIsEditing] = useState(false);
     const [isSelected, setIsSelected] = useState(false);
     const [isResizing, setIsResizing] = useState(false);
-    const resizeStartRef = useRef<{ startX: number; startWidth: number } | null>(null);
+    const resizeRef = useRef<{ side: "left" | "right"; startX: number; startWidth: number } | null>(null);
     const headlineRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const isCustomPattern = overlayPattern.startsWith("custom:");
@@ -114,35 +114,42 @@ export const BrandOverlayCanvas = forwardRef<HTMLDivElement, BrandOverlayCanvasP
       return () => document.removeEventListener("pointerdown", handleClickOutside);
     }, [isSelected]);
 
-    const handleResizePointerDown = useCallback((e: RPointerEvent, _side: "left" | "right") => {
+    // Document-level move/up for smooth resizing
+    useEffect(() => {
+      if (!isResizing) return;
+      const handleMove = (e: PointerEvent) => {
+        if (!resizeRef.current) return;
+        const canvas = (ref as React.RefObject<HTMLDivElement>)?.current;
+        if (!canvas) return;
+        const canvasWidth = canvas.getBoundingClientRect().width;
+        const deltaX = e.clientX - resizeRef.current.startX;
+        const multiplier = resizeRef.current.side === "right" ? 2 : -2;
+        const newWidthPx = resizeRef.current.startWidth + deltaX * multiplier;
+        const newWidthPct = Math.max(15, Math.min(100, (newWidthPx / canvasWidth) * 100));
+        onHeadlineWidthChange?.(Math.round(newWidthPct));
+      };
+      const handleUp = () => {
+        setIsResizing(false);
+        resizeRef.current = null;
+      };
+      document.addEventListener("pointermove", handleMove);
+      document.addEventListener("pointerup", handleUp);
+      return () => {
+        document.removeEventListener("pointermove", handleMove);
+        document.removeEventListener("pointerup", handleUp);
+      };
+    }, [isResizing, ref, onHeadlineWidthChange]);
+
+    const handleResizePointerDown = useCallback((e: RPointerEvent, side: "left" | "right") => {
       e.preventDefault();
       e.stopPropagation();
       const canvas = (ref as React.RefObject<HTMLDivElement>)?.current;
       if (!canvas) return;
       const canvasWidth = canvas.getBoundingClientRect().width;
       const currentWidthPx = ((headlineWidth || 90) / 100) * canvasWidth;
-      resizeStartRef.current = { startX: e.clientX, startWidth: currentWidthPx };
+      resizeRef.current = { side, startX: e.clientX, startWidth: currentWidthPx };
       setIsResizing(true);
-      (e.target as HTMLElement).setPointerCapture(e.pointerId);
     }, [headlineWidth, ref]);
-
-    const handleResizePointerMove = useCallback((e: RPointerEvent, side: "left" | "right") => {
-      if (!isResizing || !resizeStartRef.current) return;
-      const canvas = (ref as React.RefObject<HTMLDivElement>)?.current;
-      if (!canvas) return;
-      const canvasWidth = canvas.getBoundingClientRect().width;
-      const deltaX = e.clientX - resizeStartRef.current.startX;
-      // Both handles expand/contract symmetrically: left drag-left = wider, right drag-right = wider
-      const multiplier = side === "right" ? 2 : -2;
-      const newWidthPx = resizeStartRef.current.startWidth + deltaX * multiplier;
-      const newWidthPct = Math.max(15, Math.min(100, (newWidthPx / canvasWidth) * 100));
-      onHeadlineWidthChange?.(Math.round(newWidthPct));
-    }, [isResizing, ref, onHeadlineWidthChange]);
-
-    const handleResizePointerUp = useCallback(() => {
-      setIsResizing(false);
-      resizeStartRef.current = null;
-    }, []);
 
     const handleDoubleClick = useCallback((e: React.MouseEvent) => {
       e.preventDefault();
@@ -224,15 +231,11 @@ export const BrandOverlayCanvas = forwardRef<HTMLDivElement, BrandOverlayCanvasP
                 <div
                   className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-8 bg-white border border-border rounded-sm shadow-md cursor-ew-resize z-10 hover:bg-primary/20 transition-colors"
                   onPointerDown={(e) => handleResizePointerDown(e, "left")}
-                  onPointerMove={(e) => handleResizePointerMove(e, "left")}
-                  onPointerUp={handleResizePointerUp}
                 />
                 {/* Right handle */}
                 <div
                   className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3 h-8 bg-white border border-border rounded-sm shadow-md cursor-ew-resize z-10 hover:bg-primary/20 transition-colors"
                   onPointerDown={(e) => handleResizePointerDown(e, "right")}
-                  onPointerMove={(e) => handleResizePointerMove(e, "right")}
-                  onPointerUp={handleResizePointerUp}
                 />
                 {/* Selection border */}
                 <div className="absolute inset-0 border-2 border-white/60 border-dashed rounded pointer-events-none" />
