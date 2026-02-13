@@ -63,6 +63,8 @@ export interface BrandOverlayControlsProps {
   onHeadlineAlignChange: (v: HeadlineAlign) => void;
   headlineFont: string;
   onHeadlineFontChange: (v: string) => void;
+  headlineWidth?: number;
+  onHeadlineWidthChange?: (v: number) => void;
   headlineBold?: boolean;
   onHeadlineBoldChange?: (v: boolean) => void;
   headlineItalic?: boolean;
@@ -121,6 +123,8 @@ export function BrandOverlayControls({
   onHeadlineAlignChange,
   headlineFont,
   onHeadlineFontChange,
+  headlineWidth,
+  onHeadlineWidthChange,
   headlineBold,
   onHeadlineBoldChange,
   headlineItalic,
@@ -379,6 +383,18 @@ export function BrandOverlayControls({
                 step={1}
               />
             </div>
+            {onHeadlineWidthChange && (
+              <div className="space-y-1">
+                <Label className="text-[10px]">Text Box Width — {headlineWidth || 90}%</Label>
+                <Slider
+                  value={[headlineWidth || 90]}
+                  onValueChange={([v]) => onHeadlineWidthChange(v)}
+                  min={15}
+                  max={100}
+                  step={1}
+                />
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1">
                 <Label className="text-[10px]">Color</Label>

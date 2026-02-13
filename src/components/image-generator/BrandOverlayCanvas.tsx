@@ -37,6 +37,7 @@ export interface BrandOverlayCanvasProps {
   headlineColor: string;
   headlineAlign: HeadlineAlign;
   headlineFont: string;
+  headlineWidth?: number;
   headlineBold?: boolean;
   headlineItalic?: boolean;
   headlineUnderline?: boolean;
@@ -72,6 +73,7 @@ export const BrandOverlayCanvas = forwardRef<HTMLDivElement, BrandOverlayCanvasP
       headlineColor,
       headlineAlign,
       headlineFont,
+      headlineWidth,
       headlineBold,
       headlineItalic,
       headlineUnderline,
@@ -175,7 +177,7 @@ export const BrandOverlayCanvas = forwardRef<HTMLDivElement, BrandOverlayCanvasP
               top: `${headlineY}%`,
               transform: "translate(-50%, -50%)",
               cursor: isEditing ? "text" : isDragging ? "grabbing" : "grab",
-              maxWidth: "90%",
+              maxWidth: `${headlineWidth || 90}%`,
               lineHeight: 1.2,
               minWidth: isEditing ? "80px" : undefined,
               minHeight: isEditing ? "1.2em" : undefined,
