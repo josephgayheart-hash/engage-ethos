@@ -95,6 +95,7 @@ const ImageGeneratorPage = () => {
   const profileConfig = selectedProfile?.config as Record<string, any> | undefined;
   const brandColors = [profileConfig?.primaryColor, profileConfig?.secondaryColor, profileConfig?.tertiaryColor, profileConfig?.accentColor].filter(Boolean) as string[];
   const profileLogoUrl = profileConfig?.logoUrl as string | undefined;
+  const profileLogoUrls = [profileConfig?.logoUrl, profileConfig?.logoUrlAlt, profileConfig?.logoUrlIcon].filter(Boolean) as string[];
   const profileInstitutionName = selectedProfile?.name || profileConfig?.institutionName as string | undefined;
 
   const handleGenerate = useCallback(async () => {
@@ -569,6 +570,7 @@ const ImageGeneratorPage = () => {
                           imageUrl={blankCanvasMode ? null : imageUrl}
                           brandColors={brandColors}
                           logoUrl={profileLogoUrl}
+                          logoUrls={profileLogoUrls}
                           institutionName={profileInstitutionName}
                           channel={channel}
                         />
