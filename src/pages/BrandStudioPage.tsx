@@ -6,8 +6,11 @@ import { Button } from "@/components/ui/button";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { BrandOverlayEditor } from "@/components/image-generator/BrandOverlayEditor";
 import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
+import { AddToCollectionDialog } from "@/components/library/AddToCollectionDialog";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
-import { ArrowLeft, Download, Maximize2, FolderPlus } from "lucide-react";
+import { useLibraryCollections } from "@/hooks/useLibraryCollections";
+import { ArrowLeft, Download, Maximize2, FolderPlus, Folder } from "lucide-react";
+import type { CollectionType } from "@/types/library";
 
 interface BrandStudioState {
   imageUrl: string | null;
@@ -29,7 +32,10 @@ const BrandStudioPage = () => {
   const state = (location.state as BrandStudioState | null) || {} as Partial<BrandStudioState>;
   const canvasRef = useRef<HTMLDivElement>(null);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [collectionDialogOpen, setCollectionDialogOpen] = useState(false);
+  const [lastSavedMessageId, setLastSavedMessageId] = useState<string | null>(null);
   const { addMessage } = useMessageLibrary();
+  const { collections, addItemToCollection, createCollection } = useLibraryCollections();
 
   const {
     imageUrl = null,
@@ -80,12 +86,50 @@ const BrandStudioPage = () => {
         institutionalProfileId: profileId,
         institutionalProfileName: institutionName,
       });
+      if (result?.id) {
+        setLastSavedMessageId(result.id);
+      }
       return result?.id;
     } catch {
       toast.error("Failed to capture image for library.");
       return undefined;
     }
   }, [channel, profileId, institutionName, addMessage]);
+
+  const handleAddToExistingCollection = useCallback(async (collectionId: string) => {
+    if (!lastSavedMessageId) {
+      toast.error("Save to library first before adding to a collection.");
+      return;
+    }
+    const success = await addItemToCollection(collectionId, {
+      itemType: "message",
+      messageId: lastSavedMessageId,
+    });
+    if (success) {
+      toast.success("Added to collection!");
+    } else {
+      toast.error("Failed to add to collection.");
+    }
+  }, [lastSavedMessageId, addItemToCollection]);
+
+  const handleCreateAndAddToCollection = useCallback(async (input: { name: string; description?: string; collectionType: CollectionType }) => {
+    if (!lastSavedMessageId) {
+      toast.error("Save to library first before adding to a collection.");
+      return;
+    }
+    const collection = await createCollection(input);
+    if (collection?.id) {
+      const success = await addItemToCollection(collection.id, {
+        itemType: "message",
+        messageId: lastSavedMessageId,
+      });
+      if (success) {
+        toast.success(`Created "${input.name}" and added image!`);
+      }
+    } else {
+      toast.error("Failed to create collection.");
+    }
+  }, [lastSavedMessageId, createCollection, addItemToCollection]);
 
   const handleGoBack = useCallback(() => {
     navigate(-1);
@@ -124,6 +168,12 @@ const BrandStudioPage = () => {
           </h1>
         </div>
         <div className="flex items-center gap-2">
+          {lastSavedMessageId && (
+            <Button variant="outline" size="sm" onClick={() => setCollectionDialogOpen(true)}>
+              <Folder className="w-4 h-4 mr-1.5" />
+              Add to Collection
+            </Button>
+          )}
           <Button variant="outline" size="sm" onClick={() => setSaveDialogOpen(true)}>
             <FolderPlus className="w-4 h-4 mr-1.5" />
             Save to Library
@@ -188,6 +238,20 @@ const BrandStudioPage = () => {
                   </div>
                 </div>
               )}
+              {lastSavedMessageId && (
+                <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 space-y-2">
+                  <p className="text-xs font-medium text-green-800 dark:text-green-200">✓ Saved to Library</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs"
+                    onClick={() => setCollectionDialogOpen(true)}
+                  >
+                    <Folder className="w-3.5 h-3.5 mr-1.5" />
+                    Add to a Collection
+                  </Button>
+                </div>
+              )}
             </div>
           </ResizablePanel>
         </ResizablePanelGroup>
@@ -200,6 +264,14 @@ const BrandStudioPage = () => {
         libraryType="personal"
         contentType="branded image"
         defaultName={`${institutionName || "Branded"} — ${channel || "image"}`}
+      />
+
+      <AddToCollectionDialog
+        open={collectionDialogOpen}
+        onOpenChange={setCollectionDialogOpen}
+        collections={collections}
+        onAddToExisting={handleAddToExistingCollection}
+        onCreateAndAdd={handleCreateAndAddToCollection}
       />
     </div>
   );
