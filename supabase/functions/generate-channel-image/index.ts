@@ -567,17 +567,24 @@ CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
     const refusalMessage = aiData.choices?.[0]?.message?.refusal;
 
     if (!imageDataUrl) {
-      // Detect content policy / safety filter blocks
+      const responseContent = (aiData.choices?.[0]?.message?.content || "").toLowerCase();
+      console.error("No image in AI response. finish_reason:", finishReason, "refusal:", refusalMessage, "content:", aiData.choices?.[0]?.message?.content);
+
+      // Detect content policy / safety filter blocks — broad detection
+      const contentFilterPhrases = [
+        "i can't", "i cannot", "i'm not able", "i am not able",
+        "not able to generate", "against my policy", "unable to generate",
+        "inappropriate", "violates", "safety", "harmful", "offensive",
+        "not appropriate", "can not create", "can't create", "cannot create",
+        "not permitted", "policy", "guidelines", "content policy",
+      ];
       const isContentFiltered = finishReason === "content_filter" 
         || finishReason === "safety"
         || refusalMessage
-        || (aiData.choices?.[0]?.message?.content || "").toLowerCase().includes("i can't")
-        || (aiData.choices?.[0]?.message?.content || "").toLowerCase().includes("i cannot")
-        || (aiData.choices?.[0]?.message?.content || "").toLowerCase().includes("not able to generate")
-        || (aiData.choices?.[0]?.message?.content || "").toLowerCase().includes("against my policy");
+        || contentFilterPhrases.some(phrase => responseContent.includes(phrase));
 
       if (isContentFiltered) {
-        console.warn("Image generation blocked by content policy for prompt");
+        console.warn("Image generation blocked by content policy");
         return new Response(JSON.stringify({ 
           error: "Your prompt was flagged by our content safety filters. Please revise your description to remove inappropriate, offensive, or explicit content and try again." 
         }), {
@@ -585,9 +592,11 @@ CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
         });
       }
 
-      console.error("No image in AI response");
-      return new Response(JSON.stringify({ error: "No image was generated. Try rephrasing your description or using a different scene." }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      // If no image and no clear reason, still give a helpful message
+      return new Response(JSON.stringify({ 
+        error: "The image could not be generated. This may be due to content restrictions or a temporary issue. Try rephrasing your description and ensure it describes an appropriate campus scene." 
+      }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
