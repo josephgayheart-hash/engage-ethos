@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Download, Type, Image as ImageIcon, AlignLeft, AlignCenter, AlignRight, ChevronLeft, ChevronRight, Move } from "lucide-react";
+import { Download, Type, Image as ImageIcon, AlignLeft, AlignCenter, AlignRight, ChevronLeft, ChevronRight, Move, Sparkles, Loader2 } from "lucide-react";
 import { OverlayPatternSelector } from "./OverlayPatternSelector";
 import { getOverlayStyle, type OverlayPatternId } from "./overlayPatterns";
-import { useCustomOverlays, type CustomOverlay } from "@/hooks/useCustomOverlays";
+import { useCustomOverlays } from "@/hooks/useCustomOverlays";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
 interface BrandOverlayEditorProps {
@@ -20,10 +21,12 @@ interface BrandOverlayEditorProps {
   logoUrls?: string[];
   institutionName?: string;
   channel?: string;
-  /** When true, hides download button (used in studio page) */
   hideDownload?: boolean;
-  /** Expose canvas ref for external download */
-  canvasRef?: React.RefObject<HTMLDivElement>;
+  /** Context from the image generation form for AI headline generation */
+  sceneDescription?: string;
+  audience?: string;
+  tone?: string;
+  goal?: string;
 }
 
 type LogoPosition = "top-left" | "top-right" | "bottom-left" | "bottom-right";
@@ -78,10 +81,12 @@ export function BrandOverlayEditor({
   institutionName,
   channel,
   hideDownload,
-  canvasRef: externalCanvasRef,
+  sceneDescription,
+  audience,
+  tone,
+  goal,
 }: BrandOverlayEditorProps) {
-  const internalCanvasRef = useRef<HTMLDivElement>(null);
-  const canvasRef = externalCanvasRef || internalCanvasRef;
+  const canvasRef = useRef<HTMLDivElement>(null);
 
   const primary = brandColors[0] || "#1e3a5f";
   const secondary = brandColors[1] || brandColors[0] || "#c0392b";
@@ -120,6 +125,10 @@ export function BrandOverlayEditor({
   const [bottomBarText, setBottomBarText] = useState("");
   const [bottomBarColor, setBottomBarColor] = useState(primary);
 
+  // AI generation state
+  const [isGeneratingHeadline, setIsGeneratingHeadline] = useState(false);
+  const [isGeneratingCta, setIsGeneratingCta] = useState(false);
+
   useGoogleFont(headlineFont);
 
   const isCustomPattern = overlayPattern.startsWith('custom:');
@@ -128,11 +137,45 @@ export function BrandOverlayEditor({
     : getOverlayStyle(overlayPattern as OverlayPatternId, overlayColor, overlayOpacity, secondary);
   const activeLogo = allLogos[activeLogoIndex] || allLogos[0];
 
+  // AI text generation
+  const generateAIText = useCallback(async (type: "headline" | "cta") => {
+    const setLoading = type === "headline" ? setIsGeneratingHeadline : setIsGeneratingCta;
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-overlay-text", {
+        body: {
+          type,
+          channel,
+          audience,
+          tone,
+          institutionName,
+          goal,
+          sceneDescription,
+        },
+      });
+      if (error) throw error;
+      if (data?.text) {
+        if (type === "headline") {
+          setHeadlineText(data.text);
+        } else {
+          setBottomBarText(data.text);
+          if (!showBottomBar) setShowBottomBar(true);
+        }
+        toast.success(`${type === "headline" ? "Headline" : "CTA"} generated!`);
+      }
+    } catch (err: any) {
+      console.error("AI text generation failed:", err);
+      toast.error(err?.message || `Failed to generate ${type}. Try again.`);
+    } finally {
+      setLoading(false);
+    }
+  }, [channel, audience, tone, institutionName, goal, sceneDescription, showBottomBar]);
+
   // Drag handlers
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const canvas = (canvasRef as React.RefObject<HTMLDivElement>).current;
+    const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
     const currentPxX = (headlineX / 100) * rect.width;
@@ -143,28 +186,27 @@ export function BrandOverlayEditor({
     };
     setIsDragging(true);
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  }, [headlineX, headlineY, canvasRef]);
+  }, [headlineX, headlineY]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!isDragging) return;
-    const canvas = (canvasRef as React.RefObject<HTMLDivElement>).current;
+    const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
     const newX = ((e.clientX - rect.left - dragOffset.current.x) / rect.width) * 100;
     const newY = ((e.clientY - rect.top - dragOffset.current.y) / rect.height) * 100;
     setHeadlineX(Math.max(5, Math.min(95, newX)));
     setHeadlineY(Math.max(5, Math.min(95, newY)));
-  }, [isDragging, canvasRef]);
+  }, [isDragging]);
 
   const handlePointerUp = useCallback(() => {
     setIsDragging(false);
   }, []);
 
   const handleDownload = useCallback(async () => {
-    const ref = (canvasRef as React.RefObject<HTMLDivElement>).current;
-    if (!ref) return;
+    if (!canvasRef.current) return;
     try {
-      const dataUrl = await toPng(ref, { pixelRatio: 2 });
+      const dataUrl = await toPng(canvasRef.current, { pixelRatio: 2 });
       const a = document.createElement("a");
       a.href = dataUrl;
       a.download = `branded-${channel || "image"}-${Date.now()}.png`;
@@ -175,22 +217,17 @@ export function BrandOverlayEditor({
     } catch {
       toast.error("Download failed. Try again.");
     }
-  }, [channel, canvasRef]);
+  }, [channel]);
 
   return (
     <div className="space-y-4">
       {/* Live Preview */}
       <div
-        ref={internalCanvasRef === canvasRef ? internalCanvasRef : undefined}
-        {...(externalCanvasRef ? {} : {})}
+        ref={canvasRef}
         id="brand-overlay-canvas"
         className="relative w-full overflow-hidden rounded-lg bg-muted"
         style={{ aspectRatio: "1 / 1" }}
       >
-        {/* Use the correct ref */}
-        {externalCanvasRef && (
-          <div ref={externalCanvasRef as any} className="absolute inset-0" style={{ display: 'none' }} />
-        )}
         {imageUrl ? (
           <img src={imageUrl} alt="Base" className="absolute inset-0 w-full h-full object-cover" />
         ) : (
@@ -199,7 +236,7 @@ export function BrandOverlayEditor({
         {isCustomPattern && customOverlayUrl ? (
           <img src={customOverlayUrl} alt="Custom overlay" className="absolute inset-0 w-full h-full object-cover" style={{ opacity: overlayOpacity }} />
         ) : (
-          <div className="absolute inset-0" style={overlayStyle} />
+          <div className="absolute inset-0 w-full h-full" style={overlayStyle} />
         )}
         {showLogo && activeLogo && (
           <img
@@ -372,9 +409,25 @@ export function BrandOverlayEditor({
 
         {/* Headline Controls */}
         <div className="space-y-2 border-t border-border pt-3">
-          <Label className="text-xs flex items-center gap-1.5">
-            <Type className="w-3.5 h-3.5" /> Headline
-          </Label>
+          <div className="flex items-center justify-between">
+            <Label className="text-xs flex items-center gap-1.5">
+              <Type className="w-3.5 h-3.5" /> Headline
+            </Label>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 text-[10px] gap-1 px-2"
+              onClick={() => generateAIText("headline")}
+              disabled={isGeneratingHeadline}
+            >
+              {isGeneratingHeadline ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Sparkles className="w-3 h-3" />
+              )}
+              Generate
+            </Button>
+          </div>
           <Input
             placeholder={institutionName || "Enter headline text…"}
             value={headlineText}
@@ -472,7 +525,23 @@ export function BrandOverlayEditor({
         <div className="space-y-2 border-t border-border pt-3">
           <div className="flex items-center justify-between">
             <Label className="text-xs">Bottom CTA Bar</Label>
-            <Switch checked={showBottomBar} onCheckedChange={setShowBottomBar} />
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 text-[10px] gap-1 px-2"
+                onClick={() => generateAIText("cta")}
+                disabled={isGeneratingCta}
+              >
+                {isGeneratingCta ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  <Sparkles className="w-3 h-3" />
+                )}
+                Generate
+              </Button>
+              <Switch checked={showBottomBar} onCheckedChange={setShowBottomBar} />
+            </div>
           </div>
           {showBottomBar && (
             <div className="space-y-2">

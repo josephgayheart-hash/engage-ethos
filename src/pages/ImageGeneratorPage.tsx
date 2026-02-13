@@ -565,13 +565,17 @@ const ImageGeneratorPage = () => {
                             <Link
                               to="/brand-studio"
                               state={{
-                                imageUrl: blankCanvasMode ? null : imageUrl,
-                                brandColors,
-                                logoUrl: profileLogoUrl,
-                                logoUrls: profileLogoUrls,
-                                institutionName: profileInstitutionName,
-                                channel,
-                                profileId: selectedProfileId,
+                              imageUrl: blankCanvasMode ? null : imageUrl,
+                              brandColors,
+                              logoUrl: profileLogoUrl,
+                              logoUrls: profileLogoUrls,
+                              institutionName: profileInstitutionName,
+                              channel,
+                              profileId: selectedProfileId,
+                              sceneDescription: contentDescription,
+                              audience,
+                              tone,
+                              goal,
                               }}
                               className="flex items-center justify-center gap-1 px-2 py-1.5 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground transition-all"
                               title="Open in Brand It Studio"
@@ -593,6 +597,10 @@ const ImageGeneratorPage = () => {
                           logoUrls={profileLogoUrls}
                           institutionName={profileInstitutionName}
                           channel={channel}
+                          sceneDescription={contentDescription}
+                          audience={audience}
+                          tone={tone}
+                          goal={goal}
                         />
                       ) : viewMode === "mockup" && imageUrl ? (
                         <ChannelMockup
