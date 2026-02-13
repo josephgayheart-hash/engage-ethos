@@ -524,7 +524,9 @@ export interface InstitutionalConfig {
   // Institution Classification
   institutionType?: InstitutionType;
   // Visual Branding
-  logoUrl?: string;              // Profile-specific logo
+  logoUrl?: string;              // Profile-specific logo (primary)
+  logoUrlAlt?: string;           // Alternate logo (e.g. horizontal/stacked variant)
+  logoUrlIcon?: string;          // Icon/mark-only logo (e.g. favicon, social avatar)
   primaryColor?: string;         // Primary brand color (hex)
   secondaryColor?: string;       // Secondary brand color (hex)
   tertiaryColor?: string;        // Tertiary brand color (hex)

@@ -103,12 +103,11 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
     onChange({ ...config, [field]: currentArray.filter(v => v !== value) });
   };
 
-  // Handle logo upload for this profile
-  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Generic logo upload handler for any logo field
+  const handleLogoUploadForField = async (event: React.ChangeEvent<HTMLInputElement>, field: 'logoUrl' | 'logoUrlAlt' | 'logoUrlIcon') => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validate file type and size
     if (!file.type.startsWith('image/')) {
       toast({
         variant: "destructive",
@@ -131,7 +130,8 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
 
     try {
       const fileExt = file.name.split('.').pop()?.toLowerCase() || 'png';
-      const fileName = `${tenant?.id || 'unknown'}/profile-${profileId || 'default'}-logo-${Date.now()}.${fileExt}`;
+      const suffix = field === 'logoUrlAlt' ? '-alt' : field === 'logoUrlIcon' ? '-icon' : '';
+      const fileName = `${tenant?.id || 'unknown'}/profile-${profileId || 'default'}-logo${suffix}-${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('logos')
@@ -146,7 +146,7 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
         .from('logos')
         .getPublicUrl(fileName);
 
-      onChange({ ...config, logoUrl: publicUrl });
+      onChange({ ...config, [field]: publicUrl });
 
       toast({
         title: "Logo uploaded",
@@ -161,10 +161,12 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
       });
     } finally {
       setIsUploadingLogo(false);
-      // Reset input
       event.target.value = '';
     }
   };
+
+  // Convenience wrapper for primary logo
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => handleLogoUploadForField(event, 'logoUrl');
 
   const handleRemoveLogo = () => {
     onChange({ ...config, logoUrl: undefined });
@@ -431,7 +433,98 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
             </div>
           </div>
 
-          {/* Brand Colors Section */}
+          {/* Alternate Logo Variants */}
+          <div className="p-4 bg-muted/50 rounded-lg">
+            <h4 className="font-medium text-sm flex items-center gap-2 mb-1">
+              <ImageIcon className="w-4 h-4" />
+              Additional Logo Variants
+            </h4>
+            <p className="text-xs text-muted-foreground mb-3">
+              Upload alternate logo versions for use in branded image overlays and social graphics. These are optional.
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              {/* Alternate Logo */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">Alternate Logo</Label>
+                <p className="text-[10px] text-muted-foreground">Horizontal, stacked, or reversed variant</p>
+                <div className="flex items-center gap-3 mt-1">
+                  {config.logoUrlAlt ? (
+                    <div className="relative">
+                      <img src={config.logoUrlAlt} alt="Alt logo" className="w-14 h-14 object-contain rounded border border-border bg-white p-1" />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute -top-1.5 -right-1.5 h-5 w-5"
+                        onClick={() => {
+                          onChange({ ...config, logoUrlAlt: undefined });
+                          toast({ title: "Alternate logo removed" });
+                        }}
+                      >
+                        <X className="w-2.5 h-2.5" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <label className="w-14 h-14 rounded border-2 border-dashed border-muted-foreground/30 flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors bg-background">
+                      {isUploadingLogo ? (
+                        <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                      ) : (
+                        <Upload className="w-4 h-4 text-muted-foreground" />
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handleLogoUploadForField(e, 'logoUrlAlt')}
+                        disabled={isUploadingLogo}
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
+
+              {/* Icon Logo */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">Icon / Mark</Label>
+                <p className="text-[10px] text-muted-foreground">Square icon, favicon, or social avatar</p>
+                <div className="flex items-center gap-3 mt-1">
+                  {config.logoUrlIcon ? (
+                    <div className="relative">
+                      <img src={config.logoUrlIcon} alt="Icon logo" className="w-14 h-14 object-contain rounded border border-border bg-white p-1" />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute -top-1.5 -right-1.5 h-5 w-5"
+                        onClick={() => {
+                          onChange({ ...config, logoUrlIcon: undefined });
+                          toast({ title: "Icon logo removed" });
+                        }}
+                      >
+                        <X className="w-2.5 h-2.5" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <label className="w-14 h-14 rounded border-2 border-dashed border-muted-foreground/30 flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors bg-background">
+                      {isUploadingLogo ? (
+                        <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                      ) : (
+                        <Upload className="w-4 h-4 text-muted-foreground" />
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handleLogoUploadForField(e, 'logoUrlIcon')}
+                        disabled={isUploadingLogo}
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="p-4 bg-muted/50 rounded-lg">
             <h4 className="font-medium text-sm flex items-center gap-2 mb-3">
               <span className="w-4 h-4 rounded-full bg-gradient-to-r from-primary to-accent" />

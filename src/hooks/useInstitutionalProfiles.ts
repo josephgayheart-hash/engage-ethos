@@ -20,6 +20,8 @@ export interface InstitutionalProfile {
 const createEmptyConfig = (): InstitutionalConfig => ({
   // Visual Branding
   logoUrl: '',
+  logoUrlAlt: '',
+  logoUrlIcon: '',
   primaryColor: '#1F2A44',
   accentColor: '#2C7A7B',
   
