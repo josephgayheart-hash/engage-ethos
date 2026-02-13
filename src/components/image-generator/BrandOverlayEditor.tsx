@@ -159,6 +159,7 @@ export function BrandOverlayEditor({
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
+        onHeadlineWidthChange={setHeadlineWidth}
         showBottomBar={showBottomBar}
         bottomBarText={bottomBarText}
         bottomBarColor={bottomBarColor}
