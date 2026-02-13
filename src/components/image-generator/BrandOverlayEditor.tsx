@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Download, Type, Image as ImageIcon, AlignLeft, AlignCenter, AlignRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { OverlayPatternSelector } from "./OverlayPatternSelector";
 import { getOverlayStyle, type OverlayPatternId } from "./overlayPatterns";
+import { useCustomOverlays, type CustomOverlay } from "@/hooks/useCustomOverlays";
 import { cn } from "@/lib/utils";
 
 interface BrandOverlayEditorProps {
@@ -99,9 +100,13 @@ export function BrandOverlayEditor({
   const allLogos = Array.from(new Set([logoUrl, ...(logoUrls || [])].filter(Boolean))) as string[];
 
   // Overlay state
-  const [overlayPattern, setOverlayPattern] = useState<OverlayPatternId>("solid");
+  const [overlayPattern, setOverlayPattern] = useState<OverlayPatternId | string>("solid");
   const [overlayColor, setOverlayColor] = useState(primary);
   const [overlayOpacity, setOverlayOpacity] = useState(0.55);
+  const [customOverlayUrl, setCustomOverlayUrl] = useState<string | null>(null);
+
+  // Fetch custom overlays for the selected profile
+  const { overlays: customOverlays } = useCustomOverlays(undefined);
 
   // Logo state
   const [showLogo, setShowLogo] = useState(!!logoUrl);
@@ -124,7 +129,10 @@ export function BrandOverlayEditor({
 
   useGoogleFont(headlineFont);
 
-  const overlayStyle = getOverlayStyle(overlayPattern, overlayColor, overlayOpacity, secondary);
+  const isCustomPattern = overlayPattern.startsWith('custom:');
+  const overlayStyle = isCustomPattern
+    ? { opacity: overlayOpacity }
+    : getOverlayStyle(overlayPattern as OverlayPatternId, overlayColor, overlayOpacity, secondary);
   const activeLogo = allLogos[activeLogoIndex] || allLogos[0];
 
   const handleDownload = useCallback(async () => {
@@ -157,7 +165,11 @@ export function BrandOverlayEditor({
         ) : (
           <div className="absolute inset-0" style={{ backgroundColor: primary }} />
         )}
-        <div className="absolute inset-0" style={overlayStyle} />
+        {isCustomPattern && customOverlayUrl ? (
+          <img src={customOverlayUrl} alt="Custom overlay" className="absolute inset-0 w-full h-full object-cover" style={{ opacity: overlayOpacity }} />
+        ) : (
+          <div className="absolute inset-0" style={overlayStyle} />
+        )}
         {showLogo && activeLogo && (
           <img
             src={activeLogo}
@@ -237,6 +249,8 @@ export function BrandOverlayEditor({
             onChange={setOverlayPattern}
             brandColor={overlayColor}
             secondaryColor={secondary}
+            customOverlays={customOverlays}
+            onCustomOverlaySelect={(overlay) => setCustomOverlayUrl(overlay.fileUrl)}
           />
         </div>
 

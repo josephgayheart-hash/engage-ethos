@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useCustomOverlays } from "@/hooks/useCustomOverlays";
+import { Layers } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -524,6 +526,9 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
               </div>
             </div>
           </div>
+
+          {/* Custom Overlay Patterns */}
+          <CustomOverlayUploadSection profileId={profileId} tenantId={tenant?.id} />
 
           <div className="p-4 bg-muted/50 rounded-lg">
             <h4 className="font-medium text-sm flex items-center gap-2 mb-3">
@@ -1208,6 +1213,114 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
         <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg mt-6">
           <Check className="w-4 h-4 text-green-600" />
           <span>Institutional settings will personalize all AI-generated message outputs.</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Custom Overlay Upload Section ──
+function CustomOverlayUploadSection({ profileId, tenantId }: { profileId?: string; tenantId?: string }) {
+  const {
+    overlays,
+    isUploading,
+    canUploadMore,
+    selfServiceCount,
+    selfServiceLimit,
+    uploadOverlay,
+    deleteOverlay,
+  } = useCustomOverlays(profileId);
+  const { toast } = useToast();
+  const [overlayName, setOverlayName] = useState('');
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({ variant: "destructive", title: "Invalid file", description: "Please upload a PNG, SVG, or JPG file." });
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ variant: "destructive", title: "File too large", description: "Overlay must be under 2MB." });
+      return;
+    }
+
+    const name = overlayName.trim() || file.name.replace(/\.[^.]+$/, '');
+    const result = await uploadOverlay(file, name, profileId);
+    if (result) {
+      toast({ title: "Pattern uploaded", description: `"${result.name}" is now available in Image Studio.` });
+      setOverlayName('');
+    } else {
+      toast({ variant: "destructive", title: "Upload failed", description: "Could not upload pattern." });
+    }
+    e.target.value = '';
+  };
+
+  return (
+    <div className="p-4 bg-muted/50 rounded-lg">
+      <h4 className="font-medium text-sm flex items-center gap-2 mb-1">
+        <Layers className="w-4 h-4" />
+        Custom Brand Patterns
+      </h4>
+      <p className="text-xs text-muted-foreground mb-3">
+        Upload custom overlay patterns (PNG/SVG) that will appear in Image Studio alongside built-in styles.
+        <span className="font-medium"> {selfServiceCount}/{selfServiceLimit} slots used.</span>
+        {' '}Need more? Contact us about our premium Brand Pattern Pack service.
+      </p>
+
+      {/* Existing overlays */}
+      {overlays.length > 0 && (
+        <div className="grid grid-cols-4 gap-2 mb-3">
+          {overlays.map((o) => (
+            <div key={o.id} className="relative group">
+              <img
+                src={o.fileUrl}
+                alt={o.name}
+                className="w-full aspect-square object-cover rounded-md border border-border"
+              />
+              <span className="text-[9px] text-center block mt-0.5 truncate">{o.name}</span>
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                className="absolute -top-1.5 -right-1.5 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => {
+                  deleteOverlay(o.id);
+                  toast({ title: "Pattern removed" });
+                }}
+              >
+                <X className="w-2.5 h-2.5" />
+              </Button>
+              {o.source === 'concierge' && (
+                <Badge variant="secondary" className="absolute top-0.5 left-0.5 text-[7px] px-1 py-0">Premium</Badge>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Upload control */}
+      {canUploadMore && (
+        <div className="flex gap-2">
+          <Input
+            placeholder="Pattern name (optional)"
+            value={overlayName}
+            onChange={(e) => setOverlayName(e.target.value)}
+            className="flex-1 h-8 text-xs"
+          />
+          <label>
+            <Button type="button" variant="outline" size="sm" disabled={isUploading} asChild>
+              <span className="cursor-pointer">
+                {isUploading ? (
+                  <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Uploading...</>
+                ) : (
+                  <><Upload className="w-3.5 h-3.5 mr-1.5" />Upload Pattern</>
+                )}
+              </span>
+            </Button>
+            <input type="file" accept="image/png,image/svg+xml,image/jpeg" className="hidden" onChange={handleUpload} disabled={isUploading} />
+          </label>
         </div>
       )}
     </div>
