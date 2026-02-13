@@ -12,7 +12,7 @@ import { AddToCollectionDialog } from "@/components/library/AddToCollectionDialo
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useLibraryCollections } from "@/hooks/useLibraryCollections";
 import { useCustomOverlays } from "@/hooks/useCustomOverlays";
-import { ArrowLeft, Download, Maximize2, FolderPlus, Folder } from "lucide-react";
+import { ArrowLeft, Download, Maximize2, FolderPlus, Folder, RefreshCw } from "lucide-react";
 import type { CollectionType } from "@/types/library";
 import type { OverlayPatternId } from "@/components/image-generator/overlayPatterns";
 
@@ -303,40 +303,11 @@ const BrandStudioPage = () => {
             </div>
           </ScrollArea>
 
-          {/* Action buttons pinned to bottom */}
-          <div className="p-3 border-t border-border space-y-2 shrink-0 bg-background">
-            {lastSavedMessageId && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full text-xs"
-                onClick={() => setCollectionDialogOpen(true)}
-              >
-                <Folder className="w-3.5 h-3.5 mr-1.5" />
-                Add to Collection
-              </Button>
-            )}
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 text-xs"
-                onClick={() => setSaveDialogOpen(true)}
-              >
-                <FolderPlus className="w-3.5 h-3.5 mr-1.5" />
-                Save to Library
-              </Button>
-              <Button onClick={handleDownload} size="sm" className="flex-1 text-xs">
-                <Download className="w-3.5 h-3.5 mr-1.5" />
-                Download
-              </Button>
-            </div>
-          </div>
         </div>
 
         {/* Right: Canvas */}
         <div className="flex-1 flex items-center justify-center p-8 bg-muted/30 overflow-hidden">
-          <div className="max-w-2xl w-full">
+          <div className="max-w-2xl w-full relative group">
             <BrandOverlayCanvas
               ref={canvasRef}
               imageUrl={imageUrl}
@@ -366,6 +337,29 @@ const BrandStudioPage = () => {
               bottomBarColor={bottomBarColor}
               institutionName={institutionName}
             />
+            {/* Hover overlay actions */}
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-end justify-center pb-5 opacity-0 group-hover:opacity-100 rounded-lg pointer-events-none">
+              <div className="flex gap-2 pointer-events-auto">
+                <Button size="sm" variant="secondary" onClick={handleDownload}>
+                  <Download className="w-4 h-4 mr-1" />
+                  Download
+                </Button>
+                <Button size="sm" variant="secondary" onClick={() => setSaveDialogOpen(true)}>
+                  <FolderPlus className="w-4 h-4 mr-1" />
+                  Save to Library
+                </Button>
+                {lastSavedMessageId && (
+                  <Button size="sm" variant="secondary" onClick={() => setCollectionDialogOpen(true)}>
+                    <Folder className="w-4 h-4 mr-1" />
+                    Add to Collection
+                  </Button>
+                )}
+                <Button size="sm" variant="secondary" onClick={() => navigate(-1)}>
+                  <RefreshCw className="w-4 h-4 mr-1" />
+                  Regenerate
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
