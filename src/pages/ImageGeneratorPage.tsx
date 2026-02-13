@@ -10,9 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { supabase } from "@/integrations/supabase/client";
-import { ImageIcon, Download, RefreshCw, Loader2, Sparkles, Palette, Camera, Users, Target, Eye, Image, ExternalLink } from "lucide-react";
+import { ImageIcon, Download, RefreshCw, Loader2, Sparkles, Palette, Camera, Users, Target, Eye, Image, ExternalLink, PaintBucket } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ChannelMockup } from "@/components/image-generator/ChannelMockup";
+import { BrandOverlayEditor } from "@/components/image-generator/BrandOverlayEditor";
 import { useCampusPhotoCount } from "@/hooks/useCampusPhotoCount";
 import { toast } from "sonner";
 
@@ -85,8 +86,16 @@ const ImageGeneratorPage = () => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationPhase, setGenerationPhase] = useState(0);
-  const [viewMode, setViewMode] = useState<"raw" | "mockup">("mockup");
+  const [viewMode, setViewMode] = useState<"raw" | "mockup" | "overlay">("mockup");
+  const [blankCanvasMode, setBlankCanvasMode] = useState(false);
   const { campusPhotoCount } = useCampusPhotoCount(selectedProfileId || null);
+
+  // Extract brand info from selected profile
+  const selectedProfile = profiles?.find(p => p.id === selectedProfileId);
+  const profileConfig = selectedProfile?.config as Record<string, any> | undefined;
+  const brandColors = [profileConfig?.primaryColor, profileConfig?.secondaryColor, profileConfig?.tertiaryColor, profileConfig?.accentColor].filter(Boolean) as string[];
+  const profileLogoUrl = profileConfig?.logoUrl as string | undefined;
+  const profileInstitutionName = selectedProfile?.name || profileConfig?.institutionName as string | undefined;
 
   const handleGenerate = useCallback(async () => {
     if (!contentDescription.trim()) {
@@ -330,24 +339,42 @@ const ImageGeneratorPage = () => {
                   />
                 </div>
 
-                <Button
-                  onClick={handleGenerate}
-                  disabled={isGenerating || !contentDescription.trim()}
-                  className="w-full"
-                  size="lg"
-                >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      Generate Image
-                    </>
-                  )}
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleGenerate}
+                    disabled={isGenerating || !contentDescription.trim()}
+                    className="flex-1"
+                    size="lg"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Generate Image
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                {/* Blank Canvas shortcut */}
+                {selectedProfileId && brandColors.length > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => {
+                      setBlankCanvasMode(true);
+                      setViewMode("overlay");
+                    }}
+                  >
+                    <PaintBucket className="w-4 h-4 mr-1.5" />
+                    Create Branded Graphic (No Image)
+                  </Button>
+                )}
               </CardContent>
             </Card>
 
@@ -490,43 +517,68 @@ const ImageGeneratorPage = () => {
                     </div>
                   </div>
                   );
-                })() : imageUrl ? (
+                })() : (imageUrl || blankCanvasMode) ? (
                   <div className="space-y-3">
                     {/* View mode toggle */}
                     <div className="flex items-center gap-1 p-1 bg-muted rounded-lg">
-                      <button
-                        onClick={() => setViewMode("mockup")}
-                        className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                          viewMode === "mockup"
-                            ? "bg-background text-foreground shadow-sm"
-                            : "text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        In Context
-                      </button>
-                      <button
-                        onClick={() => setViewMode("raw")}
-                        className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                          viewMode === "raw"
-                            ? "bg-background text-foreground shadow-sm"
-                            : "text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        <Image className="w-3.5 h-3.5" />
-                        Raw Image
-                      </button>
+                      {imageUrl && (
+                        <>
+                          <button
+                            onClick={() => { setViewMode("mockup"); setBlankCanvasMode(false); }}
+                            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                              viewMode === "mockup"
+                                ? "bg-background text-foreground shadow-sm"
+                                : "text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            In Context
+                          </button>
+                          <button
+                            onClick={() => { setViewMode("raw"); setBlankCanvasMode(false); }}
+                            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                              viewMode === "raw"
+                                ? "bg-background text-foreground shadow-sm"
+                                : "text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            <Image className="w-3.5 h-3.5" />
+                            Raw Image
+                          </button>
+                        </>
+                      )}
+                      {brandColors.length > 0 && (
+                        <button
+                          onClick={() => setViewMode("overlay")}
+                          className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                            viewMode === "overlay"
+                              ? "bg-background text-foreground shadow-sm"
+                              : "text-muted-foreground hover:text-foreground"
+                          }`}
+                        >
+                          <PaintBucket className="w-3.5 h-3.5" />
+                          Brand It
+                        </button>
+                      )}
                     </div>
 
                     {/* Preview content */}
                     <div className="transition-all duration-300">
-                      {viewMode === "mockup" ? (
+                      {viewMode === "overlay" ? (
+                        <BrandOverlayEditor
+                          imageUrl={blankCanvasMode ? null : imageUrl}
+                          brandColors={brandColors}
+                          logoUrl={profileLogoUrl}
+                          institutionName={profileInstitutionName}
+                          channel={channel}
+                        />
+                      ) : viewMode === "mockup" && imageUrl ? (
                         <ChannelMockup
                           channel={channel}
                           imageUrl={imageUrl}
                           profileName={profiles?.find(p => p.id === selectedProfileId)?.name}
                         />
-                      ) : (
+                      ) : imageUrl ? (
                         <div className="relative group rounded-lg overflow-hidden">
                           <img
                             src={imageUrl}
@@ -544,17 +596,19 @@ const ImageGeneratorPage = () => {
                             </div>
                           </div>
                         </div>
-                      )}
+                      ) : null}
                     </div>
 
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1" onClick={handleDownload}>
-                        <Download className="w-4 h-4 mr-1" /> Download
-                      </Button>
-                      <Button variant="outline" size="sm" className="flex-1" onClick={handleGenerate}>
-                        <RefreshCw className="w-4 h-4 mr-1" /> Regenerate
-                      </Button>
-                    </div>
+                    {imageUrl && viewMode !== "overlay" && (
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" className="flex-1" onClick={handleDownload}>
+                          <Download className="w-4 h-4 mr-1" /> Download
+                        </Button>
+                        <Button variant="outline" size="sm" className="flex-1" onClick={handleGenerate}>
+                          <RefreshCw className="w-4 h-4 mr-1" /> Regenerate
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="aspect-square bg-muted rounded-lg flex flex-col items-center justify-center gap-3">
