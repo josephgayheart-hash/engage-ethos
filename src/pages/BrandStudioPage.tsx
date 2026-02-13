@@ -90,6 +90,7 @@ const BrandStudioPage = () => {
   const [headlineBold, setHeadlineBold] = useState(false);
   const [headlineItalic, setHeadlineItalic] = useState(false);
   const [headlineUnderline, setHeadlineUnderline] = useState(false);
+  const [headlineWidth, setHeadlineWidth] = useState(90);
 
   // Drag state
   const [isDragging, setIsDragging] = useState(false);
@@ -378,6 +379,8 @@ const BrandStudioPage = () => {
                 onHeadlineAlignChange={setHeadlineAlign}
                 headlineFont={headlineFont}
                 onHeadlineFontChange={setHeadlineFont}
+                headlineWidth={headlineWidth}
+                onHeadlineWidthChange={setHeadlineWidth}
                 headlineBold={headlineBold}
                 onHeadlineBoldChange={setHeadlineBold}
                 headlineItalic={headlineItalic}
@@ -430,6 +433,7 @@ const BrandStudioPage = () => {
               headlineColor={headlineColor}
               headlineAlign={headlineAlign}
               headlineFont={headlineFont}
+              headlineWidth={headlineWidth}
               headlineBold={headlineBold}
               headlineItalic={headlineItalic}
               headlineUnderline={headlineUnderline}
@@ -437,6 +441,7 @@ const BrandStudioPage = () => {
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
+              onHeadlineWidthChange={setHeadlineWidth}
               onHeadlineTextChange={setHeadlineText}
               showBottomBar={showBottomBar}
               bottomBarText={bottomBarText}
