@@ -13,7 +13,7 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useLibraryCollections } from "@/hooks/useLibraryCollections";
 import { useCustomOverlays } from "@/hooks/useCustomOverlays";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Download, Maximize2, FolderPlus, Folder, RefreshCw, Sparkles, Loader2 } from "lucide-react";
+import { ArrowLeft, Download, Maximize2, FolderPlus, Folder, RefreshCw, Loader2 } from "lucide-react";
 import type { CollectionType } from "@/types/library";
 import type { OverlayPatternId } from "@/components/image-generator/overlayPatterns";
 
@@ -354,6 +354,10 @@ const BrandStudioPage = () => {
                 tone={tone}
                 goal={goal}
                 sceneDescription={sceneDescription}
+                onSmartLayer={handleSmartLayer}
+                isSmartLayering={isSmartLayering}
+                smartLayerImageUrl={smartLayerImageUrl}
+                onClearSmartLayer={() => setSmartLayerImageUrl(null)}
               />
             </div>
           </ScrollArea>
@@ -418,16 +422,6 @@ const BrandStudioPage = () => {
             {!isSmartLayering && (
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-end justify-center pb-5 opacity-0 group-hover:opacity-100 rounded-lg pointer-events-none">
                 <div className="flex flex-wrap gap-2 pointer-events-auto justify-center px-4">
-                  <Button size="sm" variant="secondary" onClick={handleSmartLayer} disabled={isSmartLayering}>
-                    <Sparkles className="w-4 h-4 mr-1" />
-                    Smart Layer
-                  </Button>
-                  {smartLayerImageUrl && (
-                    <Button size="sm" variant="secondary" onClick={() => setSmartLayerImageUrl(null)}>
-                      <RefreshCw className="w-4 h-4 mr-1" />
-                      Back to Editor
-                    </Button>
-                  )}
                   <Button size="sm" variant="secondary" onClick={handleDownload}>
                     <Download className="w-4 h-4 mr-1" />
                     Download
@@ -440,6 +434,12 @@ const BrandStudioPage = () => {
                     <Button size="sm" variant="secondary" onClick={() => setCollectionDialogOpen(true)}>
                       <Folder className="w-4 h-4 mr-1" />
                       Add to Collection
+                    </Button>
+                  )}
+                  {smartLayerImageUrl && (
+                    <Button size="sm" variant="secondary" onClick={() => setSmartLayerImageUrl(null)}>
+                      <RefreshCw className="w-4 h-4 mr-1" />
+                      Back to Editor
                     </Button>
                   )}
                   <Button size="sm" variant="secondary" onClick={() => navigate(-1)}>
