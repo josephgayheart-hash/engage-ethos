@@ -86,3 +86,6 @@ verify_jwt = false
 
 [functions.generate-channel-image]
 verify_jwt = false
+
+[functions.smart-layer-image]
+verify_jwt = false

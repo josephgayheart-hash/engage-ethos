@@ -12,7 +12,8 @@ import { AddToCollectionDialog } from "@/components/library/AddToCollectionDialo
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useLibraryCollections } from "@/hooks/useLibraryCollections";
 import { useCustomOverlays } from "@/hooks/useCustomOverlays";
-import { ArrowLeft, Download, Maximize2, FolderPlus, Folder, RefreshCw } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { ArrowLeft, Download, Maximize2, FolderPlus, Folder, RefreshCw, Sparkles, Loader2 } from "lucide-react";
 import type { CollectionType } from "@/types/library";
 import type { OverlayPatternId } from "@/components/image-generator/overlayPatterns";
 
@@ -94,9 +95,54 @@ const BrandStudioPage = () => {
   const [bottomBarText, setBottomBarText] = useState("");
   const [bottomBarColor, setBottomBarColor] = useState(primary);
 
+  // Smart Layer state
+  const [isSmartLayering, setIsSmartLayering] = useState(false);
+  const [smartLayerImageUrl, setSmartLayerImageUrl] = useState<string | null>(null);
+
   useGoogleFont(headlineFont);
 
   const activeLogo = allLogos[activeLogoIndex] || allLogos[0];
+
+  const handleSmartLayer = useCallback(async () => {
+    const canvas = document.getElementById("brand-overlay-canvas");
+    if (!canvas) return;
+
+    setIsSmartLayering(true);
+    const loadingToast = toast.loading("Applying AI Smart Layer — this takes a few seconds…");
+
+    try {
+      const dataUrl = await toPng(canvas as HTMLElement, { pixelRatio: 2 });
+      const { data, error } = await supabase.functions.invoke("smart-layer-image", {
+        body: {
+          imageDataUrl: dataUrl,
+          overlayDescription: `Pattern: ${overlayPattern}, color: ${overlayColor}, opacity: ${overlayOpacity}`,
+          brandColors,
+          institutionName,
+        },
+      });
+
+      toast.dismiss(loadingToast);
+
+      if (error) {
+        console.error("Smart layer error:", error);
+        toast.error("Smart Layer failed. Try again.");
+        return;
+      }
+
+      if (data?.imageUrl) {
+        setSmartLayerImageUrl(data.imageUrl);
+        toast.success("Smart Layer applied! The pattern now wraps around your subject.");
+      } else if (data?.error) {
+        toast.error(data.error);
+      }
+    } catch (err) {
+      toast.dismiss(loadingToast);
+      console.error("Smart layer error:", err);
+      toast.error("Smart Layer failed. Try again.");
+    } finally {
+      setIsSmartLayering(false);
+    }
+  }, [overlayPattern, overlayColor, overlayOpacity, brandColors, institutionName]);
 
   // Drag handlers
   const handlePointerDown = useCallback(
@@ -308,58 +354,88 @@ const BrandStudioPage = () => {
         {/* Right: Canvas */}
         <div className="flex-1 flex items-center justify-center p-8 bg-muted/30 overflow-hidden">
           <div className="max-w-2xl w-full relative group">
-            <BrandOverlayCanvas
-              ref={canvasRef}
-              imageUrl={imageUrl}
-              primaryColor={primary}
-              secondaryColor={secondary}
-              overlayPattern={overlayPattern}
-              overlayColor={overlayColor}
-              overlayOpacity={overlayOpacity}
-              customOverlayUrl={customOverlayUrl}
-              showLogo={showLogo}
-              activeLogo={activeLogo}
-              logoPosition={logoPosition}
-              logoScale={logoScale}
-              headlineText={headlineText}
-              headlineFontSize={headlineFontSize}
-              headlineX={headlineX}
-              headlineY={headlineY}
-              headlineColor={headlineColor}
-              headlineAlign={headlineAlign}
-              headlineFont={headlineFont}
-              isDragging={isDragging}
-              onPointerDown={handlePointerDown}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-              showBottomBar={showBottomBar}
-              bottomBarText={bottomBarText}
-              bottomBarColor={bottomBarColor}
-              institutionName={institutionName}
-            />
-            {/* Hover overlay actions */}
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-end justify-center pb-5 opacity-0 group-hover:opacity-100 rounded-lg pointer-events-none">
-              <div className="flex gap-2 pointer-events-auto">
-                <Button size="sm" variant="secondary" onClick={handleDownload}>
-                  <Download className="w-4 h-4 mr-1" />
-                  Download
-                </Button>
-                <Button size="sm" variant="secondary" onClick={() => setSaveDialogOpen(true)}>
-                  <FolderPlus className="w-4 h-4 mr-1" />
-                  Save to Library
-                </Button>
-                {lastSavedMessageId && (
-                  <Button size="sm" variant="secondary" onClick={() => setCollectionDialogOpen(true)}>
-                    <Folder className="w-4 h-4 mr-1" />
-                    Add to Collection
-                  </Button>
-                )}
-                <Button size="sm" variant="secondary" onClick={() => navigate(-1)}>
-                  <RefreshCw className="w-4 h-4 mr-1" />
-                  Regenerate
-                </Button>
+            {/* Show smart layer result or the normal canvas */}
+            {smartLayerImageUrl ? (
+              <div className="relative w-full overflow-hidden rounded-lg shadow-2xl">
+                <img src={smartLayerImageUrl} alt="Smart Layer result" className="w-full h-auto block rounded-lg" />
               </div>
-            </div>
+            ) : (
+              <BrandOverlayCanvas
+                ref={canvasRef}
+                imageUrl={imageUrl}
+                primaryColor={primary}
+                secondaryColor={secondary}
+                overlayPattern={overlayPattern}
+                overlayColor={overlayColor}
+                overlayOpacity={overlayOpacity}
+                customOverlayUrl={customOverlayUrl}
+                showLogo={showLogo}
+                activeLogo={activeLogo}
+                logoPosition={logoPosition}
+                logoScale={logoScale}
+                headlineText={headlineText}
+                headlineFontSize={headlineFontSize}
+                headlineX={headlineX}
+                headlineY={headlineY}
+                headlineColor={headlineColor}
+                headlineAlign={headlineAlign}
+                headlineFont={headlineFont}
+                isDragging={isDragging}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                showBottomBar={showBottomBar}
+                bottomBarText={bottomBarText}
+                bottomBarColor={bottomBarColor}
+                institutionName={institutionName}
+              />
+            )}
+
+            {/* Loading overlay */}
+            {isSmartLayering && (
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg z-10">
+                <div className="flex flex-col items-center gap-3 text-white">
+                  <Loader2 className="w-8 h-8 animate-spin" />
+                  <span className="text-sm font-medium">Applying Smart Layer…</span>
+                </div>
+              </div>
+            )}
+
+            {/* Hover overlay actions */}
+            {!isSmartLayering && (
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-end justify-center pb-5 opacity-0 group-hover:opacity-100 rounded-lg pointer-events-none">
+                <div className="flex flex-wrap gap-2 pointer-events-auto justify-center px-4">
+                  <Button size="sm" variant="secondary" onClick={handleSmartLayer} disabled={isSmartLayering}>
+                    <Sparkles className="w-4 h-4 mr-1" />
+                    Smart Layer
+                  </Button>
+                  {smartLayerImageUrl && (
+                    <Button size="sm" variant="secondary" onClick={() => setSmartLayerImageUrl(null)}>
+                      <RefreshCw className="w-4 h-4 mr-1" />
+                      Back to Editor
+                    </Button>
+                  )}
+                  <Button size="sm" variant="secondary" onClick={handleDownload}>
+                    <Download className="w-4 h-4 mr-1" />
+                    Download
+                  </Button>
+                  <Button size="sm" variant="secondary" onClick={() => setSaveDialogOpen(true)}>
+                    <FolderPlus className="w-4 h-4 mr-1" />
+                    Save to Library
+                  </Button>
+                  {lastSavedMessageId && (
+                    <Button size="sm" variant="secondary" onClick={() => setCollectionDialogOpen(true)}>
+                      <Folder className="w-4 h-4 mr-1" />
+                      Add to Collection
+                    </Button>
+                  )}
+                  <Button size="sm" variant="secondary" onClick={() => navigate(-1)}>
+                    <RefreshCw className="w-4 h-4 mr-1" />
+                    Regenerate
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
