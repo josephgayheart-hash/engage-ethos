@@ -177,9 +177,9 @@ export function BrandOverlayControls({
 
   return (
     <div className="space-y-5">
-      {/* Overlay Color */}
+      {/* Pattern Color */}
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium">Overlay Color</Label>
+        <Label className="text-xs font-medium">Pattern Color</Label>
         <div className="flex items-center gap-2">
           {brandColors.map((c, i) => (
             <button

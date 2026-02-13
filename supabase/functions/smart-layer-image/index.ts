@@ -27,29 +27,27 @@ serve(async (req) => {
     }
 
     const colorDesc = brandColors?.length
-      ? `The brand colors are: ${brandColors.join(", ")}.`
+      ? `Brand colors: ${brandColors.join(", ")}.`
       : "";
 
-    // Build a concise, specific pattern description
-    const patternName = overlayPattern || "none";
-    const patternDesc = patternName === "none"
-      ? "a subtle branded geometric pattern"
-      : `the "${patternName}" pattern style (color: ${overlayColor || "brand color"}, opacity: ${overlayOpacity ?? 0.5})`;
+    const patternName = overlayPattern || "geometric";
 
-    const prompt = `Edit this branded image to create a depth-layered composite effect.
+    const prompt = `You are a photo compositor. This image has a ${patternName} pattern overlay on top of a photo.
 
-TASK: The image already has a pattern overlay applied flat on top. Keep that EXACT pattern — same style, same straight lines, same angles, same colors, same spacing. Do NOT redraw, warp, wave, or distort the pattern in any way. Simply mask/erase the pattern where it overlaps the main subject so the subject appears IN FRONT of the pattern, creating a depth/parallax effect.
+YOUR ONLY JOB: Cut out / mask the main subject (person or people) so they appear IN FRONT of the pattern. Think of it like layers in Photoshop:
+- Layer 1 (back): Original photo background  
+- Layer 2 (middle): The ${patternName} pattern overlay (already visible in the image — keep it EXACTLY as it appears, do not redraw or modify the pattern at all)
+- Layer 3 (front): The subject, cleanly cut out with no pattern on them
 
-RULES:
-- PRESERVE the existing pattern exactly as-is — do not regenerate, redraw, or stylize it. Keep every line straight, every angle sharp, every spacing identical.
-- ONLY remove/mask the pattern pixels that overlap the main subject's silhouette.
-- The subject must appear crisp, sharp, and fully unobstructed in the foreground.
-- The background with the pattern remains untouched behind the subject.
-- Do NOT add any new pattern elements, effects, or distortions.
-- Professional quality suitable for ${institutionName || "university"} marketing.
+CRITICAL CONSTRAINTS:
+- Do NOT change, redraw, warp, or reinterpret the pattern. It must look identical to the input image.
+- Do NOT change the background photo.  
+- ONLY erase/remove the pattern from the subject's body and face area so they pop forward.
+- Keep clean, precise edges around the subject silhouette.
+- The final result should look like the subject is standing in front of the patterned background.
 ${colorDesc}
 
-Output a single high-quality image.`;
+Output one high-quality image.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
