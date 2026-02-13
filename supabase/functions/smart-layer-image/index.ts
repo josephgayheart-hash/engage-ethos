@@ -34,17 +34,19 @@ serve(async (req) => {
 
     const prompt = `You are a photo compositor. This image has a ${patternName} pattern overlay on top of a photo.
 
-YOUR ONLY JOB: Cut out / mask the main subject (person or people) so they appear IN FRONT of the pattern. Think of it like layers in Photoshop:
-- Layer 1 (back): Original photo background  
-- Layer 2 (middle): The ${patternName} pattern overlay (already visible in the image — keep it EXACTLY as it appears, do not redraw or modify the pattern at all)
-- Layer 3 (front): The subject, cleanly cut out with no pattern on them
+YOUR ONLY JOB: Erase the pattern from the ENTIRE subject — not just their face, but their FULL BODY from head to toe, including arms, hands, legs, clothing, hair, and any object they are holding or directly interacting with (laptop, book, phone, instrument, backpack, etc.). The complete silhouette of the person AND their immediate objects must be pattern-free.
 
-CRITICAL CONSTRAINTS:
-- Do NOT change, redraw, warp, or reinterpret the pattern. It must look identical to the input image.
-- Do NOT change the background photo.  
-- ONLY erase/remove the pattern from the subject's body and face area so they pop forward.
-- Keep clean, precise edges around the subject silhouette.
-- The final result should look like the subject is standing in front of the patterned background.
+Think of it like Photoshop layers:
+- Layer 1 (back): Original photo background
+- Layer 2 (middle): The ${patternName} pattern (keep it EXACTLY as it appears — do not redraw, warp, or modify)
+- Layer 3 (front): The FULL subject cleanly cut out — entire body + held objects, no pattern on any part of them
+
+CRITICAL:
+- Erase the pattern from the subject's ENTIRE body outline, not just the face/head area.
+- Include anything the subject is holding, sitting on, or leaning against as part of the foreground cutout.
+- Keep clean, precise edges around the FULL silhouette.
+- Do NOT change, redraw, or reinterpret the pattern. It stays identical to the input.
+- Do NOT change the background photo.
 ${colorDesc}
 
 Output one high-quality image.`;
