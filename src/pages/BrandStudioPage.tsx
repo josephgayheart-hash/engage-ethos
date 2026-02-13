@@ -117,7 +117,7 @@ const BrandStudioPage = () => {
 
     try {
       // Use lower pixelRatio for faster capture & smaller payload
-      const dataUrl = await toPng(canvas as HTMLElement, { pixelRatio: 1 });
+      const dataUrl = await toPng(canvas as HTMLElement, { pixelRatio: 1, skipFonts: true });
       const { data, error } = await supabase.functions.invoke("smart-layer-image", {
         body: {
           imageDataUrl: dataUrl,

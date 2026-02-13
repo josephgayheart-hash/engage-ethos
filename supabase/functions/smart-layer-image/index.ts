@@ -30,15 +30,41 @@ serve(async (req) => {
       ? `Brand colors: ${brandColors.join(", ")}.`
       : "";
 
+    // Map pattern IDs to human-readable descriptions so the AI understands them
+    const patternDescriptions: Record<string, string> = {
+      "none": "geometric",
+      "solid": "solid color wash",
+      "gradient-vertical": "vertical gradient",
+      "gradient-horizontal": "horizontal gradient",
+      "gradient-diagonal": "diagonal gradient",
+      "gradient-radial": "radial/circular gradient",
+      "gradient-split": "split-tone gradient",
+      "slice-diagonal": "diagonal slice/block of solid color",
+      "corner-triangle": "triangle shape in the corner",
+      "chevron": "chevron/V-shaped band",
+      "band-horizontal": "horizontal color band/stripe",
+      "frame": "rectangular frame/border",
+      "checker-corners": "checkered blocks in the corners of the image",
+      "quarter-blocks": "quarter-block color sections",
+      "half-sweep": "half-sweep diagonal color block",
+      "spotlight": "spotlight/vignette circle",
+      "stripes": "diagonal repeating stripes",
+      "dots": "repeating dot/polka-dot pattern",
+      "crosshatch": "crosshatch/grid lines",
+      "wave": "wavy curved bands",
+      "diamond-grid": "diamond/rhombus grid pattern",
+      "halftone": "halftone dot gradient pattern",
+    };
     const patternName = overlayPattern || "geometric";
+    const patternHumanName = patternDescriptions[patternName] || patternName;
 
-    const prompt = `You are a photo compositor. This image has a ${patternName} pattern overlay on top of a photo.
+    const prompt = `You are a photo compositor. This image has a visible overlay pattern on top of a photo. The pattern is: ${patternHumanName}.
 
 YOUR ONLY JOB: Erase the pattern from the ENTIRE subject — not just their face, but their FULL BODY from head to toe, including arms, hands, legs, clothing, hair, and any object they are holding or directly interacting with (laptop, book, phone, instrument, backpack, etc.). The complete silhouette of the person AND their immediate objects must be pattern-free.
 
 Think of it like Photoshop layers:
 - Layer 1 (back): Original photo background
-- Layer 2 (middle): The ${patternName} pattern (keep it EXACTLY as it appears — do not redraw, warp, or modify)
+- Layer 2 (middle): The ${patternHumanName} overlay (keep it EXACTLY as it appears — do not redraw, warp, or modify)
 - Layer 3 (front): The FULL subject cleanly cut out — entire body + held objects, no pattern on any part of them
 
 CRITICAL:
