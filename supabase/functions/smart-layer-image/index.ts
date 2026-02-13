@@ -47,6 +47,8 @@ serve(async (req) => {
       "checker-corners": "checkered blocks in the corners of the image",
       "quarter-blocks": "quarter-block color sections",
       "half-sweep": "half-sweep diagonal color block",
+      "box-left": "solid color box/block covering the left side of the image",
+      "box-right": "solid color box/block covering the right side of the image",
       "spotlight": "spotlight/vignette circle",
       "stripes": "diagonal repeating stripes",
       "dots": "repeating dot/polka-dot pattern",
