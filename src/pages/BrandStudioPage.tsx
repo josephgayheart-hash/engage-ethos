@@ -12,6 +12,7 @@ import { AddToCollectionDialog } from "@/components/library/AddToCollectionDialo
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useLibraryCollections } from "@/hooks/useLibraryCollections";
 import { useCustomOverlays } from "@/hooks/useCustomOverlays";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Download, Maximize2, FolderPlus, Folder, RefreshCw, Loader2 } from "lucide-react";
 import type { CollectionType } from "@/types/library";
@@ -45,6 +46,7 @@ const BrandStudioPage = () => {
   const [lastSavedMessageId, setLastSavedMessageId] = useState<string | null>(null);
   const { addMessage } = useMessageLibrary();
   const { collections, addItemToCollection, createCollection } = useLibraryCollections();
+  const { profile, user } = useAuth();
 
   const {
     imageUrl = null,
@@ -189,7 +191,7 @@ const BrandStudioPage = () => {
     const canvas = document.getElementById("brand-overlay-canvas");
     if (!canvas) return;
     try {
-      const dataUrl = await toPng(canvas as HTMLElement, { pixelRatio: 2 });
+      const dataUrl = await toPng(canvas as HTMLElement, { pixelRatio: 2, skipFonts: true });
       const a = document.createElement("a");
       a.href = dataUrl;
       a.download = `branded-${channel || "image"}-${Date.now()}.png`;
@@ -210,7 +212,10 @@ const BrandStudioPage = () => {
         return undefined;
       }
       try {
-        const dataUrl = await toPng(canvas as HTMLElement, { pixelRatio: 2 });
+        const dataUrl = await toPng(canvas as HTMLElement, {
+          pixelRatio: 2,
+          skipFonts: true,
+        });
         const result = await addMessage({
           title: name,
           content: `![Branded Image](${dataUrl})`,
@@ -225,12 +230,46 @@ const BrandStudioPage = () => {
           setLastSavedMessageId(result.id);
         }
         return result?.id;
-      } catch {
+      } catch (err) {
+        console.error("Save to library capture error:", err);
         toast.error("Failed to capture image for library.");
         return undefined;
       }
     },
     [channel, profileId, institutionName, addMessage]
+  );
+
+  const handleSaveToSharedLibrary = useCallback(
+    async (name: string) => {
+      const canvas = document.getElementById("brand-overlay-canvas");
+      if (!canvas) return undefined;
+      try {
+        const dataUrl = await toPng(canvas as HTMLElement, {
+          pixelRatio: 2,
+          skipFonts: true,
+        });
+        const { data, error } = await supabase.from("shared_templates").insert({
+          title: name,
+          content: `![Branded Image](${dataUrl})`,
+          tenant_id: profile?.tenant_id || "",
+          created_by_user_id: user?.id || "",
+          created_by_name: profile ? `${profile.first_name} ${profile.last_name}` : "",
+          status: "submitted",
+          source: "brand-studio",
+          institutional_profile_id: profileId || null,
+          tags: ["branded-image", channel || "image"],
+        }).select("id").single();
+        if (error) {
+          console.error("Shared library save error:", error);
+          return undefined;
+        }
+        return data?.id;
+      } catch (err) {
+        console.error("Shared library capture error:", err);
+        return undefined;
+      }
+    },
+    [channel, profileId, profile, user]
   );
 
   const handleAddToExistingCollection = useCallback(
@@ -452,8 +491,15 @@ const BrandStudioPage = () => {
 
       <SaveToLibraryDialog
         open={saveDialogOpen}
-        onOpenChange={setSaveDialogOpen}
+        onOpenChange={(open) => {
+          setSaveDialogOpen(open);
+          if (!open && lastSavedMessageId) {
+            // After dialog closes with a saved item, offer collection dialog
+            setTimeout(() => setCollectionDialogOpen(true), 300);
+          }
+        }}
         onSave={handleSaveToLibrary}
+        onSaveToShared={handleSaveToSharedLibrary}
         libraryType="personal"
         contentType="branded image"
         defaultName={`${institutionName || "Branded"} — ${channel || "image"}`}
