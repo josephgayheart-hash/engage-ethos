@@ -13,6 +13,7 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useLibraryCollections } from "@/hooks/useLibraryCollections";
 import { useCustomOverlays } from "@/hooks/useCustomOverlays";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserDrafts } from "@/hooks/useUserDrafts";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Download, Maximize2, FolderPlus, Folder, RefreshCw, Loader2 } from "lucide-react";
 import type { CollectionType } from "@/types/library";
@@ -49,7 +50,8 @@ const BrandStudioPage = () => {
   const { addMessage } = useMessageLibrary();
   const { collections, addItemToCollection, createCollection } = useLibraryCollections();
   const { profile, user } = useAuth();
-
+  const { saveDraft } = useUserDrafts();
+  const savedToLibraryRef = useRef(false);
   const {
     imageUrl = null,
     brandColors = [],
@@ -110,6 +112,45 @@ const BrandStudioPage = () => {
   useGoogleFont(headlineFont);
 
   const activeLogo = allLogos[activeLogoIndex] || allLogos[0];
+
+  // Keep a ref of current draft data for unmount auto-save
+  const draftDataRef = useRef<Record<string, unknown> | null>(null);
+  const draftTitleRef = useRef("");
+  const saveDraftRef = useRef(saveDraft);
+  saveDraftRef.current = saveDraft;
+
+  useEffect(() => {
+    draftDataRef.current = imageUrl ? {
+      imageUrl: smartLayerImageUrl || imageUrl,
+      brandColors,
+      channel,
+      audience,
+      tone,
+      goal,
+      profileId,
+      profileName: institutionName,
+      headlineText,
+      overlayPattern,
+      overlayColor,
+      overlayOpacity,
+      source: 'brand-studio',
+    } : null;
+    draftTitleRef.current = `${institutionName || 'Branded'} — ${channel || 'image'}`;
+  });
+
+  // Auto-save as draft on unmount if not saved to library
+  useEffect(() => {
+    return () => {
+      if (savedToLibraryRef.current || !draftDataRef.current) return;
+      saveDraftRef.current(
+        'image' as any,
+        draftDataRef.current,
+        draftTitleRef.current,
+        undefined,
+        true
+      );
+    };
+  }, []);
 
   const handleSmartLayer = useCallback(async () => {
     const canvas = document.getElementById("brand-overlay-canvas");
@@ -255,6 +296,7 @@ const BrandStudioPage = () => {
         if (result?.id) {
           setLastSavedMessageId(result.id);
           lastSavedIdRef.current = result.id;
+          savedToLibraryRef.current = true;
           return result.id;
         }
         toast.error("Failed to save — please try again.");
