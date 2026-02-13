@@ -13,10 +13,16 @@ export type OverlayPatternId =
   | "chevron"
   | "band-horizontal"
   | "frame"
+  | "checker-corners"
+  | "quarter-blocks"
+  | "half-sweep"
+  | "spotlight"
   | "stripes"
   | "dots"
   | "crosshatch"
-  | "wave";
+  | "wave"
+  | "diamond-grid"
+  | "halftone";
 
 export interface OverlayPatternMeta {
   id: OverlayPatternId;
@@ -37,10 +43,16 @@ export const OVERLAY_PATTERNS: OverlayPatternMeta[] = [
   { id: "chevron", label: "Chevron Band", category: "Geometric" },
   { id: "band-horizontal", label: "Horizontal Band", category: "Geometric" },
   { id: "frame", label: "Frame", category: "Geometric" },
+  { id: "checker-corners", label: "Checker Corners", category: "Geometric" },
+  { id: "quarter-blocks", label: "Quarter Blocks", category: "Geometric" },
+  { id: "half-sweep", label: "Half Sweep", category: "Geometric" },
+  { id: "spotlight", label: "Spotlight", category: "Geometric" },
   { id: "stripes", label: "Stripes", category: "Patterns" },
   { id: "dots", label: "Dot Grid", category: "Patterns" },
   { id: "crosshatch", label: "Crosshatch", category: "Patterns" },
   { id: "wave", label: "Wave", category: "Patterns" },
+  { id: "diamond-grid", label: "Diamond Grid", category: "Patterns" },
+  { id: "halftone", label: "Halftone", category: "Patterns" },
 ];
 
 /**
@@ -152,6 +164,56 @@ export function getOverlayStyle(
         backgroundColor: color,
         clipPath:
           "polygon(0% 55%, 5% 50%, 10% 47%, 20% 45%, 30% 47%, 40% 52%, 50% 55%, 60% 52%, 70% 47%, 80% 45%, 90% 47%, 95% 50%, 100% 55%, 100% 100%, 0% 100%)",
+        opacity,
+      };
+
+    case "checker-corners":
+      return {
+        background: `
+          linear-gradient(${color} 50%, transparent 50%) top right / 50% 50% no-repeat,
+          linear-gradient(${color} 50%, transparent 50%) bottom left / 50% 50% no-repeat`,
+        opacity,
+      };
+
+    case "quarter-blocks":
+      return {
+        background: `
+          linear-gradient(${color} 100%, ${color} 100%) top left / 25% 25% no-repeat,
+          linear-gradient(${c2} 100%, ${c2} 100%) top right / 25% 25% no-repeat,
+          linear-gradient(${c2} 100%, ${c2} 100%) bottom left / 25% 25% no-repeat,
+          linear-gradient(${color} 100%, ${color} 100%) bottom right / 25% 25% no-repeat`,
+        opacity,
+      };
+
+    case "half-sweep":
+      return {
+        background: `linear-gradient(160deg, ${color} 45%, transparent 45.5%)`,
+        opacity,
+      };
+
+    case "spotlight":
+      return {
+        background: `radial-gradient(circle at 30% 40%, transparent 30%, ${color} 70%)`,
+        opacity,
+      };
+
+    case "diamond-grid":
+      return {
+        backgroundImage: `
+          linear-gradient(45deg, ${color} 25%, transparent 25%),
+          linear-gradient(-45deg, ${color} 25%, transparent 25%),
+          linear-gradient(45deg, transparent 75%, ${color} 75%),
+          linear-gradient(-45deg, transparent 75%, ${color} 75%)`,
+        backgroundSize: "24px 24px",
+        backgroundPosition: "0 0, 0 12px, 12px -12px, -12px 0px",
+        opacity,
+      };
+
+    case "halftone":
+      return {
+        backgroundImage: `radial-gradient(${color} 3px, transparent 3px)`,
+        backgroundSize: "12px 12px",
+        backgroundPosition: "0 0",
         opacity,
       };
 
