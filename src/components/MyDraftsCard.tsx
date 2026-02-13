@@ -414,6 +414,35 @@ export function MyDraftsCard() {
                         )}
                       </div>
                     )}
+
+                    {/* Image draft metadata */}
+                    {draft.draft_type === 'image' && (
+                      <div className="mt-1.5 space-y-1">
+                        {(draftData?.contentDescription as string) && (
+                          <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
+                            {draftData.contentDescription as string}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {(draftData?.channel as string) && (
+                            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5 bg-violet-500/10 text-violet-600">
+                              {channelLabels[draftData.channel as string] || draftData.channel as string}
+                            </Badge>
+                          )}
+                          {(draftData?.style as string) && (
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 capitalize">
+                              {draftData.style as string}
+                            </Badge>
+                          )}
+                          {(draftData?.audience as string) && (
+                            <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                              <User className="w-3 h-3" />
+                              {draftData.audience as string}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
                     
                     {/* Metadata row - spread left and right */}
                     <div className="flex items-center justify-between gap-4 mt-2 text-xs text-muted-foreground">
