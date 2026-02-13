@@ -1,110 +1,93 @@
 
+# Brand It Studio -- Expanded Editor
 
-# Brand Overlay Editor — Refined Plan
+## Overview
 
-## Answers to Your Questions
-
-### 1. Brand Colors as Overlay Options
-Yes — the overlay editor will automatically pull all brand colors (primary, secondary, tertiary, accent) from the selected institutional profile and present them as a one-click color palette. Users can pick any of their brand colors for the overlay tint, gradient stops, bottom bar, and text colors. They can also use a custom hex picker if needed, but the brand palette is front-and-center so the default workflow stays on-brand.
-
-### 2. Logo from Institutional Profile
-The `logoUrl` stored in the institutional profile config will be auto-loaded into the overlay editor. Users toggle it on/off and position it (corners or centered). No re-upload needed.
-
-### 3. UX for Accessing the Overlay Editor
-After generating an image, a third tab called **"Brand It"** appears in the existing view-mode toggle bar (alongside "In Context" and "Raw Image"). Clicking it opens the overlay editor with the generated image as the base. This is a post-generation step — the AI creates the base image, then the user layers branding on top.
-
-### 4. Creating Without an Underlying Image (Blank Canvas Mode)
-Yes — we will also offer a **"Start from Blank"** option. Before generating, or even without generating at all, users can click a "Create Branded Graphic" button that starts with a solid brand-color background (no AI image underneath). This is perfect for simple branded announcement cards, event graphics, or text-heavy pieces where a photo isn't needed. The blank canvas uses the institution's primary color as the default fill, with all the same overlay controls available.
+Two major enhancements: (1) replace the fixed text size dropdown and preset positions with a continuous font-size slider and free-form drag-to-position for the headline text, and (2) create a dedicated full-page "Brand It Studio" route (`/brand-studio`) that gives users a spacious canvas with side-by-side controls, accessible via the existing "Brand It" tab and a direct link.
 
 ---
 
-## How It Will Work (User Flow)
+## Part 1: Text Size Slider and Draggable Positioning
 
-```text
-Path A: AI Image + Brand Overlay
-  1. Fill in scene description, select profile, generate image
-  2. New "Brand It" tab appears in the view toggle
-  3. Click it -> overlay editor opens with the generated image as base
-  4. Pick overlay style (solid, gradient, diagonal slice, etc.)
-  5. Pick color from brand palette, adjust opacity
-  6. Toggle logo on, position it
-  7. Add headline text, optional bottom CTA bar
-  8. Download composite PNG
+### Font Size Slider
+- Replace the current `HeadlineSize` dropdown (sm/md/lg/xl mapping to Tailwind classes) with a pixel-based `Slider` from 14px to 72px (default 28px)
+- Apply the value directly via `style={{ fontSize: headlineFontSize }}` instead of Tailwind size classes
+- Show the current value: "Font Size -- 28px"
 
-Path B: Blank Canvas Branded Graphic
-  1. Click "Create Branded Graphic" button (no generation needed)
-  2. Overlay editor opens with a solid brand-color fill as base
-  3. Same controls: pattern/geometry, logo, text, bottom bar
-  4. Download composite PNG
-```
+### Draggable Text
+- Replace the fixed top/middle/bottom position dropdown with free-form drag
+- Track `headlineX` and `headlineY` as percentage values (0-100) so positioning is responsive to any canvas size
+- Use `onMouseDown` / `onMouseMove` / `onMouseUp` (and touch equivalents) on the headline element within the canvas
+- Show a subtle "grab" cursor on hover, "grabbing" while dragging
+- Keep the headline constrained within the canvas bounds
+- Default position: centered (x: 50%, y: 50%)
+
+### Files Changed
+- `src/components/image-generator/BrandOverlayEditor.tsx` -- Replace size dropdown with slider, replace position dropdown with drag state and handlers
 
 ---
 
-## Overlay Style Options
+## Part 2: Standalone Brand It Studio Page
 
-Organized into categories in a visual thumbnail grid:
+### New Route: `/brand-studio`
+- Full-page layout (no side-by-side with generation controls)
+- Two-panel layout using the existing `react-resizable-panels` dependency:
+  - **Left panel (~60%)**: Large canvas preview at maximum size
+  - **Right panel (~40%)**: All overlay controls (same BrandOverlayEditor controls, but with more room)
+- Header with title "Brand It Studio" and a back link to Image Studio
+- Accepts state via URL search params or React Router location state (imageUrl, profileId, channel) so users can navigate here from Image Studio
 
-**Plain**
-- None (raw image, no overlay)
-- Solid color wash
+### Navigation
+- Add an "Open in Studio" expand button on the existing Brand It tab in Image Studio that links to `/brand-studio` passing the current image URL and profile
+- Add the route to `App.tsx` as a protected route
 
-**Gradients**
-- Vertical gradient (top to bottom)
-- Horizontal gradient (left to right)
-- Diagonal gradient (corner to corner)
-- Radial gradient (center fade)
-- Split gradient (two brand colors meeting)
-
-**Geometric**
-- Diagonal slice (hard angle, one half tinted)
-- Corner triangle (brand triangle anchored to a corner)
-- Chevron / V-shape band
-- Horizontal band (top, middle, or bottom third)
-- Frame / thick border
-
-**Patterns**
-- Diagonal stripes
-- Dot grid
-- Crosshatch
-- Wave curves
+### Files Changed
+- `src/pages/BrandStudioPage.tsx` -- New full-page component with resizable panels layout
+- `src/components/image-generator/BrandOverlayEditor.tsx` -- Extract shared state/controls, support a `fullscreen` prop or just reuse as-is in the new page
+- `src/pages/ImageGeneratorPage.tsx` -- Add "Open in Studio" button on the Brand It tab
+- `src/App.tsx` -- Add `/brand-studio` route
 
 ---
 
 ## Technical Details
 
-### New Files
+### Drag Implementation (no new dependencies)
+```text
+State:
+  headlineX: number (0-100, default 50)
+  headlineY: number (0-100, default 50)
+  isDragging: boolean
 
-| File | Purpose |
-|------|---------|
-| `src/components/image-generator/BrandOverlayEditor.tsx` | Main editor component with live preview and controls |
-| `src/components/image-generator/OverlayPatternSelector.tsx` | Visual thumbnail grid for picking overlay style |
-| `src/components/image-generator/overlayPatterns.ts` | Pure utility mapping pattern names to CSS properties (`background`, `clipPath`, etc.) |
+Canvas element (ref: canvasRef):
+  onMouseDown on headline div -> set isDragging, capture offset
+  onMouseMove on canvas -> update headlineX/Y as % of canvas dimensions
+  onMouseUp -> clear isDragging
 
-### Changes to Existing Files
+Headline style:
+  position: absolute
+  left: `${headlineX}%`
+  top: `${headlineY}%`
+  transform: translate(-50%, -50%) adjusted for alignment
+  cursor: isDragging ? 'grabbing' : 'grab'
+```
 
-| File | Change |
-|------|--------|
-| `src/pages/ImageGeneratorPage.tsx` | Add "Brand It" tab to view toggle; add "Create Branded Graphic" button; pass profile config to overlay editor |
+### Brand Studio Page Layout
+```text
++--------------------------------------------------+
+| Brand It Studio            [Back to Image Studio] |
++--------------------------------------------------+
+|                        |                          |
+|                        |  Overlay Color           |
+|                        |  Opacity Slider          |
+|    Large Canvas        |  Pattern Selector        |
+|    (resizable)         |  Logo Controls           |
+|                        |  Headline Text + Font    |
+|                        |  Font Size Slider        |
+|                        |  Color / Alignment       |
+|                        |  Bottom Bar              |
+|                        |  [Download]              |
++--------------------------------------------------+
+```
 
-### Brand Color Integration
-
-The overlay editor receives the full `InstitutionalConfig` from the selected profile. It extracts:
-- `primaryColor`, `secondaryColor`, `tertiaryColor`, `accentColor` -- rendered as clickable swatches
-- `logoUrl` -- loaded as the logo layer
-- `institutionName` -- used as default headline text suggestion
-
-### Pattern Rendering
-
-All patterns are pure CSS on absolutely-positioned div layers -- no canvas or SVG. Examples:
-- Diagonal slice: `clipPath: polygon(0 0, 100% 0, 0 100%)`
-- Gradient: `background: linear-gradient(135deg, primaryColor, secondaryColor)`
-- Stripes: `background: repeating-linear-gradient(45deg, color 0px, color 2px, transparent 2px, transparent 12px)`
-
-### Download / Export
-
-Uses the already-installed `html-to-image` library to capture the layered container (`#brand-overlay-canvas`) as a PNG. All CSS clip-paths, gradients, and overlays render correctly in the capture.
-
-### No Backend Changes
-
-Everything is client-side CSS compositing. No new database tables, edge functions, or storage buckets needed for this feature.
-
+### Route State Transfer
+The "Open in Studio" button will use React Router's `Link` with `state` to pass `{ imageUrl, brandColors, logoUrl, logoUrls, institutionName, channel, profileId }` to the new page. The Brand Studio page reads this from `useLocation().state`.
