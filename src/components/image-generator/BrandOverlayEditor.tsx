@@ -77,6 +77,7 @@ export function BrandOverlayEditor({
   const [headlineColor, setHeadlineColor] = useState("#ffffff");
   const [headlineAlign, setHeadlineAlign] = useState<HeadlineAlign>("center");
   const [headlineFont, setHeadlineFont] = useState("Inter");
+  const [headlineWidth, setHeadlineWidth] = useState(90);
 
   const [isDragging, setIsDragging] = useState(false);
   const dragOffset = useRef({ x: 0, y: 0 });
@@ -153,6 +154,7 @@ export function BrandOverlayEditor({
         headlineColor={headlineColor}
         headlineAlign={headlineAlign}
         headlineFont={headlineFont}
+        headlineWidth={headlineWidth}
         isDragging={isDragging}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
@@ -194,6 +196,8 @@ export function BrandOverlayEditor({
           onHeadlineAlignChange={setHeadlineAlign}
           headlineFont={headlineFont}
           onHeadlineFontChange={setHeadlineFont}
+          headlineWidth={headlineWidth}
+          onHeadlineWidthChange={setHeadlineWidth}
           showBottomBar={showBottomBar}
           onShowBottomBarChange={setShowBottomBar}
           bottomBarText={bottomBarText}
