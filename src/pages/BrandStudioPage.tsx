@@ -114,11 +114,14 @@ const BrandStudioPage = () => {
     const loadingToast = toast.loading("Applying AI Smart Layer — this takes a few seconds…");
 
     try {
-      const dataUrl = await toPng(canvas as HTMLElement, { pixelRatio: 2 });
+      // Use lower pixelRatio for faster capture & smaller payload
+      const dataUrl = await toPng(canvas as HTMLElement, { pixelRatio: 1 });
       const { data, error } = await supabase.functions.invoke("smart-layer-image", {
         body: {
           imageDataUrl: dataUrl,
-          overlayDescription: `Pattern: ${overlayPattern}, color: ${overlayColor}, opacity: ${overlayOpacity}`,
+          overlayPattern,
+          overlayColor,
+          overlayOpacity,
           brandColors,
           institutionName,
         },
