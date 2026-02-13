@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { supabase } from "@/integrations/supabase/client";
 import { ImageIcon, Download, RefreshCw, Loader2, Sparkles, Palette, Camera, Users, Target, Eye, Image, ExternalLink, PaintBucket, Maximize2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ChannelMockup } from "@/components/image-generator/ChannelMockup";
 import { BrandOverlayEditor } from "@/components/image-generator/BrandOverlayEditor";
 import { useCampusPhotoCount } from "@/hooks/useCampusPhotoCount";
@@ -75,6 +75,7 @@ const ImageGeneratorPage = () => {
   const { profile } = useAuth();
   const tenantId = profile?.tenant_id;
   const { profiles } = useInstitutionalProfiles();
+  const location = useLocation();
 
   const [contentDescription, setContentDescription] = useState("");
   const [channel, setChannel] = useState("social-media");
@@ -90,7 +91,27 @@ const ImageGeneratorPage = () => {
   const [viewMode, setViewMode] = useState<"raw" | "mockup" | "overlay">("mockup");
   const [blankCanvasMode, setBlankCanvasMode] = useState(false);
   const { campusPhotoCount } = useCampusPhotoCount(selectedProfileId || null);
-  const { saveDraft } = useUserDrafts();
+  const { saveDraft, loadDraftById } = useUserDrafts();
+
+  // Resume draft from navigation (e.g. dashboard "My Drafts" card)
+  useEffect(() => {
+    const resumeDraftId = (location.state as { resumeDraftId?: string })?.resumeDraftId;
+    if (!resumeDraftId) return;
+
+    loadDraftById(resumeDraftId).then(draft => {
+      if (!draft) return;
+      const d = draft.draft_data as Record<string, any>;
+      if (d.contentDescription) setContentDescription(d.contentDescription);
+      if (d.channel) setChannel(d.channel);
+      if (d.audience) setAudience(d.audience);
+      if (d.tone) setTone(d.tone);
+      if (d.goal) setGoal(d.goal);
+      if (d.style) setStyle(d.style);
+      if (d.engine) setEngine(d.engine);
+      if (d.imageUrl) setImageUrl(d.imageUrl);
+      if (d.profileId) setSelectedProfileId(d.profileId);
+    });
+  }, [location.state]);
 
   // Extract brand info from selected profile
   const selectedProfile = profiles?.find(p => p.id === selectedProfileId);
@@ -139,6 +160,7 @@ const ImageGeneratorPage = () => {
           tone,
           goal,
           style,
+          engine,
           imageUrl: data.imageUrl,
           profileId: selectedProfileId,
           profileName: profileInstitutionName,
