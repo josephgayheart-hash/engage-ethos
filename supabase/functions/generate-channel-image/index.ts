@@ -563,10 +563,30 @@ CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
 
     const aiData = await aiResponse.json();
     const imageDataUrl = aiData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    const finishReason = aiData.choices?.[0]?.finish_reason;
+    const refusalMessage = aiData.choices?.[0]?.message?.refusal;
 
     if (!imageDataUrl) {
+      // Detect content policy / safety filter blocks
+      const isContentFiltered = finishReason === "content_filter" 
+        || finishReason === "safety"
+        || refusalMessage
+        || (aiData.choices?.[0]?.message?.content || "").toLowerCase().includes("i can't")
+        || (aiData.choices?.[0]?.message?.content || "").toLowerCase().includes("i cannot")
+        || (aiData.choices?.[0]?.message?.content || "").toLowerCase().includes("not able to generate")
+        || (aiData.choices?.[0]?.message?.content || "").toLowerCase().includes("against my policy");
+
+      if (isContentFiltered) {
+        console.warn("Image generation blocked by content policy for prompt");
+        return new Response(JSON.stringify({ 
+          error: "Your prompt was flagged by our content safety filters. Please revise your description to remove inappropriate, offensive, or explicit content and try again." 
+        }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       console.error("No image in AI response");
-      return new Response(JSON.stringify({ error: "No image generated" }), {
+      return new Response(JSON.stringify({ error: "No image was generated. Try rephrasing your description or using a different scene." }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
