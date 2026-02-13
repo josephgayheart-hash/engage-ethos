@@ -1,11 +1,13 @@
-import { useRef, useCallback } from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useRef, useCallback, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { toPng } from "html-to-image";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { BrandOverlayEditor } from "@/components/image-generator/BrandOverlayEditor";
-import { ArrowLeft, Download, Maximize2 } from "lucide-react";
+import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
+import { useMessageLibrary } from "@/hooks/useMessageLibrary";
+import { ArrowLeft, Download, Maximize2, FolderPlus } from "lucide-react";
 
 interface BrandStudioState {
   imageUrl: string | null;
@@ -23,8 +25,11 @@ interface BrandStudioState {
 
 const BrandStudioPage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const state = (location.state as BrandStudioState | null) || {} as Partial<BrandStudioState>;
   const canvasRef = useRef<HTMLDivElement>(null);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const { addMessage } = useMessageLibrary();
 
   const {
     imageUrl = null,
@@ -37,10 +42,10 @@ const BrandStudioPage = () => {
     audience,
     tone,
     goal,
+    profileId,
   } = state;
 
   const handleDownload = useCallback(async () => {
-    // Find the canvas element inside the editor
     const canvas = document.getElementById("brand-overlay-canvas");
     if (!canvas) return;
     try {
@@ -57,21 +62,48 @@ const BrandStudioPage = () => {
     }
   }, [channel]);
 
+  const handleSaveToLibrary = useCallback(async (name: string) => {
+    const canvas = document.getElementById("brand-overlay-canvas");
+    if (!canvas) {
+      toast.error("Could not capture the image.");
+      return undefined;
+    }
+    try {
+      const dataUrl = await toPng(canvas as HTMLElement, { pixelRatio: 2 });
+      const result = await addMessage({
+        title: name,
+        content: `![Branded Image](${dataUrl})`,
+        channel: (channel as any) || "social-media",
+        mode: "generated",
+        source: "other",
+        approved: false,
+        institutionalProfileId: profileId,
+        institutionalProfileName: institutionName,
+      });
+      return result?.id;
+    } catch {
+      toast.error("Failed to capture image for library.");
+      return undefined;
+    }
+  }, [channel, profileId, institutionName, addMessage]);
+
+  const handleGoBack = useCallback(() => {
+    navigate(-1);
+  }, [navigate]);
+
   if (brandColors.length === 0) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 p-8">
         <Maximize2 className="w-12 h-12 text-muted-foreground/30" />
         <h2 className="text-lg font-semibold">Brand It Studio</h2>
         <p className="text-sm text-muted-foreground text-center max-w-md">
-          Open this page from Image Studio by clicking "Open in Studio" on the Brand It tab. 
+          Open this page from Image Studio by clicking "Open Brand Studio" on the Brand It tab. 
           Your image, colors, and profile will transfer automatically.
         </p>
-        <Link to="/image-generator">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="w-4 h-4 mr-1.5" />
-            Go to Image Studio
-          </Button>
-        </Link>
+        <Button variant="outline" size="sm" onClick={() => navigate("/image-generator")}>
+          <ArrowLeft className="w-4 h-4 mr-1.5" />
+          Go to Image Studio
+        </Button>
       </div>
     );
   }
@@ -81,22 +113,26 @@ const BrandStudioPage = () => {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-background shrink-0">
         <div className="flex items-center gap-3">
-          <Link to="/image-generator">
-            <Button variant="ghost" size="sm" className="gap-1.5">
-              <ArrowLeft className="w-4 h-4" />
-              Image Studio
-            </Button>
-          </Link>
+          <Button variant="ghost" size="sm" className="gap-1.5" onClick={handleGoBack}>
+            <ArrowLeft className="w-4 h-4" />
+            Back to Image Studio
+          </Button>
           <div className="h-5 w-px bg-border" />
           <h1 className="font-serif text-lg font-bold flex items-center gap-2">
             <Maximize2 className="w-4 h-4 text-primary" />
             Brand It Studio
           </h1>
         </div>
-        <Button onClick={handleDownload} size="sm">
-          <Download className="w-4 h-4 mr-1.5" />
-          Download
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setSaveDialogOpen(true)}>
+            <FolderPlus className="w-4 h-4 mr-1.5" />
+            Save to Library
+          </Button>
+          <Button onClick={handleDownload} size="sm">
+            <Download className="w-4 h-4 mr-1.5" />
+            Download
+          </Button>
+        </div>
       </div>
 
       {/* Main content */}
@@ -104,8 +140,8 @@ const BrandStudioPage = () => {
         <ResizablePanelGroup direction="horizontal" className="h-full">
           {/* Canvas panel */}
           <ResizablePanel defaultSize={60} minSize={40}>
-            <div className="h-full flex items-center justify-center p-6 bg-muted/30">
-              <div className="w-full max-w-2xl">
+            <div className="h-full flex items-center justify-center p-6 bg-muted/30 overflow-auto">
+              <div className="w-full max-w-3xl">
                 <BrandOverlayEditor
                   imageUrl={imageUrl}
                   brandColors={brandColors}
@@ -125,12 +161,7 @@ const BrandStudioPage = () => {
 
           <ResizableHandle withHandle />
 
-          {/* Controls panel - the editor already renders controls below the canvas,
-              so we show a second instance with just controls. Actually, let's use a
-              single editor that has canvas + controls stacked. The left panel shows
-              the canvas large, right panel shows controls. But since the editor is
-              one component, let's just render it fully in the left panel with scrollable
-              controls below. */}
+          {/* Info panel */}
           <ResizablePanel defaultSize={40} minSize={25}>
             <div className="h-full overflow-y-auto p-4 space-y-4">
               <div className="space-y-1">
@@ -161,6 +192,15 @@ const BrandStudioPage = () => {
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
+
+      <SaveToLibraryDialog
+        open={saveDialogOpen}
+        onOpenChange={setSaveDialogOpen}
+        onSave={handleSaveToLibrary}
+        libraryType="personal"
+        contentType="branded image"
+        defaultName={`${institutionName || "Branded"} — ${channel || "image"}`}
+      />
     </div>
   );
 };

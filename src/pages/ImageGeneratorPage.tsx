@@ -577,10 +577,11 @@ const ImageGeneratorPage = () => {
                               tone,
                               goal,
                               }}
-                              className="flex items-center justify-center gap-1 px-2 py-1.5 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground transition-all"
-                              title="Open in Brand It Studio"
+                              className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground transition-all"
+                              title="Open Brand Studio"
                             >
                               <Maximize2 className="w-3.5 h-3.5" />
+                              Open Brand Studio
                             </Link>
                           )}
                         </>
