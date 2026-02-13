@@ -587,6 +587,69 @@ export type Database = {
           },
         ]
       }
+      custom_overlay_patterns: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_type: string | null
+          file_url: string
+          id: string
+          is_active: boolean
+          name: string
+          profile_id: string | null
+          sort_order: number | null
+          source: string
+          tenant_id: string
+          updated_at: string
+          uploaded_by_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_type?: string | null
+          file_url: string
+          id?: string
+          is_active?: boolean
+          name: string
+          profile_id?: string | null
+          sort_order?: number | null
+          source?: string
+          tenant_id: string
+          updated_at?: string
+          uploaded_by_user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          profile_id?: string | null
+          sort_order?: number | null
+          source?: string
+          tenant_id?: string
+          updated_at?: string
+          uploaded_by_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_overlay_patterns_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "institutional_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custom_overlay_patterns_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_nudges: {
         Row: {
           bounced_at: string | null
