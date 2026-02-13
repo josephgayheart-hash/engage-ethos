@@ -85,6 +85,9 @@ const BrandStudioPage = () => {
   const [headlineColor, setHeadlineColor] = useState("#ffffff");
   const [headlineAlign, setHeadlineAlign] = useState<HeadlineAlign>("center");
   const [headlineFont, setHeadlineFont] = useState("Inter");
+  const [headlineBold, setHeadlineBold] = useState(false);
+  const [headlineItalic, setHeadlineItalic] = useState(false);
+  const [headlineUnderline, setHeadlineUnderline] = useState(false);
 
   // Drag state
   const [isDragging, setIsDragging] = useState(false);
@@ -333,6 +336,12 @@ const BrandStudioPage = () => {
                 onHeadlineAlignChange={setHeadlineAlign}
                 headlineFont={headlineFont}
                 onHeadlineFontChange={setHeadlineFont}
+                headlineBold={headlineBold}
+                onHeadlineBoldChange={setHeadlineBold}
+                headlineItalic={headlineItalic}
+                onHeadlineItalicChange={setHeadlineItalic}
+                headlineUnderline={headlineUnderline}
+                onHeadlineUnderlineChange={setHeadlineUnderline}
                 showBottomBar={showBottomBar}
                 onShowBottomBarChange={setShowBottomBar}
                 bottomBarText={bottomBarText}
@@ -380,10 +389,14 @@ const BrandStudioPage = () => {
                 headlineColor={headlineColor}
                 headlineAlign={headlineAlign}
                 headlineFont={headlineFont}
+                headlineBold={headlineBold}
+                headlineItalic={headlineItalic}
+                headlineUnderline={headlineUnderline}
                 isDragging={isDragging}
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
+                onHeadlineTextChange={setHeadlineText}
                 showBottomBar={showBottomBar}
                 bottomBarText={bottomBarText}
                 bottomBarColor={bottomBarColor}

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Type, Image as ImageIcon, AlignLeft, AlignCenter, AlignRight, ChevronLeft, ChevronRight, Move, Sparkles, Loader2 } from "lucide-react";
+import { Type, Image as ImageIcon, AlignLeft, AlignCenter, AlignRight, ChevronLeft, ChevronRight, Move, Sparkles, Loader2, Bold, Italic, Underline } from "lucide-react";
 import { OverlayPatternSelector } from "./OverlayPatternSelector";
 import { type OverlayPatternId } from "./overlayPatterns";
 import { supabase } from "@/integrations/supabase/client";
@@ -63,6 +63,12 @@ export interface BrandOverlayControlsProps {
   onHeadlineAlignChange: (v: HeadlineAlign) => void;
   headlineFont: string;
   onHeadlineFontChange: (v: string) => void;
+  headlineBold?: boolean;
+  onHeadlineBoldChange?: (v: boolean) => void;
+  headlineItalic?: boolean;
+  onHeadlineItalicChange?: (v: boolean) => void;
+  headlineUnderline?: boolean;
+  onHeadlineUnderlineChange?: (v: boolean) => void;
 
   showBottomBar: boolean;
   onShowBottomBarChange: (v: boolean) => void;
@@ -109,6 +115,12 @@ export function BrandOverlayControls({
   onHeadlineAlignChange,
   headlineFont,
   onHeadlineFontChange,
+  headlineBold,
+  onHeadlineBoldChange,
+  headlineItalic,
+  onHeadlineItalicChange,
+  headlineUnderline,
+  onHeadlineUnderlineChange,
   showBottomBar,
   onShowBottomBarChange,
   bottomBarText,
@@ -379,8 +391,31 @@ export function BrandOverlayControls({
                 ))}
               </div>
             </div>
+            {/* Bold / Italic / Underline */}
+            <div className="space-y-1">
+              <Label className="text-[10px]">Style</Label>
+              <div className="flex items-center gap-1">
+                {([
+                  { val: "bold", icon: Bold, active: headlineBold, toggle: onHeadlineBoldChange },
+                  { val: "italic", icon: Italic, active: headlineItalic, toggle: onHeadlineItalicChange },
+                  { val: "underline", icon: Underline, active: headlineUnderline, toggle: onHeadlineUnderlineChange },
+                ] as const).map(({ val, icon: Icon, active, toggle }) => (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => toggle?.(!active)}
+                    className={cn(
+                      "p-1.5 rounded transition-all",
+                      active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                  </button>
+                ))}
+              </div>
+            </div>
             <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-              <Move className="w-3 h-3" /> Drag the headline on the canvas to reposition
+              <Move className="w-3 h-3" /> Drag to move · Double-click to edit on canvas
             </p>
           </div>
         )}
