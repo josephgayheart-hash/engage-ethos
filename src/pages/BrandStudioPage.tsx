@@ -459,9 +459,9 @@ const BrandStudioPage = () => {
               </div>
             )}
 
-            {/* Hover overlay actions */}
+            {/* Hover overlay actions — only at bottom, not covering canvas interaction area */}
             {!isSmartLayering && (
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-end justify-center pb-5 opacity-0 group-hover:opacity-100 rounded-lg pointer-events-none">
+              <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-5 pt-12 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-b-lg pointer-events-none z-20">
                 <div className="flex flex-wrap gap-2 pointer-events-auto justify-center px-4">
                   <Button size="sm" variant="secondary" onClick={handleDownload}>
                     <Download className="w-4 h-4 mr-1" />
