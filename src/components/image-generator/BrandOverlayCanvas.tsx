@@ -102,16 +102,20 @@ export const BrandOverlayCanvas = forwardRef<HTMLDivElement, BrandOverlayCanvasP
       ? { opacity: overlayOpacity }
       : getOverlayStyle(overlayPattern as OverlayPatternId, overlayColor, overlayOpacity, secondaryColor);
 
-    // Click outside to deselect
+    // Click outside to deselect — use mousedown (not pointerdown) to avoid
+    // racing with handle pointerdown, and delay check with requestAnimationFrame
     useEffect(() => {
       if (!isSelected) return;
       const handleClickOutside = (e: MouseEvent) => {
-        if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-          setIsSelected(false);
-        }
+        // Use rAF so the handle's onPointerDown fires first and sets isResizing
+        requestAnimationFrame(() => {
+          if (containerRef.current && !containerRef.current.contains(e.target as Node) && !resizeRef.current) {
+            setIsSelected(false);
+          }
+        });
       };
-      document.addEventListener("pointerdown", handleClickOutside);
-      return () => document.removeEventListener("pointerdown", handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [isSelected]);
 
     // Document-level move/up for smooth resizing
@@ -222,7 +226,7 @@ export const BrandOverlayCanvas = forwardRef<HTMLDivElement, BrandOverlayCanvasP
               width: `${headlineWidth || 90}%`,
               maxWidth: `${headlineWidth || 90}%`,
             }}
-            onClick={(e) => { e.stopPropagation(); if (!isEditing) setIsSelected(true); }}
+            onPointerDown={(e) => { if (!isEditing && !isSelected) { setIsSelected(true); } }}
           >
             {/* Resize handles - visible when selected and not editing */}
             {isSelected && !isEditing && onHeadlineWidthChange && (
