@@ -226,13 +226,13 @@ export function BrandOverlayEditor({
         ref={canvasRef}
         id="brand-overlay-canvas"
         className="relative w-full overflow-hidden rounded-lg bg-muted"
-        style={{ aspectRatio: "1 / 1" }}
       >
         {imageUrl ? (
-          <img src={imageUrl} alt="Base" className="absolute inset-0 w-full h-full object-cover" />
+          <img src={imageUrl} alt="Base" className="w-full h-auto block" />
         ) : (
-          <div className="absolute inset-0" style={{ backgroundColor: primary }} />
+          <div className="w-full" style={{ aspectRatio: "1 / 1", backgroundColor: primary }} />
         )}
+        {/* Overlay layers */}
         {isCustomPattern && customOverlayUrl ? (
           <img src={customOverlayUrl} alt="Custom overlay" className="absolute inset-0 w-full h-full object-cover" style={{ opacity: overlayOpacity }} />
         ) : (
