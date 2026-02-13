@@ -15,6 +15,10 @@ interface BrandStudioState {
   institutionName?: string;
   channel?: string;
   profileId?: string;
+  sceneDescription?: string;
+  audience?: string;
+  tone?: string;
+  goal?: string;
 }
 
 const BrandStudioPage = () => {
@@ -29,6 +33,10 @@ const BrandStudioPage = () => {
     logoUrls,
     institutionName,
     channel,
+    sceneDescription,
+    audience,
+    tone,
+    goal,
   } = state;
 
   const handleDownload = useCallback(async () => {
@@ -105,6 +113,10 @@ const BrandStudioPage = () => {
                   logoUrls={logoUrls}
                   institutionName={institutionName}
                   channel={channel}
+                  sceneDescription={sceneDescription}
+                  audience={audience}
+                  tone={tone}
+                  goal={goal}
                   hideDownload
                 />
               </div>
