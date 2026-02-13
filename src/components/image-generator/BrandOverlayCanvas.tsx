@@ -226,7 +226,7 @@ export const BrandOverlayCanvas = forwardRef<HTMLDivElement, BrandOverlayCanvasP
               width: `${headlineWidth || 90}%`,
               maxWidth: `${headlineWidth || 90}%`,
             }}
-            onPointerDown={(e) => { if (!isEditing && !isSelected) { setIsSelected(true); } }}
+            onPointerDown={(e) => { if (!isEditing) { e.stopPropagation(); setIsSelected(true); } }}
           >
             {/* Resize handles - visible when selected and not editing */}
             {isSelected && !isEditing && onHeadlineWidthChange && (
