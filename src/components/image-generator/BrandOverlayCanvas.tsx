@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import { forwardRef, useState, useCallback, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { getOverlayStyle, type OverlayPatternId } from "./overlayPatterns";
 
@@ -37,10 +37,14 @@ export interface BrandOverlayCanvasProps {
   headlineColor: string;
   headlineAlign: HeadlineAlign;
   headlineFont: string;
+  headlineBold?: boolean;
+  headlineItalic?: boolean;
+  headlineUnderline?: boolean;
   isDragging: boolean;
   onPointerDown: (e: React.PointerEvent) => void;
   onPointerMove: (e: React.PointerEvent) => void;
   onPointerUp: () => void;
+  onHeadlineTextChange?: (text: string) => void;
   showBottomBar: boolean;
   bottomBarText: string;
   bottomBarColor: string;
@@ -68,10 +72,14 @@ export const BrandOverlayCanvas = forwardRef<HTMLDivElement, BrandOverlayCanvasP
       headlineColor,
       headlineAlign,
       headlineFont,
+      headlineBold,
+      headlineItalic,
+      headlineUnderline,
       isDragging,
       onPointerDown,
       onPointerMove,
       onPointerUp,
+      onHeadlineTextChange,
       showBottomBar,
       bottomBarText,
       bottomBarColor,
@@ -79,10 +87,43 @@ export const BrandOverlayCanvas = forwardRef<HTMLDivElement, BrandOverlayCanvasP
     },
     ref
   ) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const headlineRef = useRef<HTMLDivElement>(null);
     const isCustomPattern = overlayPattern.startsWith("custom:");
     const overlayStyle = isCustomPattern
       ? { opacity: overlayOpacity }
       : getOverlayStyle(overlayPattern as OverlayPatternId, overlayColor, overlayOpacity, secondaryColor);
+
+    const handleDoubleClick = useCallback((e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (onHeadlineTextChange) {
+        setIsEditing(true);
+        // Focus after state update
+        setTimeout(() => headlineRef.current?.focus(), 0);
+      }
+    }, [onHeadlineTextChange]);
+
+    const handleBlur = useCallback(() => {
+      setIsEditing(false);
+      if (headlineRef.current && onHeadlineTextChange) {
+        onHeadlineTextChange(headlineRef.current.innerText);
+      }
+    }, [onHeadlineTextChange]);
+
+    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsEditing(false);
+        headlineRef.current?.blur();
+      }
+    }, []);
+
+    // Sync text from parent when not editing
+    useEffect(() => {
+      if (!isEditing && headlineRef.current && headlineRef.current.innerText !== headlineText) {
+        headlineRef.current.innerText = headlineText;
+      }
+    }, [headlineText, isEditing]);
 
     return (
       <div
@@ -113,28 +154,42 @@ export const BrandOverlayCanvas = forwardRef<HTMLDivElement, BrandOverlayCanvasP
             style={{ width: logoScale, height: logoScale }}
           />
         )}
-        {headlineText && (
+        {(headlineText || isEditing) && (
           <div
+            ref={headlineRef}
+            contentEditable={isEditing}
+            suppressContentEditableWarning
             className={cn(
-              "absolute px-6 font-bold drop-shadow-lg select-none",
-              HEADLINE_ALIGN_CLASSES[headlineAlign]
+              "absolute px-6 drop-shadow-lg select-none outline-none",
+              HEADLINE_ALIGN_CLASSES[headlineAlign],
+              isEditing && "ring-2 ring-white/50 rounded cursor-text select-auto bg-black/20"
             )}
             style={{
               color: headlineColor,
               fontFamily: `'${headlineFont}', sans-serif`,
               fontSize: `${headlineFontSize}px`,
+              fontWeight: headlineBold ? "bold" : "normal",
+              fontStyle: headlineItalic ? "italic" : "normal",
+              textDecoration: headlineUnderline ? "underline" : "none",
               left: `${headlineX}%`,
               top: `${headlineY}%`,
               transform: "translate(-50%, -50%)",
-              cursor: isDragging ? "grabbing" : "grab",
+              cursor: isEditing ? "text" : isDragging ? "grabbing" : "grab",
               maxWidth: "90%",
               lineHeight: 1.2,
+              minWidth: isEditing ? "80px" : undefined,
+              minHeight: isEditing ? "1.2em" : undefined,
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
             }}
-            onPointerDown={onPointerDown}
-            onPointerMove={onPointerMove}
-            onPointerUp={onPointerUp}
+            onPointerDown={isEditing ? undefined : onPointerDown}
+            onPointerMove={isEditing ? undefined : onPointerMove}
+            onPointerUp={isEditing ? undefined : onPointerUp}
+            onDoubleClick={handleDoubleClick}
+            onBlur={handleBlur}
+            onKeyDown={isEditing ? handleKeyDown : undefined}
           >
-            {headlineText}
+            {headlineText || (isEditing ? "" : "")}
           </div>
         )}
         {showBottomBar && (
