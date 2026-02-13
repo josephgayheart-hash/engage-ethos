@@ -16,6 +16,8 @@ export type OverlayPatternId =
   | "checker-corners"
   | "quarter-blocks"
   | "half-sweep"
+  | "box-left"
+  | "box-right"
   | "spotlight"
   | "stripes"
   | "dots"
@@ -46,6 +48,8 @@ export const OVERLAY_PATTERNS: OverlayPatternMeta[] = [
   { id: "checker-corners", label: "Checker Corners", category: "Geometric" },
   { id: "quarter-blocks", label: "Quarter Blocks", category: "Geometric" },
   { id: "half-sweep", label: "Half Sweep", category: "Geometric" },
+  { id: "box-left", label: "Box Left", category: "Geometric" },
+  { id: "box-right", label: "Box Right", category: "Geometric" },
   { id: "spotlight", label: "Spotlight", category: "Geometric" },
   { id: "stripes", label: "Stripes", category: "Patterns" },
   { id: "dots", label: "Dot Grid", category: "Patterns" },
@@ -188,6 +192,20 @@ export function getOverlayStyle(
     case "half-sweep":
       return {
         background: `linear-gradient(160deg, ${color} 45%, transparent 45.5%)`,
+        opacity,
+      };
+
+    case "box-left":
+      return {
+        backgroundColor: color,
+        clipPath: "polygon(0 0, 40% 0, 40% 100%, 0 100%)",
+        opacity,
+      };
+
+    case "box-right":
+      return {
+        backgroundColor: color,
+        clipPath: "polygon(60% 0, 100% 0, 100% 100%, 60% 100%)",
         opacity,
       };
 
