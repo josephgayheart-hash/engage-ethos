@@ -47,6 +47,7 @@ CRITICAL:
 - Keep clean, precise edges around the FULL silhouette.
 - Do NOT change, redraw, or reinterpret the pattern. It stays identical to the input.
 - Do NOT change the background photo.
+- The pattern MUST remain fully intact and extend to ALL edges and corners of the image (top-left, top-right, bottom-left, bottom-right). Do NOT crop, trim, fade, or cut off the pattern at the edges. The pattern should fill the entire image area exactly as in the original, only removed where the subject is.
 ${colorDesc}
 
 Output one high-quality image.`;
