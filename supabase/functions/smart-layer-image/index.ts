@@ -36,16 +36,17 @@ serve(async (req) => {
       ? "a subtle branded geometric pattern"
       : `the "${patternName}" pattern style (color: ${overlayColor || "brand color"}, opacity: ${overlayOpacity ?? 0.5})`;
 
-    const prompt = `Edit this branded image to create a depth-layered composite effect:
+    const prompt = `Edit this branded image to create a depth-layered composite effect.
 
-TASK: Remove the existing flat pattern overlay from the foreground. Then re-apply ${patternDesc} ONLY in the background areas, BEHIND the main subject(s). The subject must remain completely unobstructed, crisp, and sharp in the foreground.
+TASK: The image already has a pattern overlay applied flat on top. Keep that EXACT pattern — same style, same straight lines, same angles, same colors, same spacing. Do NOT redraw, warp, wave, or distort the pattern in any way. Simply mask/erase the pattern where it overlaps the main subject so the subject appears IN FRONT of the pattern, creating a depth/parallax effect.
 
 RULES:
-- The pattern must ONLY appear behind/around the subject, never on top of them.
-- Do NOT duplicate or add extra pattern elements — use a single clean layer of the pattern.
-- The subject should appear to "pop" forward with a subtle parallax depth effect.
-- Keep the image looking polished and professional for ${institutionName || "university"} marketing.
-- Preserve the original image quality and composition.
+- PRESERVE the existing pattern exactly as-is — do not regenerate, redraw, or stylize it. Keep every line straight, every angle sharp, every spacing identical.
+- ONLY remove/mask the pattern pixels that overlap the main subject's silhouette.
+- The subject must appear crisp, sharp, and fully unobstructed in the foreground.
+- The background with the pattern remains untouched behind the subject.
+- Do NOT add any new pattern elements, effects, or distortions.
+- Professional quality suitable for ${institutionName || "university"} marketing.
 ${colorDesc}
 
 Output a single high-quality image.`;
