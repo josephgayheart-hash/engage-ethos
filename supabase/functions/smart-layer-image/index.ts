@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { imageDataUrl, overlayDescription, brandColors, institutionName } = await req.json();
+    const { imageDataUrl, overlayPattern, overlayColor, overlayOpacity, brandColors, institutionName } = await req.json();
 
     if (!imageDataUrl) {
       return new Response(JSON.stringify({ error: "No image provided" }), {
@@ -30,21 +30,25 @@ serve(async (req) => {
       ? `The brand colors are: ${brandColors.join(", ")}.`
       : "";
 
-    const prompt = `You are an expert graphic designer specializing in branded photography composites for higher education marketing.
+    // Build a concise, specific pattern description
+    const patternName = overlayPattern || "none";
+    const patternDesc = patternName === "none"
+      ? "a subtle branded geometric pattern"
+      : `the "${patternName}" pattern style (color: ${overlayColor || "brand color"}, opacity: ${overlayOpacity ?? 0.5})`;
 
-Take this branded image and create an enhanced version with a dramatic depth-layering effect:
+    const prompt = `Edit this branded image to create a depth-layered composite effect:
 
-1. IDENTIFY the main subject (person, people, or focal object) in the image.
-2. SEPARATE the subject from the background conceptually.
-3. APPLY the brand pattern/overlay BETWEEN the background and the subject — so the pattern appears BEHIND the subject but IN FRONT of the background.
-4. The subject should appear to "pop" forward, creating a striking 3D parallax-style depth effect.
-5. Keep the subject crisp, sharp, and unobstructed — the pattern only appears in the background areas.
-6. Maintain the overall brand color palette and visual identity.
-7. The effect should look polished and professional — suitable for ${institutionName || "a university"}'s marketing materials.
+TASK: Remove the existing flat pattern overlay from the foreground. Then re-apply ${patternDesc} ONLY in the background areas, BEHIND the main subject(s). The subject must remain completely unobstructed, crisp, and sharp in the foreground.
+
+RULES:
+- The pattern must ONLY appear behind/around the subject, never on top of them.
+- Do NOT duplicate or add extra pattern elements — use a single clean layer of the pattern.
+- The subject should appear to "pop" forward with a subtle parallax depth effect.
+- Keep the image looking polished and professional for ${institutionName || "university"} marketing.
+- Preserve the original image quality and composition.
 ${colorDesc}
-${overlayDescription ? `The current overlay style: ${overlayDescription}. Use this as inspiration for the pattern layered behind the subject.` : "Use a subtle geometric or gradient brand pattern behind the subject."}
 
-Create a visually striking, depth-layered composite that makes the subject pop dramatically while maintaining professional quality.`;
+Output a single high-quality image.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -53,7 +57,7 @@ Create a visually striking, depth-layered composite that makes the subject pop d
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-pro-image-preview",
+        model: "google/gemini-2.5-flash-image",
         messages: [
           {
             role: "user",
