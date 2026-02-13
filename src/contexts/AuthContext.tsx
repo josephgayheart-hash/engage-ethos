@@ -187,21 +187,37 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     );
 
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+    // Check for existing session with a timeout to prevent infinite loading
+    const sessionPromise = supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       
       if (currentSession?.user) {
-        fetchUserData(currentSession.user.id).finally(() => {
+        return fetchUserData(currentSession.user.id).finally(() => {
           setIsLoading(false);
         });
       } else {
         setIsLoading(false);
       }
+    }).catch((err) => {
+      console.error('Session check failed:', err);
+      setIsLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    // Safety timeout: if auth takes more than 8 seconds, stop loading
+    const timeout = setTimeout(() => {
+      setIsLoading((current) => {
+        if (current) {
+          console.warn('Auth initialization timed out — proceeding without session');
+        }
+        return false;
+      });
+    }, 8000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, []);
 
   const logout = async () => {
