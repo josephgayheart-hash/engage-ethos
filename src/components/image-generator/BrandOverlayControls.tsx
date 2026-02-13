@@ -435,8 +435,7 @@ export function BrandOverlayControls({
                 </Select>
               </div>
             </div>
-            <div className="space-y-1">
-              <Label className="text-[10px]">Alignment</Label>
+            <div className="flex items-center gap-3">
               <div className="flex items-center gap-1">
                 {([
                   { val: "left" as const, icon: AlignLeft },
@@ -448,7 +447,7 @@ export function BrandOverlayControls({
                     type="button"
                     onClick={() => onHeadlineAlignChange(val)}
                     className={cn(
-                      "p-1.5 rounded transition-all",
+                      "p-1 rounded transition-all",
                       headlineAlign === val ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"
                     )}
                   >
@@ -456,10 +455,7 @@ export function BrandOverlayControls({
                   </button>
                 ))}
               </div>
-            </div>
-            {/* Bold / Italic / Underline */}
-            <div className="space-y-1">
-              <Label className="text-[10px]">Style</Label>
+              <div className="w-px h-5 bg-border" />
               <div className="flex items-center gap-1">
                 {([
                   { val: "bold", icon: Bold, active: headlineBold, toggle: onHeadlineBoldChange },
@@ -471,7 +467,7 @@ export function BrandOverlayControls({
                     type="button"
                     onClick={() => toggle?.(!active)}
                     className={cn(
-                      "p-1.5 rounded transition-all",
+                      "p-1 rounded transition-all",
                       active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"
                     )}
                   >
