@@ -331,7 +331,7 @@ const BrandStudioPage = () => {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-background shrink-0">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" className="gap-1.5" onClick={() => navigate("/image-generator")}>
+          <Button variant="ghost" size="sm" className="gap-1.5" onClick={() => navigate(-1)}>
             <ArrowLeft className="w-4 h-4" />
             Back
           </Button>
