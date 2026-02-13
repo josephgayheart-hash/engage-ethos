@@ -124,7 +124,9 @@ const ImageGeneratorPage = () => {
         },
       });
       if (error) throw error;
-      if (data?.imageUrl) {
+      if (data?.error) {
+        toast.error(data.error);
+      } else if (data?.imageUrl) {
         setImageUrl(data.imageUrl);
         toast.success("Image generated successfully!");
       } else {
