@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Dialog,
@@ -64,12 +64,19 @@ export function SaveToLibraryDialog({
   contentType = "item",
   showChannelSelector = false,
 }: SaveToLibraryDialogProps) {
-  const [name, setName] = useState("");
+  const [name, setName] = useState(defaultName);
   const [channel, setChannel] = useState<Channel | "none">("none");
   const [savedId, setSavedId] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [alsoSaveToPersonal, setAlsoSaveToPersonal] = useState(false);
   const [alsoSaveToShared, setAlsoSaveToShared] = useState(false);
+
+  // Sync defaultName when dialog opens
+  useEffect(() => {
+    if (open && defaultName) {
+      setName(defaultName);
+    }
+  }, [open, defaultName]);
 
   const handleSave = async () => {
     if (!name.trim()) return;
