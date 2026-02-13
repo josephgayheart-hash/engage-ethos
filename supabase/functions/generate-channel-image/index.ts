@@ -443,11 +443,17 @@ Photography/art direction — follow the style of real university marketing imag
 - NEVER show people standing in a line, holding hands, linking arms, or posing symmetrically — these look artificial
 - NEVER generate twins, duplicates, or people who look identical — every person should be visually distinct
 - Vary body language, posture, and gaze direction — people should look naturally occupied, not aware of the camera
-- Show authentic campus environments: brick pathways, green lawns, modern labs, lecture halls, coffee shops, residence halls, athletic facilities
 - Use natural light — golden hour warmth, dappled shade under trees, soft overcast — avoid flat studio lighting
 - Include environmental storytelling: backpacks, laptops, coffee cups, notebooks, lab equipment, sports gear
 - People should be diverse in a way that feels organic to a real campus — different backgrounds, ages, body types, clothing styles — without appearing curated or posed as a diversity photo
 - Brand colors MUST appear on clothing items (t-shirts, hoodies, scarves), campus banners, pennants, or architectural details — use ONLY the exact hex values from the palette above, never approximate or invent new colors
+
+SETTING & ENVIRONMENT RULES — READ CAREFULLY:
+- If the scene description mentions "at home", "in their home", "living room", "kitchen", "apartment", "dorm room", or any domestic setting, depict a REAL HOME or RESIDENTIAL INTERIOR — do NOT add campus buildings visible through windows, do NOT place institutional architecture in the background, do NOT make it look like a campus building. It should look like someone's actual living space.
+- If the scene is in a "lab", "classroom", "office", "studio", or other INTERIOR workspace, focus on the INTERIOR environment only — do NOT force a campus building to be visible through windows or glass walls unless the description explicitly requests a campus view.
+- Only show recognizable campus architecture and exterior buildings when the scene NATURALLY takes place OUTDOORS on campus (walking across a quad, sitting on campus steps, etc.) or when the description explicitly mentions a campus exterior.
+- Show authentic environments that match what was described: brick pathways, green lawns, modern labs, lecture halls, coffee shops, residence halls, athletic facilities — but ONLY when contextually appropriate to the scene description.
+
 - Composition: use shallow depth of field, leading lines, rule of thirds — the hallmarks of editorial campus photography
 - CRITICAL — Aspect ratio and dimensions: This image MUST be exactly ${spec.aspect} aspect ratio (${spec.width}x${spec.height} pixels). ${spec.aspect === "1:1" ? "The image must be perfectly SQUARE — equal width and height." : spec.aspect === "16:9" ? "The image must be a WIDE horizontal rectangle — significantly wider than it is tall." : `The image must match ${spec.aspect} proportions exactly.`} Do NOT generate an image with the wrong aspect ratio.
 
@@ -462,7 +468,7 @@ CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
 - Professional quality: sharp focus on subject, creamy bokeh backgrounds, rich color depth
 - Feel warm, authentic, and aspirational — like a spread in a top university's viewbook
 - Match the tone and energy of the communication moment${toneContext ? ` — the visual should feel ${tone}` : ''}
-- Imagery should resonate with the target audience${audienceContext ? ` (${audience})` : ''} and reflect their lived experience on campus`;
+- Imagery should resonate with the target audience${audienceContext ? ` (${audience})` : ''} and reflect their lived experience`;
 
     console.log("Generating channel image for:", channel, "content:", contentSummary.substring(0, 100));
 
