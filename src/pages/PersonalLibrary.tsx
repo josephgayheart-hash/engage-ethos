@@ -163,10 +163,10 @@ const PersonalLibrary = () => {
                 <div className="icon-container icon-container-lg bg-accent/10">
                   <Library className="w-6 h-6 text-accent" />
                 </div>
-                Personal Message Library
+                My Library
               </h1>
               <p className="text-muted-foreground mt-1 ml-14">
-                Your saved messages and evaluations
+                Your saved content, images, and evaluations
               </p>
             </div>
           </div>

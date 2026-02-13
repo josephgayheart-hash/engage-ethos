@@ -30,6 +30,7 @@ import {
   ChevronDown,
   LayoutGrid,
   List,
+  ImageIcon,
 } from "lucide-react";
 import type { Channel } from "@/types/campusvoice";
 
@@ -80,6 +81,7 @@ export function MyDraftsCard() {
   const messageDrafts = drafts.filter(d => d.draft_type === 'message');
   const journeyDrafts = drafts.filter(d => d.draft_type === 'journey');
   const analysisDrafts = drafts.filter(d => d.draft_type === 'analysis');
+  const imageDrafts = drafts.filter(d => d.draft_type === 'image');
   
   const INITIAL_DISPLAY_COUNT = 5;
   const displayedDrafts = showAll ? drafts : drafts.slice(0, INITIAL_DISPLAY_COUNT);
@@ -95,6 +97,7 @@ export function MyDraftsCard() {
     if (draft.draft_type === 'message') return '/build';
     if (draft.draft_type === 'journey') return '/strategy';
     if (draft.draft_type === 'analysis') return '/web-analyzer';
+    if (draft.draft_type === 'image') return '/image-generator';
     return '/build';
   };
 
@@ -102,6 +105,7 @@ export function MyDraftsCard() {
     if (type === 'message') return PenTool;
     if (type === 'journey') return Map;
     if (type === 'analysis') return Search;
+    if (type === 'image') return ImageIcon;
     return PenTool;
   };
 
@@ -135,9 +139,9 @@ export function MyDraftsCard() {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground text-center py-4">
-            No drafts yet. Start building a message or journey and it will auto-save here.
+            No drafts yet. Start building a message, journey, or image and it will auto-save here.
           </p>
-          <div className="flex gap-2 justify-center">
+          <div className="flex gap-2 justify-center flex-wrap">
             <Button variant="outline" size="sm" asChild>
               <Link to="/build">
                 <PenTool className="w-4 h-4 mr-1" />
@@ -148,6 +152,12 @@ export function MyDraftsCard() {
               <Link to="/strategy">
                 <Map className="w-4 h-4 mr-1" />
                 Journey
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/image-generator">
+                <ImageIcon className="w-4 h-4 mr-1" />
+                Image
               </Link>
             </Button>
           </div>
@@ -188,6 +198,12 @@ export function MyDraftsCard() {
                 <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
                   <Search className="w-3 h-3 mr-1" />
                   {analysisDrafts.length}
+                </Badge>
+              )}
+              {imageDrafts.length > 0 && (
+                <Badge variant="secondary" className="text-xs bg-violet-500/10 text-violet-600">
+                  <ImageIcon className="w-3 h-3 mr-1" />
+                  {imageDrafts.length}
                 </Badge>
               )}
             </div>
@@ -285,6 +301,8 @@ export function MyDraftsCard() {
                       ? 'bg-pillar-cognitive/10' 
                       : draft.draft_type === 'journey'
                       ? 'bg-pillar-consensus/10'
+                      : draft.draft_type === 'image'
+                      ? 'bg-violet-500/10'
                       : 'bg-cyan-500/10'
                   }`}>
                     <Icon className={`w-4 h-4 ${
@@ -292,6 +310,8 @@ export function MyDraftsCard() {
                         ? 'text-pillar-cognitive' 
                         : draft.draft_type === 'journey'
                         ? 'text-pillar-consensus'
+                        : draft.draft_type === 'image'
+                        ? 'text-violet-600'
                         : 'text-cyan-600'
                     }`} />
                   </div>

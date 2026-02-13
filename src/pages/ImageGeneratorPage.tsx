@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { WaveBackground } from "@/components/WaveBackground";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -15,6 +15,7 @@ import { Link } from "react-router-dom";
 import { ChannelMockup } from "@/components/image-generator/ChannelMockup";
 import { BrandOverlayEditor } from "@/components/image-generator/BrandOverlayEditor";
 import { useCampusPhotoCount } from "@/hooks/useCampusPhotoCount";
+import { useUserDrafts } from "@/hooks/useUserDrafts";
 import { toast } from "sonner";
 
 const channelOptions = [
@@ -89,6 +90,7 @@ const ImageGeneratorPage = () => {
   const [viewMode, setViewMode] = useState<"raw" | "mockup" | "overlay">("mockup");
   const [blankCanvasMode, setBlankCanvasMode] = useState(false);
   const { campusPhotoCount } = useCampusPhotoCount(selectedProfileId || null);
+  const { saveDraft } = useUserDrafts();
 
   // Extract brand info from selected profile
   const selectedProfile = profiles?.find(p => p.id === selectedProfileId);
@@ -129,6 +131,18 @@ const ImageGeneratorPage = () => {
       } else if (data?.imageUrl) {
         setImageUrl(data.imageUrl);
         toast.success("Image generated successfully!");
+        // Auto-save as image draft
+        saveDraft('image' as any, {
+          contentDescription,
+          channel,
+          audience,
+          tone,
+          goal,
+          style,
+          imageUrl: data.imageUrl,
+          profileId: selectedProfileId,
+          profileName: profileInstitutionName,
+        }, `${profileInstitutionName || 'Image'} — ${channel}`, undefined, true);
       } else {
         toast.error("No image was returned.");
       }

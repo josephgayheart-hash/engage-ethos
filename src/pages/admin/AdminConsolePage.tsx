@@ -459,8 +459,8 @@ export default function AdminConsolePage() {
       stat: contentStats.contentDNASamples > 0 ? `${contentStats.contentDNASamples} samples` : 'Add samples'
     },
     {
-      title: 'Message Library',
-      description: 'Personal and shared message templates',
+      title: 'Content Library',
+      description: 'Personal and shared content, images, and templates',
       icon: MessageSquare,
       href: '/personal-library',
       color: 'bg-[hsl(210,70%,50%)]',

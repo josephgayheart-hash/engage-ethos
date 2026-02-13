@@ -101,11 +101,11 @@ export function LibraryOverviewPanel() {
               <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
             <h3 className="font-serif font-semibold text-sm">My Library</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Personal messages & drafts</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Saved content & images</p>
             <div className="mt-3 flex items-baseline gap-1.5">
               <span className="text-2xl font-bold font-serif">{counts.personalMessages}</span>
               <span className="text-xs text-muted-foreground">
-                message{counts.personalMessages !== 1 ? 's' : ''}
+                item{counts.personalMessages !== 1 ? 's' : ''}
               </span>
             </div>
           </CardContent>

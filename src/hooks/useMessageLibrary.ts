@@ -119,6 +119,7 @@ export function useMessageLibrary() {
         channels: message.channels || null,
         channel_drafts: message.channelDrafts ? (message.channelDrafts as any) : null,
         cohort: message.cohort ? (message.cohort as any) : null,
+        cover_image_url: message.coverImageUrl || null,
       } as any)
       .select()
       .single();

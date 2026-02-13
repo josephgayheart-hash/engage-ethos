@@ -220,22 +220,44 @@ const BrandStudioPage = () => {
           pixelRatio: 1.5,
           skipFonts: true,
         });
+
+        // Upload to storage instead of storing base64 in DB
+        const base64Data = dataUrl.split(",")[1];
+        const byteArray = Uint8Array.from(atob(base64Data), (c) => c.charCodeAt(0));
+        const blob = new Blob([byteArray], { type: "image/png" });
+        const filePath = `branded-images/${user?.id || "anon"}/${Date.now()}.png`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("collection-assets")
+          .upload(filePath, blob, { contentType: "image/png", upsert: true });
+
+        let imageUrl = dataUrl; // fallback to data URL
+        if (!uploadError) {
+          const { data: publicData } = supabase.storage
+            .from("collection-assets")
+            .getPublicUrl(filePath);
+          imageUrl = publicData.publicUrl;
+        } else {
+          console.warn("Storage upload failed, falling back to data URL:", uploadError);
+        }
+
         const result = await addMessage({
           title: name,
-          content: `![Branded Image](${dataUrl})`,
+          content: `![Branded Image](${imageUrl})`,
           channel: (channel as any) || "social-media",
           mode: "generated",
           source: "other",
           approved: false,
           institutionalProfileId: profileId,
           institutionalProfileName: institutionName,
+          coverImageUrl: imageUrl,
         });
         if (result?.id) {
           setLastSavedMessageId(result.id);
           lastSavedIdRef.current = result.id;
           return result.id;
         }
-        toast.error("Failed to save — the image may be too large. Try downloading instead.");
+        toast.error("Failed to save — please try again.");
         return undefined;
       } catch (err) {
         console.error("Save to library capture error:", err);
@@ -245,7 +267,7 @@ const BrandStudioPage = () => {
         setIsSaving(false);
       }
     },
-    [channel, profileId, institutionName, addMessage]
+    [channel, profileId, institutionName, addMessage, user]
   );
 
   const handleSaveToSharedLibrary = useCallback(
