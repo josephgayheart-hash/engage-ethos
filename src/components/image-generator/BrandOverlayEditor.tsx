@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Download, Type, Image as ImageIcon, AlignLeft, AlignCenter, AlignRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { Download, Type, Image as ImageIcon, AlignLeft, AlignCenter, AlignRight, ChevronLeft, ChevronRight, Move } from "lucide-react";
 import { OverlayPatternSelector } from "./OverlayPatternSelector";
 import { getOverlayStyle, type OverlayPatternId } from "./overlayPatterns";
 import { useCustomOverlays, type CustomOverlay } from "@/hooks/useCustomOverlays";
@@ -17,15 +17,16 @@ interface BrandOverlayEditorProps {
   imageUrl: string | null;
   brandColors: string[];
   logoUrl?: string;
-  /** Additional logo URLs from institutional profile */
   logoUrls?: string[];
   institutionName?: string;
   channel?: string;
+  /** When true, hides download button (used in studio page) */
+  hideDownload?: boolean;
+  /** Expose canvas ref for external download */
+  canvasRef?: React.RefObject<HTMLDivElement>;
 }
 
 type LogoPosition = "top-left" | "top-right" | "bottom-left" | "bottom-right";
-type HeadlinePosition = "top" | "middle" | "bottom";
-type HeadlineSize = "sm" | "md" | "lg" | "xl";
 type HeadlineAlign = "left" | "center" | "right";
 
 const LOGO_POSITION_CLASSES: Record<LogoPosition, string> = {
@@ -33,19 +34,6 @@ const LOGO_POSITION_CLASSES: Record<LogoPosition, string> = {
   "top-right": "top-3 right-3",
   "bottom-left": "bottom-3 left-3",
   "bottom-right": "bottom-3 right-3",
-};
-
-const HEADLINE_POSITION_CLASSES: Record<HeadlinePosition, string> = {
-  top: "top-6 left-0 right-0",
-  middle: "top-1/2 -translate-y-1/2 left-0 right-0",
-  bottom: "bottom-14 left-0 right-0",
-};
-
-const HEADLINE_SIZE_CLASSES: Record<HeadlineSize, string> = {
-  sm: "text-sm",
-  md: "text-lg",
-  lg: "text-2xl",
-  xl: "text-3xl",
 };
 
 const HEADLINE_ALIGN_CLASSES: Record<HeadlineAlign, string> = {
@@ -69,7 +57,6 @@ const FONT_OPTIONS = [
   { value: "Crimson Text", label: "Crimson Text", style: "serif" },
 ];
 
-// Load Google Fonts dynamically
 function useGoogleFont(fontName: string) {
   useEffect(() => {
     if (!fontName || fontName === "Georgia" || fontName === "Inter") return;
@@ -90,13 +77,15 @@ export function BrandOverlayEditor({
   logoUrls,
   institutionName,
   channel,
+  hideDownload,
+  canvasRef: externalCanvasRef,
 }: BrandOverlayEditorProps) {
-  const canvasRef = useRef<HTMLDivElement>(null);
+  const internalCanvasRef = useRef<HTMLDivElement>(null);
+  const canvasRef = externalCanvasRef || internalCanvasRef;
 
   const primary = brandColors[0] || "#1e3a5f";
   const secondary = brandColors[1] || brandColors[0] || "#c0392b";
 
-  // Build available logos list
   const allLogos = Array.from(new Set([logoUrl, ...(logoUrls || [])].filter(Boolean))) as string[];
 
   // Overlay state
@@ -105,7 +94,6 @@ export function BrandOverlayEditor({
   const [overlayOpacity, setOverlayOpacity] = useState(0.55);
   const [customOverlayUrl, setCustomOverlayUrl] = useState<string | null>(null);
 
-  // Fetch custom overlays for the selected profile
   const { overlays: customOverlays } = useCustomOverlays(undefined);
 
   // Logo state
@@ -116,11 +104,16 @@ export function BrandOverlayEditor({
 
   // Headline state
   const [headlineText, setHeadlineText] = useState("");
-  const [headlineSize, setHeadlineSize] = useState<HeadlineSize>("lg");
-  const [headlinePosition, setHeadlinePosition] = useState<HeadlinePosition>("middle");
+  const [headlineFontSize, setHeadlineFontSize] = useState(28);
+  const [headlineX, setHeadlineX] = useState(50);
+  const [headlineY, setHeadlineY] = useState(50);
   const [headlineColor, setHeadlineColor] = useState("#ffffff");
   const [headlineAlign, setHeadlineAlign] = useState<HeadlineAlign>("center");
   const [headlineFont, setHeadlineFont] = useState("Inter");
+
+  // Drag state
+  const [isDragging, setIsDragging] = useState(false);
+  const dragOffset = useRef({ x: 0, y: 0 });
 
   // Bottom bar state
   const [showBottomBar, setShowBottomBar] = useState(false);
@@ -135,10 +128,43 @@ export function BrandOverlayEditor({
     : getOverlayStyle(overlayPattern as OverlayPatternId, overlayColor, overlayOpacity, secondary);
   const activeLogo = allLogos[activeLogoIndex] || allLogos[0];
 
+  // Drag handlers
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const canvas = (canvasRef as React.RefObject<HTMLDivElement>).current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const currentPxX = (headlineX / 100) * rect.width;
+    const currentPxY = (headlineY / 100) * rect.height;
+    dragOffset.current = {
+      x: e.clientX - rect.left - currentPxX,
+      y: e.clientY - rect.top - currentPxY,
+    };
+    setIsDragging(true);
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  }, [headlineX, headlineY, canvasRef]);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!isDragging) return;
+    const canvas = (canvasRef as React.RefObject<HTMLDivElement>).current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const newX = ((e.clientX - rect.left - dragOffset.current.x) / rect.width) * 100;
+    const newY = ((e.clientY - rect.top - dragOffset.current.y) / rect.height) * 100;
+    setHeadlineX(Math.max(5, Math.min(95, newX)));
+    setHeadlineY(Math.max(5, Math.min(95, newY)));
+  }, [isDragging, canvasRef]);
+
+  const handlePointerUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
   const handleDownload = useCallback(async () => {
-    if (!canvasRef.current) return;
+    const ref = (canvasRef as React.RefObject<HTMLDivElement>).current;
+    if (!ref) return;
     try {
-      const dataUrl = await toPng(canvasRef.current, { pixelRatio: 2 });
+      const dataUrl = await toPng(ref, { pixelRatio: 2 });
       const a = document.createElement("a");
       a.href = dataUrl;
       a.download = `branded-${channel || "image"}-${Date.now()}.png`;
@@ -149,17 +175,22 @@ export function BrandOverlayEditor({
     } catch {
       toast.error("Download failed. Try again.");
     }
-  }, [channel]);
+  }, [channel, canvasRef]);
 
   return (
     <div className="space-y-4">
       {/* Live Preview */}
       <div
-        ref={canvasRef}
+        ref={internalCanvasRef === canvasRef ? internalCanvasRef : undefined}
+        {...(externalCanvasRef ? {} : {})}
         id="brand-overlay-canvas"
         className="relative w-full overflow-hidden rounded-lg bg-muted"
         style={{ aspectRatio: "1 / 1" }}
       >
+        {/* Use the correct ref */}
+        {externalCanvasRef && (
+          <div ref={externalCanvasRef as any} className="absolute inset-0" style={{ display: 'none' }} />
+        )}
         {imageUrl ? (
           <img src={imageUrl} alt="Base" className="absolute inset-0 w-full h-full object-cover" />
         ) : (
@@ -181,12 +212,23 @@ export function BrandOverlayEditor({
         {headlineText && (
           <div
             className={cn(
-              "absolute px-6 font-bold drop-shadow-lg",
-              HEADLINE_POSITION_CLASSES[headlinePosition],
-              HEADLINE_SIZE_CLASSES[headlineSize],
+              "absolute px-6 font-bold drop-shadow-lg select-none",
               HEADLINE_ALIGN_CLASSES[headlineAlign]
             )}
-            style={{ color: headlineColor, fontFamily: `'${headlineFont}', sans-serif` }}
+            style={{
+              color: headlineColor,
+              fontFamily: `'${headlineFont}', sans-serif`,
+              fontSize: `${headlineFontSize}px`,
+              left: `${headlineX}%`,
+              top: `${headlineY}%`,
+              transform: 'translate(-50%, -50%)',
+              cursor: isDragging ? 'grabbing' : 'grab',
+              maxWidth: '90%',
+              lineHeight: 1.2,
+            }}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
           >
             {headlineText}
           </div>
@@ -265,7 +307,6 @@ export function BrandOverlayEditor({
             </div>
             {showLogo && (
               <div className="space-y-2">
-                {/* Logo switcher */}
                 {allLogos.length > 1 && (
                   <div className="flex items-center gap-2">
                     <Label className="text-[10px] shrink-0">Logo</Label>
@@ -342,30 +383,19 @@ export function BrandOverlayEditor({
           />
           {headlineText && (
             <div className="space-y-2">
-              <div className="grid grid-cols-3 gap-2">
-                <div className="space-y-1">
-                  <Label className="text-[10px]">Size</Label>
-                  <Select value={headlineSize} onValueChange={(v) => setHeadlineSize(v as HeadlineSize)}>
-                    <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sm">Small</SelectItem>
-                      <SelectItem value="md">Medium</SelectItem>
-                      <SelectItem value="lg">Large</SelectItem>
-                      <SelectItem value="xl">Extra Large</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px]">Position</Label>
-                  <Select value={headlinePosition} onValueChange={(v) => setHeadlinePosition(v as HeadlinePosition)}>
-                    <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="top">Top</SelectItem>
-                      <SelectItem value="middle">Middle</SelectItem>
-                      <SelectItem value="bottom">Bottom</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              {/* Font Size Slider */}
+              <div className="space-y-1">
+                <Label className="text-[10px]">Font Size — {headlineFontSize}px</Label>
+                <Slider
+                  value={[headlineFontSize]}
+                  onValueChange={([v]) => setHeadlineFontSize(v)}
+                  min={14}
+                  max={72}
+                  step={1}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
                   <Label className="text-[10px]">Color</Label>
                   <div className="flex items-center gap-1">
@@ -389,32 +419,6 @@ export function BrandOverlayEditor({
                     />
                   </div>
                 </div>
-              </div>
-
-              {/* Alignment */}
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                  <Label className="text-[10px]">Alignment</Label>
-                  <div className="flex items-center gap-1">
-                    {([
-                      { val: "left" as const, icon: AlignLeft },
-                      { val: "center" as const, icon: AlignCenter },
-                      { val: "right" as const, icon: AlignRight },
-                    ]).map(({ val, icon: Icon }) => (
-                      <button
-                        key={val}
-                        type="button"
-                        onClick={() => setHeadlineAlign(val)}
-                        className={cn(
-                          "p-1.5 rounded transition-all",
-                          headlineAlign === val ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"
-                        )}
-                      >
-                        <Icon className="w-3.5 h-3.5" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
                 <div className="space-y-1">
                   <Label className="text-[10px]">Font</Label>
                   <Select value={headlineFont} onValueChange={setHeadlineFont}>
@@ -431,6 +435,35 @@ export function BrandOverlayEditor({
                   </Select>
                 </div>
               </div>
+
+              {/* Alignment */}
+              <div className="space-y-1">
+                <Label className="text-[10px]">Alignment</Label>
+                <div className="flex items-center gap-1">
+                  {([
+                    { val: "left" as const, icon: AlignLeft },
+                    { val: "center" as const, icon: AlignCenter },
+                    { val: "right" as const, icon: AlignRight },
+                  ]).map(({ val, icon: Icon }) => (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() => setHeadlineAlign(val)}
+                      className={cn(
+                        "p-1.5 rounded transition-all",
+                        headlineAlign === val ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Drag hint */}
+              <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                <Move className="w-3 h-3" /> Drag the headline on the canvas to reposition
+              </p>
             </div>
           )}
         </div>
@@ -470,10 +503,12 @@ export function BrandOverlayEditor({
       </div>
 
       {/* Download */}
-      <Button onClick={handleDownload} className="w-full" size="sm">
-        <Download className="w-4 h-4 mr-1.5" />
-        Download Branded Image
-      </Button>
+      {!hideDownload && (
+        <Button onClick={handleDownload} className="w-full" size="sm">
+          <Download className="w-4 h-4 mr-1.5" />
+          Download Branded Image
+        </Button>
+      )}
     </div>
   );
 }

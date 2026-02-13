@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { supabase } from "@/integrations/supabase/client";
-import { ImageIcon, Download, RefreshCw, Loader2, Sparkles, Palette, Camera, Users, Target, Eye, Image, ExternalLink, PaintBucket } from "lucide-react";
+import { ImageIcon, Download, RefreshCw, Loader2, Sparkles, Palette, Camera, Users, Target, Eye, Image, ExternalLink, PaintBucket, Maximize2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ChannelMockup } from "@/components/image-generator/ChannelMockup";
 import { BrandOverlayEditor } from "@/components/image-generator/BrandOverlayEditor";
@@ -549,17 +549,37 @@ const ImageGeneratorPage = () => {
                         </>
                       )}
                       {brandColors.length > 0 && (
-                        <button
-                          onClick={() => setViewMode("overlay")}
-                          className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                            viewMode === "overlay"
-                              ? "bg-background text-foreground shadow-sm"
-                              : "text-muted-foreground hover:text-foreground"
-                          }`}
-                        >
-                          <PaintBucket className="w-3.5 h-3.5" />
-                          Brand It
-                        </button>
+                        <>
+                          <button
+                            onClick={() => setViewMode("overlay")}
+                            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                              viewMode === "overlay"
+                                ? "bg-background text-foreground shadow-sm"
+                                : "text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            <PaintBucket className="w-3.5 h-3.5" />
+                            Brand It
+                          </button>
+                          {viewMode === "overlay" && (
+                            <Link
+                              to="/brand-studio"
+                              state={{
+                                imageUrl: blankCanvasMode ? null : imageUrl,
+                                brandColors,
+                                logoUrl: profileLogoUrl,
+                                logoUrls: profileLogoUrls,
+                                institutionName: profileInstitutionName,
+                                channel,
+                                profileId: selectedProfileId,
+                              }}
+                              className="flex items-center justify-center gap-1 px-2 py-1.5 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground transition-all"
+                              title="Open in Brand It Studio"
+                            >
+                              <Maximize2 className="w-3.5 h-3.5" />
+                            </Link>
+                          )}
+                        </>
                       )}
                     </div>
 

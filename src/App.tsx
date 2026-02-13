@@ -67,6 +67,7 @@ import AgencyClientsPage from "./pages/agency/AgencyClientsPage";
 import UniversityDashboardPage from "./pages/UniversityDashboardPage";
 import ToolsPage from "./pages/ToolsPage";
 import ImageGeneratorPage from "./pages/ImageGeneratorPage";
+import BrandStudioPage from "./pages/BrandStudioPage";
 const queryClient = new QueryClient();
 
 // Component to track page views
@@ -228,6 +229,7 @@ const AppRoutes = () => (
     <Route path="/tools" element={<RequireAuth><ToolsPage /></RequireAuth>} />
     <Route path="/image-generator" element={<RequireAuth><ImageGeneratorPage /></RequireAuth>} />
     <Route path="/brand-audit" element={<RequireAuth><BrandAuditPage /></RequireAuth>} />
+    <Route path="/brand-studio" element={<RequireAuth><BrandStudioPage /></RequireAuth>} />
     <Route path="/settings" element={<Navigate to="/university-settings" replace />} />
     <Route path="/university-settings" element={<RequireAuth><UniversitySettingsPage /></RequireAuth>} />
     <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
