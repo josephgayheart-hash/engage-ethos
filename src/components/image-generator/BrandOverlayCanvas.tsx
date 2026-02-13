@@ -282,7 +282,7 @@ export const BrandOverlayCanvas = forwardRef<HTMLDivElement, BrandOverlayCanvasP
         {showBottomBar && (
           <div
             className="absolute bottom-0 left-0 right-0 py-2 px-4 text-center text-sm font-semibold"
-            style={{ backgroundColor: bottomBarColor, color: "#ffffff" }}
+            style={{ backgroundColor: bottomBarColor, color: "#ffffff", fontFamily: `'${headlineFont}', sans-serif` }}
           >
             {bottomBarText || institutionName || "Your Institution"}
           </div>
