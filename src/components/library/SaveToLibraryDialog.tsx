@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Check, ExternalLink, FolderPlus, Library } from "lucide-react";
+import { Check, ExternalLink, FolderPlus, Library, Folder } from "lucide-react";
 import type { Channel } from "@/types/campusvoice";
 
 type LibraryType = "personal" | "shared";
@@ -50,7 +50,11 @@ interface SaveToLibraryDialogProps {
   libraryType: LibraryType;
   defaultName?: string;
   contentType?: string;
-  showChannelSelector?: boolean; // Enable channel selection
+  showChannelSelector?: boolean;
+  /** Callback when user clicks "Add to Collection" in the success state */
+  onAddToCollection?: () => void;
+  /** Whether to show the "Add to Collection" button in success state */
+  showAddToCollection?: boolean;
 }
 
 export function SaveToLibraryDialog({
@@ -63,6 +67,8 @@ export function SaveToLibraryDialog({
   defaultName = "",
   contentType = "item",
   showChannelSelector = false,
+  onAddToCollection,
+  showAddToCollection = false,
 }: SaveToLibraryDialogProps) {
   const [name, setName] = useState(defaultName);
   const [channel, setChannel] = useState<Channel | "none">("none");
@@ -246,6 +252,12 @@ export function SaveToLibraryDialog({
               <Button variant="outline" onClick={handleClose}>
                 Done
               </Button>
+              {showAddToCollection && onAddToCollection && (
+                <Button variant="secondary" onClick={onAddToCollection}>
+                  <Folder className="w-4 h-4 mr-1" />
+                  Add to Collection
+                </Button>
+              )}
               <Button asChild>
                 <Link to={itemPath} className="flex items-center gap-2">
                   <ExternalLink className="w-4 h-4" />

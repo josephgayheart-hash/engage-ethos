@@ -44,6 +44,8 @@ const BrandStudioPage = () => {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [collectionDialogOpen, setCollectionDialogOpen] = useState(false);
   const [lastSavedMessageId, setLastSavedMessageId] = useState<string | null>(null);
+  const lastSavedIdRef = useRef<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const { addMessage } = useMessageLibrary();
   const { collections, addItemToCollection, createCollection } = useLibraryCollections();
   const { profile, user } = useAuth();
@@ -212,9 +214,10 @@ const BrandStudioPage = () => {
         toast.error("Could not capture the image.");
         return undefined;
       }
+      setIsSaving(true);
       try {
         const dataUrl = await toPng(canvas as HTMLElement, {
-          pixelRatio: 2,
+          pixelRatio: 1.5,
           skipFonts: true,
         });
         const result = await addMessage({
@@ -229,12 +232,17 @@ const BrandStudioPage = () => {
         });
         if (result?.id) {
           setLastSavedMessageId(result.id);
+          lastSavedIdRef.current = result.id;
+          return result.id;
         }
-        return result?.id;
+        toast.error("Failed to save — the image may be too large. Try downloading instead.");
+        return undefined;
       } catch (err) {
         console.error("Save to library capture error:", err);
         toast.error("Failed to capture image for library.");
         return undefined;
+      } finally {
+        setIsSaving(false);
       }
     },
     [channel, profileId, institutionName, addMessage]
@@ -498,7 +506,7 @@ const BrandStudioPage = () => {
         open={saveDialogOpen}
         onOpenChange={(open) => {
           setSaveDialogOpen(open);
-          if (!open && lastSavedMessageId) {
+          if (!open && lastSavedIdRef.current) {
             // After dialog closes with a saved item, offer collection dialog
             setTimeout(() => setCollectionDialogOpen(true), 300);
           }
@@ -508,6 +516,11 @@ const BrandStudioPage = () => {
         libraryType="personal"
         contentType="branded image"
         defaultName={`${institutionName || "Branded"} — ${channel || "image"}`}
+        onAddToCollection={() => {
+          setSaveDialogOpen(false);
+          setTimeout(() => setCollectionDialogOpen(true), 200);
+        }}
+        showAddToCollection={!!lastSavedMessageId}
       />
 
       <AddToCollectionDialog
