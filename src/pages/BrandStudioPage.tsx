@@ -367,46 +367,40 @@ const BrandStudioPage = () => {
         {/* Right: Canvas */}
         <div className="flex-1 flex items-center justify-center p-8 bg-muted/30 overflow-hidden">
           <div className="max-w-2xl w-full relative group">
-            {/* Show smart layer result or the normal canvas */}
-            {smartLayerImageUrl ? (
-              <div className="relative w-full overflow-hidden rounded-lg shadow-2xl">
-                <img src={smartLayerImageUrl} alt="Smart Layer result" className="w-full h-auto block rounded-lg" />
-              </div>
-            ) : (
-              <BrandOverlayCanvas
-                ref={canvasRef}
-                imageUrl={imageUrl}
-                primaryColor={primary}
-                secondaryColor={secondary}
-                overlayPattern={overlayPattern}
-                overlayColor={overlayColor}
-                overlayOpacity={overlayOpacity}
-                customOverlayUrl={customOverlayUrl}
-                showLogo={showLogo}
-                activeLogo={activeLogo}
-                logoPosition={logoPosition}
-                logoScale={logoScale}
-                headlineText={headlineText}
-                headlineFontSize={headlineFontSize}
-                headlineX={headlineX}
-                headlineY={headlineY}
-                headlineColor={headlineColor}
-                headlineAlign={headlineAlign}
-                headlineFont={headlineFont}
-                headlineBold={headlineBold}
-                headlineItalic={headlineItalic}
-                headlineUnderline={headlineUnderline}
-                isDragging={isDragging}
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerUp}
-                onHeadlineTextChange={setHeadlineText}
-                showBottomBar={showBottomBar}
-                bottomBarText={bottomBarText}
-                bottomBarColor={bottomBarColor}
-                institutionName={institutionName}
-              />
-            )}
+            {/* Always show editable canvas — use smart layer image as base when available */}
+            <BrandOverlayCanvas
+              ref={canvasRef}
+              imageUrl={smartLayerImageUrl || imageUrl}
+              primaryColor={primary}
+              secondaryColor={secondary}
+              overlayPattern={smartLayerImageUrl ? "none" : overlayPattern}
+              overlayColor={overlayColor}
+              overlayOpacity={smartLayerImageUrl ? 0 : overlayOpacity}
+              customOverlayUrl={smartLayerImageUrl ? null : customOverlayUrl}
+              showLogo={showLogo}
+              activeLogo={activeLogo}
+              logoPosition={logoPosition}
+              logoScale={logoScale}
+              headlineText={headlineText}
+              headlineFontSize={headlineFontSize}
+              headlineX={headlineX}
+              headlineY={headlineY}
+              headlineColor={headlineColor}
+              headlineAlign={headlineAlign}
+              headlineFont={headlineFont}
+              headlineBold={headlineBold}
+              headlineItalic={headlineItalic}
+              headlineUnderline={headlineUnderline}
+              isDragging={isDragging}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onHeadlineTextChange={setHeadlineText}
+              showBottomBar={showBottomBar}
+              bottomBarText={bottomBarText}
+              bottomBarColor={bottomBarColor}
+              institutionName={institutionName}
+            />
 
             {/* Loading overlay */}
             {isSmartLayering && (
