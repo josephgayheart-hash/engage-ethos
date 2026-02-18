@@ -782,10 +782,17 @@ Provide your evaluation as JSON.`;
 
     console.log("AI response received, parsing JSON...");
 
-    let jsonContent = content;
-    const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+    let jsonContent = content.trim();
+    
+    // Strip markdown code fences if present (AI sometimes wraps response)
+    const jsonMatch = jsonContent.match(/```(?:json)?\s*\n?([\s\S]*?)\n?\s*```/);
     if (jsonMatch) {
       jsonContent = jsonMatch[1].trim();
+    }
+    
+    // Also strip if it just starts/ends with backtick fences on their own lines
+    if (jsonContent.startsWith('```')) {
+      jsonContent = jsonContent.replace(/^```(?:json)?\s*\n/, '').replace(/\n\s*```\s*$/, '').trim();
     }
 
     try {
