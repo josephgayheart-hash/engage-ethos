@@ -7,6 +7,7 @@ import { WebCrawlTab } from '@/components/dna/WebCrawlTab';
 import { StoryBankTab } from '@/components/dna/StoryBankTab';
 import { FactBookTab } from '@/components/dna/FactBookTab';
 import { CampusPhotographyTab } from '@/components/dna/CampusPhotographyTab';
+import { ContentDNASetupWizard } from '@/components/ContentDNASetupWizard';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -239,6 +240,7 @@ export default function ContentDNAPage() {
   } | null>(null);
   
   const [isResetting, setIsResetting] = useState(false);
+  const [showSetupWizard, setShowSetupWizard] = useState(false);
   
   const handleResetContentDNA = async () => {
     setIsResetting(true);
@@ -682,6 +684,17 @@ export default function ContentDNAPage() {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              {!analysis && samples.length === 0 && selectedProfile && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => setShowSetupWizard(true)}
+                >
+                  <Wand2 className="w-3.5 h-3.5" />
+                  Setup Wizard
+                </Button>
+              )}
               <Badge variant="outline" className="flex items-center gap-1">
                 <FileText className="w-3 h-3" />
                 {samples.length} samples
@@ -801,6 +814,35 @@ export default function ContentDNAPage() {
         </div>
       </div>
 
+      {/* Setup Wizard - shown for fresh profiles or when explicitly triggered */}
+      {showSetupWizard || (selectedProfile && samples.length === 0 && !analysis && !isLoading) ? (
+        <div className="container mx-auto px-4 py-8 max-w-3xl">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Dna className="w-5 h-5 text-primary" />
+                {selectedProfile ? `Set Up Content DNA for ${selectedProfile.name}` : 'Content DNA Setup Wizard'}
+              </CardTitle>
+              <CardDescription>
+                Follow these steps to configure your voice profile and brand platform.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ContentDNASetupWizard
+                initialProfileId={profileIdFromUrl || selectedProfile?.id}
+                onComplete={() => {
+                  setShowSetupWizard(false);
+                  window.location.reload();
+                }}
+                onCancel={() => {
+                  setShowSetupWizard(false);
+                  if (!selectedProfile) navigate('/admin/content-dna');
+                }}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      ) : (
       <div className="container mx-auto px-4 py-8">
         {/* What is Content DNA - First */}
         {whatIsBoxVisible && (
@@ -3060,6 +3102,7 @@ export default function ContentDNAPage() {
           </TabsContent>
         </Tabs>
       </div>
+      )}
     </div>
   );
 }

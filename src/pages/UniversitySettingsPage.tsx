@@ -569,186 +569,230 @@ export default function UniversitySettingsPage() {
               </TabsTrigger>
             </TabsList>
 
-            {/* Branding Tab */}
+            {/* Branding Tab - Dynamic per-profile view */}
             <TabsContent value="branding" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Name */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      {isAgency ? <Users className="w-5 h-5" /> : <Building2 className="w-5 h-5" />}
-                      {isAgency ? 'Agency Name' : 'Institution Name'}
-                    </CardTitle>
-                    <CardDescription>
-                      {isAgency 
-                        ? 'The name of your agency displayed throughout the platform'
-                        : 'The primary name of your institution displayed throughout the app'
-                      }
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {isEditingInstitution ? (
-                      <div className="space-y-3">
-                        <Input
-                          value={institutionName}
-                          onChange={(e) => setInstitutionName(e.target.value)}
-                          placeholder={isAgency ? 'Enter agency name' : 'Enter institution name'}
-                        />
-                        <div className="flex gap-2">
-                          <Button onClick={handleSaveInstitution} disabled={isSavingInstitution} size="sm">
-                            {isSavingInstitution ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Save className="w-4 h-4 mr-1" />}
-                            Save
-                          </Button>
-                          <Button variant="outline" size="sm" onClick={() => {
-                            setIsEditingInstitution(false);
-                            setInstitutionName(tenant?.institution_name || '');
-                          }}>
-                            Cancel
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium">{tenant?.institution_name || 'Not set'}</span>
-                        <Button variant="outline" size="sm" onClick={() => setIsEditingInstitution(true)}>
-                          <Pencil className="w-4 h-4 mr-1" />
-                          Edit
-                        </Button>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* Logo */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Image className="w-5 h-5" />
-                      {isAgency ? 'Agency Logo' : 'Institution Logo'}
-                    </CardTitle>
-                    <CardDescription>
-                      {isAgency 
-                        ? 'Upload your agency logo (PNG, JPG, max 2MB)'
-                        : 'Upload your institution\'s logo (PNG, JPG, max 2MB)'
-                      }
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-4">
-                      {logoUrl ? (
-                        <div className="relative group">
-                          <img src={logoUrl} alt="Logo" className="w-20 h-20 object-contain rounded border bg-white p-2" />
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            className="absolute -top-2 -right-2 w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={handleRemoveLogo}
-                            disabled={isUploadingLogo}
-                          >
-                            <X className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="w-20 h-20 rounded border-2 border-dashed flex items-center justify-center bg-muted/30">
-                          <Image className="w-8 h-8 text-muted-foreground" />
-                        </div>
-                      )}
-                      <div>
-                        <input
-                          type="file"
-                          ref={fileInputRef}
-                          onChange={handleLogoUpload}
-                          accept="image/*"
-                          className="hidden"
-                        />
+              {/* Tenant-level header */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    {isAgency ? <Users className="w-5 h-5" /> : <Building2 className="w-5 h-5" />}
+                    {isAgency ? 'Agency Branding' : 'Institution Branding'}
+                  </CardTitle>
+                  <CardDescription>
+                    {isAgency 
+                      ? 'Your agency identity and per-client visual branding at a glance'
+                      : 'Your institution identity and per-profile visual branding at a glance'
+                    }
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-4">
+                    {logoUrl ? (
+                      <div className="relative group">
+                        <img src={logoUrl} alt="Logo" className="w-16 h-16 object-contain rounded border bg-white p-2" />
                         <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => fileInputRef.current?.click()}
+                          variant="destructive"
+                          size="icon"
+                          className="absolute -top-2 -right-2 w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={handleRemoveLogo}
                           disabled={isUploadingLogo}
                         >
-                          {isUploadingLogo ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Upload className="w-4 h-4 mr-1" />}
-                          {logoUrl ? 'Change' : 'Upload'}
+                          <X className="w-3 h-3" />
                         </Button>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Colors */}
-                <Card className="lg:col-span-2">
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Palette className="w-5 h-5" />
-                      {isAgency ? 'Agency Brand Colors' : 'Brand Colors'}
-                    </CardTitle>
-                    <CardDescription>
-                      {isAgency 
-                        ? 'Set your agency\'s primary and accent colors'
-                        : 'Set your institution\'s primary and accent colors'
-                      }
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap items-end gap-6">
-                      <div className="space-y-2">
-                        <Label>Primary Color</Label>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="color"
-                            value={primaryColorInput.length === 7 ? primaryColorInput : primaryColor}
-                            onChange={(e) => setPrimaryColorInput(e.target.value)}
-                            className="w-10 h-10 rounded cursor-pointer border-0"
-                          />
-                          <Input
-                            value={primaryColorInput}
-                            onChange={(e) => handleColorInputChange(e.target.value, setPrimaryColorInput)}
-                            className="w-28 font-mono text-sm"
-                          />
-                        </div>
+                    ) : (
+                      <div className="w-16 h-16 rounded border-2 border-dashed flex items-center justify-center bg-muted/30">
+                        <Image className="w-6 h-6 text-muted-foreground" />
                       </div>
-                      
-                      <div className="space-y-2">
-                        <Label>Accent Color</Label>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="color"
-                            value={accentColorInput.length === 7 ? accentColorInput : accentColor}
-                            onChange={(e) => setAccentColorInput(e.target.value)}
-                            className="w-10 h-10 rounded cursor-pointer border-0"
-                          />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      {isEditingInstitution ? (
+                        <div className="space-y-2">
                           <Input
-                            value={accentColorInput}
-                            onChange={(e) => handleColorInputChange(e.target.value, setAccentColorInput)}
-                            className="w-28 font-mono text-sm"
+                            value={institutionName}
+                            onChange={(e) => setInstitutionName(e.target.value)}
+                            placeholder={isAgency ? 'Agency name' : 'Institution name'}
+                            className="max-w-xs"
                           />
+                          <div className="flex gap-2">
+                            <Button onClick={handleSaveInstitution} disabled={isSavingInstitution} size="sm">
+                              {isSavingInstitution ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Save className="w-3 h-3 mr-1" />}
+                              Save
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={() => { setIsEditingInstitution(false); setInstitutionName(tenant?.institution_name || ''); }}>
+                              Cancel
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-
-                      {(primaryColorInput !== primaryColor || accentColorInput !== accentColor) && (
-                        <Button onClick={handleSaveColors} disabled={isSavingColors}>
-                          {isSavingColors ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Save className="w-4 h-4 mr-1" />}
-                          Save Colors
-                        </Button>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-lg">{tenant?.institution_name || 'Not set'}</span>
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setIsEditingInstitution(true)}>
+                            <Pencil className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
                       )}
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {isAgency ? 'Agency-level identity' : 'Tenant-level identity'} · {profiles.length} profile{profiles.length !== 1 ? 's' : ''}
+                      </p>
                     </div>
-
-                    {/* Preview */}
-                    <div className="mt-6 p-4 rounded-lg border bg-white">
-                      <p className="text-sm text-muted-foreground mb-3">Preview:</p>
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded flex items-center justify-center text-white font-bold" style={{ backgroundColor: primaryColorInput }}>
-                          {tenant?.institution_name?.charAt(0) || (isAgency ? 'A' : 'U')}
-                        </div>
-                        <div>
-                          <p className="font-medium" style={{ color: primaryColorInput }}>{tenant?.institution_name || (isAgency ? 'Your Agency' : 'Your University')}</p>
-                          <p className="text-sm" style={{ color: accentColorInput }}>Welcome message with accent color</p>
-                        </div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded border" style={{ backgroundColor: primaryColor }} title={`Primary: ${primaryColor}`} />
+                        <div className="w-8 h-8 rounded border" style={{ backgroundColor: accentColor }} title={`Accent: ${accentColor}`} />
+                      </div>
+                      <input type="file" ref={fileInputRef} onChange={handleLogoUpload} accept="image/*" className="hidden" />
+                      <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isUploadingLogo}>
+                        {isUploadingLogo ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Upload className="w-3 h-3 mr-1" />}
+                        {logoUrl ? 'Change Logo' : 'Upload Logo'}
+                      </Button>
+                    </div>
+                  </div>
+                  {/* Tenant color editor */}
+                  <div className="flex flex-wrap items-end gap-4 mt-4 pt-4 border-t">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Primary Color</Label>
+                      <div className="flex items-center gap-1.5">
+                        <input type="color" value={primaryColorInput.length === 7 ? primaryColorInput : primaryColor} onChange={(e) => setPrimaryColorInput(e.target.value)} className="w-8 h-8 rounded cursor-pointer border-0" />
+                        <Input value={primaryColorInput} onChange={(e) => handleColorInputChange(e.target.value, setPrimaryColorInput)} className="w-24 font-mono text-xs h-8" />
                       </div>
                     </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Accent Color</Label>
+                      <div className="flex items-center gap-1.5">
+                        <input type="color" value={accentColorInput.length === 7 ? accentColorInput : accentColor} onChange={(e) => setAccentColorInput(e.target.value)} className="w-8 h-8 rounded cursor-pointer border-0" />
+                        <Input value={accentColorInput} onChange={(e) => handleColorInputChange(e.target.value, setAccentColorInput)} className="w-24 font-mono text-xs h-8" />
+                      </div>
+                    </div>
+                    {(primaryColorInput !== primaryColor || accentColorInput !== accentColor) && (
+                      <Button onClick={handleSaveColors} disabled={isSavingColors} size="sm">
+                        {isSavingColors ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Save className="w-3 h-3 mr-1" />}
+                        Save Colors
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Per-profile branding cards */}
+              {profiles.length === 0 ? (
+                <Card className="border-dashed">
+                  <CardContent className="flex flex-col items-center justify-center py-10 text-center">
+                    <Palette className="w-10 h-10 text-muted-foreground/30 mb-3" />
+                    <p className="text-sm text-muted-foreground mb-3">
+                      No profiles yet. Create a profile to manage per-profile branding.
+                    </p>
+                    <Button size="sm" variant="outline" onClick={() => { setActiveTab('profiles'); setShowWizard(true); }}>
+                      <Plus className="w-3 h-3 mr-1" />
+                      Create Profile
+                    </Button>
                   </CardContent>
                 </Card>
-              </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {profiles.map((profile) => {
+                    const cfg = profile.config;
+                    const hasLogo = !!cfg.logoUrl;
+                    const hasSecondary = !!cfg.logoUrlSecondary;
+                    const hasAthletic = !!cfg.logoUrlAthletic;
+                    const hasPresidential = !!cfg.logoUrlPresidential;
+                    const logoCount = [hasLogo, hasSecondary, hasAthletic, hasPresidential].filter(Boolean).length;
+                    const parent = getParentProfile(profile.id);
+
+                    return (
+                      <Card 
+                        key={profile.id} 
+                        className="group cursor-pointer hover:border-primary/40 transition-all hover:shadow-sm"
+                        onClick={() => { setEditingProfile(profile); setActiveTab('profiles'); }}
+                      >
+                        <CardContent className="p-4 space-y-3">
+                          {/* Profile header */}
+                          <div className="flex items-center gap-3">
+                            {hasLogo ? (
+                              <img src={cfg.logoUrl!} alt={profile.name} className="w-10 h-10 object-contain rounded border bg-white p-1" />
+                            ) : (
+                              <div 
+                                className="w-10 h-10 rounded flex items-center justify-center text-white font-bold text-sm"
+                                style={{ backgroundColor: cfg.primaryColor || '#1F2A44' }}
+                              >
+                                {profile.name.charAt(0)}
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-sm truncate">{profile.name}</p>
+                              {parent && (
+                                <p className="text-[10px] text-muted-foreground truncate">
+                                  {PROFILE_TYPE_LABELS[profile.profileType]} of {parent.name}
+                                </p>
+                              )}
+                            </div>
+                            <Badge variant="outline" className="text-[10px] h-5 shrink-0">
+                              {PROFILE_TYPE_LABELS[profile.profileType]}
+                            </Badge>
+                          </div>
+
+                          {/* Color swatches */}
+                          <div className="flex items-center gap-2">
+                            {cfg.primaryColor && (
+                              <div className="flex items-center gap-1">
+                                <div className="w-5 h-5 rounded border" style={{ backgroundColor: cfg.primaryColor }} />
+                                <span className="text-[10px] text-muted-foreground font-mono">{cfg.primaryColor}</span>
+                              </div>
+                            )}
+                            {cfg.secondaryColor && (
+                              <div className="flex items-center gap-1">
+                                <div className="w-5 h-5 rounded border" style={{ backgroundColor: cfg.secondaryColor }} />
+                                <span className="text-[10px] text-muted-foreground font-mono">{cfg.secondaryColor}</span>
+                              </div>
+                            )}
+                            {!cfg.tertiaryColorNA && cfg.tertiaryColor && (
+                              <div className="flex items-center gap-1">
+                                <div className="w-5 h-5 rounded border" style={{ backgroundColor: cfg.tertiaryColor }} />
+                                <span className="text-[10px] text-muted-foreground font-mono">{cfg.tertiaryColor}</span>
+                              </div>
+                            )}
+                            {cfg.tertiaryColorNA && (
+                              <Badge variant="outline" className="text-[9px] h-4 px-1">No tertiary</Badge>
+                            )}
+                          </div>
+
+                          {/* Logo variants summary */}
+                          <div className="flex items-center gap-3">
+                            <div className="flex -space-x-1">
+                              {hasLogo && <img src={cfg.logoUrl!} alt="" className="w-6 h-6 rounded border bg-white object-contain" />}
+                              {hasSecondary && <img src={cfg.logoUrlSecondary!} alt="" className="w-6 h-6 rounded border bg-white object-contain" />}
+                              {hasAthletic && <img src={cfg.logoUrlAthletic!} alt="" className="w-6 h-6 rounded border bg-white object-contain" />}
+                              {hasPresidential && <img src={cfg.logoUrlPresidential!} alt="" className="w-6 h-6 rounded border bg-white object-contain" />}
+                            </div>
+                            <span className="text-[10px] text-muted-foreground">
+                              {logoCount}/4 logo variant{logoCount !== 1 ? 's' : ''}
+                            </span>
+                          </div>
+
+                          {/* Slogans */}
+                          {(cfg.slogans?.length || 0) > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              {cfg.slogans!.slice(0, 2).map((s, i) => (
+                                <Badge key={i} variant="secondary" className="text-[10px] h-5">{s}</Badge>
+                              ))}
+                              {cfg.slogans!.length > 2 && (
+                                <Badge variant="outline" className="text-[10px] h-5">+{cfg.slogans!.length - 2}</Badge>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Edit link */}
+                          <div className="flex items-center justify-end pt-1">
+                            <span className="text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                              Edit Profile <ChevronRight className="w-3 h-3" />
+                            </span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
             </TabsContent>
 
             {/* Profiles Tab */}
