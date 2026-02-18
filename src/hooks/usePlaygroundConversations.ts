@@ -234,6 +234,33 @@ export function usePlaygroundConversations() {
     }
   }, [currentConversation?.id, toast]);
 
+  // Delete all conversations
+  const deleteAllConversations = useCallback(async () => {
+    if (!user?.id || !tenant) return;
+    const tenantId = typeof tenant === 'string' ? tenant : tenant.id;
+    try {
+      const { error } = await supabase
+        .from('playground_conversations')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('tenant_id', tenantId);
+
+      if (error) throw error;
+
+      setConversations([]);
+      setCurrentConversation(null);
+      setMessages([]);
+      toast({ title: 'All chats cleared' });
+    } catch (error) {
+      console.error('Error deleting all conversations:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to clear conversations'
+      });
+    }
+  }, [user?.id, tenant, toast]);
+
   // Select a conversation
   const selectConversation = useCallback(async (conversation: PlaygroundConversation) => {
     setCurrentConversation(conversation);
@@ -263,6 +290,7 @@ export function usePlaygroundConversations() {
     updateConversationContext,
     addMessage,
     deleteConversation,
+    deleteAllConversations,
     selectConversation,
     setCurrentConversation,
     setMessages,
