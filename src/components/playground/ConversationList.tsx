@@ -1,8 +1,19 @@
+import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
-import { MessageCircle, Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import type { PlaygroundConversation } from '@/hooks/usePlaygroundConversations';
 
 interface ConversationListProps {
@@ -11,6 +22,7 @@ interface ConversationListProps {
   onSelect: (conversation: PlaygroundConversation) => void;
   onNew: () => void;
   onDelete: (id: string) => void;
+  onDeleteAll?: () => void;
   onCollapse?: () => void;
   isLoading?: boolean;
 }
@@ -21,8 +33,12 @@ export function ConversationList({
   onSelect,
   onNew,
   onDelete,
+  onDeleteAll,
   isLoading
 }: ConversationListProps) {
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [showClearAll, setShowClearAll] = useState(false);
+
   return (
     <div className="flex flex-col h-full">
       {/* New chat button */}
@@ -72,7 +88,7 @@ export function ConversationList({
                   className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 h-7 w-7 text-muted-foreground hover:text-destructive"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onDelete(conv.id);
+                    setDeleteTarget(conv.id);
                   }}
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -82,6 +98,69 @@ export function ConversationList({
           )}
         </div>
       </ScrollArea>
+
+      {/* Clear all button */}
+      {conversations.length > 0 && onDeleteAll && (
+        <div className="p-3 border-t border-border/40">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start gap-2 h-8 text-xs text-muted-foreground hover:text-destructive"
+            onClick={() => setShowClearAll(true)}
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            Clear all chats
+          </Button>
+        </div>
+      )}
+
+      {/* Delete single confirmation */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete chat?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this conversation and all its messages.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteTarget) onDelete(deleteTarget);
+                setDeleteTarget(null);
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Clear all confirmation */}
+      <AlertDialog open={showClearAll} onOpenChange={setShowClearAll}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear all chats?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete all {conversations.length} conversation{conversations.length !== 1 ? 's' : ''} and their messages. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                onDeleteAll?.();
+                setShowClearAll(false);
+              }}
+            >
+              Clear all
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

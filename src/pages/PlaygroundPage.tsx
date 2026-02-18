@@ -35,6 +35,7 @@ const PlaygroundPage = () => {
     updateConversationContext,
     addMessage,
     deleteConversation,
+    deleteAllConversations,
     selectConversation,
     generateTitle
   } = usePlaygroundConversations();
@@ -302,6 +303,7 @@ const PlaygroundPage = () => {
                 if (window.innerWidth < 768) setShowSidebar(false);
               }}
               onDelete={deleteConversation}
+              onDeleteAll={deleteAllConversations}
               isLoading={isLoading}
             />
           )}
