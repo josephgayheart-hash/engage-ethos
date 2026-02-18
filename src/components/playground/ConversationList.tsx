@@ -65,7 +65,7 @@ export function ConversationList({
               <div
                 key={conv.id}
                 className={cn(
-                  "group relative rounded-lg transition-colors cursor-pointer",
+                  "group/conv relative rounded-lg transition-colors cursor-pointer",
                   currentConversation?.id === conv.id
                     ? "bg-muted"
                     : "hover:bg-muted/50"
@@ -85,7 +85,7 @@ export function ConversationList({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 h-7 w-7 text-muted-foreground hover:text-destructive"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-destructive opacity-0 group-hover/conv:opacity-100 transition-opacity z-10"
                   onClick={(e) => {
                     e.stopPropagation();
                     setDeleteTarget(conv.id);
