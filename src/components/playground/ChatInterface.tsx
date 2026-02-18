@@ -1,27 +1,20 @@
 import { useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { 
   Send, 
   RefreshCw, 
-  Bot, 
-  User, 
+  Sparkles, 
+  Target, 
   Lightbulb, 
   BookOpen, 
-  Target, 
   Shield,
-  Sparkles,
-  Camera,
-  ExternalLink
+  ArrowUp
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import type { PlaygroundMessage } from '@/hooks/usePlaygroundConversations';
 import { MessageActions } from './MessageActions';
-import { ModelSelector, type AIModel } from './ModelSelector';
+import type { AIModel } from './ModelSelector';
 
 interface ChatInterfaceProps {
   messages: PlaygroundMessage[];
@@ -42,25 +35,38 @@ interface ChatInterfaceProps {
 const suggestedPrompts = [
   {
     icon: Target,
-    text: "Help me draft a re-enrollment message for at-risk students",
-    category: "Create"
+    text: "Draft a re-enrollment message for at-risk students",
   },
   {
     icon: Shield,
-    text: "Review this message and suggest improvements based on our voice guidelines",
-    category: "Review"
+    text: "Review this message against our voice guidelines",
   },
   {
     icon: Lightbulb,
-    text: "What messaging strategies work best for financial aid communications?",
-    category: "Strategy"
+    text: "Best strategies for financial aid communications?",
   },
   {
     icon: BookOpen,
-    text: "How can I apply social proof effectively without it backfiring?",
-    category: "Research"
+    text: "How to use social proof effectively?",
   }
 ];
+
+const proseClasses = [
+  "[&_p]:my-2.5 [&_p]:leading-relaxed",
+  "[&_ul]:my-2.5 [&_ul]:pl-5 [&_ul]:list-disc [&_ul]:space-y-1",
+  "[&_ul_ul]:mt-1 [&_ul_ul]:list-[circle]",
+  "[&_ol]:my-2.5 [&_ol]:pl-5 [&_ol]:list-decimal [&_ol]:space-y-1",
+  "[&_ol_ol]:mt-1 [&_ol_ol]:list-[lower-alpha]",
+  "[&_li]:leading-relaxed [&_li]:pl-0.5",
+  "[&_li_p]:my-0.5",
+  "[&_strong]:font-semibold [&_strong]:text-foreground",
+  "[&_h1]:text-lg [&_h1]:font-semibold [&_h1]:mt-4 [&_h1]:mb-2",
+  "[&_h2]:text-base [&_h2]:font-semibold [&_h2]:mt-3 [&_h2]:mb-1.5",
+  "[&_h3]:text-sm [&_h3]:font-semibold [&_h3]:mt-3 [&_h3]:mb-1",
+  "[&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono",
+  "[&_pre]:bg-muted [&_pre]:p-3 [&_pre]:rounded-xl [&_pre]:my-3 [&_pre]:overflow-x-auto",
+  "[&_blockquote]:border-l-2 [&_blockquote]:border-primary/40 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-3 [&_blockquote]:text-muted-foreground"
+].join(' ');
 
 export function ChatInterface({
   messages,
@@ -73,18 +79,23 @@ export function ChatInterface({
   profileName,
   hasDNA,
   streamingContent,
-  selectedModel,
-  onModelChange,
-  campusPhotoCount
 }: ChatInterfaceProps) {
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, streamingContent]);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 200) + 'px';
+    }
+  }, [input]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -98,68 +109,55 @@ export function ChatInterface({
     textareaRef.current?.focus();
   };
 
-  return (
-    <div className="flex-1 flex flex-col min-h-0">
-      {/* Context indicator */}
-      <div className="px-4 py-2 border-b bg-muted/30 flex items-center justify-between text-sm">
-        <div className="flex items-center gap-2">
-          {hasContext && (
-            <>
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-muted-foreground">Context:</span>
-              {profileName && (
-                <Badge variant="secondary" className="text-xs">{profileName}</Badge>
-              )}
-              {hasDNA && (
-                <Badge variant="outline" className="text-xs">Content DNA Active</Badge>
-              )}
-            </>
-          )}
-        </div>
-        <ModelSelector 
-          value={selectedModel} 
-          onChange={onModelChange} 
-          disabled={isLoading}
-        />
-      </div>
+  const isEmpty = messages.length === 0 && !streamingContent;
 
-      {/* Messages */}
-      <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
+  return (
+    <div className="flex-1 flex flex-col min-h-0 relative">
+      {/* Messages area */}
+      <div 
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto"
+      >
         {isLoadingMessages ? (
           <div className="flex items-center justify-center h-32">
             <RefreshCw className="w-5 h-5 animate-spin text-muted-foreground" />
           </div>
-        ) : messages.length === 0 && !streamingContent ? (
-          <div className="space-y-6">
-            <div className="text-center py-8">
-              <Bot className="w-12 h-12 mx-auto text-primary/60 mb-4" />
-              <h3 className="text-lg font-medium mb-2">Start a conversation</h3>
-              <p className="text-muted-foreground text-sm max-w-md mx-auto">
-                I'm your copywriting assistant, informed by your institutional voice and Content DNA. 
-                I can help you create, review, and strategize communications.
-              </p>
-            </div>
-            
-            {/* Suggested prompts */}
-            <div className="max-w-xl mx-auto px-2">
-              <p className="text-xs text-muted-foreground mb-2 text-center">Try asking:</p>
-              <div className="grid grid-cols-1 gap-2">
+        ) : isEmpty ? (
+          /* Empty state — centered greeting */
+          <div className="flex flex-col items-center justify-center h-full px-4">
+            <div className="max-w-lg w-full text-center space-y-6">
+              <div className="space-y-2">
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+                  <Sparkles className="w-6 h-6 text-primary" />
+                </div>
+                <h2 className="text-xl font-semibold text-foreground">
+                  {profileName ? `Writing for ${profileName}` : "How can I help you today?"}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {hasDNA 
+                    ? "Your Content DNA is active — I'll write in your institutional voice."
+                    : "I can help create, review, and strategize your communications."
+                  }
+                </p>
+              </div>
+              
+              {/* Suggestion chips */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {suggestedPrompts.map((prompt, i) => {
                   const Icon = prompt.icon;
                   return (
                     <button
                       key={i}
                       onClick={() => handleSuggestedPrompt(prompt.text)}
-                      className="text-left p-3 rounded-lg border bg-card hover:bg-muted/50 hover:border-primary/30 transition-colors group"
+                      className="text-left px-4 py-3 rounded-xl border border-border/60 bg-background 
+                                 hover:border-primary/30 hover:bg-muted/50 transition-all duration-150
+                                 group cursor-pointer"
                     >
-                      <div className="flex items-start gap-2">
-                        <Icon className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <Badge variant="outline" className="text-xs mb-1">{prompt.category}</Badge>
-                          <p className="text-xs text-muted-foreground group-hover:text-foreground transition-colors line-clamp-2">
-                            {prompt.text}
-                          </p>
-                        </div>
+                      <div className="flex items-start gap-2.5">
+                        <Icon className="w-4 h-4 text-muted-foreground group-hover:text-primary mt-0.5 shrink-0 transition-colors" />
+                        <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors leading-snug">
+                          {prompt.text}
+                        </span>
                       </div>
                     </button>
                   );
@@ -168,69 +166,27 @@ export function ChatInterface({
             </div>
           </div>
         ) : (
-          <div className="space-y-6">
+          /* Messages */
+          <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
             {messages.map((message) => (
-              <div
-                key={message.id}
-                className={cn(
-                  "flex gap-3 group",
-                  message.role === 'user' ? "justify-end" : "justify-start"
-                )}
-              >
-                {message.role === 'assistant' && (
-                  <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-1">
-                    <Bot className="w-5 h-5 text-primary" />
+              <div key={message.id} className="group">
+                {message.role === 'user' ? (
+                  /* User message — right-aligned bubble */
+                  <div className="flex justify-end">
+                    <div className="max-w-[80%] bg-primary text-primary-foreground rounded-2xl rounded-br-md px-4 py-3">
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                    </div>
                   </div>
-                )}
-                <div className="flex flex-col max-w-[85%]">
-                  <div
-                    className={cn(
-                      "rounded-2xl px-5 py-4",
-                      message.role === 'user'
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted"
-                    )}
-                  >
+                ) : (
+                  /* Assistant message — clean left-aligned text */
+                  <div className="space-y-1">
                     <div className={cn(
-                      "font-chat text-base leading-relaxed prose prose-base max-w-none",
-                      message.role === 'assistant' ? "dark:prose-invert" : "prose-invert",
-                      message.role === 'assistant' && [
-                        "[&_p]:my-3 [&_p]:leading-relaxed",
-                        // Unordered lists - nice bullet styling
-                        "[&_ul]:my-3 [&_ul]:pl-5 [&_ul]:list-disc [&_ul]:space-y-1.5",
-                        "[&_ul_ul]:mt-1.5 [&_ul_ul]:list-[circle]",
-                        // Ordered lists - clear numbering
-                        "[&_ol]:my-3 [&_ol]:pl-5 [&_ol]:list-decimal [&_ol]:space-y-1.5",
-                        "[&_ol_ol]:mt-1.5 [&_ol_ol]:list-[lower-alpha]",
-                        // List items
-                        "[&_li]:leading-relaxed [&_li]:pl-1",
-                        "[&_li_p]:my-1",
-                        // Bold text - make it stand out more
-                        "[&_strong]:font-bold [&_strong]:text-foreground",
-                        // Headings
-                        "[&_h1]:text-lg [&_h1]:font-bold [&_h1]:mt-4 [&_h1]:mb-2",
-                        "[&_h2]:text-base [&_h2]:font-bold [&_h2]:mt-3 [&_h2]:mb-2",
-                        "[&_h3]:text-base [&_h3]:font-semibold [&_h3]:mt-3 [&_h3]:mb-1",
-                        // Code
-                        "[&_code]:bg-background/20 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm",
-                        "[&_pre]:bg-background/20 [&_pre]:p-3 [&_pre]:rounded-lg [&_pre]:my-3",
-                        // Blockquotes
-                        "[&_blockquote]:border-l-4 [&_blockquote]:border-primary/50 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-3"
-                      ].join(' ')
+                      "text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none",
+                      proseClasses
                     )}>
                       <ReactMarkdown>{message.content}</ReactMarkdown>
                     </div>
-                    <span className="text-xs opacity-50 mt-2 block">
-                      {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-                  {message.role === 'assistant' && (
                     <MessageActions content={message.content} messageId={message.id} />
-                  )}
-                </div>
-                {message.role === 'user' && (
-                  <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center shrink-0 mt-1">
-                    <User className="w-5 h-5 text-secondary-foreground" />
                   </div>
                 )}
               </div>
@@ -238,93 +194,76 @@ export function ChatInterface({
             
             {/* Streaming response */}
             {streamingContent && (
-              <div className="flex gap-3 justify-start">
-                <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-1">
-                  <Bot className="w-5 h-5 text-primary" />
-                </div>
-                <div className="max-w-[85%] bg-muted rounded-2xl px-5 py-4">
-                  <div className={cn(
-                    "font-chat text-base leading-relaxed prose prose-base dark:prose-invert max-w-none",
-                    "[&_p]:my-3 [&_p]:leading-relaxed",
-                    "[&_ul]:my-3 [&_ul]:pl-5 [&_ul]:list-disc [&_ul]:space-y-1.5",
-                    "[&_ol]:my-3 [&_ol]:pl-5 [&_ol]:list-decimal [&_ol]:space-y-1.5",
-                    "[&_li]:leading-relaxed [&_li]:pl-1",
-                    "[&_strong]:font-bold [&_strong]:text-foreground"
-                  )}>
-                    <ReactMarkdown>{streamingContent}</ReactMarkdown>
-                    <span className="inline-block w-2 h-5 bg-primary/60 animate-pulse ml-1" />
-                  </div>
+              <div className="space-y-1">
+                <div className={cn(
+                  "text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none",
+                  proseClasses
+                )}>
+                  <ReactMarkdown>{streamingContent}</ReactMarkdown>
+                  <span className="inline-block w-1.5 h-4 bg-primary/60 rounded-sm animate-pulse ml-0.5 align-middle" />
                 </div>
               </div>
             )}
             
-            {/* Loading indicator when sending but not yet streaming */}
+            {/* Typing indicator */}
             {isLoading && !streamingContent && (
-              <div className="flex gap-3 justify-start">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <Bot className="w-4 h-4 text-primary" />
-                </div>
-                <div className="bg-muted rounded-2xl px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                    </div>
-                  </div>
-                  {/* Campus photo training indicator */}
-                  {campusPhotoCount !== undefined && (
-                    <div className="mt-2 text-[11px] text-muted-foreground">
-                      {campusPhotoCount > 0 ? (
-                        <span className="flex items-center gap-1">
-                          <Camera className="w-3 h-3 text-primary" />
-                          {campusPhotoCount} campus photo{campusPhotoCount > 1 ? "s" : ""} informing response
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-1">
-                          No campus photos —{" "}
-                          <Link to="/admin/content-dna" className="text-primary hover:text-primary/80 inline-flex items-center gap-0.5 font-medium">
-                            add them <ExternalLink className="w-2.5 h-2.5" />
-                          </Link>
-                        </span>
-                      )}
-                    </div>
-                  )}
+              <div className="flex items-center gap-1.5 py-2">
+                <div className="flex space-x-1">
+                  <div className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <div className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <div className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
               </div>
             )}
           </div>
         )}
-      </ScrollArea>
+      </div>
 
-      {/* Input Area */}
-      <div className="border-t p-3 sm:p-4">
-        <div className="flex gap-2">
-          <Textarea
-            ref={textareaRef}
-            value={input}
-            onChange={(e) => onInputChange(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Ask about creating, reviewing, or strategizing..."
-            className="min-h-[50px] sm:min-h-[60px] max-h-[100px] sm:max-h-[120px] resize-none text-sm"
-            disabled={isLoading}
-          />
-          <Button 
-            onClick={onSend} 
-            disabled={!input.trim() || isLoading}
-            size="icon"
-            className="h-[50px] w-[50px] sm:h-[60px] sm:w-[60px] shrink-0"
-          >
-            {isLoading ? (
-              <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
-            ) : (
-              <Send className="w-4 h-4 sm:w-5 sm:h-5" />
-            )}
-          </Button>
+      {/* Input area — floating at bottom */}
+      <div className="p-3 sm:p-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="relative flex items-end bg-muted/50 border border-border/60 rounded-2xl 
+                          focus-within:border-primary/40 focus-within:ring-1 focus-within:ring-primary/20 
+                          transition-all duration-150 shadow-sm">
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={(e) => onInputChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={profileName ? `Message Copywriter about ${profileName}...` : "Message Copywriter..."}
+              className="flex-1 bg-transparent border-0 resize-none px-4 py-3 text-sm 
+                         placeholder:text-muted-foreground/60 focus:outline-none focus:ring-0
+                         min-h-[44px] max-h-[200px]"
+              disabled={isLoading}
+              rows={1}
+            />
+            <div className="p-1.5 pr-2">
+              <Button 
+                onClick={onSend} 
+                disabled={!input.trim() || isLoading}
+                size="icon"
+                className={cn(
+                  "h-8 w-8 rounded-xl shrink-0 transition-all",
+                  input.trim() 
+                    ? "bg-primary text-primary-foreground shadow-sm" 
+                    : "bg-muted-foreground/20 text-muted-foreground"
+                )}
+              >
+                {isLoading ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <ArrowUp className="w-4 h-4" />
+                )}
+              </Button>
+            </div>
+          </div>
+          <p className="text-[11px] text-muted-foreground/50 mt-1.5 text-center hidden sm:block">
+            {hasContext 
+              ? "Responses shaped by your institutional voice & Content DNA" 
+              : "Select a profile above for voice-matched responses"
+            }
+          </p>
         </div>
-        <p className="text-xs text-muted-foreground mt-2 text-center hidden sm:block">
-          Responses are shaped by your institutional voice and Content DNA settings.
-        </p>
       </div>
     </div>
   );

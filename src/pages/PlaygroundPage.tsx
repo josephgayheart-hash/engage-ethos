@@ -1,9 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { Link } from "react-router-dom";
-import { WaveBackground } from "@/components/WaveBackground";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { AIBadge } from "@/components/ui/ai-indicator";
+import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
@@ -14,11 +9,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { ConversationList } from "@/components/playground/ConversationList";
 import { ChatInterface } from "@/components/playground/ChatInterface";
 import { ContextSelector } from "@/components/playground/ContextSelector";
-import { 
-  ArrowLeft, 
-  PenTool, 
-  PanelLeft
-} from "lucide-react";
+import { ModelSelector, type AIModel } from "@/components/playground/ModelSelector";
+import { PanelLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ContentDNAData {
   voiceAnalysis: Record<string, unknown> | null;
@@ -50,7 +43,7 @@ const PlaygroundPage = () => {
   const [isSending, setIsSending] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
   const [streamingContent, setStreamingContent] = useState('');
-  const [selectedModel, setSelectedModel] = useState<'google/gemini-2.5-flash' | 'google/gemini-2.5-flash-lite' | 'google/gemini-2.5-pro' | 'openai/gpt-5-mini'>('google/gemini-2.5-flash');
+  const [selectedModel, setSelectedModel] = useState<AIModel>('google/gemini-2.5-flash');
   
   // Context selections
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
@@ -74,14 +67,12 @@ const PlaygroundPage = () => {
         setContentDNA(null);
         return;
       }
-
       try {
         const { data, error } = await supabase
           .from('content_dna_analysis')
           .select('voice_analysis, custom_instructions')
           .eq('id', selectedDNAId)
           .single();
-
         if (error) throw error;
         setContentDNA({
           voiceAnalysis: data.voice_analysis as Record<string, unknown>,
@@ -92,7 +83,6 @@ const PlaygroundPage = () => {
         setContentDNA(null);
       }
     };
-
     fetchDNA();
   }, [selectedDNAId]);
 
@@ -102,7 +92,6 @@ const PlaygroundPage = () => {
       setProfileConfig(null);
       return;
     }
-
     const profile = profiles.find(p => p.id === selectedProfileId);
     if (profile) {
       setProfileConfig({
@@ -157,15 +146,10 @@ const PlaygroundPage = () => {
     });
 
     if (!resp.ok) {
-      if (resp.status === 429) {
-        throw new Error("Rate limit exceeded. Please try again in a moment.");
-      }
-      if (resp.status === 402) {
-        throw new Error("AI credits exhausted. Please add credits to continue.");
-      }
+      if (resp.status === 429) throw new Error("Rate limit exceeded. Please try again in a moment.");
+      if (resp.status === 402) throw new Error("AI credits exhausted. Please add credits to continue.");
       throw new Error("Failed to start stream");
     }
-
     if (!resp.body) throw new Error("No response body");
 
     const reader = resp.body.getReader();
@@ -182,17 +166,11 @@ const PlaygroundPage = () => {
       while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
         let line = textBuffer.slice(0, newlineIndex);
         textBuffer = textBuffer.slice(newlineIndex + 1);
-
         if (line.endsWith("\r")) line = line.slice(0, -1);
         if (line.startsWith(":") || line.trim() === "") continue;
         if (!line.startsWith("data: ")) continue;
-
         const jsonStr = line.slice(6).trim();
-        if (jsonStr === "[DONE]") {
-          streamDone = true;
-          break;
-        }
-
+        if (jsonStr === "[DONE]") { streamDone = true; break; }
         try {
           const parsed = JSON.parse(jsonStr);
           const content = parsed.choices?.[0]?.delta?.content as string | undefined;
@@ -204,7 +182,6 @@ const PlaygroundPage = () => {
       }
     }
 
-    // Final flush
     if (textBuffer.trim()) {
       for (let raw of textBuffer.split("\n")) {
         if (!raw) continue;
@@ -220,41 +197,28 @@ const PlaygroundPage = () => {
         } catch { /* ignore */ }
       }
     }
-
     onDone();
   };
 
   // Send message with streaming
   const handleSend = useCallback(async () => {
     if (!input.trim() || isSending || !user) return;
-
     const messageContent = input.trim();
     setInput('');
     setIsSending(true);
     setStreamingContent('');
 
     try {
-      // Create conversation if none exists
       let conversationId = currentConversation?.id;
       if (!conversationId) {
-        const newConv = await createConversation(
-          generateTitle(messageContent),
-          selectedProfileId,
-          selectedDNAId
-        );
+        const newConv = await createConversation(generateTitle(messageContent), selectedProfileId, selectedDNAId);
         if (!newConv) throw new Error('Failed to create conversation');
         conversationId = newConv.id;
       }
-
-      // Add user message
       await addMessage(conversationId, 'user', messageContent);
-
-      // Update title if first message
       if (messages.length === 0) {
         await updateConversationTitle(conversationId, generateTitle(messageContent));
       }
-
-      // Track tool usage
       trackToolUse('playground', 'chat', {
         hasProfile: !!selectedProfileId,
         hasDNA: !!selectedDNAId,
@@ -262,21 +226,14 @@ const PlaygroundPage = () => {
         messageLength: messageContent.length,
       });
 
-      // Stream the response
       let fullResponse = '';
-      await streamChat(
-        messageContent,
-        conversationId,
-        (chunk) => {
-          fullResponse += chunk;
-          setStreamingContent(fullResponse);
-        },
-        async () => {
-          // Save final message
-          await addMessage(conversationId!, 'assistant', fullResponse);
-          setStreamingContent('');
-        }
-      );
+      await streamChat(messageContent, conversationId, (chunk) => {
+        fullResponse += chunk;
+        setStreamingContent(fullResponse);
+      }, async () => {
+        await addMessage(conversationId!, 'assistant', fullResponse);
+        setStreamingContent('');
+      });
     } catch (error) {
       console.error("Chat error:", error);
       toast({
@@ -288,103 +245,51 @@ const PlaygroundPage = () => {
     } finally {
       setIsSending(false);
     }
-  }, [
-    input,
-    isSending,
-    user,
-    currentConversation,
-    messages,
-    createConversation,
-    addMessage,
-    updateConversationTitle,
-    generateTitle,
-    selectedProfileId,
-    selectedDNAId,
-    contentDNA,
-    profileConfig,
-    toast
-  ]);
+  }, [input, isSending, user, currentConversation, messages, createConversation, addMessage, updateConversationTitle, generateTitle, selectedProfileId, selectedDNAId, contentDNA, profileConfig, toast]);
 
   const selectedProfile = profiles.find(p => p.id === selectedProfileId);
 
   return (
-    <div className="bg-background flex flex-col">
-      
-      {/* Page Header with wave background */}
-      <div className="relative overflow-hidden pb-12">
-        <WaveBackground variant="amber" />
-        
-        <div className="relative container mx-auto px-4 pt-10 pb-8">
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-            <Link to="/dashboard" className="hover:text-foreground transition-colors flex items-center gap-1">
-              <ArrowLeft className="w-4 h-4" />
-              Home
-            </Link>
-            <span>/</span>
-            <span className="text-foreground">Copywriter</span>
-          </div>
-
-          {/* Header */}
-          <div className="flex items-start justify-between gap-4 flex-wrap">
-            <div>
-              <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
-                <div className="icon-container icon-container-lg bg-pillar-susceptibility/10">
-                  <PenTool className="w-6 h-6 text-pillar-susceptibility" />
-                </div>
-                Copywriter
-              </h1>
-              <p className="text-muted-foreground mt-1 ml-14">
-                Create, review, and strategize communications with your institutional voice
-              </p>
-            </div>
-            <AIBadge />
-          </div>
+    <div className="h-[calc(100vh-3.5rem)] flex flex-col bg-background">
+      {/* Compact top bar */}
+      <div className="flex items-center justify-between gap-3 px-4 py-2 border-b bg-background/80 backdrop-blur-sm">
+        <div className="flex items-center gap-2">
+          {/* Sidebar toggle */}
+          <button
+            onClick={() => setShowSidebar(!showSidebar)}
+            className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+            title={showSidebar ? "Hide sidebar" : "Show sidebar"}
+          >
+            <PanelLeft className="w-5 h-5" />
+          </button>
+          
+          <div className="h-5 w-px bg-border" />
+          
+          {/* Context selectors */}
+          <ContextSelector
+            selectedProfileId={selectedProfileId}
+            selectedDNAId={selectedDNAId}
+            onProfileChange={handleProfileChange}
+            onDNAChange={handleDNAChange}
+            disabled={isSending}
+          />
         </div>
+
+        <ModelSelector
+          value={selectedModel}
+          onChange={setSelectedModel}
+          disabled={isSending}
+        />
       </div>
-      
-      <main className="flex-1 container mx-auto px-4 pb-6 flex flex-col">
-        {/* Context Selector */}
-        <div className="flex items-center justify-between gap-2 sm:gap-4 mb-4">
-          <div className="flex-1 min-w-0 overflow-x-auto">
-            <ContextSelector
-              selectedProfileId={selectedProfileId}
-              selectedDNAId={selectedDNAId}
-              onProfileChange={handleProfileChange}
-              onDNAChange={handleDNAChange}
-              disabled={isSending}
-            />
-          </div>
-        </div>
 
-        {/* Main Chat Area */}
-        <Card className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative">
-          {/* Sidebar toggle tab - visible when collapsed */}
-          {!showSidebar && (
-            <button
-              onClick={() => setShowSidebar(true)}
-              className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-30 
-                         flex-col items-center gap-1 px-1.5 py-3 
-                         bg-muted hover:bg-primary/10 border border-l-0 border-border 
-                         rounded-r-lg shadow-sm transition-all duration-200 
-                         hover:px-2 group"
-              title="Show conversation history"
-            >
-              <PanelLeft className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-              <span className="text-[10px] font-medium text-muted-foreground group-hover:text-primary 
-                             writing-mode-vertical rotate-180 transition-colors"
-                    style={{ writingMode: 'vertical-rl' }}>
-                History
-              </span>
-            </button>
-          )}
-
-          {/* Conversation sidebar */}
-          <div className={`
-            ${showSidebar ? 'translate-x-0' : '-translate-x-full md:hidden'}
-            absolute inset-y-0 left-0 z-20 w-64 bg-card transition-transform duration-200
-            md:relative md:translate-x-0 ${showSidebar ? 'md:block' : 'md:hidden'}
-          `}>
+      {/* Main area */}
+      <div className="flex-1 flex min-h-0">
+        {/* Sidebar */}
+        <div className={cn(
+          "transition-all duration-200 ease-in-out border-r bg-muted/20 overflow-hidden",
+          showSidebar ? "w-64 min-w-[16rem]" : "w-0 min-w-0"
+        )}>
+          {showSidebar && (
             <ConversationList
               conversations={conversations}
               currentConversation={currentConversation}
@@ -397,39 +302,30 @@ const PlaygroundPage = () => {
                 if (window.innerWidth < 768) setShowSidebar(false);
               }}
               onDelete={deleteConversation}
-              onCollapse={() => setShowSidebar(false)}
               isLoading={isLoading}
             />
-          </div>
-
-          {/* Mobile backdrop */}
-          {showSidebar && (
-            <div 
-              className="absolute inset-0 bg-black/30 z-10 md:hidden"
-              onClick={() => setShowSidebar(false)}
-            />
           )}
+        </div>
 
-          {/* Chat interface */}
-          <div className="flex-1 flex flex-col min-h-0 min-w-0">
-            <ChatInterface
-              messages={messages}
-              input={input}
-              onInputChange={setInput}
-              onSend={handleSend}
-              isLoading={isSending}
-              isLoadingMessages={isLoadingMessages}
-              hasContext={!!(selectedProfileId || selectedDNAId)}
-              profileName={selectedProfile?.name}
-              hasDNA={!!contentDNA}
-              streamingContent={streamingContent}
-              selectedModel={selectedModel}
-              onModelChange={setSelectedModel}
-              campusPhotoCount={campusPhotoCount}
-            />
-          </div>
-        </Card>
-      </main>
+        {/* Chat interface */}
+        <div className="flex-1 flex flex-col min-h-0 min-w-0">
+          <ChatInterface
+            messages={messages}
+            input={input}
+            onInputChange={setInput}
+            onSend={handleSend}
+            isLoading={isSending}
+            isLoadingMessages={isLoadingMessages}
+            hasContext={!!(selectedProfileId || selectedDNAId)}
+            profileName={selectedProfile?.name}
+            hasDNA={!!contentDNA}
+            streamingContent={streamingContent}
+            selectedModel={selectedModel}
+            onModelChange={setSelectedModel}
+            campusPhotoCount={campusPhotoCount}
+          />
+        </div>
+      </div>
     </div>
   );
 };
