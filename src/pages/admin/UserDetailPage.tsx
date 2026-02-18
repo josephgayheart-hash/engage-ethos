@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { Header } from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -405,8 +404,7 @@ export default function UserDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <div className="bg-background">
       
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto space-y-6">

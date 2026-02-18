@@ -1,6 +1,5 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -302,8 +301,7 @@ const TemplateDetailPage = () => {
 
   if (!template) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
+      <div className="bg-background">
         <main className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto text-center py-12">
             <BookOpen className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
@@ -448,8 +446,7 @@ const TemplateDetailPage = () => {
   const displayContent = isEditing ? editedContent : customizedContent;
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <div className="bg-background">
       
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">

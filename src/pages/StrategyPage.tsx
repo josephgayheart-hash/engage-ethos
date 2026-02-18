@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { format, differenceInWeeks, addWeeks } from "date-fns";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
-import { Header } from "@/components/Header";
 import { PlaybookKitSelector } from "@/components/PlaybookKitSelector";
 import { PlaybookKitGuidance } from "@/components/PlaybookKitGuidance";
 import { ContextSelector } from "@/components/ContextSelector";
@@ -849,8 +848,7 @@ const StrategyPage = () => {
   }, [mapperResult, context.audience, toast]);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <div className="bg-background">
       
       {/* Page Header with solid colored wave background */}
       <div className="relative overflow-hidden pb-12">

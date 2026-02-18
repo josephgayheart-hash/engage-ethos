@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
-import { Header } from "@/components/Header";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
 import { BrandLayerSelector, BrandLayerSelection } from "@/components/BrandLayerSelector";
 import { ContentDNAIndicator, ContentDNAActiveBadge } from "@/components/ContentDNAIndicator";
@@ -265,8 +264,7 @@ ${callScript.followUpNotes}`;
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <div className="bg-background">
       
       {/* Page Header with wave background */}
       <div className="relative overflow-hidden pb-12">

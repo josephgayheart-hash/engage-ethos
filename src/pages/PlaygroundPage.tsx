@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Header } from "@/components/Header";
 import { WaveBackground } from "@/components/WaveBackground";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -309,8 +308,7 @@ const PlaygroundPage = () => {
   const selectedProfile = profiles.find(p => p.id === selectedProfileId);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
+    <div className="bg-background flex flex-col">
       
       {/* Page Header with wave background */}
       <div className="relative overflow-hidden pb-12">

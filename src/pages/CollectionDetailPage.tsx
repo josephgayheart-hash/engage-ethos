@@ -1,6 +1,5 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
-import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -155,8 +154,7 @@ const CollectionDetailPage = () => {
 
   if (!collection) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
+      <div className="bg-background">
         <main className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto text-center py-12">
             <Folder className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
@@ -172,8 +170,7 @@ const CollectionDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <div className="bg-background">
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">
           {/* Breadcrumbs */}

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Header } from '@/components/Header';
 import { WaveBackground } from '@/components/WaveBackground';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminAnalytics } from '@/hooks/useAdminAnalytics';
@@ -47,8 +46,7 @@ export default function UniversityDashboardPage() {
   // Require admin access
   if (!isAdmin && !isSuperAdmin) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
+      <div className="bg-background">
         <div className="container mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
           <p className="text-muted-foreground">You need admin privileges to view this page.</p>
@@ -61,9 +59,8 @@ export default function UniversityDashboardPage() {
   const tenantHealth = analytics?.tenantHealth?.find(t => t.tenant_id === tenant?.id);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background">
       <WaveBackground />
-      <Header />
       
       <main className="container mx-auto px-4 py-6 relative z-10">
         {/* Breadcrumb */}

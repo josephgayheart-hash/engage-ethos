@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Header } from "@/components/Header";
 import { WaveBackground } from "@/components/WaveBackground";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -138,8 +137,7 @@ const PersonalLibrary = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <div className="bg-background">
       
       {/* Page Header with wave background */}
       <div className="relative overflow-hidden pb-12">

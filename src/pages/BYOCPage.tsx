@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Header } from "@/components/Header";
 import { ContextSelector } from "@/components/ContextSelector";
 import { EvaluationResults } from "@/components/EvaluationResults";
 import { LibraryNav } from "@/components/LibraryNav";
@@ -188,8 +187,7 @@ const BYOCPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <div className="bg-background">
       
       {/* Page Header with wave background */}
       <div className="relative overflow-hidden pb-12">

@@ -1,14 +1,15 @@
 import { Toaster } from "@/components/ui/toaster";
-import AgencyAnalyticsPage from "@/pages/agency/AgencyAnalyticsPage";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { FeedbackButton } from "@/components/FeedbackButton";
-import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { usePageTracking } from "@/hooks/usePageTracking";
+import { AppLayout } from "@/components/app-shell/AppLayout";
+
+// Page imports
 import Index from "./pages/Index";
 import LandingPage from "./pages/LandingPage";
 import OnboardingPage from "./pages/OnboardingPage";
@@ -29,7 +30,6 @@ import BrandVoiceScorer from "./pages/BrandVoiceScorer";
 import EmailPreview from "./pages/EmailPreview";
 import PerformanceBenchmarks from "./pages/PerformanceBenchmarks";
 import TranslationTool from "./pages/TranslationTool";
-import SettingsPage from "./pages/SettingsPage";
 import UniversitySettingsPage from "./pages/UniversitySettingsPage";
 import NotFound from "./pages/NotFound";
 import LoginPage from "./pages/LoginPage";
@@ -64,221 +64,142 @@ import AgencyRequestAccessPage from "./pages/agency/AgencyRequestAccessPage";
 import AgencyOnboardingPage from "./pages/agency/AgencyOnboardingPage";
 import AgencyDashboardPage from "./pages/agency/AgencyDashboardPage";
 import AgencyClientsPage from "./pages/agency/AgencyClientsPage";
+import AgencyAnalyticsPage from "./pages/agency/AgencyAnalyticsPage";
 import UniversityDashboardPage from "./pages/UniversityDashboardPage";
 import ToolsPage from "./pages/ToolsPage";
 import ImageGeneratorPage from "./pages/ImageGeneratorPage";
 import BrandStudioPage from "./pages/BrandStudioPage";
+
 const queryClient = new QueryClient();
 
-// Component to track page views
 function PageTracker() {
   usePageTracking();
   return null;
 }
 
-// Protected route wrapper - requires authentication
+// Protected route wrapper
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { user, isLoading, profile } = useAuth();
-  
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse">Loading...</div>
-      </div>
-    );
-  }
-  
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  // Check if password reset is required
-  if (profile?.password_reset_required) {
-    return <Navigate to="/change-password" replace />;
-  }
-
-  // Check if user is active
-  if (profile?.status !== 'active' && profile?.status !== 'invited') {
-    return <Navigate to="/login" replace />;
-  }
-  
+  if (isLoading) return <div className="min-h-screen bg-background flex items-center justify-center"><div className="animate-pulse">Loading...</div></div>;
+  if (!user) return <Navigate to="/login" replace />;
+  if (profile?.password_reset_required) return <Navigate to="/change-password" replace />;
+  if (profile?.status !== 'active' && profile?.status !== 'invited') return <Navigate to="/login" replace />;
   return <>{children}</>;
 }
 
-// Admin route wrapper - requires admin role
 function RequireAdmin({ children }: { children: React.ReactNode }) {
   const { isAdmin, isLoading } = useAuth();
-  
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse">Loading...</div>
-      </div>
-    );
-  }
-  
-  if (!isAdmin) {
-    return <Navigate to="/dashboard" replace />;
-  }
-  
+  if (isLoading) return <div className="min-h-screen bg-background flex items-center justify-center"><div className="animate-pulse">Loading...</div></div>;
+  if (!isAdmin) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 
-// Super Admin route wrapper - requires super_admin role
 function RequireSuperAdmin({ children }: { children: React.ReactNode }) {
   const { isSuperAdmin, isLoading } = useAuth();
-  
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse">Loading...</div>
-      </div>
-    );
-  }
-  
-  if (!isSuperAdmin) {
-    return <Navigate to="/dashboard" replace />;
-  }
-  
+  if (isLoading) return <div className="min-h-screen bg-background flex items-center justify-center"><div className="animate-pulse">Loading...</div></div>;
+  if (!isSuperAdmin) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 
-// Approver route wrapper - requires approver or admin role
 function RequireApprover({ children }: { children: React.ReactNode }) {
   const { isApprover, isLoading } = useAuth();
-  
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse">Loading...</div>
-      </div>
-    );
-  }
-  
-  if (!isApprover) {
-    return <Navigate to="/dashboard" replace />;
-  }
-  
+  if (isLoading) return <div className="min-h-screen bg-background flex items-center justify-center"><div className="animate-pulse">Loading...</div></div>;
+  if (!isApprover) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 
-// Public route wrapper - redirects authenticated users to dashboard
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading, profile } = useAuth();
-  
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse">Loading...</div>
-      </div>
-    );
-  }
-  
-  if (user && profile?.status === 'active' && !profile?.password_reset_required) {
-    return <Navigate to="/dashboard" replace />;
-  }
-  
+  if (isLoading) return <div className="min-h-screen bg-background flex items-center justify-center"><div className="animate-pulse">Loading...</div></div>;
+  if (user && profile?.status === 'active' && !profile?.password_reset_required) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 
 const AppRoutes = () => (
   <Routes>
-    {/* Public routes */}
+    {/* Public routes — no sidebar */}
     <Route path="/" element={<LandingPage />} />
     <Route path="/og-preview" element={<OGPreviewPage />} />
     <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
     <Route path="/request-access" element={<RequestAccessPage />} />
-    <Route path="/feedback" element={<RequireAuth><BetaFeedbackPage /></RequireAuth>} />
     <Route path="/change-password" element={<ChangePasswordPage />} />
     <Route path="/setup" element={<InitialSetupPage />} />
-    
-    {/* Agency public routes */}
     <Route path="/for-agencies" element={<ForAgenciesPage />} />
     <Route path="/agency/request-access" element={<AgencyRequestAccessPage />} />
-    
-    {/* Feature marketing pages */}
     <Route path="/features/content-dna" element={<ContentDNAFeaturePage />} />
     <Route path="/features/message-builder" element={<MessageBuilderFeaturePage />} />
     <Route path="/features/journey-designer" element={<JourneyDesignerFeaturePage />} />
     <Route path="/features/evaluate" element={<EvaluateFeaturePage />} />
     <Route path="/features/library" element={<LibraryFeaturePage />} />
-    
-    {/* Protected routes */}
-    <Route path="/dashboard" element={<RequireAuth><Index /></RequireAuth>} />
-    <Route path="/onboarding" element={<RequireAuth><OnboardingPage /></RequireAuth>} />
-    <Route path="/evaluate" element={<RequireAuth><EvaluatePage /></RequireAuth>} />
-    <Route path="/build" element={<RequireAuth><BuildPage /></RequireAuth>} />
-    <Route path="/strategy" element={<RequireAuth><StrategyPage /></RequireAuth>} />
-    <Route path="/call-script" element={<RequireAuth><CallScriptPage /></RequireAuth>} />
-    <Route path="/playground" element={<RequireAuth><PlaygroundPage /></RequireAuth>} />
-    <Route path="/byoc" element={<RequireAuth><BYOCPage /></RequireAuth>} />
-    <Route path="/library" element={<RequireAuth><PersonalLibrary /></RequireAuth>} />
-    <Route path="/library/:id" element={<RequireAuth><MessageDetailPage /></RequireAuth>} />
-    <Route path="/shared-library" element={<RequireAuth><SharedLibrary /></RequireAuth>} />
-    <Route path="/shared-library/:id" element={<RequireAuth><TemplateDetailPage /></RequireAuth>} />
-    <Route path="/collections/:id" element={<RequireAuth><CollectionDetailPage /></RequireAuth>} />
-    <Route path="/campaign-dashboard" element={<RequireAuth><CampaignDashboard /></RequireAuth>} />
-    <Route path="/calendar" element={<RequireAuth><CommunicationCalendar /></RequireAuth>} />
-    <Route path="/subject-optimizer" element={<RequireAuth><SubjectLineOptimizer /></RequireAuth>} />
-    <Route path="/accessibility" element={<RequireAuth><AccessibilityChecker /></RequireAuth>} />
-    <Route path="/brand-voice" element={<RequireAuth><BrandVoiceScorer /></RequireAuth>} />
-    <Route path="/email-preview" element={<RequireAuth><EmailPreview /></RequireAuth>} />
-    <Route path="/benchmarks" element={<RequireAuth><PerformanceBenchmarks /></RequireAuth>} />
-    <Route path="/translate" element={<RequireAuth><TranslationTool /></RequireAuth>} />
-    <Route path="/web-analyzer" element={<RequireAuth><WebContentAnalyzerPage /></RequireAuth>} />
-    <Route path="/tools" element={<RequireAuth><ToolsPage /></RequireAuth>} />
-    <Route path="/image-generator" element={<RequireAuth><ImageGeneratorPage /></RequireAuth>} />
-    <Route path="/brand-audit" element={<RequireAuth><BrandAuditPage /></RequireAuth>} />
-    <Route path="/brand-studio" element={<RequireAuth><BrandStudioPage /></RequireAuth>} />
-    <Route path="/settings" element={<Navigate to="/university-settings" replace />} />
-    <Route path="/university-settings" element={<RequireAuth><UniversitySettingsPage /></RequireAuth>} />
-    <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
-    
-    {/* Agency protected routes */}
-    <Route path="/agency/onboarding" element={<RequireAuth><AgencyOnboardingPage /></RequireAuth>} />
-    <Route path="/agency/dashboard" element={<RequireAuth><AgencyDashboardPage /></RequireAuth>} />
-    <Route path="/agency/clients" element={<RequireAuth><AgencyClientsPage /></RequireAuth>} />
-    <Route path="/agency/analytics" element={<RequireAuth><AgencyAnalyticsPage /></RequireAuth>} />
-    
-    {/* Approver routes */}
-    <Route path="/approvals" element={<RequireAuth><RequireApprover><ApprovalsPage /></RequireApprover></RequireAuth>} />
-    
-    {/* Super Admin routes */}
-    <Route path="/admin/panel" element={<RequireAuth><RequireSuperAdmin><AdminPanel /></RequireSuperAdmin></RequireAuth>} />
-    <Route path="/admin/onboarding" element={<RequireAuth><RequireSuperAdmin><AdminOnboardingPage /></RequireSuperAdmin></RequireAuth>} />
-        <Route path="/admin/qa" element={<RequireAuth><RequireSuperAdmin><QADiagnosticsPage /></RequireSuperAdmin></RequireAuth>} />
-        <Route path="/admin/seed" element={<RequireAuth><RequireSuperAdmin><SeedDataPage /></RequireSuperAdmin></RequireAuth>} />
-        <Route path="/admin/security-events" element={<RequireAuth><RequireSuperAdmin><SecurityEventsPage /></RequireSuperAdmin></RequireAuth>} />
-        <Route path="/admin/institution/:id" element={<RequireAuth><RequireSuperAdmin><InstitutionDetailPage /></RequireSuperAdmin></RequireAuth>} />
-    <Route path="/admin/user/:id" element={<RequireAuth><RequireSuperAdmin><UserDetailPage /></RequireSuperAdmin></RequireAuth>} />
-    
-    {/* Content DNA - accessible to all authenticated users */}
-    <Route path="/content-dna" element={<RequireAuth><ContentDNAPage /></RequireAuth>} />
-    
-    {/* Admin routes - tenant-scoped for university admins */}
-    <Route path="/admin" element={<Navigate to="/admin/console" replace />} />
-    <Route path="/admin/console" element={<RequireAuth><RequireAdmin><AdminConsolePage /></RequireAdmin></RequireAuth>} />
-    <Route path="/admin/users" element={<RequireAuth><RequireAdmin><AdminUsersPage /></RequireAdmin></RequireAuth>} />
-    <Route path="/admin/content-dna" element={<RequireAuth><ContentDNAPage /></RequireAuth>} />
-    <Route path="/institution-dashboard" element={<RequireAuth><RequireAdmin><UniversityDashboardPage /></RequireAdmin></RequireAuth>} />
-    
+
+    {/* Authenticated routes — wrapped in AppLayout sidebar shell */}
+    <Route element={<RequireAuth><AppLayout /></RequireAuth>}>
+      <Route path="/dashboard" element={<Index />} />
+      <Route path="/onboarding" element={<OnboardingPage />} />
+      <Route path="/feedback" element={<BetaFeedbackPage />} />
+      <Route path="/evaluate" element={<EvaluatePage />} />
+      <Route path="/build" element={<BuildPage />} />
+      <Route path="/strategy" element={<StrategyPage />} />
+      <Route path="/call-script" element={<CallScriptPage />} />
+      <Route path="/playground" element={<PlaygroundPage />} />
+      <Route path="/byoc" element={<BYOCPage />} />
+      <Route path="/library" element={<PersonalLibrary />} />
+      <Route path="/library/:id" element={<MessageDetailPage />} />
+      <Route path="/shared-library" element={<SharedLibrary />} />
+      <Route path="/shared-library/:id" element={<TemplateDetailPage />} />
+      <Route path="/collections/:id" element={<CollectionDetailPage />} />
+      <Route path="/campaign-dashboard" element={<CampaignDashboard />} />
+      <Route path="/calendar" element={<CommunicationCalendar />} />
+      <Route path="/subject-optimizer" element={<SubjectLineOptimizer />} />
+      <Route path="/accessibility" element={<AccessibilityChecker />} />
+      <Route path="/brand-voice" element={<BrandVoiceScorer />} />
+      <Route path="/email-preview" element={<EmailPreview />} />
+      <Route path="/benchmarks" element={<PerformanceBenchmarks />} />
+      <Route path="/translate" element={<TranslationTool />} />
+      <Route path="/web-analyzer" element={<WebContentAnalyzerPage />} />
+      <Route path="/tools" element={<ToolsPage />} />
+      <Route path="/image-generator" element={<ImageGeneratorPage />} />
+      <Route path="/brand-audit" element={<BrandAuditPage />} />
+      <Route path="/brand-studio" element={<BrandStudioPage />} />
+      <Route path="/settings" element={<Navigate to="/university-settings" replace />} />
+      <Route path="/university-settings" element={<UniversitySettingsPage />} />
+      <Route path="/profile" element={<ProfilePage />} />
+      <Route path="/content-dna" element={<ContentDNAPage />} />
+
+      {/* Agency authenticated routes */}
+      <Route path="/agency/onboarding" element={<AgencyOnboardingPage />} />
+      <Route path="/agency/dashboard" element={<AgencyDashboardPage />} />
+      <Route path="/agency/clients" element={<AgencyClientsPage />} />
+      <Route path="/agency/analytics" element={<AgencyAnalyticsPage />} />
+
+      {/* Approver routes */}
+      <Route path="/approvals" element={<RequireApprover><ApprovalsPage /></RequireApprover>} />
+
+      {/* Admin routes */}
+      <Route path="/admin" element={<Navigate to="/admin/console" replace />} />
+      <Route element={<RequireAdmin><Outlet /></RequireAdmin>}>
+        <Route path="/admin/console" element={<AdminConsolePage />} />
+        <Route path="/admin/users" element={<AdminUsersPage />} />
+        <Route path="/admin/content-dna" element={<ContentDNAPage />} />
+        <Route path="/institution-dashboard" element={<UniversityDashboardPage />} />
+      </Route>
+
+      {/* Super Admin routes */}
+      <Route element={<RequireSuperAdmin><Outlet /></RequireSuperAdmin>}>
+        <Route path="/admin/panel" element={<AdminPanel />} />
+        <Route path="/admin/onboarding" element={<AdminOnboardingPage />} />
+        <Route path="/admin/qa" element={<QADiagnosticsPage />} />
+        <Route path="/admin/seed" element={<SeedDataPage />} />
+        <Route path="/admin/security-events" element={<SecurityEventsPage />} />
+        <Route path="/admin/institution/:id" element={<InstitutionDetailPage />} />
+        <Route path="/admin/user/:id" element={<UserDetailPage />} />
+      </Route>
+    </Route>
+
     {/* Catch-all */}
     <Route path="*" element={<NotFound />} />
   </Routes>
 );
-
-function ImpersonationWrapper() {
-  const { isImpersonating, impersonatedUserEmail, exitImpersonation } = useAuth();
-  
-  if (!isImpersonating || !impersonatedUserEmail) return null;
-  
-  return (
-    <ImpersonationBanner 
-      targetUserEmail={impersonatedUserEmail} 
-      onExit={exitImpersonation} 
-    />
-  );
-}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -287,7 +208,6 @@ const App = () => (
         <AuthProvider>
           <PageTracker />
           <ScrollToTop />
-          <ImpersonationWrapper />
           <Toaster />
           <Sonner />
           <AppRoutes />

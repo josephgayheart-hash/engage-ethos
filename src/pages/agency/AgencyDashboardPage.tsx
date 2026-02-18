@@ -18,7 +18,6 @@ import {
   PauseCircle,
   Archive,
 } from "lucide-react";
-import { Header } from "@/components/Header";
 import { SEOHead } from "@/components/SEOHead";
 
 interface ClientProfile {
@@ -164,8 +163,7 @@ export default function AgencyDashboardPage() {
         description="Manage your university clients from the agency dashboard."
       />
 
-      <div className="min-h-screen bg-background">
-        <Header />
+      <div className="bg-background">
 
         <main className="py-8 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">

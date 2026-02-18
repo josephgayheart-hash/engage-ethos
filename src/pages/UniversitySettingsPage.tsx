@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Header } from "@/components/Header";
 import { InstitutionalConfig } from "@/components/InstitutionalConfig";
 import { ProfileSetupWizard } from "@/components/ProfileSetupWizard";
 import { SubUnitSetupWizard } from "@/components/SubUnitSetupWizard";
@@ -476,8 +475,7 @@ export default function UniversitySettingsPage() {
 
   if (!isAdmin && !isSuperAdmin) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
+      <div className="bg-background">
         <div className="container mx-auto px-4 py-16 text-center">
           <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
@@ -488,8 +486,7 @@ export default function UniversitySettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <div className="bg-background">
       
       {/* Page Header */}
       <div className="relative overflow-hidden pb-8">

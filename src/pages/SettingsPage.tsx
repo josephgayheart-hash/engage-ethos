@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Header } from "@/components/Header";
 import { InstitutionalConfig } from "@/components/InstitutionalConfig";
 import { ProfileSetupWizard } from "@/components/ProfileSetupWizard";
 import { SubUnitSetupWizard } from "@/components/SubUnitSetupWizard";
@@ -253,8 +252,7 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <div className="bg-background">
       
       {/* Page Header with wave background */}
       <div className="relative overflow-hidden pb-12">
