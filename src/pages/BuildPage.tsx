@@ -271,6 +271,7 @@ const BuildPage = () => {
   const [selectedFacts, setSelectedFacts] = useState<Fact[]>([]);
   const [imageEngine, setImageEngine] = useState("fast");
   const [imageStyle, setImageStyle] = useState("photorealistic");
+  const [imageRegenerateKey, setImageRegenerateKey] = useState(0);
   const { contentDNA, isLoading: isContentDNALoading } = useContentDNAForGeneration({ profileId: selectedProfileId });
   const resultsRef = useRef<HTMLDivElement>(null);
   const canProcess = context.audience && context.moment && selectedChannels.length > 0;
@@ -1295,6 +1296,16 @@ const BuildPage = () => {
                         <option value="minimal">◻️ Minimal / Flat</option>
                       </select>
                     </div>
+                    <div className="w-px h-8 bg-border" />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-7 gap-1"
+                      onClick={() => setImageRegenerateKey(k => k + 1)}
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      Regenerate All
+                    </Button>
                   </div>
                 </div>
               )}
@@ -1361,6 +1372,7 @@ const BuildPage = () => {
                       contentSummary={context.moment ? `${context.moment} message for ${context.audience || 'students'}${context.goal ? `. Goal: ${context.goal}` : ''}${context.tone ? `. Tone: ${context.tone}` : ''}${context.cohort && context.cohort !== 'none' ? `. Cohort: ${context.cohort}` : ''}${context.domain ? `. Domain: ${context.domain}` : ''}` : undefined}
                       imageEngine={imageEngine}
                       imageStyle={imageStyle}
+                      regenerateKey={imageRegenerateKey}
                     />
                   );
                 })}
