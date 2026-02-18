@@ -523,13 +523,19 @@ export type InstitutionType =
 export interface InstitutionalConfig {
   // Institution Classification
   institutionType?: InstitutionType;
-  // Visual Branding
-  logoUrl?: string;              // Profile-specific logo (primary)
-  logoUrlAlt?: string;           // Alternate logo (e.g. horizontal/stacked variant)
-  logoUrlIcon?: string;          // Icon/mark-only logo (e.g. favicon, social avatar)
+  // Visual Branding — Logo Variants
+  logoUrl?: string;              // Primary logo
+  logoUrlSecondary?: string;     // Secondary logo (e.g. horizontal/stacked variant)
+  logoUrlAthletic?: string;      // Athletic mark
+  logoUrlPresidential?: string;  // Presidential mark / seal
+  // Legacy aliases (kept for backward compat)
+  logoUrlAlt?: string;           // @deprecated — use logoUrlSecondary
+  logoUrlIcon?: string;          // @deprecated — use logoUrlAthletic
+  // Brand Colors
   primaryColor?: string;         // Primary brand color (hex)
   secondaryColor?: string;       // Secondary brand color (hex)
   tertiaryColor?: string;        // Tertiary brand color (hex)
+  tertiaryColorNA?: boolean;     // true when institution has no tertiary color
   accentColor?: string;          // Accent color (hex) - legacy, use secondaryColor
   
   // Unit/College/Division-Specific Leadership (conditional fields)

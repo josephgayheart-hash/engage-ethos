@@ -123,9 +123,13 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
     mascot: '',
     slogans: [],
     logoUrl: '',
+    logoUrlSecondary: '',
+    logoUrlAthletic: '',
+    logoUrlPresidential: '',
     primaryColor: '#1F2A44',
     secondaryColor: '#2C7A7B',
     tertiaryColor: '#D4AF37',
+    tertiaryColorNA: false,
     accentColor: '#2C7A7B', // Legacy - keep for backward compatibility
     emailDomain: '',
     primaryContactEmail: '',
@@ -143,7 +147,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
     setConfig(prev => ({ ...prev, ...updates }));
   };
 
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>, variant: 'primary' | 'secondary' | 'athletic' | 'presidential' = 'primary') => {
     const file = e.target.files?.[0];
     if (!file || !tenant?.id) return;
 
@@ -170,7 +174,8 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
     setIsUploadingLogo(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${tenant.id}/${Date.now()}.${fileExt}`;
+      const suffix = variant === 'primary' ? '' : `-${variant}`;
+      const fileName = `${tenant.id}/${Date.now()}${suffix}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('institution-logos')
@@ -182,10 +187,16 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
         .from('institution-logos')
         .getPublicUrl(fileName);
 
-      updateConfig({ logoUrl: publicUrl });
+      const fieldMap: Record<string, keyof InstitutionalConfig> = {
+        primary: 'logoUrl',
+        secondary: 'logoUrlSecondary',
+        athletic: 'logoUrlAthletic',
+        presidential: 'logoUrlPresidential',
+      };
+      updateConfig({ [fieldMap[variant]]: publicUrl });
       toast({
         title: 'Logo uploaded',
-        description: 'Your institution logo has been saved.',
+        description: `Your ${variant} logo has been saved.`,
       });
     } catch (error: any) {
       console.error('Logo upload error:', error);
@@ -200,8 +211,14 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
     }
   };
 
-  const handleRemoveLogo = () => {
-    updateConfig({ logoUrl: '' });
+  const handleRemoveLogo = (variant: 'primary' | 'secondary' | 'athletic' | 'presidential' = 'primary') => {
+    const fieldMap: Record<string, keyof InstitutionalConfig> = {
+      primary: 'logoUrl',
+      secondary: 'logoUrlSecondary',
+      athletic: 'logoUrlAthletic',
+      presidential: 'logoUrlPresidential',
+    };
+    updateConfig({ [fieldMap[variant]]: '' });
   };
 
   const addSlogan = () => {
@@ -429,72 +446,67 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
           </div>
         );
 
-      case 1: // Branding
+      case 2: // Branding
         return (
           <div className="space-y-6">
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">{isAgency ? 'Client University Logo' : 'Institution Logo'}</Label>
-              <div className="flex items-start gap-4">
-                {config.logoUrl ? (
-                  <div className="relative">
-                    <img
-                      src={config.logoUrl}
-                      alt="Logo preview"
-                      className="w-24 h-24 object-contain rounded-lg border border-border bg-white p-2"
-                    />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon"
-                      className="absolute -top-2 -right-2 h-6 w-6"
-                      onClick={handleRemoveLogo}
-                    >
-                      <X className="w-3 h-3" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div
-                    className="w-24 h-24 rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    {isUploadingLogo ? (
-                      <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-                    ) : (
-                      <ImageIcon className="w-6 h-6 text-muted-foreground" />
-                    )}
-                  </div>
-                )}
-                <div className="flex-1">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleLogoUpload}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isUploadingLogo}
-                  >
-                    {isUploadingLogo ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Uploading...
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="w-4 h-4 mr-2" />
-                        Upload Logo
-                      </>
-                    )}
-                  </Button>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    PNG, JPG up to 2MB. Square format recommended.
-                  </p>
-                </div>
+            {/* Logo Variants */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Logo Variants</h4>
+              <p className="text-xs text-muted-foreground">
+                Upload your institution's logo variants. Only the primary logo is required.
+              </p>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {([
+                  { key: 'primary' as const, label: 'Primary Logo', field: 'logoUrl' as const, required: true },
+                  { key: 'secondary' as const, label: 'Secondary Logo', field: 'logoUrlSecondary' as const, required: false },
+                  { key: 'athletic' as const, label: 'Athletic Mark', field: 'logoUrlAthletic' as const, required: false },
+                  { key: 'presidential' as const, label: 'Presidential Mark', field: 'logoUrlPresidential' as const, required: false },
+                ]).map((logo) => {
+                  const url = config[logo.field] as string;
+                  return (
+                    <div key={logo.key} className="space-y-2">
+                      <Label className="text-xs font-medium">
+                        {logo.label} {logo.required && <span className="text-destructive">*</span>}
+                      </Label>
+                      {url ? (
+                        <div className="relative">
+                          <img
+                            src={url}
+                            alt={logo.label}
+                            className="w-full aspect-square object-contain rounded-lg border border-border bg-white p-2"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute -top-2 -right-2 h-6 w-6"
+                            onClick={() => handleRemoveLogo(logo.key)}
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <label className="w-full aspect-square rounded-lg border-2 border-dashed border-muted-foreground/30 flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors">
+                          {isUploadingLogo ? (
+                            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                          ) : (
+                            <>
+                              <ImageIcon className="w-6 h-6 text-muted-foreground mb-1" />
+                              <span className="text-[10px] text-muted-foreground">Upload</span>
+                            </>
+                          )}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => handleLogoUpload(e, logo.key)}
+                          />
+                        </label>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -562,30 +574,47 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
                   </p>
                 </div>
 
-                {/* Tertiary Color */}
+                {/* Tertiary Color with N/A toggle */}
                 <div className="space-y-3">
-                  <Label htmlFor="tertiaryColor" className="text-sm font-medium">
-                    Tertiary Color
-                  </Label>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="color"
-                      id="tertiaryColor"
-                      value={config.tertiaryColor || '#D4AF37'}
-                      onChange={(e) => updateConfig({ tertiaryColor: e.target.value })}
-                      className="w-12 h-12 rounded-lg border border-border cursor-pointer"
-                    />
-                    <div className="flex-1">
-                      <Input
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="tertiaryColor" className="text-sm font-medium">
+                      Tertiary Color
+                    </Label>
+                    <label className="flex items-center gap-1.5 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={config.tertiaryColorNA || false}
+                        onChange={(e) => updateConfig({ tertiaryColorNA: e.target.checked })}
+                        className="rounded border-border"
+                      />
+                      <span className="text-xs text-muted-foreground">N/A</span>
+                    </label>
+                  </div>
+                  {config.tertiaryColorNA ? (
+                    <div className="flex items-center justify-center h-12 rounded-lg border border-dashed border-muted-foreground/30 bg-muted/20">
+                      <span className="text-sm text-muted-foreground">No tertiary color</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="color"
+                        id="tertiaryColor"
                         value={config.tertiaryColor || '#D4AF37'}
                         onChange={(e) => updateConfig({ tertiaryColor: e.target.value })}
-                        placeholder="#D4AF37"
-                        className="font-mono text-sm"
+                        className="w-12 h-12 rounded-lg border border-border cursor-pointer"
                       />
+                      <div className="flex-1">
+                        <Input
+                          value={config.tertiaryColor || '#D4AF37'}
+                          onChange={(e) => updateConfig({ tertiaryColor: e.target.value })}
+                          placeholder="#D4AF37"
+                          className="font-mono text-sm"
+                        />
+                      </div>
                     </div>
-                  </div>
+                  )}
                   <p className="text-xs text-muted-foreground">
-                    Accent color for special elements and emphasis
+                    {config.tertiaryColorNA ? 'Check this if your institution doesn\'t use a tertiary color' : 'Accent color for special elements and emphasis'}
                   </p>
                 </div>
               </div>
@@ -641,18 +670,20 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
                     style={{ backgroundColor: config.secondaryColor || config.accentColor || '#2C7A7B' }}
                     title="Secondary"
                   />
-                  <div 
-                    className="w-8 h-8 rounded border border-border" 
-                    style={{ backgroundColor: config.tertiaryColor || '#D4AF37' }}
-                    title="Tertiary"
-                  />
+                  {!config.tertiaryColorNA && (
+                    <div 
+                      className="w-8 h-8 rounded border border-border" 
+                      style={{ backgroundColor: config.tertiaryColor || '#D4AF37' }}
+                      title="Tertiary"
+                    />
+                  )}
                 </div>
               </CardContent>
             </Card>
           </div>
         );
 
-      case 2: // Leadership
+      case 3: // Leadership
         return (
           <div className="space-y-6">
             <div className="p-3 bg-muted/30 rounded-lg">
@@ -741,7 +772,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
           </div>
         );
 
-      case 3: // Advancement
+      case 4: // Advancement
         return (
           <div className="space-y-6">
             <div className="p-3 bg-muted/30 rounded-lg">
@@ -909,7 +940,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
           </div>
         );
 
-      case 4: // Contact & Systems
+      case 5: // Contact & Systems
         return (
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
@@ -1004,7 +1035,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
           </div>
         );
 
-      case 5: // Review
+      case 6: // Review
         return (
           <div className="space-y-6">
             <Card className="bg-muted/30">
@@ -1029,6 +1060,13 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
                     <CardDescription>
                       {[config.institutionAbbreviation, config.mascot].filter(Boolean).join(' • ')}
                     </CardDescription>
+                    {(config.slogans?.length || 0) > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {config.slogans?.map((slogan, i) => (
+                          <Badge key={i} variant="secondary" className="text-xs">{slogan}</Badge>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardHeader>

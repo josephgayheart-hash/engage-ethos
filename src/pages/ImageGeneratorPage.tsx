@@ -117,7 +117,7 @@ const ImageGeneratorPage = () => {
   const profileConfig = selectedProfile?.config as Record<string, any> | undefined;
   const brandColors = [profileConfig?.primaryColor, profileConfig?.secondaryColor, profileConfig?.tertiaryColor, profileConfig?.accentColor].filter(Boolean) as string[];
   const profileLogoUrl = profileConfig?.logoUrl as string | undefined;
-  const profileLogoUrls = [profileConfig?.logoUrl, profileConfig?.logoUrlAlt, profileConfig?.logoUrlIcon].filter(Boolean) as string[];
+  const profileLogoUrls = [profileConfig?.logoUrl, profileConfig?.logoUrlSecondary, profileConfig?.logoUrlAthletic, profileConfig?.logoUrlPresidential].filter(Boolean) as string[];
   const profileInstitutionName = selectedProfile?.name || profileConfig?.institutionName as string | undefined;
 
   const handleGenerate = useCallback(async () => {
