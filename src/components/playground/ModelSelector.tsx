@@ -23,32 +23,10 @@ interface ModelOption {
 }
 
 const models: ModelOption[] = [
-  {
-    id: 'google/gemini-2.5-flash',
-    name: 'Gemini Flash',
-    description: 'Fast & balanced',
-    icon: Zap,
-    badge: 'Default'
-  },
-  {
-    id: 'google/gemini-2.5-flash-lite',
-    name: 'Gemini Lite',
-    description: 'Fastest, cost-effective',
-    icon: Cpu
-  },
-  {
-    id: 'google/gemini-2.5-pro',
-    name: 'Gemini Pro',
-    description: 'Most capable',
-    icon: Brain,
-    badge: 'Premium'
-  },
-  {
-    id: 'openai/gpt-5-mini',
-    name: 'GPT-5 Mini',
-    description: 'Strong reasoning',
-    icon: Sparkles
-  }
+  { id: 'google/gemini-2.5-flash', name: 'Flash', description: 'Fast & balanced', icon: Zap, badge: 'Default' },
+  { id: 'google/gemini-2.5-flash-lite', name: 'Lite', description: 'Fastest', icon: Cpu },
+  { id: 'google/gemini-2.5-pro', name: 'Pro', description: 'Most capable', icon: Brain, badge: 'Premium' },
+  { id: 'openai/gpt-5-mini', name: 'GPT-5 Mini', description: 'Strong reasoning', icon: Sparkles },
 ];
 
 interface ModelSelectorProps {
@@ -63,11 +41,11 @@ export function ModelSelector({ value, onChange, disabled }: ModelSelectorProps)
 
   return (
     <Select value={value} onValueChange={(v) => onChange(v as AIModel)} disabled={disabled}>
-      <SelectTrigger className="w-auto h-8 text-xs gap-1.5 border-dashed">
+      <SelectTrigger className="h-8 w-auto text-xs gap-1.5 border-border/50 rounded-lg bg-background hover:bg-muted/50 transition-colors">
         <Icon className="h-3.5 w-3.5 text-muted-foreground" />
         <SelectValue>
           <span className="hidden sm:inline">{selectedModel.name}</span>
-          <span className="sm:hidden">Model</span>
+          <span className="sm:hidden">AI</span>
         </SelectValue>
       </SelectTrigger>
       <SelectContent align="end">

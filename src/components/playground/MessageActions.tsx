@@ -30,17 +30,10 @@ export function MessageActions({ content, messageId }: MessageActionsProps) {
     try {
       await navigator.clipboard.writeText(content);
       setCopied(true);
-      toast({
-        title: "Copied",
-        description: "Message copied to clipboard",
-      });
+      toast({ title: "Copied", description: "Message copied to clipboard" });
       setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Failed to copy",
-        description: "Could not copy to clipboard",
-      });
+    } catch {
+      toast({ variant: "destructive", title: "Failed to copy", description: "Could not copy to clipboard" });
     }
   };
 
@@ -50,11 +43,8 @@ export function MessageActions({ content, messageId }: MessageActionsProps) {
     } else {
       setFeedback(type);
       toast({
-        title: type === "up" ? "Thanks for the feedback!" : "Feedback noted",
-        description:
-          type === "up"
-            ? "Glad this was helpful"
-            : "We'll work on improving responses",
+        title: type === "up" ? "Thanks!" : "Feedback noted",
+        description: type === "up" ? "Glad this was helpful" : "We'll work on improving",
       });
     }
   };
@@ -67,12 +57,7 @@ export function MessageActions({ content, messageId }: MessageActionsProps) {
   const handleSaveToPersonal = async (name: string, channel?: Channel): Promise<string | undefined> => {
     try {
       const savedMessage = await addMessage({
-        title: name,
-        content: content,
-        channel: channel,
-        approved: false,
-        mode: "generated",
-        source: "copywriter",
+        title: name, content, channel, approved: false, mode: "generated", source: "copywriter",
         createdByUserId: profile?.id,
         createdByName: profile ? `${profile.first_name} ${profile.last_name}` : undefined,
       });
@@ -86,26 +71,16 @@ export function MessageActions({ content, messageId }: MessageActionsProps) {
   const handleSaveToShared = async (name: string, channel?: Channel): Promise<string | undefined> => {
     try {
       const savedTemplate = await addTemplate({
-        title: name,
-        intentStatement: "Generated from Copywriter",
-        content: content,
+        title: name, intentStatement: "Generated from Copywriter", content,
         playbook: "Copywriter",
         owner: profile ? `${profile.first_name} ${profile.last_name}` : "Current User",
         maintainer: profile ? `${profile.first_name} ${profile.last_name}` : "Current User",
         status: (isAdmin || isApprover) ? "published" : "submitted",
         version: "1.0",
-        requiredFields: {
-          audience: [],
-          moment: [],
-          channel: channel ? [channel] : [],
-        },
-        useCases: {
-          whenToUse: ["General communications"],
-          whenNotToUse: [],
-        },
+        requiredFields: { audience: [], moment: [], channel: channel ? [channel] : [] },
+        useCases: { whenToUse: ["General communications"], whenNotToUse: [] },
         ethicalGuardrails: ["Review content before publishing"],
-        placeholders: [],
-        source: "copywriter",
+        placeholders: [], source: "copywriter",
       });
       return savedTemplate?.id;
     } catch (error) {
@@ -118,105 +93,54 @@ export function MessageActions({ content, messageId }: MessageActionsProps) {
     try {
       if (saveLibraryType === "personal") {
         const id = await handleSaveToPersonal(name, channel);
-        toast({
-          title: "Saved!",
-          description: "Message saved to My Library",
-        });
+        toast({ title: "Saved!", description: "Message saved to My Library" });
         return id;
       } else {
         const id = handleSaveToShared(name, channel);
-        toast({
-          title: "Saved!",
-          description: `Message ${(isAdmin || isApprover) ? "published to" : "submitted to"} University Library`,
-        });
+        toast({ title: "Saved!", description: `Message ${(isAdmin || isApprover) ? "published to" : "submitted to"} University Library` });
         return id;
       }
-    } catch (error) {
-      console.error("Error saving message:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to save message to library",
-      });
+    } catch {
+      toast({ variant: "destructive", title: "Error", description: "Failed to save message" });
       return undefined;
     }
   };
 
   return (
     <>
-      <div className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="flex items-center gap-0.5 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
         <Button
-          variant="ghost"
-          size="sm"
-          className={cn(
-            "h-7 w-7 p-0",
-            feedback === "up" && "text-green-600 bg-green-100 hover:bg-green-100"
-          )}
-          onClick={() => handleFeedback("up")}
-          title="Good response"
+          variant="ghost" size="sm"
+          className={cn("h-7 w-7 p-0 rounded-lg", feedback === "up" && "text-green-600 bg-green-50 dark:bg-green-950")}
+          onClick={() => handleFeedback("up")} title="Good response"
         >
           <ThumbsUp className="h-3.5 w-3.5" />
         </Button>
         <Button
-          variant="ghost"
-          size="sm"
-          className={cn(
-            "h-7 w-7 p-0",
-            feedback === "down" && "text-red-600 bg-red-100 hover:bg-red-100"
-          )}
-          onClick={() => handleFeedback("down")}
-          title="Poor response"
+          variant="ghost" size="sm"
+          className={cn("h-7 w-7 p-0 rounded-lg", feedback === "down" && "text-red-600 bg-red-50 dark:bg-red-950")}
+          onClick={() => handleFeedback("down")} title="Poor response"
         >
           <ThumbsDown className="h-3.5 w-3.5" />
         </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 w-7 p-0"
-          onClick={handleCopy}
-          title="Copy to clipboard"
-        >
-          {copied ? (
-            <Check className="h-3.5 w-3.5 text-green-600" />
-          ) : (
-            <Copy className="h-3.5 w-3.5" />
-          )}
+        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 rounded-lg" onClick={handleCopy} title="Copy">
+          {copied ? <Check className="h-3.5 w-3.5 text-green-600" /> : <Copy className="h-3.5 w-3.5" />}
         </Button>
-
-        <div className="w-px h-4 bg-border mx-1" />
-
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-          onClick={() => handleSaveClick("personal")}
-          title="Save to My Library"
-        >
+        <div className="w-px h-3.5 bg-border mx-0.5" />
+        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs rounded-lg" onClick={() => handleSaveClick("personal")} title="Save to My Library">
           <BookmarkPlus className="h-3.5 w-3.5 mr-1" />
-          <span className="hidden sm:inline">My Library</span>
+          <span className="hidden sm:inline text-muted-foreground">Save</span>
         </Button>
-
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-          onClick={() => handleSaveClick("shared")}
-          title="Save to University Library"
-        >
+        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs rounded-lg" onClick={() => handleSaveClick("shared")} title="Share">
           <BookmarkPlus className="h-3.5 w-3.5 mr-1" />
-          <span className="hidden sm:inline">University</span>
+          <span className="hidden sm:inline text-muted-foreground">Share</span>
         </Button>
       </div>
 
       <SaveToLibraryDialog
-        open={saveDialogOpen}
-        onOpenChange={setSaveDialogOpen}
-        onSave={handleSave}
-        onSaveToPersonal={handleSaveToPersonal}
-        onSaveToShared={handleSaveToShared}
-        libraryType={saveLibraryType}
-        contentType="message"
-        showChannelSelector={true}
+        open={saveDialogOpen} onOpenChange={setSaveDialogOpen}
+        onSave={handleSave} onSaveToPersonal={handleSaveToPersonal} onSaveToShared={handleSaveToShared}
+        libraryType={saveLibraryType} contentType="message" showChannelSelector={true}
       />
     </>
   );

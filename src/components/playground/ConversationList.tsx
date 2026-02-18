@@ -2,7 +2,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { MessageCircle, Plus, Trash2, PanelLeftClose } from 'lucide-react';
+import { MessageCircle, Plus, Trash2 } from 'lucide-react';
 import type { PlaygroundConversation } from '@/hooks/usePlaygroundConversations';
 
 interface ConversationListProps {
@@ -21,37 +21,27 @@ export function ConversationList({
   onSelect,
   onNew,
   onDelete,
-  onCollapse,
   isLoading
 }: ConversationListProps) {
   return (
-    <div className="flex flex-col h-full border-r bg-muted/30">
-      <div className="p-3 border-b flex items-center gap-2">
-        <Button onClick={onNew} className="flex-1" size="sm">
-          <Plus className="w-4 h-4 mr-2" />
-          New Chat
+    <div className="flex flex-col h-full">
+      {/* New chat button */}
+      <div className="p-3">
+        <Button onClick={onNew} variant="outline" className="w-full justify-start gap-2 h-9 text-sm rounded-lg border-dashed" size="sm">
+          <Plus className="w-4 h-4" />
+          New chat
         </Button>
-        {onCollapse && (
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={onCollapse}
-            className="shrink-0 h-8 w-8"
-            title="Hide sidebar"
-          >
-            <PanelLeftClose className="w-4 h-4" />
-          </Button>
-        )}
       </div>
       
-      <ScrollArea className="flex-1">
-        <div className="p-2 space-y-1">
+      {/* Conversation list */}
+      <ScrollArea className="flex-1 px-2">
+        <div className="space-y-0.5 pb-2">
           {isLoading ? (
-            <div className="px-3 py-4 text-sm text-muted-foreground text-center">
+            <div className="px-3 py-8 text-xs text-muted-foreground text-center">
               Loading...
             </div>
           ) : conversations.length === 0 ? (
-            <div className="px-3 py-4 text-sm text-muted-foreground text-center">
+            <div className="px-3 py-8 text-xs text-muted-foreground text-center">
               No conversations yet
             </div>
           ) : (
@@ -59,38 +49,33 @@ export function ConversationList({
               <div
                 key={conv.id}
                 className={cn(
-                  "group relative rounded-lg transition-colors",
+                  "group relative rounded-lg transition-colors cursor-pointer",
                   currentConversation?.id === conv.id
-                    ? "bg-primary/10 border border-primary/20"
-                    : "hover:bg-muted"
+                    ? "bg-muted"
+                    : "hover:bg-muted/50"
                 )}
               >
                 <button
                   onClick={() => onSelect(conv)}
-                  className="w-full text-left px-3 py-2"
+                  className="w-full text-left px-3 py-2.5"
                 >
-                  <div className="flex items-start gap-2">
-                    <MessageCircle className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
-                    <div className="flex-1 min-w-0 overflow-hidden">
-                      <p className="text-sm font-medium truncate max-w-[160px]" title={conv.title}>
-                        {conv.title}
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {formatDistanceToNow(new Date(conv.updated_at), { addSuffix: true })}
-                      </p>
-                    </div>
-                  </div>
+                  <p className="text-sm truncate pr-6" title={conv.title}>
+                    {conv.title}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    {formatDistanceToNow(new Date(conv.updated_at), { addSuffix: true })}
+                  </p>
                 </button>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute right-1 top-1 opacity-0 group-hover:opacity-100 h-7 w-7"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 h-7 w-7 text-muted-foreground hover:text-destructive"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDelete(conv.id);
                   }}
                 >
-                  <Trash2 className="w-3 h-3 text-destructive" />
+                  <Trash2 className="w-3.5 h-3.5" />
                 </Button>
               </div>
             ))
