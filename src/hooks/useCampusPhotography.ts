@@ -3,6 +3,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
+export interface PhotoAIAnalysis {
+  scene_type?: string;
+  primary_subjects?: string[];
+  architectural_style?: string;
+  lighting?: string;
+  mood?: string;
+  dominant_colors?: string[];
+  season?: string;
+  people_present?: boolean;
+  landscape_features?: string[];
+  best_for?: string[];
+  quality_score?: number;
+  quality_notes?: string;
+}
+
 export interface CampusPhoto {
   id: string;
   tenant_id: string;
@@ -14,6 +29,8 @@ export interface CampusPhoto {
   description: string | null;
   is_active: boolean;
   created_at: string;
+  ai_analysis: PhotoAIAnalysis | null;
+  ai_analyzed_at: string | null;
 }
 
 const PHOTO_CATEGORIES = [
@@ -34,6 +51,7 @@ export function useCampusPhotography({ profileId }: { profileId: string | null }
   const [photos, setPhotos] = useState<CampusPhoto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const fetchPhotos = useCallback(async () => {
     if (!tenant?.id) return;
@@ -63,68 +81,137 @@ export function useCampusPhotography({ profileId }: { profileId: string | null }
     fetchPhotos();
   }, [fetchPhotos]);
 
-  const uploadPhoto = async (file: File, category: string, description?: string) => {
+  const uploadPhotos = async (files: File[], category: string, description?: string) => {
     if (!tenant?.id || !user?.id) {
       toast.error('You must be logged in to upload photos.');
-      return null;
+      return [];
     }
 
-    if (photos.length >= MAX_PHOTOS) {
+    const remaining = MAX_PHOTOS - photos.length;
+    if (remaining <= 0) {
       toast.error(`Maximum ${MAX_PHOTOS} photos per profile. Remove some before uploading more.`);
-      return null;
+      return [];
     }
 
-    if (!ACCEPTED_TYPES.includes(file.type)) {
-      toast.error('Only JPG, PNG, and WEBP images are accepted.');
-      return null;
+    const filesToUpload = files.slice(0, remaining);
+    if (filesToUpload.length < files.length) {
+      toast.warning(`Only uploading ${filesToUpload.length} of ${files.length} files (limit: ${MAX_PHOTOS}).`);
     }
 
-    if (file.size > MAX_FILE_SIZE) {
-      toast.error('File too large. Maximum size is 5MB.');
-      return null;
+    // Validate all files
+    for (const file of filesToUpload) {
+      if (!ACCEPTED_TYPES.includes(file.type)) {
+        toast.error(`${file.name}: Only JPG, PNG, and WEBP images are accepted.`);
+        return [];
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(`${file.name}: File too large. Maximum size is 5MB.`);
+        return [];
+      }
     }
 
     setIsUploading(true);
+    const uploaded: CampusPhoto[] = [];
+
     try {
-      const ext = file.name.split('.').pop() || 'jpg';
-      const filePath = `${tenant.id}/${profileId || 'default'}/${crypto.randomUUID()}.${ext}`;
+      for (const file of filesToUpload) {
+        const ext = file.name.split('.').pop() || 'jpg';
+        const filePath = `${tenant.id}/${profileId || 'default'}/${crypto.randomUUID()}.${ext}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('campus-photography')
-        .upload(filePath, file, { contentType: file.type, upsert: false });
+        const { error: uploadError } = await supabase.storage
+          .from('campus-photography')
+          .upload(filePath, file, { contentType: file.type, upsert: false });
 
-      if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error(`Upload error for ${file.name}:`, uploadError);
+          continue;
+        }
 
-      const { data: publicUrl } = supabase.storage
-        .from('campus-photography')
-        .getPublicUrl(filePath);
+        const { data: publicUrl } = supabase.storage
+          .from('campus-photography')
+          .getPublicUrl(filePath);
 
-      const { data, error: insertError } = await supabase
-        .from('campus_photo_samples' as any)
-        .insert({
-          tenant_id: tenant.id,
-          profile_id: profileId,
-          user_id: user.id,
-          file_name: file.name,
-          file_url: publicUrl.publicUrl,
-          photo_category: category,
-          description: description || null,
-        })
-        .select()
-        .single();
+        const { data, error: insertError } = await supabase
+          .from('campus_photo_samples' as any)
+          .insert({
+            tenant_id: tenant.id,
+            profile_id: profileId,
+            user_id: user.id,
+            file_name: file.name,
+            file_url: publicUrl.publicUrl,
+            photo_category: category,
+            description: description || null,
+          })
+          .select()
+          .single();
 
-      if (insertError) throw insertError;
+        if (insertError) {
+          console.error(`Insert error for ${file.name}:`, insertError);
+          continue;
+        }
 
-      const newPhoto = data as unknown as CampusPhoto;
-      setPhotos(prev => [newPhoto, ...prev]);
-      toast.success('Photo uploaded successfully.');
-      return newPhoto;
+        uploaded.push(data as unknown as CampusPhoto);
+      }
+
+      if (uploaded.length > 0) {
+        setPhotos(prev => [...uploaded, ...prev]);
+        toast.success(`${uploaded.length} photo${uploaded.length > 1 ? 's' : ''} uploaded successfully.`);
+
+        // Auto-analyze the new photos
+        analyzePhotos(uploaded.map(p => p.id));
+      }
+
+      return uploaded;
     } catch (e: any) {
       console.error('Upload error:', e);
-      toast.error(e.message || 'Failed to upload photo.');
-      return null;
+      toast.error(e.message || 'Failed to upload photos.');
+      return [];
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  // Legacy single upload
+  const uploadPhoto = async (file: File, category: string, description?: string) => {
+    const results = await uploadPhotos([file], category, description);
+    return results[0] || null;
+  };
+
+  const analyzePhotos = async (photoIds: string[]) => {
+    if (photoIds.length === 0) return;
+    setIsAnalyzing(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-campus-photo', {
+        body: { photoIds },
+      });
+
+      if (error) throw error;
+
+      const results = data?.results || {};
+      
+      // Update local state with analysis results
+      setPhotos(prev => prev.map(p => {
+        const result = results[p.id];
+        if (result?.success) {
+          return {
+            ...p,
+            ai_analysis: result.analysis,
+            ai_analyzed_at: new Date().toISOString(),
+          };
+        }
+        return p;
+      }));
+
+      const successCount = Object.values(results).filter((r: any) => r.success).length;
+      if (successCount > 0) {
+        toast.success(`AI analyzed ${successCount} photo${successCount > 1 ? 's' : ''}.`);
+      }
+    } catch (e: any) {
+      console.error('Analysis error:', e);
+      // Don't show error toast - analysis is background enhancement
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
@@ -133,7 +220,6 @@ export function useCampusPhotography({ profileId }: { profileId: string | null }
       const photo = photos.find(p => p.id === photoId);
       if (!photo) return;
 
-      // Delete from storage
       const urlParts = photo.file_url.split('/campus-photography/');
       if (urlParts[1]) {
         await supabase.storage.from('campus-photography').remove([urlParts[1]]);
@@ -177,9 +263,12 @@ export function useCampusPhotography({ profileId }: { profileId: string | null }
     photos,
     isLoading,
     isUploading,
+    isAnalyzing,
     uploadPhoto,
+    uploadPhotos,
     deletePhoto,
     toggleActive,
+    analyzePhotos,
     refetch: fetchPhotos,
     maxPhotos: MAX_PHOTOS,
     acceptedTypes: ACCEPTED_TYPES,

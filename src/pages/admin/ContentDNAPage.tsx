@@ -7,6 +7,7 @@ import { WebCrawlTab } from '@/components/dna/WebCrawlTab';
 import { StoryBankTab } from '@/components/dna/StoryBankTab';
 import { FactBookTab } from '@/components/dna/FactBookTab';
 import { CampusPhotographyTab } from '@/components/dna/CampusPhotographyTab';
+import { useCampusPhotoCount } from '@/hooks/useCampusPhotoCount';
 import { ContentDNASetupWizard } from '@/components/ContentDNASetupWizard';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -230,6 +231,8 @@ export default function ContentDNAPage() {
     searchSamples,
     saveAdjustments,
   } = useContentDNA({ profileId: profileIdFromUrl });
+  
+  const { campusPhotoCount } = useCampusPhotoCount(profileIdFromUrl);
   
   // Editing sample state
   const [editingSampleId, setEditingSampleId] = useState<string | null>(null);
@@ -1293,7 +1296,41 @@ export default function ContentDNAPage() {
                 </Card>
               </div>
 
-              {/* Content Breakdown */}
+              {/* Campus Photography Summary */}
+              <Card className="border-border">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Camera className="w-4 h-4" />
+                      Campus Photography
+                    </CardTitle>
+                    <Button variant="outline" size="sm" onClick={() => setActiveTab('campus-photos')}>
+                      {campusPhotoCount > 0 ? 'Manage' : 'Add Photos'}
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {campusPhotoCount > 0 ? (
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-secondary/10">
+                        <Camera className="w-5 h-5 text-secondary" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">{campusPhotoCount}</p>
+                        <p className="text-xs text-muted-foreground">Active reference photos enhancing AI image generation</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-4">
+                      <Camera className="w-8 h-8 mx-auto text-muted-foreground/30 mb-2" />
+                      <p className="text-sm text-muted-foreground">
+                        No campus photos yet. Upload photos to improve AI-generated imagery accuracy.
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Sample Types Distribution */}
                 <Card className="border-border">
