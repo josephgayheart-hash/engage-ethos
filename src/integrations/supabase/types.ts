@@ -289,6 +289,8 @@ export type Database = {
       }
       campus_photo_samples: {
         Row: {
+          ai_analysis: Json | null
+          ai_analyzed_at: string | null
           created_at: string
           description: string | null
           file_name: string
@@ -301,6 +303,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          ai_analysis?: Json | null
+          ai_analyzed_at?: string | null
           created_at?: string
           description?: string | null
           file_name: string
@@ -313,6 +317,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          ai_analysis?: Json | null
+          ai_analyzed_at?: string | null
           created_at?: string
           description?: string | null
           file_name?: string

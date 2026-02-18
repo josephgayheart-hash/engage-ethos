@@ -89,3 +89,6 @@ verify_jwt = false
 
 [functions.smart-layer-image]
 verify_jwt = false
+
+[functions.analyze-campus-photo]
+verify_jwt = false
