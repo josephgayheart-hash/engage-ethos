@@ -79,6 +79,7 @@ interface ChannelPreviewProps {
   domain?: string;
   imageEngine?: string;
   imageStyle?: string;
+  regenerateKey?: number;
 }
 
 const channelIcons: Record<Channel, React.ReactNode> = {
@@ -111,7 +112,7 @@ const channelLabels: Record<Channel, string> = {
   'case-for-care': 'Case for Support',
 };
 
-export function ChannelPreview({ channel, content, onCopy, onContentChange, onSaveToLibrary, institutionName, branding, tenantId, profileId, audience, contentSummary, goal, tone, moment, cohort, domain, imageEngine, imageStyle }: ChannelPreviewProps) {
+export function ChannelPreview({ channel, content, onCopy, onContentChange, onSaveToLibrary, institutionName, branding, tenantId, profileId, audience, contentSummary, goal, tone, moment, cohort, domain, imageEngine, imageStyle, regenerateKey }: ChannelPreviewProps) {
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState<ChannelDrafts[keyof ChannelDrafts]>(content);
@@ -130,6 +131,13 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     if (!isVisualChannel || !contentSummary || channelImageUrl || isGeneratingImage) return;
     generateChannelImage();
   }, [contentSummary, channel]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Regenerate all images when regenerateKey changes (triggered by parent)
+  useEffect(() => {
+    if (!regenerateKey || !isVisualChannel || !contentSummary) return;
+    setChannelImageUrl(null);
+    generateChannelImage();
+  }, [regenerateKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const generateChannelImage = useCallback(async () => {
     if (!contentSummary) return;
