@@ -40,7 +40,7 @@ export function ConversationList({
   const [showClearAll, setShowClearAll] = useState(false);
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full w-full overflow-hidden">
       {/* New chat button */}
       <div className="p-3">
         <Button onClick={onNew} variant="outline" className="w-full justify-start gap-2 h-9 text-sm rounded-lg border-dashed" size="sm">
@@ -65,7 +65,7 @@ export function ConversationList({
               <div
                 key={conv.id}
                 className={cn(
-                  "relative flex items-center rounded-lg transition-colors cursor-pointer",
+                  "grid grid-cols-[1fr,auto] items-center rounded-lg transition-colors cursor-pointer",
                   currentConversation?.id === conv.id
                     ? "bg-muted"
                     : "hover:bg-muted/50"
@@ -73,7 +73,7 @@ export function ConversationList({
               >
                 <button
                   onClick={() => onSelect(conv)}
-                  className="flex-1 text-left px-3 py-2.5 min-w-0"
+                  className="text-left px-3 py-2.5 overflow-hidden"
                 >
                   <p className="text-sm truncate" title={conv.title}>
                     {conv.title}
@@ -85,7 +85,7 @@ export function ConversationList({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="shrink-0 h-7 w-7 mr-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                  className="h-7 w-7 mr-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                   onClick={(e) => {
                     e.stopPropagation();
                     setDeleteTarget(conv.id);
