@@ -1,4 +1,3 @@
-import { Header } from "@/components/Header";
 import { DashboardHero } from "@/components/dashboard";
 import { ScratchpadCapture } from "@/components/dashboard/ScratchpadCapture";
 import { ResumeWorkCard } from "@/components/dashboard/ResumeWorkCard";
@@ -13,8 +12,7 @@ import { LibraryOverviewPanel } from "@/components/dashboard/LibraryOverviewPane
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <div className="bg-background">
       
       {/* Dynamic Hero Section */}
       <DashboardHero />

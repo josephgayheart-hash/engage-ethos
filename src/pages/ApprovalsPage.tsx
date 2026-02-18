@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { Header } from "@/components/Header";
 import { AdminApprovalPanel } from "@/components/library/AdminApprovalPanel";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,16 +11,14 @@ const ApprovalsPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
+      <div className="bg-background">
         <div className="container mx-auto px-4 py-12 text-center">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <div className="bg-background">
       
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto space-y-6">

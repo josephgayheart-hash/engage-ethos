@@ -56,7 +56,6 @@ import {
   Settings,
   Copy,
 } from "lucide-react";
-import { Header } from "@/components/Header";
 import { SEOHead } from "@/components/SEOHead";
 import type { InstitutionalConfig as InstitutionalConfigType, ProfileType as ConfigProfileType } from "@/types/campusvoice";
 
@@ -436,8 +435,7 @@ export default function AgencyClientsPage() {
         description="Manage your university clients and their content."
       />
 
-      <div className="min-h-screen bg-background">
-        <Header />
+      <div className="bg-background">
 
         <main className="py-8 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">

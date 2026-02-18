@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Header } from "@/components/Header";
 import { WaveBackground } from "@/components/WaveBackground";
 import { Button } from "@/components/ui/button";
 import { useLibraryCollections } from "@/hooks/useLibraryCollections";
@@ -132,8 +131,7 @@ const SharedLibrary = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <div className="bg-background">
       
       {/* Page Header with wave background */}
       <div className="relative overflow-hidden pb-12">
