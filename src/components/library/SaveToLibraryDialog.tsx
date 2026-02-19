@@ -76,6 +76,7 @@ export function SaveToLibraryDialog({
   const [isSaved, setIsSaved] = useState(false);
   const [alsoSaveToPersonal, setAlsoSaveToPersonal] = useState(false);
   const [alsoSaveToShared, setAlsoSaveToShared] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Sync defaultName when dialog opens
   useEffect(() => {
@@ -85,32 +86,39 @@ export function SaveToLibraryDialog({
   }, [open, defaultName]);
 
   const handleSave = async () => {
-    if (!name.trim()) return;
+    if (!name.trim() || isSaving) return;
     
-    const selectedChannel = channel === "none" ? undefined : channel;
-    const result = onSave(name.trim(), selectedChannel);
-    const id = result instanceof Promise ? await result : result;
-    
-    // If saving to shared library and user wants to also save to personal
-    if (libraryType === 'shared' && alsoSaveToPersonal && onSaveToPersonal) {
-      const personalResult = onSaveToPersonal(name.trim(), selectedChannel);
-      if (personalResult instanceof Promise) await personalResult;
-    }
-    
-    // If saving to personal library and user wants to also save to shared
-    if (libraryType === 'personal' && alsoSaveToShared && onSaveToShared) {
-      const sharedResult = onSaveToShared(name.trim(), selectedChannel);
-      if (sharedResult instanceof Promise) await sharedResult;
-    }
-    
-    if (id) {
-      setSavedId(id);
-      setIsSaved(true);
-    } else {
-      setIsSaved(true);
-      setTimeout(() => {
-        handleClose();
-      }, 1500);
+    setIsSaving(true);
+    try {
+      const selectedChannel = channel === "none" ? undefined : channel;
+      const result = onSave(name.trim(), selectedChannel);
+      const id = result instanceof Promise ? await result : result;
+      
+      // If saving to shared library and user wants to also save to personal
+      if (libraryType === 'shared' && alsoSaveToPersonal && onSaveToPersonal) {
+        const personalResult = onSaveToPersonal(name.trim(), selectedChannel);
+        if (personalResult instanceof Promise) await personalResult;
+      }
+      
+      // If saving to personal library and user wants to also save to shared
+      if (libraryType === 'personal' && alsoSaveToShared && onSaveToShared) {
+        const sharedResult = onSaveToShared(name.trim(), selectedChannel);
+        if (sharedResult instanceof Promise) await sharedResult;
+      }
+      
+      if (id) {
+        setSavedId(id);
+        setIsSaved(true);
+      } else {
+        setIsSaved(true);
+        setTimeout(() => {
+          handleClose();
+        }, 1500);
+      }
+    } catch (err) {
+      console.error("Save to library error:", err);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -119,6 +127,7 @@ export function SaveToLibraryDialog({
     setChannel("none");
     setSavedId(null);
     setIsSaved(false);
+    setIsSaving(false);
     setAlsoSaveToPersonal(false);
     setAlsoSaveToShared(false);
     onOpenChange(false);
@@ -227,8 +236,8 @@ export function SaveToLibraryDialog({
               <Button variant="outline" onClick={handleClose}>
                 Cancel
               </Button>
-              <Button onClick={handleSave} disabled={!name.trim()}>
-                Save
+              <Button onClick={handleSave} disabled={!name.trim() || isSaving}>
+                {isSaving ? "Saving…" : "Save"}
               </Button>
             </DialogFooter>
           </>
