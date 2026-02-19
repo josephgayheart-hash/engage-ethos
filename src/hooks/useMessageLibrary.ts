@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToolTracking } from '@/hooks/useToolTracking';
 import type { SavedMessage, LibraryFilters, SortOption } from '@/types/library';
@@ -90,11 +91,12 @@ export function useMessageLibrary() {
       createdAt: now,
     }];
 
+    const userId = user!.id;
     const { data, error } = await supabase
       .from('personal_messages')
       .insert({
         tenant_id: profile.tenant_id,
-        user_id: profile.id,
+        user_id: userId,
         title: message.title,
         content: message.content,
         channel: message.channel || 'email',
@@ -126,6 +128,7 @@ export function useMessageLibrary() {
 
     if (error) {
       console.error('Failed to add message:', error);
+      toast.error(`Failed to save: ${error.message}`);
       return null;
     }
 
