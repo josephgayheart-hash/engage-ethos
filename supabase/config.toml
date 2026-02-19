@@ -92,3 +92,6 @@ verify_jwt = false
 
 [functions.analyze-campus-photo]
 verify_jwt = false
+
+[functions.lookup-institution]
+verify_jwt = false
