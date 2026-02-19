@@ -70,6 +70,7 @@ serve(async (req) => {
                     text: `Analyze this campus photograph for an image generation reference library. Return a JSON object with these fields:
 
 {
+  "photo_category": "architecture" | "campus-life" | "landscape" | "athletics" | "traditions" | "aerial",
   "scene_type": "outdoor" | "indoor" | "aerial" | "detail",
   "primary_subjects": ["list of main subjects/elements"],
   "architectural_style": "description of architecture if visible",
@@ -84,7 +85,7 @@ serve(async (req) => {
   "quality_notes": "brief note on photo quality and usefulness for reference"
 }
 
-Return ONLY the JSON, no extra text.`
+Pick the single best photo_category based on what you see. Return ONLY the JSON, no extra text.`
                   },
                   {
                     type: 'image_url',
@@ -112,13 +113,18 @@ Return ONLY the JSON, no extra text.`
         try {
           const analysis = JSON.parse(content);
 
-          // Save to DB
+          // Save to DB (including AI-determined category)
+          const updatePayload: Record<string, any> = {
+            ai_analysis: analysis,
+            ai_analyzed_at: new Date().toISOString(),
+          };
+          if (analysis.photo_category) {
+            updatePayload.photo_category = analysis.photo_category;
+          }
+
           const { error: updateError } = await supabase
             .from('campus_photo_samples')
-            .update({
-              ai_analysis: analysis,
-              ai_analyzed_at: new Date().toISOString(),
-            })
+            .update(updatePayload)
             .eq('id', photo.id);
 
           if (updateError) {

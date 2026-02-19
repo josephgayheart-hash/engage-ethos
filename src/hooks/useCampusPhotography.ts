@@ -190,7 +190,7 @@ export function useCampusPhotography({ profileId }: { profileId: string | null }
 
       const results = data?.results || {};
       
-      // Update local state with analysis results
+      // Update local state with analysis results (including AI-assigned category)
       setPhotos(prev => prev.map(p => {
         const result = results[p.id];
         if (result?.success) {
@@ -198,6 +198,7 @@ export function useCampusPhotography({ profileId }: { profileId: string | null }
             ...p,
             ai_analysis: result.analysis,
             ai_analyzed_at: new Date().toISOString(),
+            photo_category: result.analysis.photo_category || p.photo_category,
           };
         }
         return p;

@@ -102,7 +102,6 @@ export function CampusPhotographyTab({ profileId }: CampusPhotographyTabProps) {
   } = useCampusPhotography({ profileId });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [selectedCategory, setSelectedCategory] = useState('campus-life');
   const [description, setDescription] = useState('');
   const [dragOver, setDragOver] = useState(false);
   const [expandedPhotoId, setExpandedPhotoId] = useState<string | null>(null);
@@ -114,7 +113,7 @@ export function CampusPhotographyTab({ profileId }: CampusPhotographyTabProps) {
   const handleFileSelect = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     const fileArray = Array.from(files);
-    await uploadPhotos(fileArray, selectedCategory, description || undefined);
+    await uploadPhotos(fileArray, 'uncategorized', description || undefined);
     setDescription('');
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -222,29 +221,14 @@ export function CampusPhotographyTab({ profileId }: CampusPhotographyTabProps) {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label className="text-xs">Photo Category</Label>
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="h-9 text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map(cat => (
-                    <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs">Description (optional)</Label>
-              <Input
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-                placeholder="e.g. Main quad at sunset"
-                className="h-9 text-sm"
-              />
-            </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Description (optional)</Label>
+            <Input
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              placeholder="e.g. Main quad at sunset"
+              className="h-9 text-sm"
+            />
           </div>
 
           <div
