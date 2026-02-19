@@ -319,6 +319,7 @@ serve(async (req) => {
     let campusContext = "";
     let tenantInstitutionName = ""; // fallback only — profile institutionName takes priority
     const brandColors: string[] = [];
+    let tenantType = "";
     try {
       if (tenantId) {
         const { data: tenant } = await supabaseAdmin
@@ -328,13 +329,18 @@ serve(async (req) => {
           .single();
 
         if (tenant) {
+          tenantType = tenant.tenant_type || "";
           // For agency tenants, institution_name is the agency name — don't use it for campus context
           if (tenant.tenant_type !== "agency") {
             tenantInstitutionName = tenant.institution_name;
             brandContext += `Institution: ${tenant.institution_name}.`;
           }
-          if (tenant.primary_color) addColor(brandColors, tenant.primary_color);
-          if (tenant.accent_color) addColor(brandColors, tenant.accent_color);
+          // Only use tenant-level colors if NO profile is selected
+          // (tenant colors often represent the platform, not the institution)
+          if (!profileId) {
+            if (tenant.primary_color) addColor(brandColors, tenant.primary_color);
+            if (tenant.accent_color) addColor(brandColors, tenant.accent_color);
+          }
         }
       }
 
