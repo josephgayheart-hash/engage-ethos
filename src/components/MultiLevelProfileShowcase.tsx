@@ -25,7 +25,7 @@ interface ProfileNode {
 
 const profileHierarchy: ProfileNode = {
   id: "sgu",
-  name: "Southern Gateway University",
+  name: "Midwest State University",
   type: "university",
   icon: Building2,
   hasDNA: true,
