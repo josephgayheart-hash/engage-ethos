@@ -318,12 +318,34 @@ const BrandStudioPage = () => {
       if (!canvas) return undefined;
       try {
         const dataUrl = await toPng(canvas as HTMLElement, {
-          pixelRatio: 2,
+          pixelRatio: 1.5,
           skipFonts: true,
         });
+
+        // Upload to storage instead of storing base64 in DB
+        const base64Data = dataUrl.split(",")[1];
+        const byteArray = Uint8Array.from(atob(base64Data), (c) => c.charCodeAt(0));
+        const blob = new Blob([byteArray], { type: "image/png" });
+        const filePath = `branded-images/${user?.id || "anon"}/shared-${Date.now()}.png`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("collection-assets")
+          .upload(filePath, blob, { contentType: "image/png", upsert: true });
+
+        let storedImageUrl = dataUrl; // fallback
+        if (!uploadError) {
+          const { data: publicData } = supabase.storage
+            .from("collection-assets")
+            .getPublicUrl(filePath);
+          storedImageUrl = publicData.publicUrl;
+        } else {
+          console.warn("Storage upload failed for shared library, falling back to data URL:", uploadError);
+        }
+
         const { data, error } = await supabase.from("shared_templates").insert({
           title: name,
-          content: `![Branded Image](${dataUrl})`,
+          content: `![Branded Image](${storedImageUrl})`,
+          cover_image_url: storedImageUrl,
           tenant_id: profile?.tenant_id || "",
           created_by_user_id: user?.id || "",
           created_by_name: profile ? `${profile.first_name} ${profile.last_name}` : "",
@@ -334,11 +356,13 @@ const BrandStudioPage = () => {
         }).select("id").single();
         if (error) {
           console.error("Shared library save error:", error);
+          toast.error("Failed to save to University Library.");
           return undefined;
         }
         return data?.id;
       } catch (err) {
         console.error("Shared library capture error:", err);
+        toast.error("Failed to capture image for University Library.");
         return undefined;
       }
     },
