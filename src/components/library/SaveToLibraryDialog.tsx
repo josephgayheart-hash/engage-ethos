@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Check, ExternalLink, FolderPlus, Library, Folder } from "lucide-react";
+import { Check, ExternalLink, FolderPlus, Library, Folder, Loader2 } from "lucide-react";
 import type { Channel } from "@/types/campusvoice";
 
 type LibraryType = "personal" | "shared";
@@ -237,6 +237,7 @@ export function SaveToLibraryDialog({
                 Cancel
               </Button>
               <Button onClick={handleSave} disabled={!name.trim() || isSaving}>
+                {isSaving && <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />}
                 {isSaving ? "Saving…" : "Save"}
               </Button>
             </DialogFooter>
