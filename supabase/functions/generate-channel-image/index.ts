@@ -443,7 +443,7 @@ Photography/art direction — follow the style of real university marketing imag
 - NEVER show people standing in a line, holding hands, linking arms, or posing symmetrically — these look artificial
 - NEVER generate twins, duplicates, or people who look identical — every person should be visually distinct in appearance, hairstyle, and clothing
 - Vary body language, posture, and gaze direction — people should look naturally occupied, not aware of the camera
-- CLOTHING VARIETY IS CRITICAL: Each person MUST wear a distinctly different outfit — vary garment types (t-shirt vs hoodie vs button-down vs jacket vs sweater), colors, layers, and styles. Never put multiple people in the same type and color of clothing. Mix brand-colored items with neutral everyday clothing so it looks like a real campus, not a uniform.
+- CLOTHING VARIETY IS CRITICAL: Each person MUST wear a distinctly different outfit — vary garment types (t-shirt vs hoodie vs button-down vs jacket vs sweater), colors, layers, and styles. Never put multiple people in the same type and color of clothing. Mix brand-colored items with neutral everyday clothing so it looks like a real campus, not a uniform. EXCEPTION: If the scene explicitly depicts a sports team, athletic squad, marching band, or other organized team concept, matching uniforms/jerseys are appropriate and expected.
 - Use natural light — golden hour warmth, dappled shade under trees, soft overcast — avoid flat studio lighting
 - Include environmental storytelling: backpacks, laptops, coffee cups, notebooks, lab equipment, sports gear
 - People should be diverse in a way that feels organic to a real campus — different backgrounds, ages, body types, clothing styles — without appearing curated or posed as a diversity photo
