@@ -28,7 +28,7 @@ const steps: Step[] = [
     icon: Building2,
     title: "Institutional Profile",
     description: "Select your institution or sub-unit to ground all content in your specific context.",
-    example: "Southern Gateway University",
+    example: "Midwest State University",
     color: "text-blue-600",
     bgColor: "bg-blue-500/10",
   },
@@ -158,7 +158,7 @@ export function BuilderStepsShowcase() {
           <div className="flex-1 text-center md:text-left">
             <h3 className="font-semibold text-lg mb-2">Result: Brand-Aligned Content</h3>
             <p className="text-muted-foreground text-sm">
-              The AI generates content that sounds like <strong>Southern Gateway University</strong>—not generic 
+              The AI generates content that sounds like <strong>your institution</strong>—not generic 
               higher ed speak—tailored for <strong>first-year students</strong> checking in during 
               <strong> early term</strong>, delivered across <strong>email, SMS, and portal</strong>.
             </p>
