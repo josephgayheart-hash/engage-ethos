@@ -287,11 +287,16 @@ const BrandStudioPage = () => {
           content: `![Branded Image](${imageUrl})`,
           channel: (channel as any) || "social-media",
           mode: "generated",
-          source: "other",
+          source: "brand-studio" as any,
           approved: false,
+          audience: audience as any,
+          tone: tone as any,
+          goal: goal as any,
+          notes: sceneDescription || undefined,
           institutionalProfileId: profileId,
           institutionalProfileName: institutionName,
           coverImageUrl: imageUrl,
+          tags: ["branded-image", channel || "image"].filter(Boolean),
         });
         if (result?.id) {
           setLastSavedMessageId(result.id);
@@ -352,7 +357,18 @@ const BrandStudioPage = () => {
           status: "submitted",
           source: "brand-studio",
           institutional_profile_id: profileId || null,
-          tags: ["branded-image", channel || "image"],
+          tags: ["branded-image", channel || "image"].filter(Boolean),
+          required_fields: {
+            audience: audience ? [audience] : [],
+            moment: [],
+            channel: channel ? [channel] : ["social-media"],
+          },
+          metadata: {
+            source: "brand-studio",
+            sceneDescription: sceneDescription || null,
+            tone: tone || null,
+            goal: goal || null,
+          },
         }).select("id").single();
         if (error) {
           console.error("Shared library save error:", error);
@@ -366,7 +382,7 @@ const BrandStudioPage = () => {
         return undefined;
       }
     },
-    [channel, profileId, profile, user]
+    [channel, profileId, profile, user, audience, tone, goal, sceneDescription]
   );
 
   const handleAddToExistingCollection = useCallback(

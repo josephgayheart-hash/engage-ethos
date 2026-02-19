@@ -42,7 +42,10 @@ import {
   Pencil,
   MoreHorizontal,
   X,
-  Folder
+  Folder,
+  Image,
+  Paintbrush,
+  Download
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -67,6 +70,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
+// Helper to detect branded image entries
+const isBrandedImage = (msg: { source?: string; content: string; tags?: string[] }) => {
+  return msg.source === 'brand-studio' || 
+    (msg.content.startsWith('![Branded Image]') && msg.tags?.includes('branded-image'));
+};
+
+// Helper to extract image URL from branded image markdown
+const extractBrandedImageUrl = (content: string): string | null => {
+  const match = content.match(/!\[Branded Image\]\((.+?)\)/);
+  return match?.[1] || null;
+};
 
 const channelIcons = {
   'email': Mail,
@@ -95,6 +110,8 @@ const MessageDetailPage = () => {
   const message = messages.find(m => m.id === id);
   const isJourney = useMemo(() => message ? isJourneyContent(message.content) : false, [message]);
   const journeyData = useMemo(() => isJourney && message ? parseJourneyContent(message.content) : null, [message, isJourney]);
+  const isBranded = useMemo(() => message ? isBrandedImage(message) : false, [message]);
+  const brandedImageUrl = useMemo(() => isBranded && message ? (message.coverImageUrl || extractBrandedImageUrl(message.content)) : null, [isBranded, message]);
 
   // Fetch institutional profile config if the message has one
   useEffect(() => {
@@ -268,11 +285,29 @@ const MessageDetailPage = () => {
               <BreadcrumbSeparator>
                 <ChevronRight className="h-4 w-4" />
               </BreadcrumbSeparator>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="/library">My Library</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
+              {isBranded ? (
+                <>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink asChild>
+                      <Link to="/image-generator">Image Studio</Link>
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator>
+                    <ChevronRight className="h-4 w-4" />
+                  </BreadcrumbSeparator>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink asChild>
+                      <Link to="/library">My Library</Link>
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                </>
+              ) : (
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/library">My Library</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+              )}
               <BreadcrumbSeparator>
                 <ChevronRight className="h-4 w-4" />
               </BreadcrumbSeparator>
@@ -314,7 +349,11 @@ const MessageDetailPage = () => {
                     </div>
                   ) : (
                     <div className="flex items-start gap-2 min-w-0">
-                      <ChannelIcon className="w-5 h-5 text-muted-foreground shrink-0 mt-1" />
+                      {isBranded ? (
+                        <Image className="w-5 h-5 text-primary shrink-0 mt-1" />
+                      ) : (
+                        <ChannelIcon className="w-5 h-5 text-muted-foreground shrink-0 mt-1" />
+                      )}
                       <h1 className="font-serif text-base sm:text-lg md:text-xl font-bold text-foreground break-words">
                         {message.title}
                       </h1>
@@ -366,6 +405,30 @@ const MessageDetailPage = () => {
                   </Button>
                 )}
                 
+                {isBranded && (
+                  <Button 
+                    onClick={() => navigate('/brand-studio', { state: { imageUrl: brandedImageUrl, brandColors: [], profileId: message.institutionalProfileId } })}
+                    variant="outline" 
+                    size="sm"
+                  >
+                    <Paintbrush className="w-4 h-4 mr-2" />
+                    Edit in Brand Studio
+                  </Button>
+                )}
+
+                {isBranded && brandedImageUrl && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    asChild
+                  >
+                    <a href={brandedImageUrl} download={`${message.title}.png`}>
+                      <Download className="w-4 h-4 mr-2" />
+                      Download
+                    </a>
+                  </Button>
+                )}
+
                 {isJourney && journeyData && (
                   <Button onClick={handleRemixJourney} variant="outline" size="sm">
                     <GitBranch className="w-4 h-4 mr-2" />
@@ -488,7 +551,60 @@ const MessageDetailPage = () => {
             </TabsList>
 
             <TabsContent value="content" className="space-y-6">
-              {isJourney && journeyData ? (
+              {isBranded && brandedImageUrl ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Image className="w-5 h-5 text-primary" />
+                      Branded Image
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="rounded-lg overflow-hidden border bg-muted/30">
+                      <img 
+                        src={brandedImageUrl} 
+                        alt={message.title}
+                        className="w-full h-auto max-h-[600px] object-contain"
+                      />
+                    </div>
+                    
+                    {/* Image metadata summary */}
+                    <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {message.channel && (
+                        <div className="text-center p-3 rounded-lg bg-muted/50">
+                          <p className="text-xs text-muted-foreground mb-1">Channel</p>
+                          <Badge variant="secondary" className="text-xs">{message.channel}</Badge>
+                        </div>
+                      )}
+                      {message.audience && (
+                        <div className="text-center p-3 rounded-lg bg-muted/50">
+                          <p className="text-xs text-muted-foreground mb-1">Audience</p>
+                          <Badge variant="secondary" className="text-xs">{message.audience}</Badge>
+                        </div>
+                      )}
+                      {message.tone && (
+                        <div className="text-center p-3 rounded-lg bg-muted/50">
+                          <p className="text-xs text-muted-foreground mb-1">Tone</p>
+                          <Badge variant="outline" className="text-xs">{message.tone}</Badge>
+                        </div>
+                      )}
+                      {message.institutionalProfileName && (
+                        <div className="text-center p-3 rounded-lg bg-muted/50">
+                          <p className="text-xs text-muted-foreground mb-1">Profile</p>
+                          <Badge variant="outline" className="text-xs">{message.institutionalProfileName}</Badge>
+                        </div>
+                      )}
+                    </div>
+
+                    {message.notes && (
+                      <div className="mt-4 p-4 rounded-lg bg-muted/30 border">
+                        <p className="text-xs font-medium text-muted-foreground mb-1">Scene Description</p>
+                        <p className="text-sm">{message.notes}</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ) : isJourney && journeyData ? (
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
