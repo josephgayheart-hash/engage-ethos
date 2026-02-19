@@ -1,69 +1,81 @@
 
 
-# Rebrand Super Admin Tenant for Demo Purposes
+# Auto-Fill Wizard from .edu Domain
 
-## Goal
-Transform the "Southern Gateway University" tenant into a clean "CampusVoice" admin/demo tenant, keeping all existing data (Iowa profiles, DNA, drafts, templates) intact while removing the SGU branding. No other tenants are touched.
+Add a "smart start" step to the Profile Setup Wizard where users type their institution's `.edu` domain (e.g., `lakewood.edu`). The system scrapes the homepage and about page, then uses AI to extract institutional details and pre-fills the wizard fields.
 
-## Current State
+---
 
-| Item | Details |
-|------|---------|
-| Tenant name | Southern Gateway University |
-| Tenant ID | c839f165-... |
-| Your account | Tyler Gayheart (super_admin + admin) |
-| Profiles | Southern Gateway University (root), International Center (sub-unit), The University of Iowa (root) |
-| Content DNA | SGU profile (1 sample), Iowa profile (7 samples) |
-| Other data | 7 shared templates, 38 drafts, 6 collections, 1776 usage events |
+## User Experience
 
-## What Changes
+1. A new **Step 0** appears before the current "Institution Type" step, titled **"Quick Start"**
+2. User types a `.edu` domain (e.g., `ohio.edu`) into a clean input field
+3. A "Look Up" button triggers a brief loading state (~5-10 seconds) with a progress message
+4. On success, the wizard auto-fills what it found and advances to the next step with a toast summarizing what was populated (e.g., "Found 8 fields - review and adjust as needed")
+5. User can also click "Skip - I'll fill it manually" to bypass this step entirely
 
-### 1. Rename the Tenant
-- Update `tenants.institution_name` from "Southern Gateway University" to **"CampusVoice"**
-- Optionally update colors to CampusVoice brand colors and swap the logo
+### Fields that can be auto-populated:
+- Institution name, abbreviation, mascot
+- Institution type (four-year, community college, etc.)
+- Primary/secondary/tertiary brand colors (extracted from site CSS/meta)
+- Slogans/taglines
+- Email domain (from the input itself)
+- Website URL
+- President/Provost names and titles
+- Portal/LMS names (if mentioned)
+- Logo URL (from og:image or favicon)
 
-### 2. Rebrand the SGU Profile as a Demo Profile
-- Rename the "Southern Gateway University" institutional profile to **"Demo University"** (or delete it if you prefer)
-- Rename its sub-unit "International Center" to **"Demo - International Center"** (or delete)
-- This preserves the 1 DNA sample attached to it
+---
 
-### 3. Keep Iowa Untouched
-- "The University of Iowa" profile stays exactly as-is with all 7 DNA samples and analysis
-- Perfect for demos showing real Content DNA in action
+## Technical Approach
 
-### 4. Clean Up Other Users on the Tenant
-- Heath Price and John Smith are both "invited" status users under this tenant
-- Option to remove them if they were test accounts, or leave them as demo users
+### 1. New Edge Function: `lookup-institution`
+- Accepts `{ domain: string }`
+- Uses the existing Firecrawl scrape to fetch the homepage and `/about` page (2 calls)
+- Sends the scraped content to Gemini 2.5 Flash with a structured extraction prompt
+- Returns a JSON object mapping to `InstitutionalConfig` fields
+- No API key needed from the user (uses Lovable AI + existing Firecrawl connector)
 
-### 5. Update Hardcoded References (Code)
-- Two files reference "Southern Gateway University" in showcase/marketing components (`BuilderStepsShowcase.tsx` and `MultiLevelProfileShowcase.tsx`)
-- Update these to use "Demo University" or a generic name so the landing page doesn't reference SGU
+### 2. Frontend Changes: `ProfileSetupWizard.tsx`
+- Insert a new step at index 0: "Quick Start" with a Globe icon
+- Add state for `domainInput`, `isLookingUp`, and `lookupComplete`
+- On lookup success, call `updateConfig(...)` with all extracted fields and auto-advance
+- Show extracted results summary before advancing
+- "Skip" link to go directly to the Institution Type step
 
-### 6. UI Label for Super Admin
-- The top bar and sidebar already show the tenant name dynamically
-- Once renamed to "CampusVoice", your header will show "CampusVoice" instead of "Southern Gateway University"
-- No code changes needed for this -- it reads from the database
+### 3. STEPS array update
+- Add new step: `{ id: 'quickstart', title: 'Quick Start', description: 'Enter your .edu to auto-fill', icon: Globe }`
+- Adjust step indices throughout the `renderStepContent` switch cases
 
-## What Does NOT Change
-- Ohio State University tenant and all its data
-- University of Vermont tenant and all its data
-- USC Upstate tenant and all its data
-- University of Kentucky tenant and all its data
-- McFadden + Co (agency) tenant and all its data
-- Hard Knocks University tenant
+---
 
-## Implementation Steps
+## Edge Function Detail
 
-1. **Database update** -- Rename tenant to "CampusVoice"
-2. **Database update** -- Rename SGU institutional profile to "Demo University" (and sub-unit)
-3. **Code update** -- Update 2 showcase components to remove "Southern Gateway University" references
-4. **Optional** -- Upload a CampusVoice logo to replace the SGU logo on the tenant
-5. **Optional** -- Update tenant brand colors to CampusVoice colors
-6. **Optional** -- Remove or reassign the two invited test users (Heath Price, John Smith)
+The `lookup-institution` function will:
 
-## Technical Details
+1. Scrape `https://{domain}` via `firecrawl-scrape` (reuse existing function internally, or call Firecrawl API directly)
+2. Scrape `https://{domain}/about` as a secondary source
+3. Extract metadata (og:image, theme-color meta tags) from the HTML
+4. Send combined content to **google/gemini-2.5-flash** with a prompt like:
 
-- All changes are data updates (UPDATE statements) on the `tenants` and `institutional_profiles` tables -- no schema migrations needed
-- The 2 code files with hardcoded "Southern Gateway University" are landing page showcase components, not functional logic
-- All existing drafts, templates, collections, DNA samples, and usage events remain linked by tenant_id and profile_id -- renaming does not break any references
+```text
+Extract the following institutional details from this university website content.
+Return a JSON object with these fields:
+- institutionName, institutionAbbreviation, mascot, institutionType
+- primaryColor, secondaryColor, tertiaryColor
+- slogans (array), presidentName, presidentTitle, provostName, provostTitle
+- logoUrl, portalName, lmsName
+Only include fields you can confidently extract. Use null for unknown fields.
+```
+
+5. Return the parsed JSON to the frontend
+
+---
+
+## What stays the same
+- All existing wizard steps remain fully functional
+- Users can override any auto-filled value
+- The lookup step is entirely optional (skip link always visible)
+- No new database tables needed
+- No new secrets needed (Firecrawl key already exists, Lovable AI models are built-in)
 
