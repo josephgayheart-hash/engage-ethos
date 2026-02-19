@@ -33,7 +33,9 @@ import {
   Target,
   Briefcase,
   School,
-  BookOpen
+  BookOpen,
+  Search,
+  CheckCircle2,
 } from 'lucide-react';
 
 interface ProfileSetupWizardProps {
@@ -52,6 +54,14 @@ interface WizardStep {
 }
 
 const STEPS: WizardStep[] = [
+  {
+    id: 'quickstart',
+    title: 'Quick Start',
+    agencyTitle: 'Quick Start',
+    description: 'Enter a .edu domain to auto-fill your profile',
+    agencyDescription: 'Enter the client\'s .edu domain to auto-fill',
+    icon: <Search className="w-5 h-5" />,
+  },
   {
     id: 'type',
     title: 'Institution Type',
@@ -115,6 +125,12 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  
+  // Quick Start state
+  const [domainInput, setDomainInput] = useState('');
+  const [isLookingUp, setIsLookingUp] = useState(false);
+  const [lookupComplete, setLookupComplete] = useState(false);
+  const [fieldsFound, setFieldsFound] = useState(0);
   
   // Form state
   const [config, setConfig] = useState<InstitutionalConfig>({
@@ -253,6 +269,43 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
     }
   };
 
+  const handleLookup = async () => {
+    if (!domainInput.trim()) return;
+    setIsLookingUp(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('lookup-institution', {
+        body: { domain: domainInput.trim() },
+      });
+      if (error) throw error;
+      if (!data?.success) {
+        toast({
+          title: 'Lookup failed',
+          description: data?.error || 'Could not retrieve institution data.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      // Apply extracted fields to config
+      const extracted = data.data || {};
+      updateConfig(extracted);
+      setFieldsFound(data.fieldsFound || 0);
+      setLookupComplete(true);
+      toast({
+        title: `Found ${data.fieldsFound || 0} fields`,
+        description: 'Review and adjust the auto-filled data in the following steps.',
+      });
+    } catch (err: any) {
+      console.error('Lookup error:', err);
+      toast({
+        title: 'Lookup failed',
+        description: err.message || 'Could not look up this domain.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLookingUp(false);
+    }
+  };
+
   const handleComplete = async () => {
     if (!config.institutionName?.trim()) {
       toast({
@@ -260,7 +313,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
         description: 'Please provide an institution name.',
         variant: 'destructive',
       });
-      setCurrentStep(0);
+      setCurrentStep(1);
       return;
     }
 
@@ -281,9 +334,11 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
 
   const canProceed = () => {
     switch (currentStep) {
-      case 0: // Institution Type
+      case 0: // Quick Start - always can proceed (skip or lookup)
+        return true;
+      case 1: // Institution Type
         return config.institutionType;
-      case 1: // Identity
+      case 2: // Identity
         return config.institutionName?.trim();
       default:
         return true;
@@ -321,7 +376,109 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
 
   const renderStepContent = () => {
     switch (currentStep) {
-      case 0: // Institution Type
+      case 0: // Quick Start
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-4">
+              <h3 className="text-lg font-semibold mb-2">
+                {isAgency ? 'Auto-fill from website' : 'Quick Start — Auto-fill from your website'}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Enter your institution's website domain and we'll extract your name, colors, mascot, leadership, and more.
+              </p>
+            </div>
+
+            <div className="max-w-md mx-auto space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="domainInput" className="text-sm font-medium">Website Domain</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="domainInput"
+                    placeholder="e.g., ohio.edu"
+                    value={domainInput}
+                    onChange={(e) => setDomainInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleLookup())}
+                    disabled={isLookingUp}
+                    className="flex-1"
+                  />
+                  <Button
+                    onClick={handleLookup}
+                    disabled={!domainInput.trim() || isLookingUp}
+                    className="gap-2"
+                  >
+                    {isLookingUp ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Looking up…
+                      </>
+                    ) : (
+                      <>
+                        <Search className="w-4 h-4" />
+                        Look Up
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Works best with .edu domains, but any university website works.
+                </p>
+              </div>
+
+              {isLookingUp && (
+                <div className="p-4 rounded-lg bg-muted/50 text-center space-y-2">
+                  <Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" />
+                  <p className="text-sm text-muted-foreground">Scanning website and extracting details…</p>
+                  <p className="text-xs text-muted-foreground">This usually takes 5-10 seconds</p>
+                </div>
+              )}
+
+              {lookupComplete && (
+                <div className="p-4 rounded-lg border border-primary/30 bg-primary/5 space-y-3">
+                  <div className="flex items-center gap-2 text-primary">
+                    <CheckCircle2 className="w-5 h-5" />
+                    <span className="font-medium text-sm">Found {fieldsFound} fields</span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {config.institutionName && (
+                      <p className="text-sm"><span className="text-muted-foreground">Name:</span> {config.institutionName}</p>
+                    )}
+                    {config.mascot && (
+                      <p className="text-sm"><span className="text-muted-foreground">Mascot:</span> {config.mascot}</p>
+                    )}
+                    {config.primaryColor && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-muted-foreground">Colors:</span>
+                        <div className="flex gap-1">
+                          <div className="w-5 h-5 rounded border" style={{ backgroundColor: config.primaryColor }} />
+                          {config.secondaryColor && <div className="w-5 h-5 rounded border" style={{ backgroundColor: config.secondaryColor }} />}
+                          {config.tertiaryColor && <div className="w-5 h-5 rounded border" style={{ backgroundColor: config.tertiaryColor }} />}
+                        </div>
+                      </div>
+                    )}
+                    {config.presidentName && (
+                      <p className="text-sm"><span className="text-muted-foreground">President:</span> {config.presidentName}</p>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">You can review and edit all fields in the following steps.</p>
+                </div>
+              )}
+            </div>
+
+            <div className="text-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setCurrentStep(1)}
+                className="text-muted-foreground"
+              >
+                Skip — I'll fill it in manually
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        );
+
+      case 1: // Institution Type
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
@@ -370,7 +527,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
           </div>
         );
 
-      case 1: // Identity
+      case 2: // Identity
         return (
           <div className="space-y-6">
             <div className="space-y-2">
@@ -446,7 +603,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
           </div>
         );
 
-      case 2: // Branding
+      case 3: // Branding
         return (
           <div className="space-y-6">
             {/* Logo Variants */}
@@ -683,7 +840,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
           </div>
         );
 
-      case 3: // Leadership
+      case 4: // Leadership
         return (
           <div className="space-y-6">
             <div className="p-3 bg-muted/30 rounded-lg">
@@ -772,7 +929,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
           </div>
         );
 
-      case 4: // Advancement
+      case 5: // Advancement
         return (
           <div className="space-y-6">
             <div className="p-3 bg-muted/30 rounded-lg">
@@ -940,7 +1097,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
           </div>
         );
 
-      case 5: // Contact & Systems
+      case 6: // Contact & Systems
         return (
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
@@ -1035,7 +1192,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
           </div>
         );
 
-      case 6: // Review
+      case 7: // Review
         return (
           <div className="space-y-6">
             <Card className="bg-muted/30">
