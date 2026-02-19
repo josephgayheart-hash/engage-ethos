@@ -125,7 +125,10 @@ Requirements:
 - No text, no words, no letters, no logos, no watermarks
 - Composition suitable for a 16:9 thumbnail card
 - Should feel like a high-quality university marketing photo
-- Candid, natural poses if people are present — no staged or artificial groupings`;
+- Candid, natural poses if people are present — no staged or artificial groupings
+- ANTI-CLONE RULE: If multiple people appear, every single person MUST be visually distinct — different face shapes, skin tones, hairstyles, hair colors, body types (height, build), and ages. NEVER generate twins, look-alikes, or people who could be mistaken for each other.
+- CLOTHING VARIETY: Each person MUST wear a completely different outfit — vary garment types (t-shirt vs hoodie vs button-down vs jacket vs sweater vs vest), colors, patterns, and layers. No two people should wear the same color or style.
+- Vary body language, posture, and gaze direction — people should look naturally occupied, not posing for a camera`;
 
     // Fetch campus reference photos for visual training
     let campusPhotoUrls: string[] = [];
