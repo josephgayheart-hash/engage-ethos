@@ -100,7 +100,7 @@ export function AppSidebar() {
     { title: "Admin Console", url: "/admin/console", icon: Settings },
     { title: "Content DNA Studio", url: "/admin/content-dna", icon: Sparkles },
     { title: isAgency ? "Client Settings" : "University Settings", url: isAgency ? "/agency/clients" : "/university-settings", icon: Building2 },
-    { title: "Brand Audit", url: "/brand-audit", icon: Layers },
+    // { title: "Brand Audit", url: "/brand-audit", icon: Layers }, // Hidden until ready
     ...(isAgency ? [{ title: "Analytics", url: "/agency/analytics", icon: BarChart3 }] : []),
   ];
 
