@@ -447,7 +447,7 @@ ${spec.bestPractices}
 Photography/art direction — follow the style of real university marketing imagery:
 - Capture candid, in-the-moment scenes: a student laughing mid-conversation on a quad, a professor gesturing at a whiteboard with 2-3 engaged students, a lone student studying under a tree, a small group collaborating around a laptop in a modern library
 - NEVER show people standing in a line, holding hands, linking arms, or posing symmetrically — these look artificial
-- NEVER generate twins, duplicates, or people who look identical — every person should be visually distinct in appearance, hairstyle, and clothing
+- ANTI-CLONE RULE: NEVER generate twins, duplicates, or people who look similar — every person MUST have a distinctly different face shape, skin tone, hairstyle, hair color, hair length, body type (height, build, weight), and apparent age. If you cannot make them look like completely different individuals, reduce the number of people in the scene.
 - Vary body language, posture, and gaze direction — people should look naturally occupied, not aware of the camera
 - CLOTHING VARIETY IS CRITICAL: Each person MUST wear a distinctly different outfit — vary garment types (t-shirt vs hoodie vs button-down vs jacket vs sweater), colors, layers, and styles. Never put multiple people in the same type and color of clothing. Mix brand-colored items with neutral everyday clothing so it looks like a real campus, not a uniform. EXCEPTION: If the scene explicitly depicts a sports team, athletic squad, marching band, or other organized team concept, matching uniforms/jerseys are appropriate and expected.
 - Use natural light — golden hour warmth, dappled shade under trees, soft overcast — avoid flat studio lighting
