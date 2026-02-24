@@ -21,8 +21,11 @@ import {
   Clock, Send, ExternalLink, User, CheckCircle2, XCircle, Activity,
   Plus, PhoneCall, CalendarCheck, ArrowUpDown, Eye,
   ChevronRight, Pencil, Save, X, Contact, BarChart3, Wrench,
-  FileText, MousePointerClick, Loader2
+  FileText, MousePointerClick, Loader2, Radar
 } from "lucide-react";
+import { BrandRadarTab } from "@/components/admin/BrandRadarTab";
+import { EmailTemplatesTab } from "@/components/admin/EmailTemplatesTab";
+import { SendEmailDialog } from "@/components/admin/SendEmailDialog";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -175,6 +178,14 @@ export default function CRMPage() {
   const [fromName, setFromName] = useState("Dan Simmons");
   const [sendingEmail, setSendingEmail] = useState(false);
 
+  // Top-level CRM tab
+  const [crmTab, setCrmTab] = useState("contacts");
+
+  // Tenants & users for email tools
+  const [tenants, setTenants] = useState<{ id: string; institution_name: string }[]>([]);
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [sendBulkOpen, setSendBulkOpen] = useState(false);
+
   const selected = prospects.find((p) => p.id === selectedId) || null;
 
   // ── Load Prospects ───────────────────────────────────────────────────────
@@ -224,6 +235,13 @@ export default function CRMPage() {
     loadProspects();
     loadSignups();
     loadOutreachCounts();
+    // Load tenants & users for email tools
+    supabase.from("tenants").select("id, institution_name").then(({ data }) => {
+      if (data) setTenants(data as any[]);
+    });
+    supabase.from("profiles").select("id, first_name, last_name, email, status, tenant_id, last_login_at, created_at").then(({ data }) => {
+      if (data) setAllUsers(data as any[]);
+    });
   }, [loadProspects, loadSignups, loadOutreachCounts]);
 
   // ── Load Detail Data ────────────────────────────────────────────────────
@@ -447,20 +465,34 @@ export default function CRMPage() {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="px-6 pt-6 pb-4 border-b border-border bg-background">
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3 mb-2">
           <Contact className="h-6 w-6 text-primary" />
           <div>
             <h1 className="text-2xl font-bold text-foreground">CRM</h1>
-            <p className="text-sm text-muted-foreground">Manage contacts, notes, and outreach</p>
+            <p className="text-sm text-muted-foreground">Manage contacts, notes, outreach, and tools</p>
           </div>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Card className="bg-muted/30"><CardContent className="p-3"><div className="text-xs text-muted-foreground">Contacts</div><div className="text-2xl font-bold text-foreground">{totalContacts}</div></CardContent></Card>
-          <Card className="bg-muted/30"><CardContent className="p-3"><div className="text-xs text-muted-foreground">Signed Up</div><div className="text-2xl font-bold text-foreground">{totalSignedUp}</div></CardContent></Card>
-          <Card className="bg-muted/30"><CardContent className="p-3"><div className="text-xs text-muted-foreground">Active Users</div><div className="text-2xl font-bold text-primary">{totalActive}</div></CardContent></Card>
-          <Card className="bg-muted/30"><CardContent className="p-3"><div className="text-xs text-muted-foreground">Emails Sent</div><div className="text-2xl font-bold text-foreground">{totalEmails}</div></CardContent></Card>
-        </div>
+        <Tabs value={crmTab} onValueChange={setCrmTab} className="mt-3">
+          <TabsList className="grid grid-cols-4 w-full max-w-lg">
+            <TabsTrigger value="contacts" className="gap-1.5 text-xs"><Users className="h-3 w-3" /> Contacts</TabsTrigger>
+            <TabsTrigger value="radar" className="gap-1.5 text-xs"><Radar className="h-3 w-3" /> Radar</TabsTrigger>
+            <TabsTrigger value="templates" className="gap-1.5 text-xs"><FileText className="h-3 w-3" /> Templates</TabsTrigger>
+            <TabsTrigger value="bulk-email" className="gap-1.5 text-xs"><Mail className="h-3 w-3" /> Bulk Email</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
+
+      {crmTab === "contacts" && (
+        <>
+        {/* KPIs */}
+        <div className="px-6 py-3 border-b border-border bg-background">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <Card className="bg-muted/30"><CardContent className="p-3"><div className="text-xs text-muted-foreground">Contacts</div><div className="text-2xl font-bold text-foreground">{totalContacts}</div></CardContent></Card>
+            <Card className="bg-muted/30"><CardContent className="p-3"><div className="text-xs text-muted-foreground">Signed Up</div><div className="text-2xl font-bold text-foreground">{totalSignedUp}</div></CardContent></Card>
+            <Card className="bg-muted/30"><CardContent className="p-3"><div className="text-xs text-muted-foreground">Active Users</div><div className="text-2xl font-bold text-primary">{totalActive}</div></CardContent></Card>
+            <Card className="bg-muted/30"><CardContent className="p-3"><div className="text-xs text-muted-foreground">Emails Sent</div><div className="text-2xl font-bold text-foreground">{totalEmails}</div></CardContent></Card>
+          </div>
+        </div>
 
       {/* Filters */}
       <div className="px-6 py-3 border-b border-border flex flex-wrap items-center gap-3 bg-background">
@@ -882,6 +914,43 @@ export default function CRMPage() {
           </Tabs>
         </SheetContent>
       </Sheet>
+      </>
+      )}
+
+      {crmTab === "radar" && (
+        <div className="flex-1 overflow-auto p-6">
+          <BrandRadarTab />
+        </div>
+      )}
+
+      {crmTab === "templates" && (
+        <div className="flex-1 overflow-auto p-6">
+          <EmailTemplatesTab
+            tenants={tenants}
+            users={allUsers}
+            onEmailSent={loadOutreachCounts}
+          />
+        </div>
+      )}
+
+      {crmTab === "bulk-email" && (
+        <div className="flex-1 overflow-auto p-6">
+          <div className="max-w-2xl mx-auto text-center py-10 space-y-4">
+            <Mail className="h-10 w-10 mx-auto text-primary" />
+            <h2 className="text-xl font-bold text-foreground">Send Bulk Email</h2>
+            <p className="text-sm text-muted-foreground">Send targeted emails to users filtered by tenant, status, or retention criteria.</p>
+            <Button onClick={() => setSendBulkOpen(true)}><Send className="h-4 w-4 mr-2" /> Open Email Composer</Button>
+          </div>
+        </div>
+      )}
+
+      <SendEmailDialog
+        open={sendBulkOpen}
+        onOpenChange={setSendBulkOpen}
+        tenants={tenants}
+        users={allUsers}
+        onEmailSent={loadOutreachCounts}
+      />
     </div>
   );
 }
