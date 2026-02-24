@@ -228,6 +228,49 @@ export default function ProspectOutreachPage() {
     setManualRecipients((prev) => prev.filter((r) => r.id !== id));
   };
 
+  // Quick send to a single email address without adding to list
+  const [quickSending, setQuickSending] = useState(false);
+  const handleQuickSend = async () => {
+    const email = newRecipientEmail.trim().toLowerCase();
+    if (!email || !email.includes("@")) { toast.error("Enter a valid email address"); return; }
+    if (!subject.trim()) { toast.error("Write a subject line first"); return; }
+    const content = getEmailContent();
+    if (!content.body && !content.html_body) { toast.error("Write email body first"); return; }
+
+    const name = newRecipientName.trim() || email.split("@")[0];
+    const recipient: ManualRecipient = { id: "quick", name, email };
+    const mergedSubject = replaceMergeTags(subject, recipient);
+    const mergedBody = content.body ? replaceMergeTags(content.body, recipient) : "";
+    const mergedHtml = content.html_body ? replaceMergeTags(content.html_body, recipient) : undefined;
+
+    setQuickSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-prospect-email", {
+        body: {
+          to_email: email,
+          to_name: name,
+          subject: mergedSubject,
+          body: mergedBody,
+          html_body: mergedHtml,
+          from_name: fromName,
+          from_email: fromEmail,
+          reply_to: replyTo || undefined,
+        },
+      });
+      if (error || !data?.success) {
+        toast.error(`Failed to send to ${email}`);
+      } else {
+        toast.success(`Email sent to ${name}`);
+        setNewRecipientName("");
+        setNewRecipientEmail("");
+        loadHistory();
+      }
+    } catch {
+      toast.error("Send failed");
+    }
+    setQuickSending(false);
+  };
+
   // Total recipients count
   const totalRecipients = selectedIds.size + manualRecipients.length;
 
@@ -413,8 +456,19 @@ export default function ProspectOutreachPage() {
                   type="email"
                   onKeyDown={(e) => e.key === "Enter" && addManualRecipient()}
                 />
-                <Button variant="outline" size="sm" className="h-8 px-2 shrink-0" onClick={addManualRecipient}>
+                <Button variant="outline" size="sm" className="h-8 px-2 shrink-0" onClick={addManualRecipient} title="Add to batch list">
                   <Plus className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="h-8 px-2.5 shrink-0 gap-1"
+                  onClick={handleQuickSend}
+                  disabled={quickSending || !newRecipientEmail.trim()}
+                  title="Send email now to this address"
+                >
+                  <Send className="h-3 w-3" />
+                  <span className="text-xs">{quickSending ? "..." : "Send"}</span>
                 </Button>
               </div>
               {manualRecipients.length > 0 && (
