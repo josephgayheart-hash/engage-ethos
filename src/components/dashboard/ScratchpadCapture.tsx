@@ -323,6 +323,12 @@ export function ScratchpadCapture() {
                 <Textarea
                   value={rawText}
                   onChange={(e) => handleTextChange(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      if (rawText.trim().length >= 10 && !isOrganizing) handleOrganize();
+                    }
+                  }}
                   placeholder="Drop your notes, talking points, or rough ideas here... e.g. 'Need to reach admitted students who haven't enrolled. Dean wants a 3-touch sequence by next week.'"
                   className="min-h-[80px] max-h-[160px] resize-none border-0 bg-transparent text-sm leading-relaxed focus-visible:ring-0 focus-visible:ring-offset-0 pb-12"
                   autoFocus
