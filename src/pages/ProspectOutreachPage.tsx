@@ -14,8 +14,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
-import { Search, Send, Mail, Users, Tag, RefreshCw, BarChart3 } from "lucide-react";
+import { Search, Send, Mail, Users, Tag, RefreshCw, BarChart3, Plus, X, UserPlus } from "lucide-react";
 import { format } from "date-fns";
+import { Progress } from "@/components/ui/progress";
 
 interface Prospect {
   id: string;
@@ -24,6 +25,12 @@ interface Prospect {
   contact_email: string | null;
   contact_title: string | null;
   status: string | null;
+}
+
+interface ManualRecipient {
+  id: string;
+  name: string;
+  email: string;
 }
 
 interface OutreachRecord {
@@ -43,6 +50,7 @@ const FROM_EMAILS = [
   "noreply@campusvoice.ai",
   "sales@campusvoice.ai",
   "support@campusvoice.ai",
+  "tyler@campusvoice.ai",
 ];
 
 const STATUS_FILTERS = ["all", "new", "contacted", "qualified", "demo_scheduled", "closed"];
@@ -53,12 +61,15 @@ const MERGE_TAGS = [
   { tag: "{{contact_title}}", label: "Title" },
 ];
 
-function replaceMergeTags(text: string, prospect: Prospect): string {
-  const firstName = prospect.contact_name?.split(" ")[0] || "there";
+function replaceMergeTags(text: string, prospect: Prospect | ManualRecipient): string {
+  const isProspect = "university_name" in prospect;
+  const firstName = (isProspect ? (prospect as Prospect).contact_name : (prospect as ManualRecipient).name)?.split(" ")[0] || "there";
+  const universityName = isProspect ? (prospect as Prospect).university_name : "";
+  const contactTitle = isProspect ? ((prospect as Prospect).contact_title || "") : "";
   return text
     .replace(/\{\{first_name\}\}/g, firstName)
-    .replace(/\{\{university_name\}\}/g, prospect.university_name || "")
-    .replace(/\{\{contact_title\}\}/g, prospect.contact_title || "");
+    .replace(/\{\{university_name\}\}/g, universityName)
+    .replace(/\{\{contact_title\}\}/g, contactTitle);
 }
 
 function statusBadgeVariant(status: string | null): "default" | "secondary" | "destructive" | "outline" {
@@ -82,6 +93,11 @@ export default function ProspectOutreachPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [loadingProspects, setLoadingProspects] = useState(true);
 
+  // Manual recipients
+  const [manualRecipients, setManualRecipients] = useState<ManualRecipient[]>([]);
+  const [newRecipientName, setNewRecipientName] = useState("");
+  const [newRecipientEmail, setNewRecipientEmail] = useState("");
+
   // Composer state
   const [fromName, setFromName] = useState("Dan Simmons");
   const [fromEmail, setFromEmail] = useState(FROM_EMAILS[0]);
@@ -91,6 +107,8 @@ export default function ProspectOutreachPage() {
   const [htmlContent, setHtmlContent] = useState("");
   const [plainTextContent, setPlainTextContent] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [sendProgress, setSendProgress] = useState(0);
+  const [sendTotal, setSendTotal] = useState(0);
 
   // History state
   const [history, setHistory] = useState<OutreachRecord[]>([]);
@@ -114,16 +132,41 @@ export default function ProspectOutreachPage() {
     load();
   }, []);
 
-  // Load history
+  // Load history — new columns aren't in generated types yet, so select only base columns + cast
   const loadHistory = useCallback(async () => {
     setLoadingHistory(true);
     const { data, error } = await supabase
       .from("outreach_history")
-      .select("id, to_email, to_name, subject, delivery_status, created_at, opened_at, clicked_at, bounced_at, delivered_at")
+      .select("id, subject, created_at, prospect_id, body, type")
       .eq("type", "email")
       .order("created_at", { ascending: false })
       .limit(100);
-    if (!error) setHistory((data as OutreachRecord[]) || []);
+
+    if (!error && data) {
+      // Re-fetch with raw query to get the new tracking columns
+      const ids = data.map((d: any) => d.id);
+      if (ids.length > 0) {
+        const { data: fullData } = await supabase
+          .from("outreach_history")
+          .select("*")
+          .in("id", ids)
+          .order("created_at", { ascending: false });
+        setHistory((fullData as any[] || []).map((row: any) => ({
+          id: row.id,
+          to_email: row.to_email || null,
+          to_name: row.to_name || null,
+          subject: row.subject || null,
+          delivery_status: row.delivery_status || "sent",
+          created_at: row.created_at || null,
+          opened_at: row.opened_at || null,
+          clicked_at: row.clicked_at || null,
+          bounced_at: row.bounced_at || null,
+          delivered_at: row.delivered_at || null,
+        })));
+      } else {
+        setHistory([]);
+      }
+    }
     setLoadingHistory(false);
   }, []);
 
@@ -156,6 +199,23 @@ export default function ProspectOutreachPage() {
 
   const deselectAll = () => setSelectedIds(new Set());
 
+  // Manual recipient management
+  const addManualRecipient = () => {
+    const email = newRecipientEmail.trim().toLowerCase();
+    if (!email || !email.includes("@")) { toast.error("Enter a valid email address"); return; }
+    if (manualRecipients.some((r) => r.email === email)) { toast.error("Email already added"); return; }
+    setManualRecipients((prev) => [...prev, { id: `manual-${Date.now()}`, name: newRecipientName.trim() || email.split("@")[0], email }]);
+    setNewRecipientName("");
+    setNewRecipientEmail("");
+  };
+
+  const removeManualRecipient = (id: string) => {
+    setManualRecipients((prev) => prev.filter((r) => r.id !== id));
+  };
+
+  // Total recipients count
+  const totalRecipients = selectedIds.size + manualRecipients.length;
+
   // Get body based on active tab
   const getEmailContent = () => {
     if (composerTab === "richtext") return { body: "", html_body: richTextContent };
@@ -166,51 +226,85 @@ export default function ProspectOutreachPage() {
   // Send emails
   const handleSend = async () => {
     const selectedProspects = prospects.filter((p) => selectedIds.has(p.id) && p.contact_email);
-    if (selectedProspects.length === 0) { toast.error("No prospects with email addresses selected"); return; }
+    const allRecipients = [
+      ...selectedProspects.map((p) => ({ type: "prospect" as const, data: p })),
+      ...manualRecipients.map((r) => ({ type: "manual" as const, data: r })),
+    ];
+
+    if (allRecipients.length === 0) { toast.error("No recipients selected"); return; }
     if (!subject.trim()) { toast.error("Subject is required"); return; }
     const content = getEmailContent();
     if (!content.body && !content.html_body) { toast.error("Email body is required"); return; }
 
     setIsSending(true);
+    setSendProgress(0);
+    setSendTotal(allRecipients.length);
     let successCount = 0;
     let failCount = 0;
 
-    for (const prospect of selectedProspects) {
+    for (let i = 0; i < allRecipients.length; i++) {
+      const recipient = allRecipients[i];
       try {
-        const mergedSubject = replaceMergeTags(subject, prospect);
-        const mergedBody = content.body ? replaceMergeTags(content.body, prospect) : "";
-        const mergedHtml = content.html_body ? replaceMergeTags(content.html_body, prospect) : undefined;
+        let toEmail: string;
+        let toName: string;
+        let prospectId: string;
+        let mergeTarget: Prospect | ManualRecipient;
 
-        const { data, error } = await supabase.functions.invoke("send-prospect-email", {
-          body: {
-            prospect_id: prospect.id,
-            to_email: prospect.contact_email,
-            to_name: prospect.contact_name || "",
-            subject: mergedSubject,
-            body: mergedBody,
-            html_body: mergedHtml,
-            from_name: fromName,
-            from_email: fromEmail,
-          },
-        });
+        if (recipient.type === "prospect") {
+          const p = recipient.data as Prospect;
+          toEmail = p.contact_email!;
+          toName = p.contact_name || "";
+          prospectId = p.id;
+          mergeTarget = p;
+        } else {
+          const r = recipient.data as ManualRecipient;
+          toEmail = r.email;
+          toName = r.name;
+          // For manual recipients, we create a temporary prospect ID placeholder
+          prospectId = "";
+          mergeTarget = r;
+        }
+
+        const mergedSubject = replaceMergeTags(subject, mergeTarget);
+        const mergedBody = content.body ? replaceMergeTags(content.body, mergeTarget) : "";
+        const mergedHtml = content.html_body ? replaceMergeTags(content.html_body, mergeTarget) : undefined;
+
+        const payload: Record<string, any> = {
+          to_email: toEmail,
+          to_name: toName,
+          subject: mergedSubject,
+          body: mergedBody,
+          html_body: mergedHtml,
+          from_name: fromName,
+          from_email: fromEmail,
+        };
+
+        // Only include prospect_id if it's a real prospect
+        if (prospectId) payload.prospect_id = prospectId;
+
+        const { data, error } = await supabase.functions.invoke("send-prospect-email", { body: payload });
 
         if (error || !data?.success) {
           failCount++;
-          console.error(`Failed to send to ${prospect.contact_email}:`, error || data?.error);
+          console.error(`Failed to send to ${toEmail}:`, error || data?.error);
         } else {
           successCount++;
         }
       } catch (err) {
         failCount++;
-        console.error(`Error sending to ${prospect.contact_email}:`, err);
+        console.error(`Error sending:`, err);
       }
+      setSendProgress(i + 1);
     }
 
     setIsSending(false);
-    if (successCount > 0) toast.success(`Sent ${successCount} email${successCount > 1 ? "s" : ""} successfully`);
-    if (failCount > 0) toast.error(`${failCount} email${failCount > 1 ? "s" : ""} failed to send`);
+    setSendProgress(0);
+    setSendTotal(0);
+    if (successCount > 0) toast.success(`✅ Sent ${successCount} email${successCount > 1 ? "s" : ""} successfully`);
+    if (failCount > 0) toast.error(`❌ ${failCount} email${failCount > 1 ? "s" : ""} failed to send`);
     loadHistory();
     setSelectedIds(new Set());
+    setManualRecipients([]);
   };
 
   // Insert merge tag into active editor
@@ -241,6 +335,19 @@ export default function ProspectOutreachPage() {
         </div>
       </div>
 
+      {/* Send Progress */}
+      {isSending && sendTotal > 0 && (
+        <Card className="border-primary/30">
+          <CardContent className="pt-4 pb-3 space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-medium text-foreground">Sending emails...</span>
+              <span className="text-muted-foreground">{sendProgress} / {sendTotal}</span>
+            </div>
+            <Progress value={(sendProgress / sendTotal) * 100} className="h-2" />
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Prospect Selector */}
         <Card className="lg:col-span-1">
@@ -248,10 +355,52 @@ export default function ProspectOutreachPage() {
             <CardTitle className="text-base flex items-center gap-2">
               <Users className="h-4 w-4" />
               Prospects
-              <Badge variant="secondary" className="ml-auto">{selectedIds.size} selected</Badge>
+              <Badge variant="secondary" className="ml-auto">{totalRecipients} selected</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
+            {/* Add Individual Recipient */}
+            <div className="p-3 rounded-md border border-dashed border-border bg-muted/30 space-y-2">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                <UserPlus className="h-3.5 w-3.5" />
+                Add Individual Recipient
+              </div>
+              <Input
+                placeholder="Name (optional)"
+                value={newRecipientName}
+                onChange={(e) => setNewRecipientName(e.target.value)}
+                className="h-8 text-sm"
+              />
+              <div className="flex gap-2">
+                <Input
+                  placeholder="email@example.com"
+                  value={newRecipientEmail}
+                  onChange={(e) => setNewRecipientEmail(e.target.value)}
+                  className="h-8 text-sm"
+                  type="email"
+                  onKeyDown={(e) => e.key === "Enter" && addManualRecipient()}
+                />
+                <Button variant="outline" size="sm" className="h-8 px-2 shrink-0" onClick={addManualRecipient}>
+                  <Plus className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+              {manualRecipients.length > 0 && (
+                <div className="space-y-1 pt-1">
+                  {manualRecipients.map((r) => (
+                    <div key={r.id} className="flex items-center gap-2 text-xs bg-background rounded px-2 py-1.5">
+                      <Mail className="h-3 w-3 text-muted-foreground shrink-0" />
+                      <span className="truncate font-medium">{r.name}</span>
+                      <span className="truncate text-muted-foreground">{r.email}</span>
+                      <Button variant="ghost" size="sm" className="h-5 w-5 p-0 ml-auto shrink-0" onClick={() => removeManualRecipient(r.id)}>
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Search & Filter */}
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -273,7 +422,7 @@ export default function ProspectOutreachPage() {
               <Button variant="outline" size="sm" onClick={selectAll} className="flex-1">Select All</Button>
               <Button variant="outline" size="sm" onClick={deselectAll} className="flex-1">Deselect All</Button>
             </div>
-            <div className="max-h-[400px] overflow-y-auto space-y-1 border rounded-md p-2">
+            <div className="max-h-[350px] overflow-y-auto space-y-1 border rounded-md p-2">
               {loadingProspects ? (
                 <p className="text-sm text-muted-foreground p-2">Loading...</p>
               ) : filtered.length === 0 ? (
@@ -410,17 +559,21 @@ export default function ProspectOutreachPage() {
             <div className="flex justify-end">
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button disabled={selectedIds.size === 0 || isSending} className="gap-2">
+                  <Button disabled={totalRecipients === 0 || isSending} className="gap-2">
                     <Send className="h-4 w-4" />
-                    {isSending ? "Sending..." : `Send to ${selectedIds.size} prospect${selectedIds.size !== 1 ? "s" : ""}`}
+                    {isSending ? "Sending..." : `Send to ${totalRecipients} recipient${totalRecipients !== 1 ? "s" : ""}`}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>Confirm Send</AlertDialogTitle>
                     <AlertDialogDescription>
-                      You are about to send an email to <strong>{selectedIds.size}</strong> prospect{selectedIds.size !== 1 ? "s" : ""}
-                      {" "}from <strong>{fromName} &lt;{fromEmail}&gt;</strong>. This cannot be undone.
+                      You are about to send an email to <strong>{totalRecipients}</strong> recipient{totalRecipients !== 1 ? "s" : ""}
+                      {" "}from <strong>{fromName} &lt;{fromEmail}&gt;</strong>.
+                      {manualRecipients.length > 0 && (
+                        <span className="block mt-1 text-xs">Includes {manualRecipients.length} manually added email{manualRecipients.length > 1 ? "s" : ""}.</span>
+                      )}
+                      <span className="block mt-1">This cannot be undone.</span>
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>

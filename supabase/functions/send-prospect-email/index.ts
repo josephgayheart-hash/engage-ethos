@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 interface SendEmailRequest {
-  prospect_id: string;
+  prospect_id?: string;
   to_email: string;
   to_name: string;
   subject: string;
@@ -25,9 +25,9 @@ serve(async (req) => {
   try {
     const { prospect_id, to_email, to_name, subject, body, html_body, from_name, from_email }: SendEmailRequest = await req.json();
 
-    if (!prospect_id || !to_email || !subject || (!body && !html_body)) {
+    if (!to_email || !subject || (!body && !html_body)) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Missing required fields: prospect_id, to_email, subject, body or html_body' }),
+        JSON.stringify({ success: false, error: 'Missing required fields: to_email, subject, body or html_body' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -117,36 +117,40 @@ serve(async (req) => {
     // Log the outreach to the database with tracking fields
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     
+    const insertData: Record<string, any> = {
+      type: 'email',
+      subject,
+      body,
+      html_body: html_body || finalHtml,
+      created_by_user_id: userId,
+      provider: 'resend',
+      provider_message_id: responseData.id,
+      delivery_status: 'sent',
+      from_email: senderEmail,
+      from_name: senderName,
+      to_email,
+      to_name: to_name || null,
+    };
+    if (prospect_id) insertData.prospect_id = prospect_id;
+
     const { error: insertError } = await supabase
       .from('outreach_history')
-      .insert({
-        prospect_id,
-        type: 'email',
-        subject,
-        body,
-        html_body: html_body || finalHtml,
-        created_by_user_id: userId,
-        provider: 'resend',
-        provider_message_id: responseData.id,
-        delivery_status: 'sent',
-        from_email: senderEmail,
-        from_name: senderName,
-        to_email,
-        to_name: to_name || null,
-      });
+      .insert(insertData);
 
     if (insertError) {
       console.error('Failed to log outreach:', insertError);
     }
 
-    // Update prospect status to 'contacted'
-    const { error: updateError } = await supabase
-      .from('sales_prospects')
-      .update({ status: 'contacted' })
-      .eq('id', prospect_id);
+    // Update prospect status to 'contacted' if we have a prospect_id
+    if (prospect_id) {
+      const { error: updateError } = await supabase
+        .from('sales_prospects')
+        .update({ status: 'contacted' })
+        .eq('id', prospect_id);
 
-    if (updateError) {
-      console.error('Failed to update prospect status:', updateError);
+      if (updateError) {
+        console.error('Failed to update prospect status:', updateError);
+      }
     }
 
     return new Response(
