@@ -187,6 +187,7 @@ export default function CRMPage() {
 
   // Outreach counts
   const [outreachCounts, setOutreachCounts] = useState<Map<string, { count: number; lastDate: string | null }>>(new Map());
+  const [nudgeCountsByEmail, setNudgeCountsByEmail] = useState<Map<string, { count: number; lastDate: string | null }>>(new Map());
 
   // Detail panel
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -276,21 +277,44 @@ export default function CRMPage() {
 
   // ── Load Outreach Counts ────────────────────────────────────────────────
   const loadOutreachCounts = useCallback(async () => {
-    const { data } = await supabase
+    // Get outreach_history counts by prospect_id
+    const { data: outreachData } = await supabase
       .from("outreach_history")
       .select("prospect_id, created_at")
-      .eq("type", "email")
       .order("created_at", { ascending: false });
-    if (data) {
-      const map = new Map<string, { count: number; lastDate: string | null }>();
-      (data as any[]).forEach((row) => {
+
+    // Get email_nudges counts by recipient_email
+    const { data: nudgeData } = await supabase
+      .from("email_nudges")
+      .select("recipient_email, sent_at")
+      .order("sent_at", { ascending: false });
+
+    const map = new Map<string, { count: number; lastDate: string | null }>();
+
+    // Count outreach_history by prospect_id
+    if (outreachData) {
+      (outreachData as any[]).forEach((row) => {
         if (!row.prospect_id) return;
         const existing = map.get(row.prospect_id);
-        if (existing) existing.count++;
+        if (existing) { existing.count++; }
         else map.set(row.prospect_id, { count: 1, lastDate: row.created_at });
       });
-      setOutreachCounts(map);
     }
+
+    // We'll store nudge counts keyed by email to merge later
+    const nudgeByEmail = new Map<string, { count: number; lastDate: string | null }>();
+    if (nudgeData) {
+      (nudgeData as any[]).forEach((row) => {
+        if (!row.recipient_email) return;
+        const key = row.recipient_email.toLowerCase();
+        const existing = nudgeByEmail.get(key);
+        if (existing) existing.count++;
+        else nudgeByEmail.set(key, { count: 1, lastDate: row.sent_at });
+      });
+    }
+
+    setOutreachCounts(map);
+    setNudgeCountsByEmail(nudgeByEmail);
   }, []);
 
   // ── Load Opportunities ──────────────────────────────────────────────────
@@ -581,6 +605,17 @@ export default function CRMPage() {
     return "signed_up";
   };
 
+  // Combined email count for a prospect (outreach by id + nudges by email)
+  const getTotalEmailCount = (prospectId: string, email: string | null) => {
+    const outreach = outreachCounts.get(prospectId);
+    const nudge = email ? nudgeCountsByEmail.get(email.toLowerCase()) : null;
+    const count = (outreach?.count || 0) + (nudge?.count || 0);
+    // Pick the most recent date
+    const dates = [outreach?.lastDate, nudge?.lastDate].filter(Boolean) as string[];
+    const lastDate = dates.length > 0 ? dates.sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0] : null;
+    return { count, lastDate };
+  };
+
   const filtered = prospects
     .filter((p) => {
       const q = searchQuery.toLowerCase();
@@ -609,7 +644,7 @@ export default function CRMPage() {
   const totalContacts = prospects.length;
   const totalSignedUp = prospects.filter((p) => getAppStatus(p.contact_email) !== "none").length;
   const totalActive = prospects.filter((p) => getAppStatus(p.contact_email) === "active").length;
-  const totalEmails = Array.from(outreachCounts.values()).reduce((s, v) => s + v.count, 0);
+  const totalEmails = prospects.reduce((sum, p) => sum + getTotalEmailCount(p.id, p.contact_email).count, 0);
 
   const AppStatusBadge = ({ email }: { email: string | null }) => {
     const status = getAppStatus(email);
@@ -752,7 +787,7 @@ export default function CRMPage() {
             ) : filtered.length === 0 ? (
               <TableRow><TableCell colSpan={8} className="text-center py-10 text-muted-foreground">No contacts found</TableCell></TableRow>
             ) : filtered.map((p) => {
-              const oc = outreachCounts.get(p.id);
+              const ec = getTotalEmailCount(p.id, p.contact_email);
               return (
                 <TableRow key={p.id} className={`cursor-pointer transition-colors ${selectedId === p.id ? "bg-accent" : ""}`} onClick={() => setSelectedId(p.id)}>
                   <TableCell>
@@ -771,8 +806,8 @@ export default function CRMPage() {
                   <TableCell className="text-sm">{p.university_name}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{p.contact_email || "—"}</TableCell>
                   <TableCell><span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[p.status || "new"]}`}>{(p.status || "new").replace("_", " ")}</span></TableCell>
-                  <TableCell className="text-sm text-center">{oc?.count || 0}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{oc?.lastDate ? format(new Date(oc.lastDate), "MMM d, yyyy") : "—"}</TableCell>
+                  <TableCell className="text-sm text-center">{ec.count}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{ec.lastDate ? format(new Date(ec.lastDate), "MMM d, yyyy") : "—"}</TableCell>
                   <TableCell><AppStatusBadge email={p.contact_email} /></TableCell>
                   <TableCell><ChevronRight className="h-4 w-4 text-muted-foreground" /></TableCell>
                 </TableRow>
