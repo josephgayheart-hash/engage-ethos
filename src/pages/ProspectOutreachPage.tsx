@@ -506,9 +506,16 @@ export default function ProspectOutreachPage() {
               </SelectContent>
             </Select>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={selectAll} className="flex-1">Select All</Button>
+              <Button variant="outline" size="sm" onClick={selectAll} className="flex-1">
+                Select All ({filtered.filter((p) => p.contact_email).length})
+              </Button>
               <Button variant="outline" size="sm" onClick={deselectAll} className="flex-1">Deselect All</Button>
             </div>
+            {filtered.filter((p) => !p.contact_email).length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                {filtered.filter((p) => !p.contact_email).length} prospect{filtered.filter((p) => !p.contact_email).length > 1 ? "s" : ""} missing email — add email to enable selection
+              </p>
+            )}
             <div className="max-h-[350px] overflow-y-auto space-y-1 border rounded-md p-2">
               {loadingProspects ? (
                 <p className="text-sm text-muted-foreground p-2">Loading...</p>
