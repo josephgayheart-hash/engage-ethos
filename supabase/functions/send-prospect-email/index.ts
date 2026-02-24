@@ -15,6 +15,7 @@ interface SendEmailRequest {
   html_body?: string;
   from_name?: string;
   from_email?: string;
+  reply_to?: string;
 }
 
 serve(async (req) => {
@@ -23,7 +24,7 @@ serve(async (req) => {
   }
 
   try {
-    const { prospect_id, to_email, to_name, subject, body, html_body, from_name, from_email }: SendEmailRequest = await req.json();
+    const { prospect_id, to_email, to_name, subject, body, html_body, from_name, from_email, reply_to }: SendEmailRequest = await req.json();
 
     if (!to_email || !subject || (!body && !html_body)) {
       return new Response(
@@ -99,6 +100,7 @@ serve(async (req) => {
         to: [to_email],
         subject: subject,
         html: finalHtml,
+        ...(reply_to ? { reply_to: [reply_to] } : {}),
       }),
     });
 
