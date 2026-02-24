@@ -22,7 +22,9 @@ import {
   Plus, PhoneCall, CalendarCheck, ArrowUpDown, Eye,
   ChevronRight, Pencil, Save, X, Contact, BarChart3, Wrench,
   FileText, MousePointerClick, Loader2, Radar, Target, DollarSign,
-  TrendingUp, Calendar, Inbox, AlertTriangle, UserPlus, Briefcase
+  TrendingUp, Calendar, Inbox, AlertTriangle, UserPlus, Briefcase,
+  Globe, AtSign
+
 } from "lucide-react";
 import { BrandRadarTab } from "@/components/admin/BrandRadarTab";
 import { EmailTemplatesTab } from "@/components/admin/EmailTemplatesTab";
@@ -227,6 +229,13 @@ export default function CRMPage() {
   const [searchingLinkedIn, setSearchingLinkedIn] = useState(false);
   const [linkedInResults, setLinkedInResults] = useState<{ linkedin_url: string; title: string; description?: string }[]>([]);
 
+  // Email search
+  const [searchingEmail, setSearchingEmail] = useState(false);
+  const [emailResults, setEmailResults] = useState<{ email: string; source: string; confidence: string }[]>([]);
+
+  // Website scrape
+  const [scrapingWebsite, setScrapingWebsite] = useState(false);
+
   // Top-level CRM tab
   const [crmTab, setCrmTab] = useState("contacts");
 
@@ -408,6 +417,94 @@ export default function CRMPage() {
     setEditData((d) => ({ ...d, linkedin_url: url }));
     setLinkedInResults([]);
     toast.success("LinkedIn URL set");
+  };
+
+  // ── Email Search ────────────────────────────────────────────────────────
+  const handleEmailSearch = async () => {
+    if (!editData.contact_name) {
+      toast.error("Need contact name to search");
+      return;
+    }
+    setSearchingEmail(true);
+    setEmailResults([]);
+    try {
+      const { data, error } = await supabase.functions.invoke("find-contact-email", {
+        body: {
+          name: editData.contact_name,
+          title: editData.contact_title || "",
+          institution: editData.university_name || "",
+        },
+      });
+      if (error || !data?.success) {
+        toast.error("Email search failed");
+      } else if (data.data?.length > 0) {
+        setEmailResults(data.data);
+        toast.success(`Found ${data.data.length} email(s)`);
+      } else {
+        toast.info("No email addresses found");
+      }
+    } catch {
+      toast.error("Email search failed");
+    }
+    setSearchingEmail(false);
+  };
+
+  const handleSelectEmail = (email: string) => {
+    setEditData((d) => ({ ...d, contact_email: email }));
+    setEmailResults([]);
+    toast.success("Email set");
+  };
+
+  // ── Website Scrape ──────────────────────────────────────────────────────
+  const handleWebsiteScrape = async () => {
+    const url = (editData as any).url;
+    if (!url) {
+      toast.error("Enter a website URL first");
+      return;
+    }
+    setScrapingWebsite(true);
+    try {
+      const result = await firecrawlApi.scrape(url, { formats: ['markdown'], onlyMainContent: true });
+      if (result.success && result.data) {
+        const metadata = result.data.metadata;
+        const markdown = result.data.markdown || '';
+        
+        // Extract useful info from the scraped content
+        const updates: Partial<Prospect> = {};
+        
+        // If account name is empty, use the page title
+        if (!editData.university_name && metadata?.title) {
+          updates.university_name = metadata.title.split('|')[0].split('-')[0].trim();
+        }
+        
+        // Try to extract a phone number from content
+        if (!editData.contact_phone) {
+          const phoneMatch = markdown.match(/(?:\+1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/);
+          if (phoneMatch) updates.contact_phone = phoneMatch[0];
+        }
+        
+        // Append scraped summary to notes
+        const description = metadata?.description;
+        if (description) {
+          const currentNotes = editData.notes || '';
+          updates.notes = currentNotes 
+            ? `${currentNotes}\n\n--- Website Info ---\n${description}`
+            : `--- Website Info ---\n${description}`;
+        }
+        
+        if (Object.keys(updates).length > 0) {
+          setEditData((d) => ({ ...d, ...updates }));
+          toast.success("Website info imported");
+        } else {
+          toast.info("Scraped successfully but no new info extracted");
+        }
+      } else {
+        toast.error(result.error || "Failed to scrape website");
+      }
+    } catch {
+      toast.error("Website scrape failed");
+    }
+    setScrapingWebsite(false);
   };
 
   // ── Create Opportunity ──────────────────────────────────────────────────
@@ -865,7 +962,45 @@ export default function CRMPage() {
 
                 <div className="space-y-3">
                   <InfoRow icon={User} label="Name" value={selected?.contact_name} editing={editing} field="contact_name" editData={editData} setEditData={setEditData} />
-                  <InfoRow icon={Mail} label="Email" value={selected?.contact_email} editing={editing} field="contact_email" editData={editData} setEditData={setEditData} />
+                  
+                  {/* Email field with search */}
+                  {editing ? (
+                    <div className="flex items-center gap-3">
+                      <div className="w-5 h-5 flex items-center justify-center"><AtSign className="h-4 w-4 text-muted-foreground" /></div>
+                      <div className="flex-1">
+                        <div className="text-xs text-muted-foreground mb-1">Email</div>
+                        <div className="flex gap-2">
+                          <Input value={(editData as any).contact_email || ""} onChange={(e) => setEditData((d) => ({ ...d, contact_email: e.target.value }))} className="h-8 text-sm flex-1" placeholder="email@example.com" />
+                          <Button size="sm" variant="outline" className="h-8 text-xs shrink-0" onClick={handleEmailSearch} disabled={searchingEmail}>
+                            {searchingEmail ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Search className="h-3 w-3 mr-1" /> Find</>}
+                          </Button>
+                        </div>
+                        {emailResults.length > 0 && (
+                          <div className="mt-2 space-y-1 max-h-48 overflow-y-auto border rounded-md p-2 bg-muted/30">
+                            <div className="text-xs text-muted-foreground mb-1 font-medium">Select an email:</div>
+                            {emailResults.map((r, i) => (
+                              <button
+                                key={i}
+                                onClick={() => handleSelectEmail(r.email)}
+                                className="w-full text-left p-2 rounded-md hover:bg-accent/50 transition-colors border border-transparent hover:border-border"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-medium">{r.email}</span>
+                                  <Badge variant={r.confidence === 'high' ? 'default' : 'secondary'} className="text-[10px] h-4">
+                                    {r.confidence}
+                                  </Badge>
+                                </div>
+                                <div className="text-xs text-muted-foreground truncate mt-0.5">{r.source}</div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <InfoRow icon={Mail} label="Email" value={selected?.contact_email} editing={false} field="contact_email" editData={editData} setEditData={setEditData} />
+                  )}
+
                   <InfoRow icon={Building2} label="Title" value={selected?.contact_title} editing={editing} field="contact_title" editData={editData} setEditData={setEditData} />
                   <InfoRow icon={Phone} label="Phone" value={selected?.contact_phone} editing={editing} field="contact_phone" editData={editData} setEditData={setEditData} />
                   
@@ -904,6 +1039,25 @@ export default function CRMPage() {
                   )}
 
                   <InfoRow icon={Building2} label="Account Name" value={selected?.university_name} editing={editing} field="university_name" editData={editData} setEditData={setEditData} />
+
+                  {/* Website URL field with scrape */}
+                  {editing ? (
+                    <div className="flex items-center gap-3">
+                      <div className="w-5 h-5 flex items-center justify-center"><Globe className="h-4 w-4 text-muted-foreground" /></div>
+                      <div className="flex-1">
+                        <div className="text-xs text-muted-foreground mb-1">Website</div>
+                        <div className="flex gap-2">
+                          <Input value={(editData as any).url || ""} onChange={(e) => setEditData((d) => ({ ...d, url: e.target.value }))} className="h-8 text-sm flex-1" placeholder="https://example.edu" />
+                          <Button size="sm" variant="outline" className="h-8 text-xs shrink-0" onClick={handleWebsiteScrape} disabled={scrapingWebsite}>
+                            {scrapingWebsite ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Globe className="h-3 w-3 mr-1" /> Import</>}
+                          </Button>
+                        </div>
+                        <div className="text-[10px] text-muted-foreground mt-1">Click Import to pull account info from this URL</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <InfoRow icon={Globe} label="Website" value={selected?.url} editing={false} field="url" editData={editData} setEditData={setEditData} link />
+                  )}
 
                   {editing ? (
                     <div className="flex items-center gap-3">
