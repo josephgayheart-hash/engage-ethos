@@ -23,6 +23,7 @@ import {
   Database,
   Lock,
   Mail,
+  Contact,
   LogOut,
   User,
   UserPlus,
@@ -72,11 +73,12 @@ const createItems = [
 
 const superAdminItems = [
   { title: "Super Admin Panel", url: "/admin/panel", icon: Shield },
+  { title: "CRM", url: "/admin/crm", icon: Contact },
   { title: "Admin Users", url: "/admin/users", icon: Users },
+  { title: "Prospect Outreach", url: "/admin/prospect-outreach", icon: Mail },
   { title: "QA Diagnostics", url: "/admin/qa", icon: Bug },
   { title: "Seed Data", url: "/admin/seed", icon: Database },
   { title: "Security Events", url: "/admin/security-events", icon: Lock },
-  { title: "Prospect Outreach", url: "/admin/prospect-outreach", icon: Mail },
 ];
 
 export function AppSidebar() {
