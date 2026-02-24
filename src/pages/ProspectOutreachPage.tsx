@@ -197,10 +197,22 @@ export default function ProspectOutreachPage() {
 
   const selectAll = () => {
     const filteredWithEmail = filtered.filter((p) => p.contact_email);
-    setSelectedIds(new Set(filteredWithEmail.map((p) => p.id)));
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      filteredWithEmail.forEach((p) => next.add(p.id));
+      return next;
+    });
   };
 
-  const deselectAll = () => setSelectedIds(new Set());
+  const deselectAll = () => {
+    // Only deselect currently visible/filtered prospects
+    setSelectedIds((prev) => {
+      const filteredIds = new Set(filtered.map((p) => p.id));
+      const next = new Set(prev);
+      filteredIds.forEach((id) => next.delete(id));
+      return next;
+    });
+  };
 
   // Manual recipient management
   const addManualRecipient = () => {
@@ -238,7 +250,8 @@ export default function ProspectOutreachPage() {
     ...manualRecipients,
   ];
 
-  const currentPreviewRecipient = allPreviewRecipients[previewIndex] || null;
+  const safePreviewIndex = allPreviewRecipients.length > 0 ? Math.min(previewIndex, allPreviewRecipients.length - 1) : 0;
+  const currentPreviewRecipient = allPreviewRecipients[safePreviewIndex] || null;
   const previewSubject = currentPreviewRecipient ? replaceMergeTags(subject, currentPreviewRecipient) : subject;
   const previewBody = currentPreviewRecipient ? replaceMergeTags(getPreviewHtml(), currentPreviewRecipient) : getPreviewHtml();
 
@@ -603,19 +616,19 @@ export default function ProspectOutreachPage() {
                         variant="outline"
                         size="icon"
                         className="h-7 w-7"
-                        disabled={previewIndex <= 0}
+                        disabled={safePreviewIndex <= 0}
                         onClick={() => setPreviewIndex((i) => Math.max(0, i - 1))}
                       >
                         <ChevronLeft className="h-3.5 w-3.5" />
                       </Button>
                       <span className="text-xs font-medium tabular-nums min-w-[60px] text-center">
-                        {previewIndex + 1} / {allPreviewRecipients.length}
+                        {safePreviewIndex + 1} / {allPreviewRecipients.length}
                       </span>
                       <Button
                         variant="outline"
                         size="icon"
                         className="h-7 w-7"
-                        disabled={previewIndex >= allPreviewRecipients.length - 1}
+                        disabled={safePreviewIndex >= allPreviewRecipients.length - 1}
                         onClick={() => setPreviewIndex((i) => Math.min(allPreviewRecipients.length - 1, i + 1))}
                       >
                         <ChevronRight className="h-3.5 w-3.5" />
