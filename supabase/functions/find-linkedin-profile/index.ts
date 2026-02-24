@@ -12,6 +12,33 @@ interface LinkedInResult {
   description?: string;
 }
 
+async function searchFirecrawl(apiKey: string, query: string): Promise<any[]> {
+  try {
+    const response = await fetch('https://api.firecrawl.dev/v1/search', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query,
+        limit: 5,
+        lang: 'en',
+        country: 'us',
+      }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      console.error('Firecrawl error for query:', query, data);
+      return [];
+    }
+    return data.data || [];
+  } catch (e) {
+    console.error('Fetch error for query:', query, e);
+    return [];
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -35,48 +62,48 @@ serve(async (req) => {
       );
     }
 
-    // Simple, direct search query — just name + title + institution on LinkedIn
-    const parts = [`site:linkedin.com/in`, name];
-    if (title) parts.push(title);
-    if (institution) parts.push(institution);
-    const searchQuery = parts.join(' ');
-    
-    console.log('LinkedIn search query:', searchQuery);
+    // Build multiple search queries for better coverage
+    const queries: string[] = [];
 
-    const response = await fetch('https://api.firecrawl.dev/v1/search', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: searchQuery,
-        limit: 8,
-        lang: 'en',
-        country: 'us',
-      }),
-    });
+    // Query 1: Name + LinkedIn (most broad, most likely to find)
+    queries.push(`${name} LinkedIn`);
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error('Firecrawl search error:', data);
-      return new Response(
-        JSON.stringify({ success: false, error: data.error || 'LinkedIn search failed' }),
-        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // Query 2: Name + title + LinkedIn
+    if (title) {
+      queries.push(`${name} ${title} LinkedIn`);
     }
 
-    console.log('Search results count:', data.data?.length || 0);
+    // Query 3: Name + institution + LinkedIn
+    if (institution) {
+      queries.push(`${name} ${institution} LinkedIn`);
+    }
 
-    // Filter to only LinkedIn profile URLs and return all matches
-    const results: LinkedInResult[] = (data.data || [])
-      .filter((r: any) => (r.url || '').includes('linkedin.com/in/'))
-      .map((r: any) => ({
-        linkedin_url: r.url,
-        title: r.title || '',
-        description: r.description || '',
-      }));
+    console.log('LinkedIn search queries:', queries);
+
+    // Run searches in parallel
+    const allSearchResults = await Promise.all(
+      queries.map(q => searchFirecrawl(FIRECRAWL_API_KEY, q))
+    );
+
+    // Merge and deduplicate results by URL
+    const seen = new Set<string>();
+    const results: LinkedInResult[] = [];
+
+    for (const searchResults of allSearchResults) {
+      for (const r of searchResults) {
+        const url = r.url || '';
+        if (!url.includes('linkedin.com/in/')) continue;
+        // Normalize URL for dedup
+        const normalized = url.split('?')[0].replace(/\/$/, '').toLowerCase();
+        if (seen.has(normalized)) continue;
+        seen.add(normalized);
+        results.push({
+          linkedin_url: url,
+          title: r.title || '',
+          description: r.description || '',
+        });
+      }
+    }
 
     console.log('LinkedIn profiles found:', results.length);
 
