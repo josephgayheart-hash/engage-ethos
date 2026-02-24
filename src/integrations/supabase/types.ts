@@ -628,6 +628,53 @@ export type Database = {
           },
         ]
       }
+      crm_opportunities: {
+        Row: {
+          amount: number | null
+          close_date: string | null
+          created_at: string
+          created_by_user_id: string | null
+          id: string
+          name: string
+          notes: string | null
+          prospect_id: string | null
+          stage: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number | null
+          close_date?: string | null
+          created_at?: string
+          created_by_user_id?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          prospect_id?: string | null
+          stage?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number | null
+          close_date?: string | null
+          created_at?: string
+          created_by_user_id?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          prospect_id?: string | null
+          stage?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_opportunities_prospect_id_fkey"
+            columns: ["prospect_id"]
+            isOneToOne: false
+            referencedRelation: "sales_prospects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custom_overlay_patterns: {
         Row: {
           created_at: string
