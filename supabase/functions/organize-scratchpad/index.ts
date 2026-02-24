@@ -49,7 +49,7 @@ serve(async (req) => {
                 properties: {
                   intent: {
                     type: "string",
-                    enum: ["email_campaign", "sms_outreach", "journey_design", "content_review", "strategy_planning", "meeting_notes", "general_idea"],
+                    enum: ["email_campaign", "sms_outreach", "journey_design", "content_review", "strategy_planning", "meeting_notes", "general_idea", "visual_content", "brand_design"],
                     description: "The detected communication intent"
                   },
                   hint_text: {
@@ -58,8 +58,8 @@ serve(async (req) => {
                   },
                   icon: {
                     type: "string",
-                    enum: ["mail", "message-square", "map", "search", "lightbulb", "clipboard", "sparkles"],
-                    description: "Icon name to display: mail for email, message-square for SMS, map for journeys, search for analysis, lightbulb for ideas, clipboard for notes, sparkles for general"
+                    enum: ["mail", "message-square", "map", "search", "lightbulb", "clipboard", "sparkles", "image"],
+                    description: "Icon name to display: mail for email, message-square for SMS, map for journeys, search for analysis, lightbulb for ideas, clipboard for notes, sparkles for general, image for visuals/graphics/branding"
                   }
                 },
                 required: ["intent", "hint_text", "icon"],
@@ -133,8 +133,12 @@ Provide 2-5 specific CampusVoice tool recommendations. For each, use this exact 
 
 ### [Action Title]
 [1-2 sentence description of what to do and why, grounding in research when possible]
-**Tool:** [exactly one of: builder, evaluator, journey, copywriter, analyzer, content-dna, profiles]
+**Tool:** [exactly one of: builder, evaluator, journey, copywriter, analyzer, content-dna, profiles, image-studio, brand-studio]
 **Why:** [1 sentence connecting to the user's specific notes]
+
+Tool descriptions for visual tools:
+- image-studio: For generating on-brand campus visuals across 19 formats (social stories, digital signage, viewbooks, banners, etc.). Recommend when the user mentions needing images, graphics, social media visuals, photos, or visual content.
+- brand-studio: For overlaying logos, headlines, and brand elements onto existing images. Recommend when the user mentions branding photos, adding logos, creating branded graphics, or compositing text onto images.
 
 IMPORTANT RULES for recommendations:
 - If the user does NOT have an active Content DNA voice profile, ALWAYS include a recommendation to set one up using **Tool:** content-dna. Frame it as: "Your messaging will be stronger when grounded in your institution's authentic voice. Upload a few content samples to extract your DNA."

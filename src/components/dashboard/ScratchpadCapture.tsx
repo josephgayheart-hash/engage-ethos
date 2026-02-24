@@ -6,7 +6,7 @@ import {
   Sparkles, ChevronDown, ChevronUp, X, Mail, MessageSquare,
   Map, Search, Lightbulb, Clipboard, ArrowRight, Loader2,
   PenTool, FileText, MessageCircle, Globe, Dna, Building2,
-  Users, Target, Radio, Clock, Palette,
+  Users, Target, Radio, Clock, Palette, Image, Paintbrush,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -40,6 +40,7 @@ const iconMap: Record<string, React.ElementType> = {
   lightbulb: Lightbulb,
   clipboard: Clipboard,
   sparkles: Sparkles,
+  image: Image,
 };
 
 // Tool routing
@@ -51,6 +52,8 @@ const toolRoutes: Record<string, { path: string; label: string; color: string; i
   analyzer: { path: "/web-content-analyzer", label: "Content Analyzer", color: "bg-accent text-accent-foreground", icon: Globe },
   "content-dna": { path: "/admin/content-dna", label: "Content DNA Studio", color: "bg-accent text-accent-foreground", icon: Dna },
   profiles: { path: "/settings", label: "Institutional Profiles", color: "bg-primary text-primary-foreground", icon: Building2 },
+  "image-studio": { path: "/image-generator", label: "Image Studio", color: "bg-accent text-accent-foreground", icon: Image },
+  "brand-studio": { path: "/brand-studio", label: "Brand It Studio", color: "bg-primary text-primary-foreground", icon: Paintbrush },
 };
 
 // Icons for extracted field labels
@@ -473,7 +476,7 @@ export function ScratchpadCapture() {
                   p: ({ children }) => {
                     const text = extractText(children);
                     // Tool recommendation card
-                    const exactToolMatch = text.match(/^(?:Tool|Recommended Tool):\s*(builder|evaluator|journey|copywriter|analyzer|content-dna|profiles)$/i);
+                    const exactToolMatch = text.match(/^(?:Tool|Recommended Tool):\s*(builder|evaluator|journey|copywriter|analyzer|content-dna|profiles|image-studio|brand-studio)$/i);
                     if (exactToolMatch) {
                       const toolKey = exactToolMatch[1].toLowerCase();
                       const route = toolRoutes[toolKey];
