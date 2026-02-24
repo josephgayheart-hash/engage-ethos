@@ -310,7 +310,7 @@ export default function CRMPage() {
     setCreatingOpp(true);
     const { error } = await supabase.from("crm_opportunities" as any).insert({
       name: newOppName.trim(),
-      prospect_id: newOppProspectId || null,
+      prospect_id: newOppProspectId && newOppProspectId !== "none" ? newOppProspectId : null,
       stage: "discovery",
       created_by_user_id: user?.id,
     } as any);
@@ -1056,7 +1056,7 @@ export default function CRMPage() {
                     <Select value={newOppProspectId} onValueChange={setNewOppProspectId}>
                       <SelectTrigger className="h-9"><SelectValue placeholder="Link to account..." /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value="none">None</SelectItem>
                         {prospects.map((p) => (
                           <SelectItem key={p.id} value={p.id}>{p.university_name} — {p.contact_name || "No contact"}</SelectItem>
                         ))}
