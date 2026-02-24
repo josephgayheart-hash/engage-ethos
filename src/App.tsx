@@ -69,6 +69,7 @@ import UniversityDashboardPage from "./pages/UniversityDashboardPage";
 import ToolsPage from "./pages/ToolsPage";
 import ImageGeneratorPage from "./pages/ImageGeneratorPage";
 import BrandStudioPage from "./pages/BrandStudioPage";
+import ProspectOutreachPage from "./pages/ProspectOutreachPage";
 
 const queryClient = new QueryClient();
 
@@ -193,6 +194,7 @@ const AppRoutes = () => (
         <Route path="/admin/security-events" element={<SecurityEventsPage />} />
         <Route path="/admin/institution/:id" element={<InstitutionDetailPage />} />
         <Route path="/admin/user/:id" element={<UserDetailPage />} />
+        <Route path="/admin/prospect-outreach" element={<ProspectOutreachPage />} />
       </Route>
     </Route>
 

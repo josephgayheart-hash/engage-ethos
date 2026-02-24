@@ -22,6 +22,7 @@ import {
   Bug,
   Database,
   Lock,
+  Mail,
   LogOut,
   User,
   UserPlus,
@@ -75,6 +76,7 @@ const superAdminItems = [
   { title: "QA Diagnostics", url: "/admin/qa", icon: Bug },
   { title: "Seed Data", url: "/admin/seed", icon: Database },
   { title: "Security Events", url: "/admin/security-events", icon: Lock },
+  { title: "Prospect Outreach", url: "/admin/prospect-outreach", icon: Mail },
 ];
 
 export function AppSidebar() {

@@ -6,7 +6,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, svix-id, svix-timestamp, svix-signature",
 };
 
-// Resend webhook event types
 interface ResendWebhookEvent {
   type: string;
   created_at: string;
@@ -16,22 +15,12 @@ interface ResendWebhookEvent {
     to: string[];
     subject: string;
     created_at?: string;
-    // For bounce events
-    bounce?: {
-      message: string;
-      type: string;
-    };
-    // For click events
-    click?: {
-      link: string;
-      timestamp: string;
-      userAgent: string;
-    };
+    bounce?: { message: string; type: string };
+    click?: { link: string; timestamp: string; userAgent: string };
   };
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -53,7 +42,6 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Map Resend event types to our delivery status
     const eventTypeMap: Record<string, { status: string; field: string }> = {
       "email.sent": { status: "sent", field: "sent_at" },
       "email.delivered": { status: "delivered", field: "delivered_at" },
@@ -72,7 +60,9 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Find the email nudge by provider_message_id
+    const timestamp = new Date().toISOString();
+
+    // --- Try email_nudges first ---
     const { data: nudge, error: findError } = await supabase
       .from("email_nudges")
       .select("id, events")
@@ -82,56 +72,76 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (findError) {
       console.error("Error finding email nudge:", findError);
-      return new Response(JSON.stringify({ error: findError.message }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
     }
 
-    if (!nudge) {
-      console.log("No matching email_nudge found for:", emailId);
-      return new Response(JSON.stringify({ received: true, matched: false }), {
+    if (nudge) {
+      const existingEvents = (nudge.events as Record<string, any>) || {};
+      const updatedEvents = { ...existingEvents, [event.type]: { timestamp, data: event.data } };
+      const updateData: Record<string, any> = {
+        delivery_status: mapping.status,
+        last_event_at: timestamp,
+        events: updatedEvents,
+        [mapping.field]: timestamp,
+      };
+
+      const { error: updateError } = await supabase
+        .from("email_nudges")
+        .update(updateData)
+        .eq("id", nudge.id);
+
+      if (updateError) {
+        console.error("Error updating email nudge:", updateError);
+      } else {
+        console.log(`Updated email_nudges ${emailId} with status: ${mapping.status}`);
+      }
+
+      return new Response(JSON.stringify({ received: true, updated: true, table: "email_nudges", status: mapping.status }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Build update object
-    const timestamp = new Date().toISOString();
-    const existingEvents = (nudge.events as Record<string, any>) || {};
-    const updatedEvents = {
-      ...existingEvents,
-      [event.type]: {
-        timestamp,
-        data: event.data,
-      },
-    };
+    // --- Fallback: try outreach_history ---
+    const { data: outreach, error: outreachFindError } = await supabase
+      .from("outreach_history")
+      .select("id, events")
+      .eq("provider", "resend")
+      .eq("provider_message_id", emailId)
+      .maybeSingle();
 
-    const updateData: Record<string, any> = {
-      delivery_status: mapping.status,
-      last_event_at: timestamp,
-      events: updatedEvents,
-    };
+    if (outreachFindError) {
+      console.error("Error finding outreach_history:", outreachFindError);
+    }
 
-    // Set the specific timestamp field
-    updateData[mapping.field] = timestamp;
+    if (outreach) {
+      const existingEvents = (outreach.events as Record<string, any>) || {};
+      const updatedEvents = { ...existingEvents, [event.type]: { timestamp, data: event.data } };
+      const updateData: Record<string, any> = {
+        delivery_status: mapping.status,
+        last_event_at: timestamp,
+        events: updatedEvents,
+        [mapping.field]: timestamp,
+      };
 
-    const { error: updateError } = await supabase
-      .from("email_nudges")
-      .update(updateData)
-      .eq("id", nudge.id);
+      const { error: updateError } = await supabase
+        .from("outreach_history")
+        .update(updateData)
+        .eq("id", outreach.id);
 
-    if (updateError) {
-      console.error("Error updating email nudge:", updateError);
-      return new Response(JSON.stringify({ error: updateError.message }), {
-        status: 500,
+      if (updateError) {
+        console.error("Error updating outreach_history:", updateError);
+      } else {
+        console.log(`Updated outreach_history ${emailId} with status: ${mapping.status}`);
+      }
+
+      return new Response(JSON.stringify({ received: true, updated: true, table: "outreach_history", status: mapping.status }), {
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    console.log(`Updated email ${emailId} with status: ${mapping.status}`);
-
-    return new Response(JSON.stringify({ received: true, updated: true, status: mapping.status }), {
+    console.log("No matching record found for:", emailId);
+    return new Response(JSON.stringify({ received: true, matched: false }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

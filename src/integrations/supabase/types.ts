@@ -1300,32 +1300,74 @@ export type Database = {
       outreach_history: {
         Row: {
           body: string
+          bounced_at: string | null
+          clicked_at: string | null
           created_at: string | null
           created_by_user_id: string | null
+          delivered_at: string | null
+          delivery_status: string | null
+          events: Json | null
+          from_email: string | null
+          from_name: string | null
+          html_body: string | null
           id: string
+          last_event_at: string | null
+          opened_at: string | null
           prospect_id: string | null
+          provider: string | null
+          provider_message_id: string | null
           sent_at: string | null
           subject: string | null
+          to_email: string | null
+          to_name: string | null
           type: string
         }
         Insert: {
           body: string
+          bounced_at?: string | null
+          clicked_at?: string | null
           created_at?: string | null
           created_by_user_id?: string | null
+          delivered_at?: string | null
+          delivery_status?: string | null
+          events?: Json | null
+          from_email?: string | null
+          from_name?: string | null
+          html_body?: string | null
           id?: string
+          last_event_at?: string | null
+          opened_at?: string | null
           prospect_id?: string | null
+          provider?: string | null
+          provider_message_id?: string | null
           sent_at?: string | null
           subject?: string | null
+          to_email?: string | null
+          to_name?: string | null
           type: string
         }
         Update: {
           body?: string
+          bounced_at?: string | null
+          clicked_at?: string | null
           created_at?: string | null
           created_by_user_id?: string | null
+          delivered_at?: string | null
+          delivery_status?: string | null
+          events?: Json | null
+          from_email?: string | null
+          from_name?: string | null
+          html_body?: string | null
           id?: string
+          last_event_at?: string | null
+          opened_at?: string | null
           prospect_id?: string | null
+          provider?: string | null
+          provider_message_id?: string | null
           sent_at?: string | null
           subject?: string | null
+          to_email?: string | null
+          to_name?: string | null
           type?: string
         }
         Relationships: [
