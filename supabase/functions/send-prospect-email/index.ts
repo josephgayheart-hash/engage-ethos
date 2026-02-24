@@ -12,7 +12,9 @@ interface SendEmailRequest {
   to_name: string;
   subject: string;
   body: string;
+  html_body?: string;
   from_name?: string;
+  from_email?: string;
 }
 
 serve(async (req) => {
@@ -21,11 +23,11 @@ serve(async (req) => {
   }
 
   try {
-    const { prospect_id, to_email, to_name, subject, body, from_name }: SendEmailRequest = await req.json();
+    const { prospect_id, to_email, to_name, subject, body, html_body, from_name, from_email }: SendEmailRequest = await req.json();
 
-    if (!prospect_id || !to_email || !subject || !body) {
+    if (!prospect_id || !to_email || !subject || (!body && !html_body)) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Missing required fields: prospect_id, to_email, subject, body' }),
+        JSON.stringify({ success: false, error: 'Missing required fields: prospect_id, to_email, subject, body or html_body' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -52,13 +54,36 @@ serve(async (req) => {
       userId = user?.id || null;
     }
 
-    // Convert plain text body to HTML with line breaks preserved
-    const htmlBody = body
-      .split('\n')
-      .map((line: string) => line.trim() === '' ? '<br>' : `<p style="margin: 0 0 10px 0;">${line}</p>`)
-      .join('');
-
     const senderName = from_name || 'Dan Simmons';
+    const senderEmail = from_email || 'noreply@campusvoice.ai';
+
+    // If html_body is provided, use it directly; otherwise convert plain text to HTML
+    let finalHtml: string;
+    if (html_body) {
+      finalHtml = html_body;
+    } else {
+      const htmlBody = body
+        .split('\n')
+        .map((line: string) => line.trim() === '' ? '<br>' : `<p style="margin: 0 0 10px 0;">${line}</p>`)
+        .join('');
+
+      finalHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          ${htmlBody}
+          <br>
+          <p style="margin: 0;">Best,</p>
+          <p style="margin: 5px 0 0 0; font-weight: 600;">${senderName}</p>
+          <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Co-Founder, CampusVoice.ai</p>
+        </body>
+        </html>
+      `;
+    }
 
     console.log('Sending email to:', to_email);
     console.log('Subject:', subject);
@@ -70,26 +95,10 @@ serve(async (req) => {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        // Use your verified domain when available, fallback to onboarding domain for testing
-        from: `${senderName} <noreply@campusvoice.ai>`,
+        from: `${senderName} <${senderEmail}>`,
         to: [to_email],
         subject: subject,
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-          </head>
-          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-            ${htmlBody}
-            <br>
-            <p style="margin: 0;">Best,</p>
-            <p style="margin: 5px 0 0 0; font-weight: 600;">${senderName}</p>
-            <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Co-Founder, CampusVoice.ai</p>
-          </body>
-          </html>
-        `,
+        html: finalHtml,
       }),
     });
 
@@ -105,7 +114,7 @@ serve(async (req) => {
 
     console.log('Email sent:', responseData);
 
-    // Log the outreach to the database
+    // Log the outreach to the database with tracking fields
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     
     const { error: insertError } = await supabase
@@ -115,12 +124,19 @@ serve(async (req) => {
         type: 'email',
         subject,
         body,
+        html_body: html_body || finalHtml,
         created_by_user_id: userId,
+        provider: 'resend',
+        provider_message_id: responseData.id,
+        delivery_status: 'sent',
+        from_email: senderEmail,
+        from_name: senderName,
+        to_email,
+        to_name: to_name || null,
       });
 
     if (insertError) {
       console.error('Failed to log outreach:', insertError);
-      // Don't fail the request if logging fails
     }
 
     // Update prospect status to 'contacted'
