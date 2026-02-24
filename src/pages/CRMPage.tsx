@@ -22,7 +22,7 @@ import {
   Plus, PhoneCall, CalendarCheck, ArrowUpDown, Eye,
   ChevronRight, Pencil, Save, X, Contact, BarChart3, Wrench,
   FileText, MousePointerClick, Loader2, Radar, Target, DollarSign,
-  TrendingUp, Calendar
+  TrendingUp, Calendar, Inbox, AlertTriangle, UserPlus, Briefcase
 } from "lucide-react";
 import { BrandRadarTab } from "@/components/admin/BrandRadarTab";
 import { EmailTemplatesTab } from "@/components/admin/EmailTemplatesTab";
@@ -112,6 +112,26 @@ interface ToolUsageItem {
   tool_name: string;
   action: string;
   created_at: string;
+}
+
+interface OnboardingRequest {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string | null;
+  title: string | null;
+  institution_name_input: string | null;
+  department: string | null;
+  notes: string | null;
+  referral_source: string | null;
+  request_type: string;
+  request_status: string;
+  submitted_at: string;
+  reviewed_at: string | null;
+  agency_name: string | null;
+  agency_website: string | null;
+  estimated_client_count: number | null;
 }
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -221,6 +241,13 @@ export default function CRMPage() {
   const [newOppContactIds, setNewOppContactIds] = useState<string[]>([]);
   const [creatingOpp, setCreatingOpp] = useState(false);
 
+  // Requests
+  const [requests, setRequests] = useState<OnboardingRequest[]>([]);
+  const [loadingRequests, setLoadingRequests] = useState(false);
+  const [requestFilter, setRequestFilter] = useState("all");
+  const [requestTypeFilter, setRequestTypeFilter] = useState("all");
+  const [requestSearch, setRequestSearch] = useState("");
+
   const selected = prospects.find((p) => p.id === selectedId) || null;
 
   // ── Load Prospects ───────────────────────────────────────────────────────
@@ -277,7 +304,52 @@ export default function CRMPage() {
     setLoadingOpportunities(false);
   }, []);
 
-  // ── LinkedIn Search ─────────────────────────────────────────────────────
+  // ── Load Requests ───────────────────────────────────────────────────────
+  const loadRequests = useCallback(async () => {
+    setLoadingRequests(true);
+    const { data, error } = await supabase
+      .from("onboarding_requests")
+      .select("*")
+      .order("submitted_at", { ascending: false });
+    if (!error && data) setRequests(data as any[]);
+    setLoadingRequests(false);
+  }, []);
+
+  // ── Convert Request to Prospect ─────────────────────────────────────────
+  const handleConvertToProspect = async (req: OnboardingRequest) => {
+    // Check for duplicate
+    const existing = prospects.find(p => p.contact_email?.toLowerCase() === req.email.toLowerCase());
+    if (existing) {
+      toast.error(`A contact with email ${req.email} already exists (${existing.contact_name || existing.university_name})`);
+      return;
+    }
+    const { error } = await supabase.from("sales_prospects").insert({
+      university_name: req.institution_name_input || req.agency_name || "Unknown",
+      contact_name: `${req.first_name} ${req.last_name}`,
+      contact_email: req.email,
+      contact_title: req.title || null,
+      contact_phone: req.phone || null,
+      url: req.agency_website || "",
+      status: "new",
+      notes: `Converted from ${req.request_type} request on ${format(new Date(), "yyyy-MM-dd")}. ${req.notes || ""}`.trim(),
+    });
+    if (error) toast.error("Failed to create contact");
+    else {
+      toast.success("Contact created from request");
+      loadProspects();
+    }
+  };
+
+  // ── Update Request Status ───────────────────────────────────────────────
+  const handleUpdateRequestStatus = async (id: string, status: string) => {
+    const { error } = await supabase
+      .from("onboarding_requests")
+      .update({ request_status: status, reviewed_at: new Date().toISOString(), reviewed_by_admin_user_id: user?.id } as any)
+      .eq("id", id);
+    if (error) toast.error("Failed to update status");
+    else { toast.success("Status updated"); loadRequests(); }
+  };
+
   const handleLinkedInSearch = async () => {
     if (!editData.contact_name || !editData.university_name) {
       toast.error("Need contact name and account name to search");
@@ -346,6 +418,7 @@ export default function CRMPage() {
     loadSignups();
     loadOutreachCounts();
     loadOpportunities();
+    loadRequests();
     // Load tenants & users for email tools
     supabase.from("tenants").select("id, institution_name").then(({ data }) => {
       if (data) setTenants(data as any[]);
@@ -353,7 +426,7 @@ export default function CRMPage() {
     supabase.from("profiles").select("id, first_name, last_name, email, status, tenant_id, last_login_at, created_at").then(({ data }) => {
       if (data) setAllUsers(data as any[]);
     });
-  }, [loadProspects, loadSignups, loadOutreachCounts, loadOpportunities]);
+  }, [loadProspects, loadSignups, loadOutreachCounts, loadOpportunities, loadRequests]);
 
   // ── Load Detail Data ────────────────────────────────────────────────────
   const loadDetailData = useCallback(async (prospectId: string, contactEmail: string | null) => {
@@ -571,6 +644,33 @@ export default function CRMPage() {
     return acc;
   }, {});
 
+  // Duplicate detection: build a map of emails that appear in multiple places
+  const getDuplicateInfo = (email: string | null) => {
+    if (!email) return null;
+    const lower = email.toLowerCase();
+    const dupes: string[] = [];
+    // Check if there's an onboarding request with same email
+    const matchingReq = requests.find(r => r.email.toLowerCase() === lower);
+    if (matchingReq) dupes.push(`${matchingReq.request_type} request`);
+    // Check if there's another prospect with same email
+    const matchingProspects = prospects.filter(p => p.contact_email?.toLowerCase() === lower);
+    if (matchingProspects.length > 1) dupes.push(`${matchingProspects.length} contacts`);
+    return dupes.length > 0 ? dupes : null;
+  };
+
+  // Filtered requests
+  const filteredRequests = requests.filter((r) => {
+    const q = requestSearch.toLowerCase();
+    const matchesSearch = !q ||
+      `${r.first_name} ${r.last_name}`.toLowerCase().includes(q) ||
+      r.email.toLowerCase().includes(q) ||
+      r.institution_name_input?.toLowerCase().includes(q) ||
+      r.agency_name?.toLowerCase().includes(q);
+    const matchesStatus = requestFilter === "all" || r.request_status === requestFilter;
+    const matchesType = requestTypeFilter === "all" || r.request_type === requestTypeFilter;
+    return matchesSearch && matchesStatus && matchesType;
+  });
+
   // ── Render ──────────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col h-full">
@@ -584,8 +684,16 @@ export default function CRMPage() {
           </div>
         </div>
         <Tabs value={crmTab} onValueChange={setCrmTab} className="mt-3">
-          <TabsList className="grid grid-cols-5 w-full max-w-2xl">
+          <TabsList className="grid grid-cols-6 w-full max-w-3xl">
             <TabsTrigger value="contacts" className="gap-1.5 text-xs"><Users className="h-3 w-3" /> Contacts</TabsTrigger>
+            <TabsTrigger value="requests" className="gap-1.5 text-xs relative">
+              <Inbox className="h-3 w-3" /> Requests
+              {requests.filter(r => r.request_status === "submitted").length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[10px] rounded-full h-4 w-4 flex items-center justify-center">
+                  {requests.filter(r => r.request_status === "submitted").length}
+                </span>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="opportunities" className="gap-1.5 text-xs"><Target className="h-3 w-3" /> Opportunities</TabsTrigger>
             <TabsTrigger value="radar" className="gap-1.5 text-xs"><Radar className="h-3 w-3" /> Radar</TabsTrigger>
             <TabsTrigger value="templates" className="gap-1.5 text-xs"><FileText className="h-3 w-3" /> Templates</TabsTrigger>
@@ -647,7 +755,19 @@ export default function CRMPage() {
               const oc = outreachCounts.get(p.id);
               return (
                 <TableRow key={p.id} className={`cursor-pointer transition-colors ${selectedId === p.id ? "bg-accent" : ""}`} onClick={() => setSelectedId(p.id)}>
-                  <TableCell><div><div className="font-medium text-foreground">{p.contact_name || "—"}</div>{p.contact_title && <div className="text-xs text-muted-foreground">{p.contact_title}</div>}</div></TableCell>
+                  <TableCell>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-medium text-foreground">{p.contact_name || "—"}</span>
+                        {getDuplicateInfo(p.contact_email) && (
+                          <span title={`Duplicate: ${getDuplicateInfo(p.contact_email)!.join(", ")}`}>
+                            <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
+                          </span>
+                        )}
+                      </div>
+                      {p.contact_title && <div className="text-xs text-muted-foreground">{p.contact_title}</div>}
+                    </div>
+                  </TableCell>
                   <TableCell className="text-sm">{p.university_name}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{p.contact_email || "—"}</TableCell>
                   <TableCell><span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[p.status || "new"]}`}>{(p.status || "new").replace("_", " ")}</span></TableCell>
@@ -1204,6 +1324,129 @@ export default function CRMPage() {
             users={allUsers}
             onEmailSent={loadOutreachCounts}
           />
+        </div>
+      )}
+
+      {crmTab === "requests" && (
+        <div className="flex-1 overflow-auto flex flex-col">
+          {/* Request KPIs */}
+          <div className="px-6 py-3 border-b border-border bg-background">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <Card className="bg-muted/30"><CardContent className="p-3"><div className="text-xs text-muted-foreground">Total Requests</div><div className="text-2xl font-bold text-foreground">{requests.length}</div></CardContent></Card>
+              <Card className="bg-muted/30"><CardContent className="p-3"><div className="text-xs text-muted-foreground">Pending Review</div><div className="text-2xl font-bold text-primary">{requests.filter(r => r.request_status === "submitted").length}</div></CardContent></Card>
+              <Card className="bg-muted/30"><CardContent className="p-3"><div className="text-xs text-muted-foreground">University</div><div className="text-2xl font-bold text-foreground">{requests.filter(r => r.request_type === "university").length}</div></CardContent></Card>
+              <Card className="bg-muted/30"><CardContent className="p-3"><div className="text-xs text-muted-foreground">Agency</div><div className="text-2xl font-bold text-foreground">{requests.filter(r => r.request_type === "agency").length}</div></CardContent></Card>
+            </div>
+          </div>
+
+          {/* Filters */}
+          <div className="px-6 py-3 border-b border-border flex flex-wrap items-center gap-3 bg-background">
+            <div className="relative flex-1 min-w-[200px] max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="Search requests..." value={requestSearch} onChange={(e) => setRequestSearch(e.target.value)} className="pl-9 h-9" />
+            </div>
+            <Select value={requestFilter} onValueChange={setRequestFilter}>
+              <SelectTrigger className="w-[150px] h-9"><SelectValue placeholder="Status" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="submitted">Submitted</SelectItem>
+                <SelectItem value="approved">Approved</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={requestTypeFilter} onValueChange={setRequestTypeFilter}>
+              <SelectTrigger className="w-[150px] h-9"><SelectValue placeholder="Type" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="university">University</SelectItem>
+                <SelectItem value="agency">Agency</SelectItem>
+              </SelectContent>
+            </Select>
+            <span className="text-sm text-muted-foreground">{filteredRequests.length} requests</span>
+          </div>
+
+          {/* Requests Table */}
+          <ScrollArea className="flex-1">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Institution / Agency</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Submitted</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loadingRequests ? (
+                  <TableRow><TableCell colSpan={7} className="text-center py-10 text-muted-foreground">Loading...</TableCell></TableRow>
+                ) : filteredRequests.length === 0 ? (
+                  <TableRow><TableCell colSpan={7} className="text-center py-10 text-muted-foreground">No requests found</TableCell></TableRow>
+                ) : filteredRequests.map((r) => {
+                  const hasDuplicate = prospects.some(p => p.contact_email?.toLowerCase() === r.email.toLowerCase());
+                  return (
+                    <TableRow key={r.id}>
+                      <TableCell>
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-medium text-foreground">{r.first_name} {r.last_name}</span>
+                            {hasDuplicate && (
+                              <span title="Already exists as a contact">
+                                <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
+                              </span>
+                            )}
+                          </div>
+                          {r.title && <div className="text-xs text-muted-foreground">{r.title}</div>}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-xs gap-1">
+                          {r.request_type === "agency" ? <Briefcase className="h-3 w-3" /> : <Building2 className="h-3 w-3" />}
+                          {r.request_type}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm">{r.institution_name_input || r.agency_name || "—"}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{r.email}</TableCell>
+                      <TableCell>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
+                          r.request_status === "submitted" ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300" :
+                          r.request_status === "approved" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300" :
+                          "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                        }`}>
+                          {r.request_status}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{format(new Date(r.submitted_at), "MMM d, yyyy")}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          {r.request_status === "submitted" && (
+                            <>
+                              <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleUpdateRequestStatus(r.id, "approved")}>
+                                <CheckCircle2 className="h-3 w-3 mr-1" /> Approve
+                              </Button>
+                              <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => handleUpdateRequestStatus(r.id, "rejected")}>
+                                <XCircle className="h-3 w-3 mr-1" /> Reject
+                              </Button>
+                            </>
+                          )}
+                          {!hasDuplicate && (
+                            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleConvertToProspect(r)}>
+                              <UserPlus className="h-3 w-3 mr-1" /> Convert
+                            </Button>
+                          )}
+                          {hasDuplicate && (
+                            <Badge variant="secondary" className="text-xs">Already a contact</Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         </div>
       )}
 
