@@ -1,41 +1,103 @@
 
 
-## Brand Studio: Standalone Entry with Image Upload and Generation
+## Prospect Mass Email Tool (Super Admin Only)
 
-Currently, Brand Studio shows a dead-end "go to Image Studio" message when opened directly (no brand colors in navigation state). This plan replaces that empty state with a self-service onboarding flow.
-
----
-
-### What Changes
-
-**Replace the empty state in `src/pages/BrandStudioPage.tsx`** (lines 424-438) with a welcoming starter panel that lets the user:
-
-1. **Select an institutional profile** -- a dropdown of their configured profiles (uses `useInstitutionalProfiles`). Selecting one auto-loads brand colors, logos, and institution name into the editor state.
-
-2. **Choose an image source** (two options):
-   - **Upload your own image** -- a file input (drag-and-drop zone) that accepts PNG/JPG/WebP. The uploaded file is converted to a local object URL and used as the canvas base image.
-   - **Generate with AI** -- a text input for a scene description plus a "Generate" button that calls the existing `generate-channel-image` edge function, then loads the result onto the canvas.
-
-3. **Start with a blank canvas** -- a button that skips the image entirely and opens the editor with just a solid-color background (using the profile's primary color). This already works today once brand colors are set.
-
-Once the user picks a profile and provides an image (or chooses blank), the component sets the internal state (brandColors, logoUrl, etc.) and the full editor appears -- no navigation required.
+Build a dedicated mass email composer for CampusVoice prospects, restricted to the Super Admin section. Features three composition modes (Rich Text via TipTap, raw HTML with live preview, and Plain Text), prospect selection with filters, merge tags, and full send/open/click tracking.
 
 ---
 
-### Technical Details
+### 1. Database Migration
 
-#### File: `src/pages/BrandStudioPage.tsx`
+Add tracking columns to the existing `outreach_history` table so webhook events can update delivery status:
 
-- Import `useInstitutionalProfiles` and add it to the component.
-- Add local state: `localImageUrl`, `selectedProfileId`, `isGenerating`, `generatePrompt`.
-- Replace the `if (brandColors.length === 0)` block with a new `StartPanel` section:
-  - Profile selector (`Select` dropdown from profiles list)
-  - Three-option layout: Upload Image | Generate Image | Blank Canvas
-  - Upload uses a hidden file input + styled drop zone
-  - Generate uses an input + button calling `generate-channel-image`
-- When user completes the starter flow, derive `brandColors`, `logoUrl`, `logoUrls`, `institutionName` from the selected profile's config and set them into component state (convert these from `const` destructuring to `useState` so they can be overridden).
-- Refactor the existing destructured state variables (`imageUrl`, `brandColors`, etc.) to use `useState` with the navigation state as initial values, so they can be updated by the starter flow.
+```text
+ALTER TABLE outreach_history
+  ADD COLUMN IF NOT EXISTS provider TEXT DEFAULT 'resend',
+  ADD COLUMN IF NOT EXISTS provider_message_id TEXT,
+  ADD COLUMN IF NOT EXISTS delivery_status TEXT DEFAULT 'sent',
+  ADD COLUMN IF NOT EXISTS html_body TEXT,
+  ADD COLUMN IF NOT EXISTS from_email TEXT,
+  ADD COLUMN IF NOT EXISTS from_name TEXT,
+  ADD COLUMN IF NOT EXISTS to_email TEXT,
+  ADD COLUMN IF NOT EXISTS to_name TEXT,
+  ADD COLUMN IF NOT EXISTS delivered_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS opened_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS clicked_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS bounced_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS last_event_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS events JSONB DEFAULT '{}';
+```
 
-#### No new files, no database changes, no new edge functions.
+No new tables needed -- we extend the existing one.
 
-The existing `generate-channel-image` function already accepts `channel`, `contentSummary`, `tenantId`, and `profileId` -- the starter panel will call it with channel "social-media" and the user's prompt as the content summary.
+---
+
+### 2. Update Edge Function: `send-prospect-email`
+
+- Accept optional `html_body` and `from_email` fields in the request.
+- If `html_body` is provided, use it as the email body directly (for HTML-mode and Rich Text-mode sends). Otherwise fall back to converting plain text as it does today.
+- Allow `from_email` to choose sender address (e.g. `sales@campusvoice.ai`, `noreply@campusvoice.ai`).
+- Store `provider_message_id` (Resend's returned ID), `to_email`, `to_name`, `from_email`, `from_name`, `html_body`, and `delivery_status` in the `outreach_history` insert.
+- Return the Resend message ID in the response.
+
+---
+
+### 3. Update Edge Function: `resend-webhook`
+
+After the existing `email_nudges` lookup, add a fallback check against `outreach_history.provider_message_id`. If a match is found, update the same tracking fields (`delivery_status`, `opened_at`, `clicked_at`, `bounced_at`, `delivered_at`, `last_event_at`, `events`).
+
+---
+
+### 4. New Page: `src/pages/ProspectOutreachPage.tsx`
+
+A two-panel layout with a send history section at the bottom:
+
+**Left Panel -- Prospect Selector:**
+- Fetch all `sales_prospects` on mount
+- Search by name / university
+- Filter by status (new, contacted, qualified, etc.)
+- Select all / deselect all checkboxes
+- Show selected count
+
+**Right Panel -- Email Composer:**
+- From name input (default: "Dan Simmons")
+- From email dropdown: `noreply@campusvoice.ai`, `sales@campusvoice.ai`, `support@campusvoice.ai`
+- Subject line input with character counter
+- Three composition tabs:
+  - **Rich Text** -- uses the existing `RichTextEditor` (TipTap) component
+  - **HTML Code** -- a `textarea` for raw HTML alongside a live preview rendered in a sandboxed `iframe`
+  - **Plain Text** -- a simple `textarea`
+- Merge tag insert buttons: `{{first_name}}`, `{{university_name}}`, `{{contact_title}}`
+- "Send to X prospects" button with a confirmation dialog
+- On send: loops through selected prospects, calls `send-prospect-email` for each, replaces merge tags with prospect data
+
+**Bottom Panel -- Send History:**
+- Table of recent `outreach_history` entries with columns: Recipient, Subject, Sent At, Status (badge: Sent/Delivered/Opened/Clicked/Bounced)
+- Aggregate stats bar: Total Sent, Delivered %, Opened %, Clicked %
+- Auto-refreshes via polling or realtime subscription
+
+---
+
+### 5. Routing and Navigation (Super Admin Only)
+
+**`src/App.tsx`:**
+- Add `ProspectOutreachPage` import
+- Add route `/admin/prospect-outreach` inside the existing `RequireSuperAdmin` route group (lines 188-196)
+
+**`src/components/app-shell/AppSidebar.tsx`:**
+- Add `{ title: "Prospect Outreach", url: "/admin/prospect-outreach", icon: Mail }` to the `superAdminItems` array
+- Import `Mail` from lucide-react (already imported in other files)
+
+---
+
+### Files Changed Summary
+
+| File | Change |
+|------|--------|
+| Database migration | Add tracking columns to `outreach_history` |
+| `supabase/functions/send-prospect-email/index.ts` | Accept `html_body`, `from_email`; store tracking fields |
+| `supabase/functions/resend-webhook/index.ts` | Also update `outreach_history` on webhook events |
+| `src/pages/ProspectOutreachPage.tsx` | New page -- composer + prospect list + history |
+| `src/App.tsx` | Add route in super admin section |
+| `src/components/app-shell/AppSidebar.tsx` | Add nav link in super admin section |
+
