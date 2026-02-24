@@ -101,6 +101,7 @@ export default function ProspectOutreachPage() {
   // Composer state
   const [fromName, setFromName] = useState("Dan Simmons");
   const [fromEmail, setFromEmail] = useState(FROM_EMAILS[0]);
+  const [replyTo, setReplyTo] = useState("tyler@campusvoice.ai");
   const [subject, setSubject] = useState("");
   const [composerTab, setComposerTab] = useState("richtext");
   const [richTextContent, setRichTextContent] = useState("");
@@ -277,6 +278,7 @@ export default function ProspectOutreachPage() {
           html_body: mergedHtml,
           from_name: fromName,
           from_email: fromEmail,
+          reply_to: replyTo || undefined,
         };
 
         // Only include prospect_id if it's a real prospect
@@ -465,7 +467,7 @@ export default function ProspectOutreachPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-1.5">
                 <Label className="text-xs">From Name</Label>
                 <Input value={fromName} onChange={(e) => setFromName(e.target.value)} />
@@ -480,6 +482,15 @@ export default function ProspectOutreachPage() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Reply-To</Label>
+                <Input
+                  value={replyTo}
+                  onChange={(e) => setReplyTo(e.target.value)}
+                  placeholder="reply-to@example.com"
+                  type="email"
+                />
               </div>
             </div>
 
