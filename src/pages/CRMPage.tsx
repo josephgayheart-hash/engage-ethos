@@ -21,11 +21,13 @@ import {
   Clock, Send, ExternalLink, User, CheckCircle2, XCircle, Activity,
   Plus, PhoneCall, CalendarCheck, ArrowUpDown, Eye,
   ChevronRight, Pencil, Save, X, Contact, BarChart3, Wrench,
-  FileText, MousePointerClick, Loader2, Radar
+  FileText, MousePointerClick, Loader2, Radar, Target, DollarSign,
+  TrendingUp, Calendar
 } from "lucide-react";
 import { BrandRadarTab } from "@/components/admin/BrandRadarTab";
 import { EmailTemplatesTab } from "@/components/admin/EmailTemplatesTab";
 import { SendEmailDialog } from "@/components/admin/SendEmailDialog";
+import { firecrawlApi } from "@/lib/api/firecrawl";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -43,6 +45,18 @@ interface Prospect {
   url: string;
   discovered_at: string | null;
   updated_at: string | null;
+}
+
+interface Opportunity {
+  id: string;
+  prospect_id: string | null;
+  name: string;
+  stage: string;
+  amount: number | null;
+  close_date: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface OutreachRecord {
@@ -102,6 +116,15 @@ interface ToolUsageItem {
 // ── Constants ──────────────────────────────────────────────────────────────
 
 const STATUS_OPTIONS = ["new", "contacted", "qualified", "demo_scheduled", "closed"];
+const OPPORTUNITY_STAGES = [
+  { value: "discovery", label: "Discovery", color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300" },
+  { value: "qualification", label: "Qualification", color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300" },
+  { value: "demo", label: "Demo", color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300" },
+  { value: "proposal", label: "Proposal", color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300" },
+  { value: "negotiation", label: "Negotiation", color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300" },
+  { value: "closed_won", label: "Closed Won", color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300" },
+  { value: "closed_lost", label: "Closed Lost", color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300" },
+];
 const NOTE_TYPES = [
   { value: "general", label: "General", icon: StickyNote },
   { value: "call", label: "Call", icon: PhoneCall },
@@ -178,6 +201,9 @@ export default function CRMPage() {
   const [fromName, setFromName] = useState("Dan Simmons");
   const [sendingEmail, setSendingEmail] = useState(false);
 
+  // LinkedIn search
+  const [searchingLinkedIn, setSearchingLinkedIn] = useState(false);
+
   // Top-level CRM tab
   const [crmTab, setCrmTab] = useState("contacts");
 
@@ -185,6 +211,13 @@ export default function CRMPage() {
   const [tenants, setTenants] = useState<{ id: string; institution_name: string }[]>([]);
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [sendBulkOpen, setSendBulkOpen] = useState(false);
+
+  // Opportunities
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [loadingOpportunities, setLoadingOpportunities] = useState(false);
+  const [newOppName, setNewOppName] = useState("");
+  const [newOppProspectId, setNewOppProspectId] = useState("");
+  const [creatingOpp, setCreatingOpp] = useState(false);
 
   const selected = prospects.find((p) => p.id === selectedId) || null;
 
@@ -231,10 +264,81 @@ export default function CRMPage() {
     }
   }, []);
 
+  // ── Load Opportunities ──────────────────────────────────────────────────
+  const loadOpportunities = useCallback(async () => {
+    setLoadingOpportunities(true);
+    const { data, error } = await supabase
+      .from("crm_opportunities" as any)
+      .select("*")
+      .order("updated_at", { ascending: false });
+    if (!error && data) setOpportunities(data as any[]);
+    setLoadingOpportunities(false);
+  }, []);
+
+  // ── LinkedIn Search ─────────────────────────────────────────────────────
+  const handleLinkedInSearch = async () => {
+    if (!editData.contact_name || !editData.university_name) {
+      toast.error("Need contact name and account name to search");
+      return;
+    }
+    setSearchingLinkedIn(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("find-linkedin-profile", {
+        body: {
+          name: editData.contact_name,
+          title: editData.contact_title || "",
+          institution: editData.university_name,
+        },
+      });
+      if (error || !data?.success) {
+        toast.error("LinkedIn search failed");
+      } else if (data.data?.linkedin_url) {
+        setEditData((d) => ({ ...d, linkedin_url: data.data.linkedin_url }));
+        toast.success(`Found profile (${data.data.confidence} confidence)`);
+      } else {
+        toast.info("No LinkedIn profile found");
+      }
+    } catch {
+      toast.error("LinkedIn search failed");
+    }
+    setSearchingLinkedIn(false);
+  };
+
+  // ── Create Opportunity ──────────────────────────────────────────────────
+  const handleCreateOpportunity = async () => {
+    if (!newOppName.trim()) return;
+    setCreatingOpp(true);
+    const { error } = await supabase.from("crm_opportunities" as any).insert({
+      name: newOppName.trim(),
+      prospect_id: newOppProspectId || null,
+      stage: "discovery",
+      created_by_user_id: user?.id,
+    } as any);
+    if (error) toast.error("Failed to create opportunity");
+    else {
+      toast.success("Opportunity created");
+      setNewOppName("");
+      setNewOppProspectId("");
+      loadOpportunities();
+    }
+    setCreatingOpp(false);
+  };
+
+  // ── Update Opportunity Stage ────────────────────────────────────────────
+  const handleUpdateOppStage = async (oppId: string, newStage: string) => {
+    const { error } = await supabase
+      .from("crm_opportunities" as any)
+      .update({ stage: newStage, updated_at: new Date().toISOString() } as any)
+      .eq("id", oppId);
+    if (error) toast.error("Failed to update stage");
+    else loadOpportunities();
+  };
+
   useEffect(() => {
     loadProspects();
     loadSignups();
     loadOutreachCounts();
+    loadOpportunities();
     // Load tenants & users for email tools
     supabase.from("tenants").select("id, institution_name").then(({ data }) => {
       if (data) setTenants(data as any[]);
@@ -242,7 +346,7 @@ export default function CRMPage() {
     supabase.from("profiles").select("id, first_name, last_name, email, status, tenant_id, last_login_at, created_at").then(({ data }) => {
       if (data) setAllUsers(data as any[]);
     });
-  }, [loadProspects, loadSignups, loadOutreachCounts]);
+  }, [loadProspects, loadSignups, loadOutreachCounts, loadOpportunities]);
 
   // ── Load Detail Data ────────────────────────────────────────────────────
   const loadDetailData = useCallback(async (prospectId: string, contactEmail: string | null) => {
@@ -473,11 +577,12 @@ export default function CRMPage() {
           </div>
         </div>
         <Tabs value={crmTab} onValueChange={setCrmTab} className="mt-3">
-          <TabsList className="grid grid-cols-4 w-full max-w-lg">
+          <TabsList className="grid grid-cols-5 w-full max-w-2xl">
             <TabsTrigger value="contacts" className="gap-1.5 text-xs"><Users className="h-3 w-3" /> Contacts</TabsTrigger>
+            <TabsTrigger value="opportunities" className="gap-1.5 text-xs"><Target className="h-3 w-3" /> Opportunities</TabsTrigger>
             <TabsTrigger value="radar" className="gap-1.5 text-xs"><Radar className="h-3 w-3" /> Radar</TabsTrigger>
             <TabsTrigger value="templates" className="gap-1.5 text-xs"><FileText className="h-3 w-3" /> Templates</TabsTrigger>
-            <TabsTrigger value="bulk-email" className="gap-1.5 text-xs"><Mail className="h-3 w-3" /> Bulk Email</TabsTrigger>
+            <TabsTrigger value="bulk-email" className="gap-1.5 text-xs"><Mail className="h-3 w-3" /> Compose</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
@@ -517,7 +622,7 @@ export default function CRMPage() {
           <TableHeader>
             <TableRow>
               <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("contact_name")}><div className="flex items-center gap-1">Name <ArrowUpDown className="h-3 w-3" /></div></TableHead>
-              <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("university_name")}><div className="flex items-center gap-1">University <ArrowUpDown className="h-3 w-3" /></div></TableHead>
+              <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("university_name")}><div className="flex items-center gap-1">Account Name <ArrowUpDown className="h-3 w-3" /></div></TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Emails</TableHead>
@@ -566,10 +671,10 @@ export default function CRMPage() {
           <Tabs value={detailTab} onValueChange={setDetailTab} className="flex-1 flex flex-col overflow-hidden">
             <TabsList className="mx-5 mt-2 grid grid-cols-5">
               <TabsTrigger value="overview" className="text-xs">Overview</TabsTrigger>
-              <TabsTrigger value="compose" className="text-xs">Compose</TabsTrigger>
               <TabsTrigger value="timeline" className="text-xs">Timeline</TabsTrigger>
               <TabsTrigger value="emails" className="text-xs">Emails</TabsTrigger>
               <TabsTrigger value="usage" className="text-xs">Usage</TabsTrigger>
+              <TabsTrigger value="compose" className="text-xs">Compose</TabsTrigger>
             </TabsList>
 
             {/* ── Overview Tab ─────────────────────────────────── */}
@@ -593,8 +698,26 @@ export default function CRMPage() {
                   <InfoRow icon={Mail} label="Email" value={selected?.contact_email} editing={editing} field="contact_email" editData={editData} setEditData={setEditData} />
                   <InfoRow icon={Building2} label="Title" value={selected?.contact_title} editing={editing} field="contact_title" editData={editData} setEditData={setEditData} />
                   <InfoRow icon={Phone} label="Phone" value={selected?.contact_phone} editing={editing} field="contact_phone" editData={editData} setEditData={setEditData} />
-                  <InfoRow icon={Linkedin} label="LinkedIn" value={selected?.linkedin_url} editing={editing} field="linkedin_url" editData={editData} setEditData={setEditData} link />
-                  <InfoRow icon={Building2} label="University" value={selected?.university_name} editing={editing} field="university_name" editData={editData} setEditData={setEditData} />
+                  
+                  {/* LinkedIn field with search */}
+                  {editing ? (
+                    <div className="flex items-center gap-3">
+                      <div className="w-5 h-5 flex items-center justify-center"><Linkedin className="h-4 w-4 text-muted-foreground" /></div>
+                      <div className="flex-1">
+                        <div className="text-xs text-muted-foreground mb-1">LinkedIn</div>
+                        <div className="flex gap-2">
+                          <Input value={(editData as any).linkedin_url || ""} onChange={(e) => setEditData((d) => ({ ...d, linkedin_url: e.target.value }))} className="h-8 text-sm flex-1" placeholder="https://linkedin.com/in/..." />
+                          <Button size="sm" variant="outline" className="h-8 text-xs shrink-0" onClick={handleLinkedInSearch} disabled={searchingLinkedIn}>
+                            {searchingLinkedIn ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Search className="h-3 w-3 mr-1" /> Find</>}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <InfoRow icon={Linkedin} label="LinkedIn" value={selected?.linkedin_url} editing={false} field="linkedin_url" editData={editData} setEditData={setEditData} link />
+                  )}
+
+                  <InfoRow icon={Building2} label="Account Name" value={selected?.university_name} editing={editing} field="university_name" editData={editData} setEditData={setEditData} />
 
                   {editing ? (
                     <div className="flex items-center gap-3">
@@ -917,6 +1040,100 @@ export default function CRMPage() {
       </>
       )}
 
+      {crmTab === "opportunities" && (
+        <div className="flex-1 overflow-auto p-6">
+          <div className="max-w-5xl mx-auto space-y-6">
+            {/* Create Opportunity */}
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-end gap-3">
+                  <div className="flex-1">
+                    <label className="text-xs text-muted-foreground mb-1 block">Opportunity Name</label>
+                    <Input value={newOppName} onChange={(e) => setNewOppName(e.target.value)} placeholder="e.g. Enterprise Deal - State University" className="h-9" />
+                  </div>
+                  <div className="w-[200px]">
+                    <label className="text-xs text-muted-foreground mb-1 block">Account</label>
+                    <Select value={newOppProspectId} onValueChange={setNewOppProspectId}>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="Link to account..." /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">None</SelectItem>
+                        {prospects.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>{p.university_name} — {p.contact_name || "No contact"}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button onClick={handleCreateOpportunity} disabled={!newOppName.trim() || creatingOpp} className="h-9">
+                    {creatingOpp ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Plus className="h-4 w-4 mr-1" /> Create</>}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Pipeline Board */}
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {OPPORTUNITY_STAGES.map((stage) => {
+                const stageOpps = opportunities.filter((o) => o.stage === stage.value);
+                return (
+                  <Card key={stage.value} className="min-h-[200px]">
+                    <CardHeader className="pb-2 pt-3 px-3">
+                      <CardTitle className="text-sm flex items-center justify-between">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${stage.color}`}>
+                          {stage.label}
+                        </span>
+                        <span className="text-xs text-muted-foreground">{stageOpps.length}</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="px-3 pb-3 space-y-2">
+                      {stageOpps.length === 0 && (
+                        <p className="text-xs text-muted-foreground text-center py-4">No opportunities</p>
+                      )}
+                      {stageOpps.map((opp) => {
+                        const linkedProspect = prospects.find((p) => p.id === opp.prospect_id);
+                        return (
+                          <Card key={opp.id} className="bg-muted/30 border-border/50">
+                            <CardContent className="p-2.5 space-y-1.5">
+                              <div className="text-sm font-medium text-foreground">{opp.name}</div>
+                              {linkedProspect && (
+                                <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <Building2 className="h-3 w-3" /> {linkedProspect.university_name}
+                                </div>
+                              )}
+                              {opp.amount && (
+                                <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <DollarSign className="h-3 w-3" /> ${Number(opp.amount).toLocaleString()}
+                                </div>
+                              )}
+                              {opp.close_date && (
+                                <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" /> {format(new Date(opp.close_date), "MMM d, yyyy")}
+                                </div>
+                              )}
+                              <Select value={opp.stage} onValueChange={(v) => handleUpdateOppStage(opp.id, v)}>
+                                <SelectTrigger className="h-7 text-xs mt-1"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                  {OPPORTUNITY_STAGES.map((s) => (
+                                    <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+
+            {loadingOpportunities && (
+              <div className="text-center py-10 text-muted-foreground">Loading opportunities...</div>
+            )}
+          </div>
+        </div>
+      )}
+
       {crmTab === "radar" && (
         <div className="flex-1 overflow-auto p-6">
           <BrandRadarTab />
@@ -937,7 +1154,7 @@ export default function CRMPage() {
         <div className="flex-1 overflow-auto p-6">
           <div className="max-w-2xl mx-auto text-center py-10 space-y-4">
             <Mail className="h-10 w-10 mx-auto text-primary" />
-            <h2 className="text-xl font-bold text-foreground">Send Bulk Email</h2>
+            <h2 className="text-xl font-bold text-foreground">Compose & Send</h2>
             <p className="text-sm text-muted-foreground">Send targeted emails to users filtered by tenant, status, or retention criteria.</p>
             <Button onClick={() => setSendBulkOpen(true)}><Send className="h-4 w-4 mr-2" /> Open Email Composer</Button>
           </div>
