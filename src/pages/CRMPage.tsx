@@ -225,6 +225,7 @@ export default function CRMPage() {
 
   // LinkedIn search
   const [searchingLinkedIn, setSearchingLinkedIn] = useState(false);
+  const [linkedInResults, setLinkedInResults] = useState<{ linkedin_url: string; title: string; description?: string }[]>([]);
 
   // Top-level CRM tab
   const [crmTab, setCrmTab] = useState("contacts");
@@ -375,31 +376,38 @@ export default function CRMPage() {
   };
 
   const handleLinkedInSearch = async () => {
-    if (!editData.contact_name || !editData.university_name) {
-      toast.error("Need contact name and account name to search");
+    if (!editData.contact_name) {
+      toast.error("Need contact name to search");
       return;
     }
     setSearchingLinkedIn(true);
+    setLinkedInResults([]);
     try {
       const { data, error } = await supabase.functions.invoke("find-linkedin-profile", {
         body: {
           name: editData.contact_name,
           title: editData.contact_title || "",
-          institution: editData.university_name,
+          institution: editData.university_name || "",
         },
       });
       if (error || !data?.success) {
         toast.error("LinkedIn search failed");
-      } else if (data.data?.linkedin_url) {
-        setEditData((d) => ({ ...d, linkedin_url: data.data.linkedin_url }));
-        toast.success(`Found profile (${data.data.confidence} confidence)`);
+      } else if (data.data?.length > 0) {
+        setLinkedInResults(data.data);
+        toast.success(`Found ${data.data.length} LinkedIn result(s)`);
       } else {
-        toast.info("No LinkedIn profile found");
+        toast.info("No LinkedIn profiles found");
       }
     } catch {
       toast.error("LinkedIn search failed");
     }
     setSearchingLinkedIn(false);
+  };
+
+  const handleSelectLinkedIn = (url: string) => {
+    setEditData((d) => ({ ...d, linkedin_url: url }));
+    setLinkedInResults([]);
+    toast.success("LinkedIn URL set");
   };
 
   // ── Create Opportunity ──────────────────────────────────────────────────
@@ -873,6 +881,22 @@ export default function CRMPage() {
                             {searchingLinkedIn ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Search className="h-3 w-3 mr-1" /> Find</>}
                           </Button>
                         </div>
+                        {linkedInResults.length > 0 && (
+                          <div className="mt-2 space-y-1 max-h-48 overflow-y-auto border rounded-md p-2 bg-muted/30">
+                            <div className="text-xs text-muted-foreground mb-1 font-medium">Select a profile:</div>
+                            {linkedInResults.map((r, i) => (
+                              <button
+                                key={i}
+                                onClick={() => handleSelectLinkedIn(r.linkedin_url)}
+                                className="w-full text-left p-2 rounded-md hover:bg-accent/50 transition-colors border border-transparent hover:border-border"
+                              >
+                                <div className="text-sm font-medium truncate">{r.title || r.linkedin_url}</div>
+                                {r.description && <div className="text-xs text-muted-foreground truncate mt-0.5">{r.description}</div>}
+                                <div className="text-xs text-primary/70 truncate mt-0.5">{r.linkedin_url}</div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ) : (
