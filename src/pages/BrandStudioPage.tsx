@@ -3,7 +3,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { toPng } from "html-to-image";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BrandOverlayCanvas } from "@/components/image-generator/BrandOverlayCanvas";
 import { BrandOverlayControls } from "@/components/image-generator/BrandOverlayControls";
 import { useGoogleFont } from "@/components/image-generator/BrandOverlayEditor";
@@ -12,10 +14,11 @@ import { AddToCollectionDialog } from "@/components/library/AddToCollectionDialo
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useLibraryCollections } from "@/hooks/useLibraryCollections";
 import { useCustomOverlays } from "@/hooks/useCustomOverlays";
+import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserDrafts } from "@/hooks/useUserDrafts";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Download, Maximize2, FolderPlus, Folder, RefreshCw, Loader2 } from "lucide-react";
+import { ArrowLeft, Download, Maximize2, FolderPlus, Folder, RefreshCw, Loader2, Upload, Sparkles, PaintBucket } from "lucide-react";
 import type { CollectionType } from "@/types/library";
 import type { OverlayPatternId } from "@/components/image-generator/overlayPatterns";
 
@@ -42,6 +45,23 @@ const BrandStudioPage = () => {
   const state = (location.state as BrandStudioState | null) || ({} as Partial<BrandStudioState>);
   const canvasRef = useRef<HTMLDivElement>(null);
 
+  // --- Overridable brand state (initialized from navigation, updated by starter panel) ---
+  const [imageUrl, setImageUrl] = useState<string | null>(state.imageUrl ?? null);
+  const [brandColors, setBrandColors] = useState<string[]>(state.brandColors ?? []);
+  const [logoUrl, setLogoUrl] = useState<string | undefined>(state.logoUrl);
+  const [logoUrls, setLogoUrls] = useState<string[] | undefined>(state.logoUrls);
+  const [institutionName, setInstitutionName] = useState<string | undefined>(state.institutionName);
+  const [channel, setChannel] = useState<string | undefined>(state.channel);
+  const [profileId, setProfileId] = useState<string | undefined>(state.profileId);
+  const { sceneDescription, audience, tone, goal } = state;
+
+  // --- Starter panel state ---
+  const { profiles, isLoading: profilesLoading } = useInstitutionalProfiles();
+  const [selectedProfileId, setSelectedProfileId] = useState<string>("");
+  const [generatePrompt, setGeneratePrompt] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [collectionDialogOpen, setCollectionDialogOpen] = useState(false);
   const [lastSavedMessageId, setLastSavedMessageId] = useState<string | null>(null);
@@ -49,26 +69,80 @@ const BrandStudioPage = () => {
   const [isSaving, setIsSaving] = useState(false);
   const { addMessage } = useMessageLibrary();
   const { collections, addItemToCollection, createCollection } = useLibraryCollections();
-  const { profile, user } = useAuth();
+  const { profile, user, tenant } = useAuth();
   const { saveDraft } = useUserDrafts();
   const savedToLibraryRef = useRef(false);
-  const {
-    imageUrl = null,
-    brandColors = [],
-    logoUrl,
-    logoUrls,
-    institutionName,
-    channel,
-    sceneDescription,
-    audience,
-    tone,
-    goal,
-    profileId,
-  } = state;
 
   const primary = brandColors[0] || "#1e3a5f";
   const secondary = brandColors[1] || brandColors[0] || "#c0392b";
   const allLogos = Array.from(new Set([logoUrl, ...(logoUrls || [])].filter(Boolean))) as string[];
+
+  // --- Starter helpers ---
+  const applyProfile = useCallback((pid: string) => {
+    const p = profiles.find(pr => pr.id === pid);
+    if (!p) return;
+    const cfg = p.config;
+    const colors: string[] = [cfg.primaryColor, cfg.accentColor].filter(Boolean) as string[];
+    setBrandColors(colors.length > 0 ? colors : ["#1e3a5f"]);
+    setLogoUrl(cfg.logoUrl || undefined);
+    setLogoUrls([cfg.logoUrl, cfg.logoUrlSecondary, cfg.logoUrlAthletic, cfg.logoUrlPresidential].filter(Boolean) as string[]);
+    setInstitutionName(cfg.institutionName || p.name);
+    setProfileId(pid);
+    setChannel("social-media");
+  }, [profiles]);
+
+  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file (PNG, JPG, or WebP).");
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    setImageUrl(url);
+    if (selectedProfileId) applyProfile(selectedProfileId);
+    else setBrandColors(prev => prev.length > 0 ? prev : ["#1e3a5f"]);
+  }, [selectedProfileId, applyProfile]);
+
+  const handleGenerate = useCallback(async () => {
+    if (!generatePrompt.trim()) {
+      toast.error("Enter a description for the image.");
+      return;
+    }
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-channel-image", {
+        body: {
+          channel: "social-media",
+          contentSummary: generatePrompt.trim(),
+          tenantId: tenant?.id,
+          profileId: selectedProfileId || undefined,
+        },
+      });
+      if (error) throw error;
+      if (data?.imageUrl) {
+        setImageUrl(data.imageUrl);
+        if (selectedProfileId) applyProfile(selectedProfileId);
+        else setBrandColors(prev => prev.length > 0 ? prev : ["#1e3a5f"]);
+        toast.success("Image generated!");
+      } else {
+        toast.error(data?.error || "Failed to generate image.");
+      }
+    } catch (err) {
+      console.error("Generate image error:", err);
+      toast.error("Image generation failed. Try again.");
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [generatePrompt, tenant?.id, selectedProfileId, applyProfile]);
+
+  const handleBlankCanvas = useCallback(() => {
+    if (selectedProfileId) applyProfile(selectedProfileId);
+    else setBrandColors(prev => prev.length > 0 ? prev : ["#1e3a5f"]);
+    setImageUrl(null);
+    // Force into editor by ensuring brandColors is set
+    setBrandColors(prev => prev.length > 0 ? prev : ["#1e3a5f"]);
+  }, [selectedProfileId, applyProfile]);
 
   // Overlay state
   const [overlayPattern, setOverlayPattern] = useState<OverlayPatternId | string>("solid");
@@ -423,17 +497,103 @@ const BrandStudioPage = () => {
 
   if (brandColors.length === 0) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 p-8">
-        <Maximize2 className="w-12 h-12 text-muted-foreground/30" />
-        <h2 className="text-lg font-semibold">Brand It Studio</h2>
-        <p className="text-sm text-muted-foreground text-center max-w-md">
-          Open this page from Image Studio by clicking "Open Brand Studio" on the Brand It tab. Your image, colors, and
-          profile will transfer automatically.
-        </p>
-        <Button variant="outline" size="sm" onClick={() => navigate("/image-generator")}>
-          <ArrowLeft className="w-4 h-4 mr-1.5" />
-          Go to Image Studio
-        </Button>
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-8">
+        <div className="w-full max-w-lg space-y-6">
+          <div className="text-center space-y-2">
+            <Maximize2 className="w-10 h-10 text-primary mx-auto" />
+            <h2 className="text-xl font-serif font-bold">Brand It Studio</h2>
+            <p className="text-sm text-muted-foreground">
+              Select a profile and choose how to start — upload an image, generate one with AI, or begin with a blank canvas.
+            </p>
+          </div>
+
+          {/* Profile selector */}
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium">Institutional Profile</label>
+            <Select value={selectedProfileId} onValueChange={(v) => { setSelectedProfileId(v); }}>
+              <SelectTrigger>
+                <SelectValue placeholder={profilesLoading ? "Loading profiles…" : "Select a profile"} />
+              </SelectTrigger>
+              <SelectContent>
+                {profiles.map(p => (
+                  <SelectItem key={p.id} value={p.id}>
+                    <span className="flex items-center gap-2">
+                      {p.config.logoUrl ? (
+                        <img src={p.config.logoUrl} alt="" className="w-4 h-4 object-contain rounded-sm" />
+                      ) : (
+                        <span className="w-4 h-4 rounded-sm bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">
+                          {p.name.charAt(0)}
+                        </span>
+                      )}
+                      {p.name}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Three options */}
+          <div className="grid gap-3">
+            {/* Upload */}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-3 p-4 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors text-left"
+            >
+              <Upload className="w-5 h-5 text-primary shrink-0" />
+              <div>
+                <div className="text-sm font-medium">Upload Your Own Image</div>
+                <div className="text-xs text-muted-foreground">PNG, JPG, or WebP</div>
+              </div>
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+
+            {/* Generate */}
+            <div className="rounded-lg border border-border bg-card p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-primary shrink-0" />
+                <span className="text-sm font-medium">Generate with AI</span>
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Describe the scene…"
+                  value={generatePrompt}
+                  onChange={e => setGeneratePrompt(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter" && !isGenerating) handleGenerate(); }}
+                  disabled={isGenerating}
+                />
+                <Button size="sm" onClick={handleGenerate} disabled={isGenerating || !generatePrompt.trim()}>
+                  {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Generate"}
+                </Button>
+              </div>
+            </div>
+
+            {/* Blank canvas */}
+            <button
+              onClick={handleBlankCanvas}
+              className="flex items-center gap-3 p-4 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors text-left"
+            >
+              <PaintBucket className="w-5 h-5 text-primary shrink-0" />
+              <div>
+                <div className="text-sm font-medium">Start with a Blank Canvas</div>
+                <div className="text-xs text-muted-foreground">Solid background using your brand color</div>
+              </div>
+            </button>
+          </div>
+
+          <div className="text-center">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/image-generator")}>
+              <ArrowLeft className="w-4 h-4 mr-1.5" />
+              Go to Image Studio instead
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
