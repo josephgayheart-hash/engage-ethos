@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
-import { Search, Send, Mail, Users, Tag, RefreshCw, BarChart3, Plus, X, UserPlus } from "lucide-react";
+import { Search, Send, Mail, Users, Tag, RefreshCw, BarChart3, Plus, X, UserPlus, ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { Progress } from "@/components/ui/progress";
 
@@ -107,9 +107,11 @@ export default function ProspectOutreachPage() {
   const [richTextContent, setRichTextContent] = useState("");
   const [htmlContent, setHtmlContent] = useState("");
   const [plainTextContent, setPlainTextContent] = useState("");
-  const [isSending, setIsSending] = useState(false);
-  const [sendProgress, setSendProgress] = useState(0);
-  const [sendTotal, setSendTotal] = useState(0);
+   const [isSending, setIsSending] = useState(false);
+   const [sendProgress, setSendProgress] = useState(0);
+   const [sendTotal, setSendTotal] = useState(0);
+   const [previewIndex, setPreviewIndex] = useState(0);
+   const [showPreview, setShowPreview] = useState(false);
 
   // History state
   const [history, setHistory] = useState<OutreachRecord[]>([]);
@@ -223,6 +225,22 @@ export default function ProspectOutreachPage() {
     if (composerTab === "html") return { body: "", html_body: htmlContent };
     return { body: plainTextContent, html_body: undefined };
   };
+
+  const getPreviewHtml = (): string => {
+    if (composerTab === "richtext") return richTextContent;
+    if (composerTab === "html") return htmlContent;
+    return `<p>${plainTextContent.replace(/\n/g, "<br/>")}</p>`;
+  };
+
+  // All recipients for preview cycling
+  const allPreviewRecipients: (Prospect | ManualRecipient)[] = [
+    ...prospects.filter((p) => selectedIds.has(p.id) && p.contact_email),
+    ...manualRecipients,
+  ];
+
+  const currentPreviewRecipient = allPreviewRecipients[previewIndex] || null;
+  const previewSubject = currentPreviewRecipient ? replaceMergeTags(subject, currentPreviewRecipient) : subject;
+  const previewBody = currentPreviewRecipient ? replaceMergeTags(getPreviewHtml(), currentPreviewRecipient) : getPreviewHtml();
 
   // Send emails
   const handleSend = async () => {
@@ -565,6 +583,67 @@ export default function ProspectOutreachPage() {
                 />
               </TabsContent>
             </Tabs>
+
+            {/* Personalization Preview */}
+            {allPreviewRecipients.length > 0 && (
+              <div className="border rounded-md overflow-hidden">
+                <div className="flex items-center justify-between px-3 py-2 bg-muted/50 border-b">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1.5 text-xs"
+                    onClick={() => setShowPreview((v) => !v)}
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                    {showPreview ? "Hide" : "Preview"} Personalization
+                  </Button>
+                  {showPreview && (
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-7 w-7"
+                        disabled={previewIndex <= 0}
+                        onClick={() => setPreviewIndex((i) => Math.max(0, i - 1))}
+                      >
+                        <ChevronLeft className="h-3.5 w-3.5" />
+                      </Button>
+                      <span className="text-xs font-medium tabular-nums min-w-[60px] text-center">
+                        {previewIndex + 1} / {allPreviewRecipients.length}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-7 w-7"
+                        disabled={previewIndex >= allPreviewRecipients.length - 1}
+                        onClick={() => setPreviewIndex((i) => Math.min(allPreviewRecipients.length - 1, i + 1))}
+                      >
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                {showPreview && currentPreviewRecipient && (
+                  <div className="p-3 space-y-2 text-sm">
+                    <div className="flex gap-2 text-xs text-muted-foreground">
+                      <span className="font-medium">To:</span>
+                      <span>
+                        {"university_name" in currentPreviewRecipient
+                          ? `${(currentPreviewRecipient as Prospect).contact_name || "—"} <${(currentPreviewRecipient as Prospect).contact_email}>`
+                          : `${(currentPreviewRecipient as ManualRecipient).name} <${(currentPreviewRecipient as ManualRecipient).email}>`}
+                      </span>
+                    </div>
+                    <div className="flex gap-2 text-xs">
+                      <span className="font-medium text-muted-foreground">Subject:</span>
+                      <span>{previewSubject}</span>
+                    </div>
+                    <div className="border rounded bg-background p-3 max-h-[200px] overflow-auto">
+                      <div dangerouslySetInnerHTML={{ __html: previewBody }} className="prose prose-sm max-w-none" />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Send Button */}
             <div className="flex justify-end">
