@@ -70,6 +70,7 @@ import ToolsPage from "./pages/ToolsPage";
 import ImageGeneratorPage from "./pages/ImageGeneratorPage";
 import BrandStudioPage from "./pages/BrandStudioPage";
 import ProspectOutreachPage from "./pages/ProspectOutreachPage";
+import CRMPage from "./pages/CRMPage";
 
 const queryClient = new QueryClient();
 
@@ -195,6 +196,7 @@ const AppRoutes = () => (
         <Route path="/admin/institution/:id" element={<InstitutionDetailPage />} />
         <Route path="/admin/user/:id" element={<UserDetailPage />} />
         <Route path="/admin/prospect-outreach" element={<ProspectOutreachPage />} />
+        <Route path="/admin/crm" element={<CRMPage />} />
       </Route>
     </Route>
 

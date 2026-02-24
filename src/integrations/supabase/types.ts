@@ -593,6 +593,41 @@ export type Database = {
           },
         ]
       }
+      crm_notes: {
+        Row: {
+          created_at: string
+          created_by_user_id: string
+          id: string
+          note_text: string
+          note_type: string
+          prospect_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by_user_id: string
+          id?: string
+          note_text: string
+          note_type?: string
+          prospect_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by_user_id?: string
+          id?: string
+          note_text?: string
+          note_type?: string
+          prospect_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_notes_prospect_id_fkey"
+            columns: ["prospect_id"]
+            isOneToOne: false
+            referencedRelation: "sales_prospects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custom_overlay_patterns: {
         Row: {
           created_at: string
