@@ -1,0 +1,1 @@
+ALTER TABLE public.crm_opportunities ADD COLUMN contact_ids UUID[] DEFAULT '{}';

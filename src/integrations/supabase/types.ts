@@ -632,6 +632,7 @@ export type Database = {
         Row: {
           amount: number | null
           close_date: string | null
+          contact_ids: string[] | null
           created_at: string
           created_by_user_id: string | null
           id: string
@@ -644,6 +645,7 @@ export type Database = {
         Insert: {
           amount?: number | null
           close_date?: string | null
+          contact_ids?: string[] | null
           created_at?: string
           created_by_user_id?: string | null
           id?: string
@@ -656,6 +658,7 @@ export type Database = {
         Update: {
           amount?: number | null
           close_date?: string | null
+          contact_ids?: string[] | null
           created_at?: string
           created_by_user_id?: string | null
           id?: string

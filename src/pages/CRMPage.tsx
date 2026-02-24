@@ -50,6 +50,7 @@ interface Prospect {
 interface Opportunity {
   id: string;
   prospect_id: string | null;
+  contact_ids: string[];
   name: string;
   stage: string;
   amount: number | null;
@@ -217,6 +218,7 @@ export default function CRMPage() {
   const [loadingOpportunities, setLoadingOpportunities] = useState(false);
   const [newOppName, setNewOppName] = useState("");
   const [newOppProspectId, setNewOppProspectId] = useState("");
+  const [newOppContactIds, setNewOppContactIds] = useState<string[]>([]);
   const [creatingOpp, setCreatingOpp] = useState(false);
 
   const selected = prospects.find((p) => p.id === selectedId) || null;
@@ -305,12 +307,16 @@ export default function CRMPage() {
   };
 
   // ── Create Opportunity ──────────────────────────────────────────────────
-  const handleCreateOpportunity = async () => {
-    if (!newOppName.trim()) return;
+  const handleCreateOpportunity = async (overrideProspectId?: string, overrideContactIds?: string[], overrideName?: string) => {
+    const oppName = overrideName || newOppName.trim();
+    if (!oppName) return;
     setCreatingOpp(true);
+    const prospectId = overrideProspectId !== undefined ? overrideProspectId : (newOppProspectId && newOppProspectId !== "none" ? newOppProspectId : null);
+    const contactIds = overrideContactIds || newOppContactIds;
     const { error } = await supabase.from("crm_opportunities" as any).insert({
-      name: newOppName.trim(),
-      prospect_id: newOppProspectId && newOppProspectId !== "none" ? newOppProspectId : null,
+      name: oppName,
+      prospect_id: prospectId || null,
+      contact_ids: contactIds,
       stage: "discovery",
       created_by_user_id: user?.id,
     } as any);
@@ -319,6 +325,7 @@ export default function CRMPage() {
       toast.success("Opportunity created");
       setNewOppName("");
       setNewOppProspectId("");
+      setNewOppContactIds([]);
       loadOpportunities();
     }
     setCreatingOpp(false);
@@ -803,6 +810,12 @@ export default function CRMPage() {
                   <Button size="sm" onClick={() => setDetailTab("compose")}>
                     <Send className="h-3 w-3 mr-1" /> Compose Email
                   </Button>
+                  <Button size="sm" variant="outline" onClick={() => {
+                    const name = prompt("Opportunity name:", `Deal - ${selected?.university_name || ""}`);
+                    if (name) handleCreateOpportunity(selected?.id || undefined, selected ? [selected.id] : [], name);
+                  }}>
+                    <Target className="h-3 w-3 mr-1" /> Create Opportunity
+                  </Button>
                 </div>
               </div>
             </TabsContent>
@@ -1057,13 +1070,45 @@ export default function CRMPage() {
                       <SelectTrigger className="h-9"><SelectValue placeholder="Link to account..." /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">None</SelectItem>
-                        {prospects.map((p) => (
-                          <SelectItem key={p.id} value={p.id}>{p.university_name} — {p.contact_name || "No contact"}</SelectItem>
+                        {/* Get unique account names */}
+                        {Array.from(new Map(prospects.map(p => [p.university_name, p])).values()).map((p) => (
+                          <SelectItem key={p.id} value={p.id}>{p.university_name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button onClick={handleCreateOpportunity} disabled={!newOppName.trim() || creatingOpp} className="h-9">
+                  <div className="w-[250px]">
+                    <label className="text-xs text-muted-foreground mb-1 block">Contacts</label>
+                    <Select value={newOppContactIds[newOppContactIds.length - 1] || "none"} onValueChange={(v) => {
+                      if (v !== "none" && !newOppContactIds.includes(v)) setNewOppContactIds([...newOppContactIds, v]);
+                    }}>
+                      <SelectTrigger className="h-9"><SelectValue placeholder={newOppContactIds.length ? `${newOppContactIds.length} selected` : "Add contacts..."} /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Select a contact...</SelectItem>
+                        {prospects.filter(p => p.contact_name).map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            {newOppContactIds.includes(p.id) ? "✓ " : ""}{p.contact_name} — {p.university_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {newOppContactIds.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {newOppContactIds.map(cid => {
+                          const contact = prospects.find(p => p.id === cid);
+                          return (
+                            <Badge key={cid} variant="secondary" className="text-xs gap-1">
+                              {contact?.contact_name || "Unknown"}
+                              <button type="button" className="hover:text-destructive" onClick={() => setNewOppContactIds(ids => ids.filter(i => i !== cid))}>
+                                <X className="h-3 w-3" />
+                              </button>
+                            </Badge>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                  <Button onClick={() => handleCreateOpportunity()} disabled={!newOppName.trim() || creatingOpp} className="h-9">
                     {creatingOpp ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Plus className="h-4 w-4 mr-1" /> Create</>}
                   </Button>
                 </div>
@@ -1097,6 +1142,18 @@ export default function CRMPage() {
                               {linkedProspect && (
                                 <div className="text-xs text-muted-foreground flex items-center gap-1">
                                   <Building2 className="h-3 w-3" /> {linkedProspect.university_name}
+                                </div>
+                              )}
+                              {opp.contact_ids && opp.contact_ids.length > 0 && (
+                                <div className="flex flex-wrap gap-1">
+                                  {opp.contact_ids.map(cid => {
+                                    const c = prospects.find(p => p.id === cid);
+                                    return c ? (
+                                      <Badge key={cid} variant="outline" className="text-[10px] gap-0.5">
+                                        <User className="h-2.5 w-2.5" /> {c.contact_name || "Unknown"}
+                                      </Badge>
+                                    ) : null;
+                                  })}
                                 </div>
                               )}
                               {opp.amount && (
