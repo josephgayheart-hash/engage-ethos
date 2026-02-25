@@ -1,72 +1,74 @@
 
 
-# Micro CRM for CampusVoice
+## Plan: Image Generation Performance + "Improve Your Results" Guidance Component
 
-## Overview
-Build a lightweight CRM page as a new super admin feature that gives you a unified view of all contacts, their details, notes/activity timeline, email history, and whether they've signed up for the app.
+### Part 1: Image Generation Performance Optimizations
 
-## What You'll Get
+After reviewing the edge functions (`generate-channel-image`, `generate-cover-image`, `generate-collection-cover`), the primary bottleneck is **sequential database queries** before the AI call. The AI model itself (`gemini-3-pro-image-preview`) is inherently slow for image gen -- we can't change that, but we can shave seconds off the setup work.
 
-1. **Contact Detail Panel** -- Click any prospect to see a full profile view with all their info (name, email, title, phone, LinkedIn, university, brand launch date, notes) plus inline editing.
+#### Optimizations
 
-2. **Notes & Activity Timeline** -- A new `crm_notes` database table to store timestamped notes per prospect. The UI shows a chronological timeline mixing your manual notes with email outreach history (sent, opened, clicked, bounced).
+1. **Parallelize all DB queries** in `generate-channel-image/index.ts`
+   - Currently: tenant fetch → profile fetch → campus photos fetch (sequential)
+   - Change to: `Promise.all([tenantQuery, profileQuery, campusPhotosQuery])` -- all three fire simultaneously
+   - Same pattern applied to `generate-cover-image` and `generate-collection-cover`
 
-3. **App Signup Detection** -- Cross-references each prospect's email against the `profiles` table to show if they've created an account, when they last logged in, and their current status. A badge on each contact row shows "Signed Up", "Active", or "Not Yet".
+2. **Add a "Fast" engine option** that uses `google/gemini-2.5-flash-image` instead of `gemini-3-pro-image-preview`
+   - The `engine` param already exists in the request body but isn't used for model selection
+   - Map `engine: "fast"` → `gemini-2.5-flash-image` (faster, lower quality)
+   - Map `engine: "premium"` → `gemini-3-pro-image-preview` (current default)
+   - This gives users explicit control over speed vs quality
 
-4. **Contacts Table View** -- A searchable, filterable table of all prospects with columns for name, university, email, status, last contacted date, email count, and app signup status. Sortable and with quick-action buttons.
+3. **Reduce campus reference photos for "fast" engine** -- skip multimodal photo references when using fast engine (sending images to the model adds latency)
 
-5. **Sidebar Navigation** -- Add "CRM" link to the super admin nav section.
+4. **Trim prompt length for cover images** -- `generate-cover-image` doesn't need the full channel-specific best practices since it's just a thumbnail. Shorter prompts = faster inference.
 
-## New Database Table
+#### Files changed
+- `supabase/functions/generate-channel-image/index.ts` -- parallelize queries, respect engine param for model selection
+- `supabase/functions/generate-cover-image/index.ts` -- parallelize queries, trim prompt
+- `supabase/functions/generate-collection-cover/index.ts` -- parallelize queries
 
-**`crm_notes`** -- stores notes attached to prospects:
-- `id` (uuid, PK)
-- `prospect_id` (uuid, FK to sales_prospects)
-- `created_by_user_id` (uuid)
-- `note_text` (text)
-- `note_type` (text, default 'general' -- e.g. general, call, meeting, follow-up)
-- `created_at` (timestamptz)
+---
 
-RLS: super admins only (matching `sales_prospects` pattern).
+### Part 2: "Improve Your Results" Guidance Component
 
-## New Page & Route
+Create a reusable `AIResultsGuidance` component that appears beneath AI-generated content, nudging users to strengthen their institutional profile and Content DNA for better output.
 
-**`src/pages/CRMPage.tsx`** -- The main CRM interface with:
-- Left side: filterable contacts table with search, status filter, signup status filter
-- Right side (or expandable drawer): contact detail + notes timeline + email history
+#### Design
 
-**Route**: `/admin/crm` under the existing `RequireSuperAdmin` wrapper.
+```text
+┌─────────────────────────────────────────────────────┐
+│ 💡 Not getting the results you want?                │
+│                                                     │
+│ AI-generated content improves when your              │
+│ institutional voice and brand are configured.        │
+│                                                     │
+│ [Update Institutional Profile →]  [Refine DNA →]    │
+└─────────────────────────────────────────────────────┘
+```
 
-## Technical Details
+- Subtle, non-intrusive styling (`bg-muted/20`, small text)
+- Context-aware: checks if the user has a Content DNA analysis and an institutional profile configured. If both are set up, shows a softer message ("Refine your DNA for even better results"). If neither exists, shows a stronger nudge.
+- Links to `/settings` (profile) and `/admin/content-dna` (Content DNA studio)
 
-### Files to Create
-- `src/pages/CRMPage.tsx` -- Main CRM page with contacts table, detail panel, notes management
-- Database migration for `crm_notes` table
+#### Placement (6 locations)
+1. `BuilderResults.tsx` -- after the NextStepsBar
+2. `EvaluationResults.tsx` -- after the NextStepsBar
+3. `StrategyJourney.tsx` -- at the bottom of the journey display
+4. `ImageGeneratorPage.tsx` -- below the generated image preview
+5. `ChannelPreview.tsx` -- below generated channel images
+6. `PlaygroundPage.tsx` -- at the bottom of the chat area (optional, lighter touch)
 
-### Files to Modify
-- `src/components/app-shell/AppSidebar.tsx` -- Add CRM nav item to `superAdminItems`
-- `src/App.tsx` -- Add route for `/admin/crm` under super admin routes
+#### Files created
+- `src/components/AIResultsGuidance.tsx` -- the reusable component
 
-### Data Queries
-- **Contacts**: Query `sales_prospects` with all columns
-- **Email history**: Query `outreach_history` filtered by `prospect_id`
-- **App signup check**: Query `profiles` table matching `email` against prospect's `contact_email`, pull status and last sign-in
-- **Notes**: Query `crm_notes` by `prospect_id`, ordered by `created_at` desc
-
-### Contact Detail Panel Features
-- Inline-editable fields (name, email, title, phone, LinkedIn, notes, status)
-- "App Status" section showing if matched to a profile, with link to user detail page if found
-- Activity timeline merging notes + outreach history chronologically
-- Quick "Add Note" form with note type selector
-- Quick "Send Email" button that links to the outreach page pre-filtered
-
-### Contacts Table Columns
-- Name / Title
-- University
-- Email
-- Status (new, contacted, qualified, demo_scheduled, closed)
-- Emails Sent (count from outreach_history)
-- Last Contacted (most recent outreach date)
-- App Status (badge: Not Yet / Signed Up / Active)
-- Actions (view detail, quick note)
+#### Files modified
+- `src/components/BuilderResults.tsx`
+- `src/components/EvaluationResults.tsx`
+- `src/components/StrategyJourney.tsx`
+- `src/pages/ImageGeneratorPage.tsx`
+- `src/components/ChannelPreview.tsx`
+- `supabase/functions/generate-channel-image/index.ts`
+- `supabase/functions/generate-cover-image/index.ts`
+- `supabase/functions/generate-collection-cover/index.ts`
 
