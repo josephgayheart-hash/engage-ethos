@@ -274,6 +274,7 @@ export default function CRMPage() {
   const [oppEditData, setOppEditData] = useState<Partial<Opportunity>>({});
   const [quickOppDialog, setQuickOppDialog] = useState<{ open: boolean; prospectId?: string; contactIds?: string[]; defaultName?: string }>({ open: false });
   const [quickOppName, setQuickOppName] = useState("");
+  const [stageCelebration, setStageCelebration] = useState<"won" | "lost" | null>(null);
 
   // Requests
   const [requests, setRequests] = useState<OnboardingRequest[]>([]);
@@ -562,7 +563,16 @@ export default function CRMPage() {
       .update({ stage: newStage, updated_at: new Date().toISOString() } as any)
       .eq("id", oppId);
     if (error) toast.error("Failed to update stage");
-    else loadOpportunities();
+    else {
+      if (newStage === "closed_won") {
+        setStageCelebration("won");
+        setTimeout(() => setStageCelebration(null), 3500);
+      } else if (newStage === "closed_lost") {
+        setStageCelebration("lost");
+        setTimeout(() => setStageCelebration(null), 3500);
+      }
+      loadOpportunities();
+    }
   };
 
   // ── Delete Opportunity ──────────────────────────────────────────────────
@@ -1658,42 +1668,122 @@ export default function CRMPage() {
               </div>
             </div>
 
+            {/* Stage Celebration Overlay */}
+            {stageCelebration === "won" && (
+              <div className="fixed inset-0 z-50 pointer-events-none overflow-hidden">
+                {Array.from({ length: 60 }).map((_, i) => {
+                  const left = Math.random() * 100;
+                  const delay = Math.random() * 0.8;
+                  const duration = 2 + Math.random() * 1.5;
+                  const size = 8 + Math.random() * 14;
+                  const colors = ["#FFD700", "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7", "#DDA0DD", "#98D8C8", "#F7DC6F", "#BB8FCE"];
+                  const color = colors[i % colors.length];
+                  const rotate = Math.random() * 720;
+                  const shapes = ["■", "●", "▲", "★", "◆", "♦"];
+                  const shape = shapes[i % shapes.length];
+                  return (
+                    <div
+                      key={i}
+                      className="absolute text-2xl"
+                      style={{
+                        left: `${left}%`,
+                        top: "-5%",
+                        fontSize: `${size}px`,
+                        color,
+                        animation: `confetti-fall ${duration}s ease-in ${delay}s forwards`,
+                        transform: `rotate(${rotate}deg)`,
+                      }}
+                    >
+                      {shape}
+                    </div>
+                  );
+                })}
+                <div className="absolute inset-0 flex items-center justify-center animate-scale-in">
+                  <div className="text-6xl animate-bounce">🎉</div>
+                </div>
+              </div>
+            )}
+            {stageCelebration === "lost" && (
+              <div className="fixed inset-0 z-50 pointer-events-none overflow-hidden">
+                {Array.from({ length: 8 }).map((_, i) => {
+                  const left = 15 + Math.random() * 70;
+                  const delay = Math.random() * 0.6;
+                  const duration = 2.5 + Math.random() * 1;
+                  return (
+                    <div
+                      key={i}
+                      className="absolute text-4xl"
+                      style={{
+                        left: `${left}%`,
+                        top: "-8%",
+                        animation: `confetti-fall ${duration}s ease-in ${delay}s forwards`,
+                        transform: `rotate(${Math.random() * 360}deg)`,
+                      }}
+                    >
+                      💩
+                    </div>
+                  );
+                })}
+                <div className="absolute inset-0 flex items-center justify-center animate-scale-in">
+                  <div className="text-7xl" style={{ animation: "turd-plop 0.6s ease-out" }}>💩</div>
+                </div>
+              </div>
+            )}
+
             {/* Chevron stage path */}
             <div className="max-w-6xl mx-auto px-6 mt-5">
-              <div className="flex items-center gap-0">
+              <div className="flex items-center gap-0 rounded-xl overflow-hidden shadow-lg border border-border/50">
                 {OPPORTUNITY_STAGES.map((stage, idx) => {
                   const isActive = stage.value === selectedOpp.stage;
                   const isPast = idx < currentIdx;
                   const isClosedWon = selectedOpp.stage === "closed_won";
                   const isClosedLost = selectedOpp.stage === "closed_lost";
 
-                  let bg = "bg-muted/70 text-muted-foreground border-border";
-                  let chevronFill = "hsl(var(--muted))";
+                  let bgClass = "bg-muted/40 text-muted-foreground";
+                  let chevronFill = "hsl(var(--muted) / 0.4)";
+                  let glowClass = "";
                   if (isActive) {
-                    if (isClosedWon) { bg = "bg-emerald-500 text-white border-emerald-500"; chevronFill = "rgb(16 185 129)"; }
-                    else if (isClosedLost) { bg = "bg-destructive text-destructive-foreground border-destructive"; chevronFill = "hsl(var(--destructive))"; }
-                    else { bg = "bg-primary text-primary-foreground border-primary"; chevronFill = "hsl(var(--primary))"; }
+                    if (isClosedWon) {
+                      bgClass = "bg-gradient-to-r from-emerald-500 to-emerald-400 text-white";
+                      chevronFill = "rgb(52 211 153)";
+                      glowClass = "shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_0_20px_rgba(16,185,129,0.3)]";
+                    } else if (isClosedLost) {
+                      bgClass = "bg-gradient-to-r from-destructive to-destructive/80 text-destructive-foreground";
+                      chevronFill = "hsl(var(--destructive) / 0.8)";
+                      glowClass = "shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]";
+                    } else {
+                      bgClass = "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground";
+                      chevronFill = "hsl(var(--primary) / 0.8)";
+                      glowClass = "shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_0_16px_hsl(var(--primary)/0.25)]";
+                    }
                   } else if (isPast) {
-                    bg = "bg-primary/15 text-primary border-primary/30";
-                    chevronFill = "hsl(var(--primary) / 0.15)";
+                    bgClass = "bg-gradient-to-r from-primary/20 to-primary/10 text-primary";
+                    chevronFill = "hsl(var(--primary) / 0.1)";
                   }
 
                   return (
-                    <div key={stage.value} className="flex items-stretch flex-1 relative">
+                    <div key={stage.value} className="flex items-stretch flex-1 relative group">
                       <button
                         onClick={() => handleUpdateOppStage(selectedOpp.id, stage.value)}
-                        className={`w-full py-2.5 text-xs font-semibold text-center transition-all hover:opacity-90 border-y ${bg} ${idx === 0 ? "rounded-l-lg border-l" : ""} ${idx === OPPORTUNITY_STAGES.length - 1 ? "rounded-r-lg border-r" : ""}`}
+                        className={`w-full py-3.5 text-xs font-bold text-center transition-all duration-300 hover:brightness-110 ${bgClass} ${glowClass}`}
                       >
-                        <span className="relative z-10 flex items-center justify-center gap-1">
-                          {isPast && <CheckCircle2 className="h-3 w-3" />}
-                          {stage.label}
+                        <span className="relative z-10 flex items-center justify-center gap-1.5">
+                          {isPast && <CheckCircle2 className="h-3.5 w-3.5 drop-shadow-sm" />}
+                          {isActive && stage.value === "closed_won" && <span className="text-sm">🏆</span>}
+                          {isActive && stage.value === "closed_lost" && <span className="text-sm">💩</span>}
+                          <span className="drop-shadow-sm">{stage.label}</span>
                         </span>
                       </button>
                       {idx < OPPORTUNITY_STAGES.length - 1 && (
-                        <div className="absolute right-0 top-0 h-full w-4 translate-x-2 z-20 pointer-events-none">
-                          <svg viewBox="0 0 16 40" preserveAspectRatio="none" className="h-full w-full">
-                            <path d="M0,0 L16,20 L0,40" fill={chevronFill} />
-                            <path d="M1,0 L16,20 L1,40" fill="none" stroke="hsl(var(--border))" strokeWidth="1" />
+                        <div className="absolute right-0 top-0 h-full w-5 translate-x-2.5 z-20 pointer-events-none">
+                          <svg viewBox="0 0 20 48" preserveAspectRatio="none" className="h-full w-full drop-shadow-md">
+                            <defs>
+                              <filter id={`shadow-${idx}`}>
+                                <feDropShadow dx="1" dy="0" stdDeviation="1" floodOpacity="0.15" />
+                              </filter>
+                            </defs>
+                            <path d="M0,0 L18,24 L0,48" fill={chevronFill} filter={`url(#shadow-${idx})`} />
+                            <path d="M0,0 L18,24 L0,48" fill="none" stroke="hsl(var(--border) / 0.5)" strokeWidth="0.5" />
                           </svg>
                         </div>
                       )}
