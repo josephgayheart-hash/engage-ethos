@@ -91,6 +91,8 @@ interface NudgeRecord {
   bounced_at: string | null;
   delivered_at: string | null;
   recipient_email: string | null;
+  events: any;
+  metadata: any;
 }
 
 interface CRMNote {
@@ -210,7 +212,7 @@ export default function CRMPage() {
   // Nudge/auto emails for detail (by email match)
   const [nudgeEmails, setNudgeEmails] = useState<NudgeRecord[]>([]);
   const [loadingEmails, setLoadingEmails] = useState(false);
-
+  const [emailTemplateCache, setEmailTemplateCache] = useState<Record<string, string>>({});
   // App usage analytics
   const [toolUsage, setToolUsage] = useState<ToolUsageItem[]>([]);
   const [messagesCreated, setMessagesCreated] = useState(0);
@@ -585,7 +587,7 @@ export default function CRMPage() {
     const nudgePromise = contactEmail
       ? supabase
           .from("email_nudges")
-          .select("id, subject, sent_at, nudge_type, email_type, delivery_status, opened_at, clicked_at, bounced_at, delivered_at, recipient_email")
+          .select("id, subject, sent_at, nudge_type, email_type, delivery_status, opened_at, clicked_at, bounced_at, delivered_at, recipient_email, events, metadata")
           .eq("recipient_email", contactEmail)
           .order("sent_at", { ascending: false })
       : Promise.resolve({ data: [] });
@@ -617,8 +619,24 @@ export default function CRMPage() {
     setLoadingNotes(false);
 
     setOutreachEmails((outreachRes.data as any[]) || []);
-    setNudgeEmails((nudgeRes.data as any[]) || []);
+    const nudges = (nudgeRes.data as any[]) || [];
+    setNudgeEmails(nudges);
     setLoadingEmails(false);
+
+    // Fetch all email templates for nudge body preview (cached)
+    if (Object.keys(emailTemplateCache).length === 0) {
+      const { data: templates } = await supabase
+        .from("email_templates")
+        .select("id, html_content, template_key");
+      if (templates) {
+        const cache: Record<string, string> = {};
+        (templates as any[]).forEach((t) => {
+          cache[t.id] = t.html_content;
+          cache[t.template_key] = t.html_content;
+        });
+        setEmailTemplateCache(cache);
+      }
+    }
 
     setToolUsage((toolRes.data as any[]) || []);
     setMessagesCreated((messagesRes as any).count || 0);
@@ -777,13 +795,26 @@ export default function CRMPage() {
       from_name: e.from_name, from_email: e.from_email,
       body: e.body, html_body: e.html_body,
     })),
-    ...nudgeEmails.map((e) => ({
-      id: e.id, subject: e.subject, date: e.sent_at, source: "auto" as const,
-      delivery_status: e.delivery_status, opened_at: e.opened_at, clicked_at: e.clicked_at,
-      bounced_at: e.bounced_at, delivered_at: e.delivered_at, to_email: e.recipient_email,
-      from_name: null as string | null, from_email: null as string | null,
-      email_type: e.email_type || e.nudge_type,
-    })),
+    ...nudgeEmails.map((e) => {
+      // Extract from info from events
+      const sentEvent = e.events?.["email.sent"]?.data || e.events?.["email.delivered"]?.data;
+      const fromRaw = sentEvent?.from || "";
+      const fromMatch = typeof fromRaw === "string" ? fromRaw.match(/^(.+?)\s*<(.+?)>$/) : null;
+      const nudgeFrom = fromMatch ? fromMatch[1] : (fromRaw || null);
+      const nudgeFromEmail = fromMatch ? fromMatch[2] : (typeof fromRaw === "string" && fromRaw.includes("@") ? fromRaw : null);
+      // Look up template body
+      const templateId = e.metadata?.template_id;
+      const templateKey = e.email_type || e.nudge_type;
+      const templateHtml = (templateId && emailTemplateCache[templateId]) || emailTemplateCache[templateKey] || null;
+      return {
+        id: e.id, subject: e.subject, date: e.sent_at, source: "auto" as const,
+        delivery_status: e.delivery_status, opened_at: e.opened_at, clicked_at: e.clicked_at,
+        bounced_at: e.bounced_at, delivered_at: e.delivered_at, to_email: e.recipient_email,
+        from_name: nudgeFrom as string | null, from_email: nudgeFromEmail as string | null,
+        email_type: e.email_type || e.nudge_type,
+        html_body: templateHtml as string | undefined,
+      };
+    }),
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   // Tool usage summary
@@ -1278,7 +1309,9 @@ export default function CRMPage() {
                                     ) : item.data.body ? (
                                       <div className="p-3 text-xs whitespace-pre-wrap max-h-64 overflow-auto">{item.data.body}</div>
                                     ) : (
-                                      <div className="p-3 text-xs text-muted-foreground italic">No message body available</div>
+                                      <div className="p-3 text-xs text-muted-foreground italic">
+                                        {item.data.source === "auto" ? "System-generated email — body not stored" : "No message body available"}
+                                      </div>
                                     )}
                                   </div>
                                 )}
