@@ -98,3 +98,6 @@ verify_jwt = false
 
 [functions.find-contact-email]
 verify_jwt = false
+
+[functions.parse-contact-text]
+verify_jwt = false
