@@ -48,6 +48,7 @@ interface Prospect {
   notes: string | null;
   brand_launch_date: string | null;
   url: string;
+  logo_url: string | null;
   discovered_at: string | null;
   updated_at: string | null;
 }
@@ -313,6 +314,8 @@ export default function CRMPage() {
   const [newContactSaving, setNewContactSaving] = useState(false);
   const [quickFillText, setQuickFillText] = useState("");
   const [quickFillParsing, setQuickFillParsing] = useState(false);
+  const [logoSearching, setLogoSearching] = useState<string | null>(null); // prospect id or "new"
+  const [backfillingLogos, setBackfillingLogos] = useState(false);
   const [newContactData, setNewContactData] = useState({
     university_name: "",
     contact_name: "",
@@ -324,6 +327,7 @@ export default function CRMPage() {
     status: "new",
     notes: "",
     brand_launch_date: "",
+    logo_url: "",
   });
 
   const selected = prospects.find((p) => p.id === selectedId) || null;
@@ -935,6 +939,81 @@ export default function CRMPage() {
     }
   };
 
+  // ── Logo Search ─────────────────────────────────────────────────────────
+  const searchLogoForProspect = async (prospectId: string, universityName: string) => {
+    setLogoSearching(prospectId);
+    try {
+      const { data, error } = await supabase.functions.invoke("search-university-logo", {
+        body: { university_name: universityName },
+      });
+      if (error) throw error;
+      if (data?.logo_url) {
+        await supabase.from("sales_prospects").update({ logo_url: data.logo_url } as any).eq("id", prospectId);
+        setProspects((prev) =>
+          prev.map((p) => (p.id === prospectId ? { ...p, logo_url: data.logo_url } : p))
+        );
+        toast.success(`Logo found for ${universityName}`);
+      } else {
+        toast.info(`No logo found for ${universityName}`);
+      }
+    } catch (e: any) {
+      console.error("Logo search error:", e);
+      toast.error("Logo search failed");
+    } finally {
+      setLogoSearching(null);
+    }
+  };
+
+  const searchLogoForNewContact = async () => {
+    if (!newContactData.university_name.trim()) return;
+    setLogoSearching("new");
+    try {
+      const { data, error } = await supabase.functions.invoke("search-university-logo", {
+        body: { university_name: newContactData.university_name.trim() },
+      });
+      if (error) throw error;
+      if (data?.logo_url) {
+        setNewContactData((d) => ({ ...d, logo_url: data.logo_url }));
+        toast.success("Logo found!");
+      } else {
+        toast.info("No logo found");
+      }
+    } catch (e: any) {
+      console.error("Logo search error:", e);
+      toast.error("Logo search failed");
+    } finally {
+      setLogoSearching(null);
+    }
+  };
+
+  const backfillLogos = async () => {
+    const withoutLogos = prospects.filter((p) => !p.logo_url && p.university_name);
+    if (withoutLogos.length === 0) {
+      toast.info("All contacts already have logos");
+      return;
+    }
+    setBackfillingLogos(true);
+    let found = 0;
+    for (const p of withoutLogos) {
+      try {
+        const { data } = await supabase.functions.invoke("search-university-logo", {
+          body: { university_name: p.university_name },
+        });
+        if (data?.logo_url) {
+          await supabase.from("sales_prospects").update({ logo_url: data.logo_url } as any).eq("id", p.id);
+          setProspects((prev) =>
+            prev.map((pr) => (pr.id === p.id ? { ...pr, logo_url: data.logo_url } : pr))
+          );
+          found++;
+        }
+      } catch {
+        // continue with next
+      }
+    }
+    setBackfillingLogos(false);
+    toast.success(`Found logos for ${found} of ${withoutLogos.length} contacts`);
+  };
+
   // ── Create New Contact ─────────────────────────────────────────────────
   const handleCreateContact = async () => {
     if (!newContactData.university_name.trim()) {
@@ -942,7 +1021,7 @@ export default function CRMPage() {
       return;
     }
     setNewContactSaving(true);
-    const { error } = await supabase.from("sales_prospects").insert({
+    const { error, data: inserted } = await supabase.from("sales_prospects").insert({
       university_name: newContactData.university_name.trim(),
       contact_name: newContactData.contact_name.trim() || null,
       contact_email: newContactData.contact_email.trim() || null,
@@ -953,12 +1032,17 @@ export default function CRMPage() {
       status: newContactData.status || "new",
       notes: newContactData.notes.trim() || null,
       brand_launch_date: newContactData.brand_launch_date || null,
-    } as any);
+      logo_url: newContactData.logo_url.trim() || null,
+    } as any).select("id").single();
     setNewContactSaving(false);
     if (error) {
       toast.error("Failed to create contact");
     } else {
       toast.success("Contact created");
+      // Auto-search logo if none was set
+      if (!newContactData.logo_url && newContactData.university_name.trim() && inserted?.id) {
+        searchLogoForProspect(inserted.id, newContactData.university_name.trim());
+      }
       setNewContactOpen(false);
       setNewContactData({
         university_name: "",
@@ -971,6 +1055,7 @@ export default function CRMPage() {
         status: "new",
         notes: "",
         brand_launch_date: "",
+        logo_url: "",
       });
       loadProspects();
     }
@@ -1204,7 +1289,10 @@ export default function CRMPage() {
           <SelectContent><SelectItem value="all">All</SelectItem><SelectItem value="active">Active</SelectItem><SelectItem value="signed_up">Signed Up</SelectItem><SelectItem value="none">Not Yet</SelectItem></SelectContent>
         </Select>
         <span className="text-sm text-muted-foreground">{filtered.length} contacts</span>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={backfillLogos} disabled={backfillingLogos} className="h-9 gap-1.5">
+            {backfillingLogos ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Finding Logos...</> : <><Globe className="h-3.5 w-3.5" /> Backfill Logos</>}
+          </Button>
           <Button size="sm" onClick={() => setNewContactOpen(true)} className="h-9 gap-1.5">
             <Plus className="h-3.5 w-3.5" /> New Contact
           </Button>
@@ -1248,7 +1336,16 @@ export default function CRMPage() {
                       {p.contact_title && <div className="text-xs text-muted-foreground">{p.contact_title}</div>}
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm">{p.university_name}</TableCell>
+                  <TableCell className="text-sm">
+                    <div className="flex items-center gap-2">
+                      {p.logo_url ? (
+                        <img src={p.logo_url} alt="" className="h-5 w-5 rounded object-contain flex-shrink-0" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                      ) : (
+                        <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      )}
+                      <span>{p.university_name}</span>
+                    </div>
+                  </TableCell>
                   <TableCell className="text-sm text-muted-foreground">{p.contact_email || "—"}</TableCell>
                   <TableCell><span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[p.status || "new"]}`}>{(p.status || "new").replace("_", " ")}</span></TableCell>
                   <TableCell className="text-sm text-center">{ec.count}</TableCell>
@@ -1267,9 +1364,25 @@ export default function CRMPage() {
         <SheetContent side="right" className="w-full sm:max-w-2xl p-0 flex flex-col">
           <SheetHeader className="p-5 pb-3 border-b border-border">
             <div className="flex items-center justify-between">
-              <div>
-                <SheetTitle className="text-lg">{selected?.contact_name || "Contact"}</SheetTitle>
-                <SheetDescription className="text-sm">{selected?.university_name}</SheetDescription>
+              <div className="flex items-center gap-3">
+                {selected?.logo_url ? (
+                  <img src={selected.logo_url} alt="" className="h-10 w-10 rounded-lg object-contain border border-border bg-background p-0.5" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                ) : (
+                  <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+                    <Building2 className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                )}
+                <div>
+                  <SheetTitle className="text-lg">{selected?.contact_name || "Contact"}</SheetTitle>
+                  <SheetDescription className="text-sm flex items-center gap-1.5">
+                    {selected?.university_name}
+                    {selected && !selected.logo_url && (
+                      <Button variant="ghost" size="sm" className="h-5 px-1.5 text-[10px]" onClick={() => searchLogoForProspect(selected.id, selected.university_name)} disabled={logoSearching === selected.id}>
+                        {logoSearching === selected.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Globe className="h-3 w-3" />}
+                      </Button>
+                    )}
+                  </SheetDescription>
+                </div>
               </div>
               <AppStatusBadge email={selected?.contact_email || null} />
             </div>
@@ -2795,13 +2908,35 @@ export default function CRMPage() {
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
                 <label className="text-xs font-medium text-muted-foreground mb-1 block">Account Name *</label>
-                <Input
-                  placeholder="e.g. University of Michigan"
-                  value={newContactData.university_name}
-                  onChange={(e) => setNewContactData(d => ({ ...d, university_name: e.target.value }))}
-                  className="h-9"
-                  maxLength={200}
-                />
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="e.g. University of Michigan"
+                    value={newContactData.university_name}
+                    onChange={(e) => setNewContactData(d => ({ ...d, university_name: e.target.value }))}
+                    className="h-9 flex-1"
+                    maxLength={200}
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-9 gap-1 px-2.5 whitespace-nowrap"
+                    disabled={!newContactData.university_name.trim() || logoSearching === "new"}
+                    onClick={searchLogoForNewContact}
+                  >
+                    {logoSearching === "new" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Globe className="h-3.5 w-3.5" />}
+                    Find Logo
+                  </Button>
+                </div>
+                {newContactData.logo_url && (
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <img src={newContactData.logo_url} alt="Logo" className="h-6 w-6 rounded object-contain border border-border" />
+                    <span className="text-xs text-muted-foreground truncate">{newContactData.logo_url}</span>
+                    <Button variant="ghost" size="sm" className="h-5 px-1" onClick={() => setNewContactData(d => ({ ...d, logo_url: "" }))}>
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
               </div>
               <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1 block">Contact Name</label>
