@@ -34,6 +34,7 @@ interface BrandStudioState {
   audience?: string;
   tone?: string;
   goal?: string;
+  restoreOverlay?: Record<string, any>;
 }
 
 type LogoPosition = "top-left" | "top-right" | "bottom-left" | "bottom-right";
@@ -43,6 +44,7 @@ const BrandStudioPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const state = (location.state as BrandStudioState | null) || ({} as Partial<BrandStudioState>);
+  const restore = state.restoreOverlay;
   const canvasRef = useRef<HTMLDivElement>(null);
 
   // --- Overridable brand state (initialized from navigation, updated by starter panel) ---
@@ -90,6 +92,13 @@ const BrandStudioPage = () => {
     setProfileId(pid);
     setChannel("social-media");
   }, [profiles]);
+
+  // Auto-apply profile when coming from "Edit in Brand Studio" with profileId but no brand data
+  useEffect(() => {
+    if (profileId && brandColors.length === 0 && profiles.length > 0) {
+      applyProfile(profileId);
+    }
+  }, [profileId, profiles, brandColors.length, applyProfile]);
 
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -145,39 +154,39 @@ const BrandStudioPage = () => {
   }, [selectedProfileId, applyProfile]);
 
   // Overlay state
-  const [overlayPattern, setOverlayPattern] = useState<OverlayPatternId | string>("solid");
-  const [overlayColor, setOverlayColor] = useState(primary);
-  const [overlayOpacity, setOverlayOpacity] = useState(0.55);
+  const [overlayPattern, setOverlayPattern] = useState<OverlayPatternId | string>(restore?.overlayPattern || "solid");
+  const [overlayColor, setOverlayColor] = useState(restore?.overlayColor || primary);
+  const [overlayOpacity, setOverlayOpacity] = useState(restore?.overlayOpacity ?? 0.55);
   const [customOverlayUrl, setCustomOverlayUrl] = useState<string | null>(null);
   const { overlays: customOverlays } = useCustomOverlays(undefined);
 
   // Logo state
-  const [showLogo, setShowLogo] = useState(!!logoUrl);
-  const [logoPosition, setLogoPosition] = useState<LogoPosition>("top-left");
-  const [logoScale, setLogoScale] = useState(60);
-  const [activeLogoIndex, setActiveLogoIndex] = useState(0);
+  const [showLogo, setShowLogo] = useState(restore?.showLogo ?? !!logoUrl);
+  const [logoPosition, setLogoPosition] = useState<LogoPosition>(restore?.logoPosition || "top-left");
+  const [logoScale, setLogoScale] = useState(restore?.logoScale ?? 60);
+  const [activeLogoIndex, setActiveLogoIndex] = useState(restore?.activeLogoIndex ?? 0);
 
   // Headline state
-  const [headlineText, setHeadlineText] = useState("");
-  const [headlineFontSize, setHeadlineFontSize] = useState(28);
-  const [headlineX, setHeadlineX] = useState(50);
-  const [headlineY, setHeadlineY] = useState(50);
-  const [headlineColor, setHeadlineColor] = useState("#ffffff");
-  const [headlineAlign, setHeadlineAlign] = useState<HeadlineAlign>("center");
-  const [headlineFont, setHeadlineFont] = useState("Inter");
-  const [headlineBold, setHeadlineBold] = useState(false);
-  const [headlineItalic, setHeadlineItalic] = useState(false);
-  const [headlineUnderline, setHeadlineUnderline] = useState(false);
-  const [headlineWidth, setHeadlineWidth] = useState(90);
+  const [headlineText, setHeadlineText] = useState(restore?.headlineText || "");
+  const [headlineFontSize, setHeadlineFontSize] = useState(restore?.headlineFontSize ?? 28);
+  const [headlineX, setHeadlineX] = useState(restore?.headlineX ?? 50);
+  const [headlineY, setHeadlineY] = useState(restore?.headlineY ?? 50);
+  const [headlineColor, setHeadlineColor] = useState(restore?.headlineColor || "#ffffff");
+  const [headlineAlign, setHeadlineAlign] = useState<HeadlineAlign>(restore?.headlineAlign || "center");
+  const [headlineFont, setHeadlineFont] = useState(restore?.headlineFont || "Inter");
+  const [headlineBold, setHeadlineBold] = useState(restore?.headlineBold ?? false);
+  const [headlineItalic, setHeadlineItalic] = useState(restore?.headlineItalic ?? false);
+  const [headlineUnderline, setHeadlineUnderline] = useState(restore?.headlineUnderline ?? false);
+  const [headlineWidth, setHeadlineWidth] = useState(restore?.headlineWidth ?? 90);
 
   // Drag state
   const [isDragging, setIsDragging] = useState(false);
   const dragOffset = useRef({ x: 0, y: 0 });
 
   // Bottom bar state
-  const [showBottomBar, setShowBottomBar] = useState(false);
-  const [bottomBarText, setBottomBarText] = useState("");
-  const [bottomBarColor, setBottomBarColor] = useState(primary);
+  const [showBottomBar, setShowBottomBar] = useState(restore?.showBottomBar ?? false);
+  const [bottomBarText, setBottomBarText] = useState(restore?.bottomBarText || "");
+  const [bottomBarColor, setBottomBarColor] = useState(restore?.bottomBarColor || primary);
 
   // Smart Layer state
   const [isSmartLayering, setIsSmartLayering] = useState(false);
@@ -371,6 +380,32 @@ const BrandStudioPage = () => {
           institutionalProfileName: institutionName,
           coverImageUrl: imageUrl,
           tags: ["branded-image", channel || "image"].filter(Boolean),
+          metadata: {
+            source: "brand-studio",
+            originalImageUrl: smartLayerImageUrl || state.imageUrl || null,
+            brandColors,
+            overlayPattern,
+            overlayColor,
+            overlayOpacity,
+            headlineText,
+            headlineFontSize,
+            headlineX,
+            headlineY,
+            headlineColor,
+            headlineAlign,
+            headlineFont,
+            headlineBold,
+            headlineItalic,
+            headlineUnderline,
+            headlineWidth,
+            showLogo,
+            logoPosition,
+            logoScale,
+            activeLogoIndex,
+            showBottomBar,
+            bottomBarText,
+            bottomBarColor,
+          },
         });
         if (result?.id) {
           setLastSavedMessageId(result.id);

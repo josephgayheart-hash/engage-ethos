@@ -421,7 +421,44 @@ const MessageDetailPage = () => {
                 
                 {isBranded && (
                   <Button 
-                    onClick={() => navigate('/brand-studio', { state: { imageUrl: brandedImageUrl, brandColors: [], profileId: message.institutionalProfileId } })}
+                    onClick={() => {
+                      const meta = message.metadata || {};
+                      navigate('/brand-studio', { state: { 
+                        imageUrl: meta.originalImageUrl || brandedImageUrl, 
+                        brandColors: meta.brandColors || [], 
+                        profileId: message.institutionalProfileId,
+                        audience: message.audience,
+                        tone: message.tone,
+                        goal: message.goal,
+                        channel: message.channel,
+                        sceneDescription: message.notes,
+                        institutionName: message.institutionalProfileName,
+                        // Restore brand overlay settings
+                        restoreOverlay: meta.headlineText ? {
+                          overlayPattern: meta.overlayPattern,
+                          overlayColor: meta.overlayColor,
+                          overlayOpacity: meta.overlayOpacity,
+                          headlineText: meta.headlineText,
+                          headlineFontSize: meta.headlineFontSize,
+                          headlineX: meta.headlineX,
+                          headlineY: meta.headlineY,
+                          headlineColor: meta.headlineColor,
+                          headlineAlign: meta.headlineAlign,
+                          headlineFont: meta.headlineFont,
+                          headlineBold: meta.headlineBold,
+                          headlineItalic: meta.headlineItalic,
+                          headlineUnderline: meta.headlineUnderline,
+                          headlineWidth: meta.headlineWidth,
+                          showLogo: meta.showLogo,
+                          logoPosition: meta.logoPosition,
+                          logoScale: meta.logoScale,
+                          activeLogoIndex: meta.activeLogoIndex,
+                          showBottomBar: meta.showBottomBar,
+                          bottomBarText: meta.bottomBarText,
+                          bottomBarColor: meta.bottomBarColor,
+                        } : undefined,
+                      } });
+                    }}
                     variant="outline" 
                     size="sm"
                   >

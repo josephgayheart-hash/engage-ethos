@@ -66,6 +66,7 @@ export function useMessageLibrary() {
         remixedFrom: (row as any).remixed_from as any,
         externalAssets: ((row as any).external_assets as any[]) || [],
         coverImageUrl: (row as any).cover_image_url || undefined,
+        metadata: (row.metadata as Record<string, any>) || undefined,
       }));
 
       setMessages(mapped);
@@ -110,7 +111,7 @@ export function useMessageLibrary() {
         approved: message.approved || false,
         mode: message.mode || 'generated',
         institutional_profile_id: message.institutionalProfileId || null,
-        metadata: { source: message.source || 'other' },
+        metadata: { source: message.source || 'other', ...(message.metadata || {}) },
         source: message.source || 'other',
         versions: versions as any,
         tags: message.tags || [],
