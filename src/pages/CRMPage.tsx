@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -15,6 +15,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Separator } from "@/components/ui/separator";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { Progress } from "@/components/ui/progress";
@@ -2140,37 +2142,45 @@ export default function CRMPage() {
                       </div>
                     )}
 
-                    {/* Add contact dropdown */}
+                    {/* Add contact – searchable */}
                     <div className="pt-1">
-                      <Select
-                        value=""
-                        onValueChange={async (contactId) => {
-                          if (!contactId || selectedOpp.contact_ids?.includes(contactId)) return;
-                          const newIds = [...(selectedOpp.contact_ids || []), contactId];
-                          await supabase.from("crm_opportunities" as any).update({ contact_ids: newIds, updated_at: new Date().toISOString() } as any).eq("id", selectedOpp.id);
-                          loadOpportunities();
-                        }}
-                      >
-                        <SelectTrigger className="h-8 text-xs">
-                          <div className="flex items-center gap-1 text-muted-foreground">
-                            <UserPlus className="h-3.5 w-3.5" /> Add contact...
-                          </div>
-                        </SelectTrigger>
-                        <SelectContent>
-                          {prospects
-                            .filter(p => p.contact_name && !selectedOpp.contact_ids?.includes(p.id))
-                            .map(p => (
-                              <SelectItem key={p.id} value={p.id}>
-                                <span className="font-medium">{p.contact_name}</span>
-                                <span className="text-muted-foreground ml-1.5">· {p.university_name}</span>
-                              </SelectItem>
-                            ))
-                          }
-                          {prospects.filter(p => p.contact_name && !selectedOpp.contact_ids?.includes(p.id)).length === 0 && (
-                            <div className="px-2 py-1.5 text-xs text-muted-foreground">No more contacts available</div>
-                          )}
-                        </SelectContent>
-                      </Select>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" size="sm" className="w-full h-8 text-xs justify-start text-muted-foreground">
+                            <UserPlus className="h-3.5 w-3.5 mr-1.5" /> Add contact...
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-72 p-0" align="start">
+                          <Command>
+                            <CommandInput placeholder="Search contacts..." className="h-9" />
+                            <CommandList>
+                              <CommandEmpty>No contacts found</CommandEmpty>
+                              <CommandGroup>
+                                {prospects
+                                  .filter(p => p.contact_name && !selectedOpp.contact_ids?.includes(p.id))
+                                  .map(p => (
+                                    <CommandItem
+                                      key={p.id}
+                                      value={`${p.contact_name} ${p.university_name}`}
+                                      onSelect={async () => {
+                                        const newIds = [...(selectedOpp.contact_ids || []), p.id];
+                                        await supabase.from("crm_opportunities" as any).update({ contact_ids: newIds, updated_at: new Date().toISOString() } as any).eq("id", selectedOpp.id);
+                                        loadOpportunities();
+                                      }}
+                                      className="cursor-pointer"
+                                    >
+                                      <div className="flex flex-col">
+                                        <span className="text-sm font-medium">{p.contact_name}</span>
+                                        <span className="text-xs text-muted-foreground">{p.contact_title ? `${p.contact_title} · ` : ""}{p.university_name}</span>
+                                      </div>
+                                    </CommandItem>
+                                  ))
+                                }
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                     </div>
                   </CardContent>
                 </Card>
