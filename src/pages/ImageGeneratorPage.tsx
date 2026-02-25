@@ -9,13 +9,16 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { supabase } from "@/integrations/supabase/client";
-import { ImageIcon, Download, RefreshCw, Loader2, Sparkles, Palette, Camera, Users, Target, Eye, Image, ExternalLink, PaintBucket, Maximize2 } from "lucide-react";
+import { ImageIcon, Download, RefreshCw, Loader2, Sparkles, Palette, Camera, Users, Target, Eye, Image, ExternalLink, PaintBucket, Maximize2, FolderPlus, Library } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { ChannelMockup } from "@/components/image-generator/ChannelMockup";
 import { BrandOverlayEditor } from "@/components/image-generator/BrandOverlayEditor";
 import { useCampusPhotoCount } from "@/hooks/useCampusPhotoCount";
 import { AIResultsGuidance } from "@/components/AIResultsGuidance";
 import { useUserDrafts } from "@/hooks/useUserDrafts";
+import { useMessageLibrary } from "@/hooks/useMessageLibrary";
+import { useSharedLibrary } from "@/hooks/useSharedLibrary";
+import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
 import { toast } from "sonner";
 
 const channelOptions = [
@@ -72,7 +75,7 @@ const styleOptions = [
 ];
 
 const ImageGeneratorPage = () => {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const tenantId = profile?.tenant_id;
   const { profiles } = useInstitutionalProfiles();
   const location = useLocation();
@@ -92,6 +95,10 @@ const ImageGeneratorPage = () => {
   const [blankCanvasMode, setBlankCanvasMode] = useState(false);
   const { campusPhotoCount } = useCampusPhotoCount(selectedProfileId || null);
   const { saveDraft, loadDraftById } = useUserDrafts();
+  const { addMessage } = useMessageLibrary();
+  const { addTemplate } = useSharedLibrary();
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [saveDialogType, setSaveDialogType] = useState<'personal' | 'shared'>('personal');
 
   // Resume draft from navigation (e.g. dashboard "My Drafts" card)
   useEffect(() => {
@@ -196,6 +203,47 @@ const ImageGeneratorPage = () => {
       toast.error("Download failed.");
     }
   };
+
+  const handleSaveToLibrary = useCallback(async (name: string): Promise<string | undefined> => {
+    if (!imageUrl) return undefined;
+    const result = await addMessage({
+      title: name,
+      content: `![Generated Image](${imageUrl})`,
+      channel: (channel as any) || 'social-media',
+      mode: 'generated',
+      source: 'image-studio' as any,
+      approved: false,
+      audience: audience as any,
+      tone: tone as any,
+      goal: goal as any,
+      notes: contentDescription || undefined,
+      institutionalProfileId: selectedProfileId || undefined,
+      institutionalProfileName: profileInstitutionName,
+      coverImageUrl: imageUrl,
+      tags: ['image', channel].filter(Boolean),
+    });
+    return result?.id;
+  }, [imageUrl, channel, audience, tone, goal, contentDescription, selectedProfileId, profileInstitutionName, addMessage]);
+
+  const handleSaveToSharedLibrary = useCallback(async (name: string): Promise<string | undefined> => {
+    if (!imageUrl || !profile) return undefined;
+    const { data, error } = await supabase.from('shared_templates').insert({
+      title: name,
+      content: `![Generated Image](${imageUrl})`,
+      cover_image_url: imageUrl,
+      tenant_id: profile.tenant_id,
+      created_by_user_id: user?.id || '',
+      created_by_name: `${profile.first_name} ${profile.last_name}`,
+      status: 'submitted',
+      source: 'image-studio',
+      institutional_profile_id: selectedProfileId || null,
+      tags: ['image', channel].filter(Boolean),
+      required_fields: { audience: audience ? [audience] : [], moment: [], channel: channel ? [channel] : ['social-media'] },
+      metadata: { source: 'image-studio', sceneDescription: contentDescription, tone, goal },
+    }).select('id').single();
+    if (error) { toast.error('Failed to save to University Library.'); return undefined; }
+    return data?.id;
+  }, [imageUrl, channel, audience, tone, goal, contentDescription, selectedProfileId, profile, user]);
 
   return (
     <div className="bg-background">
@@ -670,9 +718,15 @@ const ImageGeneratorPage = () => {
                     <AIResultsGuidance variant="subtle" className="mt-2" />
 
                     {imageUrl && viewMode !== "overlay" && (
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 flex-wrap">
                         <Button variant="outline" size="sm" className="flex-1" onClick={handleDownload}>
                           <Download className="w-4 h-4 mr-1" /> Download
+                        </Button>
+                        <Button variant="outline" size="sm" className="flex-1" onClick={() => { setSaveDialogType('personal'); setSaveDialogOpen(true); }}>
+                          <FolderPlus className="w-4 h-4 mr-1" /> Save to Library
+                        </Button>
+                        <Button variant="outline" size="sm" className="flex-1" onClick={() => { setSaveDialogType('shared'); setSaveDialogOpen(true); }}>
+                          <Library className="w-4 h-4 mr-1" /> University Library
                         </Button>
                         <Button variant="outline" size="sm" className="flex-1" onClick={handleGenerate}>
                           <RefreshCw className="w-4 h-4 mr-1" /> Regenerate
@@ -696,6 +750,17 @@ const ImageGeneratorPage = () => {
           </div>
         </div>
       </main>
+
+      <SaveToLibraryDialog
+        open={saveDialogOpen}
+        onOpenChange={setSaveDialogOpen}
+        onSave={saveDialogType === 'shared' ? handleSaveToSharedLibrary : handleSaveToLibrary}
+        onSaveToPersonal={saveDialogType === 'shared' ? handleSaveToLibrary : undefined}
+        onSaveToShared={saveDialogType === 'personal' ? handleSaveToSharedLibrary : undefined}
+        libraryType={saveDialogType}
+        contentType="image"
+        defaultName={`${profileInstitutionName || 'Campus Image'} — ${channelOptions.find(c => c.value === channel)?.label || channel}`}
+      />
     </div>
   );
 };
