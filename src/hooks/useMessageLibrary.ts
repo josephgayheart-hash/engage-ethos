@@ -138,7 +138,42 @@ export function useMessageLibrary() {
       source: message.source,
     });
 
-    await loadMessages();
+    // Optimistically add to local state instead of full refetch for speed
+    if (data) {
+      const newMessage: SavedMessage = {
+        id: data.id,
+        title: data.title,
+        content: data.content,
+        channel: data.channel as any,
+        channels: (data as any).channels as any,
+        channelDrafts: (data as any).channel_drafts as any,
+        audience: data.audience as any,
+        cohort: (data as any).cohort as any,
+        domain: data.domain as any,
+        moment: data.moment as any,
+        goal: data.goal as any,
+        tone: data.tone as any,
+        senderRecommendation: data.sender_recommendation || undefined,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+        versions: ((data as any).versions as any[]) || [],
+        notes: data.notes || undefined,
+        approved: data.approved || false,
+        mode: (data.mode as any) || 'generated',
+        institutionalProfileId: data.institutional_profile_id || undefined,
+        source: ((data as any).source || 'other') as any,
+        tags: (data as any).tags || [],
+        submittedToLibrary: (data as any).submitted_to_library || false,
+        submittedAt: (data as any).submitted_at || undefined,
+        createdByUserId: data.user_id,
+        createdByName: (data as any).created_by_name || undefined,
+        remixedFrom: (data as any).remixed_from as any,
+        externalAssets: ((data as any).external_assets as any[]) || [],
+        coverImageUrl: (data as any).cover_image_url || undefined,
+      };
+      setMessages(prev => [newMessage, ...prev]);
+    }
+
     return data;
   }, [profile, loadMessages, trackToolUse]);
 

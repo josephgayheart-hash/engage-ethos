@@ -182,7 +182,7 @@ const PersonalLibrary = () => {
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
-                      placeholder="Search messages..."
+                      placeholder="Search items..."
                       value={filters.search}
                       onChange={(e) => setFilters(f => ({ ...f, search: e.target.value }))}
                       className="pl-10"
@@ -282,7 +282,7 @@ const PersonalLibrary = () => {
           {/* View Toggle & Results Count */}
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm text-muted-foreground">
-              {filteredMessages.length} message{filteredMessages.length !== 1 ? 's' : ''}
+              {filteredMessages.length} item{filteredMessages.length !== 1 ? 's' : ''}
             </p>
             <div className="flex items-center border border-border rounded-lg p-0.5 bg-muted/50">
               <Button
@@ -309,9 +309,9 @@ const PersonalLibrary = () => {
             <Card className="text-center py-12">
               <CardContent>
                 <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="font-serif text-lg font-semibold mb-2">No messages yet</h3>
+                <h3 className="font-serif text-lg font-semibold mb-2">No items yet</h3>
                 <p className="text-muted-foreground mb-4">
-                  Evaluate or generate messages to build your library.
+                  Generate content, create images, or evaluate messages to build your library.
                 </p>
                 <Link to="/dashboard">
                   <Button>Get Started</Button>
