@@ -946,8 +946,10 @@ export default function CRMPage() {
       const { data, error } = await supabase.functions.invoke("search-university-logo", {
         body: { university_name: universityName },
       });
-      if (error) throw error;
-      if (data?.logo_url) {
+      if (error) throw new Error(error.message || "Edge function error");
+      if (data?.success === false) {
+        toast.info(data.reason || `No logo found for ${universityName}`);
+      } else if (data?.logo_url) {
         await supabase.from("sales_prospects").update({ logo_url: data.logo_url } as any).eq("id", prospectId);
         setProspects((prev) =>
           prev.map((p) => (p.id === prospectId ? { ...p, logo_url: data.logo_url } : p))
@@ -958,7 +960,7 @@ export default function CRMPage() {
       }
     } catch (e: any) {
       console.error("Logo search error:", e);
-      toast.error("Logo search failed");
+      toast.error(`Logo search failed: ${e?.message || "Unknown error"}`);
     } finally {
       setLogoSearching(null);
     }
@@ -971,8 +973,10 @@ export default function CRMPage() {
       const { data, error } = await supabase.functions.invoke("search-university-logo", {
         body: { university_name: newContactData.university_name.trim() },
       });
-      if (error) throw error;
-      if (data?.logo_url) {
+      if (error) throw new Error(error.message || "Edge function error");
+      if (data?.success === false) {
+        toast.info(data.reason || "No logo found");
+      } else if (data?.logo_url) {
         setNewContactData((d) => ({ ...d, logo_url: data.logo_url }));
         toast.success("Logo found!");
       } else {
@@ -980,7 +984,7 @@ export default function CRMPage() {
       }
     } catch (e: any) {
       console.error("Logo search error:", e);
-      toast.error("Logo search failed");
+      toast.error(`Logo search failed: ${e?.message || "Unknown error"}`);
     } finally {
       setLogoSearching(null);
     }
