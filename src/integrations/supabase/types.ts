@@ -634,6 +634,7 @@ export type Database = {
           arr: number | null
           close_date: string | null
           contact_ids: string[] | null
+          contact_roles: Json | null
           contract_term_months: number | null
           created_at: string
           created_by_user_id: string | null
@@ -654,6 +655,7 @@ export type Database = {
           arr?: number | null
           close_date?: string | null
           contact_ids?: string[] | null
+          contact_roles?: Json | null
           contract_term_months?: number | null
           created_at?: string
           created_by_user_id?: string | null
@@ -674,6 +676,7 @@ export type Database = {
           arr?: number | null
           close_date?: string | null
           contact_ids?: string[] | null
+          contact_roles?: Json | null
           contract_term_months?: number | null
           created_at?: string
           created_by_user_id?: string | null
