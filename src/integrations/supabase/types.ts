@@ -631,44 +631,62 @@ export type Database = {
       crm_opportunities: {
         Row: {
           amount: number | null
+          arr: number | null
           close_date: string | null
           contact_ids: string[] | null
+          contract_term_months: number | null
           created_at: string
           created_by_user_id: string | null
           files: Json | null
           id: string
           name: string
           notes: string | null
+          product_tier: string | null
           prospect_id: string | null
+          renewal_date: string | null
+          seat_count: number | null
           stage: string
+          subscription_type: string | null
           updated_at: string
         }
         Insert: {
           amount?: number | null
+          arr?: number | null
           close_date?: string | null
           contact_ids?: string[] | null
+          contract_term_months?: number | null
           created_at?: string
           created_by_user_id?: string | null
           files?: Json | null
           id?: string
           name: string
           notes?: string | null
+          product_tier?: string | null
           prospect_id?: string | null
+          renewal_date?: string | null
+          seat_count?: number | null
           stage?: string
+          subscription_type?: string | null
           updated_at?: string
         }
         Update: {
           amount?: number | null
+          arr?: number | null
           close_date?: string | null
           contact_ids?: string[] | null
+          contract_term_months?: number | null
           created_at?: string
           created_by_user_id?: string | null
           files?: Json | null
           id?: string
           name?: string
           notes?: string | null
+          product_tier?: string | null
           prospect_id?: string | null
+          renewal_date?: string | null
+          seat_count?: number | null
           stage?: string
+          subscription_type?: string | null
           updated_at?: string
         }
         Relationships: [
