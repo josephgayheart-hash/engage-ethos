@@ -1737,64 +1737,41 @@ export default function CRMPage() {
               </div>
             )}
 
-            {/* Chevron stage path */}
+            {/* Stage pipeline - Monday.com style */}
             <div className="max-w-6xl mx-auto px-6 mt-5">
-              <div className="flex items-center gap-0 rounded-xl overflow-hidden shadow-lg border border-border/50">
+              <div className="flex items-center gap-1">
                 {OPPORTUNITY_STAGES.map((stage, idx) => {
                   const isActive = stage.value === selectedOpp.stage;
                   const isPast = idx < currentIdx;
                   const isClosedWon = selectedOpp.stage === "closed_won";
                   const isClosedLost = selectedOpp.stage === "closed_lost";
+                  const isFirst = idx === 0;
+                  const isLast = idx === OPPORTUNITY_STAGES.length - 1;
 
-                  let bgClass = "bg-muted/40 text-muted-foreground";
-                  let chevronFill = "hsl(var(--muted) / 0.4)";
-                  let glowClass = "";
+                  let bgClass = "bg-muted/50 text-muted-foreground hover:bg-muted/70";
                   if (isActive) {
-                    if (isClosedWon) {
-                      bgClass = "bg-gradient-to-r from-emerald-500 to-emerald-400 text-white";
-                      chevronFill = "rgb(52 211 153)";
-                      glowClass = "shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_0_20px_rgba(16,185,129,0.3)]";
-                    } else if (isClosedLost) {
-                      bgClass = "bg-gradient-to-r from-destructive to-destructive/80 text-destructive-foreground";
-                      chevronFill = "hsl(var(--destructive) / 0.8)";
-                      glowClass = "shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]";
-                    } else {
-                      bgClass = "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground";
-                      chevronFill = "hsl(var(--primary) / 0.8)";
-                      glowClass = "shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_0_16px_hsl(var(--primary)/0.25)]";
-                    }
+                    if (isClosedWon) bgClass = "bg-emerald-500 text-white hover:bg-emerald-600";
+                    else if (isClosedLost) bgClass = "bg-destructive text-destructive-foreground hover:bg-destructive/90";
+                    else bgClass = "bg-primary text-primary-foreground hover:bg-primary/90";
                   } else if (isPast) {
-                    bgClass = "bg-gradient-to-r from-primary/20 to-primary/10 text-primary";
-                    chevronFill = "hsl(var(--primary) / 0.1)";
+                    bgClass = "bg-primary/15 text-primary hover:bg-primary/25";
                   }
 
+                  const roundedClass = isFirst ? "rounded-l-full" : isLast ? "rounded-r-full" : "";
+
                   return (
-                    <div key={stage.value} className="flex items-stretch flex-1 relative group">
-                      <button
-                        onClick={() => handleUpdateOppStage(selectedOpp.id, stage.value)}
-                        className={`w-full py-3.5 text-xs font-bold text-center transition-all duration-300 hover:brightness-110 ${bgClass} ${glowClass}`}
-                      >
-                        <span className="relative z-10 flex items-center justify-center gap-1.5">
-                          {isPast && <CheckCircle2 className="h-3.5 w-3.5 drop-shadow-sm" />}
-                          {isActive && stage.value === "closed_won" && <span className="text-sm">🏆</span>}
-                          {isActive && stage.value === "closed_lost" && <span className="text-sm">💩</span>}
-                          <span className="drop-shadow-sm">{stage.label}</span>
-                        </span>
-                      </button>
-                      {idx < OPPORTUNITY_STAGES.length - 1 && (
-                        <div className="absolute right-0 top-0 h-full w-5 translate-x-2.5 z-20 pointer-events-none">
-                          <svg viewBox="0 0 20 48" preserveAspectRatio="none" className="h-full w-full drop-shadow-md">
-                            <defs>
-                              <filter id={`shadow-${idx}`}>
-                                <feDropShadow dx="1" dy="0" stdDeviation="1" floodOpacity="0.15" />
-                              </filter>
-                            </defs>
-                            <path d="M0,0 L18,24 L0,48" fill={chevronFill} filter={`url(#shadow-${idx})`} />
-                            <path d="M0,0 L18,24 L0,48" fill="none" stroke="hsl(var(--border) / 0.5)" strokeWidth="0.5" />
-                          </svg>
-                        </div>
-                      )}
-                    </div>
+                    <button
+                      key={stage.value}
+                      onClick={() => handleUpdateOppStage(selectedOpp.id, stage.value)}
+                      className={`flex-1 py-2.5 text-xs font-semibold text-center transition-all duration-200 ${bgClass} ${roundedClass}`}
+                    >
+                      <span className="flex items-center justify-center gap-1">
+                        {isPast && <CheckCircle2 className="h-3 w-3" />}
+                        {isActive && stage.value === "closed_won" && <span>🏆</span>}
+                        {isActive && stage.value === "closed_lost" && <span>💩</span>}
+                        {stage.label}
+                      </span>
+                    </button>
                   );
                 })}
               </div>
