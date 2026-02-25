@@ -33,6 +33,7 @@ import {
   Mic,
   Heart
 } from "lucide-react";
+import { AIResultsGuidance } from "@/components/AIResultsGuidance";
 import type { StrategyJourney, Channel, StrategyPhase, JourneyTouchpoint, MessageContext, InstitutionalConfig } from "@/types/campusvoice";
 
 interface StrategyJourneyProps {
@@ -662,6 +663,8 @@ export function StrategyJourneyDisplay({
           </CardContent>
         </Card>
       </div>
+
+      <AIResultsGuidance />
     </div>
   );
 }

@@ -305,6 +305,11 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Select model based on engine param
+    const selectedModel = engine === "premium"
+      ? "google/gemini-3-pro-image-preview"
+      : "google/gemini-2.5-flash-image";
+
     // Fetch institutional branding — build strict color palette
     // Filter out app default colors that leak into profile configs
     const APP_DEFAULT_COLORS = ["#1f2a44", "#2c7a7b"];
@@ -320,46 +325,58 @@ serve(async (req) => {
     let tenantInstitutionName = ""; // fallback only — profile institutionName takes priority
     const brandColors: string[] = [];
     let tenantType = "";
-    try {
-      if (tenantId) {
-        const { data: tenant } = await supabaseAdmin
-          .from("tenants")
-          .select("institution_name, primary_color, accent_color, logo_url, tenant_type")
-          .eq("id", tenantId)
-          .single();
 
-        if (tenant) {
-          tenantType = tenant.tenant_type || "";
-          // For agency tenants, institution_name is the agency name — don't use it for campus context
-          if (tenant.tenant_type !== "agency") {
-            tenantInstitutionName = tenant.institution_name;
-            brandContext += `Institution: ${tenant.institution_name}.`;
-          }
-          // Only use tenant-level colors if NO profile is selected
-          // (tenant colors often represent the platform, not the institution)
-          if (!profileId) {
-            if (tenant.primary_color) addColor(brandColors, tenant.primary_color);
-            if (tenant.accent_color) addColor(brandColors, tenant.accent_color);
-          }
+    // ── Parallel DB fetch: tenant, profiles, and campus photos all at once ──
+    const tenantPromise = tenantId
+      ? supabaseAdmin.from("tenants").select("institution_name, primary_color, accent_color, logo_url, tenant_type").eq("id", tenantId).single()
+      : Promise.resolve({ data: null });
+
+    const profilePromises: Promise<any>[] = [];
+    if (profileId) {
+      profilePromises.push(supabaseAdmin.from("institutional_profiles").select("name, config, parent_profile_id, profile_type").eq("id", profileId).single());
+    }
+    if (tenantId) {
+      profilePromises.push(supabaseAdmin.from("institutional_profiles").select("name, config, parent_profile_id, profile_type").eq("tenant_id", tenantId).eq("profile_type", "university").limit(1).single());
+    }
+
+    const campusPhotoQuery = supabaseAdmin
+      .from("campus_photo_samples")
+      .select("file_url, photo_category")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false });
+    if (profileId) {
+      campusPhotoQuery.eq("profile_id", profileId);
+    } else if (tenantId) {
+      campusPhotoQuery.eq("tenant_id", tenantId);
+    }
+    const campusPhotoPromise = campusPhotoQuery.limit(8);
+
+    // Fire all queries simultaneously
+    const [tenantResult, profileResults, campusPhotoResult] = await Promise.all([
+      tenantPromise.catch(e => { console.warn("Tenant fetch failed:", e); return { data: null }; }),
+      Promise.all(profilePromises).catch(e => { console.warn("Profile fetch failed:", e); return []; }),
+      campusPhotoPromise.catch(e => { console.warn("Campus photos fetch failed:", e); return { data: null }; }),
+    ]);
+
+    try {
+      const tenant = tenantResult.data;
+      if (tenant) {
+        tenantType = tenant.tenant_type || "";
+        if (tenant.tenant_type !== "agency") {
+          tenantInstitutionName = tenant.institution_name;
+          brandContext += `Institution: ${tenant.institution_name}.`;
+        }
+        if (!profileId) {
+          if (tenant.primary_color) addColor(brandColors, tenant.primary_color);
+          if (tenant.accent_color) addColor(brandColors, tenant.accent_color);
         }
       }
 
-      // Fetch both the selected profile AND the master university profile for full color palette
-      const queries: Promise<any>[] = [];
-      if (profileId) {
-        queries.push(supabaseAdmin.from("institutional_profiles").select("name, config, parent_profile_id, profile_type").eq("id", profileId).single());
-      }
-      if (tenantId) {
-        queries.push(supabaseAdmin.from("institutional_profiles").select("name, config, parent_profile_id, profile_type").eq("tenant_id", tenantId).eq("profile_type", "university").limit(1).single());
-      }
-
-      const results = await Promise.all(queries);
       let unitName = "";
       let universityName = "";
-      for (const { data: profile } of results) {
+      for (const { data: profile } of (profileResults as any[])) {
         if (profile?.config) {
           const cfg = profile.config as Record<string, any>;
-          // Do NOT include mascot in image prompts — AI can't reliably depict specific mascots
           if (cfg.slogans?.length && !brandContext.includes("Slogan")) brandContext += ` Slogan: "${cfg.slogans[0]}".`;
           if (cfg.institutionName && !brandContext.includes("Full name")) {
             brandContext += ` Full name: ${cfg.institutionName}.`;
@@ -372,13 +389,11 @@ serve(async (req) => {
           if (cfg.accentColor) addColor(brandColors, cfg.accentColor);
           if (cfg.tertiaryColor) addColor(brandColors, cfg.tertiaryColor);
         }
-        // Use profile name as unit context if it's a sub-unit
         if (profile && profile.profile_type !== "university" && profile.name) {
           unitName = unitName || profile.name;
         }
       }
 
-      // Build campus-specific imagery instruction using profile institutionName (not agency tenant name)
       const schoolName = universityName || tenantInstitutionName;
       if (schoolName) {
         campusContext = `CAMPUS SETTING: This image should look like it was taken on the campus of ${schoolName}.`;
@@ -389,7 +404,7 @@ serve(async (req) => {
         }
       }
     } catch (e) {
-      console.warn("Could not fetch branding:", e);
+      console.warn("Could not process branding:", e);
     }
 
     console.log("Resolved brand color palette:", brandColors);
@@ -479,48 +494,37 @@ CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
 
     console.log("Generating channel image for:", channel, "content:", contentSummary.substring(0, 100));
 
-    // Fetch campus reference photos for visual training
+    // Use campus photos from the parallel fetch (skip for fast engine to reduce latency)
     let campusPhotoUrls: string[] = [];
-    try {
-      const photoQuery = supabaseAdmin
-        .from("campus_photo_samples")
-        .select("file_url, photo_category")
-        .eq("is_active", true)
-        .order("created_at", { ascending: false });
+    if (engine !== "fast") {
+      try {
+        const campusPhotos = (campusPhotoResult as any)?.data;
+        if (campusPhotos && campusPhotos.length > 0) {
+          const lowerPrompt = (contentSummary + " " + (audience || "") + " " + (moment || "")).toLowerCase();
+          const categoryPriority: Record<string, string[]> = {
+            "architecture": ["architecture", "building", "campus", "hall", "center", "library"],
+            "campus-life": ["student", "campus life", "community", "event", "club"],
+            "landscape": ["outdoor", "quad", "garden", "nature", "scenic"],
+            "athletics": ["athletic", "sport", "game", "team", "stadium"],
+            "traditions": ["tradition", "ceremony", "homecoming", "commencement", "graduation"],
+            "aerial": ["aerial", "overview", "campus view", "panoramic"],
+          };
 
-      if (profileId) {
-        photoQuery.eq("profile_id", profileId);
-      } else if (tenantId) {
-        photoQuery.eq("tenant_id", tenantId);
+          const scored = campusPhotos.map((p: any) => {
+            const keywords = categoryPriority[p.photo_category] || [];
+            const score = keywords.some((kw: string) => lowerPrompt.includes(kw)) ? 2 : 1;
+            return { ...p, score };
+          });
+
+          scored.sort((a: any, b: any) => b.score - a.score);
+          campusPhotoUrls = scored.slice(0, 3).map((p: any) => p.file_url);
+          console.log(`Using ${campusPhotoUrls.length} campus reference photos`);
+        }
+      } catch (e) {
+        console.warn("Could not process campus photos:", e);
       }
-
-      const { data: campusPhotos } = await photoQuery.limit(8);
-
-      if (campusPhotos && campusPhotos.length > 0) {
-        // Smart selection: prefer photos matching prompt context
-        const lowerPrompt = (contentSummary + " " + (audience || "") + " " + (moment || "")).toLowerCase();
-        const categoryPriority: Record<string, string[]> = {
-          "architecture": ["architecture", "building", "campus", "hall", "center", "library"],
-          "campus-life": ["student", "campus life", "community", "event", "club"],
-          "landscape": ["outdoor", "quad", "garden", "nature", "scenic"],
-          "athletics": ["athletic", "sport", "game", "team", "stadium"],
-          "traditions": ["tradition", "ceremony", "homecoming", "commencement", "graduation"],
-          "aerial": ["aerial", "overview", "campus view", "panoramic"],
-        };
-
-        // Score each photo by relevance
-        const scored = campusPhotos.map(p => {
-          const keywords = categoryPriority[p.photo_category] || [];
-          const score = keywords.some(kw => lowerPrompt.includes(kw)) ? 2 : 1;
-          return { ...p, score };
-        });
-
-        scored.sort((a, b) => b.score - a.score);
-        campusPhotoUrls = scored.slice(0, 3).map(p => p.file_url);
-        console.log(`Using ${campusPhotoUrls.length} campus reference photos`);
-      }
-    } catch (e) {
-      console.warn("Could not fetch campus photos:", e);
+    } else {
+      console.log("Fast engine — skipping campus reference photos for speed");
     }
 
     // Build message content - either simple string or multimodal array
@@ -535,6 +539,8 @@ CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
       messageContent = prompt;
     }
 
+    console.log(`Using model: ${selectedModel} (engine: ${engine || "fast"})`);
+
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -542,7 +548,7 @@ CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-pro-image-preview",
+        model: selectedModel,
         messages: [{ role: "user", content: messageContent }],
         modalities: ["image", "text"],
       }),

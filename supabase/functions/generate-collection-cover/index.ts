@@ -34,70 +34,62 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Fetch institutional branding + Content DNA data
+    // ── Parallel DB fetch: tenant, profile, and DNA all at once ──
     let brandContext = "";
-    if (tenantId || profileId) {
-      try {
-        // Get tenant branding
-        if (tenantId) {
-          const { data: tenant } = await supabaseAdmin
-            .from("tenants")
-            .select("institution_name, primary_color, accent_color, logo_url")
-            .eq("id", tenantId)
-            .single();
 
-          if (tenant) {
-            brandContext += `\nInstitution: ${tenant.institution_name}.`;
-            if (tenant.primary_color) brandContext += ` Primary brand color: ${tenant.primary_color}.`;
-            if (tenant.accent_color) brandContext += ` Accent color: ${tenant.accent_color}.`;
-          }
-        }
+    const tenantPromise = tenantId
+      ? supabaseAdmin.from("tenants").select("institution_name, primary_color, accent_color, logo_url").eq("id", tenantId).single()
+      : Promise.resolve({ data: null });
 
-        // Get profile config for mascot, slogans, etc.
-        const profileQuery = profileId
-          ? supabaseAdmin.from("institutional_profiles").select("name, config").eq("id", profileId).single()
-          : tenantId
-          ? supabaseAdmin.from("institutional_profiles").select("name, config").eq("tenant_id", tenantId).eq("profile_type", "university").limit(1).single()
-          : null;
+    const profilePromise = profileId
+      ? supabaseAdmin.from("institutional_profiles").select("name, config").eq("id", profileId).single()
+      : tenantId
+      ? supabaseAdmin.from("institutional_profiles").select("name, config").eq("tenant_id", tenantId).eq("profile_type", "university").limit(1).single()
+      : Promise.resolve({ data: null });
 
-        let resolvedProfileId = profileId;
-        if (profileQuery) {
-          const { data: profile } = await profileQuery;
-          if (profile) {
-            if (!resolvedProfileId && (profile as any).id) resolvedProfileId = (profile as any).id;
-            const cfg = profile.config as Record<string, any>;
-            if (cfg.mascot) brandContext += ` Mascot: ${cfg.mascot}.`;
-            if (cfg.slogans?.length) brandContext += ` Slogan: "${cfg.slogans[0]}".`;
-            if (cfg.primaryColor) brandContext += ` Brand primary: ${cfg.primaryColor}.`;
-            if (cfg.accentColor) brandContext += ` Brand accent: ${cfg.accentColor}.`;
-            if (cfg.secondaryColor) brandContext += ` Brand secondary: ${cfg.secondaryColor}.`;
-            if (cfg.tertiaryColor) brandContext += ` Brand tertiary: ${cfg.tertiaryColor}.`;
-          }
-        }
+    const dnaPromise = profileId
+      ? supabaseAdmin.from("content_dna_analysis").select("voice_analysis, brand_platform").eq("profile_id", profileId).order("updated_at", { ascending: false }).limit(1).single()
+      : tenantId
+      ? supabaseAdmin.from("content_dna_analysis").select("voice_analysis, brand_platform").eq("tenant_id", tenantId).order("updated_at", { ascending: false }).limit(1).single()
+      : Promise.resolve({ data: null });
 
-        // Fetch Content DNA voice analysis for richer context
-        const dnaQuery = resolvedProfileId
-          ? supabaseAdmin.from("content_dna_analysis").select("voice_analysis, brand_platform").eq("profile_id", resolvedProfileId).order("updated_at", { ascending: false }).limit(1).single()
-          : tenantId
-          ? supabaseAdmin.from("content_dna_analysis").select("voice_analysis, brand_platform").eq("tenant_id", tenantId).order("updated_at", { ascending: false }).limit(1).single()
-          : null;
+    const [tenantResult, profileResult, dnaResult] = await Promise.all([
+      tenantPromise.catch(e => { console.warn("Tenant fetch failed:", e); return { data: null }; }),
+      profilePromise.catch(e => { console.warn("Profile fetch failed:", e); return { data: null }; }),
+      dnaPromise.catch(e => { console.warn("DNA fetch failed:", e); return { data: null }; }),
+    ]);
 
-        if (dnaQuery) {
-          const { data: dna } = await dnaQuery;
-          if (dna) {
-            const voice = dna.voice_analysis as Record<string, any>;
-            const brand = dna.brand_platform as Record<string, any>;
-            if (voice?.tone_descriptors?.length) brandContext += ` Voice tone: ${voice.tone_descriptors.slice(0, 3).join(", ")}.`;
-            if (voice?.personality_traits?.length) brandContext += ` Personality: ${voice.personality_traits.slice(0, 3).join(", ")}.`;
-            if (brand?.promise) brandContext += ` Brand promise: "${brand.promise}".`;
-            if (brand?.pillars?.length) {
-              const pillarNames = brand.pillars.map((p: any) => p.name || p).slice(0, 4);
-              brandContext += ` Brand pillars: ${pillarNames.join(", ")}.`;
-            }
-          }
-        }
-      } catch (e) {
-        console.warn("Could not fetch branding data:", e);
+    // Process tenant
+    const tenant = tenantResult.data;
+    if (tenant) {
+      brandContext += `\nInstitution: ${tenant.institution_name}.`;
+      if (tenant.primary_color) brandContext += ` Primary brand color: ${tenant.primary_color}.`;
+      if (tenant.accent_color) brandContext += ` Accent color: ${tenant.accent_color}.`;
+    }
+
+    // Process profile
+    const profile = profileResult.data;
+    if (profile) {
+      const cfg = profile.config as Record<string, any>;
+      if (cfg.mascot) brandContext += ` Mascot: ${cfg.mascot}.`;
+      if (cfg.slogans?.length) brandContext += ` Slogan: "${cfg.slogans[0]}".`;
+      if (cfg.primaryColor) brandContext += ` Brand primary: ${cfg.primaryColor}.`;
+      if (cfg.accentColor) brandContext += ` Brand accent: ${cfg.accentColor}.`;
+      if (cfg.secondaryColor) brandContext += ` Brand secondary: ${cfg.secondaryColor}.`;
+      if (cfg.tertiaryColor) brandContext += ` Brand tertiary: ${cfg.tertiaryColor}.`;
+    }
+
+    // Process DNA
+    const dna = dnaResult.data;
+    if (dna) {
+      const voice = dna.voice_analysis as Record<string, any>;
+      const brand = dna.brand_platform as Record<string, any>;
+      if (voice?.tone_descriptors?.length) brandContext += ` Voice tone: ${voice.tone_descriptors.slice(0, 3).join(", ")}.`;
+      if (voice?.personality_traits?.length) brandContext += ` Personality: ${voice.personality_traits.slice(0, 3).join(", ")}.`;
+      if (brand?.promise) brandContext += ` Brand promise: "${brand.promise}".`;
+      if (brand?.pillars?.length) {
+        const pillarNames = brand.pillars.map((p: any) => p.name || p).slice(0, 4);
+        brandContext += ` Brand pillars: ${pillarNames.join(", ")}.`;
       }
     }
 
@@ -107,9 +99,9 @@ serve(async (req) => {
     const prompt = `Generate a clean, professional cover image for a higher education communications collection titled "${collectionName}" (type: ${typeContext}).${descContext}${brandContext}
 
 Requirements:
-- The image must visually represent the SPECIFIC TOPIC of "${collectionName}" — show relevant imagery (e.g. for "Student Retention" show students on campus, mentoring, academic support; for "Fall Enrollment" show campus in autumn, welcome events, etc.)
+- The image must visually represent the SPECIFIC TOPIC of "${collectionName}" — show relevant imagery
 - Use a polished, editorial photography style with warm natural lighting
-- If brand colors are specified, subtly incorporate them into the scene's color grading, lighting, or environmental elements (NOT as flat colored overlays)
+- If brand colors are specified, subtly incorporate them into the scene's color grading (NOT as flat colored overlays)
 - No text, no words, no letters, no watermarks
 - Composition suitable for a 16:9 thumbnail card
 - Should feel like a high-quality university marketing photo`;
