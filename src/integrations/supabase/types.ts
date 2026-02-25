@@ -642,6 +642,7 @@ export type Database = {
           id: string
           name: string
           notes: string | null
+          price_per_seat: number | null
           product_tier: string | null
           prospect_id: string | null
           renewal_date: string | null
@@ -663,6 +664,7 @@ export type Database = {
           id?: string
           name: string
           notes?: string | null
+          price_per_seat?: number | null
           product_tier?: string | null
           prospect_id?: string | null
           renewal_date?: string | null
@@ -684,6 +686,7 @@ export type Database = {
           id?: string
           name?: string
           notes?: string | null
+          price_per_seat?: number | null
           product_tier?: string | null
           prospect_id?: string | null
           renewal_date?: string | null

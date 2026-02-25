@@ -80,6 +80,7 @@ interface Opportunity {
   contract_term_months: number | null;
   seat_count: number | null;
   arr: number | null;
+  price_per_seat: number | null;
   renewal_date: string | null;
   product_tier: string | null;
 }
@@ -622,9 +623,22 @@ export default function CRMPage() {
 
   // ── Update Opportunity Fields ───────────────────────────────────────────
   const handleUpdateOpportunity = async (oppId: string, updates: Partial<Opportunity>) => {
+    // Auto-calculate ARR from price_per_seat, seat_count, and subscription_type
+    const pps = updates.price_per_seat ?? null;
+    const seats = updates.seat_count ?? null;
+    const sub = updates.subscription_type ?? null;
+    const term = updates.contract_term_months ?? null;
+    let computedArr: number | null = null;
+    if (pps && seats) {
+      let annualMultiplier = 1;
+      if (sub === "monthly") annualMultiplier = 12;
+      else if (sub === "multi_year" && term) annualMultiplier = 12 / term;
+      computedArr = Math.round(pps * seats * annualMultiplier);
+    }
+
     const { error } = await supabase
       .from("crm_opportunities" as any)
-      .update({ ...updates, updated_at: new Date().toISOString() } as any)
+      .update({ ...updates, arr: computedArr, updated_at: new Date().toISOString() } as any)
       .eq("id", oppId);
     if (error) toast.error("Failed to update opportunity");
     else {
@@ -1869,8 +1883,8 @@ export default function CRMPage() {
                           <Input type="number" value={oppEditData.amount || ""} onChange={(e) => setOppEditData({ ...oppEditData, amount: e.target.value ? Number(e.target.value) : null })} className="h-9" />
                         </div>
                         <div>
-                          <label className="text-xs text-muted-foreground mb-1 block">ARR ($)</label>
-                          <Input type="number" value={oppEditData.arr || ""} onChange={(e) => setOppEditData({ ...oppEditData, arr: e.target.value ? Number(e.target.value) : null })} className="h-9" />
+                          <label className="text-xs text-muted-foreground mb-1 block">Price per Seat ($)</label>
+                          <Input type="number" value={oppEditData.price_per_seat || ""} onChange={(e) => setOppEditData({ ...oppEditData, price_per_seat: e.target.value ? Number(e.target.value) : null })} className="h-9" />
                         </div>
                       </div>
                       <div className="grid grid-cols-3 gap-3">
@@ -1896,6 +1910,27 @@ export default function CRMPage() {
                           <Input type="number" value={oppEditData.seat_count || ""} onChange={(e) => setOppEditData({ ...oppEditData, seat_count: e.target.value ? Number(e.target.value) : null })} className="h-9" />
                         </div>
                       </div>
+                      {/* Auto-calculated ARR preview */}
+                      {(() => {
+                        const pps = oppEditData.price_per_seat;
+                        const seats = oppEditData.seat_count;
+                        const term = oppEditData.contract_term_months;
+                        const sub = oppEditData.subscription_type;
+                        if (pps && seats) {
+                          let annualMultiplier = 1;
+                          if (sub === "monthly") annualMultiplier = 12;
+                          else if (sub === "multi_year" && term) annualMultiplier = 12 / term;
+                          else annualMultiplier = 1; // annual / perpetual = price is already annual
+                          const computedArr = pps * seats * annualMultiplier;
+                          return (
+                            <div className="rounded-md border border-primary/20 bg-primary/5 px-3 py-2 flex items-center justify-between">
+                              <span className="text-xs text-muted-foreground">Calculated ARR</span>
+                              <span className="text-sm font-semibold text-primary">${computedArr.toLocaleString(undefined, { maximumFractionDigits: 0 })}/yr</span>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="text-xs text-muted-foreground mb-1 block">Product Tier</label>
@@ -1955,7 +1990,8 @@ export default function CRMPage() {
                           {[
                             { label: "Stage", value: stageInfo?.label || selectedOpp.stage },
                             { label: "Deal Value", value: selectedOpp.amount ? `$${Number(selectedOpp.amount).toLocaleString()}` : "—" },
-                            { label: "ARR", value: selectedOpp.arr ? `$${Number(selectedOpp.arr).toLocaleString()}` : "—" },
+                            { label: "Price / Seat", value: selectedOpp.price_per_seat ? `$${Number(selectedOpp.price_per_seat).toLocaleString()}` : "—" },
+                            { label: "ARR", value: selectedOpp.arr ? `$${Number(selectedOpp.arr).toLocaleString()}/yr` : "—" },
                             { label: "Subscription", value: selectedOpp.subscription_type ? selectedOpp.subscription_type.replace("_", "-").replace(/\b\w/g, c => c.toUpperCase()) : "—" },
                             { label: "Term", value: selectedOpp.contract_term_months ? `${selectedOpp.contract_term_months} months` : "—" },
                             { label: "Seats / Users", value: selectedOpp.seat_count ? selectedOpp.seat_count.toLocaleString() : "—" },
