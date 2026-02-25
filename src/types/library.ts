@@ -51,6 +51,8 @@ export interface SavedMessage {
   externalAssets?: ExternalAsset[];
   // AI-generated cover image
   coverImageUrl?: string;
+  // Arbitrary metadata (e.g. brand-studio state for round-trip editing)
+  metadata?: Record<string, any>;
 }
 
 export interface MessageVersion {
