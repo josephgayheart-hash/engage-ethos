@@ -308,6 +308,22 @@ export default function CRMPage() {
   const [requestTypeFilter, setRequestTypeFilter] = useState("all");
   const [requestSearch, setRequestSearch] = useState("");
 
+  // New Contact dialog
+  const [newContactOpen, setNewContactOpen] = useState(false);
+  const [newContactSaving, setNewContactSaving] = useState(false);
+  const [newContactData, setNewContactData] = useState({
+    university_name: "",
+    contact_name: "",
+    contact_email: "",
+    contact_title: "",
+    contact_phone: "",
+    linkedin_url: "",
+    url: "",
+    status: "new",
+    notes: "",
+    brand_launch_date: "",
+  });
+
   const selected = prospects.find((p) => p.id === selectedId) || null;
 
   // ── Load Prospects ───────────────────────────────────────────────────────
@@ -885,6 +901,47 @@ export default function CRMPage() {
     else { toast.success("Contact updated"); setEditing(false); loadProspects(); }
   };
 
+  // ── Create New Contact ─────────────────────────────────────────────────
+  const handleCreateContact = async () => {
+    if (!newContactData.university_name.trim()) {
+      toast.error("Account name is required");
+      return;
+    }
+    setNewContactSaving(true);
+    const { error } = await supabase.from("sales_prospects").insert({
+      university_name: newContactData.university_name.trim(),
+      contact_name: newContactData.contact_name.trim() || null,
+      contact_email: newContactData.contact_email.trim() || null,
+      contact_title: newContactData.contact_title.trim() || null,
+      contact_phone: newContactData.contact_phone.trim() || null,
+      linkedin_url: newContactData.linkedin_url.trim() || null,
+      url: newContactData.url.trim() || newContactData.university_name.trim(),
+      status: newContactData.status || "new",
+      notes: newContactData.notes.trim() || null,
+      brand_launch_date: newContactData.brand_launch_date || null,
+    } as any);
+    setNewContactSaving(false);
+    if (error) {
+      toast.error("Failed to create contact");
+    } else {
+      toast.success("Contact created");
+      setNewContactOpen(false);
+      setNewContactData({
+        university_name: "",
+        contact_name: "",
+        contact_email: "",
+        contact_title: "",
+        contact_phone: "",
+        linkedin_url: "",
+        url: "",
+        status: "new",
+        notes: "",
+        brand_launch_date: "",
+      });
+      loadProspects();
+    }
+  };
+
   // ── Send Email ──────────────────────────────────────────────────────────
   const handleSendEmail = async () => {
     if (!selected?.contact_email || !emailSubject.trim() || !emailBody.trim()) {
@@ -1113,6 +1170,11 @@ export default function CRMPage() {
           <SelectContent><SelectItem value="all">All</SelectItem><SelectItem value="active">Active</SelectItem><SelectItem value="signed_up">Signed Up</SelectItem><SelectItem value="none">Not Yet</SelectItem></SelectContent>
         </Select>
         <span className="text-sm text-muted-foreground">{filtered.length} contacts</span>
+        <div className="ml-auto">
+          <Button size="sm" onClick={() => setNewContactOpen(true)} className="h-9 gap-1.5">
+            <Plus className="h-3.5 w-3.5" /> New Contact
+          </Button>
+        </div>
       </div>
 
       {/* Contacts Table */}
@@ -2621,6 +2683,127 @@ export default function CRMPage() {
               }}
             >
               <Plus className="h-4 w-4 mr-1" /> Create
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Contact Dialog */}
+      <Dialog open={newContactOpen} onOpenChange={setNewContactOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><UserPlus className="h-5 w-5" /> New Contact / Lead</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="col-span-2">
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Account Name *</label>
+                <Input
+                  placeholder="e.g. University of Michigan"
+                  value={newContactData.university_name}
+                  onChange={(e) => setNewContactData(d => ({ ...d, university_name: e.target.value }))}
+                  className="h-9"
+                  maxLength={200}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Contact Name</label>
+                <Input
+                  placeholder="Full name"
+                  value={newContactData.contact_name}
+                  onChange={(e) => setNewContactData(d => ({ ...d, contact_name: e.target.value }))}
+                  className="h-9"
+                  maxLength={150}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Title / Role</label>
+                <Input
+                  placeholder="e.g. VP of Marketing"
+                  value={newContactData.contact_title}
+                  onChange={(e) => setNewContactData(d => ({ ...d, contact_title: e.target.value }))}
+                  className="h-9"
+                  maxLength={150}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Email</label>
+                <Input
+                  type="email"
+                  placeholder="email@example.edu"
+                  value={newContactData.contact_email}
+                  onChange={(e) => setNewContactData(d => ({ ...d, contact_email: e.target.value }))}
+                  className="h-9"
+                  maxLength={255}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Phone</label>
+                <Input
+                  type="tel"
+                  placeholder="+1 (555) 000-0000"
+                  value={newContactData.contact_phone}
+                  onChange={(e) => setNewContactData(d => ({ ...d, contact_phone: e.target.value }))}
+                  className="h-9"
+                  maxLength={30}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">LinkedIn URL</label>
+                <Input
+                  placeholder="https://linkedin.com/in/..."
+                  value={newContactData.linkedin_url}
+                  onChange={(e) => setNewContactData(d => ({ ...d, linkedin_url: e.target.value }))}
+                  className="h-9"
+                  maxLength={500}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Website URL</label>
+                <Input
+                  placeholder="https://university.edu"
+                  value={newContactData.url}
+                  onChange={(e) => setNewContactData(d => ({ ...d, url: e.target.value }))}
+                  className="h-9"
+                  maxLength={500}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Status</label>
+                <Select value={newContactData.status} onValueChange={(v) => setNewContactData(d => ({ ...d, status: v }))}>
+                  <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {STATUS_OPTIONS.map(s => (
+                      <SelectItem key={s} value={s}>{s.replace("_", " ").replace(/\b\w/g, c => c.toUpperCase())}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Brand Launch Date</label>
+                <Input
+                  type="date"
+                  value={newContactData.brand_launch_date}
+                  onChange={(e) => setNewContactData(d => ({ ...d, brand_launch_date: e.target.value }))}
+                  className="h-9"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Notes</label>
+              <Textarea
+                placeholder="Any additional context..."
+                value={newContactData.notes}
+                onChange={(e) => setNewContactData(d => ({ ...d, notes: e.target.value }))}
+                rows={3}
+                maxLength={2000}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setNewContactOpen(false)}>Cancel</Button>
+            <Button onClick={handleCreateContact} disabled={newContactSaving || !newContactData.university_name.trim()}>
+              {newContactSaving ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Saving...</> : <><Plus className="h-4 w-4 mr-1" /> Create Contact</>}
             </Button>
           </DialogFooter>
         </DialogContent>
