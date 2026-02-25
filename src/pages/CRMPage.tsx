@@ -27,7 +27,7 @@ import {
   ChevronRight, Pencil, Save, X, Contact, BarChart3, Wrench,
   FileText, MousePointerClick, Loader2, Radar, Target, DollarSign,
   TrendingUp, Calendar, Inbox, AlertTriangle, UserPlus, Briefcase,
-  Globe, AtSign, Upload, Trash2, Download, Paperclip
+  Globe, AtSign, Upload, Trash2, Download, Paperclip, Sparkles
 } from "lucide-react";
 import { BrandRadarTab } from "@/components/admin/BrandRadarTab";
 import { EmailTemplatesTab } from "@/components/admin/EmailTemplatesTab";
@@ -311,6 +311,8 @@ export default function CRMPage() {
   // New Contact dialog
   const [newContactOpen, setNewContactOpen] = useState(false);
   const [newContactSaving, setNewContactSaving] = useState(false);
+  const [quickFillText, setQuickFillText] = useState("");
+  const [quickFillParsing, setQuickFillParsing] = useState(false);
   const [newContactData, setNewContactData] = useState({
     university_name: "",
     contact_name: "",
@@ -899,6 +901,38 @@ export default function CRMPage() {
       .eq("id", selectedId);
     if (error) toast.error("Failed to update contact");
     else { toast.success("Contact updated"); setEditing(false); loadProspects(); }
+  };
+
+  // ── Quick Fill with AI ───────────────────────────────────────────────────
+  const handleQuickFill = async () => {
+    if (!quickFillText.trim()) return;
+    setQuickFillParsing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("parse-contact-text", {
+        body: { text: quickFillText.trim() },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const parsed = data?.data || {};
+      setNewContactData((d) => ({
+        ...d,
+        university_name: parsed.university_name || d.university_name,
+        contact_name: parsed.contact_name || d.contact_name,
+        contact_email: parsed.contact_email || d.contact_email,
+        contact_title: parsed.contact_title || d.contact_title,
+        contact_phone: parsed.contact_phone || d.contact_phone,
+        linkedin_url: parsed.linkedin_url || d.linkedin_url,
+        url: parsed.url || d.url,
+        notes: parsed.notes ? (d.notes ? d.notes + "\n" + parsed.notes : parsed.notes) : d.notes,
+      }));
+      setQuickFillText("");
+      toast.success("Contact fields filled from text");
+    } catch (e: any) {
+      console.error("Quick fill error:", e);
+      toast.error(e?.message || "Failed to parse text");
+    } finally {
+      setQuickFillParsing(false);
+    }
   };
 
   // ── Create New Contact ─────────────────────────────────────────────────
@@ -2727,11 +2761,37 @@ export default function CRMPage() {
 
       {/* New Contact Dialog */}
       <Dialog open={newContactOpen} onOpenChange={setNewContactOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2"><UserPlus className="h-5 w-5" /> New Contact / Lead</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-2">
+          <div className="bg-muted/50 border border-border rounded-lg p-3 space-y-2">
+            <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-accent" /> Quick Fill with AI
+            </label>
+            <Textarea
+              placeholder="Paste a signature, directory listing, or any block of contact info here..."
+              value={quickFillText}
+              onChange={(e) => setQuickFillText(e.target.value)}
+              rows={4}
+              className="text-sm"
+            />
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={handleQuickFill}
+              disabled={quickFillParsing || !quickFillText.trim()}
+              className="w-full"
+            >
+              {quickFillParsing ? (
+                <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> Parsing...</>
+              ) : (
+                <><Sparkles className="h-3.5 w-3.5 mr-1.5" /> Parse & Fill Fields</>
+              )}
+            </Button>
+          </div>
+          <Separator />
+          <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
                 <label className="text-xs font-medium text-muted-foreground mb-1 block">Account Name *</label>
