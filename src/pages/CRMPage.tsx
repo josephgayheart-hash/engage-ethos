@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -271,6 +272,8 @@ export default function CRMPage() {
   const [selectedOppId, setSelectedOppId] = useState<string | null>(null);
   const [editingOpp, setEditingOpp] = useState(false);
   const [oppEditData, setOppEditData] = useState<Partial<Opportunity>>({});
+  const [quickOppDialog, setQuickOppDialog] = useState<{ open: boolean; prospectId?: string; contactIds?: string[]; defaultName?: string }>({ open: false });
+  const [quickOppName, setQuickOppName] = useState("");
 
   // Requests
   const [requests, setRequests] = useState<OnboardingRequest[]>([]);
@@ -1321,8 +1324,8 @@ export default function CRMPage() {
                     <Send className="h-3 w-3 mr-1" /> Compose Email
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => {
-                    const name = prompt("Opportunity name:", `Deal - ${selected?.university_name || ""}`);
-                    if (name) handleCreateOpportunity(selected?.id || undefined, selected ? [selected.id] : [], name);
+                    setQuickOppName(`Deal - ${selected?.university_name || ""}`);
+                    setQuickOppDialog({ open: true, prospectId: selected?.id, contactIds: selected ? [selected.id] : [], defaultName: `Deal - ${selected?.university_name || ""}` });
                   }}>
                     <Target className="h-3 w-3 mr-1" /> Create Opportunity
                   </Button>
@@ -2270,6 +2273,56 @@ export default function CRMPage() {
         users={allUsers}
         onEmailSent={loadOutreachCounts}
       />
+
+      {/* Quick Create Opportunity Dialog */}
+      <Dialog open={quickOppDialog.open} onOpenChange={(open) => setQuickOppDialog(prev => ({ ...prev, open }))}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Target className="h-5 w-5 text-primary" /> Create Opportunity</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">Opportunity Name</label>
+              <Input
+                value={quickOppName}
+                onChange={(e) => setQuickOppName(e.target.value)}
+                placeholder="e.g. Enterprise Deal - State University"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && quickOppName.trim()) {
+                    handleCreateOpportunity(
+                      quickOppDialog.prospectId,
+                      quickOppDialog.contactIds || [],
+                      quickOppName.trim()
+                    );
+                    setQuickOppDialog({ open: false });
+                    setQuickOppName("");
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setQuickOppDialog({ open: false }); setQuickOppName(""); }}>
+              Cancel
+            </Button>
+            <Button
+              disabled={!quickOppName.trim()}
+              onClick={() => {
+                handleCreateOpportunity(
+                  quickOppDialog.prospectId,
+                  quickOppDialog.contactIds || [],
+                  quickOppName.trim()
+                );
+                setQuickOppDialog({ open: false });
+                setQuickOppName("");
+              }}
+            >
+              <Plus className="h-4 w-4 mr-1" /> Create
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
