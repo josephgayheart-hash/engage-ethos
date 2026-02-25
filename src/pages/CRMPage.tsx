@@ -257,6 +257,9 @@ export default function CRMPage() {
   const [newOppProspectId, setNewOppProspectId] = useState("");
   const [newOppContactIds, setNewOppContactIds] = useState<string[]>([]);
   const [creatingOpp, setCreatingOpp] = useState(false);
+  const [selectedOppId, setSelectedOppId] = useState<string | null>(null);
+  const [editingOpp, setEditingOpp] = useState(false);
+  const [oppEditData, setOppEditData] = useState<Partial<Opportunity>>({});
 
   // Requests
   const [requests, setRequests] = useState<OnboardingRequest[]>([]);
@@ -546,6 +549,32 @@ export default function CRMPage() {
       .eq("id", oppId);
     if (error) toast.error("Failed to update stage");
     else loadOpportunities();
+  };
+
+  // ── Delete Opportunity ──────────────────────────────────────────────────
+  const handleDeleteOpportunity = async (oppId: string) => {
+    if (!confirm("Delete this opportunity? This cannot be undone.")) return;
+    const { error } = await supabase.from("crm_opportunities" as any).delete().eq("id", oppId);
+    if (error) toast.error("Failed to delete opportunity");
+    else {
+      toast.success("Opportunity deleted");
+      setSelectedOppId(null);
+      loadOpportunities();
+    }
+  };
+
+  // ── Update Opportunity Fields ───────────────────────────────────────────
+  const handleUpdateOpportunity = async (oppId: string, updates: Partial<Opportunity>) => {
+    const { error } = await supabase
+      .from("crm_opportunities" as any)
+      .update({ ...updates, updated_at: new Date().toISOString() } as any)
+      .eq("id", oppId);
+    if (error) toast.error("Failed to update opportunity");
+    else {
+      toast.success("Opportunity updated");
+      setEditingOpp(false);
+      loadOpportunities();
+    }
   };
 
   useEffect(() => {
@@ -1456,143 +1485,331 @@ export default function CRMPage() {
       </>
       )}
 
-      {crmTab === "opportunities" && (
+      {crmTab === "opportunities" && (() => {
+        const selectedOpp = opportunities.find(o => o.id === selectedOppId) || null;
+        const linkedProspect = selectedOpp ? prospects.find(p => p.id === selectedOpp.prospect_id) : null;
+        const linkedContacts = selectedOpp?.contact_ids?.map(cid => prospects.find(p => p.id === cid)).filter(Boolean) || [];
+
+        return (
         <div className="flex-1 overflow-auto p-6">
-          <div className="max-w-5xl mx-auto space-y-6">
-            {/* Create Opportunity */}
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-end gap-3">
-                  <div className="flex-1">
-                    <label className="text-xs text-muted-foreground mb-1 block">Opportunity Name</label>
-                    <Input value={newOppName} onChange={(e) => setNewOppName(e.target.value)} placeholder="e.g. Enterprise Deal - State University" className="h-9" />
+          <div className="max-w-5xl mx-auto space-y-4">
+            {/* Header row */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">Opportunities</h2>
+                <p className="text-sm text-muted-foreground">{opportunities.length} total · ${opportunities.reduce((s, o) => s + (Number(o.amount) || 0), 0).toLocaleString()} pipeline value</p>
+              </div>
+              <Button size="sm" onClick={() => {
+                setNewOppName("");
+                setNewOppProspectId("");
+                setNewOppContactIds([]);
+                setCreatingOpp(!creatingOpp);
+              }}>
+                {creatingOpp ? <X className="h-4 w-4 mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
+                {creatingOpp ? "Cancel" : "New Opportunity"}
+              </Button>
+            </div>
+
+            {/* Inline create form */}
+            {creatingOpp && (
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-end gap-3 flex-wrap">
+                    <div className="flex-1 min-w-[200px]">
+                      <label className="text-xs text-muted-foreground mb-1 block">Opportunity Name</label>
+                      <Input value={newOppName} onChange={(e) => setNewOppName(e.target.value)} placeholder="e.g. Enterprise Deal - State University" className="h-9" />
+                    </div>
+                    <div className="w-[200px]">
+                      <label className="text-xs text-muted-foreground mb-1 block">Account</label>
+                      <Select value={newOppProspectId} onValueChange={setNewOppProspectId}>
+                        <SelectTrigger className="h-9"><SelectValue placeholder="Link to account..." /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">None</SelectItem>
+                          {Array.from(new Map(prospects.map(p => [p.university_name, p])).values()).map((p) => (
+                            <SelectItem key={p.id} value={p.id}>{p.university_name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button onClick={() => handleCreateOpportunity()} disabled={!newOppName.trim()} className="h-9">
+                      <Plus className="h-4 w-4 mr-1" /> Create
+                    </Button>
                   </div>
-                  <div className="w-[200px]">
-                    <label className="text-xs text-muted-foreground mb-1 block">Account</label>
-                    <Select value={newOppProspectId} onValueChange={setNewOppProspectId}>
-                      <SelectTrigger className="h-9"><SelectValue placeholder="Link to account..." /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">None</SelectItem>
-                        {/* Get unique account names */}
-                        {Array.from(new Map(prospects.map(p => [p.university_name, p])).values()).map((p) => (
-                          <SelectItem key={p.id} value={p.id}>{p.university_name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="w-[250px]">
-                    <label className="text-xs text-muted-foreground mb-1 block">Contacts</label>
-                    <Select value={newOppContactIds[newOppContactIds.length - 1] || "none"} onValueChange={(v) => {
-                      if (v !== "none" && !newOppContactIds.includes(v)) setNewOppContactIds([...newOppContactIds, v]);
-                    }}>
-                      <SelectTrigger className="h-9"><SelectValue placeholder={newOppContactIds.length ? `${newOppContactIds.length} selected` : "Add contacts..."} /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Select a contact...</SelectItem>
-                        {prospects.filter(p => p.contact_name).map((p) => (
-                          <SelectItem key={p.id} value={p.id}>
-                            {newOppContactIds.includes(p.id) ? "✓ " : ""}{p.contact_name} — {p.university_name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {newOppContactIds.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {newOppContactIds.map(cid => {
-                          const contact = prospects.find(p => p.id === cid);
-                          return (
-                            <Badge key={cid} variant="secondary" className="text-xs gap-1">
-                              {contact?.contact_name || "Unknown"}
-                              <button type="button" className="hover:text-destructive" onClick={() => setNewOppContactIds(ids => ids.filter(i => i !== cid))}>
-                                <X className="h-3 w-3" />
-                              </button>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* List view */}
+            {loadingOpportunities ? (
+              <div className="text-center py-10 text-muted-foreground">Loading opportunities...</div>
+            ) : opportunities.length === 0 ? (
+              <div className="text-center py-16">
+                <Target className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                <p className="text-muted-foreground">No opportunities yet</p>
+              </div>
+            ) : (
+              <Card>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[280px]">Opportunity</TableHead>
+                      <TableHead>Account</TableHead>
+                      <TableHead>Stage</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                      <TableHead>Close Date</TableHead>
+                      <TableHead>Created</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {opportunities.map((opp) => {
+                      const prospect = prospects.find(p => p.id === opp.prospect_id);
+                      const stageInfo = OPPORTUNITY_STAGES.find(s => s.value === opp.stage);
+                      return (
+                        <TableRow
+                          key={opp.id}
+                          className="cursor-pointer hover:bg-muted/50"
+                          onClick={() => { setSelectedOppId(opp.id); setEditingOpp(false); }}
+                        >
+                          <TableCell>
+                            <div className="font-medium text-foreground">{opp.name}</div>
+                            {opp.contact_ids && opp.contact_ids.length > 0 && (
+                              <div className="text-xs text-muted-foreground mt-0.5">
+                                {opp.contact_ids.length} contact{opp.contact_ids.length > 1 ? "s" : ""}
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {prospect ? (
+                              <div className="flex items-center gap-1.5 text-sm">
+                                <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                                {prospect.university_name}
+                              </div>
+                            ) : <span className="text-muted-foreground text-sm">—</span>}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={`text-xs ${stageInfo?.color || ""}`}>
+                              {stageInfo?.label || opp.stage}
                             </Badge>
-                          );
-                        })}
+                          </TableCell>
+                          <TableCell className="text-right text-sm">
+                            {opp.amount ? `$${Number(opp.amount).toLocaleString()}` : "—"}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {opp.close_date ? format(new Date(opp.close_date), "MMM d, yyyy") : "—"}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {format(new Date(opp.created_at), "MMM d, yyyy")}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </Card>
+            )}
+          </div>
+
+          {/* Opportunity Detail Sheet */}
+          <Sheet open={!!selectedOppId} onOpenChange={(open) => { if (!open) setSelectedOppId(null); }}>
+            <SheetContent className="w-full sm:max-w-2xl p-0 flex flex-col">
+              <SheetHeader className="px-6 pt-5 pb-0">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-xs font-medium text-primary uppercase tracking-wide flex items-center gap-1.5">
+                      <Target className="h-3.5 w-3.5" /> Opportunity
+                    </div>
+                    <SheetTitle className="text-lg mt-0.5">{selectedOpp?.name || "Opportunity"}</SheetTitle>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Button size="sm" variant="outline" onClick={() => {
+                      if (selectedOpp) {
+                        setEditingOpp(!editingOpp);
+                        setOppEditData({ ...selectedOpp });
+                      }
+                    }}>
+                      {editingOpp ? <X className="h-3.5 w-3.5 mr-1" /> : <Pencil className="h-3.5 w-3.5 mr-1" />}
+                      {editingOpp ? "Cancel" : "Edit"}
+                    </Button>
+                    <Button size="sm" variant="destructive" onClick={() => selectedOpp && handleDeleteOpportunity(selectedOpp.id)}>
+                      <XCircle className="h-3.5 w-3.5 mr-1" /> Delete
+                    </Button>
+                  </div>
+                </div>
+                <SheetDescription className="sr-only">Opportunity details</SheetDescription>
+              </SheetHeader>
+
+              {selectedOpp && (
+                <div className="flex-1 overflow-auto">
+                  {/* Key fields bar */}
+                  <div className="grid grid-cols-4 gap-px bg-border mx-6 mt-4 rounded-lg overflow-hidden">
+                    {[
+                      { label: "Account", value: linkedProspect?.university_name || "—" },
+                      { label: "Close Date", value: selectedOpp.close_date ? format(new Date(selectedOpp.close_date), "MMM d, yyyy") : "—" },
+                      { label: "Amount", value: selectedOpp.amount ? `$${Number(selectedOpp.amount).toLocaleString()}` : "—" },
+                      { label: "Created", value: format(new Date(selectedOpp.created_at), "MMM d, yyyy") },
+                    ].map((f) => (
+                      <div key={f.label} className="bg-muted/40 px-3 py-2.5">
+                        <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{f.label}</div>
+                        <div className="text-sm font-medium text-foreground mt-0.5 truncate">{f.value}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Salesforce-style chevron stage bar */}
+                  <div className="mx-6 mt-4">
+                    <div className="flex items-stretch">
+                      {OPPORTUNITY_STAGES.map((stage, idx) => {
+                        const currentIdx = OPPORTUNITY_STAGES.findIndex(s => s.value === selectedOpp.stage);
+                        const isActive = stage.value === selectedOpp.stage;
+                        const isPast = idx < currentIdx;
+                        const isClosedWon = selectedOpp.stage === "closed_won";
+                        const isClosedLost = selectedOpp.stage === "closed_lost";
+                        
+                        let bgClass = "bg-muted/60 text-muted-foreground";
+                        if (isActive) {
+                          if (isClosedWon) bgClass = "bg-emerald-500 text-white";
+                          else if (isClosedLost) bgClass = "bg-destructive text-destructive-foreground";
+                          else bgClass = "bg-primary text-primary-foreground";
+                        } else if (isPast) {
+                          bgClass = "bg-primary/20 text-primary";
+                        }
+
+                        return (
+                          <button
+                            key={stage.value}
+                            onClick={() => handleUpdateOppStage(selectedOpp.id, stage.value)}
+                            className={`relative flex-1 py-2 text-[11px] font-medium text-center transition-colors hover:opacity-80 ${bgClass} ${idx === 0 ? "rounded-l-md" : ""} ${idx === OPPORTUNITY_STAGES.length - 1 ? "rounded-r-md" : ""}`}
+                            title={`Set to ${stage.label}`}
+                          >
+                            {/* Chevron separator */}
+                            {idx > 0 && (
+                              <svg className="absolute left-0 top-0 h-full w-3 -translate-x-1.5" viewBox="0 0 12 40" preserveAspectRatio="none">
+                                <path d="M0,0 L12,20 L0,40" fill="currentColor" className={idx <= currentIdx ? "text-primary/20" : "text-muted/60"} />
+                              </svg>
+                            )}
+                            {idx < OPPORTUNITY_STAGES.length - 1 && (
+                              <svg className="absolute right-0 top-0 h-full w-3 translate-x-1.5 z-10" viewBox="0 0 12 40" preserveAspectRatio="none">
+                                <path d="M0,0 L12,20 L0,40" fill="currentColor" className={bgClass.includes("bg-primary") || bgClass.includes("bg-emerald") || bgClass.includes("bg-destructive") ? (isActive ? (isClosedWon ? "text-emerald-500" : isClosedLost ? "text-destructive" : "text-primary") : "text-primary/20") : "text-muted/60"} />
+                              </svg>
+                            )}
+                            <span className="relative z-20">
+                              {isPast && <CheckCircle2 className="inline h-3 w-3 mr-0.5 -mt-0.5" />}
+                              {stage.label}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {selectedOpp.stage !== "closed_won" && selectedOpp.stage !== "closed_lost" && (
+                      <div className="flex justify-end mt-2">
+                        <Button size="sm" variant="default" onClick={() => {
+                          const currentIdx = OPPORTUNITY_STAGES.findIndex(s => s.value === selectedOpp.stage);
+                          if (currentIdx < OPPORTUNITY_STAGES.length - 2) {
+                            handleUpdateOppStage(selectedOpp.id, OPPORTUNITY_STAGES[currentIdx + 1].value);
+                          }
+                        }}>
+                          <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Mark Stage as Complete
+                        </Button>
                       </div>
                     )}
                   </div>
-                  <Button onClick={() => handleCreateOpportunity()} disabled={!newOppName.trim() || creatingOpp} className="h-9">
-                    {creatingOpp ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Plus className="h-4 w-4 mr-1" /> Create</>}
-                  </Button>
+
+                  <Separator className="my-4" />
+
+                  {/* Edit form or detail view */}
+                  <div className="px-6 pb-6 space-y-4">
+                    {editingOpp ? (
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-xs text-muted-foreground mb-1 block">Opportunity Name</label>
+                          <Input value={oppEditData.name || ""} onChange={(e) => setOppEditData({ ...oppEditData, name: e.target.value })} className="h-9" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-xs text-muted-foreground mb-1 block">Amount</label>
+                            <Input type="number" value={oppEditData.amount || ""} onChange={(e) => setOppEditData({ ...oppEditData, amount: e.target.value ? Number(e.target.value) : null })} className="h-9" placeholder="0" />
+                          </div>
+                          <div>
+                            <label className="text-xs text-muted-foreground mb-1 block">Close Date</label>
+                            <Input type="date" value={oppEditData.close_date || ""} onChange={(e) => setOppEditData({ ...oppEditData, close_date: e.target.value || null })} className="h-9" />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground mb-1 block">Account</label>
+                          <Select value={oppEditData.prospect_id || "none"} onValueChange={(v) => setOppEditData({ ...oppEditData, prospect_id: v === "none" ? null : v })}>
+                            <SelectTrigger className="h-9"><SelectValue placeholder="Link to account..." /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">None</SelectItem>
+                              {Array.from(new Map(prospects.map(p => [p.university_name, p])).values()).map((p) => (
+                                <SelectItem key={p.id} value={p.id}>{p.university_name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground mb-1 block">Notes</label>
+                          <Textarea value={oppEditData.notes || ""} onChange={(e) => setOppEditData({ ...oppEditData, notes: e.target.value })} rows={3} />
+                        </div>
+                        <Button onClick={() => selectedOpp && handleUpdateOpportunity(selectedOpp.id, oppEditData)} className="h-9">
+                          <Save className="h-3.5 w-3.5 mr-1" /> Save Changes
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {/* Key Fields */}
+                        <div>
+                          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Key Fields</div>
+                          <div className="grid grid-cols-2 gap-y-2 gap-x-6 text-sm">
+                            <div className="flex justify-between"><span className="text-muted-foreground">Stage</span><span className="font-medium text-foreground">{OPPORTUNITY_STAGES.find(s => s.value === selectedOpp.stage)?.label}</span></div>
+                            <div className="flex justify-between"><span className="text-muted-foreground">Amount</span><span className="font-medium text-foreground">{selectedOpp.amount ? `$${Number(selectedOpp.amount).toLocaleString()}` : "—"}</span></div>
+                            <div className="flex justify-between"><span className="text-muted-foreground">Close Date</span><span className="font-medium text-foreground">{selectedOpp.close_date ? format(new Date(selectedOpp.close_date), "MMM d, yyyy") : "—"}</span></div>
+                            <div className="flex justify-between"><span className="text-muted-foreground">Created</span><span className="font-medium text-foreground">{format(new Date(selectedOpp.created_at), "MMM d, yyyy")}</span></div>
+                            <div className="flex justify-between"><span className="text-muted-foreground">Last Updated</span><span className="font-medium text-foreground">{format(new Date(selectedOpp.updated_at), "MMM d, yyyy")}</span></div>
+                          </div>
+                        </div>
+
+                        {/* Notes */}
+                        {selectedOpp.notes && (
+                          <div>
+                            <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Notes</div>
+                            <p className="text-sm text-foreground whitespace-pre-wrap">{selectedOpp.notes}</p>
+                          </div>
+                        )}
+
+                        {/* Linked Contacts */}
+                        {linkedContacts.length > 0 && (
+                          <div>
+                            <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                              <Contact className="h-3.5 w-3.5" /> Contact Roles ({linkedContacts.length})
+                            </div>
+                            <div className="space-y-2">
+                              {linkedContacts.map((c: any) => (
+                                <div key={c.id} className="flex items-center gap-3 p-2 rounded-md bg-muted/40">
+                                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                    <User className="h-4 w-4 text-primary" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="text-sm font-medium text-foreground">{c.contact_name || "Unknown"}</div>
+                                    <div className="text-xs text-muted-foreground">{c.contact_title || c.university_name}</div>
+                                  </div>
+                                  {c.contact_email && (
+                                    <a href={`mailto:${c.contact_email}`} className="text-xs text-primary hover:underline">{c.contact_email}</a>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Pipeline Board */}
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {OPPORTUNITY_STAGES.map((stage) => {
-                const stageOpps = opportunities.filter((o) => o.stage === stage.value);
-                return (
-                  <Card key={stage.value} className="min-h-[200px]">
-                    <CardHeader className="pb-2 pt-3 px-3">
-                      <CardTitle className="text-sm flex items-center justify-between">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${stage.color}`}>
-                          {stage.label}
-                        </span>
-                        <span className="text-xs text-muted-foreground">{stageOpps.length}</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="px-3 pb-3 space-y-2">
-                      {stageOpps.length === 0 && (
-                        <p className="text-xs text-muted-foreground text-center py-4">No opportunities</p>
-                      )}
-                      {stageOpps.map((opp) => {
-                        const linkedProspect = prospects.find((p) => p.id === opp.prospect_id);
-                        return (
-                          <Card key={opp.id} className="bg-muted/30 border-border/50">
-                            <CardContent className="p-2.5 space-y-1.5">
-                              <div className="text-sm font-medium text-foreground">{opp.name}</div>
-                              {linkedProspect && (
-                                <div className="text-xs text-muted-foreground flex items-center gap-1">
-                                  <Building2 className="h-3 w-3" /> {linkedProspect.university_name}
-                                </div>
-                              )}
-                              {opp.contact_ids && opp.contact_ids.length > 0 && (
-                                <div className="flex flex-wrap gap-1">
-                                  {opp.contact_ids.map(cid => {
-                                    const c = prospects.find(p => p.id === cid);
-                                    return c ? (
-                                      <Badge key={cid} variant="outline" className="text-[10px] gap-0.5">
-                                        <User className="h-2.5 w-2.5" /> {c.contact_name || "Unknown"}
-                                      </Badge>
-                                    ) : null;
-                                  })}
-                                </div>
-                              )}
-                              {opp.amount && (
-                                <div className="text-xs text-muted-foreground flex items-center gap-1">
-                                  <DollarSign className="h-3 w-3" /> ${Number(opp.amount).toLocaleString()}
-                                </div>
-                              )}
-                              {opp.close_date && (
-                                <div className="text-xs text-muted-foreground flex items-center gap-1">
-                                  <Calendar className="h-3 w-3" /> {format(new Date(opp.close_date), "MMM d, yyyy")}
-                                </div>
-                              )}
-                              <Select value={opp.stage} onValueChange={(v) => handleUpdateOppStage(opp.id, v)}>
-                                <SelectTrigger className="h-7 text-xs mt-1"><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                  {OPPORTUNITY_STAGES.map((s) => (
-                                    <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-
-            {loadingOpportunities && (
-              <div className="text-center py-10 text-muted-foreground">Loading opportunities...</div>
-            )}
-          </div>
+              )}
+            </SheetContent>
+          </Sheet>
         </div>
-      )}
+        );
+      })()}
 
       {crmTab === "radar" && (
         <div className="flex-1 overflow-auto p-6">
