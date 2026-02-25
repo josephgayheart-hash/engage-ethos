@@ -198,7 +198,7 @@ export default function CRMPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [appStatusFilter, setAppStatusFilter] = useState("all");
-  const [sortField, setSortField] = useState<"contact_name" | "university_name" | "updated_at">("updated_at");
+  const [sortField, setSortField] = useState<"contact_name" | "university_name" | "updated_at" | "last_contacted">("updated_at");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
   // App signups cross-ref
@@ -908,6 +908,13 @@ export default function CRMPage() {
       return matchesSearch && matchesStatus && matchesApp;
     })
     .sort((a, b) => {
+      if (sortField === "last_contacted") {
+        const aDate = getTotalEmailCount(a.id, a.contact_email).lastDate;
+        const bDate = getTotalEmailCount(b.id, b.contact_email).lastDate;
+        const aTime = aDate ? new Date(aDate).getTime() : 0;
+        const bTime = bDate ? new Date(bDate).getTime() : 0;
+        return sortDir === "asc" ? aTime - bTime : bTime - aTime;
+      }
       const aVal = (a as any)[sortField] || "";
       const bVal = (b as any)[sortField] || "";
       return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
@@ -1071,7 +1078,7 @@ export default function CRMPage() {
               <TableHead>Email</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Emails</TableHead>
-              <TableHead>Last Contacted</TableHead>
+              <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("last_contacted")}><div className="flex items-center gap-1">Last Contacted <ArrowUpDown className="h-3 w-3" /></div></TableHead>
               <TableHead>App Status</TableHead>
               <TableHead></TableHead>
             </TableRow>
