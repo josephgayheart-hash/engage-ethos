@@ -45,7 +45,8 @@ import {
   Folder,
   Image,
   Paintbrush,
-  Download
+  Download,
+  Loader2
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -95,7 +96,7 @@ const MessageDetailPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isAdmin, isApprover } = useAuth();
-  const { messages, deleteMessage, updateMessage } = useMessageLibrary();
+  const { messages, isLoading, deleteMessage, updateMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
   const { getProfile } = useInstitutionalProfiles();
   const { collections, addItemToCollection, createCollection } = useLibraryCollections();
@@ -129,6 +130,19 @@ const MessageDetailPage = () => {
     title: message?.title || "Journey Export",
     containerRef: journeyContentRef,
   });
+
+  if (!message && isLoading) {
+    return (
+      <div className="bg-background">
+        <main className="container mx-auto px-4 py-8">
+          <div className="max-w-4xl mx-auto text-center py-12">
+            <Loader2 className="w-10 h-10 mx-auto text-muted-foreground mb-4 animate-spin" />
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   if (!message) {
     return (
