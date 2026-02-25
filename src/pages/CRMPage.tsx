@@ -64,6 +64,7 @@ interface Opportunity {
   id: string;
   prospect_id: string | null;
   contact_ids: string[];
+  contact_roles: Record<string, string>;
   name: string;
   stage: string;
   amount: number | null;
@@ -80,6 +81,19 @@ interface Opportunity {
   renewal_date: string | null;
   product_tier: string | null;
 }
+
+const CONTACT_ROLES = [
+  "Decision Maker",
+  "Champion",
+  "Economic Buyer",
+  "Technical Evaluator",
+  "End User",
+  "Executive Sponsor",
+  "Influencer",
+  "Blocker",
+  "Legal/Procurement",
+  "Other",
+] as const;
 
 interface OutreachRecord {
   id: string;
@@ -2067,29 +2081,97 @@ export default function CRMPage() {
               <div className="space-y-5">
                 {/* Contact Roles */}
                 <Card>
-                  <CardHeader className="pb-2">
+                  <CardHeader className="pb-2 flex-row items-center justify-between">
                     <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
                       <Contact className="h-4 w-4" /> Contact Roles ({linkedContacts.length})
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="space-y-3">
                     {linkedContacts.length === 0 ? (
-                      <p className="text-xs text-muted-foreground italic">No contacts linked</p>
+                      <p className="text-xs text-muted-foreground italic">No contacts linked yet</p>
                     ) : (
-                      <div className="space-y-3">
-                        {linkedContacts.map((c: any) => (
-                          <div key={c.id} className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center shrink-0">
-                              <User className="h-4 w-4 text-primary" />
+                      <div className="space-y-2">
+                        {linkedContacts.map((c: any) => {
+                          const role = (selectedOpp.contact_roles as Record<string, string>)?.[c.id] || "";
+                          return (
+                            <div key={c.id} className="flex items-start gap-2 p-2 rounded-lg border border-border/50 bg-muted/30">
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+                                <User className="h-3.5 w-3.5 text-primary" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="text-sm font-medium text-foreground truncate">{c.contact_name || "Unknown"}</div>
+                                <div className="text-xs text-muted-foreground truncate">{c.contact_title || c.university_name}</div>
+                                <Select
+                                  value={role || "unset"}
+                                  onValueChange={async (v) => {
+                                    const newRoles = { ...(selectedOpp.contact_roles || {}), [c.id]: v === "unset" ? "" : v };
+                                    await supabase.from("crm_opportunities" as any).update({ contact_roles: newRoles, updated_at: new Date().toISOString() } as any).eq("id", selectedOpp.id);
+                                    loadOpportunities();
+                                  }}
+                                >
+                                  <SelectTrigger className="h-7 text-xs mt-1 w-full">
+                                    <SelectValue placeholder="Assign role..." />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="unset">No role</SelectItem>
+                                    {CONTACT_ROLES.map(r => (
+                                      <SelectItem key={r} value={r}>{r}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 w-7 p-0 shrink-0 text-muted-foreground hover:text-destructive"
+                                onClick={async () => {
+                                  const newIds = (selectedOpp.contact_ids || []).filter((id: string) => id !== c.id);
+                                  const newRoles = { ...(selectedOpp.contact_roles || {}) };
+                                  delete (newRoles as any)[c.id];
+                                  await supabase.from("crm_opportunities" as any).update({ contact_ids: newIds, contact_roles: newRoles, updated_at: new Date().toISOString() } as any).eq("id", selectedOpp.id);
+                                  loadOpportunities();
+                                }}
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </Button>
                             </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="text-sm font-medium text-foreground truncate">{c.contact_name || "Unknown"}</div>
-                              <div className="text-xs text-muted-foreground truncate">{c.contact_title || c.university_name}</div>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
+
+                    {/* Add contact dropdown */}
+                    <div className="pt-1">
+                      <Select
+                        value=""
+                        onValueChange={async (contactId) => {
+                          if (!contactId || selectedOpp.contact_ids?.includes(contactId)) return;
+                          const newIds = [...(selectedOpp.contact_ids || []), contactId];
+                          await supabase.from("crm_opportunities" as any).update({ contact_ids: newIds, updated_at: new Date().toISOString() } as any).eq("id", selectedOpp.id);
+                          loadOpportunities();
+                        }}
+                      >
+                        <SelectTrigger className="h-8 text-xs">
+                          <div className="flex items-center gap-1 text-muted-foreground">
+                            <UserPlus className="h-3.5 w-3.5" /> Add contact...
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {prospects
+                            .filter(p => p.contact_name && !selectedOpp.contact_ids?.includes(p.id))
+                            .map(p => (
+                              <SelectItem key={p.id} value={p.id}>
+                                <span className="font-medium">{p.contact_name}</span>
+                                <span className="text-muted-foreground ml-1.5">· {p.university_name}</span>
+                              </SelectItem>
+                            ))
+                          }
+                          {prospects.filter(p => p.contact_name && !selectedOpp.contact_ids?.includes(p.id)).length === 0 && (
+                            <div className="px-2 py-1.5 text-xs text-muted-foreground">No more contacts available</div>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </CardContent>
                 </Card>
 
