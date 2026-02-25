@@ -60,6 +60,7 @@ interface Opportunity {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  created_by_user_id: string | null;
 }
 
 interface OutreachRecord {
@@ -1489,38 +1490,322 @@ export default function CRMPage() {
         const selectedOpp = opportunities.find(o => o.id === selectedOppId) || null;
         const linkedProspect = selectedOpp ? prospects.find(p => p.id === selectedOpp.prospect_id) : null;
         const linkedContacts = selectedOpp?.contact_ids?.map(cid => prospects.find(p => p.id === cid)).filter(Boolean) || [];
+        const creatorUser = selectedOpp?.created_by_user_id ? allUsers.find(u => u.id === selectedOpp.created_by_user_id) : null;
+        const creatorName = creatorUser ? `${creatorUser.first_name} ${creatorUser.last_name}` : null;
 
-        return (
-        <div className="flex-1 overflow-auto p-6">
-          <div className="max-w-5xl mx-auto space-y-4">
-            {/* Header row */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-foreground">Opportunities</h2>
-                <p className="text-sm text-muted-foreground">{opportunities.length} total · ${opportunities.reduce((s, o) => s + (Number(o.amount) || 0), 0).toLocaleString()} pipeline value</p>
+        // ── DETAIL VIEW ──
+        if (selectedOpp) {
+          const currentIdx = OPPORTUNITY_STAGES.findIndex(s => s.value === selectedOpp.stage);
+          const stageInfo = OPPORTUNITY_STAGES.find(s => s.value === selectedOpp.stage);
+          return (
+          <div className="flex-1 overflow-auto">
+            {/* Breadcrumb bar */}
+            <div className="border-b bg-muted/30 px-6 py-3">
+              <div className="flex items-center gap-2 text-sm">
+                <button onClick={() => setSelectedOppId(null)} className="text-primary hover:underline font-medium">Opportunities</button>
+                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-foreground font-medium truncate">{selectedOpp.name}</span>
               </div>
-              <Button size="sm" onClick={() => {
+            </div>
+
+            {/* Hero header */}
+            <div className="bg-gradient-to-r from-primary/5 via-primary/3 to-transparent border-b">
+              <div className="max-w-6xl mx-auto px-6 py-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center shadow-sm">
+                      <Target className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-0.5">Opportunity</div>
+                      <h1 className="text-xl font-bold text-foreground">{selectedOpp.name}</h1>
+                      <div className="flex items-center gap-4 mt-1.5 text-sm text-muted-foreground">
+                        {linkedProspect && (
+                          <span className="flex items-center gap-1"><Building2 className="h-3.5 w-3.5" /> {linkedProspect.university_name}</span>
+                        )}
+                        {selectedOpp.close_date && (
+                          <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> Close: {format(new Date(selectedOpp.close_date), "MMM d, yyyy")}</span>
+                        )}
+                        {selectedOpp.amount && (
+                          <span className="flex items-center gap-1 font-semibold text-foreground"><DollarSign className="h-3.5 w-3.5" /> {Number(selectedOpp.amount).toLocaleString()}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button size="sm" variant="outline" onClick={() => {
+                      setEditingOpp(!editingOpp);
+                      if (!editingOpp) setOppEditData({ ...selectedOpp });
+                    }}>
+                      {editingOpp ? <><X className="h-3.5 w-3.5 mr-1" /> Cancel</> : <><Pencil className="h-3.5 w-3.5 mr-1" /> Edit</>}
+                    </Button>
+                    <Button size="sm" variant="outline" className="text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => handleDeleteOpportunity(selectedOpp.id)}>
+                      <XCircle className="h-3.5 w-3.5 mr-1" /> Delete
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Chevron stage path */}
+            <div className="max-w-6xl mx-auto px-6 mt-5">
+              <div className="flex items-center gap-0">
+                {OPPORTUNITY_STAGES.map((stage, idx) => {
+                  const isActive = stage.value === selectedOpp.stage;
+                  const isPast = idx < currentIdx;
+                  const isClosedWon = selectedOpp.stage === "closed_won";
+                  const isClosedLost = selectedOpp.stage === "closed_lost";
+
+                  let bg = "bg-muted/70 text-muted-foreground border-border";
+                  let chevronFill = "hsl(var(--muted))";
+                  if (isActive) {
+                    if (isClosedWon) { bg = "bg-emerald-500 text-white border-emerald-500"; chevronFill = "rgb(16 185 129)"; }
+                    else if (isClosedLost) { bg = "bg-destructive text-destructive-foreground border-destructive"; chevronFill = "hsl(var(--destructive))"; }
+                    else { bg = "bg-primary text-primary-foreground border-primary"; chevronFill = "hsl(var(--primary))"; }
+                  } else if (isPast) {
+                    bg = "bg-primary/15 text-primary border-primary/30";
+                    chevronFill = "hsl(var(--primary) / 0.15)";
+                  }
+
+                  return (
+                    <div key={stage.value} className="flex items-stretch flex-1 relative">
+                      <button
+                        onClick={() => handleUpdateOppStage(selectedOpp.id, stage.value)}
+                        className={`w-full py-2.5 text-xs font-semibold text-center transition-all hover:opacity-90 border-y ${bg} ${idx === 0 ? "rounded-l-lg border-l" : ""} ${idx === OPPORTUNITY_STAGES.length - 1 ? "rounded-r-lg border-r" : ""}`}
+                      >
+                        <span className="relative z-10 flex items-center justify-center gap-1">
+                          {isPast && <CheckCircle2 className="h-3 w-3" />}
+                          {stage.label}
+                        </span>
+                      </button>
+                      {idx < OPPORTUNITY_STAGES.length - 1 && (
+                        <div className="absolute right-0 top-0 h-full w-4 translate-x-2 z-20 pointer-events-none">
+                          <svg viewBox="0 0 16 40" preserveAspectRatio="none" className="h-full w-full">
+                            <path d="M0,0 L16,20 L0,40" fill={chevronFill} />
+                            <path d="M1,0 L16,20 L1,40" fill="none" stroke="hsl(var(--border))" strokeWidth="1" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              {selectedOpp.stage !== "closed_won" && selectedOpp.stage !== "closed_lost" && (
+                <div className="flex justify-end mt-3">
+                  <Button size="sm" onClick={() => {
+                    if (currentIdx < OPPORTUNITY_STAGES.length - 2) {
+                      handleUpdateOppStage(selectedOpp.id, OPPORTUNITY_STAGES[currentIdx + 1].value);
+                    }
+                  }}>
+                    <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" /> Mark Stage as Complete
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {/* Content grid */}
+            <div className="max-w-6xl mx-auto px-6 mt-6 pb-8 grid grid-cols-3 gap-6">
+              {/* Left: Key Fields + Notes */}
+              <div className="col-span-2 space-y-5">
+                {editingOpp ? (
+                  <Card>
+                    <CardHeader className="pb-3"><CardTitle className="text-sm">Edit Opportunity</CardTitle></CardHeader>
+                    <CardContent className="space-y-3">
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">Opportunity Name</label>
+                        <Input value={oppEditData.name || ""} onChange={(e) => setOppEditData({ ...oppEditData, name: e.target.value })} className="h-9" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs text-muted-foreground mb-1 block">Amount ($)</label>
+                          <Input type="number" value={oppEditData.amount || ""} onChange={(e) => setOppEditData({ ...oppEditData, amount: e.target.value ? Number(e.target.value) : null })} className="h-9" />
+                        </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground mb-1 block">Close Date</label>
+                          <Input type="date" value={oppEditData.close_date || ""} onChange={(e) => setOppEditData({ ...oppEditData, close_date: e.target.value || null })} className="h-9" />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">Account</label>
+                        <Select value={oppEditData.prospect_id || "none"} onValueChange={(v) => setOppEditData({ ...oppEditData, prospect_id: v === "none" ? null : v })}>
+                          <SelectTrigger className="h-9"><SelectValue placeholder="Link to account..." /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">None</SelectItem>
+                            {Array.from(new Map(prospects.map(p => [p.university_name, p])).values()).map((p) => (
+                              <SelectItem key={p.id} value={p.id}>{p.university_name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">Notes</label>
+                        <Textarea value={oppEditData.notes || ""} onChange={(e) => setOppEditData({ ...oppEditData, notes: e.target.value })} rows={4} />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button onClick={() => handleUpdateOpportunity(selectedOpp.id, oppEditData)} className="h-9">
+                          <Save className="h-3.5 w-3.5 mr-1" /> Save Changes
+                        </Button>
+                        <Button variant="outline" onClick={() => setEditingOpp(false)} className="h-9">Cancel</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <>
+                    <Card>
+                      <CardHeader className="pb-2 flex-row items-center justify-between">
+                        <CardTitle className="text-sm font-semibold">Key Fields</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 gap-4">
+                          {[
+                            { label: "Stage", value: stageInfo?.label || selectedOpp.stage },
+                            { label: "Amount", value: selectedOpp.amount ? `$${Number(selectedOpp.amount).toLocaleString()}` : "—" },
+                            { label: "Close Date", value: selectedOpp.close_date ? format(new Date(selectedOpp.close_date), "MMM d, yyyy") : "—" },
+                            { label: "Account", value: linkedProspect?.university_name || "—" },
+                            { label: "Created Date", value: format(new Date(selectedOpp.created_at), "MMM d, yyyy 'at' h:mm a") },
+                            { label: "Last Modified", value: format(new Date(selectedOpp.updated_at), "MMM d, yyyy 'at' h:mm a") },
+                            { label: "Created By", value: creatorName || "—" },
+                            { label: "Opportunity Owner", value: creatorName || "—" },
+                          ].map(f => (
+                            <div key={f.label} className="flex flex-col py-2 border-b border-border/50 last:border-0">
+                              <span className="text-xs text-muted-foreground mb-0.5">{f.label}</span>
+                              <span className="text-sm font-medium text-foreground">{f.value}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Notes */}
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-semibold flex items-center gap-1.5"><StickyNote className="h-4 w-4" /> Notes</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {selectedOpp.notes ? (
+                          <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{selectedOpp.notes}</p>
+                        ) : (
+                          <p className="text-sm text-muted-foreground italic">No notes yet. Click Edit to add notes.</p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
+
+              {/* Right sidebar: Contacts + Details */}
+              <div className="space-y-5">
+                {/* Contact Roles */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
+                      <Contact className="h-4 w-4" /> Contact Roles ({linkedContacts.length})
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {linkedContacts.length === 0 ? (
+                      <p className="text-xs text-muted-foreground italic">No contacts linked</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {linkedContacts.map((c: any) => (
+                          <div key={c.id} className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center shrink-0">
+                              <User className="h-4 w-4 text-primary" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="text-sm font-medium text-foreground truncate">{c.contact_name || "Unknown"}</div>
+                              <div className="text-xs text-muted-foreground truncate">{c.contact_title || c.university_name}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Quick Details */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-semibold flex items-center gap-1.5"><Activity className="h-4 w-4" /> Details</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Owner</span>
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
+                          <User className="h-3 w-3 text-primary" />
+                        </div>
+                        <span className="font-medium text-foreground text-xs">{creatorName || "Unassigned"}</span>
+                      </div>
+                    </div>
+                    <Separator />
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Created By</span>
+                      <span className="font-medium text-foreground text-xs">{creatorName || "—"}</span>
+                    </div>
+                    <Separator />
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Created</span>
+                      <span className="text-xs text-foreground">{format(new Date(selectedOpp.created_at), "MMM d, yyyy")}</span>
+                    </div>
+                    <Separator />
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Modified</span>
+                      <span className="text-xs text-foreground">{format(new Date(selectedOpp.updated_at), "MMM d, yyyy")}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+          );
+        }
+
+        // ── LIST VIEW ──
+        return (
+        <div className="flex-1 overflow-auto">
+          {/* Header */}
+          <div className="border-b bg-gradient-to-r from-primary/5 via-transparent to-transparent px-6 py-5">
+            <div className="max-w-6xl mx-auto flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                  <Target className="h-5 w-5 text-primary" /> Opportunities
+                </h2>
+                <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                  <span>{opportunities.length} total</span>
+                  <span className="flex items-center gap-1 font-semibold text-foreground">
+                    <DollarSign className="h-3.5 w-3.5" />
+                    {opportunities.reduce((s, o) => s + (Number(o.amount) || 0), 0).toLocaleString()} pipeline
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                    {opportunities.filter(o => o.stage === "closed_won").length} won
+                  </span>
+                </div>
+              </div>
+              <Button onClick={() => {
                 setNewOppName("");
                 setNewOppProspectId("");
                 setNewOppContactIds([]);
                 setCreatingOpp(!creatingOpp);
-              }}>
-                {creatingOpp ? <X className="h-4 w-4 mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
-                {creatingOpp ? "Cancel" : "New Opportunity"}
+              }} className="shadow-sm">
+                {creatingOpp ? <><X className="h-4 w-4 mr-1.5" /> Cancel</> : <><Plus className="h-4 w-4 mr-1.5" /> New Opportunity</>}
               </Button>
             </div>
+          </div>
 
+          <div className="max-w-6xl mx-auto px-6 py-5 space-y-4">
             {/* Inline create form */}
             {creatingOpp && (
-              <Card>
+              <Card className="border-primary/20 shadow-sm">
                 <CardContent className="p-4">
                   <div className="flex items-end gap-3 flex-wrap">
                     <div className="flex-1 min-w-[200px]">
-                      <label className="text-xs text-muted-foreground mb-1 block">Opportunity Name</label>
+                      <label className="text-xs font-medium text-muted-foreground mb-1 block">Opportunity Name</label>
                       <Input value={newOppName} onChange={(e) => setNewOppName(e.target.value)} placeholder="e.g. Enterprise Deal - State University" className="h-9" />
                     </div>
-                    <div className="w-[200px]">
-                      <label className="text-xs text-muted-foreground mb-1 block">Account</label>
+                    <div className="w-[220px]">
+                      <label className="text-xs font-medium text-muted-foreground mb-1 block">Account</label>
                       <Select value={newOppProspectId} onValueChange={setNewOppProspectId}>
                         <SelectTrigger className="h-9"><SelectValue placeholder="Link to account..." /></SelectTrigger>
                         <SelectContent>
@@ -1539,42 +1824,60 @@ export default function CRMPage() {
               </Card>
             )}
 
-            {/* List view */}
+            {/* Stage summary pills */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {OPPORTUNITY_STAGES.map((stage) => {
+                const count = opportunities.filter(o => o.stage === stage.value).length;
+                if (count === 0) return null;
+                return (
+                  <Badge key={stage.value} variant="outline" className={`text-xs gap-1 ${stage.color}`}>
+                    {stage.label} <span className="font-bold">{count}</span>
+                  </Badge>
+                );
+              })}
+            </div>
+
+            {/* Table */}
             {loadingOpportunities ? (
-              <div className="text-center py-10 text-muted-foreground">Loading opportunities...</div>
+              <div className="text-center py-10 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" /> Loading...</div>
             ) : opportunities.length === 0 ? (
-              <div className="text-center py-16">
-                <Target className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-                <p className="text-muted-foreground">No opportunities yet</p>
+              <div className="text-center py-20">
+                <div className="w-16 h-16 rounded-2xl bg-muted/50 mx-auto flex items-center justify-center mb-4">
+                  <Target className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <p className="text-muted-foreground font-medium">No opportunities yet</p>
+                <p className="text-sm text-muted-foreground mt-1">Create your first opportunity to start tracking deals</p>
               </div>
             ) : (
-              <Card>
+              <Card className="shadow-sm">
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[280px]">Opportunity</TableHead>
-                      <TableHead>Account</TableHead>
-                      <TableHead>Stage</TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
-                      <TableHead>Close Date</TableHead>
-                      <TableHead>Created</TableHead>
+                    <TableRow className="bg-muted/30">
+                      <TableHead className="w-[300px] font-semibold">Opportunity Name</TableHead>
+                      <TableHead className="font-semibold">Account</TableHead>
+                      <TableHead className="font-semibold">Stage</TableHead>
+                      <TableHead className="text-right font-semibold">Amount</TableHead>
+                      <TableHead className="font-semibold">Close Date</TableHead>
+                      <TableHead className="font-semibold">Owner</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {opportunities.map((opp) => {
                       const prospect = prospects.find(p => p.id === opp.prospect_id);
                       const stageInfo = OPPORTUNITY_STAGES.find(s => s.value === opp.stage);
+                      const owner = opp.created_by_user_id ? allUsers.find(u => u.id === opp.created_by_user_id) : null;
+                      const ownerName = owner ? `${owner.first_name} ${owner.last_name}` : "—";
                       return (
                         <TableRow
                           key={opp.id}
-                          className="cursor-pointer hover:bg-muted/50"
+                          className="cursor-pointer hover:bg-primary/5 transition-colors group"
                           onClick={() => { setSelectedOppId(opp.id); setEditingOpp(false); }}
                         >
                           <TableCell>
-                            <div className="font-medium text-foreground">{opp.name}</div>
+                            <div className="font-medium text-primary group-hover:underline">{opp.name}</div>
                             {opp.contact_ids && opp.contact_ids.length > 0 && (
-                              <div className="text-xs text-muted-foreground mt-0.5">
-                                {opp.contact_ids.length} contact{opp.contact_ids.length > 1 ? "s" : ""}
+                              <div className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+                                <Contact className="h-3 w-3" /> {opp.contact_ids.length} contact{opp.contact_ids.length > 1 ? "s" : ""}
                               </div>
                             )}
                           </TableCell>
@@ -1582,23 +1885,28 @@ export default function CRMPage() {
                             {prospect ? (
                               <div className="flex items-center gap-1.5 text-sm">
                                 <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-                                {prospect.university_name}
+                                <span>{prospect.university_name}</span>
                               </div>
                             ) : <span className="text-muted-foreground text-sm">—</span>}
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline" className={`text-xs ${stageInfo?.color || ""}`}>
+                            <Badge variant="secondary" className={`text-xs font-medium ${stageInfo?.color || ""}`}>
                               {stageInfo?.label || opp.stage}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-right text-sm">
-                            {opp.amount ? `$${Number(opp.amount).toLocaleString()}` : "—"}
+                          <TableCell className="text-right text-sm font-medium">
+                            {opp.amount ? `$${Number(opp.amount).toLocaleString()}` : <span className="text-muted-foreground">—</span>}
                           </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
-                            {opp.close_date ? format(new Date(opp.close_date), "MMM d, yyyy") : "—"}
+                          <TableCell className="text-sm">
+                            {opp.close_date ? format(new Date(opp.close_date), "MMM d, yyyy") : <span className="text-muted-foreground">—</span>}
                           </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
-                            {format(new Date(opp.created_at), "MMM d, yyyy")}
+                          <TableCell>
+                            <div className="flex items-center gap-1.5">
+                              <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                                <User className="h-3 w-3 text-primary" />
+                              </div>
+                              <span className="text-xs text-foreground">{ownerName}</span>
+                            </div>
                           </TableCell>
                         </TableRow>
                       );
@@ -1608,205 +1916,6 @@ export default function CRMPage() {
               </Card>
             )}
           </div>
-
-          {/* Opportunity Detail Sheet */}
-          <Sheet open={!!selectedOppId} onOpenChange={(open) => { if (!open) setSelectedOppId(null); }}>
-            <SheetContent className="w-full sm:max-w-2xl p-0 flex flex-col">
-              <SheetHeader className="px-6 pt-5 pb-0">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-xs font-medium text-primary uppercase tracking-wide flex items-center gap-1.5">
-                      <Target className="h-3.5 w-3.5" /> Opportunity
-                    </div>
-                    <SheetTitle className="text-lg mt-0.5">{selectedOpp?.name || "Opportunity"}</SheetTitle>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Button size="sm" variant="outline" onClick={() => {
-                      if (selectedOpp) {
-                        setEditingOpp(!editingOpp);
-                        setOppEditData({ ...selectedOpp });
-                      }
-                    }}>
-                      {editingOpp ? <X className="h-3.5 w-3.5 mr-1" /> : <Pencil className="h-3.5 w-3.5 mr-1" />}
-                      {editingOpp ? "Cancel" : "Edit"}
-                    </Button>
-                    <Button size="sm" variant="destructive" onClick={() => selectedOpp && handleDeleteOpportunity(selectedOpp.id)}>
-                      <XCircle className="h-3.5 w-3.5 mr-1" /> Delete
-                    </Button>
-                  </div>
-                </div>
-                <SheetDescription className="sr-only">Opportunity details</SheetDescription>
-              </SheetHeader>
-
-              {selectedOpp && (
-                <div className="flex-1 overflow-auto">
-                  {/* Key fields bar */}
-                  <div className="grid grid-cols-4 gap-px bg-border mx-6 mt-4 rounded-lg overflow-hidden">
-                    {[
-                      { label: "Account", value: linkedProspect?.university_name || "—" },
-                      { label: "Close Date", value: selectedOpp.close_date ? format(new Date(selectedOpp.close_date), "MMM d, yyyy") : "—" },
-                      { label: "Amount", value: selectedOpp.amount ? `$${Number(selectedOpp.amount).toLocaleString()}` : "—" },
-                      { label: "Created", value: format(new Date(selectedOpp.created_at), "MMM d, yyyy") },
-                    ].map((f) => (
-                      <div key={f.label} className="bg-muted/40 px-3 py-2.5">
-                        <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{f.label}</div>
-                        <div className="text-sm font-medium text-foreground mt-0.5 truncate">{f.value}</div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Salesforce-style chevron stage bar */}
-                  <div className="mx-6 mt-4">
-                    <div className="flex items-stretch">
-                      {OPPORTUNITY_STAGES.map((stage, idx) => {
-                        const currentIdx = OPPORTUNITY_STAGES.findIndex(s => s.value === selectedOpp.stage);
-                        const isActive = stage.value === selectedOpp.stage;
-                        const isPast = idx < currentIdx;
-                        const isClosedWon = selectedOpp.stage === "closed_won";
-                        const isClosedLost = selectedOpp.stage === "closed_lost";
-                        
-                        let bgClass = "bg-muted/60 text-muted-foreground";
-                        if (isActive) {
-                          if (isClosedWon) bgClass = "bg-emerald-500 text-white";
-                          else if (isClosedLost) bgClass = "bg-destructive text-destructive-foreground";
-                          else bgClass = "bg-primary text-primary-foreground";
-                        } else if (isPast) {
-                          bgClass = "bg-primary/20 text-primary";
-                        }
-
-                        return (
-                          <button
-                            key={stage.value}
-                            onClick={() => handleUpdateOppStage(selectedOpp.id, stage.value)}
-                            className={`relative flex-1 py-2 text-[11px] font-medium text-center transition-colors hover:opacity-80 ${bgClass} ${idx === 0 ? "rounded-l-md" : ""} ${idx === OPPORTUNITY_STAGES.length - 1 ? "rounded-r-md" : ""}`}
-                            title={`Set to ${stage.label}`}
-                          >
-                            {/* Chevron separator */}
-                            {idx > 0 && (
-                              <svg className="absolute left-0 top-0 h-full w-3 -translate-x-1.5" viewBox="0 0 12 40" preserveAspectRatio="none">
-                                <path d="M0,0 L12,20 L0,40" fill="currentColor" className={idx <= currentIdx ? "text-primary/20" : "text-muted/60"} />
-                              </svg>
-                            )}
-                            {idx < OPPORTUNITY_STAGES.length - 1 && (
-                              <svg className="absolute right-0 top-0 h-full w-3 translate-x-1.5 z-10" viewBox="0 0 12 40" preserveAspectRatio="none">
-                                <path d="M0,0 L12,20 L0,40" fill="currentColor" className={bgClass.includes("bg-primary") || bgClass.includes("bg-emerald") || bgClass.includes("bg-destructive") ? (isActive ? (isClosedWon ? "text-emerald-500" : isClosedLost ? "text-destructive" : "text-primary") : "text-primary/20") : "text-muted/60"} />
-                              </svg>
-                            )}
-                            <span className="relative z-20">
-                              {isPast && <CheckCircle2 className="inline h-3 w-3 mr-0.5 -mt-0.5" />}
-                              {stage.label}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                    {selectedOpp.stage !== "closed_won" && selectedOpp.stage !== "closed_lost" && (
-                      <div className="flex justify-end mt-2">
-                        <Button size="sm" variant="default" onClick={() => {
-                          const currentIdx = OPPORTUNITY_STAGES.findIndex(s => s.value === selectedOpp.stage);
-                          if (currentIdx < OPPORTUNITY_STAGES.length - 2) {
-                            handleUpdateOppStage(selectedOpp.id, OPPORTUNITY_STAGES[currentIdx + 1].value);
-                          }
-                        }}>
-                          <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Mark Stage as Complete
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-
-                  <Separator className="my-4" />
-
-                  {/* Edit form or detail view */}
-                  <div className="px-6 pb-6 space-y-4">
-                    {editingOpp ? (
-                      <div className="space-y-3">
-                        <div>
-                          <label className="text-xs text-muted-foreground mb-1 block">Opportunity Name</label>
-                          <Input value={oppEditData.name || ""} onChange={(e) => setOppEditData({ ...oppEditData, name: e.target.value })} className="h-9" />
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="text-xs text-muted-foreground mb-1 block">Amount</label>
-                            <Input type="number" value={oppEditData.amount || ""} onChange={(e) => setOppEditData({ ...oppEditData, amount: e.target.value ? Number(e.target.value) : null })} className="h-9" placeholder="0" />
-                          </div>
-                          <div>
-                            <label className="text-xs text-muted-foreground mb-1 block">Close Date</label>
-                            <Input type="date" value={oppEditData.close_date || ""} onChange={(e) => setOppEditData({ ...oppEditData, close_date: e.target.value || null })} className="h-9" />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="text-xs text-muted-foreground mb-1 block">Account</label>
-                          <Select value={oppEditData.prospect_id || "none"} onValueChange={(v) => setOppEditData({ ...oppEditData, prospect_id: v === "none" ? null : v })}>
-                            <SelectTrigger className="h-9"><SelectValue placeholder="Link to account..." /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">None</SelectItem>
-                              {Array.from(new Map(prospects.map(p => [p.university_name, p])).values()).map((p) => (
-                                <SelectItem key={p.id} value={p.id}>{p.university_name}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <label className="text-xs text-muted-foreground mb-1 block">Notes</label>
-                          <Textarea value={oppEditData.notes || ""} onChange={(e) => setOppEditData({ ...oppEditData, notes: e.target.value })} rows={3} />
-                        </div>
-                        <Button onClick={() => selectedOpp && handleUpdateOpportunity(selectedOpp.id, oppEditData)} className="h-9">
-                          <Save className="h-3.5 w-3.5 mr-1" /> Save Changes
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {/* Key Fields */}
-                        <div>
-                          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Key Fields</div>
-                          <div className="grid grid-cols-2 gap-y-2 gap-x-6 text-sm">
-                            <div className="flex justify-between"><span className="text-muted-foreground">Stage</span><span className="font-medium text-foreground">{OPPORTUNITY_STAGES.find(s => s.value === selectedOpp.stage)?.label}</span></div>
-                            <div className="flex justify-between"><span className="text-muted-foreground">Amount</span><span className="font-medium text-foreground">{selectedOpp.amount ? `$${Number(selectedOpp.amount).toLocaleString()}` : "—"}</span></div>
-                            <div className="flex justify-between"><span className="text-muted-foreground">Close Date</span><span className="font-medium text-foreground">{selectedOpp.close_date ? format(new Date(selectedOpp.close_date), "MMM d, yyyy") : "—"}</span></div>
-                            <div className="flex justify-between"><span className="text-muted-foreground">Created</span><span className="font-medium text-foreground">{format(new Date(selectedOpp.created_at), "MMM d, yyyy")}</span></div>
-                            <div className="flex justify-between"><span className="text-muted-foreground">Last Updated</span><span className="font-medium text-foreground">{format(new Date(selectedOpp.updated_at), "MMM d, yyyy")}</span></div>
-                          </div>
-                        </div>
-
-                        {/* Notes */}
-                        {selectedOpp.notes && (
-                          <div>
-                            <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Notes</div>
-                            <p className="text-sm text-foreground whitespace-pre-wrap">{selectedOpp.notes}</p>
-                          </div>
-                        )}
-
-                        {/* Linked Contacts */}
-                        {linkedContacts.length > 0 && (
-                          <div>
-                            <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                              <Contact className="h-3.5 w-3.5" /> Contact Roles ({linkedContacts.length})
-                            </div>
-                            <div className="space-y-2">
-                              {linkedContacts.map((c: any) => (
-                                <div key={c.id} className="flex items-center gap-3 p-2 rounded-md bg-muted/40">
-                                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                                    <User className="h-4 w-4 text-primary" />
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <div className="text-sm font-medium text-foreground">{c.contact_name || "Unknown"}</div>
-                                    <div className="text-xs text-muted-foreground">{c.contact_title || c.university_name}</div>
-                                  </div>
-                                  {c.contact_email && (
-                                    <a href={`mailto:${c.contact_email}`} className="text-xs text-primary hover:underline">{c.contact_email}</a>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </SheetContent>
-          </Sheet>
         </div>
         );
       })()}
