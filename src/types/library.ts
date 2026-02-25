@@ -3,7 +3,11 @@ import type { Channel, AudienceType, MessageDomain, CommunicationMoment, Primary
 export type LibraryEntryStatus = 'draft' | 'submitted' | 'approved' | 'published';
 
 // Source of where the message/template was created
-export type LibrarySource = 'builder' | 'journey' | 'copywriter' | 'byoc' | 'evaluate' | 'import' | 'analyzer' | 'other';
+export type LibrarySource = 'builder' | 'journey' | 'copywriter' | 'byoc' | 'evaluate' | 'import' | 'analyzer' | 'image-studio' | 'brand-studio' | 'other';
+
+// Helper to determine if a source is image-based
+export const IMAGE_SOURCES: LibrarySource[] = ['image-studio', 'brand-studio'];
+export const MESSAGE_SOURCES: LibrarySource[] = ['builder', 'journey', 'copywriter', 'byoc', 'evaluate', 'import', 'analyzer', 'other'];
 
 export interface SavedMessage {
   id: string;

@@ -6,7 +6,9 @@ import {
   FileUp, 
   ClipboardCheck, 
   Download,
-  MoreHorizontal
+  MoreHorizontal,
+  ImageIcon,
+  Palette
 } from "lucide-react";
 import type { LibrarySource } from "@/types/library";
 
@@ -50,6 +52,16 @@ const sourceConfig: Record<LibrarySource, { label: string; icon: typeof PenTool;
     label: "Analyzer", 
     icon: ClipboardCheck, 
     className: "bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-950/30 dark:text-cyan-400 dark:border-cyan-800" 
+  },
+  'image-studio': {
+    label: "Image Studio",
+    icon: ImageIcon,
+    className: "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/30 dark:text-indigo-400 dark:border-indigo-800"
+  },
+  'brand-studio': {
+    label: "Brand Studio",
+    icon: Palette,
+    className: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-800"
   },
   other: { 
     label: "Other", 

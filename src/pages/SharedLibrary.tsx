@@ -21,6 +21,7 @@ import { CreateTemplateDialog } from "@/components/library/CreateTemplateDialog"
 import { AdminApprovalPanel } from "@/components/library/AdminApprovalPanel";
 import { SourceBadge } from "@/components/library/SourceBadge";
 import type { SharedTemplate, LibraryFilters, LibraryEntryStatus } from "@/types/library";
+import { IMAGE_SOURCES as IMG_SOURCES } from "@/types/library";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
@@ -45,7 +46,8 @@ import {
   LayoutGrid,
   List,
   Folder,
-  Plus
+  Plus,
+  ImageIcon
 } from "lucide-react";
 
 const statusConfig: Record<LibraryEntryStatus, { label: string; icon: typeof CheckCircle; variant: 'default' | 'secondary' | 'outline' }> = {
@@ -70,8 +72,11 @@ const SharedLibrary = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
   const [adminViewMode, setAdminViewMode] = useState<'browse' | 'admin'>('browse');
-  const [topLevelTab, setTopLevelTab] = useState<'playbooks' | 'collections'>(() => {
-    return searchParams.get('tab') === 'collections' ? 'collections' : 'playbooks';
+  const [topLevelTab, setTopLevelTab] = useState<'playbooks' | 'collections' | 'images'>(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'collections') return 'collections';
+    if (tab === 'images') return 'images';
+    return 'playbooks';
   });
   
   // View mode state (persisted in localStorage)
@@ -285,7 +290,7 @@ const SharedLibrary = () => {
                 </CardContent>
               </Card>
 
-              {/* Top-level Playbooks / Collections toggle */}
+              {/* Top-level Playbooks / Collections / Images toggle */}
               <Tabs value={topLevelTab} onValueChange={(v) => setTopLevelTab(v as any)} className="mb-6">
                 <TabsList>
                   <TabsTrigger value="playbooks" className="flex items-center gap-1">
@@ -299,10 +304,71 @@ const SharedLibrary = () => {
                       <Badge variant="secondary" className="ml-1 text-[10px]">{collections.length}</Badge>
                     )}
                   </TabsTrigger>
+                  <TabsTrigger value="images" className="flex items-center gap-1">
+                    <ImageIcon className="w-4 h-4" />
+                    Images
+                    {(() => {
+                      const imgCount = templates.filter(t => IMG_SOURCES.includes(t.source as any) && (t.status === 'published' || t.status === 'approved')).length;
+                      return imgCount > 0 ? <Badge variant="secondary" className="ml-1 text-[10px]">{imgCount}</Badge> : null;
+                    })()}
+                  </TabsTrigger>
                 </TabsList>
               </Tabs>
 
-              {topLevelTab === 'collections' ? (
+              {topLevelTab === 'images' ? (
+                /* Images View */
+                <div>
+                  {(() => {
+                    const imageTemplates = templates.filter(t => IMG_SOURCES.includes(t.source as any) && (t.status === 'published' || t.status === 'approved'));
+                    if (imageTemplates.length === 0) {
+                      return (
+                        <Card className="text-center py-12">
+                          <CardContent>
+                            <ImageIcon className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                            <h3 className="font-serif text-lg font-semibold mb-2">No images yet</h3>
+                            <p className="text-muted-foreground mb-4">
+                              Images created in Image Studio or Brand It Studio and submitted to the University Library will appear here.
+                            </p>
+                          </CardContent>
+                        </Card>
+                      );
+                    }
+                    return (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {imageTemplates.map(template => (
+                          <Card
+                            key={template.id}
+                            className="cursor-pointer hover:border-primary/50 transition-all hover:shadow-md overflow-hidden"
+                            onClick={() => handleCardClick(template.id)}
+                          >
+                            {template.coverImageUrl && (
+                              <div className="aspect-video w-full overflow-hidden bg-muted">
+                                <img
+                                  src={template.coverImageUrl}
+                                  alt={template.title}
+                                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                                />
+                              </div>
+                            )}
+                            <CardContent className="pt-3 pb-4">
+                              <h3 className="font-semibold text-sm truncate">{template.title}</h3>
+                              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                <SourceBadge source={template.source} />
+                                <StatusBadge status={template.status} />
+                              </div>
+                              {template.createdByName && (
+                                <p className="text-xs text-muted-foreground mt-2">
+                                  by {template.createdByName} • {new Date(template.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                </p>
+                              )}
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </div>
+              ) : topLevelTab === 'collections' ? (
                 /* Collections View */
                 <div>
                   <div className="flex justify-end mb-4">

@@ -16,7 +16,9 @@ import { useAgencyMode } from "@/hooks/useAgencyMode";
 import { CreateTemplateDialog } from "@/components/library/CreateTemplateDialog";
 import { SourceBadge } from "@/components/library/SourceBadge";
 import type { SavedMessage, LibraryFilters, SortOption } from "@/types/library";
+import { IMAGE_SOURCES as IMG_SOURCES } from "@/types/library";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Search, 
   ArrowLeft,
@@ -37,7 +39,9 @@ import {
   ChevronRight,
   Building2,
   LayoutGrid,
-  List
+  List,
+  ImageIcon,
+  Palette
 } from "lucide-react";
 
 const channelIcons = {
@@ -57,6 +61,7 @@ const PersonalLibrary = () => {
   const { getProfileHierarchy } = useInstitutionalProfiles();
   const [filters, setFilters] = useState<LibraryFilters>({ search: '' });
   const [sort, setSort] = useState<SortOption>('newest');
+  const [categoryTab, setCategoryTab] = useState<'all' | 'messages' | 'images'>('all');
   const [showFilters, setShowFilters] = useState(false);
   const [submitToSharedOpen, setSubmitToSharedOpen] = useState(false);
   const [messageToSubmit, setMessageToSubmit] = useState<SavedMessage | null>(null);
@@ -72,7 +77,15 @@ const PersonalLibrary = () => {
     localStorage.setItem('personalLibraryViewMode', mode);
   };
 
-  const filteredMessages = filterMessages(filters, sort);
+  const allFiltered = filterMessages(filters, sort);
+  const filteredMessages = categoryTab === 'all' 
+    ? allFiltered 
+    : categoryTab === 'images' 
+      ? allFiltered.filter(m => IMG_SOURCES.includes(m.source as any))
+      : allFiltered.filter(m => !IMG_SOURCES.includes(m.source as any));
+  
+  const imageCount = allFiltered.filter(m => IMG_SOURCES.includes(m.source as any)).length;
+  const messageCount = allFiltered.length - imageCount;
 
   const handleDelete = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -173,6 +186,26 @@ const PersonalLibrary = () => {
       
       <main className="container mx-auto px-4 pb-8">
         <div className="max-w-6xl mx-auto">
+
+          {/* Category Tabs */}
+          <Tabs value={categoryTab} onValueChange={(v) => setCategoryTab(v as any)} className="mb-6">
+            <TabsList>
+              <TabsTrigger value="all" className="flex items-center gap-1">
+                All
+                <Badge variant="secondary" className="ml-1 text-[10px]">{allFiltered.length}</Badge>
+              </TabsTrigger>
+              <TabsTrigger value="messages" className="flex items-center gap-1">
+                <FileText className="w-3.5 h-3.5" />
+                Messages
+                {messageCount > 0 && <Badge variant="secondary" className="ml-1 text-[10px]">{messageCount}</Badge>}
+              </TabsTrigger>
+              <TabsTrigger value="images" className="flex items-center gap-1">
+                <ImageIcon className="w-3.5 h-3.5" />
+                Images
+                {imageCount > 0 && <Badge variant="secondary" className="ml-1 text-[10px]">{imageCount}</Badge>}
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
 
           {/* Filters */}
           <Card className="mb-6">
