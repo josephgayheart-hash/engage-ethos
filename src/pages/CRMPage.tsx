@@ -1941,12 +1941,34 @@ export default function CRMPage() {
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="text-xs text-muted-foreground mb-1 block">Deal Value ($)</label>
-                          <Input type="number" value={oppEditData.amount || ""} onChange={(e) => setOppEditData({ ...oppEditData, amount: e.target.value ? Number(e.target.value) : null })} className="h-9" />
+                          <label className="text-xs text-muted-foreground mb-1 block">Deal Value</label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+                            <Input
+                              className="h-9 pl-7"
+                              value={oppEditData.amount ? Number(oppEditData.amount).toLocaleString() : ""}
+                              onChange={(e) => {
+                                const raw = e.target.value.replace(/[^0-9.]/g, "");
+                                setOppEditData({ ...oppEditData, amount: raw ? Number(raw) : null });
+                              }}
+                              placeholder="0"
+                            />
+                          </div>
                         </div>
                         <div>
-                          <label className="text-xs text-muted-foreground mb-1 block">Price per Seat ($)</label>
-                          <Input type="number" value={oppEditData.price_per_seat || ""} onChange={(e) => setOppEditData({ ...oppEditData, price_per_seat: e.target.value ? Number(e.target.value) : null })} className="h-9" />
+                          <label className="text-xs text-muted-foreground mb-1 block">Price per Seat</label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+                            <Input
+                              className="h-9 pl-7"
+                              value={oppEditData.price_per_seat ? Number(oppEditData.price_per_seat).toLocaleString() : ""}
+                              onChange={(e) => {
+                                const raw = e.target.value.replace(/[^0-9.]/g, "");
+                                setOppEditData({ ...oppEditData, price_per_seat: raw ? Number(raw) : null });
+                              }}
+                              placeholder="0"
+                            />
+                          </div>
                         </div>
                       </div>
                       <div className="grid grid-cols-3 gap-3">
