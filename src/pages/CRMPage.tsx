@@ -222,7 +222,7 @@ export default function CRMPage() {
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
   const [fromEmail, setFromEmail] = useState(FROM_EMAILS[0]);
-  const [fromName, setFromName] = useState("Dan Simmons");
+  const fromName = fromEmail.split('@')[0].split('.').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   const [sendingEmail, setSendingEmail] = useState(false);
 
   // LinkedIn search
@@ -1160,18 +1160,12 @@ export default function CRMPage() {
                   To: {selected?.contact_name} &lt;{selected?.contact_email}&gt;
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">From Name</label>
-                    <Input value={fromName} onChange={(e) => setFromName(e.target.value)} className="h-8 text-sm" />
-                  </div>
-                  <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">From Email</label>
-                    <Select value={fromEmail} onValueChange={setFromEmail}>
-                      <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
-                      <SelectContent>{FROM_EMAILS.map((e) => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent>
-                    </Select>
-                  </div>
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">From</label>
+                  <Select value={fromEmail} onValueChange={setFromEmail}>
+                    <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select sender" /></SelectTrigger>
+                    <SelectContent>{FROM_EMAILS.map((e) => <SelectItem key={e} value={e}>{e.split('@')[0].split('.').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} &lt;{e}&gt;</SelectItem>)}</SelectContent>
+                  </Select>
                 </div>
 
                 <div>
