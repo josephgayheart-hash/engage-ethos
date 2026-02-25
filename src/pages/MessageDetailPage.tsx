@@ -557,12 +557,85 @@ const MessageDetailPage = () => {
           <Tabs defaultValue="content" className="space-y-6">
             <TabsList className="w-full md:w-auto">
               <TabsTrigger value="content">Content</TabsTrigger>
-              <TabsTrigger value="metadata">Details</TabsTrigger>
               <TabsTrigger value="versions" className="flex items-center gap-1">
                 <History className="w-4 h-4" />
                 Versions ({message.versions.length})
               </TabsTrigger>
             </TabsList>
+
+            {/* Details summary - always visible below tabs */}
+            <Card className="mb-0">
+              <CardContent className="pt-5 pb-4">
+                <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm">
+                  {message.channel && (
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-1">Channel</p>
+                      <Badge variant="secondary" className="text-xs">{message.channel}</Badge>
+                    </div>
+                  )}
+                  {message.audience && (
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-1">Audience</p>
+                      <Badge variant="secondary" className="text-xs">{message.audience}</Badge>
+                    </div>
+                  )}
+                  {message.moment && (
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-1">Moment</p>
+                      <Badge variant="outline" className="text-xs">{message.moment}</Badge>
+                    </div>
+                  )}
+                  {message.domain && (
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-1">Domain</p>
+                      <Badge variant="outline" className="text-xs">{message.domain}</Badge>
+                    </div>
+                  )}
+                  {message.goal && (
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-1">Goal</p>
+                      <Badge variant="outline" className="text-xs">{message.goal}</Badge>
+                    </div>
+                  )}
+                  {message.tone && (
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-1">Tone</p>
+                      <Badge variant="outline" className="text-xs">{message.tone}</Badge>
+                    </div>
+                  )}
+                  {message.institutionalProfileName && (
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-1">Profile</p>
+                      <Badge variant="outline" className="text-xs">{message.institutionalProfileName}</Badge>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Mode</p>
+                    <span className="text-xs capitalize">{message.mode}</span>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Created</p>
+                    <span className="text-xs">{new Date(message.createdAt).toLocaleString()}</span>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Updated</p>
+                    <span className="text-xs">{new Date(message.updatedAt).toLocaleString()}</span>
+                  </div>
+                </div>
+                {message.senderRecommendation && (
+                  <div className="mt-3 pt-3 border-t">
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Sender Recommendation</p>
+                    <p className="text-sm">{message.senderRecommendation}</p>
+                  </div>
+                )}
+                {message.notes && (
+                  <div className="mt-3 pt-3 border-t">
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Notes</p>
+                    <p className="text-sm">{message.notes}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
             <TabsContent value="content" className="space-y-6">
               {isBranded && brandedImageUrl ? (
@@ -581,41 +654,6 @@ const MessageDetailPage = () => {
                         className="w-full h-auto max-h-[600px] object-contain"
                       />
                     </div>
-                    
-                    {/* Image metadata summary */}
-                    <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {message.channel && (
-                        <div className="text-center p-3 rounded-lg bg-muted/50">
-                          <p className="text-xs text-muted-foreground mb-1">Channel</p>
-                          <Badge variant="secondary" className="text-xs">{message.channel}</Badge>
-                        </div>
-                      )}
-                      {message.audience && (
-                        <div className="text-center p-3 rounded-lg bg-muted/50">
-                          <p className="text-xs text-muted-foreground mb-1">Audience</p>
-                          <Badge variant="secondary" className="text-xs">{message.audience}</Badge>
-                        </div>
-                      )}
-                      {message.tone && (
-                        <div className="text-center p-3 rounded-lg bg-muted/50">
-                          <p className="text-xs text-muted-foreground mb-1">Tone</p>
-                          <Badge variant="outline" className="text-xs">{message.tone}</Badge>
-                        </div>
-                      )}
-                      {message.institutionalProfileName && (
-                        <div className="text-center p-3 rounded-lg bg-muted/50">
-                          <p className="text-xs text-muted-foreground mb-1">Profile</p>
-                          <Badge variant="outline" className="text-xs">{message.institutionalProfileName}</Badge>
-                        </div>
-                      )}
-                    </div>
-
-                    {message.notes && (
-                      <div className="mt-4 p-4 rounded-lg bg-muted/30 border">
-                        <p className="text-xs font-medium text-muted-foreground mb-1">Scene Description</p>
-                        <p className="text-sm">{message.notes}</p>
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
               ) : isJourney && journeyData ? (
@@ -649,106 +687,6 @@ const MessageDetailPage = () => {
                   </CardContent>
                 </Card>
               )}
-            </TabsContent>
-
-            <TabsContent value="metadata" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Message Details</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-1">
-                        <Tag className="w-4 h-4" /> Channel
-                      </p>
-                      <Badge variant="secondary" className="text-sm">{message.channel}</Badge>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-1">
-                        <User className="w-4 h-4" /> Audience
-                      </p>
-                      <Badge variant="secondary" className="text-sm">{message.audience}</Badge>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground mb-2">Moment</p>
-                      <Badge variant="outline" className="text-sm">{message.moment}</Badge>
-                    </div>
-                    {message.domain && (
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground mb-2">Domain</p>
-                        <Badge variant="outline" className="text-sm">{message.domain}</Badge>
-                      </div>
-                    )}
-                    {message.goal && (
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground mb-2">Goal</p>
-                        <Badge variant="outline" className="text-sm">{message.goal}</Badge>
-                      </div>
-                    )}
-                    {message.tone && (
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground mb-2">Tone</p>
-                        <Badge variant="outline" className="text-sm">{message.tone}</Badge>
-                      </div>
-                    )}
-                  </div>
-
-                  {message.senderRecommendation && (
-                    <>
-                      <Separator className="my-6" />
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground mb-2">Sender Recommendation</p>
-                        <p className="text-sm">{message.senderRecommendation}</p>
-                      </div>
-                    </>
-                  )}
-
-                  {message.notes && (
-                    <>
-                      <Separator className="my-6" />
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground mb-2">Notes</p>
-                        <p className="text-sm">{message.notes}</p>
-                      </div>
-                    </>
-                  )}
-
-                  {message.institutionalProfileName && (
-                    <>
-                      <Separator className="my-6" />
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground mb-2">Institutional Profile</p>
-                        <Badge variant="default" className="bg-primary/10 text-primary border-primary/20">
-                          {message.institutionalProfileName}
-                        </Badge>
-                      </div>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Timestamps</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground mb-1">Created</p>
-                      <p className="text-sm">{new Date(message.createdAt).toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground mb-1">Last Updated</p>
-                      <p className="text-sm">{new Date(message.updatedAt).toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground mb-1">Mode</p>
-                      <p className="text-sm capitalize">{message.mode}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
             </TabsContent>
 
             <TabsContent value="versions" className="space-y-4">
