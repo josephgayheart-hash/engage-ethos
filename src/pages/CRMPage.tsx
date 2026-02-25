@@ -73,6 +73,12 @@ interface Opportunity {
   updated_at: string;
   created_by_user_id: string | null;
   files: OppFile[];
+  subscription_type: string | null;
+  contract_term_months: number | null;
+  seat_count: number | null;
+  arr: number | null;
+  renewal_date: string | null;
+  product_tier: string | null;
 }
 
 interface OutreachRecord {
@@ -1843,25 +1849,72 @@ export default function CRMPage() {
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="text-xs text-muted-foreground mb-1 block">Amount ($)</label>
+                          <label className="text-xs text-muted-foreground mb-1 block">Deal Value ($)</label>
                           <Input type="number" value={oppEditData.amount || ""} onChange={(e) => setOppEditData({ ...oppEditData, amount: e.target.value ? Number(e.target.value) : null })} className="h-9" />
+                        </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground mb-1 block">ARR ($)</label>
+                          <Input type="number" value={oppEditData.arr || ""} onChange={(e) => setOppEditData({ ...oppEditData, arr: e.target.value ? Number(e.target.value) : null })} className="h-9" />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-3">
+                        <div>
+                          <label className="text-xs text-muted-foreground mb-1 block">Subscription</label>
+                          <Select value={oppEditData.subscription_type || "none"} onValueChange={(v) => setOppEditData({ ...oppEditData, subscription_type: v === "none" ? null : v })}>
+                            <SelectTrigger className="h-9"><SelectValue placeholder="Select..." /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">—</SelectItem>
+                              <SelectItem value="monthly">Monthly</SelectItem>
+                              <SelectItem value="annual">Annual</SelectItem>
+                              <SelectItem value="multi_year">Multi-Year</SelectItem>
+                              <SelectItem value="perpetual">Perpetual</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground mb-1 block">Term (months)</label>
+                          <Input type="number" value={oppEditData.contract_term_months || ""} onChange={(e) => setOppEditData({ ...oppEditData, contract_term_months: e.target.value ? Number(e.target.value) : null })} className="h-9" />
+                        </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground mb-1 block">Seats / Users</label>
+                          <Input type="number" value={oppEditData.seat_count || ""} onChange={(e) => setOppEditData({ ...oppEditData, seat_count: e.target.value ? Number(e.target.value) : null })} className="h-9" />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs text-muted-foreground mb-1 block">Product Tier</label>
+                          <Select value={oppEditData.product_tier || "none"} onValueChange={(v) => setOppEditData({ ...oppEditData, product_tier: v === "none" ? null : v })}>
+                            <SelectTrigger className="h-9"><SelectValue placeholder="Select..." /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">—</SelectItem>
+                              <SelectItem value="starter">Starter</SelectItem>
+                              <SelectItem value="professional">Professional</SelectItem>
+                              <SelectItem value="enterprise">Enterprise</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div>
                           <label className="text-xs text-muted-foreground mb-1 block">Close Date</label>
                           <Input type="date" value={oppEditData.close_date || ""} onChange={(e) => setOppEditData({ ...oppEditData, close_date: e.target.value || null })} className="h-9" />
                         </div>
                       </div>
-                      <div>
-                        <label className="text-xs text-muted-foreground mb-1 block">Account</label>
-                        <Select value={oppEditData.prospect_id || "none"} onValueChange={(v) => setOppEditData({ ...oppEditData, prospect_id: v === "none" ? null : v })}>
-                          <SelectTrigger className="h-9"><SelectValue placeholder="Link to account..." /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none">None</SelectItem>
-                            {Array.from(new Map(prospects.map(p => [p.university_name, p])).values()).map((p) => (
-                              <SelectItem key={p.id} value={p.id}>{p.university_name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs text-muted-foreground mb-1 block">Renewal Date</label>
+                          <Input type="date" value={oppEditData.renewal_date || ""} onChange={(e) => setOppEditData({ ...oppEditData, renewal_date: e.target.value || null })} className="h-9" />
+                        </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground mb-1 block">Account</label>
+                          <Select value={oppEditData.prospect_id || "none"} onValueChange={(v) => setOppEditData({ ...oppEditData, prospect_id: v === "none" ? null : v })}>
+                            <SelectTrigger className="h-9"><SelectValue placeholder="Link to account..." /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">None</SelectItem>
+                              {Array.from(new Map(prospects.map(p => [p.university_name, p])).values()).map((p) => (
+                                <SelectItem key={p.id} value={p.id}>{p.university_name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
                       <div>
                         <label className="text-xs text-muted-foreground mb-1 block">Notes</label>
@@ -1882,11 +1935,17 @@ export default function CRMPage() {
                         <CardTitle className="text-sm font-semibold">Key Fields</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-3 gap-4">
                           {[
                             { label: "Stage", value: stageInfo?.label || selectedOpp.stage },
-                            { label: "Amount", value: selectedOpp.amount ? `$${Number(selectedOpp.amount).toLocaleString()}` : "—" },
+                            { label: "Deal Value", value: selectedOpp.amount ? `$${Number(selectedOpp.amount).toLocaleString()}` : "—" },
+                            { label: "ARR", value: selectedOpp.arr ? `$${Number(selectedOpp.arr).toLocaleString()}` : "—" },
+                            { label: "Subscription", value: selectedOpp.subscription_type ? selectedOpp.subscription_type.replace("_", "-").replace(/\b\w/g, c => c.toUpperCase()) : "—" },
+                            { label: "Term", value: selectedOpp.contract_term_months ? `${selectedOpp.contract_term_months} months` : "—" },
+                            { label: "Seats / Users", value: selectedOpp.seat_count ? selectedOpp.seat_count.toLocaleString() : "—" },
+                            { label: "Product Tier", value: selectedOpp.product_tier ? selectedOpp.product_tier.replace(/\b\w/g, c => c.toUpperCase()) : "—" },
                             { label: "Close Date", value: selectedOpp.close_date ? format(new Date(selectedOpp.close_date), "MMM d, yyyy") : "—" },
+                            { label: "Renewal Date", value: selectedOpp.renewal_date ? format(new Date(selectedOpp.renewal_date), "MMM d, yyyy") : "—" },
                             { label: "Account", value: linkedProspect?.university_name || "—" },
                             { label: "Created Date", value: format(new Date(selectedOpp.created_at), "MMM d, yyyy 'at' h:mm a") },
                             { label: "Last Modified", value: format(new Date(selectedOpp.updated_at), "MMM d, yyyy 'at' h:mm a") },
