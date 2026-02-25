@@ -370,7 +370,7 @@ const CollectionDetailPage = () => {
                 <Card className="text-center py-8">
                   <CardContent>
                     <FileText className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
-                    <p className="text-sm text-muted-foreground">No messages or playbooks in this collection yet.</p>
+                    <p className="text-sm text-muted-foreground">No items in this collection yet.</p>
                   </CardContent>
                 </Card>
               ) : (
