@@ -72,8 +72,11 @@ interface OutreachRecord {
   bounced_at: string | null;
   delivered_at: string | null;
   to_email: string | null;
+  from_email: string | null;
+  from_name: string | null;
   type: string;
   body?: string;
+  html_body?: string;
 }
 
 interface NudgeRecord {
@@ -235,6 +238,7 @@ export default function CRMPage() {
 
   // Website scrape
   const [scrapingWebsite, setScrapingWebsite] = useState(false);
+  const [expandedEmailId, setExpandedEmailId] = useState<string | null>(null);
 
   // Top-level CRM tab
   const [crmTab, setCrmTab] = useState("contacts");
@@ -763,17 +767,21 @@ export default function CRMPage() {
     id: string; subject: string | null; date: string; source: "outreach" | "auto";
     delivery_status: string | null; opened_at: string | null; clicked_at: string | null;
     bounced_at: string | null; delivered_at: string | null; to_email: string | null;
-    email_type?: string | null;
+    from_name: string | null; from_email: string | null;
+    email_type?: string | null; body?: string; html_body?: string;
   }> = [
     ...outreachEmails.map((e) => ({
       id: e.id, subject: e.subject, date: e.created_at || "", source: "outreach" as const,
       delivery_status: e.delivery_status, opened_at: e.opened_at, clicked_at: e.clicked_at,
       bounced_at: e.bounced_at, delivered_at: e.delivered_at, to_email: e.to_email,
+      from_name: e.from_name, from_email: e.from_email,
+      body: e.body, html_body: e.html_body,
     })),
     ...nudgeEmails.map((e) => ({
       id: e.id, subject: e.subject, date: e.sent_at, source: "auto" as const,
       delivery_status: e.delivery_status, opened_at: e.opened_at, clicked_at: e.clicked_at,
       bounced_at: e.bounced_at, delivered_at: e.delivered_at, to_email: e.recipient_email,
+      from_name: null as string | null, from_email: null as string | null,
       email_type: e.email_type || e.nudge_type,
     })),
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -1236,9 +1244,44 @@ export default function CRMPage() {
                               <p className="text-sm text-foreground">{item.data.note_text}</p>
                             ) : (
                               <div className="text-sm">
-                                <span className="font-medium text-foreground">{item.data.subject || "(no subject)"}</span>
-                                {item.data.delivery_status && <Badge variant="outline" className="ml-2 text-xs">{item.data.delivery_status}</Badge>}
-                                {item.data.source === "auto" && <Badge variant="secondary" className="ml-1 text-xs">Auto</Badge>}
+                                <div 
+                                  className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1 transition-colors"
+                                  onClick={() => setExpandedEmailId(expandedEmailId === item.data.id ? null : item.data.id)}
+                                >
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="font-medium text-foreground">{item.data.subject || "(no subject)"}</span>
+                                    {item.data.delivery_status && <Badge variant="outline" className="text-xs">{item.data.delivery_status}</Badge>}
+                                    {item.data.source === "auto" && <Badge variant="secondary" className="text-xs">Auto</Badge>}
+                                    <ChevronRight className={`h-3 w-3 text-muted-foreground transition-transform ${expandedEmailId === item.data.id ? "rotate-90" : ""}`} />
+                                  </div>
+                                  <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
+                                    {item.data.from_name && <span>From: {item.data.from_name}</span>}
+                                    {item.data.to_email && <span>To: {item.data.to_email}</span>}
+                                  </div>
+                                  <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
+                                    {item.data.delivered_at && <span className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-primary" /> Delivered</span>}
+                                    {item.data.opened_at && <span className="flex items-center gap-1"><Eye className="h-3 w-3 text-primary" /> Opened {format(new Date(item.data.opened_at), "MMM d, h:mm a")}</span>}
+                                    {item.data.clicked_at && <span className="flex items-center gap-1"><MousePointerClick className="h-3 w-3 text-primary" /> Clicked {format(new Date(item.data.clicked_at), "MMM d")}</span>}
+                                    {item.data.bounced_at && <span className="flex items-center gap-1"><XCircle className="h-3 w-3 text-destructive" /> Bounced</span>}
+                                  </div>
+                                </div>
+                                {expandedEmailId === item.data.id && (
+                                  <div className="mt-2 border rounded-md bg-muted/30 overflow-hidden">
+                                    <div className="px-3 py-2 border-b bg-muted/50 text-xs space-y-0.5">
+                                      <div><span className="text-muted-foreground">From:</span> {item.data.from_name || "—"} {item.data.from_email ? `<${item.data.from_email}>` : ""}</div>
+                                      <div><span className="text-muted-foreground">To:</span> {item.data.to_email || "—"}</div>
+                                      <div><span className="text-muted-foreground">Date:</span> {item.date ? format(new Date(item.date), "EEEE, MMM d, yyyy 'at' h:mm a") : "—"}</div>
+                                      <div><span className="text-muted-foreground">Subject:</span> {item.data.subject || "(no subject)"}</div>
+                                    </div>
+                                    {item.data.html_body ? (
+                                      <div className="p-3 text-xs max-h-64 overflow-auto" dangerouslySetInnerHTML={{ __html: item.data.html_body }} />
+                                    ) : item.data.body ? (
+                                      <div className="p-3 text-xs whitespace-pre-wrap max-h-64 overflow-auto">{item.data.body}</div>
+                                    ) : (
+                                      <div className="p-3 text-xs text-muted-foreground italic">No message body available</div>
+                                    )}
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
