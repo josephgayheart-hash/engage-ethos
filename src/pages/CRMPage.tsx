@@ -27,7 +27,7 @@ import {
   ChevronRight, Pencil, Save, X, Contact, BarChart3, Wrench,
   FileText, MousePointerClick, Loader2, Radar, Target, DollarSign,
   TrendingUp, Calendar, Inbox, AlertTriangle, UserPlus, Briefcase,
-  Globe, AtSign, Upload, Trash2, Download, Paperclip, Sparkles
+  Globe, AtSign, Upload, Trash2, Download, Paperclip, Sparkles, Image as ImageIcon
 } from "lucide-react";
 import { BrandRadarTab } from "@/components/admin/BrandRadarTab";
 import { EmailTemplatesTab } from "@/components/admin/EmailTemplatesTab";
@@ -1496,6 +1496,75 @@ export default function CRMPage() {
                   )}
 
                   <InfoRow icon={Building2} label="Account Name" value={selected?.university_name} editing={editing} field="university_name" editData={editData} setEditData={setEditData} />
+
+                  {/* Logo URL field with search */}
+                  {editing ? (
+                    <div className="flex items-center gap-3">
+                      <div className="w-5 h-5 flex items-center justify-center">
+                        {(editData as any).logo_url ? (
+                          <img src={(editData as any).logo_url} alt="" className="h-5 w-5 rounded object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                        ) : (
+                          <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-xs text-muted-foreground mb-1">Logo URL</div>
+                        <div className="flex gap-2">
+                          <Input value={(editData as any).logo_url || ""} onChange={(e) => setEditData((d) => ({ ...d, logo_url: e.target.value }))} className="h-8 text-sm flex-1" placeholder="https://example.edu/logo.png" />
+                          <Button size="sm" variant="outline" className="h-8 text-xs shrink-0" onClick={async () => {
+                            const name = (editData as any).university_name || selected?.university_name;
+                            if (!name) return;
+                            setLogoSearching(selected?.id || "edit");
+                            try {
+                              const { data, error } = await supabase.functions.invoke("search-university-logo", { body: { university_name: name } });
+                              if (error) throw new Error(error.message);
+                              if (data?.logo_url) {
+                                setEditData((d) => ({ ...d, logo_url: data.logo_url }));
+                                toast.success("Logo found!");
+                              } else {
+                                toast.info(data?.reason || "No logo found");
+                              }
+                            } catch (e: any) {
+                              toast.error(`Logo search failed: ${e?.message || "Unknown error"}`);
+                            } finally {
+                              setLogoSearching(null);
+                            }
+                          }} disabled={logoSearching != null}>
+                            {logoSearching ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Search className="h-3 w-3 mr-1" /> Find</>}
+                          </Button>
+                        </div>
+                        {(editData as any).logo_url && (
+                          <div className="flex items-center gap-2 mt-1.5">
+                            <img src={(editData as any).logo_url} alt="Logo preview" className="h-8 w-8 rounded-md object-contain border border-border bg-background p-0.5" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                            <Button variant="ghost" size="sm" className="h-6 px-1.5 text-xs text-destructive" onClick={() => setEditData((d) => ({ ...d, logo_url: "" }))}>
+                              <X className="h-3 w-3 mr-0.5" /> Remove
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-3">
+                      <div className="w-5 h-5 flex items-center justify-center">
+                        {selected?.logo_url ? (
+                          <img src={selected.logo_url} alt="" className="h-5 w-5 rounded object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                        ) : (
+                          <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-xs text-muted-foreground">Logo</div>
+                        {selected?.logo_url ? (
+                          <div className="flex items-center gap-2">
+                            <img src={selected.logo_url} alt="Logo" className="h-8 w-8 rounded-md object-contain border border-border bg-background p-0.5" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                            <span className="text-sm text-muted-foreground truncate max-w-[200px]">{selected.logo_url}</span>
+                          </div>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">No logo</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Website URL field with scrape */}
                   {editing ? (
