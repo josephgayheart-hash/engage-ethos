@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -275,6 +276,7 @@ export default function CRMPage() {
   const [quickOppDialog, setQuickOppDialog] = useState<{ open: boolean; prospectId?: string; contactIds?: string[]; defaultName?: string }>({ open: false });
   const [quickOppName, setQuickOppName] = useState("");
   const [stageCelebration, setStageCelebration] = useState<"won" | "lost" | null>(null);
+  const [stageConfirm, setStageConfirm] = useState<{ oppId: string; stage: "closed_won" | "closed_lost" } | null>(null);
 
   // Requests
   const [requests, setRequests] = useState<OnboardingRequest[]>([]);
@@ -558,6 +560,15 @@ export default function CRMPage() {
 
   // ── Update Opportunity Stage ────────────────────────────────────────────
   const handleUpdateOppStage = async (oppId: string, newStage: string) => {
+    // Require confirmation for terminal stages
+    if (newStage === "closed_won" || newStage === "closed_lost") {
+      setStageConfirm({ oppId, stage: newStage });
+      return;
+    }
+    await executeStageUpdate(oppId, newStage);
+  };
+
+  const executeStageUpdate = async (oppId: string, newStage: string) => {
     const { error } = await supabase
       .from("crm_opportunities" as any)
       .update({ stage: newStage, updated_at: new Date().toISOString() } as any)
@@ -1674,6 +1685,36 @@ export default function CRMPage() {
                 </div>
               </div>
             </div>
+
+            {/* Stage Confirmation Dialog */}
+            <AlertDialog open={!!stageConfirm} onOpenChange={(open) => !open && setStageConfirm(null)}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    {stageConfirm?.stage === "closed_won" ? "🏆 Mark as Closed Won?" : "Mark as Closed Lost?"}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {stageConfirm?.stage === "closed_won"
+                      ? "This will mark the opportunity as won. This action moves it to a terminal stage."
+                      : "This will mark the opportunity as lost. This action moves it to a terminal stage."}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    className={stageConfirm?.stage === "closed_won" ? "bg-emerald-500 hover:bg-emerald-600" : ""}
+                    onClick={() => {
+                      if (stageConfirm) {
+                        executeStageUpdate(stageConfirm.oppId, stageConfirm.stage);
+                        setStageConfirm(null);
+                      }
+                    }}
+                  >
+                    {stageConfirm?.stage === "closed_won" ? "Confirm Won" : "Confirm Lost"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
 
             {/* Stage Celebration Overlay */}
             {stageCelebration === "won" && (
