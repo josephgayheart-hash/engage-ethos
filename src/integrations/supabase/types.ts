@@ -1887,6 +1887,7 @@ export type Database = {
           extracted_contacts: Json | null
           id: string
           linkedin_url: string | null
+          logo_url: string | null
           notes: string | null
           source_article_title: string | null
           source_article_url: string | null
@@ -1906,6 +1907,7 @@ export type Database = {
           extracted_contacts?: Json | null
           id?: string
           linkedin_url?: string | null
+          logo_url?: string | null
           notes?: string | null
           source_article_title?: string | null
           source_article_url?: string | null
@@ -1925,6 +1927,7 @@ export type Database = {
           extracted_contacts?: Json | null
           id?: string
           linkedin_url?: string | null
+          logo_url?: string | null
           notes?: string | null
           source_article_title?: string | null
           source_article_url?: string | null
