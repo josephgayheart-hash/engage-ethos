@@ -99,7 +99,7 @@ export default function ProspectOutreachPage() {
   const [newRecipientEmail, setNewRecipientEmail] = useState("");
 
   // Composer state
-  const [fromName, setFromName] = useState("Dan Simmons");
+  const [fromName, setFromName] = useState("");
   const [fromEmail, setFromEmail] = useState(FROM_EMAILS[0]);
   const [replyTo, setReplyTo] = useState("tyler@campusvoice.ai");
   const [subject, setSubject] = useState("");
