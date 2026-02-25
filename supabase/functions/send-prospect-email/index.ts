@@ -55,7 +55,7 @@ serve(async (req) => {
       userId = user?.id || null;
     }
 
-    const senderName = from_name || 'Dan Simmons';
+    const senderName = from_name || 'CampusVoice Team';
     const senderEmail = from_email || 'noreply@campusvoice.ai';
 
     // If html_body is provided, use it directly; otherwise convert plain text to HTML

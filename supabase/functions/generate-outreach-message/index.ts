@@ -54,7 +54,7 @@ serve(async (req) => {
     const isLinkedIn = message_type === 'linkedin_dm';
     const firstName = contact_name.split(' ')[0];
 
-    const systemPrompt = `You are Dan Simmons, Co-Founder of CampusVoice.ai, writing personalized outreach messages to higher education marketing leaders.
+    const systemPrompt = `You are a representative of CampusVoice.ai, writing personalized outreach messages to higher education marketing leaders.
 
 About CampusVoice.ai:
 - AI-powered brand voice platform specifically for higher education
