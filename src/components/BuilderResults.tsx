@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { openInGoogleDocs, formatForGoogleDocs } from "@/lib/googleDocsExport";
+import { AIResultsGuidance } from "@/components/AIResultsGuidance";
 import type { BuilderResult, MessageContext, InstitutionalConfig } from "@/types/campusvoice";
 interface BuilderResultsProps {
   result: BuilderResult;
@@ -257,6 +258,8 @@ export function BuilderResults({
           { label: "Design a Journey", href: "/strategy", icon: Map },
         ]}
       />
+
+      <AIResultsGuidance />
     </div>
   );
 }

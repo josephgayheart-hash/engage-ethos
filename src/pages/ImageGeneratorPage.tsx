@@ -14,6 +14,7 @@ import { Link, useLocation } from "react-router-dom";
 import { ChannelMockup } from "@/components/image-generator/ChannelMockup";
 import { BrandOverlayEditor } from "@/components/image-generator/BrandOverlayEditor";
 import { useCampusPhotoCount } from "@/hooks/useCampusPhotoCount";
+import { AIResultsGuidance } from "@/components/AIResultsGuidance";
 import { useUserDrafts } from "@/hooks/useUserDrafts";
 import { toast } from "sonner";
 
@@ -665,6 +666,8 @@ const ImageGeneratorPage = () => {
                         </div>
                       ) : null}
                     </div>
+
+                    <AIResultsGuidance variant="subtle" className="mt-2" />
 
                     {imageUrl && viewMode !== "overlay" && (
                       <div className="flex gap-2">

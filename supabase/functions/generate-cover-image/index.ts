@@ -48,105 +48,99 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Fetch institutional branding + Content DNA
+    // ── Parallel DB fetch: tenant, profile, DNA, and campus photos all at once ──
     let brandContext = "";
-    if (tenantId || profileId) {
-      try {
-        if (tenantId) {
-          const { data: tenant } = await supabaseAdmin
-            .from("tenants")
-            .select("institution_name, primary_color, accent_color")
-            .eq("id", tenantId)
-            .single();
-          if (tenant) {
-            brandContext += `\nInstitution: ${tenant.institution_name}.`;
-            if (tenant.primary_color) brandContext += ` Primary brand color: ${tenant.primary_color}.`;
-            if (tenant.accent_color) brandContext += ` Accent color: ${tenant.accent_color}.`;
-          }
-        }
 
-        const profileQuery = profileId
-          ? supabaseAdmin.from("institutional_profiles").select("id, name, config").eq("id", profileId).single()
-          : tenantId
-          ? supabaseAdmin.from("institutional_profiles").select("id, name, config").eq("tenant_id", tenantId).eq("profile_type", "university").limit(1).single()
-          : null;
+    const tenantPromise = tenantId
+      ? supabaseAdmin.from("tenants").select("institution_name, primary_color, accent_color").eq("id", tenantId).single()
+      : Promise.resolve({ data: null });
 
-        let resolvedProfileId = profileId;
-        if (profileQuery) {
-          const { data: profile } = await profileQuery;
-          if (profile) {
-            if (!resolvedProfileId) resolvedProfileId = profile.id;
-            const cfg = profile.config as Record<string, any>;
-            if (cfg.mascot) brandContext += ` Mascot: ${cfg.mascot}.`;
-            if (cfg.slogans?.length) brandContext += ` Slogan: "${cfg.slogans[0]}".`;
-            if (cfg.primaryColor) brandContext += ` Brand primary: ${cfg.primaryColor}.`;
-            if (cfg.accentColor) brandContext += ` Brand accent: ${cfg.accentColor}.`;
-          }
-        }
+    const profilePromise = profileId
+      ? supabaseAdmin.from("institutional_profiles").select("id, name, config").eq("id", profileId).single()
+      : tenantId
+      ? supabaseAdmin.from("institutional_profiles").select("id, name, config").eq("tenant_id", tenantId).eq("profile_type", "university").limit(1).single()
+      : Promise.resolve({ data: null });
 
-        // Fetch Content DNA for voice/brand context
-        const dnaQuery = resolvedProfileId
-          ? supabaseAdmin.from("content_dna_analysis").select("voice_analysis, brand_platform").eq("profile_id", resolvedProfileId).order("updated_at", { ascending: false }).limit(1).single()
-          : tenantId
-          ? supabaseAdmin.from("content_dna_analysis").select("voice_analysis, brand_platform").eq("tenant_id", tenantId).order("updated_at", { ascending: false }).limit(1).single()
-          : null;
+    const campusPhotoQuery = supabaseAdmin
+      .from("campus_photo_samples")
+      .select("file_url, photo_category")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false });
+    if (profileId) {
+      campusPhotoQuery.eq("profile_id", profileId);
+    } else if (tenantId) {
+      campusPhotoQuery.eq("tenant_id", tenantId);
+    }
+    const campusPhotoPromise = campusPhotoQuery.limit(8);
 
-        if (dnaQuery) {
-          const { data: dna } = await dnaQuery;
-          if (dna) {
-            const voice = dna.voice_analysis as Record<string, any>;
-            const brand = dna.brand_platform as Record<string, any>;
-            if (voice?.tone_descriptors?.length) brandContext += ` Voice tone: ${voice.tone_descriptors.slice(0, 3).join(", ")}.`;
-            if (voice?.personality_traits?.length) brandContext += ` Personality: ${voice.personality_traits.slice(0, 3).join(", ")}.`;
-            if (brand?.promise) brandContext += ` Brand promise: "${brand.promise}".`;
-            if (brand?.pillars?.length) {
-              const pillarNames = brand.pillars.map((p: any) => p.name || p).slice(0, 4);
-              brandContext += ` Brand pillars: ${pillarNames.join(", ")}.`;
-            }
-          }
-        }
-      } catch (e) {
-        console.warn("Could not fetch branding data:", e);
-      }
+    const [tenantResult, profileResult, campusPhotoResult] = await Promise.all([
+      tenantPromise.catch(e => { console.warn("Tenant fetch failed:", e); return { data: null }; }),
+      profilePromise.catch(e => { console.warn("Profile fetch failed:", e); return { data: null }; }),
+      campusPhotoPromise.catch(e => { console.warn("Campus photos fetch failed:", e); return { data: null }; }),
+    ]);
+
+    // Process tenant
+    const tenant = tenantResult.data;
+    if (tenant) {
+      brandContext += `\nInstitution: ${tenant.institution_name}.`;
+      if (tenant.primary_color) brandContext += ` Primary brand color: ${tenant.primary_color}.`;
+      if (tenant.accent_color) brandContext += ` Accent color: ${tenant.accent_color}.`;
     }
 
-    // Build contextual prompt
+    // Process profile
+    let resolvedProfileId = profileId;
+    const profile = profileResult.data;
+    if (profile) {
+      if (!resolvedProfileId) resolvedProfileId = profile.id;
+      const cfg = profile.config as Record<string, any>;
+      if (cfg.mascot) brandContext += ` Mascot: ${cfg.mascot}.`;
+      if (cfg.slogans?.length) brandContext += ` Slogan: "${cfg.slogans[0]}".`;
+      if (cfg.primaryColor) brandContext += ` Brand primary: ${cfg.primaryColor}.`;
+      if (cfg.accentColor) brandContext += ` Brand accent: ${cfg.accentColor}.`;
+    }
+
+    // Fetch DNA in parallel with processing (uses resolvedProfileId which may have just been set)
+    // Since we need resolvedProfileId, do this as a quick follow-up
+    try {
+      const dnaQuery = resolvedProfileId
+        ? supabaseAdmin.from("content_dna_analysis").select("voice_analysis, brand_platform").eq("profile_id", resolvedProfileId).order("updated_at", { ascending: false }).limit(1).single()
+        : tenantId
+        ? supabaseAdmin.from("content_dna_analysis").select("voice_analysis, brand_platform").eq("tenant_id", tenantId).order("updated_at", { ascending: false }).limit(1).single()
+        : null;
+
+      if (dnaQuery) {
+        const { data: dna } = await dnaQuery;
+        if (dna) {
+          const voice = dna.voice_analysis as Record<string, any>;
+          const brand = dna.brand_platform as Record<string, any>;
+          if (voice?.tone_descriptors?.length) brandContext += ` Voice tone: ${voice.tone_descriptors.slice(0, 3).join(", ")}.`;
+          if (brand?.promise) brandContext += ` Brand promise: "${brand.promise}".`;
+        }
+      }
+    } catch (e) {
+      console.warn("DNA fetch failed:", e);
+    }
+
+    // Build contextual prompt (trimmed for cover images — shorter = faster inference)
     const audienceCtx = audience ? ` for ${audience} students` : "";
     const momentCtx = moment ? ` during ${moment}` : "";
-    const channelCtx = channels?.length ? ` across ${channels.join(", ")}` : "";
     const modeLabel = mode === "journey" ? "communication journey" : "message";
 
-    const prompt = `Generate a clean, professional thumbnail image for a higher education ${modeLabel} titled "${title}"${audienceCtx}${momentCtx}${channelCtx}.${brandContext}
+    const prompt = `Generate a clean, professional thumbnail image for a higher education ${modeLabel} titled "${title}"${audienceCtx}${momentCtx}.${brandContext}
 
 Requirements:
-- The image must visually represent the SPECIFIC TOPIC of "${title}" with relevant campus imagery
-- Use polished, editorial university photography style with warm natural lighting
-- If brand colors are specified, subtly incorporate them into the color grading and environmental elements (NOT flat overlays)
+- Visually represent the SPECIFIC TOPIC of "${title}" with relevant campus imagery
+- Polished, editorial university photography style with warm natural lighting
+- If brand colors are specified, subtly incorporate them into the color grading (NOT flat overlays)
 - No text, no words, no letters, no logos, no watermarks
 - Composition suitable for a 16:9 thumbnail card
-- Should feel like a high-quality university marketing photo
-- Candid, natural poses if people are present — no staged or artificial groupings
-- ANTI-CLONE RULE: If multiple people appear, every single person MUST be visually distinct — different face shapes, skin tones, hairstyles, hair colors, body types (height, build), and ages. NEVER generate twins, look-alikes, or people who could be mistaken for each other.
-- CLOTHING VARIETY: Each person MUST wear a completely different outfit — vary garment types (t-shirt vs hoodie vs button-down vs jacket vs sweater vs vest), colors, patterns, and layers. No two people should wear the same color or style.
-- Vary body language, posture, and gaze direction — people should look naturally occupied, not posing for a camera`;
+- Candid, natural poses if people are present
+- ANTI-CLONE RULE: Every person must be visually distinct — different faces, skin tones, hairstyles, body types, and clothing`;
 
-    // Fetch campus reference photos for visual training
+    // Process campus photos for reference
     let campusPhotoUrls: string[] = [];
     try {
-      const photoQuery = supabaseAdmin
-        .from("campus_photo_samples")
-        .select("file_url, photo_category")
-        .eq("is_active", true)
-        .order("created_at", { ascending: false });
-
-      if (profileId) {
-        photoQuery.eq("profile_id", profileId);
-      } else if (tenantId) {
-        photoQuery.eq("tenant_id", tenantId);
-      }
-
-      const { data: campusPhotos } = await photoQuery.limit(8);
-
+      const campusPhotos = (campusPhotoResult as any)?.data;
       if (campusPhotos && campusPhotos.length > 0) {
         const lowerPrompt = (title + " " + (audience || "") + " " + (moment || "")).toLowerCase();
         const categoryPriority: Record<string, string[]> = {
@@ -158,18 +152,18 @@ Requirements:
           "aerial": ["aerial", "overview", "campus view", "panoramic"],
         };
 
-        const scored = campusPhotos.map(p => {
+        const scored = campusPhotos.map((p: any) => {
           const keywords = categoryPriority[p.photo_category] || [];
-          const score = keywords.some(kw => lowerPrompt.includes(kw)) ? 2 : 1;
+          const score = keywords.some((kw: string) => lowerPrompt.includes(kw)) ? 2 : 1;
           return { ...p, score };
         });
 
-        scored.sort((a, b) => b.score - a.score);
-        campusPhotoUrls = scored.slice(0, 3).map(p => p.file_url);
+        scored.sort((a: any, b: any) => b.score - a.score);
+        campusPhotoUrls = scored.slice(0, 3).map((p: any) => p.file_url);
         console.log(`Using ${campusPhotoUrls.length} campus reference photos for cover`);
       }
     } catch (e) {
-      console.warn("Could not fetch campus photos:", e);
+      console.warn("Could not process campus photos:", e);
     }
 
     // Build message content

@@ -47,6 +47,7 @@ import {
   AlertCircle,
   Settings
 } from "lucide-react";
+import { AIResultsGuidance } from "@/components/AIResultsGuidance";
 import type { 
   ChannelDrafts, 
   EmailDraft, 
@@ -2076,6 +2077,8 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
       </CardHeader>
       <CardContent>
         {isEditing ? renderEditContent() : renderContent()}
+
+        <AIResultsGuidance variant="subtle" className="mt-3" />
 
         {/* In Context Mockup Preview */}
         {isVisualChannel && channelImageUrl && (

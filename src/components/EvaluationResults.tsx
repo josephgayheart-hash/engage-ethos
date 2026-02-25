@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PenTool, Map, FolderPlus } from "lucide-react";
+import { AIResultsGuidance } from "@/components/AIResultsGuidance";
 import type { EvaluationResult, PillarEvaluation, Rating } from "@/types/campusvoice";
 
 interface EvaluationResultsProps {
@@ -161,6 +162,8 @@ export function EvaluationResults({ result }: EvaluationResultsProps) {
           { label: "Save to Library", href: "/library", icon: FolderPlus },
         ]}
       />
+
+      <AIResultsGuidance />
     </div>
   );
 }
