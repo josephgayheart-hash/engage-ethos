@@ -1764,7 +1764,7 @@ export default function CRMPage() {
                           <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> Close: {format(new Date(selectedOpp.close_date), "MMM d, yyyy")}</span>
                         )}
                         {selectedOpp.amount && (
-                          <span className="flex items-center gap-1 font-semibold text-foreground"><DollarSign className="h-3.5 w-3.5" /> {Number(selectedOpp.amount).toLocaleString()}</span>
+                          <span className="flex items-center gap-1 font-semibold text-foreground"><DollarSign className="h-3.5 w-3.5" /> ${Number(selectedOpp.amount).toLocaleString()}</span>
                         )}
                       </div>
                     </div>
@@ -2335,7 +2335,7 @@ export default function CRMPage() {
                   <span>{opportunities.length} total</span>
                   <span className="flex items-center gap-1 font-semibold text-foreground">
                     <DollarSign className="h-3.5 w-3.5" />
-                    {opportunities.reduce((s, o) => s + (Number(o.amount) || 0), 0).toLocaleString()} pipeline
+                    ${opportunities.reduce((s, o) => s + (Number(o.amount) || 0), 0).toLocaleString()} pipeline
                   </span>
                   <span className="flex items-center gap-1">
                     <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
@@ -2413,11 +2413,14 @@ export default function CRMPage() {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/30">
-                      <TableHead className="w-[300px] font-semibold">Opportunity Name</TableHead>
+                      <TableHead className="w-[250px] font-semibold">Opportunity</TableHead>
                       <TableHead className="font-semibold">Account</TableHead>
+                      <TableHead className="font-semibold">Contact</TableHead>
                       <TableHead className="font-semibold">Stage</TableHead>
                       <TableHead className="text-right font-semibold">Amount</TableHead>
+                      <TableHead className="text-right font-semibold">ARR</TableHead>
                       <TableHead className="font-semibold">Close Date</TableHead>
+                      <TableHead className="font-semibold">Created</TableHead>
                       <TableHead className="font-semibold">Owner</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -2427,6 +2430,7 @@ export default function CRMPage() {
                       const stageInfo = OPPORTUNITY_STAGES.find(s => s.value === opp.stage);
                       const owner = opp.created_by_user_id ? allUsers.find(u => u.id === opp.created_by_user_id) : null;
                       const ownerName = owner ? `${owner.first_name} ${owner.last_name}` : "—";
+                      const primaryContact = opp.contact_ids?.[0] ? prospects.find(p => p.id === opp.contact_ids![0]) : null;
                       return (
                         <TableRow
                           key={opp.id}
@@ -2435,17 +2439,22 @@ export default function CRMPage() {
                         >
                           <TableCell>
                             <div className="font-medium text-primary group-hover:underline">{opp.name}</div>
-                            {opp.contact_ids && opp.contact_ids.length > 0 && (
-                              <div className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
-                                <Contact className="h-3 w-3" /> {opp.contact_ids.length} contact{opp.contact_ids.length > 1 ? "s" : ""}
-                              </div>
-                            )}
                           </TableCell>
                           <TableCell>
                             {prospect ? (
                               <div className="flex items-center gap-1.5 text-sm">
                                 <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
                                 <span>{prospect.university_name}</span>
+                              </div>
+                            ) : <span className="text-muted-foreground text-sm">—</span>}
+                          </TableCell>
+                          <TableCell>
+                            {primaryContact ? (
+                              <div className="text-sm">
+                                <div className="font-medium truncate max-w-[140px]">{primaryContact.contact_name}</div>
+                                {opp.contact_ids && opp.contact_ids.length > 1 && (
+                                  <span className="text-xs text-muted-foreground">+{opp.contact_ids.length - 1} more</span>
+                                )}
                               </div>
                             ) : <span className="text-muted-foreground text-sm">—</span>}
                           </TableCell>
@@ -2457,8 +2466,14 @@ export default function CRMPage() {
                           <TableCell className="text-right text-sm font-medium">
                             {opp.amount ? `$${Number(opp.amount).toLocaleString()}` : <span className="text-muted-foreground">—</span>}
                           </TableCell>
+                          <TableCell className="text-right text-sm">
+                            {opp.arr ? <span className="font-medium text-primary">${Number(opp.arr).toLocaleString()}/yr</span> : <span className="text-muted-foreground">—</span>}
+                          </TableCell>
                           <TableCell className="text-sm">
                             {opp.close_date ? format(new Date(opp.close_date), "MMM d, yyyy") : <span className="text-muted-foreground">—</span>}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {format(new Date(opp.created_at), "MMM d, yyyy")}
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-1.5">
