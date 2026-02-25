@@ -23,8 +23,7 @@ import {
   ChevronRight, Pencil, Save, X, Contact, BarChart3, Wrench,
   FileText, MousePointerClick, Loader2, Radar, Target, DollarSign,
   TrendingUp, Calendar, Inbox, AlertTriangle, UserPlus, Briefcase,
-  Globe, AtSign
-
+  Globe, AtSign, Upload, Trash2, Download, Paperclip
 } from "lucide-react";
 import { BrandRadarTab } from "@/components/admin/BrandRadarTab";
 import { EmailTemplatesTab } from "@/components/admin/EmailTemplatesTab";
@@ -49,6 +48,16 @@ interface Prospect {
   updated_at: string | null;
 }
 
+interface OppFile {
+  id: string;
+  name: string;
+  url: string;
+  size: number;
+  type: string;
+  uploaded_at: string;
+  uploaded_by?: string;
+}
+
 interface Opportunity {
   id: string;
   prospect_id: string | null;
@@ -61,6 +70,7 @@ interface Opportunity {
   created_at: string;
   updated_at: string;
   created_by_user_id: string | null;
+  files: OppFile[];
 }
 
 interface OutreachRecord {
@@ -576,6 +586,104 @@ export default function CRMPage() {
       setEditingOpp(false);
       loadOpportunities();
     }
+  };
+
+  // ── Upload Files to Opportunity ─────────────────────────────────────────
+  const [uploadingOppFiles, setUploadingOppFiles] = useState(false);
+  const oppFileInputRef = useCallback((node: HTMLInputElement | null) => {
+    if (node) node.setAttribute("multiple", "true");
+  }, []);
+
+  const handleUploadOppFiles = async (oppId: string, fileList: FileList) => {
+    const opp = opportunities.find(o => o.id === oppId);
+    if (!opp) return;
+    setUploadingOppFiles(true);
+    const existingFiles: OppFile[] = opp.files || [];
+    const newFiles: OppFile[] = [];
+
+    for (const file of Array.from(fileList)) {
+      if (file.size > 20 * 1024 * 1024) {
+        toast.error(`${file.name} exceeds 20MB limit`);
+        continue;
+      }
+      const fileId = crypto.randomUUID();
+      const ext = file.name.split(".").pop() || "";
+      const storagePath = `${oppId}/${fileId}.${ext}`;
+
+      const { error: upErr } = await supabase.storage
+        .from("crm-opportunity-files")
+        .upload(storagePath, file);
+      if (upErr) {
+        toast.error(`Failed to upload ${file.name}`);
+        continue;
+      }
+      const { data: urlData } = supabase.storage
+        .from("crm-opportunity-files")
+        .getPublicUrl(storagePath);
+
+      newFiles.push({
+        id: fileId,
+        name: file.name,
+        url: urlData.publicUrl,
+        size: file.size,
+        type: file.type || "application/octet-stream",
+        uploaded_at: new Date().toISOString(),
+        uploaded_by: user?.id || undefined,
+      });
+    }
+
+    if (newFiles.length > 0) {
+      const allFiles = [...existingFiles, ...newFiles];
+      const { error } = await supabase
+        .from("crm_opportunities" as any)
+        .update({ files: allFiles, updated_at: new Date().toISOString() } as any)
+        .eq("id", oppId);
+      if (error) toast.error("Failed to save file metadata");
+      else {
+        toast.success(`${newFiles.length} file(s) uploaded`);
+        loadOpportunities();
+      }
+    }
+    setUploadingOppFiles(false);
+  };
+
+  const handleDeleteOppFile = async (oppId: string, fileId: string) => {
+    const opp = opportunities.find(o => o.id === oppId);
+    if (!opp) return;
+    const file = (opp.files || []).find((f: OppFile) => f.id === fileId);
+    if (!file) return;
+
+    // Delete from storage
+    const pathPart = file.url.split("/crm-opportunity-files/")[1];
+    if (pathPart) {
+      await supabase.storage.from("crm-opportunity-files").remove([decodeURIComponent(pathPart)]);
+    }
+
+    const updatedFiles = (opp.files || []).filter((f: OppFile) => f.id !== fileId);
+    const { error } = await supabase
+      .from("crm_opportunities" as any)
+      .update({ files: updatedFiles, updated_at: new Date().toISOString() } as any)
+      .eq("id", oppId);
+    if (error) toast.error("Failed to remove file");
+    else {
+      toast.success("File removed");
+      loadOpportunities();
+    }
+  };
+
+  const getFileIcon = (type: string) => {
+    if (type.includes("pdf")) return "📄";
+    if (type.includes("word") || type.includes("document")) return "📝";
+    if (type.includes("sheet") || type.includes("excel")) return "📊";
+    if (type.includes("presentation") || type.includes("powerpoint")) return "📑";
+    if (type.startsWith("image/")) return "🖼️";
+    return "📎";
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
   useEffect(() => {
@@ -1686,6 +1794,91 @@ export default function CRMPage() {
                           <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{selectedOpp.notes}</p>
                         ) : (
                           <p className="text-sm text-muted-foreground italic">No notes yet. Click Edit to add notes.</p>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    {/* Files / Documents */}
+                    <Card>
+                      <CardHeader className="pb-2 flex-row items-center justify-between">
+                        <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
+                          <Paperclip className="h-4 w-4" /> Files ({(selectedOpp.files || []).length})
+                        </CardTitle>
+                        <div>
+                          <input
+                            type="file"
+                            id="opp-file-upload"
+                            className="hidden"
+                            multiple
+                            accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.svg,.txt,.csv"
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files.length > 0) {
+                                handleUploadOppFiles(selectedOpp.id, e.target.files);
+                                e.target.value = "";
+                              }
+                            }}
+                          />
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs"
+                            disabled={uploadingOppFiles}
+                            onClick={() => document.getElementById("opp-file-upload")?.click()}
+                          >
+                            {uploadingOppFiles ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Upload className="h-3 w-3 mr-1" />}
+                            Upload
+                          </Button>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        {(selectedOpp.files || []).length === 0 ? (
+                          <div className="text-center py-6 border-2 border-dashed border-border rounded-lg">
+                            <Paperclip className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
+                            <p className="text-xs text-muted-foreground">No files uploaded yet</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">Upload contracts, NDAs, proposals, etc.</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            {(selectedOpp.files as OppFile[]).map((file) => {
+                              const uploaderUser = file.uploaded_by ? allUsers.find(u => u.id === file.uploaded_by) : null;
+                              const uploaderName = uploaderUser ? `${uploaderUser.first_name} ${uploaderUser.last_name}` : null;
+                              return (
+                                <div key={file.id} className="flex items-center gap-3 p-2.5 rounded-lg border border-border bg-muted/30 hover:bg-muted/50 transition-colors group">
+                                  <span className="text-lg shrink-0">{getFileIcon(file.type)}</span>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="text-sm font-medium text-foreground truncate">{file.name}</div>
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                                      <span>{formatFileSize(file.size)}</span>
+                                      <span>·</span>
+                                      <span>{format(new Date(file.uploaded_at), "MMM d, yyyy")}</span>
+                                      {uploaderName && (
+                                        <>
+                                          <span>·</span>
+                                          <span>{uploaderName}</span>
+                                        </>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0" asChild>
+                                      <a href={file.url} target="_blank" rel="noopener noreferrer" title="Download">
+                                        <Download className="h-3.5 w-3.5" />
+                                      </a>
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                                      onClick={() => handleDeleteOppFile(selectedOpp.id, file.id)}
+                                      title="Delete"
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
                         )}
                       </CardContent>
                     </Card>
