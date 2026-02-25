@@ -49,6 +49,8 @@ interface Prospect {
   brand_launch_date: string | null;
   url: string;
   logo_url: string | null;
+  source_article_url: string | null;
+  source_article_title: string | null;
   discovered_at: string | null;
   updated_at: string | null;
 }
@@ -1585,6 +1587,25 @@ export default function CRMPage() {
                     <InfoRow icon={Globe} label="Website" value={selected?.url} editing={false} field="url" editData={editData} setEditData={setEditData} link />
                   )}
 
+                  {/* Source Article (from Radar) */}
+                  {selected?.source_article_url && !editing && (
+                    <div className="flex items-center gap-3">
+                      <div className="w-5 h-5 flex items-center justify-center"><Radar className="h-4 w-4 text-muted-foreground" /></div>
+                      <div className="flex-1">
+                        <div className="text-xs text-muted-foreground">Source Article</div>
+                        <a href={selected.source_article_url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline truncate block max-w-[400px]">
+                          {selected.source_article_title || selected.source_article_url}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  {editing && (
+                    <>
+                      <InfoRow icon={Radar} label="Source Article Title" value={selected?.source_article_title} editing={editing} field="source_article_title" editData={editData} setEditData={setEditData} />
+                      <InfoRow icon={Radar} label="Source Article URL" value={selected?.source_article_url} editing={editing} field="source_article_url" editData={editData} setEditData={setEditData} />
+                    </>
+                  )}
+
                   {editing ? (
                     <div className="flex items-center gap-3">
                       <div className="w-5 h-5 flex items-center justify-center"><Activity className="h-4 w-4 text-muted-foreground" /></div>
@@ -1734,9 +1755,20 @@ export default function CRMPage() {
                 {loadingNotes ? (
                   <div className="text-center text-sm text-muted-foreground py-4">Loading...</div>
                 ) : (() => {
-                  const timeline: { type: "note" | "email"; date: string; data: any }[] = [
+                  const timeline: { type: "note" | "email" | "radar"; date: string; data: any }[] = [
                     ...notes.map((n) => ({ type: "note" as const, date: n.created_at, data: n })),
                     ...allEmails.map((e) => ({ type: "email" as const, date: e.date, data: e })),
+                    // Add radar source article as a discovery event
+                    ...(selected?.source_article_url ? [{
+                      type: "radar" as const,
+                      date: selected.discovered_at || selected.updated_at || new Date().toISOString(),
+                      data: {
+                        id: `radar-${selected.id}`,
+                        source_article_url: selected.source_article_url,
+                        source_article_title: selected.source_article_title,
+                        university_name: selected.university_name,
+                      },
+                    }] : []),
                   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
                   if (timeline.length === 0) return <p className="text-sm text-muted-foreground text-center py-4">No activity yet</p>;
@@ -1746,19 +1778,36 @@ export default function CRMPage() {
                       {timeline.map((item, i) => (
                         <div key={`${item.type}-${item.data.id}-${i}`} className="flex gap-3">
                           <div className="flex flex-col items-center">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${item.type === "note" ? "bg-primary/10 text-primary" : item.data.source === "auto" ? "bg-accent text-accent-foreground" : "bg-primary/10 text-primary"}`}>
-                              {item.type === "note" ? <StickyNote className="h-3.5 w-3.5" /> : <Mail className="h-3.5 w-3.5" />}
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                              item.type === "radar" ? "bg-accent text-accent-foreground" :
+                              item.type === "note" ? "bg-primary/10 text-primary" : 
+                              item.data.source === "auto" ? "bg-accent text-accent-foreground" : "bg-primary/10 text-primary"
+                            }`}>
+                              {item.type === "radar" ? <Radar className="h-3.5 w-3.5" /> : item.type === "note" ? <StickyNote className="h-3.5 w-3.5" /> : <Mail className="h-3.5 w-3.5" />}
                             </div>
                             <div className="w-px flex-1 bg-border" />
                           </div>
                           <div className="pb-4 flex-1">
                             <div className="flex items-center gap-2 mb-1 flex-wrap">
                               <span className="text-xs font-medium text-foreground capitalize">
-                                {item.type === "note" ? item.data.note_type : (item.data.source === "auto" ? `Auto: ${item.data.email_type || "system"}` : "Outreach Email")}
+                                {item.type === "radar" ? "Brand Radar Discovery" : item.type === "note" ? item.data.note_type : (item.data.source === "auto" ? `Auto: ${item.data.email_type || "system"}` : "Outreach Email")}
                               </span>
                               <span className="text-xs text-muted-foreground">{format(new Date(item.date), "MMM d, yyyy h:mm a")}</span>
+                              {item.type === "radar" && <Badge variant="secondary" className="text-[10px] h-4">Radar</Badge>}
                             </div>
-                            {item.type === "note" ? (
+                            {item.type === "radar" ? (
+                              <div className="text-sm space-y-1">
+                                <p className="text-foreground">Discovered via Brand Radar article scan</p>
+                                {item.data.source_article_title && (
+                                  <p className="text-muted-foreground text-xs">"{item.data.source_article_title}"</p>
+                                )}
+                                {item.data.source_article_url && (
+                                  <a href={item.data.source_article_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
+                                    <ExternalLink className="h-3 w-3" /> View source article
+                                  </a>
+                                )}
+                              </div>
+                            ) : item.type === "note" ? (
                               <p className="text-sm text-foreground">{item.data.note_text}</p>
                             ) : (
                               <div className="text-sm">
