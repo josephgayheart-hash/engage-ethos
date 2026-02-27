@@ -258,7 +258,7 @@ const channelSpecs: Record<string, { aspect: string; width: number; height: numb
 - Sophisticated, premium aesthetic — this goes to major donors, board members, and institutional leaders.
 - A single compelling subject (student, researcher, faculty) whose story represents institutional impact.
 - Darker, more dramatic lighting (golden hour, dramatic shadows) conveys gravitas and prestige.
-- Leave upper 20% clean for the report title and lower 20% for institution name and fiscal year.
+- Leave upper 20% clean for a title overlay and lower 20% as negative space for branding to be added later in Brand Studio.
 - The mood should be reflective, proud, and forward-looking — not casual or playful.
 - Portrait orientation means vertical subjects (standing person, tall building, tree) work naturally.`
   },
@@ -650,7 +650,7 @@ VISUAL APPROACH:
 - Blend these illustrative elements with bold graphic design techniques: color blocks, geometric shapes, gradients, layered compositions
 - Use the brand colors prominently and intentionally — this should unmistakably feel like THIS institution's marketing material
 - NEVER use generic/stock iconography. Create bespoke visual elements that match the craftsmanship level of the design references.
-- ABSOLUTELY DO NOT attempt to render any university logo, crest, seal, emblem, shield, or wordmark. AI cannot accurately reproduce institutional logos — any attempt will look wrong and damage the brand. Logos will be added later by the user in the Brand Studio overlay tool.
+- ABSOLUTELY DO NOT attempt to render any university logo, crest, seal, emblem, shield, wordmark, OR the institution's name as text. AI cannot accurately reproduce institutional logos or spell institution names correctly — any attempt will look wrong and damage the brand. Logos and institution names will be added later by the user in Brand Studio.
 ${reserveLogoSpace ? "- Reserve a clean, uncluttered area (roughly bottom-right quadrant) for a logo — use negative space, but do NOT render any frame or text marking that area" : ""}
 - The mood and energy should match: ${tone || "professional and polished"}
 
@@ -698,10 +698,10 @@ SETTING & ENVIRONMENT RULES — READ CAREFULLY:
 - CRITICAL — Aspect ratio and dimensions: This image MUST be exactly ${spec.aspect} aspect ratio (${spec.width}x${spec.height} pixels). ${spec.aspect === "1:1" ? "The image must be perfectly SQUARE — equal width and height." : spec.aspect === "16:9" ? "The image must be a WIDE horizontal rectangle — significantly wider than it is tall." : `The image must match ${spec.aspect} proportions exactly.`} Do NOT generate an image with the wrong aspect ratio.
 
 CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
-- ABSOLUTELY NO TEXT of any kind in the image. No words, letters, numbers, symbols, abbreviations, or university names.
+- ABSOLUTELY NO TEXT of any kind in the image. No words, letters, numbers, symbols, abbreviations, university names, or institution names.
 - Do NOT put text on clothing — no "University", no school names, no abbreviations, no letters. Show PLAIN solid-color clothing in the brand palette instead.
 - Do NOT put text on banners, signs, buildings, flags, or any surface. All signage and banners should be BLANK or show only solid brand colors / abstract patterns.
-- Do NOT render any logos, crests, seals, emblems, or wordmarks. AI cannot accurately reproduce institutional logos — any attempt will look wrong and damage the brand.
+- Do NOT render any logos, crests, seals, emblems, wordmarks, or the institution's name as text. AI cannot accurately reproduce these — any attempt will look wrong and damage the brand. The user will add these in Brand Studio.
 - Do NOT render any mascot, mascot costume, cartoon character, or animal figure.
 - If you feel the urge to add text anywhere — DON'T. A plain scarlet hoodie is better than one with garbled "Uhiversity" on it.
 - The institution's identity should come through via COLORS, ARCHITECTURE, and ENVIRONMENT — never through rendered text or logos.
