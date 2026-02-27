@@ -565,7 +565,7 @@ PALETTE LOCK: If brand hex colors are provided, use ONLY those exact hex colors 
             messages: [
               {
                 role: "system",
-                content: `You write short marketing copy for higher-ed promotional graphics. The copy must align with the institution's brand voice and guidelines.${brandGuidelinesSummary ? ` Brand context: ${brandGuidelinesSummary}` : ""}${strictInstitutionConstraint ? ` ${strictInstitutionConstraint}` : ""} Return ONLY valid JSON with keys: headline, subheadline, cta. No markdown.`,
+                content: `You write short marketing copy for higher-ed promotional graphics. The copy must align with the institution's brand voice and guidelines.${brandGuidelinesSummary ? ` Brand context: ${brandGuidelinesSummary}` : ""}${strictInstitutionConstraint ? ` ${strictInstitutionConstraint}` : ""} SPELLING CHECK: Triple-check every word for correct spelling before returning. No typos, no truncated words, no abbreviations unless intentional. Return ONLY valid JSON with keys: headline, subheadline, cta. No markdown.`,
               },
               {
                 role: "user",
@@ -588,8 +588,8 @@ PALETTE LOCK: If brand hex colors are provided, use ONLY those exact hex colors 
         console.warn("Could not generate structured graphic copy:", e);
       }
 
-      if (!generatedHeadline) generatedHeadline = "Strategic Sales Certificate";
-      if (!generatedSubheadline) generatedSubheadline = "Build real-world sales, communication, and AI-enabled business skills.";
+      if (!generatedHeadline) generatedHeadline = "Discover Your Future";
+      if (!generatedSubheadline) generatedSubheadline = "Explore programs designed to prepare you for success.";
       if (!generatedCta) generatedCta = "Learn More";
     }
 
@@ -621,6 +621,7 @@ ${shouldRenderGraphicText
 - Do not invent extra text, numbers, dates, URLs, or random characters.
 - ABSOLUTELY NO QR codes — never generate a QR code under any circumstances.
 - NEVER include "CampusVoice" or any platform branding — only the institution's own brand identity.
+- SPELLING CHECK: Every word you render MUST be spelled correctly. Double-check every letter. If unsure of a spelling, use a simpler synonym. Never truncate words (e.g., "Strategi" instead of "Strategic" is NOT acceptable).
 - Keep typography bold, modern, and highly readable with strong contrast.
 - Place CTA inside a clear button/chip style treatment.
 - Keep enough whitespace around text for clarity and premium design quality.`
