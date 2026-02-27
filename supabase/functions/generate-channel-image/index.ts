@@ -284,7 +284,7 @@ serve(async (req) => {
   }
 
   try {
-    const { channel, contentSummary, audience, tenantId, profileId, messageId, goal, tone, moment, cohort, domain, engine, imageStyle, designStyle, colorMood, typographyStyle, layoutDensity, reserveLogoSpace } = await req.json();
+    const { channel, contentSummary, audience, tenantId, profileId, messageId, goal, tone, moment, cohort, domain, engine, imageStyle, designStyle, colorMood, typographyStyle, layoutDensity, reserveLogoSpace, renderAiTextCta } = await req.json();
 
     if (!channel || !contentSummary) {
       return new Response(JSON.stringify({ error: "Missing channel or contentSummary" }), {
@@ -309,6 +309,8 @@ serve(async (req) => {
     const selectedModel = engine === "premium"
       ? "google/gemini-3-pro-image-preview"
       : "google/gemini-2.5-flash-image";
+
+    const isGraphicDesign = imageStyle === "graphic-design";
 
     // Fetch institutional branding — build strict color palette
     // Filter out app default colors that leak into profile configs
@@ -474,7 +476,6 @@ Rules:
       "graphic-design": "Professional graphic design composition — like a finished piece from a skilled Photoshop designer. Bold typography integrated into the layout, eye-catching visual hierarchy, striking color use, modern design trends. Think event posters, social media graphics, promotional flyers created by a top-tier university marketing team.",
     };
     const selectedStyle = styleDirections[imageStyle || "photorealistic"] || styleDirections.photorealistic;
-    const isGraphicDesign = imageStyle === "graphic-design";
 
     // Build graphic design sub-parameter instructions
     const designStyleMap: Record<string, string> = {
@@ -511,6 +512,52 @@ COLOR MOOD: ${colorMoodMap[colorMood] || colorMoodMap["brand-colors"]}
 TYPOGRAPHY: ${typographyMap[typographyStyle] || typographyMap["sans-serif-modern"]}
 LAYOUT: ${layoutDensityMap[layoutDensity] || layoutDensityMap["balanced"]}` : "";
 
+    const shouldRenderGraphicText = Boolean(isGraphicDesign && renderAiTextCta !== false);
+    let generatedHeadline = "";
+    let generatedSubheadline = "";
+    let generatedCta = "";
+
+    if (shouldRenderGraphicText) {
+      try {
+        const copyResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-3-flash-preview",
+            messages: [
+              {
+                role: "system",
+                content: "You write short marketing copy for higher-ed promotional graphics. Return ONLY valid JSON with keys: headline, subheadline, cta. No markdown.",
+              },
+              {
+                role: "user",
+                content: `Source content:\n${contentSummary}\n\nAudience: ${audience || "general"}\nTone: ${tone || "professional and polished"}\nGoal: ${goal || "promote a program"}\n\nTask: Summarize to core message and produce:\n- headline: max 8 words\n- subheadline: max 18 words\n- cta: max 4 words\nNo quotation marks around values in final output JSON.`,
+              },
+            ],
+          }),
+        });
+
+        if (copyResponse.ok) {
+          const copyData = await copyResponse.json();
+          const raw = copyData?.choices?.[0]?.message?.content || "";
+          const cleaned = String(raw).replace(/```json/gi, "").replace(/```/g, "").trim();
+          const parsed = JSON.parse(cleaned);
+          generatedHeadline = (parsed?.headline || "").toString().trim();
+          generatedSubheadline = (parsed?.subheadline || "").toString().trim();
+          generatedCta = (parsed?.cta || "").toString().trim();
+        }
+      } catch (e) {
+        console.warn("Could not generate structured graphic copy:", e);
+      }
+
+      if (!generatedHeadline) generatedHeadline = "Strategic Sales Certificate";
+      if (!generatedSubheadline) generatedSubheadline = "Build real-world sales, communication, and AI-enabled business skills.";
+      if (!generatedCta) generatedCta = "Learn More";
+    }
+
     const prompt = isGraphicDesign
       ? `You are an elite graphic designer creating a marketing-forward promotional graphic for a higher education institution.
 
@@ -526,32 +573,34 @@ ${colorPaletteInstruction}
 ${designSubParams}
 ${brandGuidelinesContext}
 
-YOUR TASK: Read the content above and create a visually compelling, illustrative promotional graphic that COMMUNICATES the essence of this message through visual storytelling. This is NOT a generic abstract background — it should be a purposeful marketing graphic that:
-- Visually represents the CONCEPT, THEME, and ENERGY of the promotional content
-- Uses icons, illustrations, visual metaphors, and symbolic imagery to convey the key message (e.g., a sales certificate program → show visual metaphors for growth, achievement, professional development, handshakes, upward arrows, target/bullseye, etc.)
-- Feels like a finished promotional piece from a top-tier university marketing team — the kind of graphic that would stop someone from scrolling
-- Creates clear visual hierarchy with focal areas and breathing room for overlaid text
+YOUR TASK: Read the content above and create a visually compelling, illustrative promotional graphic that COMMUNICATES the essence of this message through visual storytelling. This is NOT a generic abstract background — it should be a purposeful marketing graphic.
 
-CRITICAL — ABSOLUTELY NO TEXT, NUMBERS, OR PLACEHOLDERS:
-- Do NOT render ANY text, letters, numbers, words, symbols, abbreviations, hex codes, or characters of any kind — not even single letters
-- Do NOT attempt typography, headlines, subtext, dates, captions, or university names
-- Do NOT render any logos, crests, seals, emblems, wordmarks, or monograms
-- Do NOT render placeholder boxes, wireframe elements, "logo here" markers, or QR codes
-- Communicate ENTIRELY through visual imagery, icons, illustrations, shapes, and color — NEVER through written language
-- If you feel the urge to add text anywhere — DON'T. Use a visual icon or illustration instead.
+${shouldRenderGraphicText
+  ? `TEXT RENDERING MODE (ON):
+- You MUST render clean, legible marketing text into the final image.
+- Use exactly these lines:
+  1) Headline: "${generatedHeadline}"
+  2) Subheadline: "${generatedSubheadline}"
+  3) CTA: "${generatedCta}"
+- Do not invent extra text, numbers, dates, URLs, or random characters.
+- Keep typography bold, modern, and highly readable with strong contrast.
+- Place CTA inside a clear button/chip style treatment.
+- Keep enough whitespace around text for clarity and premium design quality.`
+  : `CRITICAL — ABSOLUTELY NO TEXT, NUMBERS, OR PLACEHOLDERS:
+- Do NOT render ANY text, letters, numbers, words, symbols, abbreviations, hex codes, or characters of any kind.
+- Do NOT attempt typography, headlines, subtext, dates, captions, or university names.
+- Do NOT render placeholder boxes, wireframe elements, "logo here" markers, or QR codes.
+- Communicate entirely through visual imagery and illustrative elements.`}
 
 VISUAL APPROACH:
-- Use illustrative and iconic elements that represent the content: e.g., for education → graduation caps, books, lightbulbs; for sales → handshakes, targets, growth charts (as illustrations, not text); for community → connected nodes, people silhouettes, gathering imagery
+- Use illustrative and iconic elements that represent the content theme and message
 - Blend these illustrative elements with bold graphic design techniques: color blocks, geometric shapes, gradients, layered compositions
 - Use the brand colors prominently and intentionally — this should unmistakably feel like THIS institution's marketing material
-- Create a composition with clear negative space areas where headline text and CTA buttons can be overlaid by the user in our design tool
-- The overall feel should be modern, energetic, and aspirational — like a piece from a university's best marketing campaign
 ${reserveLogoSpace ? "- Reserve a clean, uncluttered area (roughly bottom-right quadrant) for a logo — use negative space, but do NOT render any frame or text marking that area" : ""}
 - The mood and energy should match: ${tone || "professional and polished"}
 
 LAYOUT:
-- Aspect ratio: ${spec.aspect} (${spec.width}x${spec.height} pixels). ${spec.aspect === "1:1" ? "Perfectly SQUARE." : `Match ${spec.aspect} proportions exactly.`}
-- Design must have clear visual hierarchy with room for overlaid headline text — leave clean areas (especially center or upper portion) for text overlay`
+- Aspect ratio: ${spec.aspect} (${spec.width}x${spec.height} pixels). ${spec.aspect === "1:1" ? "Perfectly SQUARE." : `Match ${spec.aspect} proportions exactly.`}`
       : `Generate a professional ${spec.style} for a higher education institution.
 
 Context: ${contentSummary}
