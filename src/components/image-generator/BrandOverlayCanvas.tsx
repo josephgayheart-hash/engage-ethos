@@ -1,6 +1,41 @@
-import { forwardRef, useState, useCallback, useRef, useEffect, type PointerEvent as RPointerEvent } from "react";
+import { forwardRef, useState, useCallback, useRef, useEffect, type PointerEvent as RPointerEvent, type CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import { getOverlayStyle, type OverlayPatternId } from "./overlayPatterns";
+
+function getCanvasBackgroundStyle(
+  type: string,
+  color: string,
+  secondaryColor: string
+): CSSProperties {
+  switch (type) {
+    case "gradient-vertical":
+      return { background: `linear-gradient(to bottom, ${color}, ${secondaryColor})` };
+    case "gradient-horizontal":
+      return { background: `linear-gradient(to right, ${color}, ${secondaryColor})` };
+    case "gradient-diagonal":
+      return { background: `linear-gradient(135deg, ${color}, ${secondaryColor})` };
+    case "gradient-radial":
+      return { background: `radial-gradient(circle at center, ${color}, ${secondaryColor})` };
+    case "textured-dots":
+      return {
+        backgroundColor: color,
+        backgroundImage: `radial-gradient(${secondaryColor} 2px, transparent 2px)`,
+        backgroundSize: "16px 16px",
+      };
+    case "textured-stripes":
+      return {
+        backgroundColor: color,
+        backgroundImage: `repeating-linear-gradient(45deg, ${secondaryColor} 0px, ${secondaryColor} 3px, transparent 3px, transparent 14px)`,
+      };
+    case "textured-crosshatch":
+      return {
+        backgroundColor: color,
+        backgroundImage: `repeating-linear-gradient(45deg, ${secondaryColor} 0px, ${secondaryColor} 1.5px, transparent 1.5px, transparent 10px), repeating-linear-gradient(-45deg, ${secondaryColor} 0px, ${secondaryColor} 1.5px, transparent 1.5px, transparent 10px)`,
+      };
+    default:
+      return { backgroundColor: color };
+  }
+}
 
 type LogoPosition = "top-left" | "top-right" | "bottom-left" | "bottom-right";
 type HeadlineAlign = "left" | "center" | "right";
@@ -18,10 +53,23 @@ const HEADLINE_ALIGN_CLASSES: Record<HeadlineAlign, string> = {
   right: "text-right",
 };
 
+export type CanvasBackgroundType =
+  | "solid"
+  | "gradient-vertical"
+  | "gradient-horizontal"
+  | "gradient-diagonal"
+  | "gradient-radial"
+  | "textured-dots"
+  | "textured-stripes"
+  | "textured-crosshatch";
+
 export interface BrandOverlayCanvasProps {
   imageUrl: string | null;
   primaryColor: string;
   secondaryColor: string;
+  canvasBackgroundType?: CanvasBackgroundType;
+  canvasBackgroundColor?: string;
+  canvasBackgroundSecondaryColor?: string;
   overlayPattern: OverlayPatternId | string;
   overlayColor: string;
   overlayOpacity: number;
@@ -59,6 +107,9 @@ export const BrandOverlayCanvas = forwardRef<HTMLDivElement, BrandOverlayCanvasP
       imageUrl,
       primaryColor,
       secondaryColor,
+      canvasBackgroundType = "solid",
+      canvasBackgroundColor,
+      canvasBackgroundSecondaryColor,
       overlayPattern,
       overlayColor,
       overlayOpacity,
@@ -195,7 +246,7 @@ export const BrandOverlayCanvas = forwardRef<HTMLDivElement, BrandOverlayCanvasP
         {imageUrl ? (
           <img src={imageUrl} alt="Base" className="w-full h-auto block" />
         ) : (
-          <div className="w-full" style={{ aspectRatio: "1 / 1", backgroundColor: primaryColor }} />
+          <div className="w-full" style={{ aspectRatio: "1 / 1", ...getCanvasBackgroundStyle(canvasBackgroundType, canvasBackgroundColor || primaryColor, canvasBackgroundSecondaryColor || secondaryColor) }} />
         )}
         {isCustomPattern && customOverlayUrl ? (
           <img

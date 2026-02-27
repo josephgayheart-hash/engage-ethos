@@ -21,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Download, Maximize2, FolderPlus, Folder, RefreshCw, Loader2, Upload, Sparkles, PaintBucket } from "lucide-react";
 import type { CollectionType } from "@/types/library";
 import type { OverlayPatternId } from "@/components/image-generator/overlayPatterns";
+import type { CanvasBackgroundType } from "@/components/image-generator/BrandOverlayCanvas";
 
 interface BrandStudioState {
   imageUrl: string | null;
@@ -149,6 +150,7 @@ const BrandStudioPage = () => {
     if (selectedProfileId) applyProfile(selectedProfileId);
     else setBrandColors(prev => prev.length > 0 ? prev : ["#1e3a5f"]);
     setImageUrl(null);
+    setCanvasBackgroundType("gradient-diagonal");
     // Force into editor by ensuring brandColors is set
     setBrandColors(prev => prev.length > 0 ? prev : ["#1e3a5f"]);
   }, [selectedProfileId, applyProfile]);
@@ -159,6 +161,11 @@ const BrandStudioPage = () => {
   const [overlayOpacity, setOverlayOpacity] = useState(restore?.overlayOpacity ?? 0.55);
   const [customOverlayUrl, setCustomOverlayUrl] = useState<string | null>(null);
   const { overlays: customOverlays } = useCustomOverlays(undefined);
+
+  // Canvas background state (no-image graphic design mode)
+  const [canvasBackgroundType, setCanvasBackgroundType] = useState<CanvasBackgroundType>(restore?.canvasBackgroundType || "gradient-diagonal");
+  const [canvasBackgroundColor, setCanvasBackgroundColor] = useState(restore?.canvasBackgroundColor || primary);
+  const [canvasBackgroundSecondaryColor, setCanvasBackgroundSecondaryColor] = useState(restore?.canvasBackgroundSecondaryColor || secondary);
 
   // Logo state
   const [showLogo, setShowLogo] = useState(restore?.showLogo ?? !!logoUrl);
@@ -405,6 +412,9 @@ const BrandStudioPage = () => {
             showBottomBar,
             bottomBarText,
             bottomBarColor,
+            canvasBackgroundType,
+            canvasBackgroundColor,
+            canvasBackgroundSecondaryColor,
           },
         });
         if (result?.id) {
@@ -617,7 +627,7 @@ const BrandStudioPage = () => {
               <PaintBucket className="w-5 h-5 text-primary shrink-0" />
               <div>
                 <div className="text-sm font-medium">Start with a Blank Canvas</div>
-                <div className="text-xs text-muted-foreground">Solid background using your brand color</div>
+                <div className="text-xs text-muted-foreground">Solid, gradient, or textured background — no photo needed</div>
               </div>
             </button>
           </div>
@@ -706,10 +716,17 @@ const BrandStudioPage = () => {
                 tone={tone}
                 goal={goal}
                 sceneDescription={sceneDescription}
-                onSmartLayer={handleSmartLayer}
+                onSmartLayer={imageUrl ? handleSmartLayer : undefined}
                 isSmartLayering={isSmartLayering}
                 smartLayerImageUrl={smartLayerImageUrl}
                 onClearSmartLayer={() => setSmartLayerImageUrl(null)}
+                hasImage={!!imageUrl}
+                canvasBackgroundType={canvasBackgroundType}
+                onCanvasBackgroundTypeChange={setCanvasBackgroundType}
+                canvasBackgroundColor={canvasBackgroundColor}
+                onCanvasBackgroundColorChange={setCanvasBackgroundColor}
+                canvasBackgroundSecondaryColor={canvasBackgroundSecondaryColor}
+                onCanvasBackgroundSecondaryColorChange={setCanvasBackgroundSecondaryColor}
               />
             </div>
           </ScrollArea>
@@ -725,6 +742,9 @@ const BrandStudioPage = () => {
               imageUrl={smartLayerImageUrl || imageUrl}
               primaryColor={primary}
               secondaryColor={secondary}
+              canvasBackgroundType={canvasBackgroundType}
+              canvasBackgroundColor={canvasBackgroundColor}
+              canvasBackgroundSecondaryColor={canvasBackgroundSecondaryColor}
               overlayPattern={smartLayerImageUrl ? "none" : overlayPattern}
               overlayColor={overlayColor}
               overlayOpacity={smartLayerImageUrl ? 0 : overlayOpacity}

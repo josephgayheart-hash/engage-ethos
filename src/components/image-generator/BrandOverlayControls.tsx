@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Type, Image as ImageIcon, AlignLeft, AlignCenter, AlignRight, ChevronLeft, ChevronRight, Move, Sparkles, Loader2, Bold, Italic, Underline } from "lucide-react";
+import { Type, Image as ImageIcon, AlignLeft, AlignCenter, AlignRight, ChevronLeft, ChevronRight, Move, Sparkles, Loader2, Bold, Italic, Underline, Palette } from "lucide-react";
 import { OverlayPatternSelector } from "./OverlayPatternSelector";
 import { type OverlayPatternId } from "./overlayPatterns";
+import type { CanvasBackgroundType } from "./BrandOverlayCanvas";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import type { CustomOverlay } from "@/hooks/useCustomOverlays";
@@ -91,6 +92,15 @@ export interface BrandOverlayControlsProps {
   isSmartLayering?: boolean;
   smartLayerImageUrl?: string | null;
   onClearSmartLayer?: () => void;
+
+  // Canvas background (no-image mode)
+  hasImage?: boolean;
+  canvasBackgroundType?: CanvasBackgroundType;
+  onCanvasBackgroundTypeChange?: (v: CanvasBackgroundType) => void;
+  canvasBackgroundColor?: string;
+  onCanvasBackgroundColorChange?: (v: string) => void;
+  canvasBackgroundSecondaryColor?: string;
+  onCanvasBackgroundSecondaryColorChange?: (v: string) => void;
 }
 
 export function BrandOverlayControls({
@@ -147,6 +157,13 @@ export function BrandOverlayControls({
   isSmartLayering,
   smartLayerImageUrl,
   onClearSmartLayer,
+  hasImage,
+  canvasBackgroundType,
+  onCanvasBackgroundTypeChange,
+  canvasBackgroundColor,
+  onCanvasBackgroundColorChange,
+  canvasBackgroundSecondaryColor,
+  onCanvasBackgroundSecondaryColorChange,
 }: BrandOverlayControlsProps) {
   const [isGeneratingHeadline, setIsGeneratingHeadline] = useState(false);
   const [isGeneratingCta, setIsGeneratingCta] = useState(false);
@@ -181,6 +198,91 @@ export function BrandOverlayControls({
 
   return (
     <div className="space-y-5">
+      {/* Canvas Background — only when no base image */}
+      {!hasImage && onCanvasBackgroundTypeChange && (
+        <div className="space-y-2 pb-4 border-b border-border">
+          <Label className="text-xs font-medium flex items-center gap-1.5">
+            <Palette className="w-3.5 h-3.5" /> Canvas Background
+          </Label>
+          <div className="grid grid-cols-2 gap-1.5">
+            {([
+              { value: "solid" as const, label: "Solid" },
+              { value: "gradient-vertical" as const, label: "Vertical" },
+              { value: "gradient-horizontal" as const, label: "Horizontal" },
+              { value: "gradient-diagonal" as const, label: "Diagonal" },
+              { value: "gradient-radial" as const, label: "Radial" },
+              { value: "textured-dots" as const, label: "Dots" },
+              { value: "textured-stripes" as const, label: "Stripes" },
+              { value: "textured-crosshatch" as const, label: "Crosshatch" },
+            ] as const).map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => onCanvasBackgroundTypeChange(value)}
+                className={cn(
+                  "px-2 py-1.5 rounded text-[11px] font-medium transition-all border",
+                  canvasBackgroundType === value
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-muted text-muted-foreground border-border hover:text-foreground"
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div className="grid grid-cols-2 gap-2 pt-1">
+            <div className="space-y-1">
+              <Label className="text-[10px]">Primary</Label>
+              <div className="flex items-center gap-1">
+                {brandColors.slice(0, 3).map((c, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => onCanvasBackgroundColorChange?.(c)}
+                    className={cn(
+                      "w-6 h-6 rounded-full border-2 transition-all",
+                      canvasBackgroundColor === c ? "border-foreground scale-110" : "border-border"
+                    )}
+                    style={{ backgroundColor: c }}
+                  />
+                ))}
+                <Input
+                  type="color"
+                  value={canvasBackgroundColor || brandColors[0] || "#1e3a5f"}
+                  onChange={(e) => onCanvasBackgroundColorChange?.(e.target.value)}
+                  className="w-6 h-6 p-0 border-0 cursor-pointer"
+                />
+              </div>
+            </div>
+            {canvasBackgroundType !== "solid" && (
+              <div className="space-y-1">
+                <Label className="text-[10px]">Secondary</Label>
+                <div className="flex items-center gap-1">
+                  {brandColors.slice(0, 3).map((c, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => onCanvasBackgroundSecondaryColorChange?.(c)}
+                      className={cn(
+                        "w-6 h-6 rounded-full border-2 transition-all",
+                        canvasBackgroundSecondaryColor === c ? "border-foreground scale-110" : "border-border"
+                      )}
+                      style={{ backgroundColor: c }}
+                    />
+                  ))}
+                  <Input
+                    type="color"
+                    value={canvasBackgroundSecondaryColor || brandColors[1] || "#c0392b"}
+                    onChange={(e) => onCanvasBackgroundSecondaryColorChange?.(e.target.value)}
+                    className="w-6 h-6 p-0 border-0 cursor-pointer"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Pattern Color */}
       <div className="space-y-1.5">
         <Label className="text-xs font-medium">Pattern Color</Label>
