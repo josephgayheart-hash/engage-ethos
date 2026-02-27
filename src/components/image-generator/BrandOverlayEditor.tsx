@@ -1,12 +1,10 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { toPng } from "html-to-image";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
 import { type OverlayPatternId } from "./overlayPatterns";
 import { useCustomOverlays } from "@/hooks/useCustomOverlays";
 import { BrandOverlayCanvas } from "./BrandOverlayCanvas";
 import { BrandOverlayControls } from "./BrandOverlayControls";
+import { DownloadFormatPicker } from "./DownloadFormatPicker";
 
 interface BrandOverlayEditorProps {
   imageUrl: string | null;
@@ -116,21 +114,6 @@ export function BrandOverlayEditor({
 
   const handlePointerUp = useCallback(() => { setIsDragging(false); }, []);
 
-  const handleDownload = useCallback(async () => {
-    if (!canvasRef.current) return;
-    try {
-      const dataUrl = await toPng(canvasRef.current, { pixelRatio: 2 });
-      const a = document.createElement("a");
-      a.href = dataUrl;
-      a.download = `branded-${channel || "image"}-${Date.now()}.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      toast.success("Branded image downloaded!");
-    } catch {
-      toast.error("Download failed. Try again.");
-    }
-  }, [channel]);
 
   return (
     <div className="space-y-4">
@@ -215,10 +198,12 @@ export function BrandOverlayEditor({
       </div>
 
       {!hideDownload && (
-        <Button onClick={handleDownload} className="w-full" size="sm">
-          <Download className="w-4 h-4 mr-1.5" />
-          Download Branded Image
-        </Button>
+        <DownloadFormatPicker
+          targetRef={canvasRef}
+          filenameBase={`branded-${channel || "image"}`}
+          className="w-full"
+          label="Download Branded Image"
+        />
       )}
     </div>
   );
