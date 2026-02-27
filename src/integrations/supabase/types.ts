@@ -768,6 +768,69 @@ export type Database = {
           },
         ]
       }
+      design_references: {
+        Row: {
+          created_at: string
+          description: string | null
+          file_name: string
+          file_url: string
+          id: string
+          is_active: boolean
+          name: string
+          profile_id: string | null
+          reference_type: string
+          sort_order: number | null
+          tags: string[] | null
+          tenant_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          file_name: string
+          file_url: string
+          id?: string
+          is_active?: boolean
+          name: string
+          profile_id?: string | null
+          reference_type?: string
+          sort_order?: number | null
+          tags?: string[] | null
+          tenant_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          file_name?: string
+          file_url?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          profile_id?: string | null
+          reference_type?: string
+          sort_order?: number | null
+          tags?: string[] | null
+          tenant_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_references_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "institutional_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_references_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_nudges: {
         Row: {
           bounced_at: string | null

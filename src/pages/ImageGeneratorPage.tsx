@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { WaveBackground } from "@/components/WaveBackground";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { supabase } from "@/integrations/supabase/client";
-import { ImageIcon, Download, RefreshCw, Loader2, Sparkles, Palette, Camera, Users, Target, Eye, Image, ExternalLink, PaintBucket, Maximize2, FolderPlus, Library, ChevronDown } from "lucide-react";
+import { ImageIcon, Download, RefreshCw, Loader2, Sparkles, Palette, Camera, Users, Target, Eye, Image, ExternalLink, PaintBucket, Maximize2, FolderPlus, Library, ChevronDown, Trash2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link, useLocation } from "react-router-dom";
@@ -130,6 +130,9 @@ const ImageGeneratorPage = () => {
   const [layoutDensity, setLayoutDensity] = useState("balanced");
   const [reserveLogoSpace, setReserveLogoSpace] = useState(false);
   const [renderAiTextCta, setRenderAiTextCta] = useState(true);
+  const [styleReferenceUrl, setStyleReferenceUrl] = useState<string | null>(null);
+  const [isUploadingRef, setIsUploadingRef] = useState(false);
+  const styleRefInputRef = useRef<HTMLInputElement>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationPhase, setGenerationPhase] = useState(0);
@@ -182,28 +185,29 @@ const ImageGeneratorPage = () => {
       setGenerationPhase(prev => prev < 4 ? prev + 1 : prev);
     }, engine === "premium" ? 6000 : 1200);
     try {
-      const effectiveStyle = creationMode === "graphic-design" ? "graphic-design" : style;
-      const { data, error } = await supabase.functions.invoke("generate-channel-image", {
-        body: {
-          channel,
-          contentSummary: contentDescription,
-          audience: audience || undefined,
-          tenantId,
-          profileId: selectedProfileId || undefined,
-          goal: goal || undefined,
-          tone: tone || undefined,
-          engine: engine || "fast",
-          imageStyle: effectiveStyle,
-          ...(creationMode === "graphic-design" && {
-            designStyle,
-            colorMood,
-            typographyStyle,
-            layoutDensity,
-            reserveLogoSpace,
-            renderAiTextCta,
-          }),
-        },
-      });
+          const effectiveStyle = creationMode === "graphic-design" ? "graphic-design" : style;
+          const { data, error } = await supabase.functions.invoke("generate-channel-image", {
+            body: {
+              channel,
+              contentSummary: contentDescription,
+              audience: audience || undefined,
+              tenantId,
+              profileId: selectedProfileId || undefined,
+              goal: goal || undefined,
+              tone: tone || undefined,
+              engine: engine || "fast",
+              imageStyle: effectiveStyle,
+              ...(creationMode === "graphic-design" && {
+                designStyle,
+                colorMood,
+                typographyStyle,
+                layoutDensity,
+                reserveLogoSpace,
+                renderAiTextCta,
+                styleReferenceUrl: styleReferenceUrl || undefined,
+              }),
+            },
+          });
       if (error) throw error;
       if (data?.error) {
         toast.error(data.error);
@@ -568,6 +572,56 @@ const ImageGeneratorPage = () => {
                         id="render-ai-text"
                         checked={renderAiTextCta}
                         onCheckedChange={setRenderAiTextCta}
+                      />
+                    </div>
+
+                    {/* Inline Style Reference */}
+                    <div className="space-y-2 pt-1">
+                      <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Style Reference (Optional)
+                      </Label>
+                      {styleReferenceUrl ? (
+                        <div className="flex items-center gap-2">
+                          <img src={styleReferenceUrl} alt="Style ref" className="w-12 h-12 rounded border object-cover" />
+                          <span className="text-xs text-muted-foreground flex-1">Reference uploaded</span>
+                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setStyleReferenceUrl(null)}>
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <button
+                          className="flex items-center gap-2 w-full p-2 border border-dashed rounded text-xs text-muted-foreground hover:border-primary/50 transition-colors"
+                          onClick={() => styleRefInputRef.current?.click()}
+                          disabled={isUploadingRef}
+                        >
+                          {isUploadingRef ? <Loader2 className="w-3 h-3 animate-spin" /> : <ImageIcon className="w-3 h-3" />}
+                          Upload a design sample to match this style
+                        </button>
+                      )}
+                      <input
+                        ref={styleRefInputRef}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          setIsUploadingRef(true);
+                          try {
+                            const ext = file.name.split('.').pop();
+                            const path = `inline/${crypto.randomUUID()}.${ext}`;
+                            const { error } = await supabase.storage.from('design-references').upload(path, file, { contentType: file.type });
+                            if (error) throw error;
+                            const { data } = supabase.storage.from('design-references').getPublicUrl(path);
+                            setStyleReferenceUrl(data.publicUrl);
+                          } catch (err) {
+                            console.error(err);
+                            toast.error('Failed to upload style reference');
+                          } finally {
+                            setIsUploadingRef(false);
+                            if (styleRefInputRef.current) styleRefInputRef.current.value = '';
+                          }
+                        }}
                       />
                     </div>
                   </div>

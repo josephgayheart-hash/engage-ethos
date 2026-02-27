@@ -7,6 +7,7 @@ import { WebCrawlTab } from '@/components/dna/WebCrawlTab';
 import { StoryBankTab } from '@/components/dna/StoryBankTab';
 import { FactBookTab } from '@/components/dna/FactBookTab';
 import { CampusPhotographyTab } from '@/components/dna/CampusPhotographyTab';
+import { DesignReferencesTab } from '@/components/dna/DesignReferencesTab';
 import { useCampusPhotoCount } from '@/hooks/useCampusPhotoCount';
 import { ContentDNASetupWizard } from '@/components/ContentDNASetupWizard';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -1176,6 +1177,10 @@ export default function ContentDNAPage() {
               <Camera className="w-4 h-4" />
               Campus Photos
             </TabsTrigger>
+            <TabsTrigger value="design-refs" className="flex items-center gap-2">
+              <PenTool className="w-4 h-4" />
+              Design References
+            </TabsTrigger>
             <TabsTrigger value="library" className="flex items-center gap-2">
               <BookOpen className="w-4 h-4" />
               Library
@@ -2329,6 +2334,11 @@ export default function ContentDNAPage() {
           {/* Campus Photography Tab */}
           <TabsContent value="campus-photos">
             <CampusPhotographyTab profileId={profileIdFromUrl} />
+          </TabsContent>
+
+          {/* Design References Tab */}
+          <TabsContent value="design-refs">
+            <DesignReferencesTab profileId={profileIdFromUrl} />
           </TabsContent>
 
           {/* Content Library Tab */}
