@@ -508,7 +508,7 @@ VISUAL DESIGN RULES:
 
 LAYOUT:
 - Aspect ratio: ${spec.aspect} (${spec.width}x${spec.height} pixels). ${spec.aspect === "1:1" ? "Perfectly SQUARE." : `Match ${spec.aspect} proportions exactly.`}
-- Design must work as a background composition that supports overlaid text — not a finished piece with baked-in text
+- Design must work as a background composition that supports overlaid text — not a finished piece with baked-in text`
       : `Generate a professional ${spec.style} for a higher education institution.
 
 Context: ${contentSummary}
