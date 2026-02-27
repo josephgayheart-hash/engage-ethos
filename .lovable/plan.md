@@ -1,44 +1,33 @@
 
 
-## Graphic Design Mode — No-Image Design Option
+## Graphic Design Mode Toggle with Extended Prompts
 
-### What exists today
-- Both Brand Studio and Image Studio have a basic "Blank Canvas" mode that renders a single solid-color square (`primaryColor`) when `imageUrl` is null.
-- The overlay system (24 patterns including gradients, geometric, textures) exists but only renders *on top of* an image or solid background.
-- Headline text, CTA bottom bar, logo placement, and AI text generation all work regardless of whether an image is present.
-
-### What's missing
-The blank canvas is just a flat rectangle in the primary brand color. There's no way to choose a gradient, texture, or multi-color background *as the base* (without an image). The overlay on top of a solid color creates a muddy double-layer effect rather than a clean graphic.
+### Current State
+"Graphic Design" is buried as the last option inside the Style dropdown alongside photography styles. When selected, no additional design-specific controls appear -- users only have the generic "Scene Description" textarea.
 
 ### Plan
 
-**1. Add a "Canvas Background" selector to BrandOverlayControls**
-- New collapsible section at the top of controls (above Pattern Color), visible when there's no base image (`imageUrl === null`).
-- Options: Solid Color, Vertical Gradient, Horizontal Gradient, Diagonal Gradient, Radial Gradient, Textured (reuses dots/stripes/crosshatch patterns as the base itself).
-- Color pickers for primary and secondary background colors (default to brand colors).
-- When a canvas background is active, the overlay pattern section becomes optional (user can layer or skip it).
+**1. Extract Graphic Design as a toggle above the style selector**
+- Add a prominent toggle/switch (or segmented control) at the top of the controls card: **"Photo" | "Graphic Design"**
+- When "Photo" is active, show the existing Style dropdown (photorealistic, cinematic, illustrated, watercolor, minimal)
+- When "Graphic Design" is active, hide the photography Style dropdown and show design-specific controls instead
+- Remove `graphic-design` from the `styleOptions` array
 
-**2. Update BrandOverlayCanvas to render rich backgrounds**
-- When `imageUrl` is null, instead of a plain `div` with `backgroundColor`, render the selected canvas background style using a new `canvasBackground` prop.
-- New props: `canvasBackgroundType`, `canvasBackgroundColor`, `canvasBackgroundSecondaryColor`.
-- Reuse `getOverlayStyle()` logic to generate the CSS for the background div.
+**2. Add Graphic Design sub-controls (visible only when toggle is on)**
+- **Design Style** -- radio group or small card selector: "Bold & Geometric", "Gradient Flow", "Typographic Poster", "Collage / Mixed Media", "Retro / Vintage", "Abstract Minimal"
+- **Color Mood** -- selectable chips: "Brand Colors Only", "Warm Palette", "Cool Palette", "Monochrome", "High Contrast", "Pastel"
+- **Typography Style** -- radio group: "Sans-Serif Modern", "Serif Classic", "Display / Decorative", "Handwritten"
+- **Layout Density** -- radio group: "Spacious / Breathable", "Balanced", "Dense / Packed"
+- These values will be appended to the prompt sent to the edge function
 
-**3. Wire state through BrandStudioPage and ImageGeneratorPage**
-- Lift new canvas background state in both pages.
-- Pass to `BrandOverlayCanvas` and `BrandOverlayControls`.
-- Include in save metadata for round-trip editing.
+**3. Update prompt construction in the edge function**
+- Accept new optional fields: `designStyle`, `colorMood`, `typographyStyle`, `layoutDensity`
+- When present, weave them into the graphic-design prompt block for more targeted AI output
 
-**4. Update the Image Studio blank canvas entry point**
-- Currently gated behind `selectedProfileId && brandColors.length > 0`. Make it always available with a default color.
-- When activated, show the canvas background selector in the overlay tab.
-
-**5. Enhance the Brand Studio starter panel**
-- Update "Start with a Blank Canvas" description: "Solid, gradient, or textured background — no photo needed."
-- Pre-select a gradient background type by default for a more polished starting experience.
+**4. Update the Scene Description label contextually**
+- When in Graphic Design mode, change the label to "Design Brief" and the placeholder to something like "e.g. Open house event flyer with bold headline 'Discover Your Future' and event details"
 
 ### Files to modify
-- `src/components/image-generator/BrandOverlayControls.tsx` — add Canvas Background section
-- `src/components/image-generator/BrandOverlayCanvas.tsx` — render rich backgrounds when no image
-- `src/pages/BrandStudioPage.tsx` — wire new state, update starter panel copy, include in metadata
-- `src/pages/ImageGeneratorPage.tsx` — wire new state, improve blank canvas entry point
+- `src/pages/ImageGeneratorPage.tsx` -- add toggle, conditional controls, new state, pass to generate call
+- `supabase/functions/generate-channel-image/index.ts` -- accept and use new design parameters in prompt
 
