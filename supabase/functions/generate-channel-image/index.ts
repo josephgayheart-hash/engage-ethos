@@ -284,7 +284,7 @@ serve(async (req) => {
   }
 
   try {
-    const { channel, contentSummary, audience, tenantId, profileId, messageId, goal, tone, moment, cohort, domain, engine, imageStyle, designStyle, colorMood, typographyStyle, layoutDensity } = await req.json();
+    const { channel, contentSummary, audience, tenantId, profileId, messageId, goal, tone, moment, cohort, domain, engine, imageStyle, designStyle, colorMood, typographyStyle, layoutDensity, reserveLogoSpace } = await req.json();
 
     if (!channel || !contentSummary) {
       return new Response(JSON.stringify({ error: "Missing channel or contentSummary" }), {
@@ -490,12 +490,13 @@ ${designSubParams}
 
 DESIGN DIRECTION: Create a polished, visually striking graphic design composition — an abstract visual background that a designer would use as the foundation for a poster, flyer, or social media graphic. The user will add their own headline text, logos, and CTA overlays separately using our design tool, so you must NOT render any text.
 
-CRITICAL — ABSOLUTELY NO TEXT OR NUMBERS:
+CRITICAL — ABSOLUTELY NO TEXT, NUMBERS, OR PLACEHOLDERS:
 - Do NOT render ANY text, letters, numbers, words, symbols, abbreviations, hex codes, or characters of any kind
 - Do NOT attempt typography, headlines, subtext, dates, or captions — the user adds these separately
 - Do NOT render any logos, crests, seals, emblems, wordmarks, or monograms
-- If you feel the urge to add text anywhere — DON'T. A clean abstract composition is always better than garbled AI-generated text.
-- This is a VISUAL-ONLY composition. Zero text. Zero numbers. Zero symbols.
+- Do NOT render placeholder boxes, wireframe elements, or "logo here" markers — nothing that looks like a template mockup
+- If you feel the urge to add text or a placeholder anywhere — DON'T. A clean abstract composition is always better.
+- This is a VISUAL-ONLY composition. Zero text. Zero numbers. Zero symbols. Zero placeholder boxes.
 
 VISUAL DESIGN RULES:
 - Use the brand colors prominently and intentionally throughout the design
@@ -504,6 +505,7 @@ VISUAL DESIGN RULES:
 - Abstract and graphic elements only: shapes, lines, textures, color fields, patterns
 - The design should feel contemporary, energetic, and professional
 - Leave clean areas/negative space where headline text can be overlaid later by the user
+${reserveLogoSpace ? "- Reserve a clean, uncluttered area (roughly bottom-right quadrant) where a logo can be placed later — use negative space or a subtle color block, but do NOT render any placeholder box, frame, or text marking that area" : ""}
 - The mood should match: ${tone || "professional and polished"}
 
 LAYOUT:
