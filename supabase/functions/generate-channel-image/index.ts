@@ -353,11 +353,11 @@ serve(async (req) => {
     }
     const campusPhotoPromise = campusPhotoQuery.limit(8);
 
-    // Content DNA — fetch brand platform & voice analysis for graphic design grounding
+    // Content DNA — fetch brand platform, voice analysis, and custom instructions for graphic design grounding
     const contentDnaPromise = profileId
-      ? supabaseAdmin.from("content_dna_analysis").select("voice_analysis, brand_platform").eq("profile_id", profileId).order("updated_at", { ascending: false }).limit(1).single()
+      ? supabaseAdmin.from("content_dna_analysis").select("voice_analysis, brand_platform, custom_instructions").eq("profile_id", profileId).order("updated_at", { ascending: false }).limit(1).single()
       : tenantId
-      ? supabaseAdmin.from("content_dna_analysis").select("voice_analysis, brand_platform").eq("tenant_id", tenantId).order("updated_at", { ascending: false }).limit(1).single()
+      ? supabaseAdmin.from("content_dna_analysis").select("voice_analysis, brand_platform, custom_instructions").eq("tenant_id", tenantId).order("updated_at", { ascending: false }).limit(1).single()
       : Promise.resolve({ data: null });
 
     // Fire all queries simultaneously
@@ -419,11 +419,13 @@ serve(async (req) => {
 
     // Extract Content DNA brand guidelines for graphic design grounding
     let brandGuidelinesContext = "";
+    let brandGuidelinesSummary = ""; // shorter version for copy generation
     try {
       const dna = (contentDnaResult as any)?.data;
       if (dna && isGraphicDesign) {
         const bp = dna.brand_platform as Record<string, any> | null;
         const va = dna.voice_analysis as Record<string, any> | null;
+        const customInstructions = dna.custom_instructions as string | null;
         const parts: string[] = [];
 
         if (bp?.promise) parts.push(`Brand Promise: ${bp.promise}`);
@@ -434,9 +436,18 @@ serve(async (req) => {
 
         if (va?.personality) parts.push(`Brand Personality: ${Array.isArray(va.personality) ? va.personality.join(', ') : va.personality}`);
         if (va?.toneDescriptors) parts.push(`Voice Tone: ${Array.isArray(va.toneDescriptors) ? va.toneDescriptors.join(', ') : va.toneDescriptors}`);
+        if (va?.overallTone) parts.push(`Overall Tone: ${va.overallTone}`);
+        if (va?.formalityLevel) parts.push(`Formality: ${va.formalityLevel}`);
+        if (va?.emotionalTone) parts.push(`Emotional Tone: ${va.emotionalTone}`);
+        if (va?.keyCharacteristics?.length) parts.push(`Key Characteristics: ${(va.keyCharacteristics as string[]).join(', ')}`);
+
+        if (customInstructions) {
+          parts.push(`Custom Brand / Graphic Guidelines:\n${customInstructions}`);
+        }
 
         if (parts.length > 0) {
-          brandGuidelinesContext = `\nINSTITUTIONAL BRAND GUIDELINES (from Content DNA):\n${parts.join('\n')}\n\nThe visual design MUST embody these brand values — the shapes, color use, composition, and energy should visually reflect the institution's brand personality, pillars, and promise. This is not generic design — it should FEEL like this specific institution's brand.`;
+          brandGuidelinesContext = `\nINSTITUTIONAL BRAND GUIDELINES (from Content DNA):\n${parts.join('\n')}\n\nThe visual design MUST embody these brand values — the shapes, color use, composition, and energy should visually reflect the institution's brand personality, pillars, and promise. If custom graphic guidelines are provided above, follow them precisely for typography treatment, color usage ratios, and visual style. This is not generic design — it should FEEL like this specific institution's brand.`;
+          brandGuidelinesSummary = parts.slice(0, 6).join('. ');
           console.log("Brand guidelines injected for graphic design:", parts.length, "elements");
         }
       }
@@ -530,11 +541,11 @@ LAYOUT: ${layoutDensityMap[layoutDensity] || layoutDensityMap["balanced"]}` : ""
             messages: [
               {
                 role: "system",
-                content: "You write short marketing copy for higher-ed promotional graphics. Return ONLY valid JSON with keys: headline, subheadline, cta. No markdown.",
+                content: `You write short marketing copy for higher-ed promotional graphics. The copy must align with the institution's brand voice and guidelines.${brandGuidelinesSummary ? ` Brand context: ${brandGuidelinesSummary}` : ""} Return ONLY valid JSON with keys: headline, subheadline, cta. No markdown.`,
               },
               {
                 role: "user",
-                content: `Source content:\n${contentSummary}\n\nAudience: ${audience || "general"}\nTone: ${tone || "professional and polished"}\nGoal: ${goal || "promote a program"}\n\nTask: Summarize to core message and produce:\n- headline: max 8 words\n- subheadline: max 18 words\n- cta: max 4 words\nNo quotation marks around values in final output JSON.`,
+                content: `Source content:\n${contentSummary}\n\nAudience: ${audience || "general"}\nTone: ${tone || "professional and polished"}\nGoal: ${goal || "promote a program"}\nBrand colors: ${brandColors.length > 0 ? brandColors.join(', ') : 'not specified'}\n\nTask: Summarize to core message and produce:\n- headline: max 8 words, punchy and on-brand\n- subheadline: max 18 words, compelling and action-oriented\n- cta: max 4 words, clear call-to-action\nNo quotation marks around values in final output JSON.`,
               },
             ],
           }),
