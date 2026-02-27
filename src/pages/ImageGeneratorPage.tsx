@@ -512,56 +512,58 @@ const ImageGeneratorPage = () => {
                         <span>Add design samples in <strong>Content DNA</strong> for best results</span>
                       </Link>
                     )}
-                    <div className="space-y-2">
-                      <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Design Style</Label>
-                      <RadioGroup value={designStyle} onValueChange={setDesignStyle} className="grid grid-cols-2 gap-2">
-                        {designStyleOptions.map((opt) => (
-                          <div key={opt.value} className="flex items-center space-x-2">
-                            <RadioGroupItem value={opt.value} id={`ds-${opt.value}`} />
-                            <Label htmlFor={`ds-${opt.value}`} className="text-sm font-normal cursor-pointer">{opt.label}</Label>
-                          </div>
-                        ))}
-                      </RadioGroup>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Color Mood</Label>
-                      <div className="flex flex-wrap gap-1.5">
-                        {colorMoodOptions.map((opt) => (
-                          <Badge
-                            key={opt.value}
-                            variant={colorMood === opt.value ? "default" : "outline"}
-                            className="cursor-pointer text-xs"
-                            onClick={() => setColorMood(opt.value)}
-                          >
-                            {opt.label}
-                          </Badge>
-                        ))}
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Style</Label>
+                        <RadioGroup value={designStyle} onValueChange={setDesignStyle} className="space-y-0.5">
+                          {designStyleOptions.map((opt) => (
+                            <div key={opt.value} className="flex items-center gap-1.5">
+                              <RadioGroupItem value={opt.value} id={`ds-${opt.value}`} className="h-3.5 w-3.5" />
+                              <Label htmlFor={`ds-${opt.value}`} className="text-xs font-normal cursor-pointer leading-tight">{opt.label}</Label>
+                            </div>
+                          ))}
+                        </RadioGroup>
                       </div>
-                    </div>
 
-                    <div className="space-y-2">
-                      <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Typography Style</Label>
-                      <RadioGroup value={typographyStyle} onValueChange={setTypographyStyle} className="grid grid-cols-2 gap-2">
-                        {typographyStyleOptions.map((opt) => (
-                          <div key={opt.value} className="flex items-center space-x-2">
-                            <RadioGroupItem value={opt.value} id={`ts-${opt.value}`} />
-                            <Label htmlFor={`ts-${opt.value}`} className="text-sm font-normal cursor-pointer">{opt.label}</Label>
-                          </div>
-                        ))}
-                      </RadioGroup>
-                    </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Typography</Label>
+                        <RadioGroup value={typographyStyle} onValueChange={setTypographyStyle} className="space-y-0.5">
+                          {typographyStyleOptions.map((opt) => (
+                            <div key={opt.value} className="flex items-center gap-1.5">
+                              <RadioGroupItem value={opt.value} id={`ts-${opt.value}`} className="h-3.5 w-3.5" />
+                              <Label htmlFor={`ts-${opt.value}`} className="text-xs font-normal cursor-pointer leading-tight">{opt.label}</Label>
+                            </div>
+                          ))}
+                        </RadioGroup>
+                      </div>
 
-                    <div className="space-y-2">
-                      <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Layout Density</Label>
-                      <RadioGroup value={layoutDensity} onValueChange={setLayoutDensity} className="grid grid-cols-3 gap-2">
-                        {layoutDensityOptions.map((opt) => (
-                          <div key={opt.value} className="flex items-center space-x-2">
-                            <RadioGroupItem value={opt.value} id={`ld-${opt.value}`} />
-                            <Label htmlFor={`ld-${opt.value}`} className="text-sm font-normal cursor-pointer">{opt.label}</Label>
-                          </div>
-                        ))}
-                      </RadioGroup>
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Color Mood</Label>
+                        <div className="flex flex-wrap gap-1">
+                          {colorMoodOptions.map((opt) => (
+                            <Badge
+                              key={opt.value}
+                              variant={colorMood === opt.value ? "default" : "outline"}
+                              className="cursor-pointer text-[10px] px-1.5 py-0"
+                              onClick={() => setColorMood(opt.value)}
+                            >
+                              {opt.label}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Density</Label>
+                        <RadioGroup value={layoutDensity} onValueChange={setLayoutDensity} className="space-y-0.5">
+                          {layoutDensityOptions.map((opt) => (
+                            <div key={opt.value} className="flex items-center gap-1.5">
+                              <RadioGroupItem value={opt.value} id={`ld-${opt.value}`} className="h-3.5 w-3.5" />
+                              <Label htmlFor={`ld-${opt.value}`} className="text-xs font-normal cursor-pointer leading-tight">{opt.label}</Label>
+                            </div>
+                          ))}
+                        </RadioGroup>
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between pt-1">
