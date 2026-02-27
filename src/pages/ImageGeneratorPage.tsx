@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { supabase } from "@/integrations/supabase/client";
 import { ImageIcon, Download, RefreshCw, Loader2, Sparkles, Palette, Camera, Users, Target, Eye, Image, ExternalLink, PaintBucket, Maximize2, FolderPlus, Library, ChevronDown } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link, useLocation } from "react-router-dom";
 import { ChannelMockup } from "@/components/image-generator/ChannelMockup";
@@ -127,6 +128,7 @@ const ImageGeneratorPage = () => {
   const [colorMood, setColorMood] = useState("brand-colors");
   const [typographyStyle, setTypographyStyle] = useState("sans-serif-modern");
   const [layoutDensity, setLayoutDensity] = useState("balanced");
+  const [reserveLogoSpace, setReserveLogoSpace] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationPhase, setGenerationPhase] = useState(0);
@@ -196,6 +198,7 @@ const ImageGeneratorPage = () => {
             colorMood,
             typographyStyle,
             layoutDensity,
+            reserveLogoSpace,
           }),
         },
       });
@@ -544,6 +547,17 @@ const ImageGeneratorPage = () => {
                           </div>
                         ))}
                       </RadioGroup>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1">
+                      <Label htmlFor="reserve-logo" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer">
+                        Reserve Space for Logo
+                      </Label>
+                      <Switch
+                        id="reserve-logo"
+                        checked={reserveLogoSpace}
+                        onCheckedChange={setReserveLogoSpace}
+                      />
                     </div>
                   </div>
                 )}
