@@ -512,9 +512,11 @@ TYPOGRAPHY: ${typographyMap[typographyStyle] || typographyMap["sans-serif-modern
 LAYOUT: ${layoutDensityMap[layoutDensity] || layoutDensityMap["balanced"]}` : "";
 
     const prompt = isGraphicDesign
-      ? `You are an elite graphic designer using Photoshop. A client has given you this brief — create a finished, publication-ready design.
+      ? `You are an elite graphic designer creating a marketing-forward promotional graphic for a higher education institution.
 
-Design brief: ${contentSummary}
+CONTENT TO PROMOTE:
+${contentSummary}
+
 ${audienceContext}
 ${goalContext}
 ${toneContext}
@@ -524,29 +526,32 @@ ${colorPaletteInstruction}
 ${designSubParams}
 ${brandGuidelinesContext}
 
-DESIGN DIRECTION: Create a polished, visually striking graphic design composition — an abstract visual background that a designer would use as the foundation for a poster, flyer, or social media graphic. The user will add their own headline text, logos, and CTA overlays separately using our design tool, so you must NOT render any text.
+YOUR TASK: Read the content above and create a visually compelling, illustrative promotional graphic that COMMUNICATES the essence of this message through visual storytelling. This is NOT a generic abstract background — it should be a purposeful marketing graphic that:
+- Visually represents the CONCEPT, THEME, and ENERGY of the promotional content
+- Uses icons, illustrations, visual metaphors, and symbolic imagery to convey the key message (e.g., a sales certificate program → show visual metaphors for growth, achievement, professional development, handshakes, upward arrows, target/bullseye, etc.)
+- Feels like a finished promotional piece from a top-tier university marketing team — the kind of graphic that would stop someone from scrolling
+- Creates clear visual hierarchy with focal areas and breathing room for overlaid text
 
 CRITICAL — ABSOLUTELY NO TEXT, NUMBERS, OR PLACEHOLDERS:
-- Do NOT render ANY text, letters, numbers, words, symbols, abbreviations, hex codes, or characters of any kind
-- Do NOT attempt typography, headlines, subtext, dates, or captions — the user adds these separately
+- Do NOT render ANY text, letters, numbers, words, symbols, abbreviations, hex codes, or characters of any kind — not even single letters
+- Do NOT attempt typography, headlines, subtext, dates, captions, or university names
 - Do NOT render any logos, crests, seals, emblems, wordmarks, or monograms
-- Do NOT render placeholder boxes, wireframe elements, or "logo here" markers — nothing that looks like a template mockup
-- If you feel the urge to add text or a placeholder anywhere — DON'T. A clean abstract composition is always better.
-- This is a VISUAL-ONLY composition. Zero text. Zero numbers. Zero symbols. Zero placeholder boxes.
+- Do NOT render placeholder boxes, wireframe elements, "logo here" markers, or QR codes
+- Communicate ENTIRELY through visual imagery, icons, illustrations, shapes, and color — NEVER through written language
+- If you feel the urge to add text anywhere — DON'T. Use a visual icon or illustration instead.
 
-VISUAL DESIGN RULES:
-- Use the brand colors prominently and intentionally throughout the design
-- Incorporate modern graphic design techniques: bold color blocks, geometric shapes, gradients, abstract patterns, dynamic compositions, layered elements
-- NO photographs, NO people, NO campus buildings, NO realistic scenes
-- Abstract and graphic elements only: shapes, lines, textures, color fields, patterns
-- The design should feel contemporary, energetic, and professional
-- Leave clean areas/negative space where headline text can be overlaid later by the user
-${reserveLogoSpace ? "- Reserve a clean, uncluttered area (roughly bottom-right quadrant) where a logo can be placed later — use negative space or a subtle color block, but do NOT render any placeholder box, frame, or text marking that area" : ""}
-- The mood should match: ${tone || "professional and polished"}
+VISUAL APPROACH:
+- Use illustrative and iconic elements that represent the content: e.g., for education → graduation caps, books, lightbulbs; for sales → handshakes, targets, growth charts (as illustrations, not text); for community → connected nodes, people silhouettes, gathering imagery
+- Blend these illustrative elements with bold graphic design techniques: color blocks, geometric shapes, gradients, layered compositions
+- Use the brand colors prominently and intentionally — this should unmistakably feel like THIS institution's marketing material
+- Create a composition with clear negative space areas where headline text and CTA buttons can be overlaid by the user in our design tool
+- The overall feel should be modern, energetic, and aspirational — like a piece from a university's best marketing campaign
+${reserveLogoSpace ? "- Reserve a clean, uncluttered area (roughly bottom-right quadrant) for a logo — use negative space, but do NOT render any frame or text marking that area" : ""}
+- The mood and energy should match: ${tone || "professional and polished"}
 
 LAYOUT:
 - Aspect ratio: ${spec.aspect} (${spec.width}x${spec.height} pixels). ${spec.aspect === "1:1" ? "Perfectly SQUARE." : `Match ${spec.aspect} proportions exactly.`}
-- Design must work as a background composition that supports overlaid text — not a finished piece with baked-in text`
+- Design must have clear visual hierarchy with room for overlaid headline text — leave clean areas (especially center or upper portion) for text overlay
       : `Generate a professional ${spec.style} for a higher education institution.
 
 Context: ${contentSummary}
