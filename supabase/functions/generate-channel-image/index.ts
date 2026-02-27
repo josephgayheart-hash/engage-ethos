@@ -404,7 +404,22 @@ serve(async (req) => {
         }
       }
 
-      const schoolName = universityName || tenantInstitutionName;
+      // Guard: NEVER let the platform tenant name "CampusVoice" leak into institutional image prompts
+      const PLATFORM_BRAND_BLOCKLIST = ["campusvoice", "campus voice"];
+      const isBadBrand = (s: string) => PLATFORM_BRAND_BLOCKLIST.some(b => s.toLowerCase().includes(b));
+      if (isBadBrand(brandContext)) {
+        // Strip any CampusVoice references from brand context
+        for (const blocked of PLATFORM_BRAND_BLOCKLIST) {
+          brandContext = brandContext.replace(new RegExp(blocked, "gi"), "").trim();
+        }
+        console.warn("Stripped platform brand name from image prompt context");
+      }
+
+      const schoolName = universityName && !isBadBrand(universityName)
+        ? universityName
+        : tenantInstitutionName && !isBadBrand(tenantInstitutionName)
+          ? tenantInstitutionName
+          : "";
       if (schoolName) {
         campusContext = `CAMPUS SETTING: This image should look like it was taken on the campus of ${schoolName}.`;
         campusContext += ` Use your knowledge of ${schoolName}'s real campus to depict recognizable architectural styles, building materials, landscaping, and iconic landmarks or gathering spots that are characteristic of that institution.`;
@@ -594,6 +609,8 @@ ${shouldRenderGraphicText
   2) Subheadline: "${generatedSubheadline}"
   3) CTA: "${generatedCta}"
 - Do not invent extra text, numbers, dates, URLs, or random characters.
+- ABSOLUTELY NO QR codes — never generate a QR code under any circumstances.
+- NEVER include "CampusVoice" or any platform branding — only the institution's own brand identity.
 - Keep typography bold, modern, and highly readable with strong contrast.
 - Place CTA inside a clear button/chip style treatment.
 - Keep enough whitespace around text for clarity and premium design quality.`
@@ -601,6 +618,8 @@ ${shouldRenderGraphicText
 - Do NOT render ANY text, letters, numbers, words, symbols, abbreviations, hex codes, or characters of any kind.
 - Do NOT attempt typography, headlines, subtext, dates, captions, or university names.
 - Do NOT render placeholder boxes, wireframe elements, "logo here" markers, or QR codes.
+- ABSOLUTELY NO QR codes — never generate a QR code under any circumstances.
+- NEVER include "CampusVoice" or any platform branding — only the institution's own brand identity.
 - Communicate entirely through visual imagery and illustrative elements.`}
 
 VISUAL APPROACH:
@@ -660,6 +679,8 @@ CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
 - Do NOT render any mascot, mascot costume, cartoon character, or animal figure.
 - If you feel the urge to add text anywhere — DON'T. A plain scarlet hoodie is better than one with garbled "Uhiversity" on it.
 - The institution's identity should come through via COLORS, ARCHITECTURE, and ENVIRONMENT — never through rendered text or logos.
+- ABSOLUTELY NO QR codes — never generate a QR code under any circumstances.
+- NEVER include "CampusVoice" or any platform/SaaS branding — only the institution's own brand identity.
 - Professional quality: sharp focus on subject, creamy bokeh backgrounds, rich color depth
 - Feel warm, authentic, and aspirational — like a spread in a top university's viewbook
 - Match the tone and energy of the communication moment${toneContext ? ` — the visual should feel ${tone}` : ''}
