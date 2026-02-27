@@ -1,74 +1,44 @@
 
 
-## Plan: Image Generation Performance + "Improve Your Results" Guidance Component
+## Graphic Design Mode — No-Image Design Option
 
-### Part 1: Image Generation Performance Optimizations
+### What exists today
+- Both Brand Studio and Image Studio have a basic "Blank Canvas" mode that renders a single solid-color square (`primaryColor`) when `imageUrl` is null.
+- The overlay system (24 patterns including gradients, geometric, textures) exists but only renders *on top of* an image or solid background.
+- Headline text, CTA bottom bar, logo placement, and AI text generation all work regardless of whether an image is present.
 
-After reviewing the edge functions (`generate-channel-image`, `generate-cover-image`, `generate-collection-cover`), the primary bottleneck is **sequential database queries** before the AI call. The AI model itself (`gemini-3-pro-image-preview`) is inherently slow for image gen -- we can't change that, but we can shave seconds off the setup work.
+### What's missing
+The blank canvas is just a flat rectangle in the primary brand color. There's no way to choose a gradient, texture, or multi-color background *as the base* (without an image). The overlay on top of a solid color creates a muddy double-layer effect rather than a clean graphic.
 
-#### Optimizations
+### Plan
 
-1. **Parallelize all DB queries** in `generate-channel-image/index.ts`
-   - Currently: tenant fetch → profile fetch → campus photos fetch (sequential)
-   - Change to: `Promise.all([tenantQuery, profileQuery, campusPhotosQuery])` -- all three fire simultaneously
-   - Same pattern applied to `generate-cover-image` and `generate-collection-cover`
+**1. Add a "Canvas Background" selector to BrandOverlayControls**
+- New collapsible section at the top of controls (above Pattern Color), visible when there's no base image (`imageUrl === null`).
+- Options: Solid Color, Vertical Gradient, Horizontal Gradient, Diagonal Gradient, Radial Gradient, Textured (reuses dots/stripes/crosshatch patterns as the base itself).
+- Color pickers for primary and secondary background colors (default to brand colors).
+- When a canvas background is active, the overlay pattern section becomes optional (user can layer or skip it).
 
-2. **Add a "Fast" engine option** that uses `google/gemini-2.5-flash-image` instead of `gemini-3-pro-image-preview`
-   - The `engine` param already exists in the request body but isn't used for model selection
-   - Map `engine: "fast"` → `gemini-2.5-flash-image` (faster, lower quality)
-   - Map `engine: "premium"` → `gemini-3-pro-image-preview` (current default)
-   - This gives users explicit control over speed vs quality
+**2. Update BrandOverlayCanvas to render rich backgrounds**
+- When `imageUrl` is null, instead of a plain `div` with `backgroundColor`, render the selected canvas background style using a new `canvasBackground` prop.
+- New props: `canvasBackgroundType`, `canvasBackgroundColor`, `canvasBackgroundSecondaryColor`.
+- Reuse `getOverlayStyle()` logic to generate the CSS for the background div.
 
-3. **Reduce campus reference photos for "fast" engine** -- skip multimodal photo references when using fast engine (sending images to the model adds latency)
+**3. Wire state through BrandStudioPage and ImageGeneratorPage**
+- Lift new canvas background state in both pages.
+- Pass to `BrandOverlayCanvas` and `BrandOverlayControls`.
+- Include in save metadata for round-trip editing.
 
-4. **Trim prompt length for cover images** -- `generate-cover-image` doesn't need the full channel-specific best practices since it's just a thumbnail. Shorter prompts = faster inference.
+**4. Update the Image Studio blank canvas entry point**
+- Currently gated behind `selectedProfileId && brandColors.length > 0`. Make it always available with a default color.
+- When activated, show the canvas background selector in the overlay tab.
 
-#### Files changed
-- `supabase/functions/generate-channel-image/index.ts` -- parallelize queries, respect engine param for model selection
-- `supabase/functions/generate-cover-image/index.ts` -- parallelize queries, trim prompt
-- `supabase/functions/generate-collection-cover/index.ts` -- parallelize queries
+**5. Enhance the Brand Studio starter panel**
+- Update "Start with a Blank Canvas" description: "Solid, gradient, or textured background — no photo needed."
+- Pre-select a gradient background type by default for a more polished starting experience.
 
----
-
-### Part 2: "Improve Your Results" Guidance Component
-
-Create a reusable `AIResultsGuidance` component that appears beneath AI-generated content, nudging users to strengthen their institutional profile and Content DNA for better output.
-
-#### Design
-
-```text
-┌─────────────────────────────────────────────────────┐
-│ 💡 Not getting the results you want?                │
-│                                                     │
-│ AI-generated content improves when your              │
-│ institutional voice and brand are configured.        │
-│                                                     │
-│ [Update Institutional Profile →]  [Refine DNA →]    │
-└─────────────────────────────────────────────────────┘
-```
-
-- Subtle, non-intrusive styling (`bg-muted/20`, small text)
-- Context-aware: checks if the user has a Content DNA analysis and an institutional profile configured. If both are set up, shows a softer message ("Refine your DNA for even better results"). If neither exists, shows a stronger nudge.
-- Links to `/settings` (profile) and `/admin/content-dna` (Content DNA studio)
-
-#### Placement (6 locations)
-1. `BuilderResults.tsx` -- after the NextStepsBar
-2. `EvaluationResults.tsx` -- after the NextStepsBar
-3. `StrategyJourney.tsx` -- at the bottom of the journey display
-4. `ImageGeneratorPage.tsx` -- below the generated image preview
-5. `ChannelPreview.tsx` -- below generated channel images
-6. `PlaygroundPage.tsx` -- at the bottom of the chat area (optional, lighter touch)
-
-#### Files created
-- `src/components/AIResultsGuidance.tsx` -- the reusable component
-
-#### Files modified
-- `src/components/BuilderResults.tsx`
-- `src/components/EvaluationResults.tsx`
-- `src/components/StrategyJourney.tsx`
-- `src/pages/ImageGeneratorPage.tsx`
-- `src/components/ChannelPreview.tsx`
-- `supabase/functions/generate-channel-image/index.ts`
-- `supabase/functions/generate-cover-image/index.ts`
-- `supabase/functions/generate-collection-cover/index.ts`
+### Files to modify
+- `src/components/image-generator/BrandOverlayControls.tsx` — add Canvas Background section
+- `src/components/image-generator/BrandOverlayCanvas.tsx` — render rich backgrounds when no image
+- `src/pages/BrandStudioPage.tsx` — wire new state, update starter panel copy, include in metadata
+- `src/pages/ImageGeneratorPage.tsx` — wire new state, improve blank canvas entry point
 
