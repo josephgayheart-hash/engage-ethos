@@ -436,13 +436,13 @@ Rules:
       illustrated: "Stylized digital illustration — clean vector-inspired lines, bold color blocking, modern graphic design aesthetic. NOT a photograph.",
       watercolor: "Soft watercolor painting style — gentle washes of color, visible brush strokes, organic bleeding edges, artistic and dreamy. NOT a photograph.",
       minimal: "Clean flat design illustration — minimal detail, geometric shapes, limited color palette, modern and sleek. Think tech company marketing aesthetic. NOT a photograph.",
-      "graphic-design": "Abstract graphic design background — NO people, NO campus, NO objects, NO photography. Create a bold, visually striking abstract background using gradients, geometric shapes, color blocks, textures, or patterns. This will be used as a canvas for text overlays and branding. Think modern poster design, event flyer backgrounds, or promotional graphic templates. The design should be clean with clear areas that would work well behind headline text.",
+      "graphic-design": "Professional graphic design composition — like a finished piece from a skilled Photoshop designer. Bold typography integrated into the layout, eye-catching visual hierarchy, striking color use, modern design trends. Think event posters, social media graphics, promotional flyers created by a top-tier university marketing team.",
     };
     const selectedStyle = styleDirections[imageStyle || "photorealistic"] || styleDirections.photorealistic;
     const isGraphicDesign = imageStyle === "graphic-design";
 
     const prompt = isGraphicDesign
-      ? `Generate an abstract graphic design background for a higher education ${spec.style}.
+      ? `You are an elite graphic designer using Photoshop. A client has given you this brief — create a finished, publication-ready design.
 
 Design brief: ${contentSummary}
 ${audienceContext}
@@ -452,17 +452,30 @@ ${brandContext}
 
 ${colorPaletteInstruction}
 
-VISUAL STYLE: ${selectedStyle}
+DESIGN DIRECTION: Create a COMPLETE, polished graphic design piece — NOT just a background. This should look like a finished poster, flyer, social media graphic, or promotional card that a skilled designer spent hours crafting in Photoshop.
 
-CRITICAL RULES:
-- This is a BACKGROUND DESIGN only — no people, no campus buildings, no photographs, no objects.
-- Create bold, professional abstract designs using the brand colors: gradients, geometric shapes, color fields, textures, patterns, or flowing forms.
-- The design should have clear "breathing room" areas where headline text and logos can be overlaid.
-- Think modern event posters, promotional cards, social media graphics, or branded announcement backgrounds.
-- ABSOLUTELY NO TEXT, letters, numbers, words, or symbols in the design.
-- NO logos, crests, seals, emblems, or wordmarks.
-- The mood should match: ${tone || "professional and polished"}.
-- Aspect ratio: ${spec.aspect} (${spec.width}x${spec.height} pixels). ${spec.aspect === "1:1" ? "Perfectly SQUARE." : `Match ${spec.aspect} proportions exactly.`}`
+TYPOGRAPHY IS REQUIRED:
+- Include bold, eye-catching headline text that communicates the core message from the brief
+- Use strong typographic hierarchy: large headline, supporting subtext if appropriate
+- Text should be beautifully integrated into the overall composition — not just slapped on top
+- Use creative typography treatments: scale contrast, weight mixing, color blocking behind text, text cutouts, split layouts, offset placements
+- Keep text concise and punchy — think poster copy, not paragraphs
+- Text MUST be spelled correctly and be legible
+
+VISUAL DESIGN RULES:
+- Use the brand colors prominently and intentionally throughout the design
+- Incorporate modern graphic design techniques: bold color blocks, geometric shapes, gradients, abstract patterns, dynamic compositions, layered elements
+- NO photographs, NO people, NO campus buildings, NO realistic scenes
+- Abstract and graphic elements only: shapes, lines, textures, color fields, patterns
+- The design should feel contemporary, energetic, and professional
+- Think: university event posters, orientation graphics, campaign visuals, social media announcements
+- The mood should match: ${tone || "professional and polished"}
+
+LAYOUT:
+- Aspect ratio: ${spec.aspect} (${spec.width}x${spec.height} pixels). ${spec.aspect === "1:1" ? "Perfectly SQUARE." : `Match ${spec.aspect} proportions exactly.`}
+- Design must work as a standalone piece — complete and finished, not a template or wireframe
+
+NO logos, crests, seals, emblems, or institutional wordmarks — just the headline text and design elements.`
       : `Generate a professional ${spec.style} for a higher education institution.
 
 Context: ${contentSummary}
