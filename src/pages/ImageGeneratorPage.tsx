@@ -129,6 +129,7 @@ const ImageGeneratorPage = () => {
   const [typographyStyle, setTypographyStyle] = useState("sans-serif-modern");
   const [layoutDensity, setLayoutDensity] = useState("balanced");
   const [reserveLogoSpace, setReserveLogoSpace] = useState(false);
+  const [renderAiTextCta, setRenderAiTextCta] = useState(true);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationPhase, setGenerationPhase] = useState(0);
@@ -199,6 +200,7 @@ const ImageGeneratorPage = () => {
             typographyStyle,
             layoutDensity,
             reserveLogoSpace,
+            renderAiTextCta,
           }),
         },
       });
@@ -235,7 +237,7 @@ const ImageGeneratorPage = () => {
       clearInterval(phaseInterval);
       setIsGenerating(false);
     }
-  }, [contentDescription, channel, audience, tenantId, selectedProfileId, goal, tone, engine, style, creationMode, designStyle, colorMood, typographyStyle, layoutDensity]);
+  }, [contentDescription, channel, audience, tenantId, selectedProfileId, goal, tone, engine, style, creationMode, designStyle, colorMood, typographyStyle, layoutDensity, reserveLogoSpace, renderAiTextCta]);
 
   const handleDownload = async (format: 'png' | 'jpg' | 'pdf' = 'png') => {
     if (!imageUrl) return;
@@ -557,6 +559,17 @@ const ImageGeneratorPage = () => {
                         id="reserve-logo"
                         checked={reserveLogoSpace}
                         onCheckedChange={setReserveLogoSpace}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1">
+                      <Label htmlFor="render-ai-text" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer">
+                        Render AI Text + CTA
+                      </Label>
+                      <Switch
+                        id="render-ai-text"
+                        checked={renderAiTextCta}
+                        onCheckedChange={setRenderAiTextCta}
                       />
                     </div>
                   </div>
