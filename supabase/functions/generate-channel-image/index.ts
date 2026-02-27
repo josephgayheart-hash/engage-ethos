@@ -774,8 +774,33 @@ CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
         );
       }
       if (designRefUrls.length > 0) {
+        // Build rich descriptions from persistent refs metadata
+        const refDescriptions = ((designRefsResult as any)?.data || [])
+          .filter((r: any) => r.description || r.name)
+          .map((r: any) => `- "${r.name}"${r.description ? `: ${r.description}` : ''}`)
+          .join('\n');
+
         messageContent.push(
-          { type: "text", text: "DESIGN STYLE REFERENCES — match the graphic design style, composition, color usage, typography treatment, and visual energy of these reference images. Use them as inspiration for layout and aesthetic, NOT as content to copy:" },
+          { type: "text", text: `DESIGN STYLE REFERENCES — CRITICAL VISUAL STUDY INSTRUCTIONS:
+You have ${designRefUrls.length} design reference image(s) from this institution's brand team. These are NOT content to copy — they are EXEMPLARS of the institution's approved graphic design language. You must deeply study them and apply their design principles.
+
+STEP 1 — ANALYZE each reference image for:
+  • Layout structure: grid systems, alignment patterns, whitespace ratios, element placement zones
+  • Color application: how brand colors are distributed (dominant vs accent), gradient directions, overlay opacity levels, color blocking patterns
+  • Typography hierarchy: size ratios between headline/subhead/body, weight choices, letter-spacing, text alignment, how text interacts with imagery
+  • Shape language: rounded vs sharp corners, geometric vs organic forms, decorative elements, line work, border treatments
+  • Texture & depth: flat vs dimensional, shadow usage, noise/grain, glassmorphism, paper textures, pattern overlays
+  • Compositional rhythm: visual weight distribution, focal point placement, reading flow direction, density zones vs breathing room
+  • Mood & energy: minimal-corporate vs bold-expressive, static vs dynamic, formal vs playful
+${refDescriptions ? `\nREFERENCE CONTEXT:\n${refDescriptions}` : ''}
+
+STEP 2 — APPLY these extracted principles to your new design:
+  • Your output MUST look like it belongs in the SAME design system as these references
+  • Match the SAME level of visual sophistication — if references are refined and restrained, don't make something loud; if they're bold and expressive, don't make something timid
+  • Replicate the SPECIFIC color usage ratios (e.g., if references use 70% white / 20% brand primary / 10% accent, follow that same ratio)
+  • Mirror the typography treatment — if references use tight tracking on uppercase headers, do the same; if they use elegant lightweight serif, follow suit
+  • Maintain the SAME compositional approach — if references use asymmetric layouts with left-heavy content, follow that pattern
+  • The final design should feel like the NEXT piece in a campaign series with these references` },
           ...designRefUrls.map(url => ({ type: "image_url", image_url: { url } })),
         );
       }

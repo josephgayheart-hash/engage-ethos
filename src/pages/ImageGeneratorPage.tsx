@@ -773,10 +773,12 @@ const ImageGeneratorPage = () => {
                       <div className="flex items-center justify-center gap-2">
                         <Loader2 className="w-4 h-4 animate-spin text-primary" />
                         <p className="text-sm font-medium">
-                          {creationMode === "graphic-design" ? [
+                      {creationMode === "graphic-design" ? [
                             "Reading your brand profile…",
-                            "Crafting typography & visual hierarchy…",
-                            "Designing publication-ready layout…",
+                            designRefCount > 0
+                              ? `Studying ${designRefCount} design reference${designRefCount > 1 ? "s" : ""} — analyzing layout, color, & typography patterns…`
+                              : "Crafting typography & visual hierarchy…",
+                            "Applying design principles to your composition…",
                             "Integrating brand colors & finishing composition…",
                             "Finalizing your graphic design piece…",
                           ][generationPhase] : [
@@ -790,21 +792,34 @@ const ImageGeneratorPage = () => {
                           ][generationPhase]}
                         </p>
                       </div>
-                      {/* Campus photo training indicator */}
+                      {/* Design reference & campus photo training indicator */}
+                      {creationMode === "graphic-design" && designRefCount > 0 && (
+                        <p className="text-xs text-primary font-medium flex items-center justify-center gap-1">
+                          <Dna className="w-3 h-3" />
+                          {designRefCount} design sample{designRefCount > 1 ? "s" : ""} actively shaping this design
+                        </p>
+                      )}
                       <p className="text-xs text-muted-foreground">
-                        {campusPhotoCount > 0 ? (
+                        {creationMode !== "graphic-design" && campusPhotoCount > 0 ? (
                           <span className="flex items-center justify-center gap-1">
                             <Camera className="w-3 h-3 text-primary" />
                             {campusPhotoCount} campus photo{campusPhotoCount > 1 ? "s" : ""} guiding visual style
                           </span>
-                        ) : (
+                        ) : creationMode !== "graphic-design" ? (
                           <span className="flex items-center justify-center gap-1">
                             No campus photos uploaded — imagery uses your profile &amp; brand details.{" "}
                             <Link to="/admin/content-dna" className="text-primary hover:text-primary/80 inline-flex items-center gap-0.5 font-medium">
                               Add photos for even more accuracy <ExternalLink className="w-2.5 h-2.5" />
                             </Link>
                           </span>
-                        )}
+                        ) : designRefCount === 0 ? (
+                          <span className="flex items-center justify-center gap-1">
+                            <Link to="/admin/content-dna" className="text-primary hover:text-primary/80 inline-flex items-center gap-0.5 font-medium">
+                              Upload design samples in Content DNA <ExternalLink className="w-2.5 h-2.5" />
+                            </Link>
+                            {" "}for AI to match your exact style
+                          </span>
+                        ) : null}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {engine === "premium"
