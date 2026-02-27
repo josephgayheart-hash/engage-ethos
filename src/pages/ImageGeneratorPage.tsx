@@ -18,6 +18,8 @@ import { Link, useLocation } from "react-router-dom";
 import { ChannelMockup } from "@/components/image-generator/ChannelMockup";
 import { BrandOverlayEditor } from "@/components/image-generator/BrandOverlayEditor";
 import { useCampusPhotoCount } from "@/hooks/useCampusPhotoCount";
+import { useDesignReferences } from "@/hooks/useDesignReferences";
+import { Dna, CheckCircle2, AlertCircle } from "lucide-react";
 import { AIResultsGuidance } from "@/components/AIResultsGuidance";
 import { useUserDrafts } from "@/hooks/useUserDrafts";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
@@ -82,25 +84,20 @@ const designStyleOptions = [
   { value: "bold-geometric", label: "Bold & Geometric" },
   { value: "gradient-flow", label: "Gradient Flow" },
   { value: "typographic-poster", label: "Typographic Poster" },
-  { value: "collage-mixed", label: "Collage / Mixed Media" },
-  { value: "retro-vintage", label: "Retro / Vintage" },
   { value: "abstract-minimal", label: "Abstract Minimal" },
 ];
 
 const colorMoodOptions = [
-  { value: "brand-colors", label: "Brand Colors Only" },
-  { value: "warm", label: "Warm Palette" },
-  { value: "cool", label: "Cool Palette" },
-  { value: "monochrome", label: "Monochrome" },
-  { value: "high-contrast", label: "High Contrast" },
-  { value: "pastel", label: "Pastel" },
+  { value: "brand-colors", label: "Brand Colors" },
+  { value: "warm", label: "Warm" },
+  { value: "cool", label: "Cool" },
+  { value: "monochrome", label: "Mono" },
 ];
 
 const typographyStyleOptions = [
-  { value: "sans-serif-modern", label: "Sans-Serif Modern" },
-  { value: "serif-classic", label: "Serif Classic" },
-  { value: "display-decorative", label: "Display / Decorative" },
-  { value: "handwritten", label: "Handwritten" },
+  { value: "sans-serif-modern", label: "Sans-Serif" },
+  { value: "serif-classic", label: "Serif" },
+  { value: "display-decorative", label: "Display" },
 ];
 
 const layoutDensityOptions = [
@@ -139,6 +136,8 @@ const ImageGeneratorPage = () => {
   const [viewMode, setViewMode] = useState<"raw" | "mockup" | "overlay">("mockup");
   const [blankCanvasMode, setBlankCanvasMode] = useState(false);
   const { campusPhotoCount } = useCampusPhotoCount(selectedProfileId || null);
+  const { references: designRefs } = useDesignReferences({ profileId: selectedProfileId || null });
+  const designRefCount = designRefs?.length || 0;
   const { saveDraft, loadDraftById } = useUserDrafts();
   const { addMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
@@ -501,6 +500,18 @@ const ImageGeneratorPage = () => {
                 {/* Graphic Design sub-controls */}
                 {creationMode === "graphic-design" && (
                   <div className="space-y-4 rounded-lg border border-primary/20 bg-primary/[0.03] p-3">
+                    {/* DNA confidence indicator */}
+                    {designRefCount > 0 ? (
+                      <div className="flex items-center gap-2 text-xs text-primary bg-primary/5 rounded-md px-2.5 py-1.5 border border-primary/15">
+                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                        <span><strong>{designRefCount} design sample{designRefCount !== 1 ? 's' : ''}</strong> loaded — AI will match your brand style</span>
+                      </div>
+                    ) : (
+                      <Link to="/admin/content-dna" className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-md px-2.5 py-1.5 border border-border hover:border-primary/30 transition-colors">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <span>Add design samples in <strong>Content DNA</strong> for best results</span>
+                      </Link>
+                    )}
                     <div className="space-y-2">
                       <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Design Style</Label>
                       <RadioGroup value={designStyle} onValueChange={setDesignStyle} className="grid grid-cols-2 gap-2">
