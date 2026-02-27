@@ -284,7 +284,7 @@ serve(async (req) => {
   }
 
   try {
-    const { channel, contentSummary, audience, tenantId, profileId, messageId, goal, tone, moment, cohort, domain, engine, imageStyle, designStyle, colorMood, typographyStyle, layoutDensity, reserveLogoSpace, renderAiTextCta } = await req.json();
+    const { channel, contentSummary, audience, tenantId, profileId, messageId, goal, tone, moment, cohort, domain, engine, imageStyle, designStyle, colorMood, typographyStyle, layoutDensity, reserveLogoSpace, renderAiTextCta, styleReferenceUrl } = await req.json();
 
     if (!channel || !contentSummary) {
       return new Response(JSON.stringify({ error: "Missing channel or contentSummary" }), {
@@ -362,12 +362,23 @@ serve(async (req) => {
       ? supabaseAdmin.from("content_dna_analysis").select("voice_analysis, brand_platform, custom_instructions").eq("tenant_id", tenantId).order("updated_at", { ascending: false }).limit(1).single()
       : Promise.resolve({ data: null });
 
+    // Design references — persistent style inspiration images from Content DNA
+    const designRefsQuery = isGraphicDesign && (profileId || tenantId)
+      ? (() => {
+          let q = supabaseAdmin.from("design_references").select("file_url, name, description").eq("is_active", true);
+          if (profileId) q = q.eq("profile_id", profileId);
+          else if (tenantId) q = q.eq("tenant_id", tenantId);
+          return q.order("sort_order").limit(6);
+        })()
+      : Promise.resolve({ data: null });
+
     // Fire all queries simultaneously
-    const [tenantResult, profileResults, campusPhotoResult, contentDnaResult] = await Promise.all([
+    const [tenantResult, profileResults, campusPhotoResult, contentDnaResult, designRefsResult] = await Promise.all([
       Promise.resolve(tenantPromise).catch(e => { console.warn("Tenant fetch failed:", e); return { data: null }; }),
       Promise.all(profilePromises).catch(e => { console.warn("Profile fetch failed:", e); return []; }),
       Promise.resolve(campusPhotoPromise).catch(e => { console.warn("Campus photos fetch failed:", e); return { data: null }; }),
       Promise.resolve(contentDnaPromise).catch(e => { console.warn("Content DNA fetch failed:", e); return { data: null }; }),
+      Promise.resolve(designRefsQuery).catch(e => { console.warn("Design refs fetch failed:", e); return { data: null }; }),
     ]);
 
     try {
@@ -733,14 +744,41 @@ CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
       console.log("Fast engine — skipping campus reference photos for speed");
     }
 
+    // Collect design reference URLs (persistent from DNA + inline from user)
+    let designRefUrls: string[] = [];
+    try {
+      const persistentRefs = (designRefsResult as any)?.data;
+      if (persistentRefs && persistentRefs.length > 0) {
+        designRefUrls.push(...persistentRefs.map((r: any) => r.file_url));
+        console.log(`Using ${persistentRefs.length} persistent design references from Content DNA`);
+      }
+      if (styleReferenceUrl) {
+        designRefUrls.push(styleReferenceUrl);
+        console.log("Using inline style reference from user");
+      }
+    } catch (e) {
+      console.warn("Could not process design references:", e);
+    }
+
     // Build message content - either simple string or multimodal array
     let messageContent: any;
-    if (campusPhotoUrls.length > 0) {
+    const hasRefImages = campusPhotoUrls.length > 0 || designRefUrls.length > 0;
+    if (hasRefImages) {
       messageContent = [
         { type: "text", text: prompt },
-        { type: "text", text: "REFERENCE CAMPUS PHOTOGRAPHY — match the architectural style, lighting, environment, and photographic tone of these real campus images:" },
-        ...campusPhotoUrls.map(url => ({ type: "image_url", image_url: { url } })),
       ];
+      if (campusPhotoUrls.length > 0) {
+        messageContent.push(
+          { type: "text", text: "REFERENCE CAMPUS PHOTOGRAPHY — match the architectural style, lighting, environment, and photographic tone of these real campus images:" },
+          ...campusPhotoUrls.map(url => ({ type: "image_url", image_url: { url } })),
+        );
+      }
+      if (designRefUrls.length > 0) {
+        messageContent.push(
+          { type: "text", text: "DESIGN STYLE REFERENCES — match the graphic design style, composition, color usage, typography treatment, and visual energy of these reference images. Use them as inspiration for layout and aesthetic, NOT as content to copy:" },
+          ...designRefUrls.map(url => ({ type: "image_url", image_url: { url } })),
+        );
+      }
     } else {
       messageContent = prompt;
     }
