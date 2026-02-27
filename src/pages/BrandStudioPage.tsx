@@ -1,6 +1,12 @@
 import { useRef, useCallback, useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { toPng } from "html-to-image";
+import html2canvas from "html2canvas";
+import { DownloadFormatPicker } from "@/components/image-generator/DownloadFormatPicker";
+
+async function captureToDataUrl(el: HTMLElement, scale = 1.5): Promise<string> {
+  const canvas = await html2canvas(el, { scale, useCORS: true, allowTaint: false, logging: false, backgroundColor: null });
+  return canvas.toDataURL("image/png");
+}
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -251,7 +257,7 @@ const BrandStudioPage = () => {
 
     try {
       // Use lower pixelRatio for faster capture & smaller payload
-      const dataUrl = await toPng(canvas as HTMLElement, { pixelRatio: 1, skipFonts: true });
+      const dataUrl = await captureToDataUrl(canvas as HTMLElement, 1);
       const { data, error } = await supabase.functions.invoke("smart-layer-image", {
         body: {
           imageDataUrl: dataUrl,
@@ -321,22 +327,6 @@ const BrandStudioPage = () => {
     setIsDragging(false);
   }, []);
 
-  const handleDownload = useCallback(async () => {
-    const canvas = document.getElementById("brand-overlay-canvas");
-    if (!canvas) return;
-    try {
-      const dataUrl = await toPng(canvas as HTMLElement, { pixelRatio: 2, skipFonts: true });
-      const a = document.createElement("a");
-      a.href = dataUrl;
-      a.download = `branded-${channel || "image"}-${Date.now()}.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      toast.success("Branded image downloaded!");
-    } catch {
-      toast.error("Download failed. Try again.");
-    }
-  }, [channel]);
 
   const handleSaveToLibrary = useCallback(
     async (name: string) => {
@@ -347,10 +337,7 @@ const BrandStudioPage = () => {
       }
       setIsSaving(true);
       try {
-        const dataUrl = await toPng(canvas as HTMLElement, {
-          pixelRatio: 1.5,
-          skipFonts: true,
-        });
+        const dataUrl = await captureToDataUrl(canvas as HTMLElement, 1.5);
 
         // Upload to storage instead of storing base64 in DB
         const base64Data = dataUrl.split(",")[1];
@@ -441,10 +428,7 @@ const BrandStudioPage = () => {
       const canvas = document.getElementById("brand-overlay-canvas");
       if (!canvas) return undefined;
       try {
-        const dataUrl = await toPng(canvas as HTMLElement, {
-          pixelRatio: 1.5,
-          skipFonts: true,
-        });
+        const dataUrl = await captureToDataUrl(canvas as HTMLElement, 1.5);
 
         // Upload to storage instead of storing base64 in DB
         const base64Data = dataUrl.split(",")[1];
@@ -790,10 +774,13 @@ const BrandStudioPage = () => {
             {!isSmartLayering && (
               <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-5 pt-12 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-b-lg pointer-events-none z-20">
                 <div className="flex flex-wrap gap-2 pointer-events-auto justify-center px-4">
-                  <Button size="sm" variant="secondary" onClick={handleDownload}>
-                    <Download className="w-4 h-4 mr-1" />
-                    Download
-                  </Button>
+                  <DownloadFormatPicker
+                    targetId="brand-overlay-canvas"
+                    filenameBase={`branded-${channel || "image"}`}
+                    size="sm"
+                    variant="outline"
+                    label="Download"
+                  />
                   <Button size="sm" variant="secondary" onClick={() => setSaveDialogOpen(true)}>
                     <FolderPlus className="w-4 h-4 mr-1" />
                     Save to Library

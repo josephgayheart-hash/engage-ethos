@@ -9,7 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { supabase } from "@/integrations/supabase/client";
-import { ImageIcon, Download, RefreshCw, Loader2, Sparkles, Palette, Camera, Users, Target, Eye, Image, ExternalLink, PaintBucket, Maximize2, FolderPlus, Library } from "lucide-react";
+import { ImageIcon, Download, RefreshCw, Loader2, Sparkles, Palette, Camera, Users, Target, Eye, Image, ExternalLink, PaintBucket, Maximize2, FolderPlus, Library, ChevronDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link, useLocation } from "react-router-dom";
 import { ChannelMockup } from "@/components/image-generator/ChannelMockup";
 import { BrandOverlayEditor } from "@/components/image-generator/BrandOverlayEditor";
@@ -189,21 +190,44 @@ const ImageGeneratorPage = () => {
     }
   }, [contentDescription, channel, audience, tenantId, selectedProfileId, goal, tone, engine, style]);
 
-  const handleDownload = async () => {
+  const handleDownload = async (format: 'png' | 'jpg' | 'pdf' = 'png') => {
     if (!imageUrl) return;
     try {
       const response = await fetch(imageUrl);
       const blob = await response.blob();
-      const ext = blob.type.includes("png") ? "png" : "jpg";
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `campus-image-${channel}-${Date.now()}.${ext}`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      toast.success("Image downloaded!");
+      if (format === 'pdf') {
+        const { jsPDF } = await import('jspdf');
+        const img = new window.Image();
+        img.crossOrigin = 'anonymous';
+        img.src = URL.createObjectURL(blob);
+        await new Promise<void>((resolve) => { img.onload = () => resolve(); });
+        const orientation = img.width > img.height ? 'l' : 'p';
+        const pdf = new jsPDF(orientation as any, 'px', [img.width, img.height]);
+        pdf.addImage(img, 'PNG', 0, 0, img.width, img.height);
+        pdf.save(`campus-image-${channel}-${Date.now()}.pdf`);
+        URL.revokeObjectURL(img.src);
+      } else {
+        // Convert to desired format via canvas
+        const imgEl = new window.Image();
+        imgEl.crossOrigin = 'anonymous';
+        imgEl.src = URL.createObjectURL(blob);
+        await new Promise<void>((resolve) => { imgEl.onload = () => resolve(); });
+        const canvas = document.createElement('canvas');
+        canvas.width = imgEl.width;
+        canvas.height = imgEl.height;
+        const ctx = canvas.getContext('2d')!;
+        ctx.drawImage(imgEl, 0, 0);
+        const mimeType = format === 'jpg' ? 'image/jpeg' : 'image/png';
+        const dataUrl = canvas.toDataURL(mimeType, 0.95);
+        const a = document.createElement("a");
+        a.href = dataUrl;
+        a.download = `campus-image-${channel}-${Date.now()}.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(imgEl.src);
+      }
+      toast.success(`Image downloaded as ${format.toUpperCase()}!`);
     } catch {
       toast.error("Download failed.");
     }
@@ -706,9 +730,18 @@ const ImageGeneratorPage = () => {
                           />
                           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100">
                             <div className="flex gap-2">
-                              <Button size="sm" variant="secondary" onClick={handleDownload}>
-                                <Download className="w-4 h-4 mr-1" /> Download
-                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button size="sm" variant="secondary">
+                                    <Download className="w-4 h-4 mr-1" /> Download <ChevronDown className="w-3 h-3 ml-1" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                  <DropdownMenuItem onClick={() => handleDownload('png')}>PNG</DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleDownload('jpg')}>JPG</DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleDownload('pdf')}>PDF</DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                               <Button size="sm" variant="secondary" onClick={handleGenerate}>
                                 <RefreshCw className="w-4 h-4 mr-1" /> Regenerate
                               </Button>
@@ -722,9 +755,18 @@ const ImageGeneratorPage = () => {
 
                     {imageUrl && viewMode !== "overlay" && (
                       <div className="flex gap-2 flex-wrap">
-                        <Button variant="outline" size="sm" className="flex-1" onClick={handleDownload}>
-                          <Download className="w-4 h-4 mr-1" /> Download
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm" className="flex-1">
+                              <Download className="w-4 h-4 mr-1" /> Download <ChevronDown className="w-3 h-3 ml-1" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            <DropdownMenuItem onClick={() => handleDownload('png')}>PNG</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDownload('jpg')}>JPG</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDownload('pdf')}>PDF</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                         <Button variant="outline" size="sm" className="flex-1" onClick={() => { setSaveDialogType('personal'); setSaveDialogOpen(true); }}>
                           <FolderPlus className="w-4 h-4 mr-1" /> Save to Library
                         </Button>
