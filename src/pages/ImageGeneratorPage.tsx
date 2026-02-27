@@ -73,7 +73,7 @@ const styleOptions = [
   { value: "illustrated", label: "Illustrated", description: "Stylized graphic illustration" },
   { value: "watercolor", label: "Watercolor", description: "Soft, artistic watercolor style" },
   { value: "minimal", label: "Minimal / Flat", description: "Clean, modern flat design" },
-  { value: "graphic-design", label: "Graphic Design", description: "Bold background for text overlays — no photo" },
+  { value: "graphic-design", label: "Graphic Design", description: "Complete designed piece with typography — like a pro Photoshop comp" },
 ];
 
 const ImageGeneratorPage = () => {
