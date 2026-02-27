@@ -284,7 +284,7 @@ serve(async (req) => {
   }
 
   try {
-    const { channel, contentSummary, audience, tenantId, profileId, messageId, goal, tone, moment, cohort, domain, engine, imageStyle } = await req.json();
+    const { channel, contentSummary, audience, tenantId, profileId, messageId, goal, tone, moment, cohort, domain, engine, imageStyle, designStyle, colorMood, typographyStyle, layoutDensity } = await req.json();
 
     if (!channel || !contentSummary) {
       return new Response(JSON.stringify({ error: "Missing channel or contentSummary" }), {
@@ -441,6 +441,41 @@ Rules:
     const selectedStyle = styleDirections[imageStyle || "photorealistic"] || styleDirections.photorealistic;
     const isGraphicDesign = imageStyle === "graphic-design";
 
+    // Build graphic design sub-parameter instructions
+    const designStyleMap: Record<string, string> = {
+      "bold-geometric": "Bold geometric shapes, hard edges, strong angular compositions, constructivist influences",
+      "gradient-flow": "Smooth flowing gradients, organic color transitions, fluid shapes, aurora-like color blending",
+      "typographic-poster": "Typography-dominant layout — text IS the design. Oversized letters, creative type arrangements, Swiss/Bauhaus poster aesthetics",
+      "collage-mixed": "Mixed media collage — overlapping textures, torn paper edges, layered graphic elements, editorial scrapbook energy",
+      "retro-vintage": "Retro/vintage aesthetic — halftone dots, muted retro palette, 70s-80s graphic design nostalgia, distressed textures",
+      "abstract-minimal": "Abstract minimal — extreme negative space, one or two bold graphic elements, restrained and sophisticated",
+    };
+    const colorMoodMap: Record<string, string> = {
+      "brand-colors": "Use ONLY the institution's brand colors as the dominant palette",
+      "warm": "Warm palette — reds, oranges, golds, warm earth tones alongside brand colors",
+      "cool": "Cool palette — blues, teals, purples, icy tones alongside brand colors",
+      "monochrome": "Monochrome — single brand color in varying shades and tints",
+      "high-contrast": "High contrast — stark black/white with brand color accents for maximum impact",
+      "pastel": "Pastel — soft, desaturated tints of brand colors, gentle and approachable",
+    };
+    const typographyMap: Record<string, string> = {
+      "sans-serif-modern": "Clean sans-serif typography — Helvetica/Futura style, modern and crisp",
+      "serif-classic": "Classic serif typography — elegant, timeless, academic prestige",
+      "display-decorative": "Display/decorative typeface — expressive, attention-grabbing, unique character",
+      "handwritten": "Handwritten/script typography — personal, warm, organic, human touch",
+    };
+    const layoutDensityMap: Record<string, string> = {
+      "spacious": "Spacious breathable layout — generous white space, minimal elements, let the design breathe",
+      "balanced": "Balanced layout — even distribution of elements, comfortable visual rhythm",
+      "dense": "Dense packed layout — filled frame, maximum visual information, energetic and bold",
+    };
+
+    const designSubParams = isGraphicDesign ? `
+DESIGN STYLE: ${designStyleMap[designStyle] || designStyleMap["bold-geometric"]}
+COLOR MOOD: ${colorMoodMap[colorMood] || colorMoodMap["brand-colors"]}
+TYPOGRAPHY: ${typographyMap[typographyStyle] || typographyMap["sans-serif-modern"]}
+LAYOUT: ${layoutDensityMap[layoutDensity] || layoutDensityMap["balanced"]}` : "";
+
     const prompt = isGraphicDesign
       ? `You are an elite graphic designer using Photoshop. A client has given you this brief — create a finished, publication-ready design.
 
@@ -451,6 +486,7 @@ ${toneContext}
 ${brandContext}
 
 ${colorPaletteInstruction}
+${designSubParams}
 
 DESIGN DIRECTION: Create a COMPLETE, polished graphic design piece — NOT just a background. This should look like a finished poster, flyer, social media graphic, or promotional card that a skilled designer spent hours crafting in Photoshop.
 

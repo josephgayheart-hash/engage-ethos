@@ -6,6 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { supabase } from "@/integrations/supabase/client";
@@ -73,7 +75,37 @@ const styleOptions = [
   { value: "illustrated", label: "Illustrated", description: "Stylized graphic illustration" },
   { value: "watercolor", label: "Watercolor", description: "Soft, artistic watercolor style" },
   { value: "minimal", label: "Minimal / Flat", description: "Clean, modern flat design" },
-  { value: "graphic-design", label: "Graphic Design", description: "Complete designed piece with typography — like a pro Photoshop comp" },
+];
+
+const designStyleOptions = [
+  { value: "bold-geometric", label: "Bold & Geometric" },
+  { value: "gradient-flow", label: "Gradient Flow" },
+  { value: "typographic-poster", label: "Typographic Poster" },
+  { value: "collage-mixed", label: "Collage / Mixed Media" },
+  { value: "retro-vintage", label: "Retro / Vintage" },
+  { value: "abstract-minimal", label: "Abstract Minimal" },
+];
+
+const colorMoodOptions = [
+  { value: "brand-colors", label: "Brand Colors Only" },
+  { value: "warm", label: "Warm Palette" },
+  { value: "cool", label: "Cool Palette" },
+  { value: "monochrome", label: "Monochrome" },
+  { value: "high-contrast", label: "High Contrast" },
+  { value: "pastel", label: "Pastel" },
+];
+
+const typographyStyleOptions = [
+  { value: "sans-serif-modern", label: "Sans-Serif Modern" },
+  { value: "serif-classic", label: "Serif Classic" },
+  { value: "display-decorative", label: "Display / Decorative" },
+  { value: "handwritten", label: "Handwritten" },
+];
+
+const layoutDensityOptions = [
+  { value: "spacious", label: "Spacious / Breathable" },
+  { value: "balanced", label: "Balanced" },
+  { value: "dense", label: "Dense / Packed" },
 ];
 
 const ImageGeneratorPage = () => {
@@ -90,6 +122,11 @@ const ImageGeneratorPage = () => {
   const [goal, setGoal] = useState("");
   const [engine, setEngine] = useState("fast");
   const [style, setStyle] = useState("photorealistic");
+  const [creationMode, setCreationMode] = useState<"photo" | "graphic-design">("photo");
+  const [designStyle, setDesignStyle] = useState("bold-geometric");
+  const [colorMood, setColorMood] = useState("brand-colors");
+  const [typographyStyle, setTypographyStyle] = useState("sans-serif-modern");
+  const [layoutDensity, setLayoutDensity] = useState("balanced");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationPhase, setGenerationPhase] = useState(0);
@@ -142,6 +179,7 @@ const ImageGeneratorPage = () => {
       setGenerationPhase(prev => prev < 4 ? prev + 1 : prev);
     }, engine === "premium" ? 6000 : 1200);
     try {
+      const effectiveStyle = creationMode === "graphic-design" ? "graphic-design" : style;
       const { data, error } = await supabase.functions.invoke("generate-channel-image", {
         body: {
           channel,
@@ -152,7 +190,13 @@ const ImageGeneratorPage = () => {
           goal: goal || undefined,
           tone: tone || undefined,
           engine: engine || "fast",
-          imageStyle: style || "photorealistic",
+          imageStyle: effectiveStyle,
+          ...(creationMode === "graphic-design" && {
+            designStyle,
+            colorMood,
+            typographyStyle,
+            layoutDensity,
+          }),
         },
       });
       if (error) throw error;
@@ -161,7 +205,7 @@ const ImageGeneratorPage = () => {
       } else if (data?.imageUrl) {
         setImageUrl(data.imageUrl);
         // Auto-switch to Brand It view for graphic design style
-        if (style === "graphic-design") {
+        if (creationMode === "graphic-design") {
           setViewMode("overlay");
         }
         toast.success("Image generated successfully!");
@@ -188,7 +232,7 @@ const ImageGeneratorPage = () => {
       clearInterval(phaseInterval);
       setIsGenerating(false);
     }
-  }, [contentDescription, channel, audience, tenantId, selectedProfileId, goal, tone, engine, style]);
+  }, [contentDescription, channel, audience, tenantId, selectedProfileId, goal, tone, engine, style, creationMode, designStyle, colorMood, typographyStyle, layoutDensity]);
 
   const handleDownload = async (format: 'png' | 'jpg' | 'pdf' = 'png') => {
     if (!imageUrl) return;
@@ -307,18 +351,46 @@ const ImageGeneratorPage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Creation Mode Toggle */}
                 <div className="space-y-2">
-                  <Label htmlFor="description">Scene Description *</Label>
+                  <Label>Creation Mode</Label>
+                  <ToggleGroup
+                    type="single"
+                    value={creationMode}
+                    onValueChange={(val) => { if (val) setCreationMode(val as "photo" | "graphic-design"); }}
+                    className="w-full justify-start"
+                  >
+                    <ToggleGroupItem value="photo" className="flex-1 gap-1.5" variant="outline">
+                      <Camera className="w-4 h-4" />
+                      Photo
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="graphic-design" className="flex-1 gap-1.5" variant="outline">
+                      <Palette className="w-4 h-4" />
+                      Graphic Design
+                    </ToggleGroupItem>
+                  </ToggleGroup>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description">
+                    {creationMode === "graphic-design" ? "Design Brief *" : "Scene Description *"}
+                  </Label>
                   <Textarea
                     id="description"
-                    placeholder="e.g. Students collaborating on a research project in a modern science lab during golden hour"
+                    placeholder={creationMode === "graphic-design"
+                      ? "e.g. Open house event flyer with bold headline 'Discover Your Future' and event details — Saturday, April 12"
+                      : "e.g. Students collaborating on a research project in a modern science lab during golden hour"
+                    }
                     value={contentDescription}
                     onChange={(e) => setContentDescription(e.target.value)}
                     rows={4}
                     className="resize-none"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Describe the scene, activity, and mood you want captured.
+                    {creationMode === "graphic-design"
+                      ? "Describe the finished piece you want — headlines, event info, and the visual feel."
+                      : "Describe the scene, activity, and mood you want captured."
+                    }
                   </p>
                 </div>
 
@@ -402,20 +474,79 @@ const ImageGeneratorPage = () => {
                     </Select>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label>Style</Label>
-                    <Select value={style} onValueChange={setStyle}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {styleOptions.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label} — <span className="text-muted-foreground">{opt.description}</span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  {creationMode === "photo" && (
+                    <div className="space-y-2">
+                      <Label>Style</Label>
+                      <Select value={style} onValueChange={setStyle}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {styleOptions.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                              {opt.label} — <span className="text-muted-foreground">{opt.description}</span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                 </div>
+
+                {/* Graphic Design sub-controls */}
+                {creationMode === "graphic-design" && (
+                  <div className="space-y-4 rounded-lg border border-primary/20 bg-primary/[0.03] p-3">
+                    <div className="space-y-2">
+                      <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Design Style</Label>
+                      <RadioGroup value={designStyle} onValueChange={setDesignStyle} className="grid grid-cols-2 gap-2">
+                        {designStyleOptions.map((opt) => (
+                          <div key={opt.value} className="flex items-center space-x-2">
+                            <RadioGroupItem value={opt.value} id={`ds-${opt.value}`} />
+                            <Label htmlFor={`ds-${opt.value}`} className="text-sm font-normal cursor-pointer">{opt.label}</Label>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Color Mood</Label>
+                      <div className="flex flex-wrap gap-1.5">
+                        {colorMoodOptions.map((opt) => (
+                          <Badge
+                            key={opt.value}
+                            variant={colorMood === opt.value ? "default" : "outline"}
+                            className="cursor-pointer text-xs"
+                            onClick={() => setColorMood(opt.value)}
+                          >
+                            {opt.label}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Typography Style</Label>
+                      <RadioGroup value={typographyStyle} onValueChange={setTypographyStyle} className="grid grid-cols-2 gap-2">
+                        {typographyStyleOptions.map((opt) => (
+                          <div key={opt.value} className="flex items-center space-x-2">
+                            <RadioGroupItem value={opt.value} id={`ts-${opt.value}`} />
+                            <Label htmlFor={`ts-${opt.value}`} className="text-sm font-normal cursor-pointer">{opt.label}</Label>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Layout Density</Label>
+                      <RadioGroup value={layoutDensity} onValueChange={setLayoutDensity} className="grid grid-cols-3 gap-2">
+                        {layoutDensityOptions.map((opt) => (
+                          <div key={opt.value} className="flex items-center space-x-2">
+                            <RadioGroupItem value={opt.value} id={`ld-${opt.value}`} />
+                            <Label htmlFor={`ld-${opt.value}`} className="text-sm font-normal cursor-pointer">{opt.label}</Label>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    </div>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
@@ -504,7 +635,7 @@ const ImageGeneratorPage = () => {
                   const profileName = selectedProfile?.name || cfg?.institutionName;
                   const colors = [cfg?.primaryColor, cfg?.secondaryColor, cfg?.accentColor, cfg?.tertiaryColor].filter(Boolean) as string[];
                   const selectedChannelLabel = channelOptions.find(c => c.value === channel)?.label || channel;
-                  const selectedStyleLabel = styleOptions.find(s => s.value === style)?.label || style;
+                  const selectedStyleLabel = creationMode === "graphic-design" ? "Graphic Design" : (styleOptions.find(s => s.value === style)?.label || style);
                   const selectedEngineLabel = engineOptions.find(e => e.value === engine)?.label || engine;
 
                   return (
@@ -550,7 +681,7 @@ const ImageGeneratorPage = () => {
                       <div className="flex items-center justify-center gap-2">
                         <Loader2 className="w-4 h-4 animate-spin text-primary" />
                         <p className="text-sm font-medium">
-                          {style === "graphic-design" ? [
+                          {creationMode === "graphic-design" ? [
                             "Reading your brand profile…",
                             "Crafting typography & visual hierarchy…",
                             "Designing publication-ready layout…",
