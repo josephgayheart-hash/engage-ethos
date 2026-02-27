@@ -72,6 +72,7 @@ const styleOptions = [
   { value: "illustrated", label: "Illustrated", description: "Stylized graphic illustration" },
   { value: "watercolor", label: "Watercolor", description: "Soft, artistic watercolor style" },
   { value: "minimal", label: "Minimal / Flat", description: "Clean, modern flat design" },
+  { value: "graphic-design", label: "Graphic Design", description: "Bold background for text overlays — no photo" },
 ];
 
 const ImageGeneratorPage = () => {
@@ -158,6 +159,10 @@ const ImageGeneratorPage = () => {
         toast.error(data.error);
       } else if (data?.imageUrl) {
         setImageUrl(data.imageUrl);
+        // Auto-switch to Brand It view for graphic design style
+        if (style === "graphic-design") {
+          setViewMode("overlay");
+        }
         toast.success("Image generated successfully!");
         // Auto-save as image draft
         saveDraft('image' as any, {

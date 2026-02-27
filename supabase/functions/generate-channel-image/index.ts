@@ -436,10 +436,34 @@ Rules:
       illustrated: "Stylized digital illustration — clean vector-inspired lines, bold color blocking, modern graphic design aesthetic. NOT a photograph.",
       watercolor: "Soft watercolor painting style — gentle washes of color, visible brush strokes, organic bleeding edges, artistic and dreamy. NOT a photograph.",
       minimal: "Clean flat design illustration — minimal detail, geometric shapes, limited color palette, modern and sleek. Think tech company marketing aesthetic. NOT a photograph.",
+      "graphic-design": "Abstract graphic design background — NO people, NO campus, NO objects, NO photography. Create a bold, visually striking abstract background using gradients, geometric shapes, color blocks, textures, or patterns. This will be used as a canvas for text overlays and branding. Think modern poster design, event flyer backgrounds, or promotional graphic templates. The design should be clean with clear areas that would work well behind headline text.",
     };
     const selectedStyle = styleDirections[imageStyle || "photorealistic"] || styleDirections.photorealistic;
+    const isGraphicDesign = imageStyle === "graphic-design";
 
-    const prompt = `Generate a professional ${spec.style} for a higher education institution.
+    const prompt = isGraphicDesign
+      ? `Generate an abstract graphic design background for a higher education ${spec.style}.
+
+Design brief: ${contentSummary}
+${audienceContext}
+${goalContext}
+${toneContext}
+${brandContext}
+
+${colorPaletteInstruction}
+
+VISUAL STYLE: ${selectedStyle}
+
+CRITICAL RULES:
+- This is a BACKGROUND DESIGN only — no people, no campus buildings, no photographs, no objects.
+- Create bold, professional abstract designs using the brand colors: gradients, geometric shapes, color fields, textures, patterns, or flowing forms.
+- The design should have clear "breathing room" areas where headline text and logos can be overlaid.
+- Think modern event posters, promotional cards, social media graphics, or branded announcement backgrounds.
+- ABSOLUTELY NO TEXT, letters, numbers, words, or symbols in the design.
+- NO logos, crests, seals, emblems, or wordmarks.
+- The mood should match: ${tone || "professional and polished"}.
+- Aspect ratio: ${spec.aspect} (${spec.width}x${spec.height} pixels). ${spec.aspect === "1:1" ? "Perfectly SQUARE." : `Match ${spec.aspect} proportions exactly.`}`
+      : `Generate a professional ${spec.style} for a higher education institution.
 
 Context: ${contentSummary}
 ${audienceContext}
@@ -496,7 +520,7 @@ CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
 
     // Use campus photos from the parallel fetch (skip for fast engine to reduce latency)
     let campusPhotoUrls: string[] = [];
-    if (engine !== "fast") {
+    if (engine !== "fast" && !isGraphicDesign) {
       try {
         const campusPhotos = (campusPhotoResult as any)?.data;
         if (campusPhotos && campusPhotos.length > 0) {
