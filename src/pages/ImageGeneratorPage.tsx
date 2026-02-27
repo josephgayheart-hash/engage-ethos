@@ -550,7 +550,13 @@ const ImageGeneratorPage = () => {
                       <div className="flex items-center justify-center gap-2">
                         <Loader2 className="w-4 h-4 animate-spin text-primary" />
                         <p className="text-sm font-medium">
-                          {[
+                          {style === "graphic-design" ? [
+                            "Reading your brand profile…",
+                            "Crafting typography & visual hierarchy…",
+                            "Designing publication-ready layout…",
+                            "Integrating brand colors & finishing composition…",
+                            "Finalizing your graphic design piece…",
+                          ][generationPhase] : [
                             "Reading your brand profile…",
                             campusPhotoCount > 0
                               ? `Training from ${campusPhotoCount} campus photo${campusPhotoCount > 1 ? "s" : ""}…`
