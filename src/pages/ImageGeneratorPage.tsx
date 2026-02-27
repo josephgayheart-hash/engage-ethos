@@ -447,20 +447,18 @@ const ImageGeneratorPage = () => {
                 </div>
 
                 {/* Blank Canvas shortcut */}
-                {selectedProfileId && brandColors.length > 0 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => {
-                      setBlankCanvasMode(true);
-                      setViewMode("overlay");
-                    }}
-                  >
-                    <PaintBucket className="w-4 h-4 mr-1.5" />
-                    Create Branded Graphic (No Image)
-                  </Button>
-                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => {
+                    setBlankCanvasMode(true);
+                    setViewMode("overlay");
+                  }}
+                >
+                  <PaintBucket className="w-4 h-4 mr-1.5" />
+                  Create Branded Graphic (No Image)
+                </Button>
               </CardContent>
             </Card>
 
