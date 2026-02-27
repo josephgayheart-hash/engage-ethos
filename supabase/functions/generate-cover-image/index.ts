@@ -74,9 +74,9 @@ serve(async (req) => {
     const campusPhotoPromise = campusPhotoQuery.limit(8);
 
     const [tenantResult, profileResult, campusPhotoResult] = await Promise.all([
-      tenantPromise.catch(e => { console.warn("Tenant fetch failed:", e); return { data: null }; }),
-      profilePromise.catch(e => { console.warn("Profile fetch failed:", e); return { data: null }; }),
-      campusPhotoPromise.catch(e => { console.warn("Campus photos fetch failed:", e); return { data: null }; }),
+      Promise.resolve(tenantPromise).catch(e => { console.warn("Tenant fetch failed:", e); return { data: null }; }),
+      Promise.resolve(profilePromise).catch(e => { console.warn("Profile fetch failed:", e); return { data: null }; }),
+      Promise.resolve(campusPhotoPromise).catch(e => { console.warn("Campus photos fetch failed:", e); return { data: null }; }),
     ]);
 
     // Process tenant

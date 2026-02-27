@@ -54,9 +54,9 @@ serve(async (req) => {
       : Promise.resolve({ data: null });
 
     const [tenantResult, profileResult, dnaResult] = await Promise.all([
-      tenantPromise.catch(e => { console.warn("Tenant fetch failed:", e); return { data: null }; }),
-      profilePromise.catch(e => { console.warn("Profile fetch failed:", e); return { data: null }; }),
-      dnaPromise.catch(e => { console.warn("DNA fetch failed:", e); return { data: null }; }),
+      Promise.resolve(tenantPromise).catch(e => { console.warn("Tenant fetch failed:", e); return { data: null }; }),
+      Promise.resolve(profilePromise).catch(e => { console.warn("Profile fetch failed:", e); return { data: null }; }),
+      Promise.resolve(dnaPromise).catch(e => { console.warn("DNA fetch failed:", e); return { data: null }; }),
     ]);
 
     // Process tenant
