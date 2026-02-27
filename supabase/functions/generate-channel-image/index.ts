@@ -650,6 +650,7 @@ VISUAL APPROACH:
 - Blend these illustrative elements with bold graphic design techniques: color blocks, geometric shapes, gradients, layered compositions
 - Use the brand colors prominently and intentionally — this should unmistakably feel like THIS institution's marketing material
 - NEVER use generic/stock iconography. Create bespoke visual elements that match the craftsmanship level of the design references.
+- ABSOLUTELY DO NOT attempt to render any university logo, crest, seal, emblem, shield, or wordmark. AI cannot accurately reproduce institutional logos — any attempt will look wrong and damage the brand. Logos will be added later by the user in the Brand Studio overlay tool.
 ${reserveLogoSpace ? "- Reserve a clean, uncluttered area (roughly bottom-right quadrant) for a logo — use negative space, but do NOT render any frame or text marking that area" : ""}
 - The mood and energy should match: ${tone || "professional and polished"}
 
