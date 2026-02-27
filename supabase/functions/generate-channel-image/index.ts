@@ -645,9 +645,11 @@ ${shouldRenderGraphicText
 - Communicate entirely through visual imagery and illustrative elements.`}
 
 VISUAL APPROACH:
-- Use illustrative and iconic elements that represent the content theme and message
+- If design reference images are provided below, they are your PRIMARY style guide — override any generic style instructions with what you see in those samples. Your output must look like the NEXT piece created by the same designer.
+- Use illustrative and iconic elements that represent the content theme and message — but style them to match the design references if present
 - Blend these illustrative elements with bold graphic design techniques: color blocks, geometric shapes, gradients, layered compositions
 - Use the brand colors prominently and intentionally — this should unmistakably feel like THIS institution's marketing material
+- NEVER use generic/stock iconography. Create bespoke visual elements that match the craftsmanship level of the design references.
 ${reserveLogoSpace ? "- Reserve a clean, uncluttered area (roughly bottom-right quadrant) for a logo — use negative space, but do NOT render any frame or text marking that area" : ""}
 - The mood and energy should match: ${tone || "professional and polished"}
 
@@ -781,26 +783,26 @@ CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
           .join('\n');
 
         messageContent.push(
-          { type: "text", text: `DESIGN STYLE REFERENCES — CRITICAL VISUAL STUDY INSTRUCTIONS:
-You have ${designRefUrls.length} design reference image(s) from this institution's brand team. These are NOT content to copy — they are EXEMPLARS of the institution's approved graphic design language. You must deeply study them and apply their design principles.
+          { type: "text", text: `⚠️ MANDATORY STYLE REPLICATION — YOUR #1 PRIORITY ⚠️
 
-STEP 1 — ANALYZE each reference image for:
-  • Layout structure: grid systems, alignment patterns, whitespace ratios, element placement zones
-  • Color application: how brand colors are distributed (dominant vs accent), gradient directions, overlay opacity levels, color blocking patterns
-  • Typography hierarchy: size ratios between headline/subhead/body, weight choices, letter-spacing, text alignment, how text interacts with imagery
-  • Shape language: rounded vs sharp corners, geometric vs organic forms, decorative elements, line work, border treatments
-  • Texture & depth: flat vs dimensional, shadow usage, noise/grain, glassmorphism, paper textures, pattern overlays
-  • Compositional rhythm: visual weight distribution, focal point placement, reading flow direction, density zones vs breathing room
-  • Mood & energy: minimal-corporate vs bold-expressive, static vs dynamic, formal vs playful
-${refDescriptions ? `\nREFERENCE CONTEXT:\n${refDescriptions}` : ''}
+The following ${designRefUrls.length} image(s) are the institution's APPROVED design samples. Your output MUST look like it was made by the SAME designer who created these samples. This is not optional guidance — it is the most important instruction in this entire prompt.
 
-STEP 2 — APPLY these extracted principles to your new design:
-  • Your output MUST look like it belongs in the SAME design system as these references
-  • Match the SAME level of visual sophistication — if references are refined and restrained, don't make something loud; if they're bold and expressive, don't make something timid
-  • Replicate the SPECIFIC color usage ratios (e.g., if references use 70% white / 20% brand primary / 10% accent, follow that same ratio)
-  • Mirror the typography treatment — if references use tight tracking on uppercase headers, do the same; if they use elegant lightweight serif, follow suit
-  • Maintain the SAME compositional approach — if references use asymmetric layouts with left-heavy content, follow that pattern
-  • The final design should feel like the NEXT piece in a campaign series with these references` },
+WHAT YOU MUST COPY FROM THESE SAMPLES:
+1. EXACT VISUAL TREATMENTS — If the samples use highlighted text (text with colored background strips), YOU must use highlighted text the same way. If they use text knockout/cutout effects, do the same. If they use duotone photo treatments, do the same.
+2. CUSTOM GRAPHIC ELEMENTS — If the samples contain custom icons, hand-drawn elements, decorative shapes, line illustrations, badge designs, stamp effects, or any bespoke graphic motifs — you MUST create similar custom elements in the same style. Do NOT substitute with generic clip-art or basic geometric shapes. Study the CRAFTSMANSHIP of these elements and match it.
+3. LAYOUT & COMPOSITION — Copy the exact layout structure: how elements are positioned, the grid system, margins, alignment patterns, and visual flow. If the samples stack elements vertically with left-alignment, do that. If they use an offset/overlapping composition, do that.
+4. COLOR APPLICATION METHOD — Don't just use the same colors — use them the SAME WAY. If 80% of the design is a dark brand color with small pops of accent, do exactly that. If there are gradient overlays, color washes, or tinted photography, replicate those techniques.
+5. TYPOGRAPHY STYLE — Match the exact typographic approach: weight (bold/light), case (uppercase/mixed), spacing (tight/loose), size hierarchy ratios, and how text interacts with other elements (overlapping images, inside shapes, with underlines/highlights).
+6. TEXTURE & FINISH — If the samples have grain, noise, paper texture, glossy effects, shadow depth, or dimensional layering, your output must have the same tactile quality. If they're clean and flat, yours must be too.
+7. ENERGY & SOPHISTICATION LEVEL — Match the exact level of visual complexity. If the samples are refined and editorial, don't make something busy. If they're bold and maximalist, don't make something minimal.
+
+FORBIDDEN:
+- Do NOT use generic stock-style icons (simple line icons, Font Awesome style, Material icons). If the samples show custom illustrated icons, create custom illustrated icons.
+- Do NOT default to safe/boring design. Match the BOLDNESS and CREATIVITY level of the samples.
+- Do NOT ignore any distinctive visual signature you see in the samples (stickers, badges, photo masks, color overlays, pattern fills, hand-lettering, etc.)
+
+YOUR OUTPUT should be INDISTINGUISHABLE in style from these reference samples — as if it's the next deliverable in the same campaign.
+${refDescriptions ? `\nSAMPLE CONTEXT:\n${refDescriptions}` : ''}` },
           ...designRefUrls.map(url => ({ type: "image_url", image_url: { url } })),
         );
       }
