@@ -209,10 +209,8 @@ const ImageGeneratorPage = () => {
         toast.error(data.error);
       } else if (data?.imageUrl) {
         setImageUrl(data.imageUrl);
-        // Auto-switch to Brand It view for graphic design style
-        if (creationMode === "graphic-design") {
-          setViewMode("overlay");
-        }
+        // Keep first render in "In Context" preview; user can manually switch to Brand It
+        setViewMode("mockup");
         toast.success("Image generated successfully!");
         // Auto-save as image draft
         saveDraft('image' as any, {

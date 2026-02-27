@@ -327,6 +327,7 @@ serve(async (req) => {
     let tenantInstitutionName = ""; // fallback only — profile institutionName takes priority
     const brandColors: string[] = [];
     let tenantType = "";
+    let strictInstitutionConstraint = "";
 
     // ── Parallel DB fetch: tenant, profiles, and campus photos all at once ──
     const tenantPromise = tenantId
@@ -335,9 +336,10 @@ serve(async (req) => {
 
     const profilePromises: Promise<any>[] = [];
     if (profileId) {
+      // STRICT PROFILE LOCK: when a profile is selected, fetch ONLY that profile
       profilePromises.push(supabaseAdmin.from("institutional_profiles").select("name, config, parent_profile_id, profile_type").eq("id", profileId).single());
-    }
-    if (tenantId) {
+    } else if (tenantId) {
+      // Fallback only when no explicit profile is selected
       profilePromises.push(supabaseAdmin.from("institutional_profiles").select("name, config, parent_profile_id, profile_type").eq("tenant_id", tenantId).eq("profile_type", "university").limit(1).single());
     }
 
@@ -374,7 +376,9 @@ serve(async (req) => {
         tenantType = tenant.tenant_type || "";
         if (tenant.tenant_type !== "agency") {
           tenantInstitutionName = tenant.institution_name;
-          brandContext += `Institution: ${tenant.institution_name}.`;
+          if (!profileId) {
+            brandContext += `Institution: ${tenant.institution_name}.`;
+          }
         }
         if (!profileId) {
           if (tenant.primary_color) addColor(brandColors, tenant.primary_color);
@@ -427,6 +431,10 @@ serve(async (req) => {
         if (unitName) {
           campusContext += ` This content is specifically for the ${unitName}, so if that college/department has its own building or area on campus, reference that environment.`;
         }
+      }
+
+      if (profileId && schoolName) {
+        strictInstitutionConstraint = `SELECTED INSTITUTION LOCK: The selected institutional profile is "${schoolName}". Use ONLY this institution's identity, voice, and visual references. Do NOT use, merge, or reference any other institution/profile names, slogans, logos, mascots, or metadata. If any conflicting institution appears in context, ignore it completely.`;
       }
     } catch (e) {
       console.warn("Could not process branding:", e);
@@ -514,8 +522,8 @@ Rules:
     };
     const colorMoodMap: Record<string, string> = {
       "brand-colors": "Use ONLY the institution's brand colors as the dominant palette",
-      "warm": "Warm palette — reds, oranges, golds, warm earth tones alongside brand colors",
-      "cool": "Cool palette — blues, teals, purples, icy tones alongside brand colors",
+      "warm": "Warm expression using ONLY the institution's brand palette (no extra colors) — emphasize warmer tones via composition/lighting, not new hues",
+      "cool": "Cool expression using ONLY the institution's brand palette (no extra colors) — emphasize cooler balance via composition/lighting, not new hues",
       "monochrome": "Monochrome — single brand color in varying shades and tints",
       "high-contrast": "High contrast — stark black/white with brand color accents for maximum impact",
       "pastel": "Pastel — soft, desaturated tints of brand colors, gentle and approachable",
@@ -536,7 +544,8 @@ Rules:
 DESIGN STYLE: ${designStyleMap[designStyle] || designStyleMap["bold-geometric"]}
 COLOR MOOD: ${colorMoodMap[colorMood] || colorMoodMap["brand-colors"]}
 TYPOGRAPHY: ${typographyMap[typographyStyle] || typographyMap["sans-serif-modern"]}
-LAYOUT: ${layoutDensityMap[layoutDensity] || layoutDensityMap["balanced"]}` : "";
+LAYOUT: ${layoutDensityMap[layoutDensity] || layoutDensityMap["balanced"]}
+PALETTE LOCK: If brand hex colors are provided, use ONLY those exact hex colors for every non-neutral design element. If any style instruction conflicts with palette lock, palette lock ALWAYS wins.` : "";
 
     const shouldRenderGraphicText = Boolean(isGraphicDesign && renderAiTextCta !== false);
     let generatedHeadline = "";
@@ -556,7 +565,7 @@ LAYOUT: ${layoutDensityMap[layoutDensity] || layoutDensityMap["balanced"]}` : ""
             messages: [
               {
                 role: "system",
-                content: `You write short marketing copy for higher-ed promotional graphics. The copy must align with the institution's brand voice and guidelines.${brandGuidelinesSummary ? ` Brand context: ${brandGuidelinesSummary}` : ""} Return ONLY valid JSON with keys: headline, subheadline, cta. No markdown.`,
+                content: `You write short marketing copy for higher-ed promotional graphics. The copy must align with the institution's brand voice and guidelines.${brandGuidelinesSummary ? ` Brand context: ${brandGuidelinesSummary}` : ""}${strictInstitutionConstraint ? ` ${strictInstitutionConstraint}` : ""} Return ONLY valid JSON with keys: headline, subheadline, cta. No markdown.`,
               },
               {
                 role: "user",
@@ -594,6 +603,7 @@ ${audienceContext}
 ${goalContext}
 ${toneContext}
 ${brandContext}
+${strictInstitutionConstraint}
 
 ${colorPaletteInstruction}
 ${designSubParams}
@@ -641,6 +651,7 @@ ${momentContext}
 ${cohortContext}
 ${domainContext}
 ${brandContext}
+${strictInstitutionConstraint}
 
 ${campusContext}
 
