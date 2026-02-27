@@ -488,15 +488,14 @@ ${brandContext}
 ${colorPaletteInstruction}
 ${designSubParams}
 
-DESIGN DIRECTION: Create a COMPLETE, polished graphic design piece — NOT just a background. This should look like a finished poster, flyer, social media graphic, or promotional card that a skilled designer spent hours crafting in Photoshop.
+DESIGN DIRECTION: Create a polished, visually striking graphic design composition — an abstract visual background that a designer would use as the foundation for a poster, flyer, or social media graphic. The user will add their own headline text, logos, and CTA overlays separately using our design tool, so you must NOT render any text.
 
-TYPOGRAPHY IS REQUIRED:
-- Include bold, eye-catching headline text that communicates the core message from the brief
-- Use strong typographic hierarchy: large headline, supporting subtext if appropriate
-- Text should be beautifully integrated into the overall composition — not just slapped on top
-- Use creative typography treatments: scale contrast, weight mixing, color blocking behind text, text cutouts, split layouts, offset placements
-- Keep text concise and punchy — think poster copy, not paragraphs
-- Text MUST be spelled correctly and be legible
+CRITICAL — ABSOLUTELY NO TEXT OR NUMBERS:
+- Do NOT render ANY text, letters, numbers, words, symbols, abbreviations, hex codes, or characters of any kind
+- Do NOT attempt typography, headlines, subtext, dates, or captions — the user adds these separately
+- Do NOT render any logos, crests, seals, emblems, wordmarks, or monograms
+- If you feel the urge to add text anywhere — DON'T. A clean abstract composition is always better than garbled AI-generated text.
+- This is a VISUAL-ONLY composition. Zero text. Zero numbers. Zero symbols.
 
 VISUAL DESIGN RULES:
 - Use the brand colors prominently and intentionally throughout the design
@@ -504,14 +503,12 @@ VISUAL DESIGN RULES:
 - NO photographs, NO people, NO campus buildings, NO realistic scenes
 - Abstract and graphic elements only: shapes, lines, textures, color fields, patterns
 - The design should feel contemporary, energetic, and professional
-- Think: university event posters, orientation graphics, campaign visuals, social media announcements
+- Leave clean areas/negative space where headline text can be overlaid later by the user
 - The mood should match: ${tone || "professional and polished"}
 
 LAYOUT:
 - Aspect ratio: ${spec.aspect} (${spec.width}x${spec.height} pixels). ${spec.aspect === "1:1" ? "Perfectly SQUARE." : `Match ${spec.aspect} proportions exactly.`}
-- Design must work as a standalone piece — complete and finished, not a template or wireframe
-
-NO logos, crests, seals, emblems, or institutional wordmarks — just the headline text and design elements.`
+- Design must work as a background composition that supports overlaid text — not a finished piece with baked-in text
       : `Generate a professional ${spec.style} for a higher education institution.
 
 Context: ${contentSummary}
