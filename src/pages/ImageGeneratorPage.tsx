@@ -606,19 +606,21 @@ const ImageGeneratorPage = () => {
                   </Button>
                 </div>
 
-                {/* Blank Canvas shortcut */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full"
-                  onClick={() => {
-                    setBlankCanvasMode(true);
-                    setViewMode("overlay");
-                  }}
-                >
-                  <PaintBucket className="w-4 h-4 mr-1.5" />
-                  Create Branded Graphic (No Image)
-                </Button>
+                {/* Blank Canvas shortcut — only in Graphic Design mode */}
+                {creationMode === "graphic-design" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => {
+                      setBlankCanvasMode(true);
+                      setViewMode("overlay");
+                    }}
+                  >
+                    <PaintBucket className="w-4 h-4 mr-1.5" />
+                    Blank Canvas — Skip AI, Design from Scratch
+                  </Button>
+                )}
               </CardContent>
             </Card>
 
