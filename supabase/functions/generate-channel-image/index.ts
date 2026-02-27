@@ -551,7 +551,7 @@ ${reserveLogoSpace ? "- Reserve a clean, uncluttered area (roughly bottom-right 
 
 LAYOUT:
 - Aspect ratio: ${spec.aspect} (${spec.width}x${spec.height} pixels). ${spec.aspect === "1:1" ? "Perfectly SQUARE." : `Match ${spec.aspect} proportions exactly.`}
-- Design must have clear visual hierarchy with room for overlaid headline text — leave clean areas (especially center or upper portion) for text overlay
+- Design must have clear visual hierarchy with room for overlaid headline text — leave clean areas (especially center or upper portion) for text overlay`
       : `Generate a professional ${spec.style} for a higher education institution.
 
 Context: ${contentSummary}
