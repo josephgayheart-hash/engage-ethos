@@ -351,11 +351,19 @@ serve(async (req) => {
     }
     const campusPhotoPromise = campusPhotoQuery.limit(8);
 
+    // Content DNA — fetch brand platform & voice analysis for graphic design grounding
+    const contentDnaPromise = profileId
+      ? supabaseAdmin.from("content_dna_analysis").select("voice_analysis, brand_platform").eq("profile_id", profileId).order("updated_at", { ascending: false }).limit(1).single()
+      : tenantId
+      ? supabaseAdmin.from("content_dna_analysis").select("voice_analysis, brand_platform").eq("tenant_id", tenantId).order("updated_at", { ascending: false }).limit(1).single()
+      : Promise.resolve({ data: null });
+
     // Fire all queries simultaneously
-    const [tenantResult, profileResults, campusPhotoResult] = await Promise.all([
+    const [tenantResult, profileResults, campusPhotoResult, contentDnaResult] = await Promise.all([
       Promise.resolve(tenantPromise).catch(e => { console.warn("Tenant fetch failed:", e); return { data: null }; }),
       Promise.all(profilePromises).catch(e => { console.warn("Profile fetch failed:", e); return []; }),
       Promise.resolve(campusPhotoPromise).catch(e => { console.warn("Campus photos fetch failed:", e); return { data: null }; }),
+      Promise.resolve(contentDnaPromise).catch(e => { console.warn("Content DNA fetch failed:", e); return { data: null }; }),
     ]);
 
     try {
@@ -405,6 +413,33 @@ serve(async (req) => {
       }
     } catch (e) {
       console.warn("Could not process branding:", e);
+    }
+
+    // Extract Content DNA brand guidelines for graphic design grounding
+    let brandGuidelinesContext = "";
+    try {
+      const dna = (contentDnaResult as any)?.data;
+      if (dna && isGraphicDesign) {
+        const bp = dna.brand_platform as Record<string, any> | null;
+        const va = dna.voice_analysis as Record<string, any> | null;
+        const parts: string[] = [];
+
+        if (bp?.promise) parts.push(`Brand Promise: ${bp.promise}`);
+        if (bp?.pillars?.length) parts.push(`Brand Pillars: ${bp.pillars.map((p: any) => typeof p === 'string' ? p : p.name || p.title).join(', ')}`);
+        if (bp?.pathways?.length) parts.push(`Brand Pathways: ${bp.pathways.map((p: any) => typeof p === 'string' ? p : p.name || p.title).join(', ')}`);
+        if (bp?.commitments?.length) parts.push(`Brand Commitments: ${bp.commitments.map((c: any) => typeof c === 'string' ? c : c.name || c.title).join(', ')}`);
+        if (bp?.proofPoints?.length) parts.push(`Proof Points: ${bp.proofPoints.slice(0, 5).map((p: any) => typeof p === 'string' ? p : p.text || p.name).join('; ')}`);
+
+        if (va?.personality) parts.push(`Brand Personality: ${Array.isArray(va.personality) ? va.personality.join(', ') : va.personality}`);
+        if (va?.toneDescriptors) parts.push(`Voice Tone: ${Array.isArray(va.toneDescriptors) ? va.toneDescriptors.join(', ') : va.toneDescriptors}`);
+
+        if (parts.length > 0) {
+          brandGuidelinesContext = `\nINSTITUTIONAL BRAND GUIDELINES (from Content DNA):\n${parts.join('\n')}\n\nThe visual design MUST embody these brand values — the shapes, color use, composition, and energy should visually reflect the institution's brand personality, pillars, and promise. This is not generic design — it should FEEL like this specific institution's brand.`;
+          console.log("Brand guidelines injected for graphic design:", parts.length, "elements");
+        }
+      }
+    } catch (e) {
+      console.warn("Could not process Content DNA:", e);
     }
 
     console.log("Resolved brand color palette:", brandColors);
@@ -487,6 +522,7 @@ ${brandContext}
 
 ${colorPaletteInstruction}
 ${designSubParams}
+${brandGuidelinesContext}
 
 DESIGN DIRECTION: Create a polished, visually striking graphic design composition — an abstract visual background that a designer would use as the foundation for a poster, flyer, or social media graphic. The user will add their own headline text, logos, and CTA overlays separately using our design tool, so you must NOT render any text.
 
