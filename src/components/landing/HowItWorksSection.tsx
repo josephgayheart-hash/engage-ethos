@@ -123,9 +123,8 @@ function PhaseCard({
           : "hsl(222 40% 13%)",
         borderColor: isActive ? phase.accent : "hsl(0 0% 100% / 0.06)",
         boxShadow: isActive
-          ? `0 0 32px ${phase.accent}25, inset 0 1px 0 ${phase.accent}20`
+          ? `0 0 24px ${phase.accent}20, inset 0 1px 0 ${phase.accent}15`
           : "none",
-        transform: isActive ? "translateY(-4px)" : "translateY(0)",
       }}
     >
       {/* number badge */}
@@ -241,10 +240,10 @@ function MobilePhaseCard({
 
       {/* card */}
       <div
-        className="flex-1 rounded-xl border p-4 mb-4"
+        className="flex-1 rounded-xl p-4 mb-4"
         style={{
           background: "hsl(222 40% 14%)",
-          borderColor: `${phase.accent}30`,
+          border: `0.5px solid ${phase.accent}25`,
         }}
       >
         <div className="flex items-center gap-2 mb-3">
