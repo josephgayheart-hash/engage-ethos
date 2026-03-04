@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { Image, Palette, Type, Wand2, Layers, Sparkles, CheckCircle2, MessageSquare, Send, Bot, PenTool, Users, Mail, Smartphone, Share2, Target, Map, Clock, ArrowRight, GitBranch, BarChart3, Zap, Crown, Camera, Paintbrush, Dna, Building2, BookOpen, Loader2 } from 'lucide-react';
 import showcaseCampusImage from '@/assets/showcase-student-image.png';
 
@@ -107,6 +108,9 @@ export function MessageBuilderShowcase() {
               </div>
             ))}
           </div>
+          <Link to="/request-access" className="inline-flex items-center gap-1.5 text-sm font-semibold mt-6 transition-colors" style={{ color: 'hsl(173 58% 39%)' }}>
+            Try the Message Builder <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
 
         <BrowserChrome title="CampusVoice — Message Builder">
@@ -464,6 +468,9 @@ export function JourneyBuilderShowcase() {
               </div>
             ))}
           </div>
+          <Link to="/request-access" className="inline-flex items-center gap-1.5 text-sm font-semibold mt-6 transition-colors" style={{ color: 'hsl(45 93% 42%)' }}>
+            Plan your first journey <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
       </div>
     </div>
@@ -536,6 +543,9 @@ export function ImageStudioShowcase() {
               </div>
             ))}
           </div>
+          <Link to="/request-access" className="inline-flex items-center gap-1.5 text-sm font-semibold mt-6 transition-colors" style={{ color: 'hsl(82 85% 45%)' }}>
+            Generate your first image <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
 
         <BrowserChrome title="CampusVoice — AI Image Studio">
@@ -883,9 +893,12 @@ export function BrandStudioShowcase() {
               </div>
             ))}
           </div>
+          </div>
+          <Link to="/request-access" className="inline-flex items-center gap-1.5 text-sm font-semibold mt-6 transition-colors" style={{ color: 'hsl(270 70% 55%)' }}>
+            Brand your visuals <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
       </div>
-    </div>
   );
 }
 
@@ -936,6 +949,9 @@ export function AICopywriterShowcase() {
               </div>
             ))}
           </div>
+          <Link to="/request-access" className="inline-flex items-center gap-1.5 text-sm font-semibold mt-6 transition-colors" style={{ color: 'hsl(200 100% 45%)' }}>
+            Chat with your brand <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
 
         <BrowserChrome title="CampusVoice — AI Copywriter">
