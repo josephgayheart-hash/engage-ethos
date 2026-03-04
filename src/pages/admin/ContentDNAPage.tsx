@@ -246,6 +246,14 @@ export default function ContentDNAPage() {
   
   const [isResetting, setIsResetting] = useState(false);
   const [showSetupWizard, setShowSetupWizard] = useState(false);
+  const [wizardDismissed, setWizardDismissed] = useState(false);
+
+  // Auto-show wizard for fresh profiles (no samples, no analysis) after loading
+  useEffect(() => {
+    if (!isLoading && selectedProfile && samples.length === 0 && !analysis && !wizardDismissed) {
+      setShowSetupWizard(true);
+    }
+  }, [isLoading, selectedProfile, samples.length, analysis, wizardDismissed]);
   
   const handleResetContentDNA = async () => {
     setIsResetting(true);
@@ -820,7 +828,7 @@ export default function ContentDNAPage() {
       </div>
 
       {/* Setup Wizard - shown for fresh profiles or when explicitly triggered */}
-      {showSetupWizard || (selectedProfile && samples.length === 0 && !analysis && !isLoading) ? (
+      {showSetupWizard ? (
         <div className="container mx-auto px-4 py-8 max-w-3xl">
           <Card>
             <CardHeader>
@@ -835,12 +843,18 @@ export default function ContentDNAPage() {
             <CardContent>
               <ContentDNASetupWizard
                 initialProfileId={profileIdFromUrl || selectedProfile?.id}
-                onComplete={async () => {
+                onComplete={async (completedProfileId: string) => {
                   setShowSetupWizard(false);
-                  await refetch();
+                  // Navigate to the completed profile so the page hook fetches the right data
+                  if (completedProfileId && completedProfileId !== profileIdFromUrl) {
+                    navigate(`/admin/content-dna?profileId=${completedProfileId}`);
+                  } else {
+                    await refetch();
+                  }
                 }}
                 onCancel={() => {
                   setShowSetupWizard(false);
+                  setWizardDismissed(true);
                   if (!selectedProfile) navigate('/admin/content-dna');
                 }}
               />
