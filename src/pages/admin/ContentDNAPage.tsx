@@ -231,6 +231,7 @@ export default function ContentDNAPage() {
     extractSemantics,
     searchSamples,
     saveAdjustments,
+    refetch,
   } = useContentDNA({ profileId: profileIdFromUrl });
   
   const { campusPhotoCount } = useCampusPhotoCount(profileIdFromUrl);
@@ -834,9 +835,9 @@ export default function ContentDNAPage() {
             <CardContent>
               <ContentDNASetupWizard
                 initialProfileId={profileIdFromUrl || selectedProfile?.id}
-                onComplete={() => {
+                onComplete={async () => {
                   setShowSetupWizard(false);
-                  window.location.reload();
+                  await refetch();
                 }}
                 onCancel={() => {
                   setShowSetupWizard(false);

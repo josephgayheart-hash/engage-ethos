@@ -203,6 +203,11 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
   }, [tenant?.id, analysis?.id]);
 
   useEffect(() => {
+    if (!tenant?.id) {
+      // Keep isLoading true until tenant is available
+      return;
+    }
+    
     const loadData = async () => {
       setIsLoading(true);
       await Promise.all([fetchSamples(), fetchAnalysis()]);
@@ -210,7 +215,7 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
     };
     
     loadData();
-  }, [fetchSamples, fetchAnalysis]);
+  }, [fetchSamples, fetchAnalysis, tenant?.id]);
 
   // Fetch adjustments when analysis is loaded
   useEffect(() => {
@@ -714,6 +719,12 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
     }
   };
 
+  const refetch = useCallback(async () => {
+    setIsLoading(true);
+    await Promise.all([fetchSamples(), fetchAnalysis()]);
+    setIsLoading(false);
+  }, [fetchSamples, fetchAnalysis]);
+
   return {
     samples,
     analysis,
@@ -734,8 +745,6 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
     extractSemantics,
     searchSamples,
     saveAdjustments,
-    refetch: async () => {
-      await Promise.all([fetchSamples(), fetchAnalysis()]);
-    }
+    refetch,
   };
 }
