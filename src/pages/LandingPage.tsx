@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -107,7 +108,41 @@ const trustIndicators = [
   { icon: GraduationCap, label: 'Built for Higher Ed' },
 ];
 
+const HERO_NOUNS = [
+  { text: "Firms", color: "hsl(82 85% 55%)" },
+  { text: "Brands", color: "hsl(270 70% 60%)" },
+  { text: "Thinkers", color: "hsl(200 100% 50%)" },
+  { text: "Writers", color: "hsl(82 85% 55%)" },
+  { text: "Marketers", color: "hsl(270 70% 60%)" },
+  { text: "Storytellers", color: "hsl(200 100% 50%)" },
+  { text: "Designers", color: "hsl(82 85% 55%)" },
+  { text: "Founders", color: "hsl(270 70% 60%)" },
+  { text: "Creators", color: "hsl(200 100% 50%)" },
+  { text: "Strategists", color: "hsl(82 85% 55%)" },
+  { text: "Educators", color: "hsl(270 70% 60%)" },
+  { text: "Communicators", color: "hsl(200 100% 50%)" },
+  { text: "Visionaries", color: "hsl(82 85% 55%)" },
+  { text: "Innovators", color: "hsl(270 70% 60%)" },
+  { text: "Leaders", color: "hsl(200 100% 50%)" },
+];
+
 export default function LandingPage() {
+  const [nounIndex, setNounIndex] = useState(() => Math.floor(Math.random() * HERO_NOUNS.length));
+  const [nounFade, setNounFade] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNounFade(false);
+      setTimeout(() => {
+        setNounIndex(prev => (prev + 1) % HERO_NOUNS.length);
+        setNounFade(true);
+      }, 400);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const currentNoun = HERO_NOUNS[nounIndex];
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead 
@@ -158,8 +193,18 @@ export default function LandingPage() {
               className="font-serif text-3xl sm:text-4xl lg:text-5xl text-foreground tracking-tight animate-fade-in max-w-4xl mx-auto leading-tight"
               style={{ animationDelay: '0.2s' }}
             >
-              <span className="text-[hsl(82_85%_55%)]">Plan.</span> <span className="text-[hsl(270_70%_60%)]">Strategize.</span> <span className="text-[hsl(200_100%_50%)]">Execute.</span>
-              <span className="block text-foreground text-2xl sm:text-3xl lg:text-4xl mt-2">Your Digital Playbook for Higher Ed Communications</span>
+              Built for{' '}
+              <span
+                className="inline-block transition-all duration-500"
+                style={{
+                  opacity: nounFade ? 1 : 0,
+                  transform: nounFade ? 'translateY(0)' : 'translateY(12px)',
+                  color: currentNoun.color,
+                }}
+              >
+                {currentNoun.text}.
+              </span>
+              <span className="block text-foreground text-2xl sm:text-3xl lg:text-4xl mt-2">Strategic Messaging Intelligence</span>
             </h1>
 
             {/* Secondary Tagline */}
