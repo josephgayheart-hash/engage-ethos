@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Image, Palette, Type, Wand2, Layers, Sparkles, CheckCircle2, MessageSquare, Send, Bot, PenTool, Users, Mail, Smartphone, Share2, Target, Map, Clock, ArrowRight, GitBranch, BarChart3 } from 'lucide-react';
+import { Image, Palette, Type, Wand2, Layers, Sparkles, CheckCircle2, MessageSquare, Send, Bot, PenTool, Users, Mail, Smartphone, Share2, Target, Map, Clock, ArrowRight, GitBranch, BarChart3, Zap, Crown, Camera, Paintbrush, Dna, Building2, BookOpen, Loader2 } from 'lucide-react';
+import showcaseCampusImage from '@/assets/showcase-campus-image.jpg';
 
 /* ─── Intersection Observer hook ─── */
 function useInView(threshold = 0.15) {
@@ -462,16 +463,33 @@ export function ImageStudioShowcase() {
     if (!visible) return;
     const timers: ReturnType<typeof setTimeout>[] = [];
     const run = () => {
-      timers.push(setTimeout(() => setStep(1), 1200));
-      timers.push(setTimeout(() => setStep(2), 3000));
-      timers.push(setTimeout(() => setStep(3), 5000));
-      timers.push(setTimeout(() => { setStep(0); run(); }, 8000));
+      timers.push(setTimeout(() => setStep(1), 800));   // Select style + engine
+      timers.push(setTimeout(() => setStep(2), 2200));   // Select channel
+      timers.push(setTimeout(() => setStep(3), 3600));   // Processing screen
+      timers.push(setTimeout(() => setStep(4), 6200));   // Image reveals
+      timers.push(setTimeout(() => setStep(5), 8500));   // Mockup + brand score
+      timers.push(setTimeout(() => { setStep(0); run(); }, 12000));
     };
     run();
     return () => timers.forEach(clearTimeout);
   }, [visible]);
 
+  const styles = [
+    { emoji: '📷', label: 'Photorealistic', active: true },
+    { emoji: '🎨', label: 'Artistic', active: false },
+    { emoji: '✏️', label: 'Illustrative', active: false },
+    { emoji: '🖼️', label: 'Abstract', active: false },
+  ];
+
   const channels = ['Instagram Post', 'Email Header', 'LinkedIn', 'Billboard', 'Postcard'];
+
+  const processingSteps = [
+    { icon: Building2, label: 'Loading institutional profile…', delay: 0 },
+    { icon: Dna, label: 'Analyzing Content DNA…', delay: 400 },
+    { icon: Palette, label: 'Applying brand colors & palette…', delay: 800 },
+    { icon: BookOpen, label: 'Referencing fact book & stories…', delay: 1200 },
+    { icon: Camera, label: 'Composing photorealistic scene…', delay: 1600 },
+  ];
 
   return (
     <div ref={ref} className={`transition-all duration-1000 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
@@ -484,13 +502,15 @@ export function ImageStudioShowcase() {
             19 channels.<br />One studio.
           </h3>
           <p className="text-muted-foreground leading-relaxed mb-6">
-            Generate on-brand visuals for any format — social, print, digital, and web. Toggle between Photo and Graphic Design modes, then preview in realistic device mockups.
+            Generate on-brand visuals for any format — social, print, digital, and web. Choose from AI image styles, toggle between Fast and Premium engines, and watch your Content DNA shape every pixel.
           </p>
           <div className="space-y-3">
             {[
-              { icon: Wand2, text: 'AI-powered generation from your brand palette' },
+              { icon: Wand2, text: '4 AI styles: Photorealistic, Artistic, Illustrative, Abstract' },
+              { icon: Zap, text: 'Fast engine for speed or Premium engine for maximum quality' },
+              { icon: Dna, text: 'Every image grounded in your Content DNA & brand palette' },
               { icon: Layers, text: 'Photo mode, Graphic Design mode, or Blank Canvas' },
-              { icon: Image, text: 'In-context mockups: phones, browsers, postcards' },
+              { icon: Image, text: 'In-context mockups: phones, browsers, postcards & more' },
             ].map((f, i) => (
               <div key={i} className="flex items-center gap-3 text-sm text-muted-foreground">
                 <f.icon className="w-4 h-4 flex-shrink-0" style={{ color: 'hsl(82 85% 45%)' }} />
@@ -501,66 +521,176 @@ export function ImageStudioShowcase() {
         </div>
 
         <BrowserChrome title="CampusVoice — Image Studio">
-          <div className="p-5">
-            {/* Channel selector */}
-            <div className="flex gap-2 mb-4 overflow-hidden">
-              {channels.map((ch, i) => (
-                <span
-                  key={ch}
-                  className={`text-[10px] font-medium px-2.5 py-1 rounded-full border whitespace-nowrap transition-all duration-300 ${
-                    step >= 1 && i === 0
-                      ? 'border-[hsl(82_85%_55%)] text-[hsl(82_85%_45%)]'
-                      : 'border-border/60 text-muted-foreground'
-                  }`}
-                  style={step >= 1 && i === 0 ? { background: 'hsl(82 85% 55% / 0.1)' } : {}}
-                >
-                  {ch}
-                </span>
-              ))}
+          <div className="p-5 space-y-3">
+            {/* Engine selector */}
+            <div className="flex items-center gap-2">
+              <p className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground mr-1">Engine</p>
+              <div
+                className={`flex items-center gap-1.5 text-[10px] font-medium px-2.5 py-1 rounded-lg border transition-all duration-300 ${
+                  step >= 1 ? 'border-border/60 text-muted-foreground' : 'border-border/40 text-muted-foreground/50'
+                }`}
+              >
+                <Zap className="w-3 h-3" />
+                Fast
+              </div>
+              <div
+                className={`flex items-center gap-1.5 text-[10px] font-medium px-2.5 py-1 rounded-lg border transition-all duration-300 ${
+                  step >= 1 ? 'border-[hsl(270_70%_60%)] text-[hsl(270_70%_55%)]' : 'border-border/40 text-muted-foreground/50'
+                }`}
+                style={step >= 1 ? { background: 'hsl(270 70% 60% / 0.1)' } : {}}
+              >
+                <Crown className="w-3 h-3" />
+                Premium
+              </div>
             </div>
 
-            {/* Generation area */}
-            <div className="rounded-xl border border-border/60 overflow-hidden" style={{ aspectRatio: '1/1', maxHeight: '280px' }}>
-              {step < 2 ? (
+            {/* Style selector */}
+            <div>
+              <p className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground mb-1.5">AI Style</p>
+              <div className="flex gap-1.5">
+                {styles.map((s, i) => (
+                  <div
+                    key={s.label}
+                    className={`flex items-center gap-1 text-[9px] font-medium px-2 py-1 rounded-lg border transition-all duration-300 ${
+                      step >= 1 && s.active
+                        ? 'border-[hsl(82_85%_55%)] text-[hsl(82_85%_45%)]'
+                        : 'border-border/40 text-muted-foreground/60'
+                    }`}
+                    style={step >= 1 && s.active ? { background: 'hsl(82 85% 55% / 0.1)' } : {}}
+                  >
+                    <span>{s.emoji}</span>
+                    {s.label}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Channel selector */}
+            <div>
+              <p className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground mb-1.5">Channel</p>
+              <div className="flex gap-1.5 overflow-hidden">
+                {channels.map((ch, i) => (
+                  <span
+                    key={ch}
+                    className={`text-[9px] font-medium px-2 py-1 rounded-full border whitespace-nowrap transition-all duration-300 ${
+                      step >= 2 && i === 0
+                        ? 'border-[hsl(82_85%_55%)] text-[hsl(82_85%_45%)]'
+                        : 'border-border/50 text-muted-foreground/60'
+                    }`}
+                    style={step >= 2 && i === 0 ? { background: 'hsl(82 85% 55% / 0.1)' } : {}}
+                  >
+                    {ch}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Main visual area */}
+            <div className="rounded-xl border border-border/60 overflow-hidden relative" style={{ aspectRatio: '1/1', maxHeight: '260px' }}>
+              {/* State 0-1: Empty placeholder */}
+              {step < 3 && (
                 <div className="w-full h-full flex flex-col items-center justify-center gap-3" style={{ background: 'hsl(222 47% 14% / 0.03)' }}>
-                  {step >= 1 ? (
-                    <>
-                      <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: 'hsl(82 85% 55%)', borderTopColor: 'transparent' }} />
-                      <span className="text-xs text-muted-foreground">Generating visual…</span>
-                    </>
+                  {step >= 2 ? (
+                    <button
+                      className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-lg transition-all"
+                      style={{ background: 'hsl(82 85% 55% / 0.15)', color: 'hsl(82 85% 45%)', border: '1px solid hsl(82 85% 55% / 0.3)' }}
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Generate with Content DNA
+                    </button>
                   ) : (
                     <>
-                      <Image className="w-10 h-10 text-muted-foreground/30" />
-                      <span className="text-xs text-muted-foreground/50">Select a channel to begin</span>
+                      <Image className="w-10 h-10 text-muted-foreground/20" />
+                      <span className="text-[10px] text-muted-foreground/40">Choose style & channel to begin</span>
                     </>
                   )}
                 </div>
-              ) : (
-                <div className="w-full h-full relative" style={{ background: 'linear-gradient(135deg, hsl(222 47% 16%), hsl(270 40% 20%), hsl(222 47% 14%))' }}>
-                  {/* Simulated campus image with brand overlay shapes */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-32 h-32 rounded-full blur-[40px]" style={{ background: 'hsl(82 85% 55% / 0.3)' }} />
+              )}
+
+              {/* State 3: Processing screen */}
+              {step === 3 && (
+                <div className="w-full h-full flex flex-col items-center justify-center p-5" style={{ background: 'linear-gradient(135deg, hsl(222 47% 13%), hsl(222 47% 16%))' }}>
+                  <div className="w-7 h-7 rounded-full border-2 border-t-transparent animate-spin mb-3" style={{ borderColor: 'hsl(82 85% 55%)', borderTopColor: 'transparent' }} />
+                  <p className="text-[10px] font-semibold text-white/80 mb-3">Generating with Premium Engine…</p>
+                  <div className="w-full max-w-[200px] space-y-1.5">
+                    {processingSteps.map((ps, i) => {
+                      const elapsed = 2600; // show all as progressing
+                      const isActive = true;
+                      return (
+                        <div
+                          key={i}
+                          className="flex items-center gap-2 transition-all duration-500"
+                          style={{
+                            opacity: 1,
+                            transform: 'translateX(0)',
+                            transitionDelay: `${ps.delay}ms`,
+                          }}
+                        >
+                          {i < 4 ? (
+                            <CheckCircle2 className="w-3 h-3 shrink-0" style={{ color: 'hsl(82 85% 55%)' }} />
+                          ) : (
+                            <Loader2 className="w-3 h-3 shrink-0 animate-spin" style={{ color: 'hsl(82 85% 55% / 0.6)' }} />
+                          )}
+                          <span className={`text-[8px] ${i < 4 ? 'text-white/60' : 'text-white/40'}`}>{ps.label}</span>
+                        </div>
+                      );
+                    })}
                   </div>
-                  <div className="absolute top-6 left-6 w-20 h-20 rounded-2xl" style={{ background: 'hsl(200 100% 50% / 0.2)', backdropFilter: 'blur(8px)' }} />
-                  <div className="absolute bottom-6 right-6 w-16 h-24 rounded-xl" style={{ background: 'hsl(270 70% 60% / 0.25)', backdropFilter: 'blur(8px)' }} />
+                  {/* Brand DNA readback */}
+                  <div className="mt-3 flex gap-1.5 flex-wrap justify-center">
+                    {['Tone: Warm', 'Formality: 7/10', 'Slogan: "Where leaders begin"'].map((tag, i) => (
+                      <span key={i} className="text-[7px] px-1.5 py-0.5 rounded-full border" style={{ borderColor: 'hsl(270 70% 60% / 0.3)', color: 'hsl(270 70% 65%)', background: 'hsl(270 70% 60% / 0.08)' }}>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* State 4-5: Generated image */}
+              {step >= 4 && (
+                <div className="w-full h-full relative">
+                  <img
+                    src={showcaseCampusImage}
+                    alt="AI-generated university campus"
+                    className="w-full h-full object-cover transition-all duration-700"
+                    style={{ opacity: step >= 4 ? 1 : 0 }}
+                  />
                   {/* Aspect ratio label */}
-                  <div className="absolute top-3 right-3 text-[9px] font-medium px-2 py-0.5 rounded-full text-white/70" style={{ background: 'hsl(222 47% 14% / 0.6)' }}>
+                  <div className="absolute top-2 right-2 text-[8px] font-medium px-1.5 py-0.5 rounded-full text-white/80" style={{ background: 'hsl(222 47% 14% / 0.7)', backdropFilter: 'blur(4px)' }}>
                     1:1 — 1080×1080
                   </div>
-                  {step >= 3 && (
-                    <div className="absolute bottom-3 left-3 flex items-center gap-1.5 text-[10px] font-semibold px-2 py-1 rounded-full" style={{ background: 'hsl(82 85% 55% / 0.2)', color: 'hsl(82 85% 55%)' }}>
-                      <CheckCircle2 className="w-3 h-3" /> Ready for Brand Studio
+                  {/* Style badge */}
+                  <div className="absolute top-2 left-2 text-[8px] font-medium px-1.5 py-0.5 rounded-full text-white/80 flex items-center gap-1" style={{ background: 'hsl(222 47% 14% / 0.7)', backdropFilter: 'blur(4px)' }}>
+                    📷 Photorealistic · Premium
+                  </div>
+                  {/* Brand score + ready badge */}
+                  {step >= 5 && (
+                    <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+                      <div className="flex items-center gap-1 text-[9px] font-semibold px-2 py-1 rounded-full" style={{ background: 'hsl(82 85% 55% / 0.2)', color: 'hsl(82 85% 55%)', backdropFilter: 'blur(4px)' }}>
+                        <CheckCircle2 className="w-3 h-3" /> Ready for Brand Studio
+                      </div>
+                      <div className="text-[9px] font-bold px-2 py-1 rounded-full" style={{ background: 'hsl(82 85% 55% / 0.2)', color: 'hsl(82 85% 55%)', backdropFilter: 'blur(4px)' }}>
+                        Brand Score: 94
+                      </div>
                     </div>
                   )}
                 </div>
               )}
             </div>
 
-            {/* Mode toggle */}
-            <div className="flex items-center gap-3 mt-4">
-              <span className="text-[10px] font-semibold px-3 py-1 rounded-full" style={{ background: 'hsl(270 70% 60% / 0.15)', color: 'hsl(270 70% 55%)' }}>📷 Photo</span>
-              <span className="text-[10px] font-semibold px-3 py-1 rounded-full border border-border/60 text-muted-foreground">🎨 Graphic Design</span>
-              <span className="text-[10px] font-semibold px-3 py-1 rounded-full border border-border/60 text-muted-foreground">📐 Blank Canvas</span>
+            {/* Mode toggle + In Context */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-[9px] font-semibold px-2.5 py-1 rounded-full" style={{ background: 'hsl(270 70% 60% / 0.15)', color: 'hsl(270 70% 55%)' }}>📷 Photo</span>
+                <span className="text-[9px] font-semibold px-2.5 py-1 rounded-full border border-border/50 text-muted-foreground">🎨 Graphic Design</span>
+                <span className="text-[9px] font-semibold px-2.5 py-1 rounded-full border border-border/50 text-muted-foreground">📐 Blank Canvas</span>
+              </div>
+              {step >= 5 && (
+                <span className="text-[8px] font-medium px-2 py-0.5 rounded-full" style={{ background: 'hsl(200 100% 50% / 0.12)', color: 'hsl(200 100% 45%)' }}>
+                  In Context ▸
+                </span>
+              )}
             </div>
           </div>
         </BrowserChrome>
