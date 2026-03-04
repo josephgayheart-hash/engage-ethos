@@ -165,8 +165,8 @@ export default function LandingPage() {
         />
 
         {/* Animated floating orbs */}
-        <div className="absolute w-72 h-72 rounded-full blur-[80px] animate-float-slow" style={{ background: 'hsl(82 85% 55% / 0.18)', top: '5%', right: '10%' }} />
-        <div className="absolute w-56 h-56 rounded-full blur-[70px] animate-float-medium" style={{ background: 'hsl(270 70% 60% / 0.2)', bottom: '10%', left: '5%', animationDelay: '1s' }} />
+        <div className="hidden sm:block absolute w-72 h-72 rounded-full blur-[80px] animate-float-slow" style={{ background: 'hsl(82 85% 55% / 0.18)', top: '5%', right: '10%' }} />
+        <div className="hidden sm:block absolute w-56 h-56 rounded-full blur-[70px] animate-float-medium" style={{ background: 'hsl(270 70% 60% / 0.2)', bottom: '10%', left: '5%', animationDelay: '1s' }} />
         <div className="hidden sm:block absolute w-40 h-40 rounded-full blur-[60px] animate-float-fast" style={{ background: 'hsl(200 100% 50% / 0.2)', top: '40%', left: '25%', animationDelay: '0.5s' }} />
         <div className="hidden sm:block absolute w-32 h-32 rounded-full blur-[50px] animate-float-medium" style={{ background: 'hsl(340 75% 55% / 0.12)', bottom: '25%', right: '20%', animationDelay: '2s' }} />
         <div className="hidden sm:block absolute w-24 h-24 rounded-full blur-[40px] animate-float-slow" style={{ background: 'hsl(45 93% 55% / 0.12)', top: '20%', left: '15%', animationDelay: '1.5s' }} />
