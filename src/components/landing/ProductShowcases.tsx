@@ -19,6 +19,21 @@ function useInView(threshold = 0.15) {
   return { ref, visible };
 }
 
+function useShouldLoopAnimations() {
+  const [shouldLoop, setShouldLoop] = useState(true);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 767px), (prefers-reduced-motion: reduce)');
+    const update = () => setShouldLoop(!mediaQuery.matches);
+
+    update();
+    mediaQuery.addEventListener('change', update);
+    return () => mediaQuery.removeEventListener('change', update);
+  }, []);
+
+  return shouldLoop;
+}
+
 /* ─── Browser Chrome wrapper ─── */
 function BrowserChrome({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -42,6 +57,7 @@ function BrowserChrome({ title, children }: { title: string; children: React.Rea
 export function MessageBuilderShowcase() {
   const { ref, visible } = useInView(0.1);
   const [step, setStep] = useState(0);
+  const shouldLoop = useShouldLoopAnimations();
 
   useEffect(() => {
     if (!visible) return;
@@ -52,7 +68,7 @@ export function MessageBuilderShowcase() {
       timers.push(setTimeout(() => setStep(3), 3500));
       timers.push(setTimeout(() => setStep(4), 5200));
       timers.push(setTimeout(() => setStep(5), 7000));
-      timers.push(setTimeout(() => { setStep(0); run(); }, 10000));
+      if (shouldLoop) timers.push(setTimeout(() => { setStep(0); run(); }, 10000));
     };
     run();
     return () => timers.forEach(clearTimeout);
@@ -215,6 +231,7 @@ export function MessageBuilderShowcase() {
 export function JourneyBuilderShowcase() {
   const { ref, visible } = useInView(0.1);
   const [step, setStep] = useState(0);
+  const shouldLoop = useShouldLoopAnimations();
 
   useEffect(() => {
     if (!visible) return;
@@ -226,7 +243,7 @@ export function JourneyBuilderShowcase() {
       timers.push(setTimeout(() => setStep(4), 4800));
       timers.push(setTimeout(() => setStep(5), 6200));
       timers.push(setTimeout(() => setStep(6), 8000));
-      timers.push(setTimeout(() => { setStep(0); run(); }, 11500));
+      if (shouldLoop) timers.push(setTimeout(() => { setStep(0); run(); }, 11500));
     };
     run();
     return () => timers.forEach(clearTimeout);
@@ -458,6 +475,7 @@ export function JourneyBuilderShowcase() {
 export function ImageStudioShowcase() {
   const { ref, visible } = useInView(0.1);
   const [step, setStep] = useState(0);
+  const shouldLoop = useShouldLoopAnimations();
 
   useEffect(() => {
     if (!visible) return;
@@ -468,7 +486,7 @@ export function ImageStudioShowcase() {
       timers.push(setTimeout(() => setStep(3), 3600));   // Processing screen
       timers.push(setTimeout(() => setStep(4), 6200));   // Image reveals
       timers.push(setTimeout(() => setStep(5), 8500));   // Mockup + brand score
-      timers.push(setTimeout(() => { setStep(0); run(); }, 12000));
+      if (shouldLoop) timers.push(setTimeout(() => { setStep(0); run(); }, 12000));
     };
     run();
     return () => timers.forEach(clearTimeout);
@@ -705,6 +723,7 @@ export function ImageStudioShowcase() {
 export function BrandStudioShowcase() {
   const { ref, visible } = useInView(0.1);
   const [step, setStep] = useState(0);
+  const shouldLoop = useShouldLoopAnimations();
 
   useEffect(() => {
     if (!visible) return;
@@ -713,7 +732,7 @@ export function BrandStudioShowcase() {
       timers.push(setTimeout(() => setStep(1), 1000));
       timers.push(setTimeout(() => setStep(2), 2500));
       timers.push(setTimeout(() => setStep(3), 4500));
-      timers.push(setTimeout(() => { setStep(0); run(); }, 7500));
+      if (shouldLoop) timers.push(setTimeout(() => { setStep(0); run(); }, 7500));
     };
     run();
     return () => timers.forEach(clearTimeout);
@@ -876,6 +895,7 @@ export function BrandStudioShowcase() {
 export function AICopywriterShowcase() {
   const { ref, visible } = useInView(0.1);
   const [step, setStep] = useState(0);
+  const shouldLoop = useShouldLoopAnimations();
 
   useEffect(() => {
     if (!visible) return;
@@ -885,7 +905,7 @@ export function AICopywriterShowcase() {
       timers.push(setTimeout(() => setStep(2), 2200));
       timers.push(setTimeout(() => setStep(3), 3800));
       timers.push(setTimeout(() => setStep(4), 5500));
-      timers.push(setTimeout(() => { setStep(0); run(); }, 8500));
+      if (shouldLoop) timers.push(setTimeout(() => { setStep(0); run(); }, 8500));
     };
     run();
     return () => timers.forEach(clearTimeout);
