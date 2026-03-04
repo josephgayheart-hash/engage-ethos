@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Image, Palette, Type, Wand2, Layers, Sparkles, CheckCircle2, MessageSquare, Send, Bot } from 'lucide-react';
+import { Image, Palette, Type, Wand2, Layers, Sparkles, CheckCircle2, MessageSquare, Send, Bot, PenTool, Users, Mail, Smartphone, Share2, Target, Map, Clock, ArrowRight, GitBranch, BarChart3 } from 'lucide-react';
 
 /* ─── Intersection Observer hook ─── */
 function useInView(threshold = 0.15) {
@@ -31,6 +31,343 @@ function BrowserChrome({ title, children }: { title: string; children: React.Rea
         <span className="text-white/50 text-xs ml-2">{title}</span>
       </div>
       {children}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   MESSAGE BUILDER SHOWCASE
+   ══════════════════════════════════════════════════════════════ */
+export function MessageBuilderShowcase() {
+  const { ref, visible } = useInView(0.1);
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    if (!visible) return;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const run = () => {
+      timers.push(setTimeout(() => setStep(1), 800));
+      timers.push(setTimeout(() => setStep(2), 2000));
+      timers.push(setTimeout(() => setStep(3), 3500));
+      timers.push(setTimeout(() => setStep(4), 5200));
+      timers.push(setTimeout(() => setStep(5), 7000));
+      timers.push(setTimeout(() => { setStep(0); run(); }, 10000));
+    };
+    run();
+    return () => timers.forEach(clearTimeout);
+  }, [visible]);
+
+  const audiences = ['Prospective Students', 'Admitted Students', 'Current Students', 'Alumni', 'Donors'];
+  const channels = [
+    { icon: Mail, label: 'Email' },
+    { icon: Smartphone, label: 'SMS' },
+    { icon: Share2, label: 'Social' },
+    { icon: Send, label: 'Direct Mail' },
+  ];
+
+  return (
+    <div ref={ref} className={`transition-all duration-1000 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+      <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <div className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full mb-4" style={{ background: 'hsl(173 58% 39% / 0.15)', color: 'hsl(173 58% 39%)' }}>
+            <PenTool className="w-3.5 h-3.5" /> Message Builder
+          </div>
+          <h3 className="text-2xl md:text-3xl font-serif font-bold text-foreground tracking-tight mb-4">
+            Audience first.<br />Brand always.
+          </h3>
+          <p className="text-muted-foreground leading-relaxed mb-6">
+            Select your audience, pick channels, set the moment — and let AI generate on-brand messaging grounded in your Content DNA, brand pillars, and institutional facts.
+          </p>
+          <div className="space-y-3">
+            {[
+              { icon: Users, text: '12 audience segments with cohort-level targeting' },
+              { icon: Target, text: 'Goal-driven: awareness, yield, engagement, retention' },
+              { icon: Sparkles, text: 'AI generates multi-channel drafts in seconds' },
+            ].map((f, i) => (
+              <div key={i} className="flex items-center gap-3 text-sm text-muted-foreground">
+                <f.icon className="w-4 h-4 flex-shrink-0" style={{ color: 'hsl(173 58% 39%)' }} />
+                <span>{f.text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <BrowserChrome title="CampusVoice — Message Builder">
+          <div className="p-5 space-y-4">
+            {/* Step indicators */}
+            <div className="flex items-center gap-2">
+              {['Audience', 'Channel', 'Context', 'Generate'].map((s, i) => (
+                <div key={s} className="flex items-center gap-1.5">
+                  <div
+                    className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold transition-all duration-500 ${
+                      step > i + 1 ? 'text-white' : step === i + 1 ? 'text-white' : 'text-muted-foreground border border-border/60'
+                    }`}
+                    style={
+                      step > i + 1
+                        ? { background: 'hsl(173 58% 39%)' }
+                        : step === i + 1
+                        ? { background: 'hsl(173 58% 39% / 0.7)' }
+                        : {}
+                    }
+                  >
+                    {step > i + 1 ? '✓' : i + 1}
+                  </div>
+                  <span className={`text-[9px] font-medium ${step >= i + 1 ? 'text-foreground' : 'text-muted-foreground/50'}`}>{s}</span>
+                  {i < 3 && <div className="w-4 h-px bg-border/40" />}
+                </div>
+              ))}
+            </div>
+
+            {/* Audience selector */}
+            <div>
+              <p className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground mb-2">Audience</p>
+              <div className="flex flex-wrap gap-1.5">
+                {audiences.map((a, i) => (
+                  <span
+                    key={a}
+                    className={`text-[10px] font-medium px-2.5 py-1 rounded-full border transition-all duration-300 ${
+                      step >= 1 && i === 1
+                        ? 'border-[hsl(173_58%_39%)] text-[hsl(173_58%_39%)]'
+                        : 'border-border/60 text-muted-foreground'
+                    }`}
+                    style={step >= 1 && i === 1 ? { background: 'hsl(173 58% 39% / 0.1)' } : {}}
+                  >
+                    {a}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Channel selector */}
+            <div>
+              <p className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground mb-2">Channels</p>
+              <div className="flex gap-2">
+                {channels.map((ch, i) => (
+                  <div
+                    key={ch.label}
+                    className={`flex items-center gap-1.5 text-[10px] font-medium px-2.5 py-1.5 rounded-lg border transition-all duration-300 ${
+                      step >= 2 && (i === 0 || i === 1)
+                        ? 'border-[hsl(173_58%_39%)] text-[hsl(173_58%_39%)]'
+                        : 'border-border/60 text-muted-foreground'
+                    }`}
+                    style={step >= 2 && (i === 0 || i === 1) ? { background: 'hsl(173 58% 39% / 0.1)' } : {}}
+                  >
+                    <ch.icon className="w-3 h-3" />
+                    {ch.label}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Context row */}
+            {step >= 3 && (
+              <div className="flex gap-3 transition-all duration-500" style={{ opacity: step >= 3 ? 1 : 0 }}>
+                <div className="flex-1 rounded-lg border border-border/60 px-3 py-2">
+                  <p className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground mb-1">Goal</p>
+                  <p className="text-[10px] font-medium text-foreground">Yield — Convert admits</p>
+                </div>
+                <div className="flex-1 rounded-lg border border-border/60 px-3 py-2">
+                  <p className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground mb-1">Moment</p>
+                  <p className="text-[10px] font-medium text-foreground">Post-Admit Welcome</p>
+                </div>
+              </div>
+            )}
+
+            {/* Generation result */}
+            {step >= 4 && (
+              <div className="rounded-xl border border-border/60 p-3 transition-all duration-500" style={{ opacity: step >= 4 ? 1 : 0, background: 'hsl(173 58% 39% / 0.03)' }}>
+                {step === 4 ? (
+                  <div className="flex items-center justify-center gap-2 py-6">
+                    <div className="w-5 h-5 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: 'hsl(173 58% 39%)', borderTopColor: 'transparent' }} />
+                    <span className="text-xs text-muted-foreground">Generating with Content DNA…</span>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-foreground">📧 Email Draft</span>
+                      <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'hsl(82 85% 55% / 0.15)', color: 'hsl(82 85% 45%)' }}>Brand Score: 91</span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground leading-relaxed">
+                      <span className="font-semibold text-foreground">Subject:</span> Your Next Chapter Begins — Welcome to [University]
+                    </p>
+                    <p className="text-[10px] text-muted-foreground leading-relaxed line-clamp-2">
+                      Dear [First Name], We're thrilled you've chosen to join our community of scholars and changemakers. Your journey of discovery starts now…
+                    </p>
+                    <div className="flex gap-2 pt-1">
+                      <span className="text-[9px] px-2 py-0.5 rounded-full border border-border/60 text-muted-foreground">📱 SMS Draft</span>
+                      <span className="text-[9px] px-2 py-0.5 rounded-full border border-border/60 text-muted-foreground">+ 1 more</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </BrowserChrome>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   JOURNEY BUILDER SHOWCASE
+   ══════════════════════════════════════════════════════════════ */
+export function JourneyBuilderShowcase() {
+  const { ref, visible } = useInView(0.1);
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    if (!visible) return;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const run = () => {
+      timers.push(setTimeout(() => setStep(1), 700));
+      timers.push(setTimeout(() => setStep(2), 2000));
+      timers.push(setTimeout(() => setStep(3), 3800));
+      timers.push(setTimeout(() => setStep(4), 5500));
+      timers.push(setTimeout(() => setStep(5), 7500));
+      timers.push(setTimeout(() => { setStep(0); run(); }, 10500));
+    };
+    run();
+    return () => timers.forEach(clearTimeout);
+  }, [visible]);
+
+  const phases = [
+    { name: 'Awareness', weeks: 'Wk 1–3', color: 'hsl(200 100% 50%)', channels: ['Email', 'Social'] },
+    { name: 'Nurture', weeks: 'Wk 4–8', color: 'hsl(270 70% 60%)', channels: ['Email', 'SMS', 'Direct Mail'] },
+    { name: 'Yield', weeks: 'Wk 9–12', color: 'hsl(82 85% 55%)', channels: ['Email', 'Phone', 'SMS'] },
+    { name: 'Commit', weeks: 'Wk 13–14', color: 'hsl(173 58% 39%)', channels: ['Email', 'Portal'] },
+  ];
+
+  return (
+    <div ref={ref} className={`transition-all duration-1000 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+      <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <BrowserChrome title="CampusVoice — Journey Builder">
+          <div className="p-5 space-y-4">
+            {/* Journey header */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold text-foreground">Fall Admitted Students Journey</p>
+                <p className="text-[10px] text-muted-foreground">14-week multi-channel campaign</p>
+              </div>
+              {step >= 1 && (
+                <div className="flex items-center gap-1.5 transition-all duration-300" style={{ opacity: step >= 1 ? 1 : 0 }}>
+                  <Clock className="w-3 h-3 text-muted-foreground" />
+                  <span className="text-[9px] text-muted-foreground">4 phases · 12 channels</span>
+                </div>
+              )}
+            </div>
+
+            {/* Phase timeline */}
+            <div className="space-y-2">
+              {phases.map((phase, i) => (
+                <div
+                  key={phase.name}
+                  className={`flex items-center gap-3 rounded-lg border px-3 py-2 transition-all duration-500 ${
+                    step >= i + 1 ? 'border-border/80' : 'border-border/30 opacity-40'
+                  }`}
+                  style={{
+                    opacity: step >= i + 1 ? 1 : 0.35,
+                    transform: step >= i + 1 ? 'translateX(0)' : 'translateX(-8px)',
+                    transition: `all 0.5s ease ${i * 100}ms`,
+                  }}
+                >
+                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: phase.color }} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-foreground">{phase.name}</span>
+                      <span className="text-[9px] text-muted-foreground">{phase.weeks}</span>
+                    </div>
+                    {step >= i + 2 && (
+                      <div className="flex gap-1 mt-1 transition-all duration-300">
+                        {phase.channels.map((ch) => (
+                          <span key={ch} className="text-[8px] px-1.5 py-0.5 rounded border border-border/40 text-muted-foreground">{ch}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  {/* Intensity bar */}
+                  <div className="w-16 h-1.5 rounded-full bg-border/30 overflow-hidden flex-shrink-0">
+                    <div
+                      className="h-full rounded-full transition-all duration-700"
+                      style={{
+                        background: phase.color,
+                        width: step >= i + 1 ? `${[40, 70, 100, 85][i]}%` : '0%',
+                        transitionDelay: `${i * 150}ms`,
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Flow visualization */}
+            {step >= 5 && (
+              <div className="rounded-xl border border-border/60 p-3 transition-all duration-600" style={{ opacity: step >= 5 ? 1 : 0, background: 'hsl(222 47% 14% / 0.03)' }}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[9px] font-bold text-foreground flex items-center gap-1">
+                    <GitBranch className="w-3 h-3" /> Flow Diagram
+                  </span>
+                  <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'hsl(82 85% 55% / 0.15)', color: 'hsl(82 85% 45%)' }}>
+                    32 touchpoints
+                  </span>
+                </div>
+                {/* Mini flow nodes */}
+                <div className="flex items-center gap-1.5 overflow-hidden">
+                  {phases.map((phase, i) => (
+                    <div key={phase.name} className="flex items-center gap-1.5">
+                      <div className="w-12 h-8 rounded-md flex items-center justify-center text-[7px] font-bold text-white" style={{ background: phase.color }}>
+                        {phase.name.substring(0, 3).toUpperCase()}
+                      </div>
+                      {i < phases.length - 1 && <ArrowRight className="w-3 h-3 text-muted-foreground/40 flex-shrink-0" />}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Cadence controls */}
+            {step >= 3 && (
+              <div className="flex gap-3 transition-all duration-500" style={{ opacity: step >= 3 ? 1 : 0 }}>
+                <div className="flex-1 rounded-lg border border-border/60 px-3 py-2">
+                  <p className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground mb-1">Cadence</p>
+                  <p className="text-[10px] font-medium text-foreground">2–3× / week</p>
+                </div>
+                <div className="flex-1 rounded-lg border border-border/60 px-3 py-2">
+                  <p className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground mb-1">Escalation</p>
+                  <p className="text-[10px] font-medium text-foreground">Ramp Up</p>
+                </div>
+                <div className="flex-1 rounded-lg border border-border/60 px-3 py-2">
+                  <p className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground mb-1">Messages</p>
+                  <p className="text-[10px] font-medium text-foreground">32 total</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </BrowserChrome>
+
+        <div>
+          <div className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full mb-4" style={{ background: 'hsl(45 93% 47% / 0.15)', color: 'hsl(45 93% 42%)' }}>
+            <Map className="w-3.5 h-3.5" /> Journey Builder
+          </div>
+          <h3 className="text-2xl md:text-3xl font-serif font-bold text-foreground tracking-tight mb-4">
+            Map the journey.<br />Own the timeline.
+          </h3>
+          <p className="text-muted-foreground leading-relaxed mb-6">
+            Design multi-week, multi-channel communication flows with cadence controls, escalation patterns, and visual timelines. AI generates every touchpoint, on-brand and on-schedule.
+          </p>
+          <div className="space-y-3">
+            {[
+              { icon: Map, text: 'Visual phase timeline with intensity controls' },
+              { icon: GitBranch, text: 'Interactive flow diagram with 12 channel types' },
+              { icon: BarChart3, text: 'Cadence & escalation patterns: ramp up, steady, burst' },
+            ].map((f, i) => (
+              <div key={i} className="flex items-center gap-3 text-sm text-muted-foreground">
+                <f.icon className="w-4 h-4 flex-shrink-0" style={{ color: 'hsl(45 93% 42%)' }} />
+                <span>{f.text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

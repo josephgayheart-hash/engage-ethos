@@ -21,7 +21,7 @@ import campusvoiceLogo from '@/assets/campusvoice-logo-new.png';
 import HowItWorksSection from '@/components/landing/HowItWorksSection';
 import { SEOHead, getOrganizationSchema, getSoftwareApplicationSchema } from '@/components/SEOHead';
 import { RequestDemoDialog } from '@/components/landing/RequestDemoDialog';
-import { ImageStudioShowcase, BrandStudioShowcase, AICopywriterShowcase } from '@/components/landing/ProductShowcases';
+import { ImageStudioShowcase, BrandStudioShowcase, AICopywriterShowcase, MessageBuilderShowcase, JourneyBuilderShowcase } from '@/components/landing/ProductShowcases';
 
 // JSON-LD schemas for landing page
 const landingPageSchemas = [
@@ -335,6 +335,8 @@ export default function LandingPage() {
             </p>
           </div>
 
+          <MessageBuilderShowcase />
+          <JourneyBuilderShowcase />
           <ImageStudioShowcase />
           <BrandStudioShowcase />
           <AICopywriterShowcase />
