@@ -14,13 +14,13 @@ import campusvoiceLogo from '@/assets/campusvoice-logo.png';
 const INVITE_EXPIRATION_HOURS = 72;
 
 const WELCOME_PHRASES = [
-  { text: "Built for\nFirms", emoji: "🏢" },
-  { text: "Built for\nBrands", emoji: "✨" },
-  { text: "Built for\nThinkers", emoji: "🧠" },
-  { text: "Built for\nWriters", emoji: "✍️" },
-  { text: "Built for\nMarketers", emoji: "🎯" },
-  { text: "Built for\nStorytellers", emoji: "📖" },
-  { text: "Built for\nDesigners", emoji: "🎨" },
+  { text: "Firms", color: "hsl(82 85% 55%)" },
+  { text: "Brands", color: "hsl(270 70% 60%)" },
+  { text: "Thinkers", color: "hsl(200 100% 50%)" },
+  { text: "Writers", color: "hsl(82 85% 55%)" },
+  { text: "Marketers", color: "hsl(270 70% 60%)" },
+  { text: "Storytellers", color: "hsl(200 100% 50%)" },
+  { text: "Designers", color: "hsl(82 85% 55%)" },
 ];
 
 export default function LoginPage() {
@@ -197,21 +197,17 @@ export default function LoginPage() {
         {/* Rotating motivational message */}
         <div className="relative z-10 space-y-6">
           <h1 className="text-4xl xl:text-5xl font-serif font-bold leading-tight tracking-tight">
+            <span className="text-white">Built for</span>
+            <br />
             <span
               className="inline-block transition-all duration-500"
               style={{
                 opacity: fadeIn ? 1 : 0,
                 transform: fadeIn ? 'translateY(0)' : 'translateY(12px)',
+                color: currentPhrase.color,
               }}
             >
-              {currentPhrase.text.split('\n').map((line, i) => (
-                <span key={i} className="text-white">
-                  {i > 0 && <br />}
-                  {line}
-                </span>
-              ))}
-              {' '}
-              <span className="text-3xl xl:text-4xl">{currentPhrase.emoji}</span>
+              {currentPhrase.text}.
             </span>
           </h1>
           <p className="text-white/50 text-lg max-w-md leading-relaxed font-sans">
