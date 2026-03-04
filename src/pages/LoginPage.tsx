@@ -21,6 +21,7 @@ const WELCOME_PHRASES = [
   { text: "Marketers", color: "hsl(270 70% 60%)" },
   { text: "Storytellers", color: "hsl(200 100% 50%)" },
   { text: "Designers", color: "hsl(82 85% 55%)" },
+  { text: "Higher Education", color: "hsl(270 70% 60%)" },
 ];
 
 export default function LoginPage() {

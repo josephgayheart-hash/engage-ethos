@@ -124,6 +124,7 @@ const HERO_NOUNS = [
   { text: "Visionaries", color: "hsl(82 85% 55%)" },
   { text: "Innovators", color: "hsl(270 70% 60%)" },
   { text: "Leaders", color: "hsl(200 100% 50%)" },
+  { text: "Higher Education", color: "hsl(270 70% 60%)" },
 ];
 
 export default function LandingPage() {
