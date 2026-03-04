@@ -957,24 +957,50 @@ export default function ContentDNAPage() {
               </div>
               {/* Color Swatches */}
               <div className="flex items-center gap-2">
-                <Tooltip>
-                  <TooltipTrigger>
-                    <div 
-                      className="w-6 h-6 rounded-full border border-border"
-                      style={{ backgroundColor: selectedProfile?.config?.primaryColor || tenant?.primary_color || 'hsl(222,47%,14%)' }}
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent>Primary Color</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <div 
-                      className="w-6 h-6 rounded-full border border-border"
-                      style={{ backgroundColor: selectedProfile?.config?.accentColor || tenant?.accent_color || 'hsl(173,58%,39%)' }}
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent>Accent Color</TooltipContent>
-                </Tooltip>
+                {selectedProfile?.config?.primaryColor && (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <div 
+                        className="w-6 h-6 rounded-full border border-border"
+                        style={{ backgroundColor: selectedProfile.config.primaryColor }}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>Primary Color</TooltipContent>
+                  </Tooltip>
+                )}
+                {selectedProfile?.config?.secondaryColor && (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <div 
+                        className="w-6 h-6 rounded-full border border-border"
+                        style={{ backgroundColor: selectedProfile.config.secondaryColor }}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>Secondary Color</TooltipContent>
+                  </Tooltip>
+                )}
+                {selectedProfile?.config?.tertiaryColor && !selectedProfile?.config?.tertiaryColorNA && (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <div 
+                        className="w-6 h-6 rounded-full border border-border"
+                        style={{ backgroundColor: selectedProfile.config.tertiaryColor }}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>Tertiary Color</TooltipContent>
+                  </Tooltip>
+                )}
+                {!selectedProfile?.config?.primaryColor && (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <div 
+                        className="w-6 h-6 rounded-full border border-border"
+                        style={{ backgroundColor: tenant?.primary_color || 'hsl(222,47%,14%)' }}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>Primary Color</TooltipContent>
+                  </Tooltip>
+                )}
               </div>
               {/* Edit Settings Button */}
               {isAdmin && (
