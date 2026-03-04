@@ -241,12 +241,12 @@ export default function RequestAccessPage() {
       </div>
 
       {/* Right form panel */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-12 bg-background relative overflow-hidden">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-8 bg-background relative overflow-hidden">
         {/* Subtle orb accents */}
         <div className="absolute w-64 h-64 rounded-full blur-[100px] opacity-[0.04]" style={{ background: 'hsl(82 85% 55%)', top: '-5%', right: '-5%' }} />
         <div className="absolute w-48 h-48 rounded-full blur-[80px] opacity-[0.04]" style={{ background: 'hsl(270 70% 60%)', bottom: '-5%', left: '-5%' }} />
 
-        <div className="w-full max-w-md space-y-8 relative z-10 overflow-y-auto max-h-[calc(100vh-3rem)]">
+        <div className="w-full max-w-md space-y-4 relative z-10">
           {/* Mobile logo */}
           <div className="lg:hidden text-center space-y-3">
             <img src={campusvoiceLogo} alt="CampusVoice.AI" className="h-12 w-auto mx-auto" />
@@ -276,8 +276,8 @@ export default function RequestAccessPage() {
           ) : (
             <>
               {/* Header */}
-              <div className="space-y-2">
-                <h2 className="text-2xl sm:text-3xl font-serif font-bold tracking-tight text-foreground">
+              <div className="space-y-1">
+                <h2 className="text-xl sm:text-2xl font-serif font-bold tracking-tight text-foreground">
                   {isColleagueReferral
                     ? isSameInstitution
                       ? `Join ${institutionFromUrl || 'Your Team'}`
@@ -285,10 +285,10 @@ export default function RequestAccessPage() {
                     : 'Start Your Journey'
                   }
                 </h2>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   {isColleagueReferral
                     ? 'A colleague invited you — fill in the details below.'
-                    : 'Tell us about yourself and we\'ll get you set up with CampusVoice.'
+                    : 'Tell us about yourself and we\'ll get you set up.'
                   }
                 </p>
               </div>
@@ -301,68 +301,69 @@ export default function RequestAccessPage() {
               )}
 
               {/* Form */}
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName" className="text-sm font-medium text-foreground">First Name *</Label>
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="firstName" className="text-xs font-medium text-foreground">First Name *</Label>
                     <Input
                       id="firstName"
                       name="firstName"
                       value={formData.firstName}
                       onChange={handleChange}
-                      className="h-12 bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                      className="h-9 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName" className="text-sm font-medium text-foreground">Last Name *</Label>
+                  <div className="space-y-1">
+                    <Label htmlFor="lastName" className="text-xs font-medium text-foreground">Last Name *</Label>
                     <Input
                       id="lastName"
                       name="lastName"
                       value={formData.lastName}
                       onChange={handleChange}
-                      className="h-12 bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                      className="h-9 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
                       required
                     />
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-medium text-foreground">Email *</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="you@institution.edu"
-                    className="h-12 bg-muted/30 border-border/60 focus:bg-background transition-colors"
-                    required
-                  />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="email" className="text-xs font-medium text-foreground">Email *</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="you@institution.edu"
+                      className="h-9 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="phone" className="text-xs font-medium text-foreground">Phone</Label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="(555) 123-4567"
+                      className="h-9 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-sm font-medium text-foreground">Phone</Label>
-                  <Input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder="(555) 123-4567"
-                    className="h-12 bg-muted/30 border-border/60 focus:bg-background transition-colors"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="institutionName" className="text-sm font-medium text-foreground">Institution / Company *</Label>
+                <div className="space-y-1">
+                  <Label htmlFor="institutionName" className="text-xs font-medium text-foreground">Institution / Company *</Label>
                   <Input
                     id="institutionName"
                     name="institutionName"
                     value={formData.institutionName}
                     onChange={handleChange}
                     placeholder="University Name"
-                    className="h-12 bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                    className="h-9 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
                     required
                     disabled={isSameInstitution && !!institutionFromUrl}
                   />
@@ -373,38 +374,38 @@ export default function RequestAccessPage() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="department" className="text-sm font-medium text-foreground">Department</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="department" className="text-xs font-medium text-foreground">Department</Label>
                     <Input
                       id="department"
                       name="department"
                       value={formData.department}
                       onChange={handleChange}
                       placeholder="e.g., Enrollment"
-                      className="h-12 bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                      className="h-9 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="title" className="text-sm font-medium text-foreground">Title</Label>
+                  <div className="space-y-1">
+                    <Label htmlFor="title" className="text-xs font-medium text-foreground">Title</Label>
                     <Input
                       id="title"
                       name="title"
                       value={formData.title}
                       onChange={handleChange}
                       placeholder="e.g., Director"
-                      className="h-12 bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                      className="h-9 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="referralSource" className="text-sm font-medium text-foreground">How did you hear about us?</Label>
+                <div className="space-y-1">
+                  <Label htmlFor="referralSource" className="text-xs font-medium text-foreground">How did you hear about us?</Label>
                   <Select
                     value={formData.referralSource}
                     onValueChange={(value) => setFormData(prev => ({ ...prev, referralSource: value }))}
                   >
-                    <SelectTrigger className="h-12 bg-muted/30 border-border/60 focus:bg-background transition-colors">
+                    <SelectTrigger className="h-9 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors">
                       <SelectValue placeholder="Select an option" />
                     </SelectTrigger>
                     <SelectContent>
@@ -419,7 +420,7 @@ export default function RequestAccessPage() {
 
                 <Button
                   type="submit"
-                  className="w-full h-12 text-base font-semibold rounded-xl gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+                  className="w-full h-10 text-sm font-semibold rounded-xl gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
