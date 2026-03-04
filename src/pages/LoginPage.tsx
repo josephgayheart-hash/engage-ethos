@@ -14,14 +14,13 @@ import campusvoiceLogo from '@/assets/campusvoice-logo.png';
 const INVITE_EXPIRATION_HOURS = 72;
 
 const WELCOME_PHRASES = [
-  { text: "Craft Messages\nThat Move", emoji: "✨", color: "from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)]" },
-  { text: "Your Brand\nYour Voice", emoji: "🎯", color: "from-[hsl(270_70%_60%)] to-[hsl(270_70%_50%)]" },
-  { text: "Strategy\nMeets Story", emoji: "🧠", color: "from-[hsl(200_100%_50%)] to-[hsl(200_100%_40%)]" },
-  { text: "Words That\nResonate", emoji: "💡", color: "from-[hsl(45_93%_55%)] to-[hsl(45_93%_47%)]" },
-  { text: "Engage\nWith Purpose", emoji: "🚀", color: "from-[hsl(173_58%_45%)] to-[hsl(173_58%_35%)]" },
-  { text: "Research-Driven\nImpact", emoji: "📊", color: "from-[hsl(82_85%_55%)] to-[hsl(200_100%_50%)]" },
-  { text: "Every Message\nMatters", emoji: "⭐", color: "from-[hsl(270_70%_60%)] to-[hsl(340_75%_55%)]" },
-  { text: "Plan. Build.\nLaunch.", emoji: "⚡", color: "from-[hsl(200_100%_50%)] to-[hsl(82_85%_55%)]" },
+  { text: "Built for\nFirms", emoji: "🏢" },
+  { text: "Built for\nBrands", emoji: "✨" },
+  { text: "Built for\nThinkers", emoji: "🧠" },
+  { text: "Built for\nWriters", emoji: "✍️" },
+  { text: "Built for\nMarketers", emoji: "🎯" },
+  { text: "Built for\nStorytellers", emoji: "📖" },
+  { text: "Built for\nDesigners", emoji: "🎨" },
 ];
 
 export default function LoginPage() {
@@ -216,7 +215,7 @@ export default function LoginPage() {
             </span>
           </h1>
           <p className="text-white/50 text-lg max-w-md leading-relaxed font-sans">
-            Strategic Messaging Intelligence for Higher Education — plan, build, and evaluate communications that resonate.
+            Strategic Messaging Intelligence — plan, build, and evaluate communications that resonate.
           </p>
         </div>
 
