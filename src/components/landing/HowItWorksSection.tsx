@@ -1,118 +1,298 @@
-import { Upload, Database, Zap, Library, Globe } from "lucide-react";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import {
+  Building2,
+  Upload,
+  BookOpen,
+  Dna,
+  Mail,
+  Route,
+  Image,
+  MessageSquare,
+  Library,
+  Share2,
+  ChevronRight,
+  Sparkles,
+  Check,
+} from "lucide-react";
 
-const leftSteps = [
-  { icon: Globe, label: "Upload or Scrape Content" },
-  { icon: Database, label: "Import Brand Assets" },
-  { icon: Zap, label: "Define Your Voice" },
+/* ------------------------------------------------------------------ */
+/*  Data                                                              */
+/* ------------------------------------------------------------------ */
+
+const phases = [
+  {
+    number: "01",
+    title: "Set Up Your Institution",
+    accent: "hsl(200 100% 50%)",     // blue
+    accentMuted: "hsl(200 100% 50% / 0.15)",
+    icon: Building2,
+    bullets: [
+      "University name, colors & logo",
+      "Department / sub-unit profiles",
+      "Audience segments & terminology",
+    ],
+  },
+  {
+    number: "02",
+    title: "Build Your Content DNA",
+    accent: "hsl(270 70% 60%)",       // purple
+    accentMuted: "hsl(270 70% 60% / 0.15)",
+    icon: Dna,
+    bullets: [
+      "Upload brand guidelines & samples",
+      "Import fact book & story bank",
+      "AI extracts voice + brand platform",
+    ],
+  },
+  {
+    number: "03",
+    title: "Create On-Brand Content",
+    accent: "hsl(82 85% 55%)",        // green
+    accentMuted: "hsl(82 85% 55% / 0.15)",
+    icon: Sparkles,
+    tools: [
+      { icon: Mail, label: "Messages" },
+      { icon: Route, label: "Journeys" },
+      { icon: Image, label: "Branded Images" },
+      { icon: MessageSquare, label: "AI Copywriter" },
+    ],
+  },
+  {
+    number: "04",
+    title: "Store & Share",
+    accent: "hsl(48 100% 60%)",       // gold
+    accentMuted: "hsl(48 100% 60% / 0.15)",
+    icon: Library,
+    bullets: [
+      "Personal & shared libraries",
+      "Collections & approval workflow",
+      "Export to CRM, SFMC & more",
+    ],
+  },
 ];
 
-const rightStep = { icon: Library, label: "University Library & Campus Comms" };
+/* ------------------------------------------------------------------ */
+/*  Animated connector (desktop)                                      */
+/* ------------------------------------------------------------------ */
 
-type Point = { x: number; y: number };
-
-type LineLayout = {
-  width: number;
-  height: number;
-  uploadToHub: string;
-  assetsToHub: string;
-  voiceToHub: string;
-  hubToLibrary: string;
-};
-
-const DEFAULT_LAYOUT: LineLayout = {
-  width: 100,
-  height: 100,
-  uploadToHub: "M 17 17 C 30 17, 38 34, 45 50",
-  assetsToHub: "M 17 50 L 45 50",
-  voiceToHub: "M 17 83 C 30 83, 38 66, 45 50",
-  hubToLibrary: "M 55 50 L 83 50",
-};
-
-function curve(start: Point, end: Point) {
-  const distance = Math.max(1, Math.abs(end.x - start.x));
-  const bend = Math.min(220, Math.max(90, distance * 0.55));
-  const dir = end.x >= start.x ? 1 : -1;
-  const c1x = start.x + dir * bend;
-  const c2x = end.x - dir * bend;
-  return `M ${start.x} ${start.y} C ${c1x} ${start.y}, ${c2x} ${end.y}, ${end.x} ${end.y}`;
+function Connector({ color }: { color: string }) {
+  return (
+    <div className="hidden lg:flex items-center justify-center" style={{ width: 56 }}>
+      <div className="relative flex items-center w-full">
+        {/* base line */}
+        <div
+          className="absolute inset-y-1/2 left-0 right-0 h-px"
+          style={{ background: `${color}55` }}
+        />
+        {/* pulse overlay */}
+        <div
+          className="absolute inset-y-1/2 left-0 right-0 h-px animate-pulse"
+          style={{ background: color, filter: "blur(1px)" }}
+        />
+        {/* chevron */}
+        <ChevronRight
+          className="relative ml-auto -mr-2 w-4 h-4"
+          style={{ color }}
+        />
+      </div>
+    </div>
+  );
 }
 
-function rightCenter(container: DOMRect, el: HTMLElement): Point {
-  const r = el.getBoundingClientRect();
-  return { x: r.right - container.left, y: r.top - container.top + r.height / 2 };
+/* ------------------------------------------------------------------ */
+/*  Phase card                                                        */
+/* ------------------------------------------------------------------ */
+
+function PhaseCard({
+  phase,
+  index,
+  activePhase,
+}: {
+  phase: (typeof phases)[number];
+  index: number;
+  activePhase: number;
+}) {
+  const isActive = index === activePhase;
+
+  return (
+    <div
+      className="relative flex-1 min-w-[220px] rounded-2xl border transition-all duration-700"
+      style={{
+        background: isActive
+          ? `linear-gradient(135deg, hsl(222 40% 14%), hsl(222 40% 18%))`
+          : "hsl(222 40% 13%)",
+        borderColor: isActive ? phase.accent : "hsl(0 0% 100% / 0.06)",
+        boxShadow: isActive
+          ? `0 0 32px ${phase.accent}25, inset 0 1px 0 ${phase.accent}20`
+          : "none",
+        transform: isActive ? "translateY(-4px)" : "translateY(0)",
+      }}
+    >
+      {/* number badge */}
+      <div
+        className="absolute -top-3 left-5 text-xs font-bold px-2.5 py-0.5 rounded-full"
+        style={{
+          background: phase.accent,
+          color: "hsl(222 47% 11%)",
+        }}
+      >
+        {phase.number}
+      </div>
+
+      <div className="p-5 pt-6">
+        {/* icon + title */}
+        <div className="flex items-center gap-2.5 mb-4">
+          <div
+            className="w-9 h-9 rounded-lg flex items-center justify-center"
+            style={{ background: phase.accentMuted }}
+          >
+            <phase.icon className="w-4.5 h-4.5" style={{ color: phase.accent }} />
+          </div>
+          <h3 className="text-white font-semibold text-sm leading-tight">
+            {phase.title}
+          </h3>
+        </div>
+
+        {/* bullets or tools grid */}
+        {phase.bullets ? (
+          <ul className="space-y-2">
+            {phase.bullets.map((b, i) => (
+              <li
+                key={i}
+                className="flex items-start gap-2 text-xs leading-relaxed transition-all duration-500"
+                style={{
+                  color: isActive ? "hsl(0 0% 100% / 0.75)" : "hsl(0 0% 100% / 0.4)",
+                }}
+              >
+                <Check
+                  className="w-3 h-3 mt-0.5 shrink-0"
+                  style={{ color: isActive ? phase.accent : "hsl(0 0% 100% / 0.2)" }}
+                />
+                {b}
+              </li>
+            ))}
+          </ul>
+        ) : phase.tools ? (
+          <div className="grid grid-cols-2 gap-2">
+            {phase.tools.map((tool, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs transition-all duration-500"
+                style={{
+                  background: isActive ? phase.accentMuted : "hsl(0 0% 100% / 0.03)",
+                  color: isActive ? "hsl(0 0% 100% / 0.85)" : "hsl(0 0% 100% / 0.4)",
+                }}
+              >
+                <tool.icon
+                  className="w-3.5 h-3.5 shrink-0"
+                  style={{ color: isActive ? phase.accent : "hsl(0 0% 100% / 0.25)" }}
+                />
+                {tool.label}
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </div>
+
+      {/* bottom progress bar */}
+      <div className="h-0.5 rounded-b-2xl overflow-hidden">
+        <div
+          className="h-full transition-all duration-700"
+          style={{
+            width: isActive ? "100%" : "0%",
+            background: `linear-gradient(90deg, transparent, ${phase.accent})`,
+          }}
+        />
+      </div>
+    </div>
+  );
 }
 
-function leftCenter(container: DOMRect, el: HTMLElement): Point {
-  const r = el.getBoundingClientRect();
-  return { x: r.left - container.left, y: r.top - container.top + r.height / 2 };
+/* ------------------------------------------------------------------ */
+/*  Mobile phase card (vertical)                                      */
+/* ------------------------------------------------------------------ */
+
+function MobilePhaseCard({
+  phase,
+  index,
+  isLast,
+}: {
+  phase: (typeof phases)[number];
+  index: number;
+  isLast: boolean;
+}) {
+  return (
+    <div className="relative flex gap-4">
+      {/* timeline spine */}
+      <div className="flex flex-col items-center">
+        <div
+          className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+          style={{ background: phase.accent, color: "hsl(222 47% 11%)" }}
+        >
+          {phase.number}
+        </div>
+        {!isLast && (
+          <div
+            className="w-px flex-1 my-1"
+            style={{ background: `linear-gradient(to bottom, ${phase.accent}60, ${phases[index + 1].accent}60)` }}
+          />
+        )}
+      </div>
+
+      {/* card */}
+      <div
+        className="flex-1 rounded-xl border p-4 mb-4"
+        style={{
+          background: "hsl(222 40% 14%)",
+          borderColor: `${phase.accent}30`,
+        }}
+      >
+        <div className="flex items-center gap-2 mb-3">
+          <phase.icon className="w-4 h-4" style={{ color: phase.accent }} />
+          <h3 className="text-white font-semibold text-sm">{phase.title}</h3>
+        </div>
+
+        {phase.bullets ? (
+          <ul className="space-y-1.5">
+            {phase.bullets.map((b, i) => (
+              <li key={i} className="flex items-start gap-2 text-xs text-white/50">
+                <Check className="w-3 h-3 mt-0.5 shrink-0" style={{ color: phase.accent }} />
+                {b}
+              </li>
+            ))}
+          </ul>
+        ) : phase.tools ? (
+          <div className="grid grid-cols-2 gap-1.5">
+            {phase.tools.map((tool, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs text-white/60"
+                style={{ background: phase.accentMuted }}
+              >
+                <tool.icon className="w-3 h-3" style={{ color: phase.accent }} />
+                {tool.label}
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
 }
+
+/* ------------------------------------------------------------------ */
+/*  Main component                                                    */
+/* ------------------------------------------------------------------ */
 
 export default function HowItWorksSection() {
-  const diagramRef = useRef<HTMLDivElement>(null);
-  const uploadBoxRef = useRef<HTMLDivElement>(null);
-  const assetsBoxRef = useRef<HTMLDivElement>(null);
-  const voiceBoxRef = useRef<HTMLDivElement>(null);
-  const hubRef = useRef<HTMLDivElement>(null);
-  const libraryBoxRef = useRef<HTMLDivElement>(null);
+  const [activePhase, setActivePhase] = useState(0);
 
-  const [layout, setLayout] = useState<LineLayout>(DEFAULT_LAYOUT);
-
-  useLayoutEffect(() => {
-    const recalc = () => {
-      const diagramEl = diagramRef.current;
-      const uploadEl = uploadBoxRef.current;
-      const assetsEl = assetsBoxRef.current;
-      const voiceEl = voiceBoxRef.current;
-      const hubEl = hubRef.current;
-      const libraryEl = libraryBoxRef.current;
-
-      if (!diagramEl || !uploadEl || !assetsEl || !voiceEl || !hubEl || !libraryEl) return;
-
-      const containerRect = diagramEl.getBoundingClientRect();
-
-      const uploadStart = rightCenter(containerRect, uploadEl);
-      const assetsStart = rightCenter(containerRect, assetsEl);
-      const voiceStart = rightCenter(containerRect, voiceEl);
-
-      const hubLeft = leftCenter(containerRect, hubEl);
-      const hubRight = rightCenter(containerRect, hubEl);
-
-      const libraryLeft = leftCenter(containerRect, libraryEl);
-
-      setLayout({
-        width: Math.max(1, containerRect.width),
-        height: Math.max(1, containerRect.height),
-        uploadToHub: curve(uploadStart, hubLeft),
-        assetsToHub: curve(assetsStart, hubLeft),
-        voiceToHub: curve(voiceStart, hubLeft),
-        hubToLibrary: curve(hubRight, libraryLeft),
-      });
-    };
-
-    const raf = requestAnimationFrame(recalc);
-    const ro = new ResizeObserver(recalc);
-
-    const diagramEl = diagramRef.current;
-    if (diagramEl) ro.observe(diagramEl);
-
-    [
-      uploadBoxRef.current,
-      assetsBoxRef.current,
-      voiceBoxRef.current,
-      hubRef.current,
-      libraryBoxRef.current,
-    ].forEach((el) => {
-      if (el) ro.observe(el);
-    });
-
-    window.addEventListener("resize", recalc);
-
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("resize", recalc);
-      ro.disconnect();
-    };
+  // Auto-cycle through phases
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActivePhase((prev) => (prev + 1) % phases.length);
+    }, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -120,281 +300,85 @@ export default function HowItWorksSection() {
       id="how-it-works"
       className="py-24 px-4 sm:px-6 lg:px-8 bg-[hsl(222_47%_11%)] relative overflow-hidden"
     >
-      {/* Subtle background gradient */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(270_50%_20%_/_0.15),_transparent_70%)]" />
+      {/* Background */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(270_50%_20%_/_0.12),_transparent_70%)]" />
 
-      <div className="max-w-5xl mx-auto relative z-10">
+      <div className="max-w-6xl mx-auto relative z-10">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-6">
           <h2 className="font-serif text-4xl sm:text-5xl mb-4">
             <span className="text-white">How It </span>
             <span className="bg-gradient-to-r from-[hsl(200_100%_60%)] to-[hsl(270_70%_65%)] bg-clip-text text-transparent">
               Works
             </span>
           </h2>
-          <p className="text-white/60 text-lg max-w-2xl mx-auto">
-            Feed your brand assets, upload content samples, or scrape directly from your website—our AI extracts your Content DNA and brand layer, then crafts on-brand messages ready for review and distribution across your campus communications.
+          <p className="text-white/55 text-lg max-w-2xl mx-auto">
+            From institutional setup to on-brand content at scale—four steps to
+            transform how your campus communicates.
           </p>
         </div>
 
-        {/* Hub and Spoke Diagram - Desktop */}
-        <div
-          ref={diagramRef}
-          className="hidden md:block relative"
-          style={{ height: "320px" }}
-        >
-          {/* Single SVG for all connecting lines */}
-          <svg
-            className="absolute inset-0 w-full h-full pointer-events-none"
-            preserveAspectRatio="none"
-            viewBox={`0 0 ${layout.width} ${layout.height}`}
-            style={{ overflow: "visible" }}
-          >
-            <defs>
-              <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="hsl(270 70% 60%)" stopOpacity="0.55" />
-                <stop offset="100%" stopColor="hsl(200 100% 60%)" stopOpacity="0.85" />
-              </linearGradient>
-            </defs>
-
-            {/* Base lines (always visible) */}
-            <path
-              d={layout.uploadToHub}
-              stroke="url(#lineGrad)"
-              strokeWidth={1.25}
-              fill="none"
-              strokeLinecap="round"
-              opacity="0.55"
-            />
-            <path
-              d={layout.assetsToHub}
-              stroke="url(#lineGrad)"
-              strokeWidth={1.25}
-              fill="none"
-              strokeLinecap="round"
-              opacity="0.55"
-            />
-            <path
-              d={layout.voiceToHub}
-              stroke="url(#lineGrad)"
-              strokeWidth={1.25}
-              fill="none"
-              strokeLinecap="round"
-              opacity="0.55"
-            />
-            <path
-              d={layout.hubToLibrary}
-              stroke="url(#lineGrad)"
-              strokeWidth={1.25}
-              fill="none"
-              strokeLinecap="round"
-              opacity="0.55"
-            />
-
-            {/* Pulse overlays (throb + flow) */}
-            <path
-              d={layout.uploadToHub}
-              stroke="url(#lineGrad)"
-              strokeWidth={2.25}
-              fill="none"
-              strokeLinecap="round"
-              className="animate-pulse-flow"
-              style={{ filter: "blur(0.6px)" }}
-            />
-            <path
-              d={layout.assetsToHub}
-              stroke="url(#lineGrad)"
-              strokeWidth={2.25}
-              fill="none"
-              strokeLinecap="round"
-              className="animate-pulse-flow delay-1"
-              style={{ filter: "blur(0.6px)" }}
-            />
-            <path
-              d={layout.voiceToHub}
-              stroke="url(#lineGrad)"
-              strokeWidth={2.25}
-              fill="none"
-              strokeLinecap="round"
-              className="animate-pulse-flow delay-2"
-              style={{ filter: "blur(0.6px)" }}
-            />
-            <path
-              d={layout.hubToLibrary}
-              stroke="url(#lineGrad)"
-              strokeWidth={2.25}
-              fill="none"
-              strokeLinecap="round"
-              className="animate-pulse-flow delay-3"
-              style={{ filter: "blur(0.6px)" }}
-            />
-          </svg>
-
-          {/* Left Cards - Positioned absolutely */}
-          <div
-            className="absolute left-0 top-0 bottom-0 grid grid-rows-3 items-center"
-            style={{ width: "170px" }}
-          >
-            {leftSteps.map((step, index) => (
-              <div key={index} className="flex flex-col items-center justify-center">
-                <div
-                  ref={
-                    index === 0
-                      ? uploadBoxRef
-                      : index === 1
-                        ? assetsBoxRef
-                        : voiceBoxRef
-                  }
-                  className="w-full h-14 rounded-xl bg-[hsl(222_40%_16%)] border border-white/10 flex items-center justify-center transition-all hover:border-[hsl(270_70%_60%_/_0.5)] hover:bg-[hsl(222_40%_18%)]"
-                >
-                  <step.icon className="w-5 h-5 text-white/70" />
-                </div>
-                <span className="mt-2 text-white/50 text-xs text-center">{step.label}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Center Hub */}
-          <div
-            ref={hubRef}
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-          >
-            <div className="w-40 h-40 rounded-full bg-[hsl(222_40%_14%)] border border-white/15 flex items-center justify-center relative overflow-hidden shadow-[0_0_40px_hsl(270_70%_50%_/_0.2)]">
-              {/* Animated glow ring */}
-              <div
-                className="absolute inset-0 rounded-full opacity-70"
+        {/* Phase indicator dots (desktop) */}
+        <div className="hidden lg:flex justify-center gap-2 mb-10">
+          {phases.map((phase, i) => (
+            <button
+              key={i}
+              onClick={() => setActivePhase(i)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-500"
+              style={{
+                background: i === activePhase ? `${phase.accent}20` : "transparent",
+                color: i === activePhase ? phase.accent : "hsl(0 0% 100% / 0.3)",
+                border: `1px solid ${i === activePhase ? `${phase.accent}40` : "transparent"}`,
+              }}
+            >
+              <span
+                className="w-1.5 h-1.5 rounded-full transition-all duration-500"
                 style={{
-                  background:
-                    "conic-gradient(from 0deg, transparent 0%, hsl(270 70% 60% / 0.5) 20%, hsl(200 100% 60% / 0.5) 40%, transparent 60%)",
-                  animation: "spin 5s linear infinite",
+                  background: i === activePhase ? phase.accent : "hsl(0 0% 100% / 0.2)",
+                  boxShadow: i === activePhase ? `0 0 6px ${phase.accent}` : "none",
                 }}
               />
-              <div className="absolute inset-[3px] rounded-full bg-[hsl(222_40%_14%)] flex items-center justify-center">
-                <div className="text-center">
-                  <span className="text-white font-semibold text-xs leading-tight block">CampusVoice</span>
-                  <span className="text-white/50 text-[10px]">AI Engine</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Card - Positioned absolutely */}
-          <div
-            className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col items-center"
-            style={{ width: "170px" }}
-          >
-            <div
-              ref={libraryBoxRef}
-              className="w-full h-14 rounded-xl bg-[hsl(222_40%_16%)] border border-white/10 flex items-center justify-center transition-all hover:border-[hsl(200_100%_60%_/_0.5)] hover:bg-[hsl(222_40%_18%)]"
-            >
-              <rightStep.icon className="w-5 h-5 text-white/70" />
-            </div>
-            <span className="mt-2 text-white/50 text-xs text-center">{rightStep.label}</span>
-          </div>
+              {phase.title}
+            </button>
+          ))}
         </div>
 
-        {/* Mobile Layout - Vertical with SVG connecting lines */}
-        <div className="md:hidden relative" style={{ minHeight: "580px" }}>
-          {/* SVG overlay for connecting lines */}
-          <svg
-            className="absolute inset-0 w-full h-full pointer-events-none"
-            viewBox="0 0 200 580"
-            preserveAspectRatio="xMidYMid meet"
-            style={{ overflow: "visible" }}
-          >
-            <defs>
-              <linearGradient id="mobileLineGradV" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="hsl(270 70% 60%)" stopOpacity="0.55" />
-                <stop offset="100%" stopColor="hsl(200 100% 60%)" stopOpacity="0.85" />
-              </linearGradient>
-            </defs>
-
-            {/* Line from Box 1 to Box 2 */}
-            <line x1="100" y1="70" x2="100" y2="105" stroke="url(#mobileLineGradV)" strokeWidth="1.5" strokeLinecap="round" opacity="0.55" />
-            <line x1="100" y1="70" x2="100" y2="105" stroke="url(#mobileLineGradV)" strokeWidth="2.5" strokeLinecap="round" className="animate-pulse-flow-vertical" style={{ filter: "blur(0.5px)" }} />
-
-            {/* Line from Box 2 to Box 3 */}
-            <line x1="100" y1="175" x2="100" y2="210" stroke="url(#mobileLineGradV)" strokeWidth="1.5" strokeLinecap="round" opacity="0.55" />
-            <line x1="100" y1="175" x2="100" y2="210" stroke="url(#mobileLineGradV)" strokeWidth="2.5" strokeLinecap="round" className="animate-pulse-flow-vertical" style={{ animationDelay: "0.35s", filter: "blur(0.5px)" }} />
-
-            {/* Line from Box 3 to Hub */}
-            <line x1="100" y1="280" x2="100" y2="320" stroke="url(#mobileLineGradV)" strokeWidth="1.5" strokeLinecap="round" opacity="0.55" />
-            <line x1="100" y1="280" x2="100" y2="320" stroke="url(#mobileLineGradV)" strokeWidth="2.5" strokeLinecap="round" className="animate-pulse-flow-vertical" style={{ animationDelay: "0.7s", filter: "blur(0.5px)" }} />
-
-            {/* Line from Hub to Output */}
-            <line x1="100" y1="430" x2="100" y2="470" stroke="url(#mobileLineGradV)" strokeWidth="1.5" strokeLinecap="round" opacity="0.55" />
-            <line x1="100" y1="430" x2="100" y2="470" stroke="url(#mobileLineGradV)" strokeWidth="2.5" strokeLinecap="round" className="animate-pulse-flow-vertical" style={{ animationDelay: "1.05s", filter: "blur(0.5px)" }} />
-          </svg>
-
-          {/* Content positioned over SVG */}
-          <div className="relative z-10 flex flex-col items-center">
-            {/* Box 1 - Upload or Scrape */}
-            <div className="flex flex-col items-center">
-              <div className="w-52 h-14 rounded-xl bg-[hsl(222_40%_16%)] border border-white/10 flex items-center justify-center">
-                <Globe className="w-5 h-5 text-white/70" />
-              </div>
-              <span className="mt-2 text-white/50 text-xs text-center">Upload or Scrape Content</span>
+        {/* Desktop layout */}
+        <div className="hidden lg:flex items-stretch gap-0">
+          {phases.map((phase, i) => (
+            <div key={i} className="contents">
+              <PhaseCard phase={phase} index={i} activePhase={activePhase} />
+              {i < phases.length - 1 && (
+                <Connector color={phases[i + 1].accent} />
+              )}
             </div>
+          ))}
+        </div>
 
-            {/* Spacer for line */}
-            <div className="h-9" />
+        {/* Mobile layout */}
+        <div className="lg:hidden mt-8">
+          {phases.map((phase, i) => (
+            <MobilePhaseCard
+              key={i}
+              phase={phase}
+              index={i}
+              isLast={i === phases.length - 1}
+            />
+          ))}
+        </div>
 
-            {/* Box 2 - Import */}
-            <div className="flex flex-col items-center">
-              <div className="w-52 h-14 rounded-xl bg-[hsl(222_40%_16%)] border border-white/10 flex items-center justify-center">
-                <Database className="w-5 h-5 text-white/70" />
-              </div>
-              <span className="mt-2 text-white/50 text-xs text-center">Import Brand Assets</span>
-            </div>
-
-            {/* Spacer for line */}
-            <div className="h-9" />
-
-            {/* Box 3 - Voice */}
-            <div className="flex flex-col items-center">
-              <div className="w-52 h-14 rounded-xl bg-[hsl(222_40%_16%)] border border-white/10 flex items-center justify-center">
-                <Zap className="w-5 h-5 text-white/70" />
-              </div>
-              <span className="mt-2 text-white/50 text-xs text-center">Define Your Voice</span>
-            </div>
-
-            {/* Spacer for line to hub */}
-            <div className="h-10" />
-
-            {/* Hub with animated glow */}
-            <div className="w-28 h-28 rounded-full bg-[hsl(222_40%_14%)] border border-white/15 flex items-center justify-center relative overflow-hidden shadow-[0_0_30px_hsl(270_70%_50%_/_0.2)]">
-              {/* Animated glow ring */}
-              <div
-                className="absolute inset-0 rounded-full opacity-70"
-                style={{
-                  background:
-                    "conic-gradient(from 0deg, transparent 0%, hsl(270 70% 60% / 0.5) 20%, hsl(200 100% 60% / 0.5) 40%, transparent 60%)",
-                  animation: "spin 5s linear infinite",
-                }}
-              />
-              <div className="absolute inset-[3px] rounded-full bg-[hsl(222_40%_14%)] flex items-center justify-center">
-                <div className="text-center">
-                  <span className="text-white font-semibold text-[11px] leading-tight block">CampusVoice</span>
-                  <span className="text-white/50 text-[9px]">AI Engine</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Spacer for line from hub */}
-            <div className="h-10" />
-
-            {/* Output */}
-            <div className="flex flex-col items-center">
-              <div className="w-52 h-14 rounded-xl bg-[hsl(222_40%_16%)] border border-white/10 flex items-center justify-center">
-                <Library className="w-5 h-5 text-white/70" />
-              </div>
-              <span className="mt-2 text-white/50 text-xs text-center">{rightStep.label}</span>
-            </div>
+        {/* Bottom tagline */}
+        <div className="mt-10 flex justify-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.04] border border-white/[0.06]">
+            <Dna className="w-3.5 h-3.5 text-[hsl(270_70%_60%)]" />
+            <span className="text-white/40 text-xs">
+              Every output is grounded in your Content DNA — voice, brand platform & institutional facts
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Wave Divider to next section */}
+      {/* Wave divider */}
       <div className="absolute -bottom-px left-0 right-0">
         <svg
           viewBox="0 0 1440 80"
@@ -409,56 +393,6 @@ export default function HowItWorksSection() {
           />
         </svg>
       </div>
-
-      <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-
-        @keyframes pulse-line {
-          0%, 100% {
-            opacity: 0.25;
-          }
-          50% {
-            opacity: 0.95;
-          }
-        }
-
-        @keyframes flow {
-          0% {
-            stroke-dasharray: 6 16;
-            stroke-dashoffset: 60;
-          }
-          100% {
-            stroke-dasharray: 6 16;
-            stroke-dashoffset: 0;
-          }
-        }
-
-        @keyframes flow-vertical {
-          0% {
-            stroke-dasharray: 4 12;
-            stroke-dashoffset: 24;
-          }
-          100% {
-            stroke-dasharray: 4 12;
-            stroke-dashoffset: 0;
-          }
-        }
-
-        .animate-pulse-flow {
-          animation: pulse-line 2.2s ease-in-out infinite, flow 1.8s linear infinite;
-        }
-
-        .animate-pulse-flow-vertical {
-          animation: pulse-line 2.2s ease-in-out infinite, flow-vertical 1.8s linear infinite;
-        }
-
-        .delay-1 { animation-delay: 0.35s, 0.35s; }
-        .delay-2 { animation-delay: 0.7s, 0.7s; }
-        .delay-3 { animation-delay: 1.05s, 1.05s; }
-      `}</style>
     </section>
   );
 }
