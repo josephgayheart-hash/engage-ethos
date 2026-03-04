@@ -226,7 +226,7 @@ export default function LandingPage() {
 
             {/* CTA Buttons */}
             <div 
-              className="flex flex-col sm:flex-row gap-4 justify-center items-start pt-4 animate-fade-in"
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center sm:items-start pt-4 animate-fade-in"
               style={{ animationDelay: '0.4s' }}
             >
               <Button 
