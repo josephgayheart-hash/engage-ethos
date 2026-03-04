@@ -239,19 +239,21 @@ export default function LandingPage() {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button 
-                asChild
-                variant="ghost"
-                size="lg"
-                className="border-2 border-white/30 text-white bg-white/5 hover:bg-white/15 hover:border-white/50 text-base px-8 py-6 backdrop-blur-sm"
-              >
-                <Link to="/login">
-                  Sign In
+              <div className="flex flex-col items-center">
+                <Button 
+                  asChild
+                  variant="ghost"
+                  size="lg"
+                  className="border-2 border-white/30 text-white bg-white/5 hover:bg-white/15 hover:border-white/50 text-base px-8 py-6 backdrop-blur-sm"
+                >
+                  <Link to="/login">
+                    Sign In
+                  </Link>
+                </Button>
+                <Link to="/login" className="text-white/40 text-xs mt-1.5 hover:text-white/60 transition-colors">
+                  Already in Beta?
                 </Link>
-              </Button>
-              <p className="w-full text-center text-white/40 text-xs mt-1">
-                <Link to="/login" className="hover:text-white/60 transition-colors">Already in Beta?</Link>
-              </p>
+              </div>
             </div>
 
             {/* Trust Indicators */}
