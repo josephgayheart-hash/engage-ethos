@@ -226,7 +226,7 @@ export default function LandingPage() {
 
             {/* CTA Buttons */}
             <div 
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4 animate-fade-in"
+              className="flex flex-col sm:flex-row gap-4 justify-center items-start pt-4 animate-fade-in"
               style={{ animationDelay: '0.4s' }}
             >
               <Button 
@@ -250,7 +250,7 @@ export default function LandingPage() {
                     Sign In
                   </Link>
                 </Button>
-                <Link to="/login" className="text-white/40 text-xs mt-1.5 hover:text-white/60 transition-colors">
+                <Link to="/login" className="text-white/35 text-[10px] mt-1 hover:text-white/55 transition-colors">
                   Already in Beta?
                 </Link>
               </div>
