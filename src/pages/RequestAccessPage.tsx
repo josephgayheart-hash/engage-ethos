@@ -30,12 +30,12 @@ const VALUE_PROPS = [
 ];
 
 const ROTATING_PHRASES = [
-  { text: "Your Voice.", color: "hsl(82 85% 55%)" },
-  { text: "Your Brand.", color: "hsl(270 70% 60%)" },
-  { text: "Amplified.", color: "hsl(200 100% 50%)" },
-  { text: "On Strategy.", color: "hsl(82 85% 55%)" },
-  { text: "On Brand.", color: "hsl(270 70% 60%)" },
-  { text: "Every Time.", color: "hsl(200 100% 50%)" },
+  { text: "Smarter Messaging.", color: "hsl(82 85% 55%)" },
+  { text: "Brand Consistency.", color: "hsl(270 70% 60%)" },
+  { text: "Strategic Impact.", color: "hsl(200 100% 50%)" },
+  { text: "Faster Campaigns.", color: "hsl(82 85% 55%)" },
+  { text: "Authentic Voice.", color: "hsl(270 70% 60%)" },
+  { text: "Real Results.", color: "hsl(200 100% 50%)" },
 ];
 
 export default function RequestAccessPage() {
@@ -181,7 +181,7 @@ export default function RequestAccessPage() {
             <span className="text-white">Get Ready for</span>
             <br />
             <span
-              className="inline-block transition-all duration-500"
+              className="inline-block relative transition-all duration-500"
               style={{
                 opacity: fadeIn ? 1 : 0,
                 transform: fadeIn ? 'translateY(0)' : 'translateY(12px)',
@@ -189,6 +189,13 @@ export default function RequestAccessPage() {
               }}
             >
               {currentPhrase.text}
+              <span
+                className="absolute left-0 bottom-0 h-[3px] rounded-full transition-all duration-500"
+                style={{
+                  width: fadeIn ? '100%' : '0%',
+                  background: `linear-gradient(90deg, ${currentPhrase.color}, ${currentPhrase.color}00)`,
+                }}
+              />
             </span>
           </h1>
 
