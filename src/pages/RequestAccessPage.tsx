@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { UserPlus, CheckCircle2, Loader2, ArrowLeft, Users, Sparkles, Shield, Brain, GraduationCap, ArrowRight, Clock, FileCheck, Mail } from 'lucide-react';
+import { CheckCircle2, Loader2, ArrowLeft, ArrowRight, Zap, BarChart3, Palette, MessageSquareText } from 'lucide-react';
 import campusvoiceLogo from '@/assets/campusvoice-logo.png';
 import { SEOHead } from '@/components/SEOHead';
 
@@ -24,22 +22,24 @@ const REFERRAL_OPTIONS = [
   { value: 'other', label: 'Other' },
 ];
 
-const trustIndicators = [
-  { icon: Shield, label: 'Brand Governance' },
-  { icon: Brain, label: 'Research-Driven' },
-  { icon: GraduationCap, label: 'Built for Higher Ed' },
+const VALUE_PROPS = [
+  { icon: MessageSquareText, text: "AI-powered message generation tuned to your brand voice", color: "hsl(82 85% 55%)" },
+  { icon: BarChart3, text: "Research-backed evaluation that scores every message", color: "hsl(270 70% 60%)" },
+  { icon: Palette, text: "Brand governance tools that keep your team on-brand", color: "hsl(200 100% 50%)" },
+  { icon: Zap, text: "From strategy to send in minutes, not weeks", color: "hsl(82 85% 55%)" },
 ];
 
-const processSteps = [
-  { icon: FileCheck, label: 'Submit Request', description: 'Complete the form' },
-  { icon: Clock, label: 'Review', description: '24-48 hour review' },
-  { icon: Mail, label: 'Credentials', description: 'Receive login via email' },
+const ROTATING_PHRASES = [
+  { text: "Your Voice.", color: "hsl(82 85% 55%)" },
+  { text: "Your Brand.", color: "hsl(270 70% 60%)" },
+  { text: "Amplified.", color: "hsl(200 100% 50%)" },
+  { text: "On Strategy.", color: "hsl(82 85% 55%)" },
+  { text: "On Brand.", color: "hsl(270 70% 60%)" },
+  { text: "Every Time.", color: "hsl(200 100% 50%)" },
 ];
 
 export default function RequestAccessPage() {
   const [searchParams] = useSearchParams();
-  
-  // Check for referral parameters
   const refSource = searchParams.get('ref');
   const tenantId = searchParams.get('tenant');
   const institutionFromUrl = searchParams.get('institution');
@@ -59,8 +59,9 @@ export default function RequestAccessPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const [fadeIn, setFadeIn] = useState(true);
 
-  // Pre-fill institution name from URL if provided
   useEffect(() => {
     if (institutionFromUrl && !formData.institutionName) {
       setFormData(prev => ({ ...prev, institutionName: institutionFromUrl }));
@@ -70,11 +71,21 @@ export default function RequestAccessPage() {
     }
   }, [institutionFromUrl, isColleagueReferral]);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFadeIn(false);
+      setTimeout(() => {
+        setPhraseIndex(prev => (prev + 1) % ROTATING_PHRASES.length);
+        setFadeIn(true);
+      }, 400);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const currentPhrase = ROTATING_PHRASES[phraseIndex];
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -95,7 +106,6 @@ export default function RequestAccessPage() {
           title: formData.title || null,
           referral_source: formData.referralSource || null,
           request_status: 'submitted',
-          // Store tenant_id if this is a same-institution referral
           tenant_id: isSameInstitution ? tenantId : null,
         });
 
@@ -108,7 +118,6 @@ export default function RequestAccessPage() {
         return;
       }
 
-      // Send confirmation email (fire-and-forget - don't block on success)
       supabase.functions.invoke('send-request-confirmation', {
         body: {
           email: formData.email,
@@ -129,177 +138,190 @@ export default function RequestAccessPage() {
     }
   };
 
-  if (isSubmitted) {
-    return (
-      <div className="min-h-screen relative overflow-hidden">
-        {/* Gradient background */}
-        <div className="absolute inset-0 bg-zone-hero" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(200_70%_90%_/_0.4),_transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_hsl(173_58%_85%_/_0.3),_transparent_50%)]" />
-        
-        {/* Lens flares */}
-        <div className="absolute top-20 right-[15%] w-32 h-32 bg-[hsl(82_85%_55%_/_0.12)] rounded-full blur-2xl" />
-        <div className="absolute bottom-32 left-[10%] w-40 h-40 bg-[hsl(270_70%_60%_/_0.1)] rounded-full blur-3xl" />
-        
-        <div className="relative flex items-center justify-center min-h-screen p-4">
-          <div className="w-full max-w-md space-y-6 animate-fade-in">
-            <div className="text-center">
-              <img src={campusvoiceLogo} alt="CampusVoice.AI" className="h-14 w-auto mx-auto mb-4" />
-            </div>
-
-            <Card className="border-border/60 shadow-lg bg-card/95 backdrop-blur-sm">
-              <CardContent className="pt-8 pb-8 text-center space-y-4">
-                <div className="mx-auto p-4 rounded-2xl bg-status-strong/10 w-fit animate-scale-in">
-                  <CheckCircle2 className="w-12 h-12 text-status-strong" />
-                </div>
-                <h2 className="font-serif text-2xl font-bold text-foreground">
-                  Request Submitted
-                </h2>
-                <p className="text-muted-foreground">
-                  Thank you for your interest in CampusVoice. An administrator will review your request and activate your account.
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  You will receive your login credentials once approved.
-                </p>
-                <Link to="/login">
-                  <Button variant="outline" className="mt-4 border-border hover:bg-muted">
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back to Login
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen flex flex-col lg:flex-row">
       <SEOHead 
         title="Request Beta Access - CampusVoice.AI"
         description="Join the CampusVoice.AI beta program. Get early access to AI-powered strategic messaging intelligence built for higher education."
         keywords={['CampusVoice beta', 'higher education AI', 'enrollment marketing', 'request access']}
       />
-      
-      {/* Gradient background matching landing page */}
-      <div className="absolute inset-0 bg-zone-hero" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(200_70%_90%_/_0.4),_transparent_50%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_hsl(173_58%_85%_/_0.3),_transparent_50%)]" />
-      
-      {/* Lens flares */}
-      <div className="absolute top-20 right-[12%] w-32 h-32 bg-[hsl(270_70%_60%_/_0.12)] rounded-full blur-2xl" />
-      <div className="absolute bottom-36 left-[8%] w-40 h-40 bg-[hsl(82_85%_55%_/_0.1)] rounded-full blur-3xl" />
-      <div className="absolute top-44 left-[22%] w-24 h-24 bg-[hsl(200_100%_50%_/_0.1)] rounded-full blur-2xl" />
-      <div className="absolute bottom-48 right-[25%] w-20 h-20 bg-[hsl(340_75%_55%_/_0.08)] rounded-full blur-2xl" />
-      
-      <div className="relative flex items-center justify-center min-h-screen p-4 py-12">
-        <div className="w-full max-w-lg space-y-6 animate-fade-in">
-          {/* Logo & Tagline */}
-          <div className="text-center">
-            <Badge 
-              variant="secondary" 
-              className="mb-4 bg-[hsl(200_100%_50%_/_0.15)] text-[hsl(200_100%_40%)] border-[hsl(200_100%_50%_/_0.3)] px-3 py-1"
+
+      {/* Left branded panel — matches login */}
+      <div
+        className="hidden lg:flex lg:w-[48%] relative overflow-hidden flex-col justify-between p-12"
+        style={{
+          background: 'linear-gradient(145deg, hsl(222, 47%, 11%) 0%, hsl(222, 47%, 16%) 40%, hsl(222, 47%, 13%) 100%)',
+        }}
+      >
+        {/* Dot grid */}
+        <div
+          className="absolute inset-0 opacity-[0.05]"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.5) 1px, transparent 0)',
+            backgroundSize: '40px 40px',
+          }}
+        />
+
+        {/* Floating orbs */}
+        <div className="absolute w-72 h-72 rounded-full blur-[80px] animate-float-slow" style={{ background: 'hsl(82 85% 55% / 0.25)', top: '8%', right: '10%' }} />
+        <div className="absolute w-56 h-56 rounded-full blur-[70px] animate-float-medium" style={{ background: 'hsl(270 70% 60% / 0.3)', bottom: '15%', left: '5%', animationDelay: '1s' }} />
+        <div className="absolute w-40 h-40 rounded-full blur-[60px] animate-float-fast" style={{ background: 'hsl(200 100% 50% / 0.3)', top: '45%', left: '30%', animationDelay: '0.5s' }} />
+        <div className="absolute w-32 h-32 rounded-full blur-[50px] animate-float-medium" style={{ background: 'hsl(340 75% 55% / 0.2)', bottom: '30%', right: '20%', animationDelay: '2s' }} />
+        <div className="absolute w-24 h-24 rounded-full blur-[40px] animate-float-slow" style={{ background: 'hsl(45 93% 55% / 0.2)', top: '25%', left: '15%', animationDelay: '1.5s' }} />
+        <div className="absolute w-48 h-48 rounded-full blur-[60px] animate-float-fast" style={{ background: 'hsl(173 58% 45% / 0.2)', bottom: '5%', right: '5%', animationDelay: '3s' }} />
+
+        {/* Logo */}
+        <div className="relative z-10">
+          <img src={campusvoiceLogo} alt="CampusVoice.AI" className="h-10 w-auto brightness-0 invert" />
+        </div>
+
+        {/* Motivating content */}
+        <div className="relative z-10 space-y-8">
+          <h1 className="text-4xl xl:text-5xl font-serif font-bold leading-tight tracking-tight">
+            <span className="text-white">Get Ready for</span>
+            <br />
+            <span
+              className="inline-block transition-all duration-500"
+              style={{
+                opacity: fadeIn ? 1 : 0,
+                transform: fadeIn ? 'translateY(0)' : 'translateY(12px)',
+                color: currentPhrase.color,
+              }}
             >
-              <Sparkles className="w-3 h-3 mr-1.5" />
-              Beta Access
-            </Badge>
-            <img src={campusvoiceLogo} alt="CampusVoice.AI" className="h-12 w-auto mx-auto mb-4" />
-            <h1 className="font-serif text-xl text-foreground mb-2">
-              <span className="text-[hsl(82_85%_45%)]">Plan.</span>{' '}
-              <span className="text-[hsl(270_70%_55%)]">Strategize.</span>{' '}
-              <span className="text-[hsl(200_100%_45%)]">Execute.</span>
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              Strategic Messaging Intelligence for Higher Education
-            </p>
-          </div>
+              {currentPhrase.text}
+            </span>
+          </h1>
 
-          {/* What Happens Next Timeline */}
-          <div className="bg-card/80 backdrop-blur-sm rounded-xl border border-border/60 p-4">
-            <p className="text-xs font-medium text-muted-foreground mb-3 text-center">What happens next?</p>
-            <div className="flex items-center justify-between gap-2">
-              {processSteps.map((step, index) => (
-                <div key={step.label} className="flex flex-col items-center text-center flex-1">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-                    <step.icon className="w-5 h-5 text-primary" />
-                  </div>
-                  <p className="text-xs font-medium text-foreground">{step.label}</p>
-                  <p className="text-xs text-muted-foreground">{step.description}</p>
-                  {index < processSteps.length - 1 && (
-                    <div className="absolute hidden" /> 
-                  )}
+          <div className="space-y-4">
+            {VALUE_PROPS.map((prop) => (
+              <div key={prop.text} className="flex items-start gap-3">
+                <div
+                  className="mt-0.5 w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: `${prop.color}20` }}
+                >
+                  <prop.icon className="w-4 h-4" style={{ color: prop.color }} />
                 </div>
-              ))}
-            </div>
+                <p className="text-white/70 text-sm leading-relaxed font-sans">{prop.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="relative z-10 flex items-center justify-between">
+          <p className="text-white/25 text-sm font-sans">
+            © {new Date().getFullYear()} CampusVoice.AI
+          </p>
+          <div className="flex gap-3">
+            {['Plan', 'Strategize', 'Execute'].map((word, i) => {
+              const colors = ['hsl(82 85% 55%)', 'hsl(270 70% 60%)', 'hsl(200 100% 50%)'];
+              return (
+                <span
+                  key={word}
+                  className="text-xs font-sans font-medium px-2.5 py-1 rounded-full border"
+                  style={{
+                    color: colors[i],
+                    borderColor: `${colors[i]}40`,
+                    background: `${colors[i]}10`,
+                  }}
+                >
+                  {word}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Right form panel */}
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-12 bg-background relative overflow-hidden">
+        {/* Subtle orb accents */}
+        <div className="absolute w-64 h-64 rounded-full blur-[100px] opacity-[0.04]" style={{ background: 'hsl(82 85% 55%)', top: '-5%', right: '-5%' }} />
+        <div className="absolute w-48 h-48 rounded-full blur-[80px] opacity-[0.04]" style={{ background: 'hsl(270 70% 60%)', bottom: '-5%', left: '-5%' }} />
+
+        <div className="w-full max-w-md space-y-8 relative z-10 overflow-y-auto max-h-[calc(100vh-3rem)]">
+          {/* Mobile logo */}
+          <div className="lg:hidden text-center space-y-3">
+            <img src={campusvoiceLogo} alt="CampusVoice.AI" className="h-12 w-auto mx-auto" />
+            <p className="text-muted-foreground text-sm">Strategic Messaging Intelligence</p>
           </div>
 
-          {/* Request Card */}
-          <Card className="border-border/60 shadow-lg bg-card/95 backdrop-blur-sm">
-            <CardHeader className="text-center pb-4">
-              {isColleagueReferral ? (
-                <>
-                  <div className="mx-auto p-3 rounded-xl bg-[hsl(200_100%_50%_/_0.1)] w-fit mb-2">
-                    <Users className="w-6 h-6 text-[hsl(200_100%_45%)]" />
-                  </div>
-                  <CardTitle className="font-serif text-foreground">
-                    {isSameInstitution ? `Join ${institutionFromUrl || 'Your Team'}` : 'Complete Your Profile'}
-                  </CardTitle>
-                  <CardDescription className="text-muted-foreground">
-                    {isSameInstitution 
-                      ? "A colleague invited you to join their team on CampusVoice"
-                      : "A colleague recommended CampusVoice for your institution"
-                    }
-                  </CardDescription>
-                </>
-              ) : (
-                <>
-                  <div className="mx-auto p-3 rounded-xl bg-accent/10 w-fit mb-2">
-                    <UserPlus className="w-6 h-6 text-accent" />
-                  </div>
-                  <CardTitle className="font-serif text-foreground">Request Access</CardTitle>
-                  <CardDescription className="text-muted-foreground">
-                    Fill out the form below to request access to CampusVoice
-                  </CardDescription>
-                </>
-              )}
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {error && (
-                  <Alert variant="destructive" className="bg-destructive/10 border-destructive/30">
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
+          {isSubmitted ? (
+            <div className="py-8 space-y-6 text-center animate-fade-in">
+              <div className="mx-auto p-4 rounded-2xl bg-[hsl(82_85%_55%_/_0.1)] w-fit">
+                <CheckCircle2 className="w-12 h-12 text-[hsl(82_70%_40%)]" />
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-2xl sm:text-3xl font-serif font-bold tracking-tight text-foreground">
+                  You're In the Queue
+                </h2>
+                <p className="text-muted-foreground">
+                  We'll review your request and send login credentials to <strong className="text-foreground">{formData.email}</strong> within 24–48 hours.
+                </p>
+              </div>
+              <Link to="/login">
+                <Button variant="outline" className="mt-4 border-border/60 hover:bg-muted/50">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Login
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <>
+              {/* Header */}
+              <div className="space-y-2">
+                <h2 className="text-2xl sm:text-3xl font-serif font-bold tracking-tight text-foreground">
+                  {isColleagueReferral
+                    ? isSameInstitution
+                      ? `Join ${institutionFromUrl || 'Your Team'}`
+                      : 'Welcome Aboard'
+                    : 'Start Your Journey'
+                  }
+                </h2>
+                <p className="text-muted-foreground">
+                  {isColleagueReferral
+                    ? 'A colleague invited you — fill in the details below.'
+                    : 'Tell us about yourself and we\'ll get you set up with CampusVoice.'
+                  }
+                </p>
+              </div>
 
+              {/* Error */}
+              {error && (
+                <Alert variant="destructive" className="bg-destructive/10 border-destructive/30">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              {/* Form */}
+              <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName" className="text-foreground">First Name *</Label>
+                    <Label htmlFor="firstName" className="text-sm font-medium text-foreground">First Name *</Label>
                     <Input
                       id="firstName"
                       name="firstName"
                       value={formData.firstName}
                       onChange={handleChange}
-                      className="border-border"
+                      className="h-12 bg-muted/30 border-border/60 focus:bg-background transition-colors"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="lastName" className="text-foreground">Last Name *</Label>
+                    <Label htmlFor="lastName" className="text-sm font-medium text-foreground">Last Name *</Label>
                     <Input
                       id="lastName"
                       name="lastName"
                       value={formData.lastName}
                       onChange={handleChange}
-                      className="border-border"
+                      className="h-12 bg-muted/30 border-border/60 focus:bg-background transition-colors"
                       required
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-foreground">Email *</Label>
+                  <Label htmlFor="email" className="text-sm font-medium text-foreground">Email *</Label>
                   <Input
                     id="email"
                     name="email"
@@ -307,13 +329,13 @@ export default function RequestAccessPage() {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="you@institution.edu"
-                    className="border-border"
+                    className="h-12 bg-muted/30 border-border/60 focus:bg-background transition-colors"
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-foreground">Phone</Label>
+                  <Label htmlFor="phone" className="text-sm font-medium text-foreground">Phone</Label>
                   <Input
                     id="phone"
                     name="phone"
@@ -321,19 +343,19 @@ export default function RequestAccessPage() {
                     value={formData.phone}
                     onChange={handleChange}
                     placeholder="(555) 123-4567"
-                    className="border-border"
+                    className="h-12 bg-muted/30 border-border/60 focus:bg-background transition-colors"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="institutionName" className="text-foreground">Institution Name *</Label>
+                  <Label htmlFor="institutionName" className="text-sm font-medium text-foreground">Institution / Company *</Label>
                   <Input
                     id="institutionName"
                     name="institutionName"
                     value={formData.institutionName}
                     onChange={handleChange}
                     placeholder="University Name"
-                    className="border-border"
+                    className="h-12 bg-muted/30 border-border/60 focus:bg-background transition-colors"
                     required
                     disabled={isSameInstitution && !!institutionFromUrl}
                   />
@@ -346,36 +368,36 @@ export default function RequestAccessPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="department" className="text-foreground">Department</Label>
+                    <Label htmlFor="department" className="text-sm font-medium text-foreground">Department</Label>
                     <Input
                       id="department"
                       name="department"
                       value={formData.department}
                       onChange={handleChange}
                       placeholder="e.g., Enrollment"
-                      className="border-border"
+                      className="h-12 bg-muted/30 border-border/60 focus:bg-background transition-colors"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="title" className="text-foreground">Title</Label>
+                    <Label htmlFor="title" className="text-sm font-medium text-foreground">Title</Label>
                     <Input
                       id="title"
                       name="title"
                       value={formData.title}
                       onChange={handleChange}
                       placeholder="e.g., Director"
-                      className="border-border"
+                      className="h-12 bg-muted/30 border-border/60 focus:bg-background transition-colors"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="referralSource" className="text-foreground">How did you hear about us?</Label>
+                  <Label htmlFor="referralSource" className="text-sm font-medium text-foreground">How did you hear about us?</Label>
                   <Select
                     value={formData.referralSource}
                     onValueChange={(value) => setFormData(prev => ({ ...prev, referralSource: value }))}
                   >
-                    <SelectTrigger className="border-border">
+                    <SelectTrigger className="h-12 bg-muted/30 border-border/60 focus:bg-background transition-colors">
                       <SelectValue placeholder="Select an option" />
                     </SelectTrigger>
                     <SelectContent>
@@ -388,53 +410,33 @@ export default function RequestAccessPage() {
                   </Select>
                 </div>
 
-                <Button 
-                  type="submit" 
-                  className="w-full bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] shadow-md hover:shadow-lg transition-all duration-300 font-semibold"
+                <Button
+                  type="submit"
+                  className="w-full h-12 text-base font-semibold rounded-xl gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <Loader2 className="w-4 h-4 animate-spin" />
                       Submitting...
                     </>
                   ) : (
                     <>
-                      Submit Request
-                      <ArrowRight className="w-4 h-4 ml-2" />
+                      Request Access
+                      <ArrowRight className="w-4 h-4" />
                     </>
                   )}
                 </Button>
               </form>
 
-              <div className="mt-6 text-center">
-                <Link to="/login" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  <ArrowLeft className="w-4 h-4 inline mr-1" />
-                  Back to Login
+              <p className="text-center text-sm text-muted-foreground">
+                Already have an account?{' '}
+                <Link to="/login" className="font-medium text-accent hover:underline underline-offset-4">
+                  Sign In
                 </Link>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Trust Indicators */}
-          <div className="flex flex-wrap justify-center gap-4 pt-2">
-            {trustIndicators.map((indicator, index) => {
-              const colors = [
-                'text-[hsl(82_85%_45%)]',
-                'text-[hsl(270_70%_55%)]', 
-                'text-[hsl(200_100%_45%)]'
-              ];
-              return (
-                <div 
-                  key={indicator.label}
-                  className="flex items-center gap-2 text-xs"
-                >
-                  <indicator.icon className={`w-3.5 h-3.5 ${colors[index % 3]}`} />
-                  <span className="text-muted-foreground">{indicator.label}</span>
-                </div>
-              );
-            })}
-          </div>
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>
