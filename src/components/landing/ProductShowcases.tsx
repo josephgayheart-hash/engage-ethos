@@ -686,7 +686,7 @@ export function ImageStudioShowcase() {
                   {step >= 5 && (
                     <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
                       <div className="flex items-center gap-1 text-[9px] font-semibold px-2 py-1 rounded-full" style={{ background: 'hsl(82 85% 55% / 0.2)', color: 'hsl(82 85% 55%)', backdropFilter: 'blur(4px)' }}>
-                        <CheckCircle2 className="w-3 h-3" /> Ready for Brand Studio
+                        <CheckCircle2 className="w-3 h-3" /> Ready for AI Brand Studio
                       </div>
                       <div className="text-[9px] font-bold px-2 py-1 rounded-full" style={{ background: 'hsl(82 85% 55% / 0.2)', color: 'hsl(82 85% 55%)', backdropFilter: 'blur(4px)' }}>
                         Brand Score: 94
@@ -743,7 +743,7 @@ export function BrandStudioShowcase() {
   return (
     <div ref={ref} className={`transition-all duration-1000 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
       <div className="grid lg:grid-cols-2 gap-12 items-center">
-        <BrowserChrome title="CampusVoice — Brand Studio">
+        <BrowserChrome title="CampusVoice — AI Brand Studio">
           <div className="p-5 flex gap-4">
             {/* Controls sidebar */}
             <div className="w-36 flex-shrink-0 space-y-3">
@@ -863,7 +863,7 @@ export function BrandStudioShowcase() {
 
         <div>
           <div className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full mb-4" style={{ background: 'hsl(270 70% 60% / 0.15)', color: 'hsl(270 70% 55%)' }}>
-            <Palette className="w-3.5 h-3.5" /> Brand Studio
+            <Palette className="w-3.5 h-3.5" /> AI Brand Studio
           </div>
           <h3 className="text-2xl md:text-3xl font-serif font-bold text-foreground tracking-tight mb-4">
             Brand it.<br />Own it.
