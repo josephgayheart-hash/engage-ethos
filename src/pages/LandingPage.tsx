@@ -21,6 +21,7 @@ import campusvoiceLogo from '@/assets/campusvoice-logo-new.png';
 import HowItWorksSection from '@/components/landing/HowItWorksSection';
 import { SEOHead, getOrganizationSchema, getSoftwareApplicationSchema } from '@/components/SEOHead';
 import { RequestDemoDialog } from '@/components/landing/RequestDemoDialog';
+import { ImageStudioShowcase, BrandStudioShowcase, AICopywriterShowcase } from '@/components/landing/ProductShowcases';
 
 // JSON-LD schemas for landing page
 const landingPageSchemas = [
@@ -312,6 +313,33 @@ export default function LandingPage() {
 
       {/* How It Works Section - Position #2 */}
       <HowItWorksSection />
+
+      {/* Product Showcases Section */}
+      <section className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-background relative overflow-hidden">
+        {/* Subtle orb accents */}
+        <div className="absolute top-20 right-[8%] w-48 h-48 bg-[hsl(82_85%_55%_/_0.06)] rounded-full blur-3xl" />
+        <div className="absolute bottom-32 left-[5%] w-40 h-40 bg-[hsl(270_70%_60%_/_0.06)] rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-[50%] w-32 h-32 bg-[hsl(200_100%_50%_/_0.05)] rounded-full blur-3xl" />
+
+        <div className="max-w-6xl mx-auto relative z-10 space-y-24 sm:space-y-32">
+          <div className="text-center">
+            <Badge className="mb-4 bg-[hsl(270_70%_60%_/_0.15)] text-[hsl(270_70%_55%)] border-[hsl(270_70%_60%_/_0.3)]">
+              <Sparkles className="w-3 h-3 mr-1" />
+              Product Tour
+            </Badge>
+            <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-3">
+              See it in action.
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              From AI-powered image generation to brand-perfect overlays to conversational copywriting — explore the tools that make CampusVoice different.
+            </p>
+          </div>
+
+          <ImageStudioShowcase />
+          <BrandStudioShowcase />
+          <AICopywriterShowcase />
+        </div>
+      </section>
 
       {/* Value Proposition Section - Fun Yellow Background */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(48_100%_90%)] relative overflow-hidden">
