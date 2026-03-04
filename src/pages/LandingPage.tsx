@@ -249,6 +249,9 @@ export default function LandingPage() {
                   Sign In
                 </Link>
               </Button>
+              <p className="w-full text-center text-white/40 text-xs mt-1">
+                <Link to="/login" className="hover:text-white/60 transition-colors">Already in Beta?</Link>
+              </p>
             </div>
 
             {/* Trust Indicators */}
