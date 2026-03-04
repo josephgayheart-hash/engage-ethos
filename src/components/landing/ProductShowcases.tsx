@@ -778,35 +778,63 @@ export function BrandStudioShowcase() {
             </div>
 
             {/* Canvas preview */}
-            <div className="flex-1 rounded-xl border border-border/60 overflow-hidden relative" style={{ aspectRatio: '1/1', maxHeight: '300px', background: 'linear-gradient(135deg, hsl(222 47% 16%), hsl(270 40% 20%))' }}>
-              {/* Abstract generated image bg */}
-              <div className="absolute inset-0">
-                <div className="absolute w-24 h-24 rounded-full blur-[30px]" style={{ background: 'hsl(82 85% 55% / 0.25)', top: '20%', right: '15%' }} />
-                <div className="absolute w-20 h-20 rounded-full blur-[25px]" style={{ background: 'hsl(200 100% 50% / 0.2)', bottom: '25%', left: '10%' }} />
-              </div>
+            <div className="flex-1 rounded-xl border border-border/60 overflow-hidden relative" style={{ aspectRatio: '1/1', maxHeight: '300px' }}>
+              {/* Student image as base */}
+              <img 
+                src={showcaseCampusImage} 
+                alt="Student studying" 
+                className="absolute inset-0 w-full h-full object-cover"
+              />
 
-              {/* Gradient overlay */}
+              {/* Color overlay - step 2 */}
               {step >= 2 && (
-                <div className="absolute inset-0 transition-opacity duration-700" style={{ background: 'linear-gradient(to top, hsl(222 47% 14% / 0.8), transparent 60%)', opacity: step >= 2 ? 1 : 0 }} />
+                <div 
+                  className="absolute inset-0 transition-opacity duration-700"
+                  style={{ 
+                    background: 'linear-gradient(to top, hsl(222 47% 14% / 0.85) 10%, hsl(222 47% 14% / 0.4) 45%, transparent 70%)',
+                    opacity: step >= 2 ? 1 : 0,
+                  }} 
+                />
               )}
 
-              {/* Logo placement */}
+              {/* Pattern stripe overlay - step 2 */}
+              {step >= 2 && (
+                <div 
+                  className="absolute inset-0 transition-opacity duration-500"
+                  style={{ 
+                    opacity: 0.08,
+                    backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 8px, hsl(82 85% 55%) 8px, hsl(82 85% 55%) 9px)',
+                  }} 
+                />
+              )}
+
+              {/* Logo placement - step 1 */}
               {step >= 1 && (
-                <div className="absolute bottom-12 right-4 transition-all duration-500" style={{ opacity: step >= 1 ? 1 : 0 }}>
-                  <div className="w-14 h-14 rounded-xl border-2 border-dashed border-white/30 flex items-center justify-center">
-                    <span className="text-[8px] text-white/50 font-bold">LOGO</span>
+                <div className="absolute top-3 left-3 transition-all duration-500" style={{ opacity: step >= 1 ? 1 : 0, transform: step >= 1 ? 'scale(1)' : 'scale(0.8)' }}>
+                  <div className="w-12 h-12 rounded-lg bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg">
+                    <span className="text-[7px] text-[hsl(222_47%_14%)] font-bold leading-tight text-center">MIDWEST<br/>STATE</span>
                   </div>
                 </div>
               )}
 
-              {/* Headline text */}
+              {/* Headline + CTA - step 3 */}
               {step >= 3 && (
-                <div className="absolute bottom-4 left-4 right-20 transition-all duration-500">
-                  <p className="text-white font-serif text-sm font-bold leading-tight" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
-                    Your Future Starts Here
+                <div className="absolute bottom-3 left-3 right-3 transition-all duration-600" style={{ opacity: step >= 3 ? 1 : 0, transform: step >= 3 ? 'translateY(0)' : 'translateY(12px)' }}>
+                  <p className="text-white font-serif text-base font-bold leading-tight drop-shadow-lg">
+                    Your Future in<br />Computer Science
                   </p>
-                  <div className="mt-1.5 text-[9px] font-medium px-2 py-0.5 rounded w-fit" style={{ background: 'hsl(82 85% 55%)', color: 'hsl(222 47% 14%)' }}>
+                  <p className="text-white/60 text-[9px] mt-1">100% Online · ABET Accredited</p>
+                  <div className="mt-2 text-[9px] font-bold px-3 py-1 rounded w-fit" style={{ background: 'hsl(82 85% 55%)', color: 'hsl(222 47% 14%)' }}>
                     Apply Now →
+                  </div>
+                </div>
+              )}
+
+              {/* Brand Score badge - step 3 */}
+              {step >= 3 && (
+                <div className="absolute top-3 right-3 transition-all duration-500" style={{ opacity: step >= 3 ? 1 : 0 }}>
+                  <div className="bg-white/90 backdrop-blur-sm rounded-lg px-2 py-1 shadow-lg">
+                    <p className="text-[8px] font-bold text-[hsl(82_70%_35%)]">✓ On Brand</p>
                   </div>
                 </div>
               )}
