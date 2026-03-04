@@ -79,7 +79,7 @@ const STEPS: WizardStep[] = [
 
 interface ContentDNASetupWizardProps {
   initialProfileId?: string | null;
-  onComplete: () => void;
+  onComplete: (profileId: string) => void;
   onCancel: () => void;
 }
 
@@ -472,7 +472,7 @@ export function ContentDNASetupWizard({ initialProfileId, onComplete, onCancel }
                   <p className="text-sm text-muted-foreground">
                     Your Content DNA has been extracted and will be applied to all AI-generated content for {selectedProfile?.name || 'this profile'}.
                   </p>
-                  <Button onClick={onComplete} size="lg" className="gap-2">
+                  <Button onClick={() => onComplete(selectedProfileId!)} size="lg" className="gap-2">
                     <Check className="w-4 h-4" />
                     Finish Setup
                   </Button>
