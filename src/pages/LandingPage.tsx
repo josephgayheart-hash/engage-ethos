@@ -22,6 +22,7 @@ import HowItWorksSection from '@/components/landing/HowItWorksSection';
 import { SEOHead, getOrganizationSchema, getSoftwareApplicationSchema } from '@/components/SEOHead';
 import { RequestDemoDialog } from '@/components/landing/RequestDemoDialog';
 import { ImageStudioShowcase, BrandStudioShowcase, AICopywriterShowcase, MessageBuilderShowcase, JourneyBuilderShowcase } from '@/components/landing/ProductShowcases';
+import { StickyCtaBar } from '@/components/landing/StickyCtaBar';
 
 // JSON-LD schemas for landing page
 const landingPageSchemas = [
@@ -147,7 +148,8 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <SEOHead 
+      <StickyCtaBar />
+      <SEOHead
         title="CampusVoice.AI - Strategic Messaging Intelligence for Higher Education"
         description="Plan, strategize, and execute brand-aligned communications at scale. Research-driven messaging intelligence built for higher education."
         keywords={['higher education communications', 'enrollment marketing', 'brand messaging AI', 'university marketing', 'college admissions']}
