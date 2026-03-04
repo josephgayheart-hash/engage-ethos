@@ -238,9 +238,9 @@ export default function LandingPage() {
               </Button>
               <Button 
                 asChild
-                variant="outline"
+                variant="ghost"
                 size="lg"
-                className="border-2 border-white/30 text-white hover:bg-white/10 hover:border-white/50 text-base px-8 py-6 backdrop-blur-sm"
+                className="border-2 border-white/30 text-white bg-white/5 hover:bg-white/15 hover:border-white/50 text-base px-8 py-6 backdrop-blur-sm"
               >
                 <Link to="/login">
                   Sign In
