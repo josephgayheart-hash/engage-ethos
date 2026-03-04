@@ -514,7 +514,7 @@ export function ImageStudioShowcase() {
       <div className="grid lg:grid-cols-2 gap-12 items-center">
         <div>
           <div className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full mb-4" style={{ background: 'hsl(82 85% 55% / 0.15)', color: 'hsl(82 85% 45%)' }}>
-            <Image className="w-3.5 h-3.5" /> Image Studio
+            <Image className="w-3.5 h-3.5" /> AI Image Studio
           </div>
           <h3 className="text-2xl md:text-3xl font-serif font-bold text-foreground tracking-tight mb-4">
             19 channels.<br />One studio.
@@ -538,7 +538,7 @@ export function ImageStudioShowcase() {
           </div>
         </div>
 
-        <BrowserChrome title="CampusVoice — Image Studio">
+        <BrowserChrome title="CampusVoice — AI Image Studio">
           <div className="p-5 space-y-3">
             {/* Engine selector */}
             <div className="flex items-center gap-2">
