@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Image, Palette, Type, Wand2, Layers, Sparkles, CheckCircle2, MessageSquare, Send, Bot, PenTool, Users, Mail, Smartphone, Share2, Target, Map, Clock, ArrowRight, GitBranch, BarChart3, Zap, Crown, Camera, Paintbrush, Dna, Building2, BookOpen, Loader2 } from 'lucide-react';
-import showcaseCampusImage from '@/assets/showcase-campus-image.jpg';
+import showcaseCampusImage from '@/assets/showcase-student-image.png';
 
 /* ─── Intersection Observer hook ─── */
 function useInView(threshold = 0.15) {
