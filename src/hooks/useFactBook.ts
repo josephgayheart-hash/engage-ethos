@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
+import { toastError, toastSuccess } from '@/lib/errors';
 
 export interface Fact {
   id: string;
@@ -85,7 +85,6 @@ interface UseFactBookOptions {
 export function useFactBook(options: UseFactBookOptions = {}) {
   const { profileId } = options;
   const { tenant, user } = useAuth();
-  const { toast } = useToast();
   
   const [facts, setFacts] = useState<Fact[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -114,17 +113,12 @@ export function useFactBook(options: UseFactBookOptions = {}) {
       if (error) throw error;
       
       setFacts((data || []) as unknown as Fact[]);
-    } catch (error: any) {
-      console.error('Error fetching facts:', error);
-      toast({
-        title: 'Error loading facts',
-        description: error.message,
-        variant: 'destructive',
-      });
+    } catch (error) {
+      toastError('Error loading facts', error);
     } finally {
       setIsLoading(false);
     }
-  }, [tenant?.id, profileId, toast]);
+  }, [tenant?.id, profileId]);
 
   useEffect(() => {
     fetchFacts();
@@ -165,19 +159,11 @@ export function useFactBook(options: UseFactBookOptions = {}) {
       const newFact = data as unknown as Fact;
       setFacts(prev => [newFact, ...prev]);
       
-      toast({
-        title: 'Fact added',
-        description: `"${input.label}" has been added to your Fact Book.`,
-      });
+      toastSuccess('Fact added', `"${input.label}" has been added to your Fact Book.`);
       
       return newFact;
-    } catch (error: any) {
-      console.error('Error adding fact:', error);
-      toast({
-        title: 'Error adding fact',
-        description: error.message,
-        variant: 'destructive',
-      });
+    } catch (error) {
+      toastError('Error adding fact', error);
       return null;
     } finally {
       setIsSaving(false);
@@ -220,19 +206,11 @@ export function useFactBook(options: UseFactBookOptions = {}) {
       const newFacts = (data || []) as unknown as Fact[];
       setFacts(prev => [...newFacts, ...prev]);
       
-      toast({
-        title: 'Facts imported',
-        description: `${newFacts.length} facts have been added to your Fact Book.`,
-      });
+      toastSuccess('Facts imported', `${newFacts.length} facts have been added to your Fact Book.`);
       
       return newFacts.length;
-    } catch (error: any) {
-      console.error('Error adding facts in bulk:', error);
-      toast({
-        title: 'Error importing facts',
-        description: error.message,
-        variant: 'destructive',
-      });
+    } catch (error) {
+      toastError('Error importing facts', error);
       return 0;
     } finally {
       setIsSaving(false);
@@ -256,19 +234,11 @@ export function useFactBook(options: UseFactBookOptions = {}) {
         f.id === id ? { ...f, ...updates, updated_at: new Date().toISOString() } : f
       ));
       
-      toast({
-        title: 'Fact updated',
-        description: 'Your changes have been saved.',
-      });
+      toastSuccess('Fact updated', 'Your changes have been saved.');
       
       return true;
-    } catch (error: any) {
-      console.error('Error updating fact:', error);
-      toast({
-        title: 'Error updating fact',
-        description: error.message,
-        variant: 'destructive',
-      });
+    } catch (error) {
+      toastError('Error updating fact', error);
       return false;
     } finally {
       setIsSaving(false);
@@ -286,19 +256,11 @@ export function useFactBook(options: UseFactBookOptions = {}) {
       
       setFacts(prev => prev.filter(f => f.id !== id));
       
-      toast({
-        title: 'Fact deleted',
-        description: 'The fact has been removed from your Fact Book.',
-      });
+      toastSuccess('Fact deleted', 'The fact has been removed from your Fact Book.');
       
       return true;
-    } catch (error: any) {
-      console.error('Error deleting fact:', error);
-      toast({
-        title: 'Error deleting fact',
-        description: error.message,
-        variant: 'destructive',
-      });
+    } catch (error) {
+      toastError('Error deleting fact', error);
       return false;
     }
   };
@@ -322,19 +284,11 @@ export function useFactBook(options: UseFactBookOptions = {}) {
       
       setFacts([]);
       
-      toast({
-        title: 'All facts deleted',
-        description: 'Your Fact Book has been cleared.',
-      });
+      toastSuccess('All facts deleted', 'Your Fact Book has been cleared.');
       
       return true;
-    } catch (error: any) {
-      console.error('Error deleting all facts:', error);
-      toast({
-        title: 'Error deleting facts',
-        description: error.message,
-        variant: 'destructive',
-      });
+    } catch (error) {
+      toastError('Error deleting facts', error);
       return false;
     }
   };
@@ -353,13 +307,8 @@ export function useFactBook(options: UseFactBookOptions = {}) {
       }
       
       return data.facts || [];
-    } catch (error: any) {
-      console.error('Error parsing fact book:', error);
-      toast({
-        title: 'Error parsing fact book',
-        description: error.message,
-        variant: 'destructive',
-      });
+    } catch (error) {
+      toastError('Error parsing fact book', error);
       return [];
     } finally {
       setIsParsing(false);
