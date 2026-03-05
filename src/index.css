@@ -41,7 +41,7 @@
     --input: 220 13% 88%;
     --ring: 222 47% 14%;
 
-    --radius: 0.625rem;
+    --radius: 0.5rem;
 
     /* Status Colors */
     --status-strong: 158 64% 42%;
@@ -145,12 +145,12 @@
   }
 
   .card-elevated {
-    @apply bg-card rounded-lg border border-border;
-    box-shadow: var(--shadow-md);
+    @apply bg-card rounded-md border border-border;
+    box-shadow: var(--shadow-sm);
   }
 
   .card-elevated:hover {
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-md);
   }
 
   .pillar-badge {
@@ -358,11 +358,11 @@
 
   /* Section Headers */
   .section-header {
-    @apply font-serif text-xl font-semibold text-foreground;
+    @apply text-base font-semibold text-foreground;
   }
 
   .section-subheader {
-    @apply text-sm text-muted-foreground;
+    @apply text-xs text-muted-foreground;
   }
 
   /* Lens Flare Effects (subtle version for dashboard) */

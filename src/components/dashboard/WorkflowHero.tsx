@@ -18,127 +18,82 @@ interface WorkflowHeroProps {
 }
 
 export function WorkflowHero({ context }: WorkflowHeroProps) {
-  const { profile, tenant, isAdmin } = useAuth();
-  const { isAgency } = useAgencyMode();
+  const { profile, tenant } = useAuth();
   const firstName = profile?.first_name || 'there';
   
-  const { mode, personalStats, institutionalStats, platformInsight, mostRecentDraft } = context;
+  const { mode, personalStats, platformInsight, mostRecentDraft } = context;
 
-  // Dynamic headline based on mode
   const getHeadline = () => {
-    if (mode === 'power-user') {
-      return `${firstName}'s Command Center`;
-    }
-    if (mode === 'active') {
-      return `Your Workflow Hub`;
-    }
+    if (mode === 'power-user') return `${firstName}'s Command Center`;
+    if (mode === 'active') return `Your Workflow Hub`;
     return `Welcome back, ${firstName}`;
   };
 
-  // Dynamic subtitle
   const getSubtitle = () => {
     const institutionName = tenant?.institution_name || 'Your Institution';
-    const parts = [institutionName];
-    
-    if (context.setupProgress.hasDNA) {
-      parts.push('Content DNA Active');
-    }
-    
     if (mode === 'power-user' && personalStats.topTool) {
       return `${personalStats.topTool} specialist • ${personalStats.buildsCount} messages crafted`;
     }
-    
+    const parts = [institutionName];
+    if (context.setupProgress.hasDNA) parts.push('Content DNA Active');
     return parts.join(' • ');
   };
 
   return (
-    <section className="relative overflow-hidden">
-      {/* Background - more compact for active users */}
-      <div className="absolute inset-0 bg-zone-hero" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(200_70%_90%_/_0.2),_transparent_50%)]" />
-      
-      {/* Subtle lens flares */}
-      <div className="absolute top-8 right-[20%] w-20 h-20 bg-[hsl(270_70%_60%_/_0.08)] rounded-full blur-2xl" />
-      <div className="absolute bottom-4 left-[15%] w-24 h-24 bg-[hsl(82_85%_55%_/_0.06)] rounded-full blur-3xl" />
-      
-      <div className="relative py-6 md:py-8">
-        <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto">
-            {/* Header Row */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-              <div className="text-center md:text-left">
-                {/* Mode Badge */}
-                <div className="mb-2 animate-fade-in">
-                  {mode === 'power-user' ? (
-                    <Badge className="bg-[hsl(82_85%_45%_/_0.15)] text-[hsl(82_85%_35%)] border-[hsl(82_85%_45%_/_0.3)]">
-                      <Sparkles className="w-3 h-3 mr-1" />
-                      Power User
-                    </Badge>
-                  ) : (
-                    <Badge className="bg-[hsl(200_100%_50%_/_0.15)] text-[hsl(200_100%_40%)] border-[hsl(200_100%_50%_/_0.3)]">
-                      <Dna className="w-3 h-3 mr-1" />
-                      DNA Active
-                    </Badge>
-                  )}
-                </div>
-
-                {/* Headline */}
-                <h1 className="font-serif text-xl md:text-2xl font-bold text-foreground mb-1 animate-fade-in">
-                  {getHeadline()}
-                </h1>
-                <p className="text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: '100ms' }}>
-                  {getSubtitle()}
-                </p>
+    <section className="border-b border-border bg-background">
+      <div className="container mx-auto px-4 py-4">
+        <div className="max-w-6xl mx-auto">
+          {/* Header Row — compact workspace-style */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-3">
+            <div>
+              <div className="flex items-center gap-2 mb-0.5">
+                {mode === 'power-user' ? (
+                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 border-primary/30 text-primary">
+                    <Sparkles className="w-2.5 h-2.5 mr-0.5" />
+                    Power User
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 border-accent/30 text-accent">
+                    <Dna className="w-2.5 h-2.5 mr-0.5" />
+                    DNA Active
+                  </Badge>
+                )}
               </div>
-
-              {/* Quick Actions / Resume Draft */}
-              {mostRecentDraft && (
-                <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
-                  <Button asChild variant="outline" size="sm" className="group">
-                    <Link to={
-                      mostRecentDraft.type === 'journey' 
-                        ? `/strategy?draft=${mostRecentDraft.id}` 
-                        : `/build?draft=${mostRecentDraft.id}`
-                    }>
-                      <RotateCcw className="w-4 h-4 mr-2" />
-                      Resume: {mostRecentDraft.title || 'Draft'}
-                      <ArrowRight className="w-3 h-3 ml-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </Link>
-                  </Button>
-                </div>
-              )}
+              <h1 className="text-lg font-semibold text-foreground leading-tight">
+                {getHeadline()}
+              </h1>
+              <p className="text-xs text-muted-foreground">
+                {getSubtitle()}
+              </p>
             </div>
 
-            {/* Insight Cards Row */}
-            <InsightCards context={context} />
-
-            {/* Platform Insight as subtle tip */}
-            {platformInsight && (
-              <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground/80 animate-fade-in" style={{ animationDelay: '300ms' }}>
-                <Lightbulb className="w-3.5 h-3.5 text-secondary/70" />
-                <span>{platformInsight.message}</span>
-              </div>
+            {mostRecentDraft && (
+              <Button asChild variant="outline" size="sm" className="group h-8 text-xs">
+                <Link to={
+                  mostRecentDraft.type === 'journey' 
+                    ? `/strategy?draft=${mostRecentDraft.id}` 
+                    : `/build?draft=${mostRecentDraft.id}`
+                }>
+                  <RotateCcw className="w-3 h-3 mr-1.5" />
+                  Resume: {mostRecentDraft.title || 'Draft'}
+                  <ArrowRight className="w-3 h-3 ml-1.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </Link>
+              </Button>
             )}
           </div>
+
+          {/* Insight Cards Row */}
+          <InsightCards context={context} />
+
+          {/* Platform Insight */}
+          {platformInsight && (
+            <div className="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground/70">
+              <Lightbulb className="w-3 h-3 text-secondary/60" />
+              <span>{platformInsight.message}</span>
+            </div>
+          )}
         </div>
-      </div>
-      
-      {/* Wave Divider */}
-      <div className="absolute bottom-0 left-0 right-0">
-        <svg 
-          viewBox="0 0 1440 40" 
-          fill="none" 
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-auto"
-          preserveAspectRatio="none"
-        >
-          <path 
-            d="M0 40L60 35C120 30 240 20 360 17C480 14 600 18 720 20C840 22 960 22 1080 20C1200 18 1320 14 1380 12L1440 10V40H1380C1320 40 1200 40 1080 40C960 40 840 40 720 40C600 40 480 40 360 40C240 40 120 40 60 40H0Z" 
-            fill="hsl(var(--background))"
-          />
-        </svg>
       </div>
     </section>
   );
 }
-

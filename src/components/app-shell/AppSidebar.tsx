@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Home,
@@ -28,6 +28,8 @@ import {
   User,
   UserPlus,
   ChevronsUpDown,
+  Search,
+  Dna,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -57,18 +59,21 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
-const mainItems = [
-  { title: "Dashboard", url: "/dashboard", icon: Home },
-  { title: "Message Builder", url: "/build", icon: PenTool },
-  { title: "Journey Designer", url: "/strategy", icon: Route },
-  { title: "Evaluator", url: "/evaluate", icon: ClipboardCheck },
-  { title: "Tools", url: "/tools", icon: Wrench },
-];
+/* ── Navigation Groups ── */
 
 const createItems = [
+  { title: "Message Builder", url: "/build", icon: PenTool },
+  { title: "Journey Designer", url: "/strategy", icon: Route },
   { title: "AI Copywriter", url: "/playground", icon: Sparkles },
   { title: "Image Studio", url: "/image-generator", icon: ImageIcon },
   { title: "Brand Studio", url: "/brand-studio", icon: Palette },
+];
+
+const manageItems = [
+  { title: "My Library", url: "/library", icon: FolderOpen },
+  { title: "My Drafts", url: "/dashboard#my-drafts", icon: FileEdit },
+  { title: "Evaluator", url: "/evaluate", icon: ClipboardCheck },
+  { title: "Tools", url: "/tools", icon: Wrench },
 ];
 
 const superAdminItems = [
@@ -95,25 +100,25 @@ export function AppSidebar() {
   };
 
   const libraryItems = [
-    { title: "My Library", url: "/library", icon: FolderOpen },
     { title: isAgency ? "Templates" : "University Library", url: "/shared-library", icon: Library },
-    { title: "My Drafts", url: "/dashboard#my-drafts", icon: FileEdit },
   ];
 
-  const adminItems = [
-    { title: "Admin Console", url: "/admin/console", icon: Settings },
-    { title: "Content DNA Studio", url: "/admin/content-dna", icon: Sparkles },
-    { title: isAgency ? "Client Settings" : "University Settings", url: isAgency ? "/agency/clients" : "/university-settings", icon: Building2 },
-    // { title: "Brand Audit", url: "/brand-audit", icon: Layers }, // Hidden until ready
+  const governItems = [
+    { title: "Content DNA Studio", url: "/admin/content-dna", icon: Dna },
+    { title: isAgency ? "Client Settings" : "Institution Settings", url: isAgency ? "/agency/clients" : "/university-settings", icon: Building2 },
+    ...(isAdmin ? [{ title: "Admin Console", url: "/admin/console", icon: Settings }] : []),
     ...(isAgency ? [{ title: "Analytics", url: "/agency/analytics", icon: BarChart3 }] : []),
   ];
 
   const initials = `${profile?.first_name?.[0] ?? ""}${profile?.last_name?.[0] ?? ""}`;
 
+  const navLinkClasses = "hover:bg-sidebar-accent/50 h-9 text-[13px]";
+  const activeClasses = "bg-sidebar-accent text-sidebar-accent-foreground font-medium border-l-2 border-primary";
+
   return (
     <Sidebar collapsible="icon">
       {/* Logo Header */}
-      <SidebarHeader className="border-b border-sidebar-border">
+      <SidebarHeader className="border-b border-sidebar-border px-3 py-2">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild tooltip="CampusVoice">
@@ -121,81 +126,65 @@ export function AppSidebar() {
                 <img
                   src={campusvoiceLogo}
                   alt="CampusVoice"
-                  className="h-6 w-6 object-contain shrink-0"
+                  className="h-5 w-5 object-contain shrink-0"
                 />
-                <span className="font-semibold text-sm truncate">CampusVoice.AI</span>
+                <span className="font-semibold text-sm truncate">CampusVoice</span>
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent>
-        {/* Main */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Main</SidebarGroupLabel>
+      <SidebarContent className="px-1">
+        {/* Home */}
+        <SidebarGroup className="py-1">
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={item.title}>
-                    <NavLink
-                      to={item.url}
-                      end={item.url === "/dashboard"}
-                      className="hover:bg-sidebar-accent/50"
-                      activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                    >
-                      <item.icon className="shrink-0" />
-                      <span>{item.title}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Dashboard">
+                  <NavLink to="/dashboard" end className={navLinkClasses} activeClassName={activeClasses}>
+                    <Home className="shrink-0 !w-4 !h-4" />
+                    <span>Dashboard</span>
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarSeparator />
-
-        {/* Libraries */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Libraries</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {libraryItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={item.title}>
-                    <NavLink
-                      to={item.url}
-                      className="hover:bg-sidebar-accent/50"
-                      activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                    >
-                      <item.icon className="shrink-0" />
-                      <span>{item.title}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarSeparator />
+        <SidebarSeparator className="my-0.5" />
 
         {/* Create */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Create</SidebarGroupLabel>
+        <SidebarGroup className="py-1">
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/60 px-3 mb-0.5">Create</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {createItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.title}>
-                    <NavLink
-                      to={item.url}
-                      className="hover:bg-sidebar-accent/50"
-                      activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                    >
-                      <item.icon className="shrink-0" />
+                    <NavLink to={item.url} className={navLinkClasses} activeClassName={activeClasses}>
+                      <item.icon className="shrink-0 !w-4 !h-4" />
+                      <span>{item.title}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarSeparator className="my-0.5" />
+
+        {/* Manage */}
+        <SidebarGroup className="py-1">
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/60 px-3 mb-0.5">Manage</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {[...manageItems, ...libraryItems].map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild tooltip={item.title}>
+                    <NavLink to={item.url} className={navLinkClasses} activeClassName={activeClasses}>
+                      <item.icon className="shrink-0 !w-4 !h-4" />
                       <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
@@ -207,74 +196,56 @@ export function AppSidebar() {
 
         {/* Approvals */}
         {isApprover && (
-          <>
-            <SidebarSeparator />
-            <SidebarGroup>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild tooltip="Approvals">
-                      <NavLink
-                        to="/approvals"
-                        className="hover:bg-sidebar-accent/50"
-                        activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                      >
-                        <CheckCircle className="shrink-0" />
-                        <span>Approvals</span>
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </>
+          <SidebarGroup className="py-0">
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip="Approvals">
+                    <NavLink to="/approvals" className={navLinkClasses} activeClassName={activeClasses}>
+                      <CheckCircle className="shrink-0 !w-4 !h-4" />
+                      <span>Approvals</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
         )}
 
-        {/* Admin */}
-        {isAdmin && (
-          <>
-            <SidebarSeparator />
-            <SidebarGroup>
-              <SidebarGroupLabel>Admin</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {adminItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild tooltip={item.title}>
-                        <NavLink
-                          to={item.url}
-                          className="hover:bg-sidebar-accent/50"
-                          activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                        >
-                          <item.icon className="shrink-0" />
-                          <span>{item.title}</span>
-                        </NavLink>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </>
-        )}
+        <SidebarSeparator className="my-0.5" />
+
+        {/* Govern */}
+        <SidebarGroup className="py-1">
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/60 px-3 mb-0.5">Govern</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {governItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild tooltip={item.title}>
+                    <NavLink to={item.url} className={navLinkClasses} activeClassName={activeClasses}>
+                      <item.icon className="shrink-0 !w-4 !h-4" />
+                      <span>{item.title}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
         {/* Super Admin */}
         {isSuperAdmin && (
           <>
-            <SidebarSeparator />
-            <SidebarGroup>
-              <SidebarGroupLabel>Super Admin</SidebarGroupLabel>
+            <SidebarSeparator className="my-0.5" />
+            <SidebarGroup className="py-1">
+              <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/60 px-3 mb-0.5">Platform</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   {superAdminItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild tooltip={item.title}>
-                        <NavLink
-                          to={item.url}
-                          className="hover:bg-sidebar-accent/50"
-                          activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                        >
-                          <item.icon className="shrink-0" />
+                        <NavLink to={item.url} className={navLinkClasses} activeClassName={activeClasses}>
+                          <item.icon className="shrink-0 !w-4 !h-4" />
                           <span>{item.title}</span>
                         </NavLink>
                       </SidebarMenuButton>
@@ -288,49 +259,53 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Footer: User dropdown */}
-      <SidebarFooter className="border-t border-sidebar-border">
+      <SidebarFooter className="border-t border-sidebar-border p-2">
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton
                   size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground h-10"
                   tooltip={profile ? `${profile.first_name} ${profile.last_name}` : "Account"}
                 >
-                  <Avatar className="h-8 w-8 shrink-0">
-                    <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                  <Avatar className="h-7 w-7 shrink-0">
+                    <AvatarFallback className="bg-primary text-primary-foreground text-[10px]">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">
+                    <span className="truncate font-medium text-xs">
                       {profile?.first_name} {profile?.last_name}
                     </span>
-                    <span className="truncate text-xs text-muted-foreground">
+                    <span className="truncate text-[10px] text-muted-foreground">
                       {profile?.email}
                     </span>
                   </div>
-                  <ChevronsUpDown className="ml-auto size-4 shrink-0" />
+                  <ChevronsUpDown className="ml-auto size-3.5 shrink-0" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56"
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-52"
                 side="top"
                 align="start"
                 sideOffset={4}
               >
-                <DropdownMenuItem onClick={() => navigate("/profile")} className="cursor-pointer">
-                  <User className="mr-2 h-4 w-4" />
+                <DropdownMenuItem onClick={() => navigate("/profile")} className="cursor-pointer text-xs">
+                  <User className="mr-2 h-3.5 w-3.5" />
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setReferDialogOpen(true)} className="cursor-pointer">
-                  <UserPlus className="mr-2 h-4 w-4" />
+                <DropdownMenuItem onClick={() => navigate("/settings")} className="cursor-pointer text-xs">
+                  <Settings className="mr-2 h-3.5 w-3.5" />
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setReferDialogOpen(true)} className="cursor-pointer text-xs">
+                  <UserPlus className="mr-2 h-3.5 w-3.5" />
                   Invite a Colleague
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive cursor-pointer">
-                  <LogOut className="mr-2 h-4 w-4" />
+                <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive cursor-pointer text-xs">
+                  <LogOut className="mr-2 h-3.5 w-3.5" />
                   Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
