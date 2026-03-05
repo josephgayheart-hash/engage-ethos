@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useActiveWorkspaceId } from '@/contexts/WorkspaceContext';
 import { useToast } from '@/hooks/use-toast';
 import type { BrandPlatform, BrandPillar, BrandPathway } from '@/types/campusvoice';
 
@@ -103,6 +104,7 @@ interface UseContentDNAOptions {
 export function useContentDNA(options: UseContentDNAOptions = {}) {
   const { profileId } = options;
   const { tenant, profile } = useAuth();
+  const workspaceId = useActiveWorkspaceId();
   const { toast } = useToast();
   const [samples, setSamples] = useState<ContentDNASample[]>([]);
   const [analysis, setAnalysis] = useState<ContentDNAAnalysis | null>(null);
@@ -114,13 +116,13 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
   const [isSavingAdjustments, setIsSavingAdjustments] = useState(false);
 
   const fetchSamples = useCallback(async () => {
-    if (!tenant?.id) return;
+    if (!workspaceId) return;
     
     try {
       let query = supabase
         .from('content_dna_samples')
         .select('*')
-        .eq('tenant_id', tenant.id)
+        .eq('tenant_id', workspaceId)
         .order('created_at', { ascending: false });
 
       // If a profileId is specified, filter by it
@@ -138,16 +140,16 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
     } catch (error: any) {
       console.error('Error fetching samples:', error);
     }
-  }, [tenant?.id, profileId]);
+  }, [workspaceId, profileId]);
 
   const fetchAnalysis = useCallback(async () => {
-    if (!tenant?.id) return;
+    if (!workspaceId) return;
     
     try {
       let query = supabase
         .from('content_dna_analysis')
         .select('*')
-        .eq('tenant_id', tenant.id);
+        .eq('tenant_id', workspaceId);
 
       // If a profileId is specified, filter by it
       if (profileId) {
@@ -173,10 +175,10 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
     } catch (error: any) {
       console.error('Error fetching analysis:', error);
     }
-  }, [tenant?.id, profileId]);
+  }, [workspaceId, profileId]);
 
   const fetchAdjustments = useCallback(async () => {
-    if (!tenant?.id || !analysis?.id) return;
+    if (!workspaceId || !analysis?.id) return;
     
     try {
       const { data, error } = await supabase
@@ -200,11 +202,11 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
     } catch (error: any) {
       console.error('Error fetching adjustments:', error);
     }
-  }, [tenant?.id, analysis?.id]);
+  }, [workspaceId, analysis?.id]);
 
   useEffect(() => {
-    if (!tenant?.id) {
-      // Keep isLoading true until tenant is available
+    if (!workspaceId) {
+      // Keep isLoading true until workspace is available
       return;
     }
     
@@ -215,7 +217,7 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
     };
     
     loadData();
-  }, [fetchSamples, fetchAnalysis, tenant?.id]);
+  }, [fetchSamples, fetchAnalysis, workspaceId]);
 
   // Fetch adjustments when analysis is loaded
   useEffect(() => {
@@ -236,7 +238,7 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
       fileSize?: number;
     } = {}
   ) => {
-    if (!tenant?.id || !profile?.id) {
+     if (!workspaceId || !profile?.id) {
       toast({
         title: 'Error',
         description: 'You must be logged in to add samples',
@@ -249,7 +251,7 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
       const { data, error } = await supabase
         .from('content_dna_samples')
         .insert({
-          tenant_id: tenant.id,
+          tenant_id: workspaceId,
           user_id: profile.id,
           profile_id: profileId || null,
           content_text: content,
@@ -306,7 +308,7 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
   };
 
   const analyzeVoice = async () => {
-    if (!tenant?.id || samples.length === 0) {
+    if (!workspaceId || samples.length === 0) {
       toast({
         title: 'Cannot Analyze',
         description: 'Add at least one content sample to analyze.',
@@ -342,7 +344,7 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
 
       // Build the upsert data
       const upsertData: any = {
-        tenant_id: tenant.id,
+        tenant_id: workspaceId,
         profile_id: profileId || null,
         voice_analysis: voiceAnalysis as any,
         brand_platform: brandPlatform as any,
@@ -412,7 +414,7 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
   };
 
   const updateCustomInstructions = async (instructions: string) => {
-    if (!tenant?.id) return;
+    if (!workspaceId) return;
 
     setIsSaving(true);
     try {
@@ -439,7 +441,7 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
         const { data, error } = await supabase
           .from('content_dna_analysis')
           .insert({
-            tenant_id: tenant.id,
+            tenant_id: workspaceId,
             profile_id: profileId || null,
             custom_instructions: instructions,
             voice_analysis: {},
@@ -473,7 +475,7 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
   };
 
   const updateBrandPlatform = async (brandPlatform: BrandPlatform) => {
-    if (!tenant?.id || !analysis) return;
+    if (!workspaceId || !analysis) return;
 
     setIsSaving(true);
     try {
@@ -580,11 +582,11 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
 
   // Search samples by semantic content
   const searchSamples = async (query: string, themes?: string[], limit: number = 10) => {
-    if (!tenant?.id) return [];
+    if (!workspaceId) return [];
 
     try {
       const { data, error } = await supabase.rpc('search_content_samples', {
-        p_tenant_id: tenant.id,
+        p_tenant_id: workspaceId,
         p_profile_id: profileId || null,
         p_search_query: query || null,
         p_themes: themes || null,
@@ -601,7 +603,7 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
 
   // Save DNA adjustments (sliders, feedback, rules)
   const saveAdjustments = async (newAdjustments: DNAAdjustments) => {
-    if (!tenant?.id || !analysis?.id || !profile?.id) {
+    if (!workspaceId || !analysis?.id || !profile?.id) {
       toast({
         title: 'Error',
         description: 'You must have an analyzed Content DNA to save adjustments',
@@ -614,7 +616,7 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
     try {
       const adjustmentData = {
         content_dna_id: analysis.id,
-        tenant_id: tenant.id,
+        tenant_id: workspaceId,
         profile_id: profileId || null,
         dimensions: newAdjustments.dimensions as unknown as any,
         section_feedback: newAdjustments.sectionFeedback as unknown as any,
@@ -689,7 +691,7 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
     sample_type?: string;
     source_description?: string;
   }) => {
-    if (!tenant?.id) return;
+    if (!workspaceId) return;
 
     try {
       const { error } = await supabase

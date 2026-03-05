@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useActiveWorkspaceId } from '@/contexts/WorkspaceContext';
 import { toastError, toastSuccess } from '@/lib/errors';
 
 export interface Fact {
@@ -85,21 +86,21 @@ interface UseFactBookOptions {
 export function useFactBook(options: UseFactBookOptions = {}) {
   const { profileId } = options;
   const { tenant, user } = useAuth();
-  
+  const workspaceId = useActiveWorkspaceId();
   const [facts, setFacts] = useState<Fact[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isParsing, setIsParsing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const fetchFacts = useCallback(async () => {
-    if (!tenant?.id) return;
+    if (!workspaceId) return;
     
     setIsLoading(true);
     try {
       let query = supabase
         .from('fact_book')
         .select('*')
-        .eq('tenant_id', tenant.id)
+        .eq('tenant_id', workspaceId)
         .order('category')
         .order('sort_order')
         .order('created_at', { ascending: false });
@@ -118,21 +119,21 @@ export function useFactBook(options: UseFactBookOptions = {}) {
     } finally {
       setIsLoading(false);
     }
-  }, [tenant?.id, profileId]);
+  }, [workspaceId, profileId]);
 
   useEffect(() => {
     fetchFacts();
   }, [fetchFacts]);
 
   const addFact = async (input: CreateFactInput): Promise<Fact | null> => {
-    if (!tenant?.id || !user?.id) return null;
+    if (!workspaceId || !user?.id) return null;
     
     setIsSaving(true);
     try {
       const { data, error } = await supabase
         .from('fact_book')
         .insert({
-          tenant_id: tenant.id,
+          tenant_id: workspaceId,
           profile_id: profileId || null,
           created_by_user_id: user.id,
           category: input.category,
@@ -171,12 +172,12 @@ export function useFactBook(options: UseFactBookOptions = {}) {
   };
 
   const addFactsBulk = async (inputs: CreateFactInput[]): Promise<number> => {
-    if (!tenant?.id || !user?.id) return 0;
+    if (!workspaceId || !user?.id) return 0;
     
     setIsSaving(true);
     try {
       const factsToInsert = inputs.map(input => ({
-        tenant_id: tenant.id,
+        tenant_id: workspaceId,
         profile_id: profileId || null,
         created_by_user_id: user.id,
         category: input.category,
@@ -266,13 +267,13 @@ export function useFactBook(options: UseFactBookOptions = {}) {
   };
 
   const deleteAllFacts = async (): Promise<boolean> => {
-    if (!tenant?.id) return false;
+    if (!workspaceId) return false;
     
     try {
       let query = supabase
         .from('fact_book')
         .delete()
-        .eq('tenant_id', tenant.id);
+        .eq('tenant_id', workspaceId);
       
       if (profileId) {
         query = query.eq('profile_id', profileId);

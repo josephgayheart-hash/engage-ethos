@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useActiveWorkspaceId } from '@/contexts/WorkspaceContext';
 import { useToast } from '@/hooks/use-toast';
 
 export interface Story {
@@ -55,6 +56,7 @@ interface UseStoryBankOptions {
 export function useStoryBank(options: UseStoryBankOptions = {}) {
   const { profileId } = options;
   const { tenant, user } = useAuth();
+  const workspaceId = useActiveWorkspaceId();
   const { toast } = useToast();
   
   const [stories, setStories] = useState<Story[]>([]);
@@ -63,14 +65,14 @@ export function useStoryBank(options: UseStoryBankOptions = {}) {
   const [isSaving, setIsSaving] = useState(false);
 
   const fetchStories = useCallback(async () => {
-    if (!tenant?.id) return;
+    if (!workspaceId) return;
     
     setIsLoading(true);
     try {
       let query = supabase
         .from('story_bank')
         .select('*')
-        .eq('tenant_id', tenant.id)
+        .eq('tenant_id', workspaceId)
         .order('created_at', { ascending: false });
       
       if (profileId) {
@@ -93,21 +95,21 @@ export function useStoryBank(options: UseStoryBankOptions = {}) {
     } finally {
       setIsLoading(false);
     }
-  }, [tenant?.id, profileId, toast]);
+  }, [workspaceId, profileId, toast]);
 
   useEffect(() => {
     fetchStories();
   }, [fetchStories]);
 
   const addStory = async (input: CreateStoryInput): Promise<Story | null> => {
-    if (!tenant?.id || !user?.id) return null;
+    if (!workspaceId || !user?.id) return null;
     
     setIsSaving(true);
     try {
       const { data, error } = await supabase
         .from('story_bank')
         .insert({
-          tenant_id: tenant.id,
+          tenant_id: workspaceId,
           profile_id: profileId || null,
           created_by_user_id: user.id,
           title: input.title,
@@ -215,13 +217,13 @@ export function useStoryBank(options: UseStoryBankOptions = {}) {
   };
 
   const deleteAllStories = async (): Promise<boolean> => {
-    if (!tenant?.id) return false;
+    if (!workspaceId) return false;
     
     try {
       let query = supabase
         .from('story_bank')
         .delete()
-        .eq('tenant_id', tenant.id);
+        .eq('tenant_id', workspaceId);
       
       if (profileId) {
         query = query.eq('profile_id', profileId);

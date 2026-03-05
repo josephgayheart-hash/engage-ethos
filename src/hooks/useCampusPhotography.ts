@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useActiveWorkspaceId } from '@/contexts/WorkspaceContext';
 import { toast } from 'sonner';
 
 export interface PhotoAIAnalysis {
@@ -48,19 +49,20 @@ const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 export function useCampusPhotography({ profileId }: { profileId: string | null }) {
   const { tenant, user } = useAuth();
+  const workspaceId = useActiveWorkspaceId();
   const [photos, setPhotos] = useState<CampusPhoto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const fetchPhotos = useCallback(async () => {
-    if (!tenant?.id) return;
+    if (!workspaceId) return;
     setIsLoading(true);
     try {
       let query = supabase
         .from('campus_photo_samples' as any)
         .select('*')
-        .eq('tenant_id', tenant.id)
+        .eq('tenant_id', workspaceId)
         .order('created_at', { ascending: false });
 
       if (profileId) {
@@ -75,14 +77,14 @@ export function useCampusPhotography({ profileId }: { profileId: string | null }
     } finally {
       setIsLoading(false);
     }
-  }, [tenant?.id, profileId]);
+  }, [workspaceId, profileId]);
 
   useEffect(() => {
     fetchPhotos();
   }, [fetchPhotos]);
 
   const uploadPhotos = async (files: File[], category: string, description?: string) => {
-    if (!tenant?.id || !user?.id) {
+    if (!workspaceId || !user?.id) {
       toast.error('You must be logged in to upload photos.');
       return [];
     }
@@ -116,7 +118,7 @@ export function useCampusPhotography({ profileId }: { profileId: string | null }
     try {
       for (const file of filesToUpload) {
         const ext = file.name.split('.').pop() || 'jpg';
-        const filePath = `${tenant.id}/${profileId || 'default'}/${crypto.randomUUID()}.${ext}`;
+        const filePath = `${workspaceId}/${profileId || 'default'}/${crypto.randomUUID()}.${ext}`;
 
         const { error: uploadError } = await supabase.storage
           .from('campus-photography')
@@ -134,7 +136,7 @@ export function useCampusPhotography({ profileId }: { profileId: string | null }
         const { data, error: insertError } = await supabase
           .from('campus_photo_samples' as any)
           .insert({
-            tenant_id: tenant.id,
+            tenant_id: workspaceId,
             profile_id: profileId,
             user_id: user.id,
             file_name: file.name,

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useActiveWorkspaceId } from '@/contexts/WorkspaceContext';
 import { useUserDrafts } from '@/hooks/useUserDrafts';
 import { useInstitutionalProfiles } from '@/hooks/useInstitutionalProfiles';
 
@@ -76,6 +77,7 @@ const TOOL_DISPLAY_NAMES: Record<string, string> = {
 
 export function useUserDashboardContext(): UserDashboardContext {
   const { user, profile, tenant, isAdmin } = useAuth();
+  const workspaceId = useActiveWorkspaceId();
   const { profiles: institutionalProfiles } = useInstitutionalProfiles();
   const { drafts } = useUserDrafts();
   
@@ -170,14 +172,14 @@ export function useUserDashboardContext(): UserDashboardContext {
 
   // Fetch institutional stats (for admins)
   const fetchInstitutionalStats = useCallback(async () => {
-    if (!tenant?.id || !isAdmin) return;
+    if (!workspaceId || !isAdmin) return;
 
     try {
       // Get users in tenant
       const { data: tenantUsers, count: totalUsers } = await supabase
         .from('profiles')
         .select('id, last_login_at', { count: 'exact' })
-        .eq('tenant_id', tenant.id);
+        .eq('tenant_id', workspaceId);
 
       if (!tenantUsers) return;
 
@@ -194,11 +196,11 @@ export function useUserDashboardContext(): UserDashboardContext {
         supabase
           .from('content_dna_analysis')
           .select('id, voice_analysis, brand_platform')
-          .eq('tenant_id', tenant.id),
+          .eq('tenant_id', workspaceId),
         supabase
           .from('campus_photo_samples')
           .select('id', { count: 'exact', head: true })
-          .eq('tenant_id', tenant.id)
+          .eq('tenant_id', workspaceId)
           .eq('is_active', true)
       ]);
 
@@ -229,7 +231,7 @@ export function useUserDashboardContext(): UserDashboardContext {
     } catch (error) {
       console.error('Error fetching institutional stats:', error);
     }
-  }, [tenant?.id, isAdmin]);
+  }, [workspaceId, isAdmin]);
 
   // Fetch platform insights (anonymized)
   const fetchPlatformInsight = useCallback(async () => {
@@ -287,25 +289,25 @@ export function useUserDashboardContext(): UserDashboardContext {
 
   // Check if DNA is active and if campus photos exist
   const checkDNA = useCallback(async () => {
-    if (!tenant?.id) return;
+    if (!workspaceId) return;
 
     const [dnaResult, photosResult] = await Promise.all([
       supabase
         .from('content_dna_analysis')
         .select('id')
-        .eq('tenant_id', tenant.id)
+        .eq('tenant_id', workspaceId)
         .not('last_analyzed_at', 'is', null)
         .limit(1),
       supabase
         .from('campus_photo_samples')
         .select('id', { count: 'exact', head: true })
-        .eq('tenant_id', tenant.id)
+        .eq('tenant_id', workspaceId)
         .eq('is_active', true)
     ]);
 
     setHasDNA(!!dnaResult.data && dnaResult.data.length > 0);
     setHasCampusPhotos((photosResult.count || 0) > 0);
-  }, [tenant?.id]);
+  }, [workspaceId]);
 
   // Fetch all data
   useEffect(() => {
