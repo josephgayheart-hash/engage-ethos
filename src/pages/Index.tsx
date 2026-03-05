@@ -13,56 +13,41 @@ import { LibraryOverviewPanel } from "@/components/dashboard/LibraryOverviewPane
 const Index = () => {
   return (
     <div className="bg-background">
-      
-      {/* Dynamic Hero Section */}
       <DashboardHero />
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto space-y-6">
-
-          {/* Quick Capture Scratchpad */}
+      <main className="container mx-auto px-4 py-4">
+        <div className="max-w-6xl mx-auto space-y-4">
           <ScratchpadCapture />
-
-          {/* Resume Where You Left Off */}
           <ResumeWorkCard />
-
-          {/* Core Actions — prominent for new users, dismissible */}
           <QuickActionsPanel />
           
-          {/* My Drafts - Promoted to full width */}
           <section id="my-drafts">
             <MyDraftsCard />
           </section>
 
-          {/* Library & Collections Overview */}
           <LibraryOverviewPanel />
 
-          {/* Institution Management + Content DNA */}
-          <section className="grid md:grid-cols-2 gap-6">
+          <section className="grid md:grid-cols-2 gap-4">
             <InstitutionManagementCard />
             <ContentDNAStatusCard />
           </section>
 
-          {/* Admin Team Overview - University Admins Only */}
           <AdminTeamOverview />
-
-          {/* Quick Launch Bar */}
           <QuickLaunchBar />
         </div>
       </main>
 
-      {/* Simplified Footer */}
-      <footer className="border-t border-border bg-card py-6">
+      <footer className="border-t border-border py-4">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-muted-foreground">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-2">
+            <p className="text-[11px] text-muted-foreground">
               CampusVoice — Your Voice for Student Success
             </p>
             <a 
               href="mailto:support@campusvoice.ai" 
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="text-[11px] text-muted-foreground hover:text-foreground transition-colors"
             >
-              Need help? support@campusvoice.ai
+              support@campusvoice.ai
             </a>
           </div>
         </div>
