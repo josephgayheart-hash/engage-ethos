@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
+import { toastError, toastSuccess } from "@/lib/errors";
 import type { 
   BrandAuditTouchpoint, 
   BrandAuditReport, 
@@ -12,7 +12,6 @@ import type {
 
 export function useBrandAudit(profileId?: string | null) {
   const { profile, tenant } = useAuth();
-  const { toast } = useToast();
   const [touchpoints, setTouchpoints] = useState<BrandAuditTouchpoint[]>([]);
   const [reports, setReports] = useState<BrandAuditReport[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -90,11 +89,7 @@ export function useBrandAudit(profileId?: string | null) {
     contentSample?: string
   ) => {
     if (!tenant?.id || !profile?.id) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "You must be logged in to add touchpoints.",
-      });
+      toastError("Error", "You must be logged in to add touchpoints.");
       return null;
     }
 
@@ -118,19 +113,11 @@ export function useBrandAudit(profileId?: string | null) {
 
       await fetchTouchpoints();
 
-      toast({
-        title: "Touchpoint Added",
-        description: `"${touchpointName}" has been added to your audit.`,
-      });
+      toastSuccess("Touchpoint Added", `"${touchpointName}" has been added to your audit.`);
 
       return data;
     } catch (err) {
-      console.error('Error adding touchpoint:', err);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to add touchpoint. Please try again.",
-      });
+      toastError("Error adding touchpoint", err);
       return null;
     }
   };
@@ -142,7 +129,6 @@ export function useBrandAudit(profileId?: string | null) {
     >>
   ) => {
     try {
-      // Convert to DB-compatible format
       const dbUpdates: Record<string, unknown> = {
         updated_at: new Date().toISOString(),
       };
@@ -163,17 +149,9 @@ export function useBrandAudit(profileId?: string | null) {
 
       await fetchTouchpoints();
 
-      toast({
-        title: "Touchpoint Updated",
-        description: "The touchpoint has been updated.",
-      });
+      toastSuccess("Touchpoint Updated", "The touchpoint has been updated.");
     } catch (err) {
-      console.error('Error updating touchpoint:', err);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to update touchpoint.",
-      });
+      toastError("Error updating touchpoint", err);
     }
   };
 
@@ -188,17 +166,9 @@ export function useBrandAudit(profileId?: string | null) {
 
       await fetchTouchpoints();
 
-      toast({
-        title: "Touchpoint Removed",
-        description: "The touchpoint has been removed from your audit.",
-      });
+      toastSuccess("Touchpoint Removed", "The touchpoint has been removed from your audit.");
     } catch (err) {
-      console.error('Error deleting touchpoint:', err);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to delete touchpoint.",
-      });
+      toastError("Error deleting touchpoint", err);
     }
   };
 
