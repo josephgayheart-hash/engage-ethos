@@ -1,20 +1,20 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { useActiveWorkspaceId } from '@/contexts/WorkspaceContext';
 
 export function useCampusPhotoCount(profileId: string | null) {
-  const { tenant } = useAuth();
+  const workspaceId = useActiveWorkspaceId();
   const [count, setCount] = useState<number>(0);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    if (!tenant?.id) return;
+    if (!workspaceId) return;
 
     const fetchCount = async () => {
       let query = supabase
         .from('campus_photo_samples')
         .select('id', { count: 'exact', head: true })
-        .eq('tenant_id', tenant.id)
+        .eq('tenant_id', workspaceId)
         .eq('is_active', true);
 
       if (profileId) {
@@ -27,7 +27,7 @@ export function useCampusPhotoCount(profileId: string | null) {
     };
 
     fetchCount();
-  }, [tenant?.id, profileId]);
+  }, [workspaceId, profileId]);
 
   return { campusPhotoCount: count, isLoaded };
 }

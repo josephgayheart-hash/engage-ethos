@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useActiveWorkspaceId } from "@/contexts/WorkspaceContext";
 import { toastError, toastSuccess } from "@/lib/errors";
 import type { 
   BrandAuditTouchpoint, 
@@ -12,18 +13,19 @@ import type {
 
 export function useBrandAudit(profileId?: string | null) {
   const { profile, tenant } = useAuth();
+  const workspaceId = useActiveWorkspaceId();
   const [touchpoints, setTouchpoints] = useState<BrandAuditTouchpoint[]>([]);
   const [reports, setReports] = useState<BrandAuditReport[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchTouchpoints = useCallback(async () => {
-    if (!tenant?.id) return;
+    if (!workspaceId) return;
 
     try {
       let query = supabase
         .from('brand_audit_touchpoints')
         .select('*')
-        .eq('tenant_id', tenant.id)
+        .eq('tenant_id', workspaceId)
         .order('created_at', { ascending: false });
 
       if (profileId) {
@@ -46,16 +48,16 @@ export function useBrandAudit(profileId?: string | null) {
     } catch (err) {
       console.error('Error fetching touchpoints:', err);
     }
-  }, [tenant?.id, profileId]);
+  }, [workspaceId, profileId]);
 
   const fetchReports = useCallback(async () => {
-    if (!tenant?.id) return;
+    if (!workspaceId) return;
 
     try {
       let query = supabase
         .from('brand_audit_reports')
         .select('*')
-        .eq('tenant_id', tenant.id)
+        .eq('tenant_id', workspaceId)
         .order('report_date', { ascending: false });
 
       if (profileId) {
@@ -70,7 +72,7 @@ export function useBrandAudit(profileId?: string | null) {
     } catch (err) {
       console.error('Error fetching reports:', err);
     }
-  }, [tenant?.id, profileId]);
+  }, [workspaceId, profileId]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -88,7 +90,7 @@ export function useBrandAudit(profileId?: string | null) {
     touchpointCategory?: string,
     contentSample?: string
   ) => {
-    if (!tenant?.id || !profile?.id) {
+    if (!workspaceId || !profile?.id) {
       toastError("Error", "You must be logged in to add touchpoints.");
       return null;
     }
@@ -97,7 +99,7 @@ export function useBrandAudit(profileId?: string | null) {
       const { data, error } = await supabase
         .from('brand_audit_touchpoints')
         .insert({
-          tenant_id: tenant.id,
+          tenant_id: workspaceId,
           profile_id: profileId || null,
           user_id: profile.id,
           touchpoint_type: touchpointType,

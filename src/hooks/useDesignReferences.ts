@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useActiveWorkspaceId } from '@/contexts/WorkspaceContext';
 import { toast } from 'sonner';
 
 export interface DesignReference {
@@ -25,18 +26,19 @@ const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 export function useDesignReferences({ profileId }: { profileId: string | null }) {
   const { tenant, user } = useAuth();
+  const workspaceId = useActiveWorkspaceId();
   const [references, setReferences] = useState<DesignReference[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
 
   const fetchReferences = useCallback(async () => {
-    if (!tenant?.id) return;
+    if (!workspaceId) return;
     setIsLoading(true);
     try {
       let query = supabase
         .from('design_references' as any)
         .select('*')
-        .eq('tenant_id', tenant.id)
+        .eq('tenant_id', workspaceId)
         .order('sort_order', { ascending: true });
 
       if (profileId) {
@@ -51,7 +53,7 @@ export function useDesignReferences({ profileId }: { profileId: string | null })
     } finally {
       setIsLoading(false);
     }
-  }, [tenant?.id, profileId]);
+  }, [workspaceId, profileId]);
 
   useEffect(() => {
     fetchReferences();
@@ -63,7 +65,7 @@ export function useDesignReferences({ profileId }: { profileId: string | null })
     description?: string,
     referenceType: string = 'inspiration'
   ) => {
-    if (!tenant?.id || !user?.id) {
+    if (!workspaceId || !user?.id) {
       toast.error('You must be logged in to upload.');
       return;
     }
@@ -83,7 +85,7 @@ export function useDesignReferences({ profileId }: { profileId: string | null })
     try {
       for (const file of files) {
         const ext = file.name.split('.').pop();
-        const path = `${tenant.id}/${profileId || 'general'}/${crypto.randomUUID()}.${ext}`;
+        const path = `${workspaceId}/${profileId || 'general'}/${crypto.randomUUID()}.${ext}`;
         
         const { error: uploadError } = await supabase.storage
           .from('design-references')
@@ -97,7 +99,7 @@ export function useDesignReferences({ profileId }: { profileId: string | null })
         const { error: insertError } = await supabase
           .from('design_references' as any)
           .insert({
-            tenant_id: tenant.id,
+            tenant_id: workspaceId,
             profile_id: profileId,
             user_id: user.id,
             file_name: file.name,
@@ -118,7 +120,7 @@ export function useDesignReferences({ profileId }: { profileId: string | null })
     } finally {
       setIsUploading(false);
     }
-  }, [tenant?.id, user?.id, profileId, references.length, fetchReferences]);
+  }, [workspaceId, user?.id, profileId, references.length, fetchReferences]);
 
   const deleteReference = useCallback(async (id: string) => {
     try {

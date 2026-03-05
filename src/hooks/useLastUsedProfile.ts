@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useActiveWorkspaceId } from '@/contexts/WorkspaceContext';
 
 const STORAGE_KEY = 'campusvoice_last_used_profile';
 
@@ -25,13 +25,13 @@ interface LastUsedProfileData {
  * Builder, Web Analyzer, and other tools.
  */
 export function useLastUsedProfile() {
-  const { tenant } = useAuth();
+  const workspaceId = useActiveWorkspaceId();
   const [lastUsedProfileId, setLastUsedProfileIdState] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load from localStorage on mount
   useEffect(() => {
-    if (!tenant?.id) {
+    if (!workspaceId) {
       setIsLoaded(true);
       return;
     }
@@ -40,8 +40,8 @@ export function useLastUsedProfile() {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const data: LastUsedProfileData = JSON.parse(stored);
-        // Only use if it's for the same tenant
-        if (data.tenantId === tenant.id) {
+        // Only use if it's for the same workspace
+        if (data.tenantId === workspaceId) {
           setLastUsedProfileIdState(data.profileId);
         }
       }
@@ -49,18 +49,18 @@ export function useLastUsedProfile() {
       console.error('Failed to load last used profile:', e);
     }
     setIsLoaded(true);
-  }, [tenant?.id]);
+  }, [workspaceId]);
 
   // Save to localStorage
   const setLastUsedProfileId = useCallback((profileId: string | null) => {
-    if (!tenant?.id) return;
+    if (!workspaceId) return;
 
     setLastUsedProfileIdState(profileId);
 
     if (profileId) {
       try {
         const data: LastUsedProfileData = {
-          tenantId: tenant.id,
+          tenantId: workspaceId,
           profileId,
           timestamp: Date.now(),
         };
@@ -71,7 +71,7 @@ export function useLastUsedProfile() {
     } else {
       localStorage.removeItem(STORAGE_KEY);
     }
-  }, [tenant?.id]);
+  }, [workspaceId]);
 
   return {
     lastUsedProfileId,
