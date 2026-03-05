@@ -1,6 +1,6 @@
 import { DashboardHero } from "@/components/dashboard";
 import { ScratchpadCapture } from "@/components/dashboard/ScratchpadCapture";
-import { ResumeWorkCard } from "@/components/dashboard/ResumeWorkCard";
+
 import { QuickActionsPanel } from "@/components/dashboard/QuickActionsPanel";
 import { MyDraftsCard } from "@/components/MyDraftsCard";
 
@@ -18,7 +18,7 @@ const Index = () => {
       <main className="container mx-auto px-4 py-4">
         <div className="max-w-6xl mx-auto space-y-4">
           <ScratchpadCapture />
-          <ResumeWorkCard />
+          
           <QuickActionsPanel />
           
           <section id="my-drafts">
