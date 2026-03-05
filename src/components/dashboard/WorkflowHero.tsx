@@ -67,19 +67,6 @@ export function WorkflowHero({ context }: WorkflowHeroProps) {
               </p>
             </div>
 
-            {mostRecentDraft && (
-              <Button asChild variant="outline" size="sm" className="group h-8 text-xs">
-                <Link to={
-                  mostRecentDraft.type === 'journey' 
-                    ? `/strategy?draft=${mostRecentDraft.id}` 
-                    : `/build?draft=${mostRecentDraft.id}`
-                }>
-                  <RotateCcw className="w-3 h-3 mr-1.5" />
-                  Resume: {mostRecentDraft.title || 'Draft'}
-                  <ArrowRight className="w-3 h-3 ml-1.5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </Link>
-              </Button>
-            )}
           </div>
 
           {/* Insight Cards Row */}
