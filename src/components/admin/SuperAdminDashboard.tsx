@@ -16,9 +16,7 @@ import {
   Mail,
   FileText,
   Radar,
-  Settings,
-  FileSignature,
-  Bug
+  Settings
 } from 'lucide-react';
 import { useAdminAnalytics } from '@/hooks/useAdminAnalytics';
 import {
@@ -100,18 +98,6 @@ export function SuperAdminDashboard({
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
             {formatTime(lastRefresh)}
-          </Button>
-          <Button variant="outline" asChild>
-            <Link to="/admin/qa">
-              <Bug className="w-4 h-4 mr-2" />
-              QA
-            </Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link to="/admin/nda-links">
-              <FileSignature className="w-4 h-4 mr-2" />
-              NDA Links
-            </Link>
           </Button>
           <Button variant="outline" asChild>
             <Link to="/admin/qa">
