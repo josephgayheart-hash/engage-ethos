@@ -1398,6 +1398,125 @@ export type Database = {
           },
         ]
       }
+      nda_links: {
+        Row: {
+          agreement_version: string
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          is_one_time: boolean
+          label: string
+          notes: string | null
+          organization: string | null
+          recipient_email: string | null
+          recipient_name: string | null
+          redirect_url: string | null
+          slug: string
+          status: string
+        }
+        Insert: {
+          agreement_version?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          is_one_time?: boolean
+          label: string
+          notes?: string | null
+          organization?: string | null
+          recipient_email?: string | null
+          recipient_name?: string | null
+          redirect_url?: string | null
+          slug: string
+          status?: string
+        }
+        Update: {
+          agreement_version?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          is_one_time?: boolean
+          label?: string
+          notes?: string | null
+          organization?: string | null
+          recipient_email?: string | null
+          recipient_name?: string | null
+          redirect_url?: string | null
+          slug?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      nda_responses: {
+        Row: {
+          agreement_text: string
+          agreement_version: string | null
+          drawn_signature_url: string | null
+          id: string
+          nda_link_id: string
+          public_slug: string | null
+          redirect_url: string | null
+          signer_email: string
+          signer_name: string
+          signer_organization: string | null
+          signer_title: string | null
+          status: string
+          submitted_at: string
+          timezone: string | null
+          typed_signature: string
+          user_agent: string | null
+        }
+        Insert: {
+          agreement_text: string
+          agreement_version?: string | null
+          drawn_signature_url?: string | null
+          id?: string
+          nda_link_id: string
+          public_slug?: string | null
+          redirect_url?: string | null
+          signer_email: string
+          signer_name: string
+          signer_organization?: string | null
+          signer_title?: string | null
+          status?: string
+          submitted_at?: string
+          timezone?: string | null
+          typed_signature: string
+          user_agent?: string | null
+        }
+        Update: {
+          agreement_text?: string
+          agreement_version?: string | null
+          drawn_signature_url?: string | null
+          id?: string
+          nda_link_id?: string
+          public_slug?: string | null
+          redirect_url?: string | null
+          signer_email?: string
+          signer_name?: string
+          signer_organization?: string | null
+          signer_title?: string | null
+          status?: string
+          submitted_at?: string
+          timezone?: string | null
+          typed_signature?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nda_responses_nda_link_id_fkey"
+            columns: ["nda_link_id"]
+            isOneToOne: false
+            referencedRelation: "nda_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       onboarding_requests: {
         Row: {
           agency_name: string | null
