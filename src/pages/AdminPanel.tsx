@@ -1898,9 +1898,9 @@ const AdminPanel = () => {
                       </Link>
                     </Button>
                     <Button variant="outline" className="w-full justify-start" size="sm" asChild>
-                      <Link to="/admin/seed">
-                        <Database className="w-4 h-4 mr-2" />
-                        Seed Data
+                      <Link to="/admin/nda-links">
+                        <FileText className="w-4 h-4 mr-2" />
+                        NDA Links
                         <ChevronRight className="w-4 h-4 ml-auto" />
                       </Link>
                     </Button>
