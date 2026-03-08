@@ -75,7 +75,6 @@ const manageItems = [
 const superAdminItems = [
   { title: "Super Admin Panel", url: "/admin/panel", icon: Shield },
   { title: "CRM", url: "/admin/crm", icon: Contact },
-  { title: "QA Diagnostics", url: "/admin/qa", icon: Bug },
 ];
 
 export function AppSidebar() {
