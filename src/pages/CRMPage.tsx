@@ -283,7 +283,7 @@ export default function CRMPage() {
   const [expandedEmailId, setExpandedEmailId] = useState<string | null>(null);
 
   // Top-level CRM tab
-  const [crmTab, setCrmTab] = useState("contacts");
+  const [crmTab, setCrmTab] = useState("requests");
 
   // Tenants & users for email tools
   const [tenants, setTenants] = useState<{ id: string; institution_name: string }[]>([]);
