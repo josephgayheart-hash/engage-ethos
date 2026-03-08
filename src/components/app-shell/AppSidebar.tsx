@@ -18,13 +18,8 @@ import {
   Layers,
   BarChart3,
   Shield,
-  Users,
   Bug,
-  Database,
-  Lock,
-  Mail,
   Contact,
-  FileSignature,
   LogOut,
   User,
   UserPlus,
@@ -80,12 +75,7 @@ const manageItems = [
 const superAdminItems = [
   { title: "Super Admin Panel", url: "/admin/panel", icon: Shield },
   { title: "CRM", url: "/admin/crm", icon: Contact },
-  { title: "Admin Users", url: "/admin/users", icon: Users },
-  { title: "Prospect Outreach", url: "/admin/prospect-outreach", icon: Mail },
   { title: "QA Diagnostics", url: "/admin/qa", icon: Bug },
-  { title: "Seed Data", url: "/admin/seed", icon: Database },
-  { title: "Security Events", url: "/admin/security-events", icon: Lock },
-  { title: "NDA Links", url: "/admin/nda-links", icon: FileSignature },
 ];
 
 export function AppSidebar() {

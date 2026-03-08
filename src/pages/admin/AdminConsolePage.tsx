@@ -32,7 +32,8 @@ import {
   Dna,
   FolderTree,
   FileText,
-  MessageSquare
+  MessageSquare,
+  FileSignature
 } from 'lucide-react';
 
 interface UserStats {
@@ -433,6 +434,14 @@ export default function AdminConsolePage() {
       href: '/admin/onboarding',
       color: 'bg-[hsl(173,58%,39%)]',
       stat: onboardingStats.pending > 0 ? `${onboardingStats.pending} pending` : 'No pending'
+    },
+    {
+      title: 'NDA Links',
+      description: 'Create and manage demo confidentiality agreements',
+      icon: FileSignature,
+      href: '/admin/nda-links',
+      color: 'bg-[hsl(250,52%,47%)]',
+      stat: 'Manage'
     },
     {
       title: 'Security & QA',
