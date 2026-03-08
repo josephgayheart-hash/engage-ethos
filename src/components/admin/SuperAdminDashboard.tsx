@@ -101,18 +101,6 @@ export function SuperAdminDashboard({
           </Button>
           <Button variant="outline" asChild>
             <Link to="/admin/qa">
-              <Bug className="w-4 h-4 mr-2" />
-              QA
-            </Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link to="/admin/nda-links">
-              <FileSignature className="w-4 h-4 mr-2" />
-              NDA Links
-            </Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link to="/admin/qa">
               <Shield className="w-4 h-4 mr-2" />
               Security
             </Link>
