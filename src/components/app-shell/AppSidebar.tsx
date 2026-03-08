@@ -21,7 +21,6 @@ import {
   Bug,
   Contact,
   LogOut,
-  LogOut,
   User,
   UserPlus,
   ChevronsUpDown,
