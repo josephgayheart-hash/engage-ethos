@@ -18,7 +18,7 @@ import {
   Layers,
   BarChart3,
   Shield,
-  Bug,
+  
   Contact,
   LogOut,
   User,
