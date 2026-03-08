@@ -10,6 +10,7 @@ import type { SavedMessage } from "@/types/library";
 import { JourneyViewer, isJourneyContent, parseJourneyContent } from "./JourneyViewer";
 import { openInGoogleDocs, formatForGoogleDocs } from "@/lib/googleDocsExport";
 import { SalesforceCredentialsDialog } from "@/components/SalesforceCredentialsDialog";
+import { SlateCredentialsDialog } from "@/components/SlateCredentialsDialog";
 import { CheckCircle, Copy, Trash2, History, Map, ExternalLink, FileText, Pencil, X, Save, Cloud } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -265,6 +266,13 @@ export function MessageDetailDialog({ message, open, onOpenChange, onApprove, on
         <SalesforceCredentialsDialog
           open={sfmcDialogOpen}
           onOpenChange={setSfmcDialogOpen}
+          content={displayContent}
+          contentName={message.title}
+          channel={message.channel || 'email'}
+        />
+        <SlateCredentialsDialog
+          open={false}
+          onOpenChange={() => {}}
           content={displayContent}
           contentName={message.title}
           channel={message.channel || 'email'}
