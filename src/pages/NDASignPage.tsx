@@ -211,17 +211,8 @@ export default function NDASignPage() {
     }
   }, [countdown, link?.redirect_url]);
 
-  // Shared wrapper
-  const Wrapper = ({ children }: { children: React.ReactNode }) => (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-2xl mx-auto px-4 py-8 md:py-16">
-        <div className="flex justify-center mb-8">
-          <img src={campusvoiceLogo} alt="CampusVoice" className="h-10 object-contain" />
-        </div>
-        {children}
-      </div>
-    </div>
-  );
+  return (
+    <NDAPageWrapper>
 
   if (pageState === "loading") return (
     <Wrapper>
