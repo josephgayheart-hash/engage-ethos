@@ -135,6 +135,7 @@ const AppRoutes = () => (
     <Route path="/features/journey-designer" element={<JourneyDesignerFeaturePage />} />
     <Route path="/features/evaluate" element={<EvaluateFeaturePage />} />
     <Route path="/features/library" element={<LibraryFeaturePage />} />
+    <Route path="/nda/sign/:slug" element={<NDASignPage />} />
 
     {/* Authenticated routes — wrapped in AppLayout sidebar shell */}
     <Route element={<RequireAuth><AppLayout /></RequireAuth>}>
