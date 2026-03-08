@@ -13,3 +13,15 @@
    - **Layout Density** — radio group: Spacious, Balanced, Dense
 4. **Updated edge function prompt** — accepts `designStyle`, `colorMood`, `typographyStyle`, `layoutDensity` and weaves them into the graphic design prompt
 5. **Contextual UI** — Scene Description becomes "Design Brief" with a graphic-design-specific placeholder when in GD mode
+
+## NDA Links — Super Admin Feature — ✅ COMPLETED
+
+### What was done
+
+1. **Database**: Created `nda_links` and `nda_responses` tables with full RLS (super admin CRUD, anonymous INSERT for public signing, anonymous SELECT for active links)
+2. **Storage**: Created `nda-signatures` bucket for drawn signature images
+3. **Public signing page** (`/nda/sign/:slug`): CampusVoice-branded page with wave emoji heading, agreement text, form fields (name, email, org, title), 3 required checkboxes, typed + optional drawn signature canvas, success screen with countdown redirect
+4. **Admin page** (`/admin/nda-links`): Two-tab layout — Links table (create, copy, duplicate, revoke) + Responses table (search, filter, CSV export, detail drawer)
+5. **Components**: `CreateNDALinkDialog`, `NDALinksTable`, `NDAResponsesTable`, `NDAResponseDetailDrawer`
+6. **Navigation**: Added to Super Admin sidebar with FileSignature icon
+7. **Routes**: Public route for `/nda/sign/:slug`, Super Admin route for `/admin/nda-links`
