@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { resilientFetch, corsHeaders, handleGatewayErrorResponse } from "../_shared/resilience.ts";
 
 const EXTRACTION_PROMPT = `You are a content analyst specializing in higher education communications. Analyze the provided content sample and extract semantic information for retrieval purposes.
 
