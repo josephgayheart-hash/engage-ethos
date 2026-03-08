@@ -39,6 +39,19 @@ interface NDALink {
 
 type PageState = "loading" | "form" | "success" | "expired" | "signed" | "not-found";
 
+function NDAPageWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="max-w-2xl mx-auto px-4 py-8 md:py-16">
+        <div className="flex justify-center mb-8">
+          <img src={campusvoiceLogo} alt="CampusVoice" className="h-10 object-contain" />
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export default function NDASignPage() {
   const { slug } = useParams<{ slug: string }>();
   const [pageState, setPageState] = useState<PageState>("loading");
@@ -140,7 +153,6 @@ export default function NDASignPage() {
 
     setSubmitting(true);
     try {
-      // Upload drawn signature if exists
       let drawnSigUrl: string | null = null;
       if (hasDrawn && canvasRef.current) {
         const blob = await new Promise<Blob | null>((res) => canvasRef.current!.toBlob(res, "image/png"));
@@ -176,7 +188,6 @@ export default function NDASignPage() {
 
       if (error) throw error;
 
-      // Update link status if one-time
       if (link.is_one_time) {
         await supabase.from("nda_links").update({ status: "signed" }).eq("id", link.id);
       }
@@ -197,13 +208,9 @@ export default function NDASignPage() {
   // Countdown redirect
   useEffect(() => {
     if (countdown === null || countdown <= 0) return;
-    if (countdown === 0 && link?.redirect_url) {
-      window.location.href = link.redirect_url;
-      return;
-    }
     const t = setTimeout(() => setCountdown(countdown - 1), 1000);
     return () => clearTimeout(t);
-  }, [countdown, link?.redirect_url]);
+  }, [countdown]);
 
   useEffect(() => {
     if (countdown === 0 && link?.redirect_url) {
@@ -211,26 +218,14 @@ export default function NDASignPage() {
     }
   }, [countdown, link?.redirect_url]);
 
-  // Shared wrapper
-  const Wrapper = ({ children }: { children: React.ReactNode }) => (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-2xl mx-auto px-4 py-8 md:py-16">
-        <div className="flex justify-center mb-8">
-          <img src={campusvoiceLogo} alt="CampusVoice" className="h-10 object-contain" />
-        </div>
-        {children}
-      </div>
-    </div>
-  );
-
   if (pageState === "loading") return (
-    <Wrapper>
+    <NDAPageWrapper>
       <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
-    </Wrapper>
+    </NDAPageWrapper>
   );
 
   if (pageState === "not-found") return (
-    <Wrapper>
+    <NDAPageWrapper>
       <Card className="text-center py-12">
         <CardContent className="space-y-3">
           <XCircle className="h-12 w-12 text-muted-foreground mx-auto" />
@@ -238,11 +233,11 @@ export default function NDASignPage() {
           <p className="text-muted-foreground">This NDA link doesn't exist or may have been removed.</p>
         </CardContent>
       </Card>
-    </Wrapper>
+    </NDAPageWrapper>
   );
 
   if (pageState === "expired") return (
-    <Wrapper>
+    <NDAPageWrapper>
       <Card className="text-center py-12">
         <CardContent className="space-y-3">
           <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto" />
@@ -250,11 +245,11 @@ export default function NDASignPage() {
           <p className="text-muted-foreground">This NDA link is no longer active. Please reach out for a new one.</p>
         </CardContent>
       </Card>
-    </Wrapper>
+    </NDAPageWrapper>
   );
 
   if (pageState === "signed") return (
-    <Wrapper>
+    <NDAPageWrapper>
       <Card className="text-center py-12">
         <CardContent className="space-y-3">
           <CheckCircle className="h-12 w-12 text-emerald-500 mx-auto" />
@@ -262,11 +257,11 @@ export default function NDASignPage() {
           <p className="text-muted-foreground">This NDA has already been signed. No further action is needed.</p>
         </CardContent>
       </Card>
-    </Wrapper>
+    </NDAPageWrapper>
   );
 
   if (pageState === "success") return (
-    <Wrapper>
+    <NDAPageWrapper>
       <Card className="text-center py-12">
         <CardContent className="space-y-4">
           <CheckCircle className="h-14 w-14 text-emerald-500 mx-auto" />
@@ -288,14 +283,13 @@ export default function NDASignPage() {
           )}
         </CardContent>
       </Card>
-    </Wrapper>
+    </NDAPageWrapper>
   );
 
   // Form state
   return (
-    <Wrapper>
+    <NDAPageWrapper>
       <div className="space-y-6">
-        {/* Heading */}
         <div className="text-center space-y-2">
           <h1 className="text-2xl md:text-3xl font-bold">👋 Hey, I can't wait to show you what I've built.</h1>
           <p className="text-muted-foreground text-sm md:text-base max-w-lg mx-auto">
@@ -303,7 +297,6 @@ export default function NDASignPage() {
           </p>
         </div>
 
-        {/* Agreement text */}
         <Card>
           <CardContent className="p-4 md:p-6">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Confidentiality Agreement</h3>
@@ -313,7 +306,6 @@ export default function NDASignPage() {
           </CardContent>
         </Card>
 
-        {/* Form */}
         <Card>
           <CardContent className="p-4 md:p-6 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -335,7 +327,6 @@ export default function NDASignPage() {
               </div>
             </div>
 
-            {/* Checkboxes */}
             <div className="space-y-3 pt-2">
               <div className="flex items-start gap-2">
                 <Checkbox id="c1" checked={check1} onCheckedChange={(v) => setCheck1(!!v)} className="mt-0.5" />
@@ -357,7 +348,6 @@ export default function NDASignPage() {
               </div>
             </div>
 
-            {/* Typed signature */}
             <div className="space-y-1.5 pt-2">
               <Label htmlFor="sig">Electronic Signature <span className="text-destructive">*</span></Label>
               <Input
@@ -370,7 +360,6 @@ export default function NDASignPage() {
               />
             </div>
 
-            {/* Drawn signature (optional) */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <Label>Drawn Signature <span className="text-muted-foreground text-xs">(optional)</span></Label>
@@ -405,6 +394,6 @@ export default function NDASignPage() {
           </CardContent>
         </Card>
       </div>
-    </Wrapper>
+    </NDAPageWrapper>
   );
 }
