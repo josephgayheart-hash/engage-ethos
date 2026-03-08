@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { SmsCharCounter } from "@/components/ui/sms-char-counter";
 import { useToast } from "@/hooks/use-toast";
 import { SalesforceCredentialsDialog } from "@/components/SalesforceCredentialsDialog";
+import { SlateCredentialsDialog } from "@/components/SlateCredentialsDialog";
 import { openInGoogleDocs, formatForGoogleDocs } from "@/lib/googleDocsExport";
 import { exportTalkingPointsToPDF, exportCaseForSupportToPDF, type BrandingOptions } from "@/lib/pdfExport";
 import { 
@@ -118,6 +119,7 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState<ChannelDrafts[keyof ChannelDrafts]>(content);
   const [sfmcDialogOpen, setSfmcDialogOpen] = useState(false);
+  const [slateDialogOpen, setSlateDialogOpen] = useState(false);
   const [channelImageUrl, setChannelImageUrl] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [showInContext, setShowInContext] = useState(false);
@@ -369,6 +371,10 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
 
   const handleExportToSalesforce = () => {
     setSfmcDialogOpen(true);
+  };
+
+  const handleExportToSlate = () => {
+    setSlateDialogOpen(true);
   };
 
   const handleStartEdit = () => {
@@ -2031,14 +2037,24 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
                   </Button>
                 )}
                 {['email', 'sms', 'landing-page'].includes(channel) && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleExportToSalesforce}
-                    title="Push to Salesforce Marketing Cloud"
-                  >
-                    <Cloud className="w-4 h-4 text-blue-500" />
-                  </Button>
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleExportToSalesforce}
+                      title="Push to Salesforce Marketing Cloud"
+                    >
+                      <Cloud className="w-4 h-4 text-blue-500" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleExportToSlate}
+                      title="Push to Slate CRM"
+                    >
+                      <Cloud className="w-4 h-4 text-emerald-500" />
+                    </Button>
+                  </>
                 )}
                 {['talking-points', 'case-for-care'].includes(channel) && (
                   <Button
@@ -2114,6 +2130,15 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
         content={getFullContent(editedContent)}
         contentName={`${channelLabels[channel]} - ${new Date().toLocaleDateString()}`}
         channel={channel}
+      />
+
+      <SlateCredentialsDialog
+        open={slateDialogOpen}
+        onOpenChange={setSlateDialogOpen}
+        content={getFullContent(editedContent)}
+        contentName={`${channelLabels[channel]} - ${new Date().toLocaleDateString()}`}
+        channel={channel}
+        audience={audience}
       />
     </Card>
   );
