@@ -283,7 +283,7 @@ export default function CRMPage() {
   const [expandedEmailId, setExpandedEmailId] = useState<string | null>(null);
 
   // Top-level CRM tab
-  const [crmTab, setCrmTab] = useState("contacts");
+  const [crmTab, setCrmTab] = useState("requests");
 
   // Tenants & users for email tools
   const [tenants, setTenants] = useState<{ id: string; institution_name: string }[]>([]);
@@ -1267,15 +1267,15 @@ export default function CRMPage() {
         </div>
         <Tabs value={crmTab} onValueChange={setCrmTab} className="mt-3">
           <TabsList className="grid grid-cols-6 w-full max-w-3xl">
-            <TabsTrigger value="contacts" className="gap-1.5 text-xs"><Users className="h-3 w-3" /> Contacts</TabsTrigger>
             <TabsTrigger value="requests" className="gap-1.5 text-xs relative">
-              <Inbox className="h-3 w-3" /> Requests
+              <Inbox className="h-3 w-3" /> Leads
               {requests.filter(r => r.request_status === "submitted").length > 0 && (
                 <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[10px] rounded-full h-4 w-4 flex items-center justify-center">
                   {requests.filter(r => r.request_status === "submitted").length}
                 </span>
               )}
             </TabsTrigger>
+            <TabsTrigger value="contacts" className="gap-1.5 text-xs"><Users className="h-3 w-3" /> Contacts</TabsTrigger>
             <TabsTrigger value="opportunities" className="gap-1.5 text-xs"><Target className="h-3 w-3" /> Opportunities</TabsTrigger>
             <TabsTrigger value="radar" className="gap-1.5 text-xs"><Radar className="h-3 w-3" /> Radar</TabsTrigger>
             <TabsTrigger value="templates" className="gap-1.5 text-xs"><FileText className="h-3 w-3" /> Templates</TabsTrigger>
