@@ -104,3 +104,9 @@ verify_jwt = false
 
 [functions.search-university-logo]
 verify_jwt = false
+
+[functions.push-to-slate]
+verify_jwt = false
+
+[functions.generate-overlay-text]
+verify_jwt = false

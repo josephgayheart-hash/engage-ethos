@@ -1,10 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { resilientFetch, corsHeaders, handleGatewayErrorResponse } from "../_shared/resilience.ts";
 
 interface OutreachRequest {
   contact_name: string;
@@ -86,65 +82,56 @@ ${source_article_title ? `I found them via: "${source_article_title}"` : ''}
 
 The message should congratulate them on their rebrand and offer to show how CampusVoice.ai helps teams adopt and maintain brand voice consistency.`;
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-3-flash-preview',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        tools: [
-          {
-            type: 'function',
-            function: {
-              name: 'generate_outreach',
-              description: 'Generate a personalized outreach message',
-              parameters: {
-                type: 'object',
-                properties: {
-                  subject: { 
-                    type: 'string', 
-                    description: 'Email subject line (omit for LinkedIn DM)' 
+    const response = await resilientFetch(
+      'https://ai.gateway.lovable.dev/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-3-flash-preview',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+          ],
+          tools: [
+            {
+              type: 'function',
+              function: {
+                name: 'generate_outreach',
+                description: 'Generate a personalized outreach message',
+                parameters: {
+                  type: 'object',
+                  properties: {
+                    subject: { 
+                      type: 'string', 
+                      description: 'Email subject line (omit for LinkedIn DM)' 
+                    },
+                    body: { 
+                      type: 'string', 
+                      description: 'The main message body' 
+                    },
+                    call_to_action: { 
+                      type: 'string', 
+                      description: 'The specific ask or next step' 
+                    }
                   },
-                  body: { 
-                    type: 'string', 
-                    description: 'The main message body' 
-                  },
-                  call_to_action: { 
-                    type: 'string', 
-                    description: 'The specific ask or next step' 
-                  }
-                },
-                required: ['body', 'call_to_action'],
-                additionalProperties: false
+                  required: ['body', 'call_to_action'],
+                  additionalProperties: false
+                }
               }
             }
-          }
-        ],
-        tool_choice: { type: 'function', function: { name: 'generate_outreach' } }
-      }),
-    });
+          ],
+          tool_choice: { type: 'function', function: { name: 'generate_outreach' } }
+        }),
+      },
+      { label: 'generate-outreach-message', maxRetries: 2 }
+    );
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('AI gateway error:', response.status, errorText);
-      
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ success: false, error: 'Rate limit exceeded. Please try again later.' }),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      
-      return new Response(
-        JSON.stringify({ success: false, error: 'AI generation failed' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return await handleGatewayErrorResponse(response, "generate-outreach-message");
     }
 
     const data = await response.json();

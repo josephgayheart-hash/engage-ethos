@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { resilientFetch, corsHeaders, handleGatewayErrorResponse } from "../_shared/resilience.ts";
 
 const EXTRACTION_PROMPT = `You are a content analyst specializing in higher education communications. Analyze the provided content sample and extract semantic information for retrieval purposes.
 
@@ -83,36 +79,30 @@ serve(async (req) => {
         console.log(`Extracting semantics for sample ${id} (${truncatedContent.length} chars)...`);
 
         // Call Lovable AI for extraction
-        const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
-            "Content-Type": "application/json",
+        const response = await resilientFetch(
+          "https://ai.gateway.lovable.dev/v1/chat/completions",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${LOVABLE_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: "google/gemini-2.5-flash",
+              messages: [
+                { role: "system", content: EXTRACTION_PROMPT },
+                { role: "user", content: `Analyze this content sample and extract semantic information:\n\n${truncatedContent}` },
+              ],
+              response_format: { type: "json_object" },
+            }),
           },
-          body: JSON.stringify({
-            model: "google/gemini-2.5-flash",
-            messages: [
-              { role: "system", content: EXTRACTION_PROMPT },
-              { role: "user", content: `Analyze this content sample and extract semantic information:\n\n${truncatedContent}` },
-            ],
-            response_format: { type: "json_object" },
-          }),
-        });
+          { label: `extract-semantics-${id}`, maxRetries: 1 }
+        );
 
         if (!response.ok) {
           const errorText = await response.text();
           console.error(`AI gateway error for ${id}:`, response.status, errorText);
-          
-          if (response.status === 429) {
-            results.push({ id, success: false, error: "Rate limit exceeded" });
-            continue;
-          }
-          if (response.status === 402) {
-            results.push({ id, success: false, error: "AI credits exhausted" });
-            continue;
-          }
-          
-          results.push({ id, success: false, error: "AI processing failed" });
+          results.push({ id, success: false, error: response.status === 429 ? "Rate limit exceeded" : response.status === 402 ? "AI credits exhausted" : "AI processing failed" });
           continue;
         }
 
