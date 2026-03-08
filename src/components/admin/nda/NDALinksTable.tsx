@@ -3,11 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Copy, Ban, MoreHorizontal, ExternalLink } from "lucide-react";
+import { Copy, Ban, MoreHorizontal, ExternalLink, Pencil } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
-
+import type { NDALinkData } from "./CreateNDALinkDialog";
 interface NDALink {
   id: string;
   slug: string;
@@ -32,7 +32,7 @@ const statusColor: Record<string, string> = {
   expired: "bg-amber-500/10 text-amber-700 border-amber-200",
 };
 
-export function NDALinksTable({ refreshKey, onRefresh }: { refreshKey: number; onRefresh: () => void }) {
+export function NDALinksTable({ refreshKey, onRefresh, onEdit }: { refreshKey: number; onRefresh: () => void; onEdit: (link: NDALinkData) => void }) {
   const [links, setLinks] = useState<NDALink[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -128,6 +128,9 @@ export function NDALinksTable({ refreshKey, onRefresh }: { refreshKey: number; o
                       <Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => onEdit(link)}>
+                        <Pencil className="h-4 w-4 mr-2" /> Edit
+                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => copyLink(link.slug)}>
                         <Copy className="h-4 w-4 mr-2" /> Copy Link
                       </DropdownMenuItem>

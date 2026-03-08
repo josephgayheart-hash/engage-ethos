@@ -2,13 +2,30 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Plus, FileSignature } from "lucide-react";
-import { CreateNDALinkDialog } from "@/components/admin/nda/CreateNDALinkDialog";
+import { CreateNDALinkDialog, type NDALinkData } from "@/components/admin/nda/CreateNDALinkDialog";
 import { NDALinksTable } from "@/components/admin/nda/NDALinksTable";
 import { NDAResponsesTable } from "@/components/admin/nda/NDAResponsesTable";
 
 export default function NDALinksPage() {
-  const [createOpen, setCreateOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingLink, setEditingLink] = useState<NDALinkData | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleEdit = (link: NDALinkData) => {
+    setEditingLink(link);
+    setDialogOpen(true);
+  };
+
+  const handleCreate = () => {
+    setEditingLink(null);
+    setDialogOpen(true);
+  };
+
+  const handleSaved = () => {
+    setDialogOpen(false);
+    setEditingLink(null);
+    setRefreshKey((k) => k + 1);
+  };
 
   return (
     <div className="space-y-6">
@@ -21,7 +38,7 @@ export default function NDALinksPage() {
             Create and manage confidentiality agreement links for demos
           </p>
         </div>
-        <Button onClick={() => setCreateOpen(true)}>
+        <Button onClick={handleCreate}>
           <Plus className="h-4 w-4 mr-1" /> Create NDA Link
         </Button>
       </div>
@@ -32,7 +49,7 @@ export default function NDALinksPage() {
           <TabsTrigger value="responses">Signed Responses</TabsTrigger>
         </TabsList>
         <TabsContent value="links">
-          <NDALinksTable refreshKey={refreshKey} onRefresh={() => setRefreshKey((k) => k + 1)} />
+          <NDALinksTable refreshKey={refreshKey} onRefresh={() => setRefreshKey((k) => k + 1)} onEdit={handleEdit} />
         </TabsContent>
         <TabsContent value="responses">
           <NDAResponsesTable />
@@ -40,9 +57,10 @@ export default function NDALinksPage() {
       </Tabs>
 
       <CreateNDALinkDialog
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-        onCreated={() => { setCreateOpen(false); setRefreshKey((k) => k + 1); }}
+        open={dialogOpen}
+        onOpenChange={(v) => { setDialogOpen(v); if (!v) setEditingLink(null); }}
+        onCreated={handleSaved}
+        editingLink={editingLink}
       />
     </div>
   );

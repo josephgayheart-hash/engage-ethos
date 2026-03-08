@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,13 +14,27 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 
+export interface NDALinkData {
+  id: string;
+  slug: string;
+  label: string;
+  recipient_name: string | null;
+  recipient_email: string | null;
+  organization: string | null;
+  redirect_url: string | null;
+  expires_at: string | null;
+  is_one_time: boolean;
+  notes: string | null;
+}
+
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCreated: () => void;
+  editingLink?: NDALinkData | null;
 }
 
-export function CreateNDALinkDialog({ open, onOpenChange, onCreated }: Props) {
+export function CreateNDALinkDialog({ open, onOpenChange, onCreated, editingLink }: Props) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [label, setLabel] = useState("");
@@ -32,35 +46,62 @@ export function CreateNDALinkDialog({ open, onOpenChange, onCreated }: Props) {
   const [isOneTime, setIsOneTime] = useState(true);
   const [notes, setNotes] = useState("");
 
-  const reset = () => {
-    setLabel(""); setRecipientName(""); setRecipientEmail("");
-    setOrganization(""); setRedirectUrl(""); setExpiresAt(undefined);
-    setIsOneTime(true); setNotes("");
-  };
+  const isEditing = !!editingLink;
 
-  const handleCreate = async () => {
+  useEffect(() => {
+    if (editingLink) {
+      setLabel(editingLink.label);
+      setRecipientName(editingLink.recipient_name || "");
+      setRecipientEmail(editingLink.recipient_email || "");
+      setOrganization(editingLink.organization || "");
+      setRedirectUrl(editingLink.redirect_url || "");
+      setExpiresAt(editingLink.expires_at ? new Date(editingLink.expires_at) : undefined);
+      setIsOneTime(editingLink.is_one_time);
+      setNotes(editingLink.notes || "");
+    } else {
+      setLabel(""); setRecipientName(""); setRecipientEmail("");
+      setOrganization(""); setRedirectUrl(""); setExpiresAt(undefined);
+      setIsOneTime(true); setNotes("");
+    }
+  }, [editingLink, open]);
+
+  const handleSave = async () => {
     if (!label.trim()) {
       toast({ title: "Label required", variant: "destructive" });
       return;
     }
     setLoading(true);
     try {
-      const slug = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
-      const { error } = await supabase.from("nda_links").insert({
-        slug,
-        label: label.trim(),
-        recipient_name: recipientName.trim() || null,
-        recipient_email: recipientEmail.trim() || null,
-        organization: organization.trim() || null,
-        redirect_url: redirectUrl.trim() || null,
-        expires_at: expiresAt?.toISOString() || null,
-        is_one_time: isOneTime,
-        notes: notes.trim() || null,
-        created_by: user?.id || null,
-      });
-      if (error) throw error;
-      toast({ title: "NDA link created" });
-      reset();
+      if (isEditing) {
+        const { error } = await supabase.from("nda_links").update({
+          label: label.trim(),
+          recipient_name: recipientName.trim() || null,
+          recipient_email: recipientEmail.trim() || null,
+          organization: organization.trim() || null,
+          redirect_url: redirectUrl.trim() || null,
+          expires_at: expiresAt?.toISOString() || null,
+          is_one_time: isOneTime,
+          notes: notes.trim() || null,
+        }).eq("id", editingLink!.id);
+        if (error) throw error;
+        toast({ title: "NDA link updated" });
+      } else {
+        const slug = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
+        const { error } = await supabase.from("nda_links").insert({
+          slug,
+          label: label.trim(),
+          recipient_name: recipientName.trim() || null,
+          recipient_email: recipientEmail.trim() || null,
+          organization: organization.trim() || null,
+          redirect_url: redirectUrl.trim() || null,
+          expires_at: expiresAt?.toISOString() || null,
+          is_one_time: isOneTime,
+          notes: notes.trim() || null,
+          created_by: user?.id || null,
+        });
+        if (error) throw error;
+        toast({ title: "NDA link created" });
+      }
       onCreated();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -73,7 +114,7 @@ export function CreateNDALinkDialog({ open, onOpenChange, onCreated }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create NDA Link</DialogTitle>
+          <DialogTitle>{isEditing ? "Edit NDA Link" : "Create NDA Link"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 pt-2">
           <div className="space-y-1.5">
@@ -123,8 +164,8 @@ export function CreateNDALinkDialog({ open, onOpenChange, onCreated }: Props) {
             <Label>Notes</Label>
             <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Internal notes about this link..." rows={2} />
           </div>
-          <Button onClick={handleCreate} disabled={loading || !label.trim()} className="w-full">
-            {loading ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Creating…</> : "Create Link"}
+          <Button onClick={handleSave} disabled={loading || !label.trim()} className="w-full">
+            {loading ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> {isEditing ? "Saving…" : "Creating…"}</> : isEditing ? "Save Changes" : "Create Link"}
           </Button>
         </div>
       </DialogContent>
