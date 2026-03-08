@@ -3,7 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Download, Search, Eye } from "lucide-react";
+import { Download, Search, Eye, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { NDAResponseDetailDrawer } from "./NDAResponseDetailDrawer";
 
@@ -31,15 +33,16 @@ export function NDAResponsesTable() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<NDAResponse | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<NDAResponse | null>(null);
 
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      const { data } = await supabase.from("nda_responses").select("*").order("submitted_at", { ascending: false });
-      setResponses((data as unknown as NDAResponse[]) || []);
-      setLoading(false);
-    })();
-  }, []);
+  const loadResponses = async () => {
+    setLoading(true);
+    const { data } = await supabase.from("nda_responses").select("*").order("submitted_at", { ascending: false });
+    setResponses((data as unknown as NDAResponse[]) || []);
+    setLoading(false);
+  };
+
+  useEffect(() => { loadResponses(); }, []);
 
   const filtered = responses.filter((r) => {
     const q = search.toLowerCase();
@@ -58,6 +61,13 @@ export function NDAResponsesTable() {
     const a = document.createElement("a");
     a.href = url; a.download = `nda-responses-${format(new Date(), "yyyy-MM-dd")}.csv`;
     a.click(); URL.revokeObjectURL(url);
+  };
+
+  const deleteResponse = async (r: NDAResponse) => {
+    const { error } = await supabase.from("nda_responses").delete().eq("id", r.id);
+    if (error) toast({ title: "Failed to delete", description: error.message, variant: "destructive" });
+    else { toast({ title: "Response deleted" }); loadResponses(); }
+    setDeleteTarget(null);
   };
 
   if (loading) return <div className="py-8 text-center text-muted-foreground">Loading…</div>;
@@ -103,7 +113,10 @@ export function NDAResponsesTable() {
                   <TableCell className="text-sm">{format(new Date(r.submitted_at), "MMM d, yyyy h:mm a")}</TableCell>
                   <TableCell>{r.agreement_version || "—"}</TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="icon" className="h-8 w-8"><Eye className="h-4 w-4" /></Button>
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); setSelected(r); }}><Eye className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteTarget(r); }}><Trash2 className="h-4 w-4" /></Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -113,6 +126,23 @@ export function NDAResponsesTable() {
       )}
 
       <NDAResponseDetailDrawer response={selected} onClose={() => setSelected(null)} />
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(v) => !v && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Signed Response</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to permanently delete the signed response from <span className="font-medium">{deleteTarget?.signer_name}</span> ({deleteTarget?.signer_email})? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => deleteTarget && deleteResponse(deleteTarget)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
