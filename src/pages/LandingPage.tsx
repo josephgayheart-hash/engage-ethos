@@ -113,7 +113,7 @@ const trustIndicators = [
 const HERO_NOUNS = [
   { text: "Firms", color: "hsl(82 85% 55%)" },
   { text: "Brands", color: "hsl(270 70% 60%)" },
-  { text: "Thinkers", color: "hsl(200 100% 50%)" },
+  { text: "Planners", color: "hsl(200 100% 50%)" },
   { text: "Writers", color: "hsl(82 85% 55%)" },
   { text: "Marketers", color: "hsl(270 70% 60%)" },
   { text: "Storytellers", color: "hsl(200 100% 50%)" },
