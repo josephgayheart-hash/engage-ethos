@@ -1,10 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { resilientFetch, corsHeaders, handleGatewayErrorResponse } from "../_shared/resilience.ts";
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -42,25 +38,27 @@ Return ONLY valid JSON with these exact fields. Do not include any other text or
 
     console.log('Parsing story, text length:', text.length, 'sourceUrl:', sourceUrl || 'none');
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
+    const response = await resilientFetch(
+      'https://ai.gateway.lovable.dev/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: `Parse this story:\n\n${text.substring(0, 12000)}` }
+          ],
+        }),
       },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Parse this story:\n\n${text.substring(0, 12000)}` }
-        ],
-      }),
-    });
+      { label: 'parse-story', maxRetries: 2 }
+    );
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('AI API error:', errorText);
-      throw new Error(`AI API error: ${response.status}`);
+      return await handleGatewayErrorResponse(response, "parse-story");
     }
 
     const data = await response.json();

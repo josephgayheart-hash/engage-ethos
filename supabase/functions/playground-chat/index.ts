@@ -1,9 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { corsHeaders } from "../_shared/resilience.ts";
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -167,6 +163,9 @@ ${profileInstructions}
     const selectedModel = validModels.includes(model) ? model : 'google/gemini-2.5-flash';
     console.log("Using model:", selectedModel);
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s for streaming
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -178,7 +177,10 @@ ${profileInstructions}
         messages: conversationMessages,
         stream: true,
       }),
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorText = await response.text();
