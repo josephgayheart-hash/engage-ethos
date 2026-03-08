@@ -71,6 +71,8 @@ import ImageGeneratorPage from "./pages/ImageGeneratorPage";
 import BrandStudioPage from "./pages/BrandStudioPage";
 import ProspectOutreachPage from "./pages/ProspectOutreachPage";
 import CRMPage from "./pages/CRMPage";
+import NDALinksPage from "./pages/admin/NDALinksPage";
+import NDASignPage from "./pages/NDASignPage";
 
 const queryClient = new QueryClient();
 
@@ -133,6 +135,7 @@ const AppRoutes = () => (
     <Route path="/features/journey-designer" element={<JourneyDesignerFeaturePage />} />
     <Route path="/features/evaluate" element={<EvaluateFeaturePage />} />
     <Route path="/features/library" element={<LibraryFeaturePage />} />
+    <Route path="/nda/sign/:slug" element={<NDASignPage />} />
 
     {/* Authenticated routes — wrapped in AppLayout sidebar shell */}
     <Route element={<RequireAuth><AppLayout /></RequireAuth>}>
@@ -197,6 +200,7 @@ const AppRoutes = () => (
         <Route path="/admin/user/:id" element={<UserDetailPage />} />
         <Route path="/admin/prospect-outreach" element={<ProspectOutreachPage />} />
         <Route path="/admin/crm" element={<CRMPage />} />
+        <Route path="/admin/nda-links" element={<NDALinksPage />} />
       </Route>
     </Route>
 

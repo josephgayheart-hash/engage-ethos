@@ -24,6 +24,7 @@ import {
   Lock,
   Mail,
   Contact,
+  FileSignature,
   LogOut,
   User,
   UserPlus,
@@ -84,6 +85,7 @@ const superAdminItems = [
   { title: "QA Diagnostics", url: "/admin/qa", icon: Bug },
   { title: "Seed Data", url: "/admin/seed", icon: Database },
   { title: "Security Events", url: "/admin/security-events", icon: Lock },
+  { title: "NDA Links", url: "/admin/nda-links", icon: FileSignature },
 ];
 
 export function AppSidebar() {
