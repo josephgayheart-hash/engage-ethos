@@ -16,7 +16,9 @@ import {
   Mail,
   FileText,
   Radar,
-  Settings
+  Settings,
+  FileSignature,
+  Bug
 } from 'lucide-react';
 import { useAdminAnalytics } from '@/hooks/useAdminAnalytics';
 import {
