@@ -35,6 +35,7 @@ const statusColor: Record<string, string> = {
 export function NDALinksTable({ refreshKey, onRefresh, onEdit }: { refreshKey: number; onRefresh: () => void; onEdit: (link: NDALinkData) => void }) {
   const [links, setLinks] = useState<NDALink[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState<NDALink | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -54,6 +55,15 @@ export function NDALinksTable({ refreshKey, onRefresh, onEdit }: { refreshKey: n
     await supabase.from("nda_links").update({ status: "revoked", is_active: false }).eq("id", id);
     toast({ title: "Link revoked" });
     onRefresh();
+  };
+
+  const deleteLink = async (link: NDALink) => {
+    // Delete associated responses first
+    await supabase.from("nda_responses").delete().eq("nda_link_id", link.id);
+    const { error } = await supabase.from("nda_links").delete().eq("id", link.id);
+    if (error) toast({ title: "Failed to delete", description: error.message, variant: "destructive" });
+    else { toast({ title: "Link deleted" }); onRefresh(); }
+    setDeleteTarget(null);
   };
 
   const duplicateLink = async (link: NDALink) => {
@@ -145,6 +155,9 @@ export function NDALinksTable({ refreshKey, onRefresh, onEdit }: { refreshKey: n
                           <Ban className="h-4 w-4 mr-2" /> Revoke
                         </DropdownMenuItem>
                       )}
+                      <DropdownMenuItem onClick={() => setDeleteTarget(link)} className="text-destructive">
+                        <Trash2 className="h-4 w-4 mr-2" /> Delete
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -153,6 +166,23 @@ export function NDALinksTable({ refreshKey, onRefresh, onEdit }: { refreshKey: n
           ))}
         </TableBody>
       </Table>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(v) => !v && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete NDA Link</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "<span className="font-medium">{deleteTarget?.label}</span>"? This will also permanently remove all signed responses associated with this link. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => deleteTarget && deleteLink(deleteTarget)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
