@@ -16,12 +16,13 @@ const INVITE_EXPIRATION_HOURS = 72;
 const WELCOME_PHRASES = [
   { text: "Firms", color: "hsl(82 85% 55%)" },
   { text: "Brands", color: "hsl(270 70% 60%)" },
-  { text: "Thinkers", color: "hsl(200 100% 50%)" },
+  { text: "Planners", color: "hsl(200 100% 50%)" },
   { text: "Writers", color: "hsl(82 85% 55%)" },
   { text: "Marketers", color: "hsl(270 70% 60%)" },
   { text: "Storytellers", color: "hsl(200 100% 50%)" },
   { text: "Designers", color: "hsl(82 85% 55%)" },
   { text: "Higher Education", color: "hsl(270 70% 60%)" },
+  { text: "Strategists", color: "hsl(82 85% 55%)" },
 ];
 
 export default function LoginPage() {
