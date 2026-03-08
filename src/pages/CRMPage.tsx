@@ -260,6 +260,7 @@ export default function CRMPage() {
   // Inline editing
   const [editing, setEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Prospect>>({});
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   // Email composer
   const [composerOpen, setComposerOpen] = useState(false);
@@ -909,6 +910,21 @@ export default function CRMPage() {
     else { toast.success("Contact updated"); setEditing(false); loadProspects(); }
   };
 
+  // ── Delete Contact ──────────────────────────────────────────────────────
+  const handleDeleteContact = async () => {
+    if (!selectedId) return;
+    // Delete related records first
+    await supabase.from("crm_notes" as any).delete().eq("prospect_id", selectedId);
+    const { error } = await supabase.from("sales_prospects" as any).delete().eq("id", selectedId);
+    if (error) toast.error("Failed to delete contact");
+    else {
+      toast.success("Contact deleted");
+      setSelectedId(null);
+      setDeleteConfirmOpen(false);
+      loadProspects();
+    }
+  };
+
   // ── Quick Fill with AI ───────────────────────────────────────────────────
   const handleQuickFill = async () => {
     if (!quickFillText.trim()) return;
@@ -1413,9 +1429,14 @@ export default function CRMPage() {
                       <Button size="sm" onClick={handleSaveEdit}><Save className="h-3 w-3 mr-1" /> Save</Button>
                     </div>
                   ) : (
-                    <Button size="sm" variant="outline" onClick={() => { setEditing(true); setEditData(selected || {}); }}>
-                      <Pencil className="h-3 w-3 mr-1" /> Edit
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" onClick={() => { setEditing(true); setEditData(selected || {}); }}>
+                        <Pencil className="h-3 w-3 mr-1" /> Edit
+                      </Button>
+                      <Button size="sm" variant="outline" className="text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => setDeleteConfirmOpen(true)}>
+                        <Trash2 className="h-3 w-3 mr-1" /> Delete
+                      </Button>
+                    </div>
                   )}
                 </div>
 
