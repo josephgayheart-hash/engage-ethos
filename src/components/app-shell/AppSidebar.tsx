@@ -240,7 +240,7 @@ export function AppSidebar() {
           <>
             <SidebarSeparator className="my-0.5" />
             <SidebarGroup className="py-1">
-              <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/60 px-3 mb-0.5">Platform</SidebarGroupLabel>
+              <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/60 px-3 mb-0.5">Platform Admin</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   {superAdminItems.map((item) => (
