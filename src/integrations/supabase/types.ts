@@ -2232,6 +2232,44 @@ export type Database = {
           },
         ]
       }
+      tenant_integrations: {
+        Row: {
+          created_at: string
+          credentials: Json
+          id: string
+          integration_type: Database["public"]["Enums"]["integration_type"]
+          is_active: boolean
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          credentials?: Json
+          id?: string
+          integration_type: Database["public"]["Enums"]["integration_type"]
+          is_active?: boolean
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          credentials?: Json
+          id?: string
+          integration_type?: Database["public"]["Enums"]["integration_type"]
+          is_active?: boolean
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_integrations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           accent_color: string | null
@@ -2454,6 +2492,7 @@ export type Database = {
         | "super_admin"
         | "agency_admin"
         | "agency_user"
+      integration_type: "slate" | "sfmc"
       onboarding_status: "submitted" | "approved" | "rejected"
       tenant_status: "active" | "inactive"
       tenant_type: "university" | "agency"
@@ -2593,6 +2632,7 @@ export const Constants = {
         "agency_admin",
         "agency_user",
       ],
+      integration_type: ["slate", "sfmc"],
       onboarding_status: ["submitted", "approved", "rejected"],
       tenant_status: ["active", "inactive"],
       tenant_type: ["university", "agency"],
