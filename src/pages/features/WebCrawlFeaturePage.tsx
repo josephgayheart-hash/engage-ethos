@@ -46,12 +46,12 @@ const crawlSteps = [
 ];
 
 const extractionTypes = [
-  { label: "Voice Patterns", desc: "Formality, warmth, energy, authority", icon: "🎯" },
-  { label: "Terminology", desc: "Preferred terms, phrases, and naming conventions", icon: "📝" },
-  { label: "Brand Signals", desc: "Values, commitments, differentiators", icon: "🏛️" },
-  { label: "Tone Markers", desc: "How your institution speaks to different audiences", icon: "🎤" },
-  { label: "Page Structure", desc: "Content hierarchy, navigation patterns, information architecture", icon: "🗂️" },
-  { label: "Key Themes", desc: "Recurring topics, strategic emphases, campaign language", icon: "💡" },
+  { label: "Voice Patterns", desc: "Formality, warmth, energy, authority", icon: Target },
+  { label: "Terminology", desc: "Preferred terms, phrases, and naming conventions", icon: FileText },
+  { label: "Brand Signals", desc: "Values, commitments, differentiators", icon: Shield },
+  { label: "Tone Markers", desc: "How your institution speaks to different audiences", icon: MessageCircle },
+  { label: "Page Structure", desc: "Content hierarchy, navigation patterns, information architecture", icon: LayoutGrid },
+  { label: "Key Themes", desc: "Recurring topics, strategic emphases, campaign language", icon: Lightbulb },
 ];
 
 const capabilities = [
