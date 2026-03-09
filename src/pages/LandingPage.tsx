@@ -79,19 +79,19 @@ const features = [
     icon: Image,
     title: 'AI Image Studio',
     description: 'Generate on-brand photography and graphic design across 19 formats — photo, poster, social, and more.',
-    link: '/tools',
+    link: '/features/image-studio',
   },
   {
     icon: Palette,
     title: 'Brand It Studio',
     description: 'Layer logos, headlines, CTAs, and brand patterns onto any image. AI-generated copy that matches your tone.',
-    link: '/tools',
+    link: '/features/brand-studio',
   },
   {
     icon: Bot,
     title: 'AI Copywriter',
     description: 'A brand-aware messaging assistant that knows your voice, facts, and stories. Chat your way to on-brand copy.',
-    link: '/playground',
+    link: '/features/ai-copywriter',
   },
   {
     icon: Target,
@@ -103,13 +103,13 @@ const features = [
     icon: PenTool,
     title: 'Message Evaluator',
     description: 'Score any piece of content against your brand platform, voice profile, and terminology standards.',
-    link: '/evaluate',
+    link: '/features/evaluate',
   },
   {
     icon: Globe,
     title: 'WebCrawl Intelligence',
     description: 'Automatically extract brand voice from your website. Our AI crawls your pages to understand your unique tone.',
-    link: '/features/content-dna',
+    link: '/features/webcrawl',
   },
   {
     icon: BookOpen,
@@ -121,7 +121,7 @@ const features = [
     icon: BarChart,
     title: 'Brand Audit & Scoring',
     description: 'Audit touchpoints across your institution. Track brand consistency scores and remediation progress over time.',
-    link: '/tools',
+    link: '/features/brand-audit',
   },
 ];
 

@@ -56,6 +56,11 @@ import MessageBuilderFeaturePage from "./pages/features/MessageBuilderFeaturePag
 import JourneyDesignerFeaturePage from "./pages/features/JourneyDesignerFeaturePage";
 import EvaluateFeaturePage from "./pages/features/EvaluateFeaturePage";
 import LibraryFeaturePage from "./pages/features/LibraryFeaturePage";
+import ImageStudioFeaturePage from "./pages/features/ImageStudioFeaturePage";
+import BrandStudioFeaturePage from "./pages/features/BrandStudioFeaturePage";
+import AICopywriterFeaturePage from "./pages/features/AICopywriterFeaturePage";
+import BrandAuditFeaturePage from "./pages/features/BrandAuditFeaturePage";
+import WebCrawlFeaturePage from "./pages/features/WebCrawlFeaturePage";
 import OGPreviewPage from "./pages/OGPreviewPage";
 import WebContentAnalyzerPage from "./pages/WebContentAnalyzerPage";
 import BrandAuditPage from "./pages/BrandAuditPage";
@@ -135,6 +140,11 @@ const AppRoutes = () => (
     <Route path="/features/journey-designer" element={<JourneyDesignerFeaturePage />} />
     <Route path="/features/evaluate" element={<EvaluateFeaturePage />} />
     <Route path="/features/library" element={<LibraryFeaturePage />} />
+    <Route path="/features/image-studio" element={<ImageStudioFeaturePage />} />
+    <Route path="/features/brand-studio" element={<BrandStudioFeaturePage />} />
+    <Route path="/features/ai-copywriter" element={<AICopywriterFeaturePage />} />
+    <Route path="/features/brand-audit" element={<BrandAuditFeaturePage />} />
+    <Route path="/features/webcrawl" element={<WebCrawlFeaturePage />} />
     <Route path="/nda/sign/:slug" element={<NDASignPage />} />
 
     {/* Authenticated routes — wrapped in AppLayout sidebar shell */}
