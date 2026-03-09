@@ -218,23 +218,12 @@ export default function LandingPage() {
               </Badge>
             </div>
 
-            {/* Value-first headline */}
+            {/* Primary headline — rotating noun */}
             <h1 
               className="font-serif text-4xl sm:text-5xl lg:text-6xl tracking-tight animate-fade-in max-w-4xl mx-auto leading-tight"
               style={{ animationDelay: '0.15s' }}
             >
-              <span className="text-white">Your Brand. Every Channel.</span>
-              <br />
-              <span className="text-white">Always </span>
-              <span className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_65%)] bg-clip-text text-transparent">On-Voice.</span>
-            </h1>
-
-            {/* Secondary — rotating noun */}
-            <p 
-              className="text-lg sm:text-xl text-white/45 max-w-2xl mx-auto leading-relaxed animate-fade-in"
-              style={{ animationDelay: '0.25s' }}
-            >
-              Built for{' '}
+              <span className="text-white">Built for{' '}</span>
               <span
                 className="inline-block font-semibold transition-all duration-500"
                 style={{
@@ -244,8 +233,16 @@ export default function LandingPage() {
                 }}
               >
                 {currentNoun.text}
-              </span>{' '}
-              — craft meaningful, research-driven, brand-informed messaging at scale.
+              </span>
+            </h1>
+
+            {/* Sub-header */}
+            <p 
+              className="text-lg sm:text-xl text-white/50 max-w-2xl mx-auto leading-relaxed animate-fade-in"
+              style={{ animationDelay: '0.25s' }}
+            >
+              Your Brand. Every Channel. Always{' '}
+              <span className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_65%)] bg-clip-text text-transparent font-semibold">On-Voice.</span>
             </p>
 
             {/* CTA Buttons */}
