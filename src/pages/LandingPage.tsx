@@ -152,10 +152,17 @@ const trustIndicators = [
 
 const HERO_NOUNS = [
   { text: "Planners", color: "hsl(82 85% 55%)" },
-  { text: "Strategists", color: "hsl(270 70% 60%)" },
   { text: "Smarter Messaging.", color: "hsl(200 100% 50%)" },
+  { text: "Strategists", color: "hsl(270 70% 60%)" },
   { text: "Brand Consistency.", color: "hsl(82 85% 55%)" },
+  { text: "Storytellers", color: "hsl(200 100% 50%)" },
   { text: "Strategic Impact.", color: "hsl(270 70% 60%)" },
+  { text: "Communicators", color: "hsl(82 85% 55%)" },
+  { text: "Enrollment Growth.", color: "hsl(200 100% 50%)" },
+  { text: "Educators", color: "hsl(270 70% 60%)" },
+  { text: "Every Touchpoint.", color: "hsl(82 85% 55%)" },
+  { text: "Leaders", color: "hsl(200 100% 50%)" },
+  { text: "Audience Connection.", color: "hsl(270 70% 60%)" },
 ];
 
 export default function LandingPage() {
