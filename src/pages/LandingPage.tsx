@@ -218,12 +218,13 @@ export default function LandingPage() {
               </Badge>
             </div>
 
-            {/* Primary headline — rotating noun */}
+            {/* Primary headline — rotating noun on second line */}
             <h1 
               className="font-serif text-4xl sm:text-5xl lg:text-6xl tracking-tight animate-fade-in max-w-4xl mx-auto leading-tight"
               style={{ animationDelay: '0.15s' }}
             >
-              <span className="text-white">Built for{' '}</span>
+              <span className="text-white">Built for</span>
+              <br />
               <span
                 className="inline-block font-semibold transition-all duration-500"
                 style={{
