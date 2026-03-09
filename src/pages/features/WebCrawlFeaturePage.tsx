@@ -14,6 +14,10 @@ import {
   Zap,
   Target,
   Eye,
+  Shield,
+  MessageCircle,
+  LayoutGrid,
+  Lightbulb,
 } from "lucide-react";
 import campusvoiceLogo from "@/assets/campusvoice-logo.png";
 import { FeatureNavigation } from "@/components/FeatureNavigation";
