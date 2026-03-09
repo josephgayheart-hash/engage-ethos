@@ -33,6 +33,7 @@ import { SEOHead, getOrganizationSchema, getSoftwareApplicationSchema } from '@/
 import { RequestDemoDialog } from '@/components/landing/RequestDemoDialog';
 import { MessageBuilderShowcase, JourneyBuilderShowcase } from '@/components/landing/ProductShowcases';
 import { StickyCtaBar } from '@/components/landing/StickyCtaBar';
+import { SocialProofStrip } from '@/components/landing/SocialProofStrip';
 
 // JSON-LD schemas for landing page
 const landingPageSchemas = [
