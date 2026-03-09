@@ -308,11 +308,11 @@ export default function LandingPage() {
                 return (
                   <span
                     key={word}
-                    className="text-xs font-sans font-medium px-3 py-1 rounded-full border"
+                    className="text-xs font-sans font-medium px-3 py-1 rounded-full border transition-all duration-300"
                     style={{
                       color: colors[i],
-                      borderColor: `${colors[i]}40`,
-                      background: `${colors[i]}10`,
+                      borderColor: `${colors[i].replace(')', ' / 0.4)')}`,
+                      background: `${colors[i].replace(')', ' / 0.1)')}`,
                     }}
                   >
                     {word}
