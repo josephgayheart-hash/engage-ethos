@@ -79,7 +79,7 @@ const features = [
     icon: Image,
     title: 'AI Image Studio',
     description: 'Generate on-brand photography and graphic design across 19 formats — photo, poster, social, and more.',
-    link: '/tools',
+    link: '/features/image-studio',
   },
   {
     icon: Palette,
