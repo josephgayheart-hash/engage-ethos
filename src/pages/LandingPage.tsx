@@ -121,7 +121,7 @@ const features = [
     icon: BarChart,
     title: 'Brand Audit & Scoring',
     description: 'Audit touchpoints across your institution. Track brand consistency scores and remediation progress over time.',
-    link: '/tools',
+    link: '/features/brand-audit',
   },
 ];
 
