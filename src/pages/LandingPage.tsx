@@ -33,6 +33,7 @@ import { SEOHead, getOrganizationSchema, getSoftwareApplicationSchema } from '@/
 import { RequestDemoDialog } from '@/components/landing/RequestDemoDialog';
 import { MessageBuilderShowcase, JourneyBuilderShowcase } from '@/components/landing/ProductShowcases';
 import { StickyCtaBar } from '@/components/landing/StickyCtaBar';
+import { SocialProofStrip } from '@/components/landing/SocialProofStrip';
 
 // JSON-LD schemas for landing page
 const landingPageSchemas = [
@@ -347,9 +348,11 @@ export default function LandingPage() {
         </div>
       </header>
 
+      {/* Social Proof Strip */}
+      <SocialProofStrip />
+
       {/* How It Works Section - Position #2 */}
       <HowItWorksSection />
-
 
       {/* Product Showcases Section — Top 2 inline + 3 tabbed */}
       <section className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-background relative overflow-hidden">
