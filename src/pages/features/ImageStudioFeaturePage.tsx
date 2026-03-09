@@ -18,6 +18,13 @@ import {
   Dna,
   Download,
   Wand2,
+  Sun,
+  Briefcase,
+  Hexagon,
+  Waves,
+  Type,
+  Clock,
+  Square,
 } from "lucide-react";
 import campusvoiceLogo from "@/assets/campusvoice-logo.png";
 import { FeatureNavigation } from "@/components/FeatureNavigation";
