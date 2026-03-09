@@ -208,7 +208,7 @@ export default function ImageStudioFeaturePage() {
               <div className="grid grid-cols-2 gap-2">
                 {designStyles.map((s) => (
                   <div key={s.name} className="flex items-start gap-2 p-2.5 rounded-lg bg-muted/50">
-                    <span className="text-sm mt-0.5">{s.emoji}</span>
+                    <s.icon className="w-3.5 h-3.5 text-orange-500 mt-0.5 shrink-0" />
                     <div>
                       <p className="text-xs font-medium text-foreground">{s.name}</p>
                       <p className="text-[10px] text-muted-foreground leading-tight">{s.desc}</p>
