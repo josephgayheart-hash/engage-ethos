@@ -31,6 +31,7 @@ import { FeatureNavigation } from "@/components/FeatureNavigation";
 import { SEOHead, getSoftwareApplicationSchema, getWebPageSchema } from "@/components/SEOHead";
 import { FeatureBreadcrumbs } from "@/components/FeatureBreadcrumbs";
 import { MobileNav } from "@/components/MobileNav";
+import ImageStudioShowcaseDemo from "@/components/feature-showcases/ImageStudioShowcaseDemo";
 
 const formats = [
   { label: "Social Media Post", icon: Smartphone, desc: "Instagram, Facebook, LinkedIn" },
