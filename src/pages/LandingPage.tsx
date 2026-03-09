@@ -85,7 +85,7 @@ const features = [
     icon: Palette,
     title: 'Brand It Studio',
     description: 'Layer logos, headlines, CTAs, and brand patterns onto any image. AI-generated copy that matches your tone.',
-    link: '/tools',
+    link: '/features/brand-studio',
   },
   {
     icon: Bot,
