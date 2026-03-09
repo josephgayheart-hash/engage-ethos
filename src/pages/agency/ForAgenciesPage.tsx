@@ -465,34 +465,7 @@ export default function ForAgenciesPage() {
         </section>
 
         {/* Footer */}
-        <footer className="py-10 px-4 sm:px-6 lg:px-8 border-t bg-background">
-          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <img
-                src={campusvoiceLogo}
-                alt="CampusVoice.AI"
-                className="h-7 w-auto max-w-[140px] opacity-70"
-              />
-              <span className="text-sm text-muted-foreground">
-                © 2026 CampusVoice.AI
-              </span>
-            </div>
-            <div className="flex items-center gap-4">
-              <a
-                href="mailto:sales@campusvoice.ai"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Partner inquiries: sales@campusvoice.ai
-              </a>
-              <Link
-                to="/"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                For Universities →
-              </Link>
-            </div>
-          </div>
-        </footer>
+        <LandingFooter variant="light" />
       </div>
     </>
   );
