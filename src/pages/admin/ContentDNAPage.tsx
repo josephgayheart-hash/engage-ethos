@@ -248,12 +248,14 @@ export default function ContentDNAPage() {
   const [showSetupWizard, setShowSetupWizard] = useState(false);
   const [wizardDismissed, setWizardDismissed] = useState(false);
 
-  // Auto-show wizard for fresh profiles (no samples, no analysis) after loading
+  // Only auto-show wizard for brand-new profiles explicitly opened via ?wizard=true
+  // Never auto-trigger for existing profiles that may have had content before
   useEffect(() => {
-    if (!isLoading && selectedProfile && samples.length === 0 && !analysis && !wizardDismissed) {
+    const shouldShowWizard = searchParams.get('wizard') === 'true';
+    if (!isLoading && selectedProfile && samples.length === 0 && !analysis && shouldShowWizard && !wizardDismissed) {
       setShowSetupWizard(true);
     }
-  }, [isLoading, selectedProfile, samples.length, analysis, wizardDismissed]);
+  }, [isLoading, selectedProfile, samples.length, analysis, wizardDismissed, searchParams]);
   
   const handleResetContentDNA = async () => {
     setIsResetting(true);
