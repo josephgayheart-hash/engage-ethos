@@ -19,9 +19,14 @@ import {
 } from 'lucide-react';
 import campusvoiceLogo from '@/assets/campusvoice-logo-new.png';
 import HowItWorksSection from '@/components/landing/HowItWorksSection';
+import SocialProofSection from '@/components/landing/SocialProofSection';
+import PricingSignalSection from '@/components/landing/PricingSignalSection';
+import ProductTourTabs from '@/components/landing/ProductTourTabs';
+import { LandingNav } from '@/components/landing/LandingNav';
+import { LandingFooter } from '@/components/landing/LandingFooter';
 import { SEOHead, getOrganizationSchema, getSoftwareApplicationSchema } from '@/components/SEOHead';
 import { RequestDemoDialog } from '@/components/landing/RequestDemoDialog';
-import { ImageStudioShowcase, BrandStudioShowcase, AICopywriterShowcase, MessageBuilderShowcase, JourneyBuilderShowcase } from '@/components/landing/ProductShowcases';
+import { MessageBuilderShowcase, JourneyBuilderShowcase } from '@/components/landing/ProductShowcases';
 import { StickyCtaBar } from '@/components/landing/StickyCtaBar';
 
 // JSON-LD schemas for landing page
@@ -88,7 +93,7 @@ const features = [
 const valueProps = [
   {
     title: 'Brand protection at scale',
-    description: '"Finally, a way to protect our brand across every college without being in every meeting." — A CMO\'s perspective',
+    description: 'Protect your brand across every college, every department — without being in every meeting.',
   },
   {
     title: 'University-to-subunit governance',
@@ -111,22 +116,12 @@ const trustIndicators = [
 ];
 
 const HERO_NOUNS = [
-  { text: "Firms", color: "hsl(82 85% 55%)" },
-  { text: "Brands", color: "hsl(270 70% 60%)" },
-  { text: "Planners", color: "hsl(200 100% 50%)" },
-  { text: "Writers", color: "hsl(82 85% 55%)" },
-  { text: "Marketers", color: "hsl(270 70% 60%)" },
-  { text: "Storytellers", color: "hsl(200 100% 50%)" },
-  { text: "Designers", color: "hsl(82 85% 55%)" },
-  { text: "Founders", color: "hsl(270 70% 60%)" },
-  { text: "Creators", color: "hsl(200 100% 50%)" },
-  { text: "Strategists", color: "hsl(82 85% 55%)" },
-  { text: "Educators", color: "hsl(270 70% 60%)" },
+  { text: "Planners", color: "hsl(82 85% 55%)" },
+  { text: "Strategists", color: "hsl(270 70% 60%)" },
   { text: "Communicators", color: "hsl(200 100% 50%)" },
-  { text: "Visionaries", color: "hsl(82 85% 55%)" },
-  { text: "Innovators", color: "hsl(270 70% 60%)" },
-  { text: "Leaders", color: "hsl(200 100% 50%)" },
-  { text: "Higher Education", color: "hsl(270 70% 60%)" },
+  { text: "Marketers", color: "hsl(82 85% 55%)" },
+  { text: "Leaders", color: "hsl(270 70% 60%)" },
+  { text: "Educators", color: "hsl(200 100% 50%)" },
 ];
 
 export default function LandingPage() {
@@ -155,8 +150,12 @@ export default function LandingPage() {
         keywords={['higher education communications', 'enrollment marketing', 'brand messaging AI', 'university marketing', 'college admissions']}
         jsonLd={landingPageSchemas}
       />
+
       {/* Hero Section — Dark & Moody */}
       <header className="relative overflow-hidden" style={{ background: 'linear-gradient(145deg, hsl(222, 47%, 18%) 0%, hsl(222, 40%, 24%) 40%, hsl(222, 35%, 20%) 100%)' }}>
+        {/* Navigation */}
+        <LandingNav />
+
         {/* Dot grid pattern */}
         <div
           className="absolute inset-0 opacity-[0.05]"
@@ -171,63 +170,54 @@ export default function LandingPage() {
         <div className="hidden sm:block absolute w-56 h-56 rounded-full blur-[70px] animate-float-medium" style={{ background: 'hsl(270 70% 60% / 0.2)', bottom: '10%', left: '5%', animationDelay: '1s' }} />
         <div className="hidden sm:block absolute w-40 h-40 rounded-full blur-[60px] animate-float-fast" style={{ background: 'hsl(200 100% 50% / 0.2)', top: '40%', left: '25%', animationDelay: '0.5s' }} />
         <div className="hidden sm:block absolute w-32 h-32 rounded-full blur-[50px] animate-float-medium" style={{ background: 'hsl(340 75% 55% / 0.12)', bottom: '25%', right: '20%', animationDelay: '2s' }} />
-        <div className="hidden sm:block absolute w-24 h-24 rounded-full blur-[40px] animate-float-slow" style={{ background: 'hsl(45 93% 55% / 0.12)', top: '20%', left: '15%', animationDelay: '1.5s' }} />
-        <div className="hidden sm:block absolute w-48 h-48 rounded-full blur-[60px] animate-float-fast" style={{ background: 'hsl(173 58% 45% / 0.12)', bottom: '5%', right: '5%', animationDelay: '3s' }} />
 
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-36">
-          <div className="text-center space-y-8">
-            {/* Beta Badge */}
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-32">
+          <div className="text-center space-y-7">
+            {/* Strategic Messaging Intelligence badge — primary */}
             <div className="animate-fade-in">
               <Badge 
                 variant="secondary" 
-                className="bg-[hsl(200_100%_50%_/_0.15)] text-[hsl(200_100%_60%)] border-[hsl(200_100%_50%_/_0.3)] px-4 py-1.5 text-sm font-semibold backdrop-blur-sm"
+                className="bg-[hsl(270_70%_60%_/_0.15)] text-[hsl(270_70%_70%)] border-[hsl(270_70%_60%_/_0.3)] px-4 py-1.5 text-sm font-semibold backdrop-blur-sm"
               >
                 <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-                Beta Access
+                Strategic Messaging Intelligence
               </Badge>
             </div>
 
-            {/* Logo */}
-            <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
-              <img 
-                src={campusvoiceLogo} 
-                alt="CampusVoice.AI" 
-                className="h-14 sm:h-16 lg:h-20 w-auto max-w-[280px] sm:max-w-[340px] lg:max-w-[400px] mx-auto brightness-0 invert"
-              />
-            </div>
-
-            {/* Primary Slogan — line break with stable "Built for" */}
+            {/* Value-first headline */}
             <h1 
               className="font-serif text-4xl sm:text-5xl lg:text-6xl tracking-tight animate-fade-in max-w-4xl mx-auto leading-tight"
-              style={{ animationDelay: '0.2s' }}
+              style={{ animationDelay: '0.15s' }}
             >
-              <span className="text-white">Built for</span>
+              <span className="text-white">Your Brand. Every Channel.</span>
               <br />
+              <span className="text-white">Always </span>
+              <span className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_65%)] bg-clip-text text-transparent">On-Voice.</span>
+            </h1>
+
+            {/* Secondary — rotating noun */}
+            <p 
+              className="text-lg sm:text-xl text-white/45 max-w-2xl mx-auto leading-relaxed animate-fade-in"
+              style={{ animationDelay: '0.25s' }}
+            >
+              Built for{' '}
               <span
-                className="inline-block transition-all duration-500"
+                className="inline-block font-semibold transition-all duration-500"
                 style={{
                   opacity: nounFade ? 1 : 0,
-                  transform: nounFade ? 'translateY(0)' : 'translateY(12px)',
+                  transform: nounFade ? 'translateY(0)' : 'translateY(8px)',
                   color: currentNoun.color,
                 }}
               >
-                {currentNoun.text}.
-              </span>
-              <span className="block text-white/60 text-xl sm:text-2xl lg:text-3xl mt-4 font-serif">Strategic Messaging Intelligence</span>
-            </h1>
-
-            {/* Secondary Tagline */}
-            <p 
-              className="text-lg sm:text-xl text-white/40 max-w-2xl mx-auto leading-relaxed animate-fade-in"
-              style={{ animationDelay: '0.3s' }}
-            >
-              Craft meaningful, research-driven, brand-informed messaging at scale. From the boardroom to every inbox.
+                {currentNoun.text}
+              </span>{' '}
+              — craft meaningful, research-driven, brand-informed messaging at scale.
             </p>
 
             {/* CTA Buttons */}
             <div 
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center sm:items-start pt-4 animate-fade-in"
-              style={{ animationDelay: '0.4s' }}
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center sm:items-start pt-2 animate-fade-in"
+              style={{ animationDelay: '0.35s' }}
             >
               <Button 
                 asChild
@@ -235,7 +225,7 @@ export default function LandingPage() {
                 className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] shadow-[0_0_30px_hsl(82_85%_55%_/_0.3)] hover:shadow-[0_0_40px_hsl(82_85%_55%_/_0.5)] transition-all duration-300 text-base px-8 py-6 font-bold border-0"
               >
                 <Link to="/request-access">
-                  Join the Beta
+                  Get Early Access
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
@@ -251,15 +241,15 @@ export default function LandingPage() {
                   </Link>
                 </Button>
                 <Link to="/login" className="text-white/35 text-[10px] mt-1 hover:text-white/55 transition-colors">
-                  Already in Beta?
+                  Already have an account?
                 </Link>
               </div>
             </div>
 
             {/* Trust Indicators */}
             <div 
-              className="flex flex-wrap justify-center gap-6 pt-6 animate-fade-in"
-              style={{ animationDelay: '0.5s' }}
+              className="flex flex-wrap justify-center gap-6 pt-4 animate-fade-in"
+              style={{ animationDelay: '0.45s' }}
             >
               {trustIndicators.map((indicator, index) => {
                 const colors = [
@@ -280,7 +270,7 @@ export default function LandingPage() {
             </div>
 
             {/* Plan / Strategize / Execute pills */}
-            <div className="flex justify-center gap-3 pt-2 animate-fade-in" style={{ animationDelay: '0.6s' }}>
+            <div className="flex justify-center gap-3 pt-1 animate-fade-in" style={{ animationDelay: '0.55s' }}>
               {['Plan', 'Strategize', 'Execute'].map((word, i) => {
                 const colors = ['hsl(82 85% 55%)', 'hsl(270 70% 60%)', 'hsl(200 100% 50%)'];
                 return (
@@ -301,7 +291,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Wave Divider to How It Works (dark navy — seamless since hero is already dark) */}
+        {/* Wave Divider */}
         <div className="absolute -bottom-px left-0 right-0">
           <svg 
             viewBox="0 0 1440 120" 
@@ -321,12 +311,13 @@ export default function LandingPage() {
       {/* How It Works Section - Position #2 */}
       <HowItWorksSection />
 
-      {/* Product Showcases Section */}
+      {/* Social Proof Section */}
+      <SocialProofSection />
+
+      {/* Product Showcases Section — Top 2 inline + 3 tabbed */}
       <section className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-background relative overflow-hidden">
-        {/* Subtle orb accents */}
         <div className="absolute top-20 right-[8%] w-48 h-48 bg-[hsl(82_85%_55%_/_0.06)] rounded-full blur-3xl" />
         <div className="absolute bottom-32 left-[5%] w-40 h-40 bg-[hsl(270_70%_60%_/_0.06)] rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-[50%] w-32 h-32 bg-[hsl(200_100%_50%_/_0.05)] rounded-full blur-3xl" />
 
         <div className="max-w-6xl mx-auto relative z-10 space-y-24 sm:space-y-32">
           <div className="text-center">
@@ -338,27 +329,25 @@ export default function LandingPage() {
               See it in action.
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              From AI-powered image generation to brand-perfect overlays to conversational copywriting — explore the tools that make CampusVoice different.
+              From AI-powered messaging to brand-perfect visuals — explore the tools that make CampusVoice different.
             </p>
           </div>
 
+          {/* Top 2 showcases inline */}
           <MessageBuilderShowcase />
           <JourneyBuilderShowcase />
-          <ImageStudioShowcase />
-          <BrandStudioShowcase />
-          <AICopywriterShowcase />
+
+          {/* Remaining 3 in tabbed format */}
+          <ProductTourTabs />
         </div>
       </section>
 
       {/* Value Proposition Section - Fun Yellow Background */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(48_100%_90%)] relative overflow-hidden">
-        {/* Lens flares - blurred and varied */}
         <div className="absolute top-12 right-[10%] w-28 h-28 bg-[hsl(270_70%_60%_/_0.2)] rounded-full blur-2xl" />
         <div className="absolute bottom-28 left-[6%] w-36 h-36 bg-[hsl(82_85%_55%_/_0.18)] rounded-full blur-3xl" />
-        <div className="absolute top-1/3 left-[40%] w-20 h-20 bg-[hsl(200_100%_50%_/_0.15)] rounded-full blur-2xl" />
-        <div className="absolute bottom-1/3 right-[20%] w-16 h-16 bg-[hsl(340_75%_55%_/_0.15)] rounded-full blur-xl" />
         
-        {/* Wave transition at bottom to mint section */}
+        {/* Wave transition at bottom */}
         <div className="absolute -bottom-px left-0 right-0">
           <svg 
             viewBox="0 0 1440 80" 
@@ -410,11 +399,8 @@ export default function LandingPage() {
 
       {/* Features Section - Fresh Mint Background */}
       <section className="pt-16 sm:pt-20 pb-32 sm:pb-36 px-4 sm:px-6 lg:px-8 bg-[hsl(173_40%_92%)] relative overflow-hidden">
-        {/* Lens flares - blurred and varied */}
         <div className="absolute top-16 left-[18%] w-32 h-32 bg-[hsl(200_100%_50%_/_0.18)] rounded-full blur-2xl" />
         <div className="absolute bottom-20 right-[15%] w-44 h-44 bg-[hsl(270_70%_60%_/_0.12)] rounded-full blur-3xl" />
-        <div className="absolute top-1/2 right-[8%] w-24 h-24 bg-[hsl(82_85%_55%_/_0.2)] rounded-full blur-2xl" />
-        <div className="absolute bottom-1/3 left-[5%] w-20 h-20 bg-[hsl(340_75%_55%_/_0.12)] rounded-full blur-xl" />
         
         <div className="max-w-6xl mx-auto relative z-10">
           <div className="text-center mb-12">
@@ -423,7 +409,7 @@ export default function LandingPage() {
               Core Capabilities
             </Badge>
             <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-3">
-              Powered by <span className="text-[hsl(200_100%_45%)]">Persuasion Science</span>
+              Powered by <span className="text-[hsl(200_100%_45%)]">Communication Science</span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Every feature is designed around how people actually make decisions.
@@ -444,19 +430,13 @@ export default function LandingPage() {
                   to={feature.link}
                   key={feature.title}
                   className={`group ${colors.bg} ${colors.border} border-2 rounded-2xl p-6 ${colors.hoverBorder} hover:shadow-2xl hover:-translate-y-3 hover:scale-[1.02] transition-all duration-500 ease-out cursor-pointer block`}
-                  style={{ 
-                    transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
-                  }}
+                  style={{ transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }}
                 >
                   <div className={`p-3 rounded-xl ${colors.iconBg} w-fit mb-4 group-hover:scale-110 transition-transform`}>
                     <feature.icon className={`w-6 h-6 ${colors.iconColor}`} />
                   </div>
-                  <h3 className="font-semibold text-foreground mb-2">
-                    {feature.title}
-                  </h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    {feature.description}
-                  </p>
+                  <h3 className="font-semibold text-foreground mb-2">{feature.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
                   <div className="mt-4 flex items-center gap-1 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: colors.iconColor.replace('text-[', '').replace(']', '') }}>
                     <span className={colors.iconColor}>Learn more</span>
                     <ArrowRight className={`w-4 h-4 ${colors.iconColor}`} />
@@ -467,7 +447,7 @@ export default function LandingPage() {
           </div>
         </div>
         
-        {/* Wave transition to CTA section */}
+        {/* Wave transition to pricing section */}
         <div className="absolute -bottom-px left-0 right-0">
           <svg 
             viewBox="0 0 1440 80" 
@@ -478,20 +458,20 @@ export default function LandingPage() {
           >
             <path 
               d="M0 80L60 65C120 50 240 20 360 15C480 10 600 30 720 40C840 50 960 50 1080 45C1200 40 1320 30 1380 25L1440 20V80H1380C1320 80 1200 80 1080 80C960 80 840 80 720 80C600 80 480 80 360 80C240 80 120 80 60 80H0Z" 
-              fill="hsl(270 60% 50%)"
+              className="fill-background"
             />
           </svg>
         </div>
       </section>
 
+      {/* Pricing Signal */}
+      <PricingSignalSection />
+
       {/* Secondary CTA Section - Vibrant Purple */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(270_60%_50%)] relative overflow-hidden">
-        {/* Lens flares - blurred and varied */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-12 right-[12%] w-40 h-40 bg-[hsl(82_85%_55%_/_0.2)] rounded-full blur-3xl" />
           <div className="absolute bottom-20 left-[8%] w-48 h-48 bg-[hsl(200_100%_50%_/_0.15)] rounded-full blur-3xl" />
-          <div className="absolute top-1/3 left-[25%] w-28 h-28 bg-[hsl(340_75%_60%_/_0.18)] rounded-full blur-2xl" />
-          <div className="absolute bottom-1/3 right-[35%] w-20 h-20 bg-[hsl(82_85%_60%_/_0.15)] rounded-full blur-xl" />
         </div>
         
         <div className="max-w-3xl mx-auto text-center relative z-10">
@@ -508,7 +488,7 @@ export default function LandingPage() {
               className="bg-[hsl(82_85%_55%)] text-primary hover:bg-[hsl(82_85%_50%)] shadow-xl hover:shadow-2xl hover:scale-105 px-8 font-bold transition-all duration-300 rounded-full"
             >
               <Link to="/request-access">
-                Request Beta Access
+                Get Early Access
               </Link>
             </Button>
             <RequestDemoDialog
@@ -527,38 +507,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer - Playful but professional */}
-      <footer className="py-10 px-4 sm:px-6 lg:px-8 bg-primary">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <img 
-              src={campusvoiceLogo} 
-              alt="CampusVoice.AI" 
-              className="h-7 w-auto max-w-[140px] brightness-0 invert opacity-90"
-            />
-            <span className="text-sm text-primary-foreground/70">
-              © 2026 CampusVoice.AI
-            </span>
-          </div>
-          <div className="flex items-center gap-4">
-            <a 
-              href="mailto:sales@campusvoice.ai" 
-              className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
-            >
-              sales@campusvoice.ai
-            </a>
-            <Link 
-              to="/for-agencies" 
-              className="text-sm text-primary-foreground/50 hover:text-primary-foreground/80 transition-colors"
-            >
-              Agency Partner Program
-            </Link>
-          </div>
-          <p className="text-sm text-primary-foreground/60">
-            Research-grounded messaging intelligence for higher education.
-          </p>
-        </div>
-      </footer>
+      {/* Footer */}
+      <LandingFooter variant="dark" />
     </div>
   );
 }

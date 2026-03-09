@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { LandingFooter } from "@/components/landing/LandingFooter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -108,7 +109,7 @@ export default function ForAgenciesPage() {
                 <Button size="sm" className="gap-2 whitespace-nowrap">
                   <Briefcase className="h-4 w-4 hidden sm:block" />
                   <span className="sm:hidden">Apply</span>
-                  <span className="hidden sm:inline">Become a Partner</span>
+                  <span className="hidden sm:inline">Get Early Access</span>
                 </Button>
               </Link>
             </div>
@@ -149,7 +150,7 @@ export default function ForAgenciesPage() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link to="/agency/request-access">
                   <Button size="lg" className="gap-2 text-base px-8 shadow-lg hover:shadow-xl transition-shadow">
-                    Become a Partner
+                    Get Early Access
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
@@ -297,6 +298,7 @@ export default function ForAgenciesPage() {
                   <Briefcase className="h-5 w-5 text-primary" />
                   <span className="font-semibold">Your University Clients</span>
                   <Badge variant="secondary" className="ml-2">24 Active</Badge>
+                  <Badge variant="outline" className="ml-1 text-xs text-muted-foreground border-muted-foreground/30">Example</Badge>
                 </div>
                 <Button size="sm" variant="outline" className="gap-2">
                   <Users className="h-4 w-4" />
@@ -305,30 +307,30 @@ export default function ForAgenciesPage() {
               </div>
               <div className="divide-y max-h-[400px] overflow-y-auto">
                 {[
-                  { name: "Ohio State University", status: "active", messages: 847, dna: true },
-                  { name: "University of Michigan", status: "active", messages: 632, dna: true },
-                  { name: "Penn State University", status: "active", messages: 521, dna: true },
-                  { name: "University of Texas at Austin", status: "active", messages: 489, dna: true },
-                  { name: "University of Florida", status: "active", messages: 456, dna: true },
-                  { name: "UCLA", status: "active", messages: 423, dna: true },
-                  { name: "University of Wisconsin-Madison", status: "active", messages: 398, dna: true },
-                  { name: "University of Georgia", status: "active", messages: 367, dna: true },
-                  { name: "Arizona State University", status: "active", messages: 345, dna: true },
-                  { name: "University of North Carolina", status: "active", messages: 334, dna: true },
-                  { name: "Indiana University", status: "active", messages: 312, dna: true },
-                  { name: "University of Minnesota", status: "active", messages: 298, dna: true },
-                  { name: "Michigan State University", status: "active", messages: 287, dna: true },
-                  { name: "University of Maryland", status: "active", messages: 276, dna: false },
-                  { name: "Purdue University", status: "active", messages: 265, dna: true },
-                  { name: "University of Virginia", status: "active", messages: 254, dna: true },
-                  { name: "University of Iowa", status: "active", messages: 243, dna: true },
-                  { name: "University of Colorado Boulder", status: "active", messages: 232, dna: true },
-                  { name: "University of Pittsburgh", status: "active", messages: 221, dna: false },
-                  { name: "Rutgers University", status: "active", messages: 210, dna: true },
-                  { name: "University of Illinois", status: "active", messages: 198, dna: true },
-                  { name: "University of Washington", status: "active", messages: 187, dna: true },
-                  { name: "Boston University", status: "active", messages: 176, dna: true },
-                  { name: "Syracuse University", status: "active", messages: 165, dna: false },
+                  { name: "Lakewood State University", status: "active", messages: 847, dna: true },
+                  { name: "Pacific Ridge University", status: "active", messages: 632, dna: true },
+                  { name: "Summit Valley State", status: "active", messages: 521, dna: true },
+                  { name: "Northfield University", status: "active", messages: 489, dna: true },
+                  { name: "Crestview College", status: "active", messages: 456, dna: true },
+                  { name: "Harbor Point University", status: "active", messages: 423, dna: true },
+                  { name: "Westbrook State University", status: "active", messages: 398, dna: true },
+                  { name: "Pinecrest University", status: "active", messages: 367, dna: true },
+                  { name: "Redstone State University", status: "active", messages: 345, dna: true },
+                  { name: "Clearwater College", status: "active", messages: 334, dna: true },
+                  { name: "Ironwood University", status: "active", messages: 312, dna: true },
+                  { name: "Briarfield State", status: "active", messages: 298, dna: true },
+                  { name: "Mapleton University", status: "active", messages: 287, dna: true },
+                  { name: "Silver Creek College", status: "active", messages: 276, dna: false },
+                  { name: "Ashford University", status: "active", messages: 265, dna: true },
+                  { name: "Cedar Springs State", status: "active", messages: 254, dna: true },
+                  { name: "Willowbrook University", status: "active", messages: 243, dna: true },
+                  { name: "Granite Hills College", status: "active", messages: 232, dna: true },
+                  { name: "Foxfield University", status: "active", messages: 221, dna: false },
+                  { name: "Emerald Coast State", status: "active", messages: 210, dna: true },
+                  { name: "Oakridge University", status: "active", messages: 198, dna: true },
+                  { name: "Stonegate College", status: "active", messages: 187, dna: true },
+                  { name: "Bayview University", status: "active", messages: 176, dna: true },
+                  { name: "Thornhill College", status: "active", messages: 165, dna: false },
                 ].map((client, index) => (
                   <div 
                     key={client.name}
@@ -442,7 +444,7 @@ export default function ForAgenciesPage() {
                   variant="secondary"
                   className="gap-2 text-base px-10 py-6 text-lg shadow-lg hover:shadow-xl transition-all"
                 >
-                  Apply Now
+                  Get Early Access
                   <ArrowRight className="h-5 w-5" />
                 </Button>
               </Link>
@@ -463,34 +465,7 @@ export default function ForAgenciesPage() {
         </section>
 
         {/* Footer */}
-        <footer className="py-10 px-4 sm:px-6 lg:px-8 border-t bg-background">
-          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <img
-                src={campusvoiceLogo}
-                alt="CampusVoice.AI"
-                className="h-7 w-auto max-w-[140px] opacity-70"
-              />
-              <span className="text-sm text-muted-foreground">
-                © 2026 CampusVoice.AI
-              </span>
-            </div>
-            <div className="flex items-center gap-4">
-              <a
-                href="mailto:sales@campusvoice.ai"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Partner inquiries: sales@campusvoice.ai
-              </a>
-              <Link
-                to="/"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                For Universities →
-              </Link>
-            </div>
-          </div>
-        </footer>
+        <LandingFooter variant="light" />
       </div>
     </>
   );
