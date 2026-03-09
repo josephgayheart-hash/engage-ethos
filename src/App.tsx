@@ -90,7 +90,7 @@ function PageTracker() {
 // Protected route wrapper
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { user, isLoading, profile } = useAuth();
-  if (isLoading) return <div className="min-h-screen bg-background flex items-center justify-center"><div className="animate-pulse">Loading...</div></div>;
+  if (isLoading) return <BrandedLoader />;
   if (!user) return <Navigate to="/login" replace />;
   if (profile?.password_reset_required) return <Navigate to="/change-password" replace />;
   if (profile?.status !== 'active' && profile?.status !== 'invited') return <Navigate to="/login" replace />;
@@ -99,28 +99,28 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 
 function RequireAdmin({ children }: { children: React.ReactNode }) {
   const { isAdmin, isLoading } = useAuth();
-  if (isLoading) return <div className="min-h-screen bg-background flex items-center justify-center"><div className="animate-pulse">Loading...</div></div>;
+  if (isLoading) return <BrandedLoader />;
   if (!isAdmin) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 
 function RequireSuperAdmin({ children }: { children: React.ReactNode }) {
   const { isSuperAdmin, isLoading } = useAuth();
-  if (isLoading) return <div className="min-h-screen bg-background flex items-center justify-center"><div className="animate-pulse">Loading...</div></div>;
+  if (isLoading) return <BrandedLoader />;
   if (!isSuperAdmin) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 
 function RequireApprover({ children }: { children: React.ReactNode }) {
   const { isApprover, isLoading } = useAuth();
-  if (isLoading) return <div className="min-h-screen bg-background flex items-center justify-center"><div className="animate-pulse">Loading...</div></div>;
+  if (isLoading) return <BrandedLoader />;
   if (!isApprover) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading, profile } = useAuth();
-  if (isLoading) return <div className="min-h-screen bg-background flex items-center justify-center"><div className="animate-pulse">Loading...</div></div>;
+  if (isLoading) return <BrandedLoader />;
   if (user && profile?.status === 'active' && !profile?.password_reset_required) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }

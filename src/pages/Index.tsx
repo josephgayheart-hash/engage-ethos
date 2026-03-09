@@ -9,6 +9,8 @@ import { InstitutionManagementCard } from "@/components/dashboard/InstitutionMan
 import { AdminTeamOverview } from "@/components/dashboard/AdminTeamOverview";
 import { QuickLaunchBar } from "@/components/dashboard/QuickLaunchBar";
 import { LibraryOverviewPanel } from "@/components/dashboard/LibraryOverviewPanel";
+import { ImpactMetricsCard } from "@/components/dashboard/ImpactMetricsCard";
+import { TeamActivityFeed } from "@/components/dashboard/TeamActivityFeed";
 
 const Index = () => {
   return (
@@ -20,6 +22,8 @@ const Index = () => {
           <ScratchpadCapture />
           
           <QuickActionsPanel />
+
+          <ImpactMetricsCard />
           
           <section id="my-drafts">
             <MyDraftsCard />
@@ -32,6 +36,7 @@ const Index = () => {
             <ContentDNAStatusCard />
           </section>
 
+          <TeamActivityFeed />
           <AdminTeamOverview />
           <QuickLaunchBar />
         </div>

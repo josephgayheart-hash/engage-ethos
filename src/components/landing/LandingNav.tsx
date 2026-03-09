@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import campusvoiceLogo from '@/assets/campusvoice-logo-new.png';
+import { FeaturesDropdown } from './FeaturesDropdown';
 
 export function LandingNav() {
   return (
@@ -16,6 +17,7 @@ export function LandingNav() {
         </Link>
 
         <div className="flex items-center gap-1 sm:gap-3">
+          <FeaturesDropdown />
           <Link to="/" className="hidden sm:block">
             <Button
               variant="ghost"
