@@ -35,19 +35,19 @@ const formats = [
 ];
 
 const photoStyles = [
-  { name: "Photorealistic", emoji: "📸", desc: "Campus life, student portraits, architecture" },
-  { name: "Cinematic", emoji: "🎬", desc: "Dramatic lighting, editorial quality" },
-  { name: "Warm & Candid", emoji: "☀️", desc: "Natural, approachable, authentic feel" },
-  { name: "Professional", emoji: "💼", desc: "Executive portraits, formal events" },
+  { name: "Photorealistic", icon: Camera, desc: "Campus life, student portraits, architecture" },
+  { name: "Cinematic", icon: Sparkles, desc: "Dramatic lighting, editorial quality" },
+  { name: "Warm & Candid", icon: Sun, desc: "Natural, approachable, authentic feel" },
+  { name: "Professional", icon: Briefcase, desc: "Executive portraits, formal events" },
 ];
 
 const designStyles = [
-  { name: "Bold & Geometric", emoji: "🔷", desc: "Clean shapes, strong visual hierarchy" },
-  { name: "Gradient Flow", emoji: "🌊", desc: "Smooth color transitions, modern feel" },
-  { name: "Typographic Poster", emoji: "🔤", desc: "Type-driven layouts, impactful headlines" },
-  { name: "Collage / Mixed Media", emoji: "🎨", desc: "Layered textures, editorial style" },
-  { name: "Retro / Vintage", emoji: "📻", desc: "Nostalgic aesthetics, classic typography" },
-  { name: "Abstract Minimal", emoji: "⬜", desc: "Clean, spacious, sophisticated" },
+  { name: "Bold & Geometric", icon: Hexagon, desc: "Clean shapes, strong visual hierarchy" },
+  { name: "Gradient Flow", icon: Waves, desc: "Smooth color transitions, modern feel" },
+  { name: "Typographic Poster", icon: Type, desc: "Type-driven layouts, impactful headlines" },
+  { name: "Collage / Mixed Media", icon: Palette, desc: "Layered textures, editorial style" },
+  { name: "Retro / Vintage", icon: Clock, desc: "Nostalgic aesthetics, classic typography" },
+  { name: "Abstract Minimal", icon: Square, desc: "Clean, spacious, sophisticated" },
 ];
 
 const capabilities = [
