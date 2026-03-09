@@ -286,48 +286,6 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Trust Indicators */}
-            <div 
-              className="flex flex-wrap justify-center gap-6 pt-4 animate-fade-in"
-              style={{ animationDelay: '0.45s' }}
-            >
-              {trustIndicators.map((indicator, index) => {
-                const colors = [
-                  'text-[hsl(82_85%_55%)]',
-                  'text-[hsl(270_70%_60%)]', 
-                  'text-[hsl(200_100%_50%)]'
-                ];
-                return (
-                  <div 
-                    key={indicator.label}
-                    className="flex items-center gap-2 text-sm"
-                  >
-                    <indicator.icon className={`w-4 h-4 ${colors[index % 3]}`} />
-                    <span className="text-white/50">{indicator.label}</span>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Plan / Strategize / Execute pills */}
-            <div className="flex justify-center gap-3 pt-1 animate-fade-in" style={{ animationDelay: '0.55s' }}>
-              {['Plan', 'Strategize', 'Execute'].map((word, i) => {
-                const colors = ['hsl(82 85% 55%)', 'hsl(270 70% 60%)', 'hsl(200 100% 50%)'];
-                return (
-                  <span
-                    key={word}
-                    className="text-xs font-sans font-medium px-3 py-1 rounded-full border transition-all duration-300"
-                    style={{
-                      color: colors[i],
-                      borderColor: `${colors[i].replace(')', ' / 0.4)')}`,
-                      background: `${colors[i].replace(')', ' / 0.1)')}`,
-                    }}
-                  >
-                    {word}
-                  </span>
-                );
-              })}
-            </div>
           </div>
         </div>
 
