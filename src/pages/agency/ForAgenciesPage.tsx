@@ -298,6 +298,7 @@ export default function ForAgenciesPage() {
                   <Briefcase className="h-5 w-5 text-primary" />
                   <span className="font-semibold">Your University Clients</span>
                   <Badge variant="secondary" className="ml-2">24 Active</Badge>
+                  <Badge variant="outline" className="ml-1 text-xs text-muted-foreground border-muted-foreground/30">Example</Badge>
                 </div>
                 <Button size="sm" variant="outline" className="gap-2">
                   <Users className="h-4 w-4" />
