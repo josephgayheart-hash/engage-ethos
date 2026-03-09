@@ -72,14 +72,26 @@ const features = [
   {
     icon: BarChart3,
     title: 'Content DNA Studio',
-    description: 'Upload samples or scrape content from your website. Score messages against your institutional brand platform.',
+    description: 'Upload samples or scrape your website. AI extracts voice profiles and brand platform elements for every generation.',
     link: '/features/content-dna',
   },
   {
-    icon: Globe,
-    title: 'WebCrawl Intelligence',
-    description: 'Automatically extract brand voice from your website. Our AI crawls your pages to understand your unique tone and style.',
-    link: '/features/content-dna',
+    icon: Image,
+    title: 'AI Image Studio',
+    description: 'Generate on-brand photography and graphic design across 19 formats — photo, poster, social, and more.',
+    link: '/tools',
+  },
+  {
+    icon: Palette,
+    title: 'Brand It Studio',
+    description: 'Layer logos, headlines, CTAs, and brand patterns onto any image. AI-generated copy that matches your tone.',
+    link: '/tools',
+  },
+  {
+    icon: Bot,
+    title: 'AI Copywriter',
+    description: 'A brand-aware messaging assistant that knows your voice, facts, and stories. Chat your way to on-brand copy.',
+    link: '/playground',
   },
   {
     icon: Target,
@@ -88,10 +100,28 @@ const features = [
     link: '/features/journey-designer',
   },
   {
+    icon: PenTool,
+    title: 'Message Evaluator',
+    description: 'Score any piece of content against your brand platform, voice profile, and terminology standards.',
+    link: '/evaluate',
+  },
+  {
+    icon: Globe,
+    title: 'WebCrawl Intelligence',
+    description: 'Automatically extract brand voice from your website. Our AI crawls your pages to understand your unique tone.',
+    link: '/features/content-dna',
+  },
+  {
     icon: BookOpen,
     title: 'University Library',
-    description: 'Governed content with approval workflows. Personal drafts for experimentation. Shared libraries for approved, on-brand plays.',
+    description: 'Governed content with approval workflows. Personal drafts, shared libraries, and collections for on-brand plays.',
     link: '/features/library',
+  },
+  {
+    icon: BarChart,
+    title: 'Brand Audit & Scoring',
+    description: 'Audit touchpoints across your institution. Track brand consistency scores and remediation progress over time.',
+    link: '/tools',
   },
 ];
 
