@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import campusvoiceLogo from '@/assets/campusvoice-logo-new.png';
 import HowItWorksSection from '@/components/landing/HowItWorksSection';
-import SocialProofSection from '@/components/landing/SocialProofSection';
+
 import PricingSignalSection from '@/components/landing/PricingSignalSection';
 import ProductTourTabs from '@/components/landing/ProductTourTabs';
 import { LandingNav } from '@/components/landing/LandingNav';
