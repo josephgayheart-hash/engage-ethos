@@ -314,7 +314,7 @@ export default function MessageBuilderFeaturePage() {
                     <Badge variant="secondary" className="text-xs ml-auto">142 chars</Badge>
                   </div>
                   <div className="text-sm">
-                    Hey [First Name]! Your advisor is here to help. Book a quick chat this week: [link]. We're rooting for you! 🎓
+                    Hey [First Name]! Your advisor is here to help. Book a quick chat this week: [link]. We're rooting for you!
                   </div>
                 </div>
 
