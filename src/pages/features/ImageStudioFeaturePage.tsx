@@ -184,7 +184,7 @@ export default function ImageStudioFeaturePage() {
               <div className="space-y-3">
                 {photoStyles.map((s) => (
                   <div key={s.name} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                    <span className="text-lg">{s.emoji}</span>
+                    <s.icon className="w-4 h-4 text-pink-500 shrink-0" />
                     <div>
                       <p className="text-sm font-medium text-foreground">{s.name}</p>
                       <p className="text-xs text-muted-foreground">{s.desc}</p>
