@@ -8,6 +8,7 @@ import { FeedbackButton } from "@/components/FeedbackButton";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { usePageTracking } from "@/hooks/usePageTracking";
 import { AppLayout } from "@/components/app-shell/AppLayout";
+import { BrandedLoader } from "@/components/BrandedLoader";
 
 // Page imports
 import Index from "./pages/Index";
