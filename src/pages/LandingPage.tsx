@@ -109,7 +109,7 @@ const features = [
     icon: Globe,
     title: 'WebCrawl Intelligence',
     description: 'Automatically extract brand voice from your website. Our AI crawls your pages to understand your unique tone.',
-    link: '/features/content-dna',
+    link: '/features/webcrawl',
   },
   {
     icon: BookOpen,
