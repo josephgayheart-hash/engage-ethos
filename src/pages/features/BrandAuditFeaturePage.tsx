@@ -21,6 +21,7 @@ import { FeatureNavigation } from "@/components/FeatureNavigation";
 import { SEOHead, getSoftwareApplicationSchema, getWebPageSchema } from "@/components/SEOHead";
 import { FeatureBreadcrumbs } from "@/components/FeatureBreadcrumbs";
 import { MobileNav } from "@/components/MobileNav";
+import BrandAuditShowcaseDemo from "@/components/feature-showcases/BrandAuditShowcaseDemo";
 
 const touchpointTypes = [
   { icon: Globe, label: "Website Pages", desc: "Homepage, program pages, news" },
