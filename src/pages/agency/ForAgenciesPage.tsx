@@ -442,7 +442,7 @@ export default function ForAgenciesPage() {
                   variant="secondary"
                   className="gap-2 text-base px-10 py-6 text-lg shadow-lg hover:shadow-xl transition-all"
                 >
-                  Apply Now
+                  Get Early Access
                   <ArrowRight className="h-5 w-5" />
                 </Button>
               </Link>
