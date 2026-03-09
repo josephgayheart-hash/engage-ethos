@@ -5,7 +5,12 @@ import {
   Target, 
   BookOpen,
   Dna,
-  ArrowRight
+  ArrowRight,
+  Image,
+  Palette,
+  Bot,
+  Globe,
+  BarChart,
 } from "lucide-react";
 
 const allFeatures = [
@@ -30,14 +35,44 @@ const allFeatures = [
     borderColor: "border-purple-300",
   },
   {
+    id: "image-studio",
+    icon: Image,
+    title: "AI Image Studio",
+    description: "Generate on-brand photography and graphic designs across 19 communication formats.",
+    link: "/features/image-studio",
+    color: "text-pink-600",
+    bgColor: "bg-pink-500/10",
+    borderColor: "border-pink-300",
+  },
+  {
+    id: "brand-studio",
+    icon: Palette,
+    title: "AI Brand Studio",
+    description: "Layer logos, headlines, CTAs, and brand patterns onto any image with Smart Layer masking.",
+    link: "/features/brand-studio",
+    color: "text-violet-600",
+    bgColor: "bg-violet-500/10",
+    borderColor: "border-violet-300",
+  },
+  {
+    id: "ai-copywriter",
+    icon: Bot,
+    title: "AI Copywriter",
+    description: "A brand-aware messaging assistant that knows your voice, facts, and stories.",
+    link: "/features/ai-copywriter",
+    color: "text-teal-600",
+    bgColor: "bg-teal-500/10",
+    borderColor: "border-teal-300",
+  },
+  {
     id: "journey-designer",
     icon: Target,
     title: "Journey Designer",
     description: "Map multi-channel strategies with duration, intensity, and ramp-up controls.",
     link: "/features/journey-designer",
-    color: "text-teal-600",
-    bgColor: "bg-teal-500/10",
-    borderColor: "border-teal-300",
+    color: "text-cyan-600",
+    bgColor: "bg-cyan-500/10",
+    borderColor: "border-cyan-300",
   },
   {
     id: "evaluate",
@@ -50,6 +85,16 @@ const allFeatures = [
     borderColor: "border-orange-300",
   },
   {
+    id: "webcrawl",
+    icon: Globe,
+    title: "WebCrawl Intelligence",
+    description: "Automatically extract brand voice from your institutional website.",
+    link: "/features/webcrawl",
+    color: "text-sky-600",
+    bgColor: "bg-sky-500/10",
+    borderColor: "border-sky-300",
+  },
+  {
     id: "library",
     icon: BookOpen,
     title: "Content Library",
@@ -59,6 +104,16 @@ const allFeatures = [
     bgColor: "bg-green-500/10",
     borderColor: "border-green-300",
   },
+  {
+    id: "brand-audit",
+    icon: BarChart,
+    title: "Brand Audit & Scoring",
+    description: "Audit touchpoints across your institution and track brand consistency.",
+    link: "/features/brand-audit",
+    color: "text-amber-600",
+    bgColor: "bg-amber-500/10",
+    borderColor: "border-amber-300",
+  },
 ];
 
 interface FeatureNavigationProps {
@@ -67,6 +122,8 @@ interface FeatureNavigationProps {
 
 export function FeatureNavigation({ currentFeatureId }: FeatureNavigationProps) {
   const otherFeatures = allFeatures.filter(f => f.id !== currentFeatureId);
+  // Show max 4 at a time to keep it clean
+  const displayFeatures = otherFeatures.slice(0, 4);
 
   return (
     <section className="py-16 bg-muted/30">
@@ -82,7 +139,7 @@ export function FeatureNavigation({ currentFeatureId }: FeatureNavigationProps) 
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {otherFeatures.map((feature) => (
+            {displayFeatures.map((feature) => (
               <Link
                 key={feature.id}
                 to={feature.link}
