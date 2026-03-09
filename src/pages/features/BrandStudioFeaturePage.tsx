@@ -162,6 +162,19 @@ export default function BrandStudioFeaturePage() {
         </div>
       </section>
 
+      {/* Interactive Demo */}
+      <section className="py-16 bg-[hsl(270_60%_96%)] relative overflow-hidden">
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-10">
+            <h2 className="font-serif text-3xl font-bold text-foreground mb-4">See It In Action</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">Watch logos, patterns, headlines, and CTAs layer onto an image — progressively building a branded asset.</p>
+          </div>
+          <div className="max-w-4xl mx-auto">
+            <BrandStudioShowcaseDemo />
+          </div>
+        </div>
+      </section>
+
       {/* The Layering Process */}
       <section className="py-16 bg-[hsl(270_60%_96%)] relative overflow-hidden">
         <div className="container mx-auto px-4 relative z-10">

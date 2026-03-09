@@ -157,6 +157,19 @@ export default function WebCrawlFeaturePage() {
         </div>
       </section>
 
+      {/* Interactive Demo */}
+      <section className="py-16 bg-[hsl(200_70%_96%)] relative overflow-hidden">
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-10">
+            <h2 className="font-serif text-3xl font-bold text-foreground mb-4">See It In Action</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">Watch the crawler discover pages, extract voice patterns, and generate your Content DNA — automatically.</p>
+          </div>
+          <div className="max-w-4xl mx-auto">
+            <WebCrawlShowcaseDemo />
+          </div>
+        </div>
+      </section>
+
       {/* How It Works */}
       <section className="py-16 bg-[hsl(200_70%_96%)] relative overflow-hidden">
         <div className="container mx-auto px-4 relative z-10">

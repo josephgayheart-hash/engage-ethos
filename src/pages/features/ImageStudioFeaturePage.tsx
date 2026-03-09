@@ -161,6 +161,19 @@ export default function ImageStudioFeaturePage() {
         </div>
       </section>
 
+      {/* Interactive Demo */}
+      <section className="py-16 bg-[hsl(340_75%_95%)] relative overflow-hidden">
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-10">
+            <h2 className="font-serif text-3xl font-bold text-foreground mb-4">See It In Action</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">Watch the full generation workflow — from style selection to brand-scored output.</p>
+          </div>
+          <div className="max-w-4xl mx-auto">
+            <ImageStudioShowcaseDemo />
+          </div>
+        </div>
+      </section>
+
       {/* Photo vs Graphic Design Mode */}
       <section className="py-16 bg-[hsl(340_75%_95%)] relative overflow-hidden">
         <div className="absolute top-12 right-[10%] w-28 h-28 bg-[hsl(270_70%_60%_/_0.12)] rounded-full blur-2xl" />
