@@ -56,6 +56,11 @@ import MessageBuilderFeaturePage from "./pages/features/MessageBuilderFeaturePag
 import JourneyDesignerFeaturePage from "./pages/features/JourneyDesignerFeaturePage";
 import EvaluateFeaturePage from "./pages/features/EvaluateFeaturePage";
 import LibraryFeaturePage from "./pages/features/LibraryFeaturePage";
+import ImageStudioFeaturePage from "./pages/features/ImageStudioFeaturePage";
+import BrandStudioFeaturePage from "./pages/features/BrandStudioFeaturePage";
+import AICopywriterFeaturePage from "./pages/features/AICopywriterFeaturePage";
+import BrandAuditFeaturePage from "./pages/features/BrandAuditFeaturePage";
+import WebCrawlFeaturePage from "./pages/features/WebCrawlFeaturePage";
 import OGPreviewPage from "./pages/OGPreviewPage";
 import WebContentAnalyzerPage from "./pages/WebContentAnalyzerPage";
 import BrandAuditPage from "./pages/BrandAuditPage";
