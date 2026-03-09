@@ -108,7 +108,7 @@ export default function ForAgenciesPage() {
                 <Button size="sm" className="gap-2 whitespace-nowrap">
                   <Briefcase className="h-4 w-4 hidden sm:block" />
                   <span className="sm:hidden">Apply</span>
-                  <span className="hidden sm:inline">Become a Partner</span>
+                  <span className="hidden sm:inline">Get Early Access</span>
                 </Button>
               </Link>
             </div>
