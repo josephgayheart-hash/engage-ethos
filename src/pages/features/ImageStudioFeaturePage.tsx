@@ -276,10 +276,10 @@ export default function ImageStudioFeaturePage() {
                       <p className="text-sm text-muted-foreground">Your image rendered inside realistic device frames</p>
                     </div>
                     <div className="flex justify-center gap-2">
-                      <Badge variant="outline" className="text-xs">📱 Phone</Badge>
-                      <Badge variant="outline" className="text-xs">🖥 Browser</Badge>
-                      <Badge variant="outline" className="text-xs">📬 Postcard</Badge>
-                      <Badge variant="outline" className="text-xs">📰 Magazine</Badge>
+                      <Badge variant="outline" className="text-xs gap-1"><Smartphone className="w-3 h-3" /> Phone</Badge>
+                      <Badge variant="outline" className="text-xs gap-1"><Monitor className="w-3 h-3" /> Browser</Badge>
+                      <Badge variant="outline" className="text-xs gap-1"><Mail className="w-3 h-3" /> Postcard</Badge>
+                      <Badge variant="outline" className="text-xs gap-1"><FileText className="w-3 h-3" /> Magazine</Badge>
                     </div>
                   </div>
                 </div>
