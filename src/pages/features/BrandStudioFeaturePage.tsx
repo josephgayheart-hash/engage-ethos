@@ -20,6 +20,7 @@ import { FeatureNavigation } from "@/components/FeatureNavigation";
 import { SEOHead, getSoftwareApplicationSchema, getWebPageSchema } from "@/components/SEOHead";
 import { FeatureBreadcrumbs } from "@/components/FeatureBreadcrumbs";
 import { MobileNav } from "@/components/MobileNav";
+import BrandStudioShowcaseDemo from "@/components/feature-showcases/BrandStudioShowcaseDemo";
 
 const overlayLayers = [
   {
