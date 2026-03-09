@@ -449,7 +449,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
             {features.map((feature, index) => {
               const cardColors = [
                 { bg: 'bg-white', border: 'border-[hsl(82_85%_55%_/_0.4)]', iconBg: 'bg-[hsl(82_85%_55%_/_0.2)]', iconColor: 'text-[hsl(82_70%_35%)]', hoverBorder: 'hover:border-[hsl(82_85%_55%)]' },
