@@ -149,7 +149,7 @@ export default function ForAgenciesPage() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link to="/agency/request-access">
                   <Button size="lg" className="gap-2 text-base px-8 shadow-lg hover:shadow-xl transition-shadow">
-                    Become a Partner
+                    Get Early Access
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
