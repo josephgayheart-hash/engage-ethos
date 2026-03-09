@@ -15,7 +15,12 @@ import {
   CheckCircle2,
   GraduationCap,
   Globe,
-  Calendar
+  Calendar,
+  Image,
+  Palette,
+  Bot,
+  PenTool,
+  BarChart
 } from 'lucide-react';
 import campusvoiceLogo from '@/assets/campusvoice-logo-new.png';
 import HowItWorksSection from '@/components/landing/HowItWorksSection';
