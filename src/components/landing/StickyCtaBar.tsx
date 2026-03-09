@@ -45,7 +45,7 @@ export function StickyCtaBar() {
               className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] shadow-[0_0_20px_hsl(82_85%_55%_/_0.3)] font-bold rounded-full px-5"
             >
               <Link to="/request-access">
-                Request Access
+                Get Early Access
                 <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
               </Link>
             </Button>
