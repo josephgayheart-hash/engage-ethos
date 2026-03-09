@@ -14,6 +14,10 @@ import {
   Zap,
   Target,
   Eye,
+  Shield,
+  MessageCircle,
+  LayoutGrid,
+  Lightbulb,
 } from "lucide-react";
 import campusvoiceLogo from "@/assets/campusvoice-logo.png";
 import { FeatureNavigation } from "@/components/FeatureNavigation";
@@ -46,12 +50,12 @@ const crawlSteps = [
 ];
 
 const extractionTypes = [
-  { label: "Voice Patterns", desc: "Formality, warmth, energy, authority", icon: "🎯" },
-  { label: "Terminology", desc: "Preferred terms, phrases, and naming conventions", icon: "📝" },
-  { label: "Brand Signals", desc: "Values, commitments, differentiators", icon: "🏛️" },
-  { label: "Tone Markers", desc: "How your institution speaks to different audiences", icon: "🎤" },
-  { label: "Page Structure", desc: "Content hierarchy, navigation patterns, information architecture", icon: "🗂️" },
-  { label: "Key Themes", desc: "Recurring topics, strategic emphases, campaign language", icon: "💡" },
+  { label: "Voice Patterns", desc: "Formality, warmth, energy, authority", icon: Target },
+  { label: "Terminology", desc: "Preferred terms, phrases, and naming conventions", icon: FileText },
+  { label: "Brand Signals", desc: "Values, commitments, differentiators", icon: Shield },
+  { label: "Tone Markers", desc: "How your institution speaks to different audiences", icon: MessageCircle },
+  { label: "Page Structure", desc: "Content hierarchy, navigation patterns, information architecture", icon: LayoutGrid },
+  { label: "Key Themes", desc: "Recurring topics, strategic emphases, campaign language", icon: Lightbulb },
 ];
 
 const capabilities = [
@@ -187,7 +191,9 @@ export default function WebCrawlFeaturePage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
             {extractionTypes.map((t) => (
               <div key={t.label} className="flex items-start gap-3 p-4 rounded-xl border border-border bg-card hover:border-blue-300 hover:shadow-sm transition-all">
-                <span className="text-xl mt-0.5">{t.icon}</span>
+                <div className="p-1.5 rounded-md bg-blue-500/10 shrink-0">
+                  <t.icon className="w-4 h-4 text-blue-600" />
+                </div>
                 <div>
                   <p className="font-medium text-sm text-foreground">{t.label}</p>
                   <p className="text-xs text-muted-foreground">{t.desc}</p>

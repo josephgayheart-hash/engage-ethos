@@ -32,7 +32,7 @@ const conversationExamples = [
   },
   {
     prompt: "Now give me an SMS version",
-    response: "🎓 [First Name], you're invited to Lakewood's new Honors Program! Smaller classes, research opportunities & a $2K scholarship. Details: lkwd.edu/honors Reply STOP to opt out",
+    response: "[First Name], you're invited to Lakewood's new Honors Program! Smaller classes, research opportunities & a $2K scholarship. Details: lkwd.edu/honors Reply STOP to opt out",
   },
 ];
 

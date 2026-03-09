@@ -18,6 +18,13 @@ import {
   Dna,
   Download,
   Wand2,
+  Sun,
+  Briefcase,
+  Hexagon,
+  Waves,
+  Type,
+  Clock,
+  Square,
 } from "lucide-react";
 import campusvoiceLogo from "@/assets/campusvoice-logo.png";
 import { FeatureNavigation } from "@/components/FeatureNavigation";
@@ -35,19 +42,19 @@ const formats = [
 ];
 
 const photoStyles = [
-  { name: "Photorealistic", emoji: "📸", desc: "Campus life, student portraits, architecture" },
-  { name: "Cinematic", emoji: "🎬", desc: "Dramatic lighting, editorial quality" },
-  { name: "Warm & Candid", emoji: "☀️", desc: "Natural, approachable, authentic feel" },
-  { name: "Professional", emoji: "💼", desc: "Executive portraits, formal events" },
+  { name: "Photorealistic", icon: Camera, desc: "Campus life, student portraits, architecture" },
+  { name: "Cinematic", icon: Sparkles, desc: "Dramatic lighting, editorial quality" },
+  { name: "Warm & Candid", icon: Sun, desc: "Natural, approachable, authentic feel" },
+  { name: "Professional", icon: Briefcase, desc: "Executive portraits, formal events" },
 ];
 
 const designStyles = [
-  { name: "Bold & Geometric", emoji: "🔷", desc: "Clean shapes, strong visual hierarchy" },
-  { name: "Gradient Flow", emoji: "🌊", desc: "Smooth color transitions, modern feel" },
-  { name: "Typographic Poster", emoji: "🔤", desc: "Type-driven layouts, impactful headlines" },
-  { name: "Collage / Mixed Media", emoji: "🎨", desc: "Layered textures, editorial style" },
-  { name: "Retro / Vintage", emoji: "📻", desc: "Nostalgic aesthetics, classic typography" },
-  { name: "Abstract Minimal", emoji: "⬜", desc: "Clean, spacious, sophisticated" },
+  { name: "Bold & Geometric", icon: Hexagon, desc: "Clean shapes, strong visual hierarchy" },
+  { name: "Gradient Flow", icon: Waves, desc: "Smooth color transitions, modern feel" },
+  { name: "Typographic Poster", icon: Type, desc: "Type-driven layouts, impactful headlines" },
+  { name: "Collage / Mixed Media", icon: Palette, desc: "Layered textures, editorial style" },
+  { name: "Retro / Vintage", icon: Clock, desc: "Nostalgic aesthetics, classic typography" },
+  { name: "Abstract Minimal", icon: Square, desc: "Clean, spacious, sophisticated" },
 ];
 
 const capabilities = [
@@ -177,7 +184,7 @@ export default function ImageStudioFeaturePage() {
               <div className="space-y-3">
                 {photoStyles.map((s) => (
                   <div key={s.name} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                    <span className="text-lg">{s.emoji}</span>
+                    <s.icon className="w-4 h-4 text-pink-500 shrink-0" />
                     <div>
                       <p className="text-sm font-medium text-foreground">{s.name}</p>
                       <p className="text-xs text-muted-foreground">{s.desc}</p>
@@ -201,7 +208,7 @@ export default function ImageStudioFeaturePage() {
               <div className="grid grid-cols-2 gap-2">
                 {designStyles.map((s) => (
                   <div key={s.name} className="flex items-start gap-2 p-2.5 rounded-lg bg-muted/50">
-                    <span className="text-sm mt-0.5">{s.emoji}</span>
+                    <s.icon className="w-3.5 h-3.5 text-orange-500 mt-0.5 shrink-0" />
                     <div>
                       <p className="text-xs font-medium text-foreground">{s.name}</p>
                       <p className="text-[10px] text-muted-foreground leading-tight">{s.desc}</p>
@@ -269,10 +276,10 @@ export default function ImageStudioFeaturePage() {
                       <p className="text-sm text-muted-foreground">Your image rendered inside realistic device frames</p>
                     </div>
                     <div className="flex justify-center gap-2">
-                      <Badge variant="outline" className="text-xs">📱 Phone</Badge>
-                      <Badge variant="outline" className="text-xs">🖥 Browser</Badge>
-                      <Badge variant="outline" className="text-xs">📬 Postcard</Badge>
-                      <Badge variant="outline" className="text-xs">📰 Magazine</Badge>
+                      <Badge variant="outline" className="text-xs gap-1"><Smartphone className="w-3 h-3" /> Phone</Badge>
+                      <Badge variant="outline" className="text-xs gap-1"><Monitor className="w-3 h-3" /> Browser</Badge>
+                      <Badge variant="outline" className="text-xs gap-1"><Mail className="w-3 h-3" /> Postcard</Badge>
+                      <Badge variant="outline" className="text-xs gap-1"><FileText className="w-3 h-3" /> Magazine</Badge>
                     </div>
                   </div>
                 </div>
