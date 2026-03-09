@@ -103,7 +103,7 @@ const features = [
     icon: PenTool,
     title: 'Message Evaluator',
     description: 'Score any piece of content against your brand platform, voice profile, and terminology standards.',
-    link: '/evaluate',
+    link: '/features/evaluate',
   },
   {
     icon: Globe,
