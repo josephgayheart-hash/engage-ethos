@@ -311,8 +311,6 @@ export default function LandingPage() {
       {/* How It Works Section - Position #2 */}
       <HowItWorksSection />
 
-      {/* Social Proof Section */}
-      <SocialProofSection />
 
       {/* Product Showcases Section — Top 2 inline + 3 tabbed */}
       <section className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-background relative overflow-hidden">
