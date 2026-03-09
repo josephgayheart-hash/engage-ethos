@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import campusvoiceLogo from '@/assets/campusvoice-logo-new.png';
 import HowItWorksSection from '@/components/landing/HowItWorksSection';
-import SocialProofSection from '@/components/landing/SocialProofSection';
+
 import PricingSignalSection from '@/components/landing/PricingSignalSection';
 import ProductTourTabs from '@/components/landing/ProductTourTabs';
 import { LandingNav } from '@/components/landing/LandingNav';
@@ -311,8 +311,6 @@ export default function LandingPage() {
       {/* How It Works Section - Position #2 */}
       <HowItWorksSection />
 
-      {/* Social Proof Section */}
-      <SocialProofSection />
 
       {/* Product Showcases Section — Top 2 inline + 3 tabbed */}
       <section className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-background relative overflow-hidden">
