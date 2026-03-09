@@ -91,7 +91,7 @@ const features = [
     icon: Bot,
     title: 'AI Copywriter',
     description: 'A brand-aware messaging assistant that knows your voice, facts, and stories. Chat your way to on-brand copy.',
-    link: '/playground',
+    link: '/features/ai-copywriter',
   },
   {
     icon: Target,
