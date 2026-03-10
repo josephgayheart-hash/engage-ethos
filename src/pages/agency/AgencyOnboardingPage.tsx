@@ -134,9 +134,9 @@ export default function AgencyOnboardingPage() {
                     <div className="flex items-start gap-4 p-4 rounded-lg bg-muted/50">
                       <Sparkles className="h-5 w-5 text-primary mt-0.5" />
                       <div>
-                        <h3 className="font-medium">Per-Client Content DNA</h3>
+                        <h3 className="font-medium">Per-Institution Content DNA</h3>
                         <p className="text-sm text-muted-foreground">
-                          Each client gets their own voice profile and brand
+                          Each institution gets their own voice profile and brand
                           configuration.
                         </p>
                       </div>
