@@ -442,10 +442,22 @@ const GivingDayPlannerPage = () => {
                 <ArrowLeft className="w-5 h-5" />
               </Button>
               <div>
-                <h1 className="font-serif text-xl md:text-2xl font-bold text-foreground">
-                  {selectedCampaign?.name}
-                </h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="font-serif text-xl md:text-2xl font-bold text-foreground">
+                    {selectedCampaign?.name}
+                  </h1>
+                  {selectedProfile && (() => {
+                    const meta = PROFILE_TYPE_LABELS[selectedProfile.profileType] || PROFILE_TYPE_LABELS.university;
+                    const Icon = meta.icon;
+                    return (
+                      <Badge variant="outline" className="gap-1 text-[11px] border-primary/30 text-primary">
+                        <Icon className="w-3 h-3" /> {meta.label} Plan
+                      </Badge>
+                    );
+                  })()}
+                </div>
                 <p className="text-sm text-muted-foreground">
+                  {selectedProfile && <span className="font-medium">{selectedProfile.name} · </span>}
                   Giving Day: {selectedCampaign && format(parseISO(selectedCampaign.giving_day_date), 'EEEE, MMMM d, yyyy')}
                 </p>
               </div>
