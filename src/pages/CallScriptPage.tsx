@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
 import { BrandLayerSelector, BrandLayerSelection } from "@/components/BrandLayerSelector";
-import { ContentDNAIndicator, ContentDNAActiveBadge } from "@/components/ContentDNAIndicator";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
