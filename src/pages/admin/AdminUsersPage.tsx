@@ -220,6 +220,7 @@ export default function AdminUsersPage() {
           title: newUser.title || null,
           role: newUser.role,
           sendInvite: sendInviteEmail,
+          tenantId: effectiveTenantId, // Target the active workspace
         },
       });
 
