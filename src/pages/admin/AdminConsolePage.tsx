@@ -530,10 +530,10 @@ export default function AdminConsolePage() {
           </div>
         </div>
         {/* Accent color bar */}
-        {tenant?.accent_color && (
+        {effectiveTenant?.accent_color && (
           <div 
             className="h-1 w-full" 
-            style={{ backgroundColor: tenant.accent_color }}
+            style={{ backgroundColor: effectiveTenant.accent_color }}
           />
         )}
       </div>
