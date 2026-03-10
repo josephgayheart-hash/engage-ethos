@@ -529,6 +529,26 @@ const GivingDayPlannerPage = () => {
                                       </div>
                                     </div>
                                     <div className="flex items-center gap-1 shrink-0">
+                                      {tp.generatedContent && (
+                                        <Button
+                                          size="icon"
+                                          variant="ghost"
+                                          className="h-7 w-7"
+                                          onClick={() => {
+                                            setExpandedTouchpoints(prev => {
+                                              const next = new Set(prev);
+                                              if (next.has(tp.id)) next.delete(tp.id);
+                                              else next.add(tp.id);
+                                              return next;
+                                            });
+                                          }}
+                                        >
+                                          <ChevronDown className={cn(
+                                            "w-3.5 h-3.5 transition-transform",
+                                            expandedTouchpoints.has(tp.id) && "rotate-180"
+                                          )} />
+                                        </Button>
+                                      )}
                                       <Select
                                         value={tp.status}
                                         onValueChange={(v) => handleTouchpointUpdate(tp.id, { status: v as any })}
@@ -553,6 +573,14 @@ const GivingDayPlannerPage = () => {
                                       </Tooltip>
                                     </div>
                                   </div>
+                                  {/* Collapsible generated content */}
+                                  {tp.generatedContent && expandedTouchpoints.has(tp.id) && (
+                                    <div className="mt-3 pt-3 border-t">
+                                      <div className="text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none bg-muted/30 rounded-lg p-3 [&_p]:my-1.5 [&_p]:leading-relaxed [&_ul]:my-1.5 [&_ul]:pl-5 [&_ul]:list-disc [&_ol]:my-1.5 [&_ol]:pl-5 [&_ol]:list-decimal [&_strong]:font-semibold [&_strong]:text-foreground [&_h1]:text-base [&_h1]:font-semibold [&_h2]:text-sm [&_h2]:font-semibold [&_h3]:text-sm [&_h3]:font-medium">
+                                        <ReactMarkdown>{tp.generatedContent}</ReactMarkdown>
+                                      </div>
+                                    </div>
+                                  )}
                                 </CardContent>
                               </Card>
                             );
