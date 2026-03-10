@@ -39,8 +39,8 @@ export default function AgencyOnboardingPage() {
   const handleAddClient = async () => {
     if (!clientData.name.trim()) {
       toast({
-        title: "Client name required",
-        description: "Please enter a name for your first client.",
+        title: "Institution name required",
+        description: "Please enter a name for your first partner institution.",
         variant: "destructive",
       });
       return;
