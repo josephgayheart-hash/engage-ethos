@@ -182,7 +182,7 @@ const StewardshipReportPage = () => {
 
   return (
     <div className="bg-background">
-      {isGenerating && <GenerationLoadingOverlay isVisible={isGenerating} context={{ mode: 'builder', audience: 'donors', channel: 'email' }} />}
+      {isGenerating && <GenerationLoadingOverlay isVisible={isGenerating} context={{ mode: 'builder', audience: 'donors', channels: ['email'] }} />}
 
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
