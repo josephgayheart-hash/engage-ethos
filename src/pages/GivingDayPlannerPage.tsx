@@ -240,7 +240,79 @@ const GivingDayPlannerPage = () => {
     setAddTpOpen(true);
   };
 
-  // Group touchpoints by phase
+  const getCampaignText = useCallback(() => {
+    if (!selectedCampaign) return "";
+    return campaignToText(selectedCampaign, selectedProfile?.name);
+  }, [selectedCampaign, selectedProfile]);
+
+  const handleCopyToClipboard = useCallback(async () => {
+    const text = getCampaignText();
+    await navigator.clipboard.writeText(text);
+    toast({ title: "Copied!", description: "Campaign plan copied to clipboard. Paste it anywhere." });
+  }, [getCampaignText, toast]);
+
+  const handleExportGoogleDocs = useCallback(async () => {
+    const text = getCampaignText();
+    const success = await openInGoogleDocs(text, selectedCampaign?.name);
+    if (success) {
+      toast({ title: "Opening Google Docs", description: "Your campaign plan is on the clipboard — paste it in the new doc." });
+    }
+  }, [getCampaignText, selectedCampaign?.name, toast]);
+
+  const handleExportPdf = useCallback(async () => {
+    if (!campaignDetailRef.current) return;
+    setIsExporting(true);
+    try {
+      await (document as any).fonts?.ready;
+      const canvas = await html2canvas(campaignDetailRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+        scrollX: 0,
+        scrollY: -window.scrollY,
+      });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const margin = 40;
+      const availW = pageW - margin * 2;
+      const imgH = (canvas.height * availW) / canvas.width;
+
+      // Paginate if needed
+      let offset = 0;
+      const srcW = canvas.width;
+      const srcH = canvas.height;
+      const availH = pageH - margin * 2;
+      let page = 0;
+
+      while (offset < srcH) {
+        if (page > 0) pdf.addPage();
+        const sliceH = Math.min(srcH - offset, (availH * srcW) / availW);
+        const sliceRealH = (sliceH * availW) / srcW;
+        const sliceCanvas = document.createElement("canvas");
+        sliceCanvas.width = srcW;
+        sliceCanvas.height = sliceH;
+        const ctx = sliceCanvas.getContext("2d");
+        if (ctx) ctx.drawImage(canvas, 0, offset, srcW, sliceH, 0, 0, srcW, sliceH);
+        pdf.addImage(sliceCanvas.toDataURL("image/png"), "PNG", margin, margin, availW, sliceRealH, undefined, "FAST");
+        offset += sliceH;
+        page++;
+      }
+
+      const fileName = `${(selectedCampaign?.name || "campaign").replace(/\s+/g, "-").toLowerCase()}-${format(new Date(), "yyyy-MM-dd")}.pdf`;
+      pdf.save(fileName);
+      toast({ title: "PDF exported", description: `Saved as ${fileName}` });
+    } catch (err) {
+      console.error("PDF export error:", err);
+      toast({ title: "Export failed", description: "Could not generate PDF.", variant: "destructive" });
+    } finally {
+      setIsExporting(false);
+    }
+  }, [selectedCampaign?.name, toast]);
+
+
   const groupedTouchpoints = useMemo(() => {
     if (!selectedCampaign) return {};
     const groups: Record<string, { milestone: typeof T_MINUS_MILESTONES[0]; touchpoints: CampaignTouchpoint[] }> = {};
