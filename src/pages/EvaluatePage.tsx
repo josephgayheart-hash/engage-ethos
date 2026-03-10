@@ -6,7 +6,6 @@ import { MessageInput } from "@/components/MessageInput";
 import { EvaluationResults } from "@/components/EvaluationResults";
 import { LibraryNav } from "@/components/LibraryNav";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
-import { ContentDNAIndicator } from "@/components/ContentDNAIndicator";
 import { ContentDNAExplainer } from "@/components/ContentDNAExplainer";
 import { BrandLayerSelector, BrandLayerSelection } from "@/components/BrandLayerSelector";
 import { BuilderStepSection } from "@/components/BuilderStepSection";
@@ -205,12 +204,6 @@ const EvaluatePage = () => {
                 icon={<Target className="w-4 h-4" />}
               >
                 <div className="space-y-4">
-                  <ContentDNAIndicator
-                    enabled={useContentDNA}
-                    onToggle={setUseContentDNA}
-                    selectedProfileId={selectedProfileId}
-                    selectedProfileName={selectedProfileName}
-                  />
 
                   {useContentDNA && contentDNA?.brandPlatform && (
                     <BrandLayerSelector

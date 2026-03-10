@@ -6,7 +6,6 @@ import { ContextSelector } from "@/components/ContextSelector";
 import { LibraryNav } from "@/components/LibraryNav";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
 import { ChannelPreview } from "@/components/ChannelPreview";
-import { ContentDNAIndicator, ContentDNAActiveBadge } from "@/components/ContentDNAIndicator";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { ContentDNAExplainer } from "@/components/ContentDNAExplainer";
 import { BuilderStepSection, BuilderStepDivider } from "@/components/BuilderStepSection";
@@ -865,13 +864,6 @@ const BuildPage = () => {
                 icon={<Target className="w-4 h-4" />}
               >
                 <div className="space-y-4">
-                  {/* Content DNA Indicator */}
-                  <ContentDNAIndicator
-                    enabled={useContentDNA}
-                    onToggle={setUseContentDNA}
-                    selectedProfileId={selectedProfileId}
-                    selectedProfileName={selectedProfileName}
-                  />
 
                   {/* Brand Layer Selector - only show when Content DNA is enabled and brand platform exists */}
                   {useContentDNA && contentDNA?.brandPlatform && (
@@ -1162,7 +1154,7 @@ const BuildPage = () => {
                           {selectedChannels.length} channel{selectedChannels.length > 1 ? 's' : ''}
                         </Badge>
                       </CardTitle>
-                      {useContentDNA && <ContentDNAActiveBadge profileId={selectedProfileId} institutionName={selectedProfileName} />}
+                      
                       {useContentDNA && contentDNA?.brandPlatform && (
                         <BrandLayerActiveBadge 
                           brandPlatform={contentDNA.brandPlatform} 

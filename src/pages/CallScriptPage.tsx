@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
 import { BrandLayerSelector, BrandLayerSelection } from "@/components/BrandLayerSelector";
-import { ContentDNAIndicator, ContentDNAActiveBadge } from "@/components/ContentDNAIndicator";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -338,9 +337,6 @@ ${callScript.followUpNotes}`;
                     </p>
                   </div>
                 </div>
-                {useContentDNA && contentDNA && (
-                  <ContentDNAActiveBadge profileId={selectedProfileId ?? undefined} institutionName={selectedProfileName} />
-                )}
               </div>
 
               {/* Brand Layer Selector - only show when Content DNA is enabled and brand platform exists */}
