@@ -506,7 +506,7 @@ export default function AgencyClientsPage() {
         {/* Profile Setup Wizard - Full wizard for new clients */}
         {showWizard && (
           <Dialog open={showWizard} onOpenChange={setShowWizard}>
-            <DialogContent className="max-w-6xl max-h-[92vh] overflow-y-auto p-0">
+            <DialogContent className="max-w-6xl max-h-[92vh] overflow-y-auto p-6">
               <ProfileSetupWizard
                 onComplete={handleCreateClient}
                 onCancel={() => setShowWizard(false)}
