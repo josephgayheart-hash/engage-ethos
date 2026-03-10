@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWorkspace } from '@/contexts/WorkspaceContext';
 import { useContentDNA, ContentDNASample } from '@/hooks/useContentDNA';
 import { useInstitutionalProfiles } from '@/hooks/useInstitutionalProfiles';
 import { WebCrawlTab } from '@/components/dna/WebCrawlTab';
@@ -190,6 +191,8 @@ function detectContentType(text: string): string | null {
 
 export default function ContentDNAPage() {
   const { tenant, profile, isAdmin } = useAuth();
+  const { activeWorkspace, canSwitch } = useWorkspace();
+  const effectiveTenant = canSwitch && activeWorkspace ? activeWorkspace : tenant;
   const location = useLocation();
   
   // Brand pillar inline editing state
@@ -920,23 +923,23 @@ export default function ContentDNAPage() {
           <CardContent className="py-5">
             <div className="flex items-center gap-4">
               {/* Use profile logo if available, otherwise fall back to tenant logo */}
-              {(selectedProfile?.config?.logoUrl || tenant?.logo_url) ? (
+              {(selectedProfile?.config?.logoUrl || effectiveTenant?.logo_url) ? (
                 <img 
-                  src={selectedProfile?.config?.logoUrl || tenant?.logo_url || ''}
-                  alt={`${selectedProfile?.name || tenant?.institution_name} logo`}
+                  src={selectedProfile?.config?.logoUrl || effectiveTenant?.logo_url || ''}
+                  alt={`${selectedProfile?.name || effectiveTenant?.institution_name} logo`}
                   className="w-14 h-14 object-contain rounded-lg border border-border bg-background p-1"
                 />
               ) : (
                 <div 
                   className="w-14 h-14 rounded-lg flex items-center justify-center text-white font-bold text-xl"
-                  style={{ backgroundColor: selectedProfile?.config?.primaryColor || tenant?.primary_color || 'hsl(222,47%,14%)' }}
+                  style={{ backgroundColor: selectedProfile?.config?.primaryColor || effectiveTenant?.primary_color || 'hsl(222,47%,14%)' }}
                 >
-                  {(selectedProfile?.name || tenant?.institution_name)?.charAt(0) || 'U'}
+                  {(selectedProfile?.name || effectiveTenant?.institution_name)?.charAt(0) || 'U'}
                 </div>
               )}
               <div className="flex-1">
                 <h3 className="font-medium text-foreground">
-                  {selectedProfile?.name || tenant?.institution_name || 'Your Institution'}
+                  {selectedProfile?.name || effectiveTenant?.institution_name || 'Your Institution'}
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   {selectedProfile ? `Content DNA for ${selectedProfile.name}` : 'Institution-wide Content DNA'}
@@ -997,7 +1000,7 @@ export default function ContentDNAPage() {
                     <TooltipTrigger>
                       <div 
                         className="w-6 h-6 rounded-full border border-border"
-                        style={{ backgroundColor: tenant?.primary_color || 'hsl(222,47%,14%)' }}
+                        style={{ backgroundColor: effectiveTenant?.primary_color || 'hsl(222,47%,14%)' }}
                       />
                     </TooltipTrigger>
                     <TooltipContent>Primary Color</TooltipContent>
@@ -1246,23 +1249,23 @@ export default function ContentDNAPage() {
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      {(selectedProfile?.config?.logoUrl || tenant?.logo_url) ? (
+                      {(selectedProfile?.config?.logoUrl || effectiveTenant?.logo_url) ? (
                         <img 
-                          src={selectedProfile?.config?.logoUrl || tenant?.logo_url || ''}
+                          src={selectedProfile?.config?.logoUrl || effectiveTenant?.logo_url || ''}
                           alt="Logo"
                           className="w-12 h-12 object-contain rounded-lg border bg-white p-1"
                         />
                       ) : (
                         <div 
                           className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg"
-                          style={{ backgroundColor: selectedProfile?.config?.primaryColor || tenant?.primary_color || '#1F2A44' }}
+                          style={{ backgroundColor: selectedProfile?.config?.primaryColor || effectiveTenant?.primary_color || '#1F2A44' }}
                         >
-                          {(selectedProfile?.name || tenant?.institution_name)?.charAt(0) || 'U'}
+                          {(selectedProfile?.name || effectiveTenant?.institution_name)?.charAt(0) || 'U'}
                         </div>
                       )}
                       <div>
                         <CardTitle className="text-lg">
-                          {selectedProfile?.name || tenant?.institution_name || 'Institution'} Content DNA
+                          {selectedProfile?.name || effectiveTenant?.institution_name || 'Institution'} Content DNA
                         </CardTitle>
                         <CardDescription>
                           {selectedProfile ? 'Profile-specific Content DNA' : 'Institution-wide Content DNA'}
