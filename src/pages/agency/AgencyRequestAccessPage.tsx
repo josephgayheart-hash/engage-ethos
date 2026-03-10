@@ -31,7 +31,7 @@ const processSteps = [
   {
     step: 1,
     title: "Submit Your Interest",
-    description: "Tell us about your agency and university clients",
+    description: "Tell us about your firm and the institutions you serve",
   },
   {
     step: 2,
