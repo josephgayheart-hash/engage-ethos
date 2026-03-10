@@ -142,7 +142,7 @@ export default function AgencyRequestAccessPage() {
     <>
       <SEOHead
         title="Become a Partner | CampusVoice.AI"
-        description="Apply to become a CampusVoice Agency Partner. Manage multiple university clients from one platform."
+        description="Apply to become a CampusVoice Agency Partner. Manage multiple partner institutions from one platform."
       />
 
       <div className="min-h-screen bg-background">
