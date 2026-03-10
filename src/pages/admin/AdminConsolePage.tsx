@@ -126,7 +126,10 @@ export default function AdminConsolePage() {
       setInstitutionName('');
     }
     if (effectiveTenant?.logo_url) {
-      setLogoUrl(effectiveTenant.logo_url);
+      // Add cache-buster to prevent stale browser cache after uploads
+      const url = effectiveTenant.logo_url;
+      const bustUrl = url.includes('?') ? url : `${url}?t=${Date.now()}`;
+      setLogoUrl(bustUrl);
     } else {
       setLogoUrl(null);
     }
