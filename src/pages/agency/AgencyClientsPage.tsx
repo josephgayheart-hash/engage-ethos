@@ -473,24 +473,24 @@ export default function AgencyClientsPage() {
             {/* Clients List */}
             {isLoading ? (
               <div className="text-center py-12 text-muted-foreground">
-                Loading clients...
+                Loading institutions...
               </div>
             ) : filteredProfiles.length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">
                   <Building2 className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
                   <h3 className="font-medium text-foreground mb-2">
-                    {searchQuery ? "No matching clients" : "No clients yet"}
+                    {searchQuery ? "No matching institutions" : "No partner institutions yet"}
                   </h3>
                   <p className="text-muted-foreground mb-4">
                     {searchQuery
                       ? "Try adjusting your search."
-                      : "Add your first university client to get started. You'll be able to configure their branding, structure, and Content DNA."}
+                      : "Add your first partner institution to get started. You'll be able to configure their branding, structure, and Content DNA."}
                   </p>
                   {!searchQuery && (
                     <Button onClick={() => setShowWizard(true)} className="gap-2">
                       <Plus className="h-4 w-4" />
-                      Add First Client
+                      Add First Institution
                     </Button>
                   )}
                 </CardContent>
