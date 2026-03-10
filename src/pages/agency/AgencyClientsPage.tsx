@@ -68,7 +68,7 @@ const PROFILE_TYPE_ICONS: Record<ProfileType, React.ReactNode> = {
 };
 
 const PROFILE_TYPE_LABELS: Record<ProfileType, string> = {
-  university: 'University Client',
+  university: 'Partner Institution',
   college: 'College',
   division: 'Division',
   unit: 'Unit',
