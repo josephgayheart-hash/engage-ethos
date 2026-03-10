@@ -173,20 +173,20 @@ export default function AgencyDashboardPage() {
                 <div className="flex items-center gap-2 mb-2">
                   <Badge variant="outline" className="border-primary/30">
                     <Briefcase className="h-3 w-3 mr-1.5" />
-                    Agency
+                    Agency Partner
                   </Badge>
                 </div>
                 <h1 className="text-3xl font-bold text-foreground">
-                  {agencyName} Client Hub
+                  {agencyName} Partner Hub
                 </h1>
                 <p className="text-muted-foreground mt-1">
-                  Manage your university clients and their content
+                  Manage your partner institutions and their content
                 </p>
               </div>
               <Link to="/agency/clients">
                 <Button className="gap-2">
                   <Plus className="h-4 w-4" />
-                  Add Client
+                  Add Institution
                 </Button>
               </Link>
             </div>
