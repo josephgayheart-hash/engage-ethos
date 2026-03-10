@@ -20,7 +20,7 @@ import { QuickGenerateDialog } from "@/components/giving-day/QuickGenerateDialog
 import {
   ArrowLeft, Plus, CalendarIcon, Target, Mail, MessageSquare, Megaphone, Phone,
   Globe, Heart, Users, Clock, ChevronRight, Sparkles, CheckCircle2, FileEdit,
-  Send, Trash2, Gift, TrendingUp
+  Send, Trash2, Gift, TrendingUp, DollarSign, LayoutList, PartyPopper, Timer
 } from "lucide-react";
 
 // T-minus milestones for giving day countdown
