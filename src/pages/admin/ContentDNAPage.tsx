@@ -191,6 +191,8 @@ function detectContentType(text: string): string | null {
 
 export default function ContentDNAPage() {
   const { tenant, profile, isAdmin } = useAuth();
+  const { activeWorkspace, canSwitch } = useWorkspace();
+  const effectiveTenant = canSwitch && activeWorkspace ? activeWorkspace : tenant;
   const location = useLocation();
   
   // Brand pillar inline editing state
