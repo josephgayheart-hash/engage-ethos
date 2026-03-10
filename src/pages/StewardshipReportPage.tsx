@@ -48,6 +48,7 @@ const StewardshipReportPage = () => {
   const { toast } = useToast();
   const { tenant } = useAuth();
   const navigate = useNavigate();
+  const { saveDraft } = useUserDrafts('stewardship');
 
   // Profile selection
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);

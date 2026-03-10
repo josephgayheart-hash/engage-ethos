@@ -202,6 +202,16 @@ const GivingDayPlannerPage = () => {
       setNewDate(undefined);
       setNewGoal("");
       setNewChannels(["email", "social-media"]);
+
+      // Save as draft for dashboard visibility
+      saveDraft('campaign', {
+        campaignId: result.id,
+        campaignName: newName,
+        givingDayDate: format(newDate!, 'yyyy-MM-dd'),
+        goalAmount: newGoal || null,
+        profileId: newProfileId,
+        touchpointCount: touchpoints.length,
+      }, newName, undefined, true);
     }
   };
 
