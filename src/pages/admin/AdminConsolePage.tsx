@@ -354,7 +354,7 @@ export default function AdminConsolePage() {
 
   useEffect(() => {
     const fetchStats = async () => {
-      if (!tenant?.id) return;
+      if (!effectiveTenant?.id) return;
       
       try {
         // Fetch users in tenant
