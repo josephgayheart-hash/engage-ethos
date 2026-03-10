@@ -525,7 +525,7 @@ export default function AdminConsolePage() {
       color: 'bg-[hsl(173,58%,39%)]',
       stat: contentStats.contentDNASamples > 0 ? `${contentStats.contentDNASamples} samples` : 'Add samples'
     },
-    {
+    ...(!isEffectiveAgency ? [{
       title: 'Content Library',
       description: 'Personal and shared content, images, and templates',
       icon: MessageSquare,
@@ -540,7 +540,7 @@ export default function AdminConsolePage() {
       href: '/approvals',
       color: 'bg-[hsl(45,93%,47%)]',
       stat: 'Review queue'
-    },
+    }] : []),
   ];
 
   return (

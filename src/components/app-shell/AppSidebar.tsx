@@ -90,8 +90,8 @@ export function AppSidebar() {
     navigate("/login");
   };
 
-  const libraryItems = [
-    { title: isAgency ? "Templates" : "University Library", url: "/shared-library", icon: Library },
+  const libraryItems = isAgency ? [] : [
+    { title: "University Library", url: "/shared-library", icon: Library },
   ];
 
   const governItems = [
@@ -185,8 +185,8 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Approvals */}
-        {isApprover && (
+        {/* Approvals - hidden for agency users */}
+        {isApprover && !isAgency && (
           <SidebarGroup className="py-0">
             <SidebarGroupContent>
               <SidebarMenu>
