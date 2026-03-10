@@ -989,13 +989,6 @@ const StrategyPage = () => {
                 icon={<Target className="w-4 h-4" />}
               >
                 <div className="space-y-4">
-                  {/* Content DNA Indicator */}
-                  <ContentDNAIndicator
-                    enabled={useContentDNA}
-                    onToggle={setUseContentDNA}
-                    selectedProfileId={selectedProfileId}
-                    selectedProfileName={selectedProfileName}
-                  />
 
                   {/* Brand Layer Selector - only show when Content DNA is enabled and brand platform exists */}
                   {useContentDNA && contentDNA?.brandPlatform && (
