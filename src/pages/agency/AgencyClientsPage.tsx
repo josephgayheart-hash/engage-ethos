@@ -217,7 +217,7 @@ export default function AgencyClientsPage() {
     await updateProfile(editingProfile.id, { config: pendingConfig });
     setEditingProfile({ ...editingProfile, config: pendingConfig });
     setHasUnsavedChanges(false);
-    toast({ title: "Client updated", description: "Configuration has been saved." });
+    toast({ title: "Institution updated", description: "Configuration has been saved." });
   };
 
   const handleCloseConfigDialog = (open: boolean) => {
