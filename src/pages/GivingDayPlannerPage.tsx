@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { Link, useNavigate } from "react-router-dom";
 import { format, differenceInDays, addDays, parseISO, isBefore, isToday } from "date-fns";
@@ -18,13 +18,24 @@ import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileS
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { QuickGenerateDialog } from "@/components/giving-day/QuickGenerateDialog";
+import { SEOHead } from "@/components/SEOHead";
 import {
   ArrowLeft, Plus, CalendarIcon, Target, Mail, MessageSquare, Megaphone, Phone,
   Globe, Clock, ChevronRight, ChevronDown, Sparkles, CheckCircle2, FileEdit,
-  Send, Trash2, Gift, DollarSign, LayoutList, PartyPopper, Timer
+  Send, Trash2, Gift, DollarSign, LayoutList, PartyPopper, Timer,
+  GraduationCap, Layers, Building, Briefcase, Building2
 } from "lucide-react";
+
+const PROFILE_TYPE_LABELS: Record<string, { label: string; icon: typeof Building2 }> = {
+  university: { label: "University", icon: Building2 },
+  college: { label: "College", icon: GraduationCap },
+  division: { label: "Division", icon: Layers },
+  unit: { label: "Unit", icon: Building },
+  department: { label: "Department", icon: Briefcase },
+};
 
 // T-minus milestones for giving day countdown
 const T_MINUS_MILESTONES = [
