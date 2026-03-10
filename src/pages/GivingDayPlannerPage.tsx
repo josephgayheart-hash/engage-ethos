@@ -260,45 +260,133 @@ const GivingDayPlannerPage = () => {
   }, [getCampaignText, selectedCampaign?.name, toast]);
 
   const handleExportPdf = useCallback(async () => {
-    if (!campaignDetailRef.current) return;
+    if (!selectedCampaign) return;
     setIsExporting(true);
     try {
-      await (document as any).fonts?.ready;
-      const canvas = await html2canvas(campaignDetailRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: "#ffffff",
-        scrollX: 0,
-        scrollY: -window.scrollY,
-      });
-      const imgData = canvas.toDataURL("image/png");
+      const text = getCampaignText();
       const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
       const pageW = pdf.internal.pageSize.getWidth();
       const pageH = pdf.internal.pageSize.getHeight();
-      const margin = 40;
-      const availW = pageW - margin * 2;
-      const imgH = (canvas.height * availW) / canvas.width;
+      const margin = 50;
+      const maxW = pageW - margin * 2;
+      const lineHeight = 14;
+      let y = margin;
 
-      // Paginate if needed
-      let offset = 0;
-      const srcW = canvas.width;
-      const srcH = canvas.height;
-      const availH = pageH - margin * 2;
-      let page = 0;
+      const addPage = () => { pdf.addPage(); y = margin; };
 
-      while (offset < srcH) {
-        if (page > 0) pdf.addPage();
-        const sliceH = Math.min(srcH - offset, (availH * srcW) / availW);
-        const sliceRealH = (sliceH * availW) / srcW;
-        const sliceCanvas = document.createElement("canvas");
-        sliceCanvas.width = srcW;
-        sliceCanvas.height = sliceH;
-        const ctx = sliceCanvas.getContext("2d");
-        if (ctx) ctx.drawImage(canvas, 0, offset, srcW, sliceH, 0, 0, srcW, sliceH);
-        pdf.addImage(sliceCanvas.toDataURL("image/png"), "PNG", margin, margin, availW, sliceRealH, undefined, "FAST");
-        offset += sliceH;
-        page++;
+      const lines = text.split("\n");
+      for (const rawLine of lines) {
+        // Detect section headers
+        const isSectionDivider = /^-{5,}$/.test(rawLine.trim());
+        const isTitle = /^={5,}$/.test(rawLine.trim());
+        const isPhaseHeader = rawLine.startsWith("## ");
+
+        if (isTitle) continue; // skip underline decoration
+
+        if (isSectionDivider) {
+          y += 6;
+          pdf.setDrawColor(180);
+          pdf.line(margin, y, pageW - margin, y);
+          y += 12;
+          continue;
+        }
+
+        if (isPhaseHeader) {
+          if (y > pageH - margin - 60) addPage();
+          y += 8;
+          pdf.setFont("helvetica", "bold");
+          pdf.setFontSize(13);
+          pdf.setTextColor(40, 40, 40);
+          pdf.text(rawLine.replace("## ", ""), margin, y);
+          y += lineHeight + 6;
+          pdf.setFont("helvetica", "normal");
+          pdf.setFontSize(10);
+          pdf.setTextColor(60, 60, 60);
+          continue;
+        }
+
+        // First line (campaign name) gets special treatment
+        if (lines.indexOf(rawLine) === 0) {
+          pdf.setFont("helvetica", "bold");
+          pdf.setFontSize(16);
+          pdf.setTextColor(20, 20, 20);
+          pdf.text(rawLine, margin, y);
+          y += 22;
+          pdf.setFont("helvetica", "normal");
+          pdf.setFontSize(10);
+          pdf.setTextColor(60, 60, 60);
+          continue;
+        }
+
+        // Status icon lines (touchpoint headers)
+        const isTouchpointLine = /^[✅📝📤⬜]/.test(rawLine.trim());
+        if (isTouchpointLine) {
+          if (y > pageH - margin - 40) addPage();
+          pdf.setFont("helvetica", "bold");
+          pdf.setFontSize(10);
+          pdf.setTextColor(40, 40, 40);
+          // Replace emoji with text markers for PDF compatibility
+          const cleanLine = rawLine
+            .replace("✅", "[APPROVED]")
+            .replace("📝", "[DRAFT]")
+            .replace("📤", "[SENT]")
+            .replace("⬜", "[PENDING]");
+          const wrapped = pdf.splitTextToSize(cleanLine, maxW);
+          for (const wl of wrapped) {
+            if (y > pageH - margin) addPage();
+            pdf.text(wl, margin, y);
+            y += lineHeight;
+          }
+          pdf.setFont("helvetica", "normal");
+          pdf.setTextColor(60, 60, 60);
+          continue;
+        }
+
+        // Metadata lines (indented with Channel/Segment info)
+        const isMetaLine = rawLine.startsWith("    Channel:");
+        if (isMetaLine) {
+          pdf.setFontSize(9);
+          pdf.setTextColor(100, 100, 100);
+          const wrapped = pdf.splitTextToSize(rawLine.trim(), maxW - 10);
+          for (const wl of wrapped) {
+            if (y > pageH - margin) addPage();
+            pdf.text(wl, margin + 10, y);
+            y += lineHeight - 1;
+          }
+          pdf.setFontSize(10);
+          pdf.setTextColor(60, 60, 60);
+          continue;
+        }
+
+        // Indented content (generated drafts)
+        if (rawLine.startsWith("    ")) {
+          pdf.setFontSize(9);
+          pdf.setTextColor(80, 80, 80);
+          const wrapped = pdf.splitTextToSize(rawLine.trim(), maxW - 20);
+          for (const wl of wrapped) {
+            if (y > pageH - margin) addPage();
+            pdf.text(wl, margin + 15, y);
+            y += lineHeight - 1;
+          }
+          pdf.setFontSize(10);
+          pdf.setTextColor(60, 60, 60);
+          continue;
+        }
+
+        // Empty lines
+        if (rawLine.trim() === "") {
+          y += 6;
+          if (y > pageH - margin) addPage();
+          continue;
+        }
+
+        // Regular text (header fields, notes, footer)
+        const wrapped = pdf.splitTextToSize(rawLine, maxW);
+        for (const wl of wrapped) {
+          if (y > pageH - margin) addPage();
+          pdf.text(wl, margin, y);
+          y += lineHeight;
+        }
       }
 
       const fileName = `${(selectedCampaign?.name || "campaign").replace(/\s+/g, "-").toLowerCase()}-${format(new Date(), "yyyy-MM-dd")}.pdf`;
@@ -310,7 +398,7 @@ const GivingDayPlannerPage = () => {
     } finally {
       setIsExporting(false);
     }
-  }, [selectedCampaign?.name, toast]);
+  }, [selectedCampaign, getCampaignText, toast]);
 
 
   const groupedTouchpoints = useMemo(() => {
