@@ -501,10 +501,10 @@ export default function AdminConsolePage() {
       stat: 'Monitor'
     }] : []),
     {
-      title: isAgency ? 'Partner Institutions' : 'Institution Settings',
-      description: isAgency ? 'Manage partner institution profiles and branding' : 'Branding, profiles, and Content DNA management',
+      title: isEffectiveAgency ? 'Partner Institutions' : 'Institution Settings',
+      description: isEffectiveAgency ? 'Manage partner institution profiles and branding' : 'Branding, profiles, and Content DNA management',
       icon: Building2,
-      href: isAgency ? '/agency/clients' : '/university-settings',
+      href: isEffectiveAgency ? '/agency/clients' : '/university-settings',
       color: 'bg-[hsl(262,52%,47%)]',
       stat: contentStats.institutionalProfiles > 0 ? `${contentStats.institutionalProfiles} profiles` : 'Configure'
     },
