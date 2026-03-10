@@ -6,7 +6,7 @@ import { MessageInput } from "@/components/MessageInput";
 import { EvaluationResults } from "@/components/EvaluationResults";
 import { LibraryNav } from "@/components/LibraryNav";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
-import { ContentDNAIndicator } from "@/components/ContentDNAIndicator";
+import { ContentDNAExplainer } from "@/components/ContentDNAExplainer";
 import { ContentDNAExplainer } from "@/components/ContentDNAExplainer";
 import { BrandLayerSelector, BrandLayerSelection } from "@/components/BrandLayerSelector";
 import { BuilderStepSection } from "@/components/BuilderStepSection";
