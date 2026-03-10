@@ -28,6 +28,10 @@ interface QuickGenerateDialogProps {
   givingDayDate?: string;
   institutionalConfig?: InstitutionalConfig | null;
   contentDNA?: ContentDNAForGeneration | null;
+  profileFacts?: { label: string; value: string; category: string }[];
+  profileStories?: { title: string; narrative: string; pull_quote: string | null; story_type: string }[];
+  profileName?: string;
+  profileType?: string;
   onSaveDraft?: (touchpointId: string, content: string, updates: Partial<CampaignTouchpoint>) => void;
 }
 
@@ -70,6 +74,10 @@ export function QuickGenerateDialog({
   givingDayDate,
   institutionalConfig,
   contentDNA,
+  profileFacts,
+  profileStories,
+  profileName,
+  profileType,
   onSaveDraft,
 }: QuickGenerateDialogProps) {
   const { toast } = useToast();
@@ -124,6 +132,24 @@ export function QuickGenerateDialog({
       notes ? `Additional context: ${notes}` : null,
     ].filter(Boolean).join(". ");
 
+    // Build facts context
+    const factsContext = profileFacts && profileFacts.length > 0
+      ? `\nINSTITUTIONAL FACTS (use these real data points in the message where appropriate):\n${profileFacts.slice(0, 10).map(f => `- ${f.label}: ${f.value}`).join('\n')}`
+      : '';
+
+    // Build stories context
+    const storiesContext = profileStories && profileStories.length > 0
+      ? `\nSTORY BANK (weave these real stories/quotes into the message for authenticity):\n${profileStories.slice(0, 5).map(s => {
+          const quote = s.pull_quote ? ` Pull quote: "${s.pull_quote}"` : '';
+          return `- [${s.story_type}] ${s.title}: ${s.narrative.substring(0, 200)}...${quote}`;
+        }).join('\n')}`
+      : '';
+
+    // Profile hierarchy context
+    const profileContext = profileName
+      ? `\nPROFILE CONTEXT: This campaign is specifically for "${profileName}" (${profileType || 'university'}). All messaging should be from and about this ${profileType || 'institution'}'s perspective, using its specific stories, facts, and identity. If this is a college or division within a larger university, frame messages as coming from that unit's gift office.`
+      : '';
+
     // Build the full additional context for the builder type
     const additionalContext = `
 GIVING DAY CAMPAIGN CONTEXT:
@@ -141,6 +167,9 @@ ${goalAmount ? `- Fundraising Goal: $${goalAmount.replace(/^\$/, '')}` : ""}
 ${givingDayDate ? `- Giving Day Date: ${givingDayDate}` : ""}
 ${cta ? `- Desired CTA: ${cta}` : ""}
 ${notes ? `- Specific notes: ${notes}` : ""}
+${profileContext}
+${factsContext}
+${storiesContext}
 
 PHASE-SPECIFIC GUIDANCE:
 ${phase === "Cultivation" ? "Focus on awareness, excitement, and saving the date. Build anticipation without making a direct ask." : ""}
@@ -324,9 +353,14 @@ Generate a COMPLETE, ready-to-use ${channelLabel.toLowerCase()} message. Do NOT 
             <Badge variant="secondary" className="gap-1 text-[11px]">
               <Lock className="w-2.5 h-2.5" /> {touchpoint.messageType}
             </Badge>
-            {institutionalConfig?.institutionName && (
+             {institutionalConfig?.institutionName && (
               <Badge variant="outline" className="gap-1 text-[11px] border-primary/30 text-primary">
                 {institutionalConfig.institutionName}
+              </Badge>
+            )}
+            {profileName && profileName !== institutionalConfig?.institutionName && (
+              <Badge variant="outline" className="gap-1 text-[11px] border-accent/50 text-accent-foreground">
+                {profileType === 'college' ? '🎓' : profileType === 'division' ? '📊' : '🏛️'} {profileName}
               </Badge>
             )}
           </div>

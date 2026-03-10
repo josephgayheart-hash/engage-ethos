@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { Link, useNavigate } from "react-router-dom";
 import { format, differenceInDays, addDays, parseISO, isBefore, isToday } from "date-fns";
@@ -18,13 +18,24 @@ import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileS
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { QuickGenerateDialog } from "@/components/giving-day/QuickGenerateDialog";
+import { SEOHead } from "@/components/SEOHead";
 import {
   ArrowLeft, Plus, CalendarIcon, Target, Mail, MessageSquare, Megaphone, Phone,
   Globe, Clock, ChevronRight, ChevronDown, Sparkles, CheckCircle2, FileEdit,
-  Send, Trash2, Gift, DollarSign, LayoutList, PartyPopper, Timer
+  Send, Trash2, Gift, DollarSign, LayoutList, PartyPopper, Timer,
+  GraduationCap, Layers, Building, Briefcase, Building2
 } from "lucide-react";
+
+const PROFILE_TYPE_LABELS: Record<string, { label: string; icon: typeof Building2 }> = {
+  university: { label: "University", icon: Building2 },
+  college: { label: "College", icon: GraduationCap },
+  division: { label: "Division", icon: Layers },
+  unit: { label: "Unit", icon: Building },
+  department: { label: "Department", icon: Briefcase },
+};
 
 // T-minus milestones for giving day countdown
 const T_MINUS_MILESTONES = [
@@ -115,6 +126,40 @@ const GivingDayPlannerPage = () => {
   // Get the institutional profile config for the selected campaign
   const selectedProfile = profiles.find(p => p.id === selectedCampaign?.profile_id);
   const { contentDNA } = useContentDNAForGeneration({ profileId: selectedCampaign?.profile_id });
+
+  // Fetch facts & stories for the selected campaign's profile for AI context
+  const [profileFacts, setProfileFacts] = useState<{ label: string; value: string; category: string }[]>([]);
+  const [profileStories, setProfileStories] = useState<{ title: string; narrative: string; pull_quote: string | null; story_type: string }[]>([]);
+
+  useEffect(() => {
+    if (!selectedCampaign?.profile_id) {
+      setProfileFacts([]);
+      setProfileStories([]);
+      return;
+    }
+    const pid = selectedCampaign.profile_id;
+    // Fetch facts
+    supabase
+      .from('fact_book')
+      .select('label, value, category, is_highlight')
+      .eq('profile_id', pid)
+      .order('is_highlight', { ascending: false })
+      .limit(20)
+      .then(({ data }) => {
+        setProfileFacts((data || []).map(f => ({ label: f.label, value: f.value, category: f.category })));
+      });
+    // Fetch stories
+    supabase
+      .from('story_bank')
+      .select('title, narrative, pull_quote, story_type')
+      .eq('profile_id', pid)
+      .eq('is_approved', true)
+      .order('is_featured', { ascending: false })
+      .limit(10)
+      .then(({ data }) => {
+        setProfileStories((data || []).map(s => ({ title: s.title, narrative: s.narrative, pull_quote: s.pull_quote, story_type: s.story_type })));
+      });
+  }, [selectedCampaign?.profile_id]);
 
   const toggleNewChannel = (ch: string) => {
     setNewChannels(prev =>
@@ -209,6 +254,11 @@ const GivingDayPlannerPage = () => {
   // Campaign list view
   if (!selectedCampaignId) {
     return (
+      <>
+      <SEOHead
+        title="Giving Day Planner | CampusVoice.AI"
+        description="Plan and execute giving day campaigns with countdown-driven content calendars for every college, division, and unit."
+      />
       <div className="bg-background">
         <main className="container mx-auto px-4 py-8">
           <div className="max-w-5xl mx-auto">
@@ -295,7 +345,8 @@ const GivingDayPlannerPage = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Institutional Profile (optional)</Label>
+                      <Label>Institutional Profile</Label>
+                      <p className="text-xs text-muted-foreground">Select a university, college, or division to scope this campaign. AI-generated content will use that unit's stories, facts, and brand voice.</p>
                       <InstitutionalProfileSelector selectedProfileId={newProfileId} onProfileChange={(id) => setNewProfileId(id)} />
                     </div>
                   </div>
@@ -325,6 +376,9 @@ const GivingDayPlannerPage = () => {
                   const daysUntil = differenceInDays(givingDay, new Date());
                   const draftedCount = campaign.touchpoints.filter((t: any) => t.status !== 'planned').length;
                   const isPast = daysUntil < 0;
+                  const campProfile = profiles.find(p => p.id === campaign.profile_id);
+                  const profileMeta = campProfile ? PROFILE_TYPE_LABELS[campProfile.profileType] || PROFILE_TYPE_LABELS.university : null;
+                  const ProfileIcon = profileMeta?.icon || Building2;
 
                   return (
                     <Card
@@ -334,9 +388,18 @@ const GivingDayPlannerPage = () => {
                     >
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
-                          <div>
+                          <div className="space-y-1">
                             <CardTitle className="text-lg">{campaign.name}</CardTitle>
                             <CardDescription>{format(givingDay, 'EEEE, MMMM d, yyyy')}</CardDescription>
+                            {campProfile && (
+                              <div className="flex items-center gap-1.5 pt-1">
+                                <Badge variant="outline" className="gap-1 text-[10px] px-2 py-0.5 border-primary/30 text-primary">
+                                  <ProfileIcon className="w-3 h-3" />
+                                  {profileMeta?.label} Plan
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">{campProfile.name}</span>
+                              </div>
+                            )}
                           </div>
                           <Badge variant={isPast ? "secondary" : daysUntil <= 7 ? "destructive" : "default"}>
                             {isPast ? `${Math.abs(daysUntil)}d ago` : daysUntil === 0 ? "TODAY" : `${daysUntil}d away`}
@@ -363,6 +426,7 @@ const GivingDayPlannerPage = () => {
           </div>
         </main>
       </div>
+      </>
     );
   }
 
@@ -378,10 +442,22 @@ const GivingDayPlannerPage = () => {
                 <ArrowLeft className="w-5 h-5" />
               </Button>
               <div>
-                <h1 className="font-serif text-xl md:text-2xl font-bold text-foreground">
-                  {selectedCampaign?.name}
-                </h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="font-serif text-xl md:text-2xl font-bold text-foreground">
+                    {selectedCampaign?.name}
+                  </h1>
+                  {selectedProfile && (() => {
+                    const meta = PROFILE_TYPE_LABELS[selectedProfile.profileType] || PROFILE_TYPE_LABELS.university;
+                    const Icon = meta.icon;
+                    return (
+                      <Badge variant="outline" className="gap-1 text-[11px] border-primary/30 text-primary">
+                        <Icon className="w-3 h-3" /> {meta.label} Plan
+                      </Badge>
+                    );
+                  })()}
+                </div>
                 <p className="text-sm text-muted-foreground">
+                  {selectedProfile && <span className="font-medium">{selectedProfile.name} · </span>}
                   Giving Day: {selectedCampaign && format(parseISO(selectedCampaign.giving_day_date), 'EEEE, MMMM d, yyyy')}
                 </p>
               </div>
@@ -658,6 +734,10 @@ const GivingDayPlannerPage = () => {
             givingDayDate={selectedCampaign?.giving_day_date}
             institutionalConfig={selectedProfile?.config}
             contentDNA={contentDNA}
+            profileFacts={profileFacts}
+            profileStories={profileStories}
+            profileName={selectedProfile?.name}
+            profileType={selectedProfile?.profileType}
             onSaveDraft={(id, content, updates) => {
               handleTouchpointUpdate(id, {
                 ...updates,
