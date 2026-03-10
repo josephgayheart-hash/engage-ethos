@@ -173,6 +173,10 @@ const BuildPage = () => {
     originalTitle?: string;
     originalId?: string;
     source?: string;
+    // Advancement integration: pre-select channel/audience from Stewardship Report
+    preSelectChannel?: string;
+    preSelectAudience?: string;
+    preSelectProfileId?: string;
   } | null;
 
   // Find profile name from URL param if needed
