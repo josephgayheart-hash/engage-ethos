@@ -394,10 +394,10 @@ export default function AdminConsolePage() {
 
         // Fetch content stats for the tenant
         const [profilesResult, dnaSamplesResult, messagesResult, templatesResult] = await Promise.all([
-          supabase.from('institutional_profiles').select('id').eq('tenant_id', tenant.id),
-          supabase.from('content_dna_samples').select('id').eq('tenant_id', tenant.id),
-          supabase.from('personal_messages').select('id').eq('tenant_id', tenant.id),
-          supabase.from('shared_templates').select('id').eq('tenant_id', tenant.id),
+          supabase.from('institutional_profiles').select('id').eq('tenant_id', effectiveTenant.id),
+          supabase.from('content_dna_samples').select('id').eq('tenant_id', effectiveTenant.id),
+          supabase.from('personal_messages').select('id').eq('tenant_id', effectiveTenant.id),
+          supabase.from('shared_templates').select('id').eq('tenant_id', effectiveTenant.id),
         ]);
 
         setContentStats({
