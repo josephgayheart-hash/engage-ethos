@@ -17,6 +17,8 @@ interface WorkspaceContextType {
   canSwitch: boolean;
   /** Change the active workspace */
   setActiveWorkspaceId: (id: string) => void;
+  /** Re-fetch workspace data (call after updating tenant branding etc.) */
+  refreshWorkspaces: () => Promise<void>;
 }
 
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
