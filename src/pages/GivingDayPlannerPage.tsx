@@ -345,7 +345,8 @@ const GivingDayPlannerPage = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Institutional Profile (optional)</Label>
+                      <Label>Institutional Profile</Label>
+                      <p className="text-xs text-muted-foreground">Select a university, college, or division to scope this campaign. AI-generated content will use that unit's stories, facts, and brand voice.</p>
                       <InstitutionalProfileSelector selectedProfileId={newProfileId} onProfileChange={(id) => setNewProfileId(id)} />
                     </div>
                   </div>
