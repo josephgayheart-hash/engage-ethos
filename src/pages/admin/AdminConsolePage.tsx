@@ -212,15 +212,15 @@ export default function AdminConsolePage() {
     try {
       // Resize the image
       const resizedBlob = await resizeImage(file);
-      const fileName = `${tenant.id}/logo-${Date.now()}.png`;
+      const fileName = `${effectiveTenant.id}/logo-${Date.now()}.png`;
 
       // Delete old logo if exists
-      if (tenant.logo_url) {
-        const oldPath = tenant.logo_url.split('/').pop();
+      if (effectiveTenant.logo_url) {
+        const oldPath = effectiveTenant.logo_url.split('/').pop();
         if (oldPath) {
           await supabase.storage
             .from('institution-logos')
-            .remove([`${tenant.id}/${oldPath}`]);
+            .remove([`${effectiveTenant.id}/${oldPath}`]);
         }
       }
 
