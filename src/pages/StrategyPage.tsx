@@ -12,7 +12,7 @@ import { StrategyJourneyDisplay } from "@/components/StrategyJourney";
 import { JourneyFlowDiagram } from "@/components/JourneyFlowDiagram";
 import { LibraryNav } from "@/components/LibraryNav";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
-import { ContentDNAIndicator, ContentDNAActiveBadge } from "@/components/ContentDNAIndicator";
+import { ContentDNAExplainer } from "@/components/ContentDNAExplainer";
 import { ContentDNAExplainer } from "@/components/ContentDNAExplainer";
 import { BrandLayerSelector, BrandLayerActiveBadge, BrandLayerSelection } from "@/components/BrandLayerSelector";
 import { CadenceSelector, CadenceFrequency, EscalationPattern } from "@/components/CadenceSelector";
