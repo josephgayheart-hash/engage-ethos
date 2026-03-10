@@ -160,7 +160,7 @@ export default function AgencyDashboardPage() {
     <>
       <SEOHead
         title={`${agencyName} | CampusVoice.AI`}
-        description="Manage your university clients from the agency dashboard."
+        description="Manage your partner institutions from the agency partner dashboard."
       />
 
       <div className="bg-background">
