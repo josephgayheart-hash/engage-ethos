@@ -132,6 +132,24 @@ export function QuickGenerateDialog({
       notes ? `Additional context: ${notes}` : null,
     ].filter(Boolean).join(". ");
 
+    // Build facts context
+    const factsContext = profileFacts && profileFacts.length > 0
+      ? `\nINSTITUTIONAL FACTS (use these real data points in the message where appropriate):\n${profileFacts.slice(0, 10).map(f => `- ${f.label}: ${f.value}`).join('\n')}`
+      : '';
+
+    // Build stories context
+    const storiesContext = profileStories && profileStories.length > 0
+      ? `\nSTORY BANK (weave these real stories/quotes into the message for authenticity):\n${profileStories.slice(0, 5).map(s => {
+          const quote = s.pull_quote ? ` Pull quote: "${s.pull_quote}"` : '';
+          return `- [${s.story_type}] ${s.title}: ${s.narrative.substring(0, 200)}...${quote}`;
+        }).join('\n')}`
+      : '';
+
+    // Profile hierarchy context
+    const profileContext = profileName
+      ? `\nPROFILE CONTEXT: This campaign is specifically for "${profileName}" (${profileType || 'university'}). All messaging should be from and about this ${profileType || 'institution'}'s perspective, using its specific stories, facts, and identity. If this is a college or division within a larger university, frame messages as coming from that unit's gift office.`
+      : '';
+
     // Build the full additional context for the builder type
     const additionalContext = `
 GIVING DAY CAMPAIGN CONTEXT:
@@ -149,6 +167,9 @@ ${goalAmount ? `- Fundraising Goal: $${goalAmount.replace(/^\$/, '')}` : ""}
 ${givingDayDate ? `- Giving Day Date: ${givingDayDate}` : ""}
 ${cta ? `- Desired CTA: ${cta}` : ""}
 ${notes ? `- Specific notes: ${notes}` : ""}
+${profileContext}
+${factsContext}
+${storiesContext}
 
 PHASE-SPECIFIC GUIDANCE:
 ${phase === "Cultivation" ? "Focus on awareness, excitement, and saving the date. Build anticipation without making a direct ask." : ""}
