@@ -330,6 +330,7 @@ export default function AdminConsolePage() {
       setPrimaryColor(primaryColorInput);
       setAccentColor(accentColorInput);
       await refreshProfile();
+      await refreshWorkspaces();
 
       toast({
         title: 'Colors Saved',
