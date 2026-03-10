@@ -104,7 +104,7 @@ export function AppSidebar() {
     { title: "Content DNA Studio", url: "/admin/content-dna", icon: Dna },
     { title: isAgency ? "Partner Institutions" : "Institution Settings", url: isAgency ? "/agency/clients" : "/university-settings", icon: Building2 },
     ...(isAdmin ? [{ title: "Admin Console", url: "/admin/console", icon: Settings }] : []),
-    ...(isAgency ? [{ title: "Analytics", url: "/agency/analytics", icon: BarChart3 }] : []),
+    ...(isAgency && isViewingOwnWorkspace ? [{ title: "Analytics", url: "/agency/analytics", icon: BarChart3 }] : []),
   ];
 
   const initials = `${profile?.first_name?.[0] ?? ""}${profile?.last_name?.[0] ?? ""}`;
