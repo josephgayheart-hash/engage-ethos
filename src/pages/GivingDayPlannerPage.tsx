@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { useUserDrafts } from "@/hooks/useUserDrafts";
 import ReactMarkdown from "react-markdown";
 import { Link, useNavigate } from "react-router-dom";
 import { format, differenceInDays, addDays, parseISO, isBefore, isToday } from "date-fns";
@@ -117,6 +118,7 @@ const GivingDayPlannerPage = () => {
   const { profiles } = useInstitutionalProfiles();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { saveDraft, currentDraft } = useUserDrafts('campaign');
 
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
   const [showNewDialog, setShowNewDialog] = useState(false);
@@ -200,6 +202,16 @@ const GivingDayPlannerPage = () => {
       setNewDate(undefined);
       setNewGoal("");
       setNewChannels(["email", "social-media"]);
+
+      // Save as draft for dashboard visibility
+      saveDraft('campaign', {
+        campaignId: result.id,
+        campaignName: newName,
+        givingDayDate: format(newDate!, 'yyyy-MM-dd'),
+        goalAmount: newGoal || null,
+        profileId: newProfileId,
+        touchpointCount: touchpoints.length,
+      }, newName, undefined, true);
     }
   };
 

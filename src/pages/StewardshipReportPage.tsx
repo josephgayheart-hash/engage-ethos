@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { useUserDrafts } from "@/hooks/useUserDrafts";
 import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,7 @@ const StewardshipReportPage = () => {
   const { toast } = useToast();
   const { tenant } = useAuth();
   const navigate = useNavigate();
+  const { saveDraft } = useUserDrafts('stewardship');
 
   // Profile selection
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
@@ -164,6 +166,19 @@ const StewardshipReportPage = () => {
 
       setGeneratedOutput(output);
       toast({ title: "Report generated", description: "Your stewardship content is ready across all selected channels." });
+
+      // Save as draft for dashboard visibility
+      const draftTitle = effectiveCampaignName ? `Stewardship: ${effectiveCampaignName}` : 'Stewardship Report';
+      saveDraft('stewardship', {
+        selectedProfileId,
+        selectedCampaignId,
+        campaignName: effectiveCampaignName,
+        selectedChannels: Array.from(selectedChannels),
+        selectedFactIds: Array.from(selectedFactIds),
+        selectedStoryIds: Array.from(selectedStoryIds),
+        additionalContext,
+        generatedOutput: output,
+      }, draftTitle, undefined, true);
     } catch (err: any) {
       console.error('Generation error:', err);
       toast({ title: "Generation failed", description: err.message, variant: "destructive" });
