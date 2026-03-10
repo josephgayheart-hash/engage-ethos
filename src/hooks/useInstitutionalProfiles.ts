@@ -203,7 +203,7 @@ export function useInstitutionalProfiles() {
       console.error('Error creating profile:', error);
       return null;
     }
-  }, [user, tenant?.id]);
+  }, [user, effectiveTenantId]);
 
   // Get children of a profile
   const getChildProfiles = useCallback((parentId: string): InstitutionalProfile[] => {
