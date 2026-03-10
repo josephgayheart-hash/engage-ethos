@@ -310,32 +310,68 @@ const GivingDayPlannerPage = () => {
           {/* Countdown Hero */}
           {countdownInfo && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-              <Card className={cn("border-l-4", countdownInfo.daysUntil <= 0 ? "border-l-green-500" : countdownInfo.daysUntil <= 7 ? "border-l-orange-500" : "border-l-primary")}>
-                <CardContent className="p-4 text-center">
-                  <div className="text-3xl font-bold text-foreground">
-                    {countdownInfo.daysUntil <= 0 ? (countdownInfo.daysUntil === 0 ? "🎉" : `+${Math.abs(countdownInfo.daysUntil)}`) : countdownInfo.daysUntil}
+              <Card className={cn("border-l-4", countdownInfo.daysUntil <= 0 ? "border-l-primary" : countdownInfo.daysUntil <= 7 ? "border-l-destructive" : "border-l-primary")}>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+                      countdownInfo.daysUntil === 0 ? "bg-primary/10" : "bg-muted"
+                    )}>
+                      {countdownInfo.daysUntil === 0 
+                        ? <PartyPopper className="w-5 h-5 text-primary" />
+                        : <Timer className="w-5 h-5 text-muted-foreground" />
+                      }
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-foreground">
+                        {countdownInfo.daysUntil <= 0 ? (countdownInfo.daysUntil === 0 ? "Today" : `+${Math.abs(countdownInfo.daysUntil)}`) : countdownInfo.daysUntil}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {countdownInfo.daysUntil === 0 ? "It's Giving Day!" : countdownInfo.daysUntil > 0 ? "Days Until" : "Days Since"}
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {countdownInfo.daysUntil === 0 ? "It's Giving Day!" : countdownInfo.daysUntil > 0 ? "Days Until" : "Days Since"}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0">
+                      <LayoutList className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-foreground">{countdownInfo.totalTouchpoints}</div>
+                      <div className="text-xs text-muted-foreground">Touchpoints</div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="p-4 text-center">
-                  <div className="text-3xl font-bold text-foreground">{countdownInfo.totalTouchpoints}</div>
-                  <div className="text-xs text-muted-foreground mt-1">Touchpoints</div>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0">
+                      <FileEdit className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-foreground">{countdownInfo.draftedCount}</div>
+                      <div className="text-xs text-muted-foreground">Content Drafted</div>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="p-4 text-center">
-                  <div className="text-3xl font-bold text-foreground">{countdownInfo.draftedCount}</div>
-                  <div className="text-xs text-muted-foreground mt-1">Content Drafted</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4 text-center">
-                  <div className="text-3xl font-bold text-foreground">{selectedCampaign?.goal_amount || "—"}</div>
-                  <div className="text-xs text-muted-foreground mt-1">Goal</div>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0">
+                      <DollarSign className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-foreground">
+                        {selectedCampaign?.goal_amount ? `$${selectedCampaign.goal_amount.replace(/^\$/, '')}` : "—"}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Goal</div>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>
