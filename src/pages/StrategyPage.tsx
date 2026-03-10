@@ -7,6 +7,7 @@ import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { PlaybookKitSelector } from "@/components/PlaybookKitSelector";
 import { PlaybookKitGuidance } from "@/components/PlaybookKitGuidance";
+import { usePlaybookKits } from "@/hooks/usePlaybookKits";
 import { ContextSelector } from "@/components/ContextSelector";
 import { StrategyJourneyDisplay } from "@/components/StrategyJourney";
 import { JourneyFlowDiagram } from "@/components/JourneyFlowDiagram";
