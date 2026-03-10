@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWorkspace } from '@/contexts/WorkspaceContext';
+import { useAgencyMode } from '@/hooks/useAgencyMode';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -62,7 +63,8 @@ const MAX_LOGO_DIMENSION = 400; // Max width/height in pixels
 
 export default function AdminConsolePage() {
   const { tenant, profile, isSuperAdmin, refreshProfile } = useAuth();
-  const { activeWorkspace, canSwitch } = useWorkspace();
+  const { activeWorkspace, canSwitch, refreshWorkspaces } = useWorkspace();
+  const { isAgency, labels } = useAgencyMode();
   const { toast } = useToast();
 
   // Use active workspace when super admin is switching, otherwise own tenant
@@ -130,6 +132,7 @@ export default function AdminConsolePage() {
       if (error) throw error;
 
       await refreshProfile();
+      await refreshWorkspaces();
       setIsEditingInstitution(false);
       
       toast({
@@ -249,6 +252,7 @@ export default function AdminConsolePage() {
 
       setLogoUrl(publicUrl);
       await refreshProfile();
+      await refreshWorkspaces();
 
       toast({
         title: 'Logo Uploaded',
@@ -291,6 +295,7 @@ export default function AdminConsolePage() {
 
       setLogoUrl(null);
       await refreshProfile();
+      await refreshWorkspaces();
 
       toast({
         title: 'Logo Removed',
@@ -325,6 +330,7 @@ export default function AdminConsolePage() {
       setPrimaryColor(primaryColorInput);
       setAccentColor(accentColorInput);
       await refreshProfile();
+      await refreshWorkspaces();
 
       toast({
         title: 'Colors Saved',
@@ -435,7 +441,7 @@ export default function AdminConsolePage() {
   const adminLinks = [
     {
       title: 'User Management',
-      description: isSuperAdmin ? 'Create, edit, and manage user accounts' : 'View users in your institution',
+      description: isSuperAdmin ? 'Create, edit, and manage user accounts' : `View users in your ${isAgency ? 'organization' : 'institution'}`,
       icon: Users,
       href: '/admin/users',
       color: 'bg-[hsl(222,47%,14%)]',
@@ -467,10 +473,10 @@ export default function AdminConsolePage() {
       stat: 'Monitor'
     }] : []),
     {
-      title: 'University Settings',
-      description: 'Branding, profiles, and Content DNA management',
+      title: isAgency ? 'Partner Institutions' : 'Institution Settings',
+      description: isAgency ? 'Manage partner institution profiles and branding' : 'Branding, profiles, and Content DNA management',
       icon: Building2,
-      href: '/university-settings',
+      href: isAgency ? '/agency/clients' : '/university-settings',
       color: 'bg-[hsl(262,52%,47%)]',
       stat: contentStats.institutionalProfiles > 0 ? `${contentStats.institutionalProfiles} profiles` : 'Configure'
     },
@@ -510,12 +516,12 @@ export default function AdminConsolePage() {
               <Home className="w-4 h-4" />
             </Link>
             <span>/</span>
-            <span className="text-[hsl(222,47%,11%)]">Institution Admin</span>
+            <span className="text-[hsl(222,47%,11%)]">{isAgency ? 'Agency Partner Admin' : 'Institution Admin'}</span>
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="font-serif text-2xl font-bold text-[hsl(222,47%,11%)]">Institution Admin</h1>
-              <p className="text-[hsl(220,14%,46%)]">Manage your institution's platform settings</p>
+              <h1 className="font-serif text-2xl font-bold text-[hsl(222,47%,11%)]">{isAgency ? 'Agency Partner Admin' : 'Institution Admin'}</h1>
+              <p className="text-[hsl(220,14%,46%)]">{isAgency ? "Manage your agency's platform settings and partner institutions" : "Manage your institution's platform settings"}</p>
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="flex items-center gap-1">
@@ -556,8 +562,8 @@ export default function AdminConsolePage() {
                   Welcome, {profile?.first_name}
                 </h2>
                 <p className="text-white/80">
-                  As an administrator for {effectiveTenant?.institution_name || 'your institution'}, you can manage users, 
-                  review access requests, and configure institutional settings.
+                  As an administrator for {effectiveTenant?.institution_name || 'your organization'}, you can manage users, 
+                  review access requests, and configure {isAgency ? 'partner institution' : 'institutional'} settings.
                 </p>
               </div>
             </div>
@@ -571,9 +577,9 @@ export default function AdminConsolePage() {
               <div>
                 <CardTitle className="flex items-center gap-2 text-[hsl(222,47%,11%)]">
                   <Building2 className="w-5 h-5" />
-                  Institution Branding
+                  {isAgency ? 'Agency Partner Branding' : 'Institution Branding'}
                 </CardTitle>
-                <CardDescription>Manage your institution's name, logo, and colors</CardDescription>
+                <CardDescription>{isAgency ? "Manage your agency's name, logo, and colors" : "Manage your institution's name, logo, and colors"}</CardDescription>
               </div>
               {!isEditingInstitution && (
                 <Button variant="outline" size="sm" onClick={() => setIsEditingInstitution(true)}>
@@ -588,19 +594,19 @@ export default function AdminConsolePage() {
               <div className="space-y-6">
                 {/* Institution Name */}
                 <div className="space-y-2">
-                  <Label htmlFor="institutionName">Institution Name</Label>
+                  <Label htmlFor="institutionName">{isAgency ? 'Agency Name' : 'Institution Name'}</Label>
                   <Input
                     id="institutionName"
                     value={institutionName}
                     onChange={(e) => setInstitutionName(e.target.value)}
-                    placeholder="Enter institution name"
+                    placeholder={isAgency ? "Enter agency name" : "Enter institution name"}
                     className="max-w-md"
                   />
                 </div>
 
                 {/* Logo Upload */}
                 <div className="space-y-3">
-                  <Label>Institution Logo</Label>
+                  <Label>{isAgency ? 'Agency Logo' : 'Institution Logo'}</Label>
                   <div className="flex items-center gap-4">
                     {logoUrl ? (
                       <div className="relative">
@@ -766,7 +772,7 @@ export default function AdminConsolePage() {
                     <p className="text-lg font-semibold text-[hsl(222,47%,11%)]">
                       {effectiveTenant?.institution_name || 'Loading...'}
                     </p>
-                    <p className="text-sm text-[hsl(220,14%,46%)]">Your institution's display name</p>
+                    <p className="text-sm text-[hsl(220,14%,46%)]">{isAgency ? "Your agency's display name" : "Your institution's display name"}</p>
                   </div>
                 </div>
                 {effectiveTenant?.accent_color && (
