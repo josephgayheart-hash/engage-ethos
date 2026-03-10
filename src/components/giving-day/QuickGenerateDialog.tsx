@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
@@ -138,6 +138,18 @@ export function QuickGenerateDialog({
       }
       if (!resp.body) throw new Error("No response body");
 
+      const contentType = resp.headers.get("content-type") || "";
+
+      // Handle plain JSON response (non-streaming)
+      if (contentType.includes("application/json")) {
+        const json = await resp.json();
+        const content = json.message || json.content || JSON.stringify(json);
+        setGeneratedContent(content);
+        setIsGenerating(false);
+        return;
+      }
+
+      // Handle SSE streaming response
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
@@ -168,6 +180,16 @@ export function QuickGenerateDialog({
             buffer = line + "\n" + buffer;
             break;
           }
+        }
+      }
+
+      // If SSE yielded nothing, try parsing the whole buffer as JSON fallback
+      if (!full && buffer.trim()) {
+        try {
+          const fallback = JSON.parse(buffer.trim());
+          full = fallback.message || fallback.content || buffer.trim();
+        } catch {
+          full = buffer.trim();
         }
       }
 
@@ -215,6 +237,9 @@ export function QuickGenerateDialog({
             <Sparkles className="w-4 h-4 text-primary" />
             Quick Generate
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Generate AI copy for your campaign touchpoint
+          </DialogDescription>
           {/* Locked context chips */}
           <div className="flex flex-wrap gap-1.5 mt-3">
             <Badge variant="secondary" className="gap-1 text-[11px]">
