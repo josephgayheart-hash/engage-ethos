@@ -274,12 +274,12 @@ export default function AdminConsolePage() {
     setIsUploadingLogo(true);
     try {
       // Extract filename from URL and delete
-      const urlParts = tenant.logo_url.split('/');
+      const urlParts = effectiveTenant.logo_url!.split('/');
       const fileName = urlParts[urlParts.length - 1];
       
       await supabase.storage
         .from('institution-logos')
-        .remove([`${tenant.id}/${fileName}`]);
+        .remove([`${effectiveTenant.id}/${fileName}`]);
 
       // Update tenant to remove logo URL
       const { error } = await supabase
