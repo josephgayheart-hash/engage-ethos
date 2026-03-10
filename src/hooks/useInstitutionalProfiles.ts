@@ -272,7 +272,7 @@ export function useInstitutionalProfiles() {
       const { data, error } = await supabase
         .from('institutional_profiles')
         .insert([{
-          tenant_id: tenant.id,
+          tenant_id: effectiveTenantId,
           created_by_user_id: user.id,
           name: newName,
           config: JSON.parse(JSON.stringify(original.config)) as Json,
