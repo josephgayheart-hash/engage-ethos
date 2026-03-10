@@ -769,14 +769,14 @@ export default function AdminConsolePage() {
                     <p className="text-sm text-[hsl(220,14%,46%)]">Your institution's display name</p>
                   </div>
                 </div>
-                {tenant?.accent_color && (
+                {effectiveTenant?.accent_color && (
                   <div className="flex items-center gap-2 text-sm">
                     <span className="text-muted-foreground">Header accent:</span>
                     <div 
                       className="h-4 w-24 rounded" 
-                      style={{ backgroundColor: tenant.accent_color }}
+                      style={{ backgroundColor: effectiveTenant.accent_color }}
                     />
-                    <span className="text-xs text-muted-foreground font-mono">{tenant.accent_color}</span>
+                    <span className="text-xs text-muted-foreground font-mono">{effectiveTenant.accent_color}</span>
                   </div>
                 )}
               </div>
