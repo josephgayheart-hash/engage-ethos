@@ -636,7 +636,7 @@ export default function AdminConsolePage() {
 
                 {/* Logo Upload */}
                 <div className="space-y-3">
-                  <Label>{isAgency ? 'Agency Logo' : 'Institution Logo'}</Label>
+                  <Label>{isPlatformOwner ? 'Platform Logo' : isEffectiveAgency ? 'Agency Logo' : 'Institution Logo'}</Label>
                   <div className="flex items-center gap-4">
                     {logoUrl ? (
                       <div className="relative">
