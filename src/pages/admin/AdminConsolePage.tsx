@@ -118,7 +118,7 @@ export default function AdminConsolePage() {
   }, [effectiveTenant]);
 
   const handleSaveInstitution = async () => {
-    if (!tenant?.id || !institutionName.trim()) return;
+    if (!effectiveTenant?.id || !institutionName.trim()) return;
     
     setIsSavingInstitution(true);
     try {
