@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useActiveWorkspaceId } from '@/contexts/WorkspaceContext';
 import type { InstitutionalConfig } from '@/types/campusvoice';
 import type { Json } from '@/integrations/supabase/types';
 
