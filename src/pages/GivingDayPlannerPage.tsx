@@ -1,17 +1,17 @@
 import { useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { format, differenceInDays, addDays, parseISO, isBefore, isAfter, isToday } from "date-fns";
+import { format, differenceInDays, addDays, parseISO, isBefore, isToday } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useAdvancementCampaigns, CampaignTouchpoint } from "@/hooks/useAdvancementCampaigns";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,8 +19,8 @@ import { cn } from "@/lib/utils";
 import { QuickGenerateDialog } from "@/components/giving-day/QuickGenerateDialog";
 import {
   ArrowLeft, Plus, CalendarIcon, Target, Mail, MessageSquare, Megaphone, Phone,
-  Globe, Heart, Users, Clock, ChevronRight, Sparkles, CheckCircle2, FileEdit,
-  Send, Trash2, Gift, TrendingUp, DollarSign, LayoutList, PartyPopper, Timer
+  Globe, Clock, ChevronRight, Sparkles, CheckCircle2, FileEdit,
+  Send, Trash2, Gift, DollarSign, LayoutList, PartyPopper, Timer
 } from "lucide-react";
 
 // T-minus milestones for giving day countdown
@@ -64,16 +64,26 @@ const MESSAGE_TYPES: Record<string, { types: string[] }> = {
   "Stewardship": { types: ["Thank You", "Impact Update", "Receipt + Next Steps", "Donor Spotlight"] },
 };
 
-const DEFAULT_TOUCHPOINTS: CampaignTouchpoint[] = T_MINUS_MILESTONES.map((m, i) => ({
-  id: `default-${i}`,
-  tMinusDays: m.days,
-  label: m.days === 0 ? "Launch Email" : `${m.label} ${m.phase}`,
-  channel: m.days === 0 ? "email" : (i % 2 === 0 ? "email" : "social-media"),
-  segment: "all-donors",
-  messageType: MESSAGE_TYPES[m.phase]?.types[0] || "Direct Ask",
-  tone: m.phase === "Urgency" ? "urgent" : m.phase === "Stewardship" ? "celebratory" : "encouraging",
-  status: "planned",
-}));
+/** Build touchpoints distributed across selected channels */
+function buildDefaultTouchpoints(selectedChannels: string[]): CampaignTouchpoint[] {
+  if (selectedChannels.length === 0) return [];
+  return T_MINUS_MILESTONES.map((m, i) => {
+    // Round-robin across the selected channels
+    const channel = selectedChannels[i % selectedChannels.length];
+    return {
+      id: `default-${i}`,
+      tMinusDays: m.days,
+      label: m.days === 0
+        ? `Launch ${CHANNELS.find(c => c.value === channel)?.label || "Message"}`
+        : `${m.label} ${m.phase}`,
+      channel,
+      segment: "all-donors",
+      messageType: MESSAGE_TYPES[m.phase]?.types[0] || "Direct Ask",
+      tone: m.phase === "Urgency" ? "urgent" : m.phase === "Stewardship" ? "celebratory" : "encouraging",
+      status: "planned",
+    };
+  });
+}
 
 const GivingDayPlannerPage = () => {
   const { campaigns, isLoading, createCampaign, updateCampaign, deleteCampaign } = useAdvancementCampaigns();
@@ -86,13 +96,25 @@ const GivingDayPlannerPage = () => {
   const [newDate, setNewDate] = useState<Date | undefined>();
   const [newGoal, setNewGoal] = useState("");
   const [newProfileId, setNewProfileId] = useState<string | null>(null);
+  const [newChannels, setNewChannels] = useState<string[]>(["email", "social-media"]);
   const [quickGenTouchpoint, setQuickGenTouchpoint] = useState<CampaignTouchpoint | null>(null);
   const [quickGenOpen, setQuickGenOpen] = useState(false);
 
+  // Add touchpoint dialog state
+  const [addTpMilestone, setAddTpMilestone] = useState<typeof T_MINUS_MILESTONES[0] | null>(null);
+  const [addTpChannel, setAddTpChannel] = useState("email");
+  const [addTpOpen, setAddTpOpen] = useState(false);
+
   const selectedCampaign = campaigns.find(c => c.id === selectedCampaignId);
 
+  const toggleNewChannel = (ch: string) => {
+    setNewChannels(prev =>
+      prev.includes(ch) ? prev.filter(c => c !== ch) : [...prev, ch]
+    );
+  };
+
   const handleCreate = async () => {
-    if (!newName || !newDate) return;
+    if (!newName || !newDate || newChannels.length === 0) return;
     const result = await createCampaign({
       name: newName,
       giving_day_date: format(newDate, 'yyyy-MM-dd'),
@@ -101,13 +123,14 @@ const GivingDayPlannerPage = () => {
       target_segments: SEGMENTS.map(s => s.value),
     });
     if (result) {
-      // Save default touchpoints
-      await updateCampaign(result.id, { touchpoints: DEFAULT_TOUCHPOINTS as any });
+      const touchpoints = buildDefaultTouchpoints(newChannels);
+      await updateCampaign(result.id, { touchpoints: touchpoints as any });
       setSelectedCampaignId(result.id);
       setShowNewDialog(false);
       setNewName("");
       setNewDate(undefined);
       setNewGoal("");
+      setNewChannels(["email", "social-media"]);
     }
   };
 
@@ -120,9 +143,32 @@ const GivingDayPlannerPage = () => {
   };
 
   const handleGenerateCopy = (touchpoint: CampaignTouchpoint) => {
-    const milestone = T_MINUS_MILESTONES.find(m => m.days === touchpoint.tMinusDays);
     setQuickGenTouchpoint(touchpoint);
     setQuickGenOpen(true);
+  };
+
+  const handleAddTouchpoint = () => {
+    if (!selectedCampaign || !addTpMilestone) return;
+    const newTp: CampaignTouchpoint = {
+      id: `tp-${Date.now()}`,
+      tMinusDays: addTpMilestone.days,
+      label: `${addTpMilestone.phase} ${CHANNELS.find(c => c.value === addTpChannel)?.label || "Message"}`,
+      channel: addTpChannel,
+      segment: "all-donors",
+      messageType: MESSAGE_TYPES[addTpMilestone.phase]?.types[0] || "Direct Ask",
+      tone: addTpMilestone.phase === "Urgency" ? "urgent" : "encouraging",
+      status: "planned",
+    };
+    updateCampaign(selectedCampaign.id, {
+      touchpoints: [...selectedCampaign.touchpoints, newTp] as any,
+    });
+    setAddTpOpen(false);
+  };
+
+  const openAddTouchpoint = (milestone: typeof T_MINUS_MILESTONES[0]) => {
+    setAddTpMilestone(milestone);
+    setAddTpChannel("email");
+    setAddTpOpen(true);
   };
 
   // Group touchpoints by phase
@@ -131,9 +177,7 @@ const GivingDayPlannerPage = () => {
     const groups: Record<string, { milestone: typeof T_MINUS_MILESTONES[0]; touchpoints: CampaignTouchpoint[] }> = {};
     for (const m of T_MINUS_MILESTONES) {
       const tps = selectedCampaign.touchpoints.filter(tp => tp.tMinusDays === m.days);
-      if (tps.length > 0 || true) {
-        groups[m.label] = { milestone: m, touchpoints: tps };
-      }
+      groups[m.label] = { milestone: m, touchpoints: tps };
     }
     return groups;
   }, [selectedCampaign]);
@@ -178,7 +222,7 @@ const GivingDayPlannerPage = () => {
                 <DialogTrigger asChild>
                   <Button><Plus className="w-4 h-4 mr-2" /> New Campaign</Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="sm:max-w-lg">
                   <DialogHeader>
                     <DialogTitle>Create Giving Day Campaign</DialogTitle>
                   </DialogHeader>
@@ -203,6 +247,44 @@ const GivingDayPlannerPage = () => {
                       <Label>Fundraising Goal (optional)</Label>
                       <Input placeholder="e.g., $250,000" value={newGoal} onChange={e => setNewGoal(e.target.value)} />
                     </div>
+
+                    {/* Channel Mix Selection */}
+                    <div className="space-y-2">
+                      <Label>Channel Mix</Label>
+                      <p className="text-xs text-muted-foreground">Select the channels you'll use. Touchpoints will be distributed across your mix.</p>
+                      <div className="grid grid-cols-2 gap-2 mt-1.5">
+                        {CHANNELS.map(ch => {
+                          const Icon = ch.icon;
+                          const selected = newChannels.includes(ch.value);
+                          return (
+                            <button
+                              key={ch.value}
+                              type="button"
+                              onClick={() => toggleNewChannel(ch.value)}
+                              className={cn(
+                                "flex items-center gap-2.5 px-3 py-2.5 rounded-lg border text-sm transition-all text-left",
+                                selected
+                                  ? "border-primary bg-primary/5 text-foreground"
+                                  : "border-border bg-background text-muted-foreground hover:border-primary/30"
+                              )}
+                            >
+                              <div className={cn(
+                                "w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors",
+                                selected ? "bg-primary border-primary" : "border-muted-foreground/30"
+                              )}>
+                                {selected && <CheckCircle2 className="w-3 h-3 text-primary-foreground" />}
+                              </div>
+                              <Icon className="w-4 h-4 shrink-0" />
+                              <span className="font-medium">{ch.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {newChannels.length === 0 && (
+                        <p className="text-xs text-destructive mt-1">Select at least one channel</p>
+                      )}
+                    </div>
+
                     <div className="space-y-2">
                       <Label>Institutional Profile (optional)</Label>
                       <InstitutionalProfileSelector selectedProfileId={newProfileId} onProfileChange={(id) => setNewProfileId(id)} />
@@ -210,7 +292,7 @@ const GivingDayPlannerPage = () => {
                   </div>
                   <DialogFooter>
                     <Button variant="outline" onClick={() => setShowNewDialog(false)}>Cancel</Button>
-                    <Button onClick={handleCreate} disabled={!newName || !newDate}>Create Campaign</Button>
+                    <Button onClick={handleCreate} disabled={!newName || !newDate || newChannels.length === 0}>Create Campaign</Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
@@ -386,7 +468,6 @@ const GivingDayPlannerPage = () => {
 
               return (
                 <div key={label} className={cn("relative", isPast && "opacity-60")}>
-                  {/* Phase connector line */}
                   <div className="flex items-stretch gap-4">
                     {/* Timeline marker */}
                     <div className="flex flex-col items-center w-20 shrink-0">
@@ -412,22 +493,7 @@ const GivingDayPlannerPage = () => {
                         <Card className="border-dashed">
                           <CardContent className="p-3 flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">No touchpoint planned</span>
-                            <Button size="sm" variant="ghost" onClick={() => {
-                              if (!selectedCampaign) return;
-                              const newTp: CampaignTouchpoint = {
-                                id: `tp-${Date.now()}`,
-                                tMinusDays: milestone.days,
-                                label: `${milestone.phase} Message`,
-                                channel: "email",
-                                segment: "all-donors",
-                                messageType: MESSAGE_TYPES[milestone.phase]?.types[0] || "Direct Ask",
-                                tone: milestone.phase === "Urgency" ? "urgent" : "encouraging",
-                                status: "planned",
-                              };
-                              updateCampaign(selectedCampaign.id, {
-                                touchpoints: [...selectedCampaign.touchpoints, newTp] as any,
-                              });
-                            }}>
+                            <Button size="sm" variant="ghost" onClick={() => openAddTouchpoint(milestone)}>
                               <Plus className="w-3.5 h-3.5 mr-1" /> Add
                             </Button>
                           </CardContent>
@@ -481,7 +547,7 @@ const GivingDayPlannerPage = () => {
                                             <Sparkles className="w-3.5 h-3.5" />
                                           </Button>
                                         </TooltipTrigger>
-                                        <TooltipContent>Generate copy in Message Builder</TooltipContent>
+                                        <TooltipContent>Generate AI copy</TooltipContent>
                                       </Tooltip>
                                     </div>
                                   </div>
@@ -489,23 +555,8 @@ const GivingDayPlannerPage = () => {
                               </Card>
                             );
                           })}
-                          {/* Add another touchpoint at this milestone */}
-                          <Button size="sm" variant="ghost" className="text-xs w-full" onClick={() => {
-                            if (!selectedCampaign) return;
-                            const newTp: CampaignTouchpoint = {
-                              id: `tp-${Date.now()}`,
-                              tMinusDays: milestone.days,
-                              label: `Additional ${milestone.phase} Message`,
-                              channel: "sms",
-                              segment: "all-donors",
-                              messageType: MESSAGE_TYPES[milestone.phase]?.types[1] || "Direct Ask",
-                              tone: "encouraging",
-                              status: "planned",
-                            };
-                            updateCampaign(selectedCampaign.id, {
-                              touchpoints: [...selectedCampaign.touchpoints, newTp] as any,
-                            });
-                          }}>
+                          {/* Add another touchpoint */}
+                          <Button size="sm" variant="ghost" className="text-xs w-full" onClick={() => openAddTouchpoint(milestone)}>
                             <Plus className="w-3 h-3 mr-1" /> Add touchpoint
                           </Button>
                         </div>
@@ -515,7 +566,49 @@ const GivingDayPlannerPage = () => {
                 </div>
               );
             })}
-        </div>
+          </div>
+
+          {/* Add Touchpoint Dialog */}
+          <Dialog open={addTpOpen} onOpenChange={setAddTpOpen}>
+            <DialogContent className="sm:max-w-sm">
+              <DialogHeader>
+                <DialogTitle className="text-base">Add Touchpoint{addTpMilestone ? ` — ${addTpMilestone.label}` : ''}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-3">
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium">Channel</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {CHANNELS.map(ch => {
+                      const Icon = ch.icon;
+                      const selected = addTpChannel === ch.value;
+                      return (
+                        <button
+                          key={ch.value}
+                          type="button"
+                          onClick={() => setAddTpChannel(ch.value)}
+                          className={cn(
+                            "flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-all text-left",
+                            selected
+                              ? "border-primary bg-primary/5 text-foreground"
+                              : "border-border text-muted-foreground hover:border-primary/30"
+                          )}
+                        >
+                          <Icon className="w-4 h-4 shrink-0" />
+                          <span className="font-medium">{ch.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" size="sm" onClick={() => setAddTpOpen(false)}>Cancel</Button>
+                <Button size="sm" onClick={handleAddTouchpoint}>
+                  <Plus className="w-3.5 h-3.5 mr-1" /> Add
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
           {/* Quick Generate Dialog */}
           <QuickGenerateDialog
