@@ -550,6 +550,25 @@ const GivingDayPlannerPage = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" disabled={isExporting}>
+                    {isExporting ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Download className="w-4 h-4 mr-1.5" />}
+                    Share / Export
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleCopyToClipboard}>
+                    <ClipboardCopy className="w-4 h-4 mr-2" /> Copy to Clipboard
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleExportGoogleDocs}>
+                    <FileText className="w-4 h-4 mr-2" /> Open in Google Docs
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleExportPdf}>
+                    <Download className="w-4 h-4 mr-2" /> Download PDF
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button variant="outline" size="sm" className="text-destructive" onClick={async () => {
                 if (selectedCampaign && confirm('Delete this campaign?')) {
                   await deleteCampaign(selectedCampaign.id);
