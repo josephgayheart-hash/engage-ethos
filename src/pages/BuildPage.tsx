@@ -173,6 +173,10 @@ const BuildPage = () => {
     originalTitle?: string;
     originalId?: string;
     source?: string;
+    // Advancement integration: pre-select channel/audience from Stewardship Report
+    preSelectChannel?: string;
+    preSelectAudience?: string;
+    preSelectProfileId?: string;
   } | null;
 
   // Find profile name from URL param if needed
@@ -242,13 +246,28 @@ const BuildPage = () => {
     }
   }, [selectedProfileId, institutionalConfig, profiles]);
   const [context, setContext] = useState<MessageContext>({
-    audience: (remixState?.remixContext?.audience as any) || undefined,
+    audience: (remixState?.preSelectAudience as any) || (remixState?.remixContext?.audience as any) || undefined,
     moment: (remixState?.remixContext?.moment as any) || undefined,
-    channel: (remixState?.remixContext?.channel as any) || 'email',
+    channel: (remixState?.preSelectChannel as any) || (remixState?.remixContext?.channel as any) || 'email',
   });
   const [selectedChannels, setSelectedChannels] = useState<Channel[]>(
-    (remixState?.remixContext?.channels as Channel[]) || []
+    remixState?.preSelectChannel 
+      ? [remixState.preSelectChannel as Channel]
+      : (remixState?.remixContext?.channels as Channel[]) || []
   );
+
+  // Handle pre-select from Stewardship Report navigation
+  useEffect(() => {
+    if (remixState?.preSelectProfileId && !profileIdFromUrl) {
+      setSelectedProfileId(remixState.preSelectProfileId);
+      const found = profiles.find(p => p.id === remixState.preSelectProfileId);
+      if (found) setSelectedProfileName(found.name);
+    }
+    if (remixState?.preSelectChannel) {
+      // Clear navigation state after consuming
+      window.history.replaceState({}, document.title);
+    }
+  }, [remixState, profiles]);
   const [builderResult, setBuilderResult] = useState<BuilderResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);

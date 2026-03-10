@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 import {
   ArrowLeft, Heart, BookOpen, BarChart3, Users, Gift, Mail, MessageSquare,
   Megaphone, FileText, Copy, RefreshCw, Sparkles, Check, Star, TrendingUp,
-  DollarSign, Award, CheckCircle2
+  DollarSign, Award, CheckCircle2, Map, ArrowRight, Pen
 } from "lucide-react";
 
 const CHANNELS = [
@@ -46,6 +46,7 @@ interface GeneratedOutput {
 const StewardshipReportPage = () => {
   const { toast } = useToast();
   const { tenant } = useAuth();
+  const navigate = useNavigate();
 
   // Profile selection
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
@@ -593,6 +594,50 @@ const StewardshipReportPage = () => {
                   </TabsContent>
                 )}
               </Tabs>
+
+              {/* Next Steps CTAs */}
+              <Card className="border-primary/20 bg-primary/5">
+                <CardContent className="p-5">
+                  <h3 className="text-sm font-semibold mb-1 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    Continue Your Advancement Workflow
+                  </h3>
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Build on this stewardship content with a full donor journey or a Case for Support document.
+                  </p>
+                  <div className="flex flex-wrap gap-3">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={() => navigate('/strategy', {
+                        state: {
+                          preSelectKitKey: 'advancement-stewardship',
+                          preSelectProfileId: selectedProfileId,
+                        }
+                      })}
+                    >
+                      <Map className="w-3.5 h-3.5 mr-1.5" />
+                      Design Stewardship Journey
+                      <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate('/build', {
+                        state: {
+                          preSelectChannel: 'case-for-care',
+                          preSelectAudience: 'donors',
+                          preSelectProfileId: selectedProfileId,
+                        }
+                      })}
+                    >
+                      <Pen className="w-3.5 h-3.5 mr-1.5" />
+                      Generate Case for Support
+                      <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           )}
         </div>

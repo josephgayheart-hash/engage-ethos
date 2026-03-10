@@ -7,6 +7,7 @@ import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { PlaybookKitSelector } from "@/components/PlaybookKitSelector";
 import { PlaybookKitGuidance } from "@/components/PlaybookKitGuidance";
+import { usePlaybookKits } from "@/hooks/usePlaybookKits";
 import { ContextSelector } from "@/components/ContextSelector";
 import { StrategyJourneyDisplay } from "@/components/StrategyJourney";
 import { JourneyFlowDiagram } from "@/components/JourneyFlowDiagram";
@@ -159,6 +160,30 @@ const StrategyPage = () => {
   // Playbook kit state
   const [selectedPlaybookKit, setSelectedPlaybookKit] = useState<PlaybookKit | null>(null);
   const [showAllPlaybookKits, setShowAllPlaybookKits] = useState(false);
+  const [pendingKitKey, setPendingKitKey] = useState<string | null>(null);
+  const { kits: allPlaybookKits } = usePlaybookKits();
+
+  // Resolve pending kit key (from navigation state) once kits are loaded
+  useEffect(() => {
+    if (pendingKitKey && allPlaybookKits.length > 0) {
+      const kit = allPlaybookKits.find(k => k.kit_key === pendingKitKey);
+      if (kit) {
+        setSelectedPlaybookKit(kit);
+        if (kit.target_audiences && kit.target_audiences.length > 0) {
+          setContext(prev => ({ ...prev, audience: kit.target_audiences![0] as MessageContext['audience'] }));
+        }
+        // Pre-select advancement-appropriate channels
+        if (kit.category === 'advancement') {
+          setSelectedChannels(['email', 'direct-mail', 'landing-page', 'phone-call', 'case-for-care']);
+        }
+        toast({
+          title: "Playbook Selected",
+          description: `Using "${kit.name}" — customize timeline and channels below.`,
+        });
+      }
+      setPendingKitKey(null);
+    }
+  }, [pendingKitKey, allPlaybookKits, toast]);
 
   // Load journey data from navigation state (for edit/remix/resume)
   useEffect(() => {
@@ -171,7 +196,21 @@ const StrategyPage = () => {
       originalTitle?: string;
       originalId?: string;
       source?: 'personal' | 'university';
+      // Advancement integration: pre-select a playbook kit by key
+      preSelectKitKey?: string;
+      preSelectProfileId?: string | null;
     } | null;
+
+    // Pre-select advancement playbook kit from Stewardship Report
+    if (state?.preSelectKitKey) {
+      // We'll set kit once kits are loaded — store the key and handle in a separate effect
+      setPendingKitKey(state.preSelectKitKey);
+      if (state.preSelectProfileId) {
+        setSelectedProfileId(state.preSelectProfileId);
+      }
+      window.history.replaceState({}, document.title);
+      return;
+    }
 
     // Resume draft from dashboard
     if (state?.resumeDraftId) {
@@ -937,6 +976,10 @@ const StrategyPage = () => {
                   }
                   if (kit.target_cohorts && kit.target_cohorts.length > 0) {
                     setContext(prev => ({ ...prev, cohort: kit.target_cohorts![0] as MessageContext['cohort'] }));
+                  }
+                  // Auto-select advancement-appropriate channels
+                  if (kit.category === 'advancement') {
+                    setSelectedChannels(['email', 'direct-mail', 'landing-page', 'phone-call', 'case-for-care']);
                   }
                   toast({
                     title: "Playbook Selected",
