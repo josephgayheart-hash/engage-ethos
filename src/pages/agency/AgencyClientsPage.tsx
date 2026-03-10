@@ -431,8 +431,8 @@ export default function AgencyClientsPage() {
   return (
     <>
       <SEOHead
-        title="Client Management | CampusVoice.AI"
-        description="Manage your university clients and their content."
+        title="Partner Institutions | CampusVoice.AI"
+        description="Manage your partner institutions and their content."
       />
 
       <div className="bg-background">
@@ -442,14 +442,14 @@ export default function AgencyClientsPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
               <div>
-                <h1 className="text-3xl font-bold text-foreground">Client Management</h1>
+                <h1 className="text-3xl font-bold text-foreground">Partner Institutions</h1>
                 <p className="text-muted-foreground mt-1">
-                  Manage your university clients, their branding, and organizational structure
+                  Manage the institutions you serve, their branding, and organizational structure
                 </p>
               </div>
               <Button onClick={() => setShowWizard(true)} className="gap-2">
                 <Plus className="h-4 w-4" />
-                Add University Client
+                Add Partner Institution
               </Button>
             </div>
 
