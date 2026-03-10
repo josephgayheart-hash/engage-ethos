@@ -209,7 +209,7 @@ const GivingDayPlannerPage = () => {
                     </div>
                     <div className="space-y-2">
                       <Label>Institutional Profile (optional)</Label>
-                      <InstitutionalProfileSelector selectedProfileId={newProfileId} onSelectProfile={setNewProfileId} />
+                      <InstitutionalProfileSelector selectedProfileId={newProfileId} onProfileChange={(id) => setNewProfileId(id)} />
                     </div>
                   </div>
                   <DialogFooter>
