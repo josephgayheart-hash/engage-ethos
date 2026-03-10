@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWorkspace } from '@/contexts/WorkspaceContext';
 import { useContentDNA, ContentDNASample } from '@/hooks/useContentDNA';
 import { useInstitutionalProfiles } from '@/hooks/useInstitutionalProfiles';
 import { WebCrawlTab } from '@/components/dna/WebCrawlTab';
