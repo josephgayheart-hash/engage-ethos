@@ -185,8 +185,8 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Approvals */}
-        {isApprover && (
+        {/* Approvals - hidden for agency users */}
+        {isApprover && !isAgency && (
           <SidebarGroup className="py-0">
             <SidebarGroupContent>
               <SidebarMenu>
