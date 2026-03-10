@@ -308,7 +308,7 @@ export default function AdminConsolePage() {
   };
 
   const handleSaveColors = async () => {
-    if (!tenant?.id) return;
+    if (!effectiveTenant?.id) return;
 
     setIsSavingColors(true);
     try {
