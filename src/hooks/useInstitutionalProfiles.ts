@@ -301,7 +301,7 @@ export function useInstitutionalProfiles() {
       console.error('Error duplicating profile:', error);
       return null;
     }
-  }, [profiles, user, tenant?.id]);
+  }, [profiles, user, effectiveTenantId]);
 
   const getProfile = useCallback((id: string): InstitutionalProfile | undefined => {
     return profiles.find(p => p.id === id);
