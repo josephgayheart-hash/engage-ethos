@@ -159,6 +159,7 @@ const StrategyPage = () => {
   // Playbook kit state
   const [selectedPlaybookKit, setSelectedPlaybookKit] = useState<PlaybookKit | null>(null);
   const [showAllPlaybookKits, setShowAllPlaybookKits] = useState(false);
+  const [pendingKitKey, setPendingKitKey] = useState<string | null>(null);
 
   // Load journey data from navigation state (for edit/remix/resume)
   useEffect(() => {
