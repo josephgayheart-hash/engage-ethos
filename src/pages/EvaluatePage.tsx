@@ -205,12 +205,6 @@ const EvaluatePage = () => {
                 icon={<Target className="w-4 h-4" />}
               >
                 <div className="space-y-4">
-                  <ContentDNAIndicator
-                    enabled={useContentDNA}
-                    onToggle={setUseContentDNA}
-                    selectedProfileId={selectedProfileId}
-                    selectedProfileName={selectedProfileName}
-                  />
 
                   {useContentDNA && contentDNA?.brandPlatform && (
                     <BrandLayerSelector

@@ -681,9 +681,6 @@ export default function WebContentAnalyzerPage() {
                   selectedProfileId={selectedProfileId}
                   onProfileChange={(id, config, name) => setSelectedProfileId(id || '')}
                 />
-                {selectedProfileId && contentDNA && (
-                  <ContentDNAActiveBadge profileId={selectedProfileId} />
-                )}
               </div>
 
               {/* Input Section */}

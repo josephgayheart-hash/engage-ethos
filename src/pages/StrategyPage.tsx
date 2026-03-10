@@ -1355,7 +1355,7 @@ const StrategyPage = () => {
                     <div className="flex items-center gap-3">
                       <BookMarked className="w-5 h-5 text-primary" />
                       <span className="font-medium">Save this journey</span>
-                      {useContentDNA && <ContentDNAActiveBadge profileId={selectedProfileId} institutionName={selectedProfileName} />}
+                      
                     </div>
                     <div className="flex gap-2">
                       <Button 

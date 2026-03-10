@@ -1155,7 +1155,7 @@ const BuildPage = () => {
                           {selectedChannels.length} channel{selectedChannels.length > 1 ? 's' : ''}
                         </Badge>
                       </CardTitle>
-                      {useContentDNA && <ContentDNAActiveBadge profileId={selectedProfileId} institutionName={selectedProfileName} />}
+                      
                       {useContentDNA && contentDNA?.brandPlatform && (
                         <BrandLayerActiveBadge 
                           brandPlatform={contentDNA.brandPlatform} 

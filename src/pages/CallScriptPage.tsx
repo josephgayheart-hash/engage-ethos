@@ -338,9 +338,6 @@ ${callScript.followUpNotes}`;
                     </p>
                   </div>
                 </div>
-                {useContentDNA && contentDNA && (
-                  <ContentDNAActiveBadge profileId={selectedProfileId ?? undefined} institutionName={selectedProfileName} />
-                )}
               </div>
 
               {/* Brand Layer Selector - only show when Content DNA is enabled and brand platform exists */}
