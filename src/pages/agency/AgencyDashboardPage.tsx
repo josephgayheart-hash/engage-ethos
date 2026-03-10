@@ -248,7 +248,7 @@ export default function AgencyDashboardPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">
-                        Paused Clients
+                        Paused Institutions
                       </p>
                       <p className="text-3xl font-bold">{stats.pausedClients}</p>
                     </div>
