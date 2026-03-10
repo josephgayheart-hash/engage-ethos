@@ -40,6 +40,7 @@ const createItems = [
   { title: "Message Builder", url: "/build", icon: PenTool },
   { title: "Journey Designer", url: "/strategy", icon: Route },
   { title: "Giving Day Planner", url: "/giving-day-planner", icon: Gift },
+  { title: "Stewardship Report", url: "/stewardship-report", icon: Heart },
   { title: "AI Copywriter", url: "/playground", icon: Sparkles },
   { title: "Image Studio", url: "/image-generator", icon: ImageIcon },
   { title: "Brand Studio", url: "/brand-studio", icon: Palette },
