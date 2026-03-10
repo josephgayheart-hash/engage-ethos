@@ -923,23 +923,23 @@ export default function ContentDNAPage() {
           <CardContent className="py-5">
             <div className="flex items-center gap-4">
               {/* Use profile logo if available, otherwise fall back to tenant logo */}
-              {(selectedProfile?.config?.logoUrl || tenant?.logo_url) ? (
+              {(selectedProfile?.config?.logoUrl || effectiveTenant?.logo_url) ? (
                 <img 
-                  src={selectedProfile?.config?.logoUrl || tenant?.logo_url || ''}
-                  alt={`${selectedProfile?.name || tenant?.institution_name} logo`}
+                  src={selectedProfile?.config?.logoUrl || effectiveTenant?.logo_url || ''}
+                  alt={`${selectedProfile?.name || effectiveTenant?.institution_name} logo`}
                   className="w-14 h-14 object-contain rounded-lg border border-border bg-background p-1"
                 />
               ) : (
                 <div 
                   className="w-14 h-14 rounded-lg flex items-center justify-center text-white font-bold text-xl"
-                  style={{ backgroundColor: selectedProfile?.config?.primaryColor || tenant?.primary_color || 'hsl(222,47%,14%)' }}
+                  style={{ backgroundColor: selectedProfile?.config?.primaryColor || effectiveTenant?.primary_color || 'hsl(222,47%,14%)' }}
                 >
-                  {(selectedProfile?.name || tenant?.institution_name)?.charAt(0) || 'U'}
+                  {(selectedProfile?.name || effectiveTenant?.institution_name)?.charAt(0) || 'U'}
                 </div>
               )}
               <div className="flex-1">
                 <h3 className="font-medium text-foreground">
-                  {selectedProfile?.name || tenant?.institution_name || 'Your Institution'}
+                  {selectedProfile?.name || effectiveTenant?.institution_name || 'Your Institution'}
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   {selectedProfile ? `Content DNA for ${selectedProfile.name}` : 'Institution-wide Content DNA'}
