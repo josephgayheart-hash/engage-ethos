@@ -166,6 +166,19 @@ const StewardshipReportPage = () => {
 
       setGeneratedOutput(output);
       toast({ title: "Report generated", description: "Your stewardship content is ready across all selected channels." });
+
+      // Save as draft for dashboard visibility
+      const draftTitle = effectiveCampaignName ? `Stewardship: ${effectiveCampaignName}` : 'Stewardship Report';
+      saveDraft('stewardship', {
+        selectedProfileId,
+        selectedCampaignId,
+        campaignName: effectiveCampaignName,
+        selectedChannels: Array.from(selectedChannels),
+        selectedFactIds: Array.from(selectedFactIds),
+        selectedStoryIds: Array.from(selectedStoryIds),
+        additionalContext,
+        generatedOutput: output,
+      }, draftTitle, undefined, true);
     } catch (err: any) {
       console.error('Generation error:', err);
       toast({ title: "Generation failed", description: err.message, variant: "destructive" });
