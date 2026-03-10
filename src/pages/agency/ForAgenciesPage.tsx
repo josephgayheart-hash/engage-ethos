@@ -212,7 +212,7 @@ export default function ForAgenciesPage() {
                 Built for How Agencies Actually Work
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Everything you need to manage multiple university clients efficiently,
+                Everything you need to manage multiple partner institutions efficiently,
                 without the context-switching overhead.
               </p>
             </div>
