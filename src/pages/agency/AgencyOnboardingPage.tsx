@@ -63,10 +63,10 @@ export default function AgencyOnboardingPage() {
 
       setCurrentStep("complete");
     } catch (error: any) {
-      console.error("Error creating client:", error);
+      console.error("Error creating institution:", error);
       toast({
         title: "Error",
-        description: "Failed to create client. Please try again.",
+        description: "Failed to create institution. Please try again.",
         variant: "destructive",
       });
     } finally {
