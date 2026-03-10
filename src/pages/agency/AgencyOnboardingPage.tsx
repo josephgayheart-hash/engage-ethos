@@ -185,7 +185,7 @@ export default function AgencyOnboardingPage() {
                 <CardContent>
                   <div className="space-y-6">
                     <div className="space-y-2">
-                      <Label htmlFor="clientName">University Name *</Label>
+                      <Label htmlFor="clientName">Institution Name *</Label>
                       <div className="relative">
                         <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
