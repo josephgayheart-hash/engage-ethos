@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import { QuickGenerateDialog } from "@/components/giving-day/QuickGenerateDialog";
 import {
   ArrowLeft, Plus, CalendarIcon, Target, Mail, MessageSquare, Megaphone, Phone,
-  Globe, Clock, ChevronRight, Sparkles, CheckCircle2, FileEdit,
+  Globe, Clock, ChevronRight, ChevronDown, Sparkles, CheckCircle2, FileEdit,
   Send, Trash2, Gift, DollarSign, LayoutList, PartyPopper, Timer
 } from "lucide-react";
 
