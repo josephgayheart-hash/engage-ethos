@@ -15,6 +15,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAdvancementCampaigns, CampaignTouchpoint } from "@/hooks/useAdvancementCampaigns";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
+import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
+import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { QuickGenerateDialog } from "@/components/giving-day/QuickGenerateDialog";
