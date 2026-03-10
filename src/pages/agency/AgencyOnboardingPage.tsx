@@ -116,7 +116,7 @@ export default function AgencyOnboardingPage() {
                     Welcome to CampusVoice, {agencyName}!
                   </CardTitle>
                   <p className="text-muted-foreground mt-2">
-                    Let's get you set up to manage your university clients.
+                    Let's get you set up to manage your partner institutions.
                   </p>
                 </CardHeader>
                 <CardContent className="pt-6">
