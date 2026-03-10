@@ -469,7 +469,7 @@ export default function AdminConsolePage() {
   const adminLinks = [
     {
       title: 'User Management',
-      description: isSuperAdmin ? 'Create, edit, and manage user accounts' : `View users in your ${isAgency ? 'organization' : 'institution'}`,
+      description: isSuperAdmin ? 'Create, edit, and manage user accounts' : `View users in your ${entityTerm}`,
       icon: Users,
       href: '/admin/users',
       color: 'bg-[hsl(222,47%,14%)]',
