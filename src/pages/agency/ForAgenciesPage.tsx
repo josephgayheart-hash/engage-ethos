@@ -172,11 +172,11 @@ export default function ForAgenciesPage() {
               <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2 bg-background/60 backdrop-blur-sm px-4 py-2 rounded-full">
                   <Users className="h-4 w-4 text-primary" />
-                  <span>Multi-Client Support</span>
+                  <span>Multi-Institution Support</span>
                 </div>
                 <div className="flex items-center gap-2 bg-background/60 backdrop-blur-sm px-4 py-2 rounded-full">
                   <Shield className="h-4 w-4 text-primary" />
-                  <span>Per-Client Branding</span>
+                  <span>Per-Institution Branding</span>
                 </div>
                 <div className="flex items-center gap-2 bg-background/60 backdrop-blur-sm px-4 py-2 rounded-full">
                   <Zap className="h-4 w-4 text-primary" />
