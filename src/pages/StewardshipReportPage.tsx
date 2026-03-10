@@ -54,7 +54,7 @@ const StewardshipReportPage = () => {
   const { facts, isLoading: factsLoading } = useFactBook({ profileId: selectedProfileId });
   const { stories, isLoading: storiesLoading } = useStoryBank({ profileId: selectedProfileId });
   const { campaigns } = useAdvancementCampaigns();
-  const { contentDNA } = useContentDNAForGeneration(selectedProfileId);
+  const { contentDNA } = useContentDNAForGeneration({ profileId: selectedProfileId });
 
   // UI state
   const [selectedFactIds, setSelectedFactIds] = useState<Set<string>>(new Set());
