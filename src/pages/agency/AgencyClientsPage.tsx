@@ -249,9 +249,9 @@ export default function AgencyClientsPage() {
         setShowConfigDialog(false);
       }
       
-      toast({ title: "Client deleted", description: "Client and all associated data have been removed." });
+      toast({ title: "Institution removed", description: "Institution and all associated data have been removed." });
     } catch (error: any) {
-      toast({ title: "Error", description: error.message || "Failed to delete client", variant: "destructive" });
+      toast({ title: "Error", description: error.message || "Failed to remove institution", variant: "destructive" });
     } finally {
       setDeleteDialogOpen(false);
       setProfileToDelete(null);
