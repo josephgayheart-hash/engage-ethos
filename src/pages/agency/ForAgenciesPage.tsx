@@ -142,7 +142,7 @@ export default function ForAgenciesPage() {
               </h1>
 
               <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-                Manage multiple university clients without the context-switching chaos.
+                Manage multiple partner institutions without the context-switching chaos.
                 CampusVoice learns each institution's unique voice so every message
                 sounds authentically theirs—not templated.
               </p>
