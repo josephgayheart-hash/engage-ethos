@@ -375,6 +375,9 @@ const GivingDayPlannerPage = () => {
                   const daysUntil = differenceInDays(givingDay, new Date());
                   const draftedCount = campaign.touchpoints.filter((t: any) => t.status !== 'planned').length;
                   const isPast = daysUntil < 0;
+                  const campProfile = profiles.find(p => p.id === campaign.profile_id);
+                  const profileMeta = campProfile ? PROFILE_TYPE_LABELS[campProfile.profileType] || PROFILE_TYPE_LABELS.university : null;
+                  const ProfileIcon = profileMeta?.icon || Building2;
 
                   return (
                     <Card
@@ -384,9 +387,18 @@ const GivingDayPlannerPage = () => {
                     >
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
-                          <div>
+                          <div className="space-y-1">
                             <CardTitle className="text-lg">{campaign.name}</CardTitle>
                             <CardDescription>{format(givingDay, 'EEEE, MMMM d, yyyy')}</CardDescription>
+                            {campProfile && (
+                              <div className="flex items-center gap-1.5 pt-1">
+                                <Badge variant="outline" className="gap-1 text-[10px] px-2 py-0.5 border-primary/30 text-primary">
+                                  <ProfileIcon className="w-3 h-3" />
+                                  {profileMeta?.label} Plan
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">{campProfile.name}</span>
+                              </div>
+                            )}
                           </div>
                           <Badge variant={isPast ? "secondary" : daysUntil <= 7 ? "destructive" : "default"}>
                             {isPast ? `${Math.abs(daysUntil)}d ago` : daysUntil === 0 ? "TODAY" : `${daysUntil}d away`}
