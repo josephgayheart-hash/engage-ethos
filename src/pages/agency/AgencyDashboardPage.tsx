@@ -263,7 +263,7 @@ export default function AgencyDashboardPage() {
             {/* Clients Grid */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Your Clients</CardTitle>
+                <CardTitle>Your Partner Institutions</CardTitle>
                 <Link to="/agency/clients">
                   <Button variant="ghost" size="sm" className="gap-1">
                     View All
