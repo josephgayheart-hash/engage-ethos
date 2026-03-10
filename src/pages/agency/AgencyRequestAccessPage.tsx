@@ -278,7 +278,7 @@ export default function AgencyRequestAccessPage() {
                       {/* Agency Info */}
                       <div className="space-y-4 pt-4 border-t">
                         <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
-                          Agency Information
+                          Firm Information
                         </h3>
                         <div className="space-y-2">
                           <Label htmlFor="agencyName">Agency Name *</Label>
