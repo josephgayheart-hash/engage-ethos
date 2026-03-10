@@ -560,7 +560,6 @@ export default function AdminConsolePage() {
                 <Shield className="w-3 h-3 mr-1" />
                 {isPlatformOwner ? 'Platform Owner' : 'Admin'}
               </Badge>
-              </Badge>
             </div>
           </div>
         </div>
