@@ -353,9 +353,14 @@ Generate a COMPLETE, ready-to-use ${channelLabel.toLowerCase()} message. Do NOT 
             <Badge variant="secondary" className="gap-1 text-[11px]">
               <Lock className="w-2.5 h-2.5" /> {touchpoint.messageType}
             </Badge>
-            {institutionalConfig?.institutionName && (
+             {institutionalConfig?.institutionName && (
               <Badge variant="outline" className="gap-1 text-[11px] border-primary/30 text-primary">
                 {institutionalConfig.institutionName}
+              </Badge>
+            )}
+            {profileName && profileName !== institutionalConfig?.institutionName && (
+              <Badge variant="outline" className="gap-1 text-[11px] border-accent/50 text-accent-foreground">
+                {profileType === 'college' ? '🎓' : profileType === 'division' ? '📊' : '🏛️'} {profileName}
               </Badge>
             )}
           </div>
