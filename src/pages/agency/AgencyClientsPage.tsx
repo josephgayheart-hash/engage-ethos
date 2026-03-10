@@ -186,6 +186,8 @@ export default function AgencyClientsPage() {
     const profile = await createProfile(name, config, null, 'university');
     setShowWizard(false);
     if (profile) {
+      // Refetch profiles to ensure the new client appears
+      await refreshProfiles();
       toast({ 
         title: "Institution added", 
         description: `${profile.name} has been added as a partner institution.` 
