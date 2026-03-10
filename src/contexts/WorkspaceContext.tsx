@@ -127,6 +127,7 @@ export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
       isLoading,
       canSwitch,
       setActiveWorkspaceId,
+      refreshWorkspaces,
     }}>
       {children}
     </WorkspaceContext.Provider>
