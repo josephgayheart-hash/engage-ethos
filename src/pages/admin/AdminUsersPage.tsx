@@ -511,6 +511,9 @@ export default function AdminUsersPage() {
   };
 
   const filteredUsers = users.filter(user => {
+    // When super admin has a workspace selected, filter to that workspace
+    const matchesTenant = effectiveTenantId ? user.tenant_id === effectiveTenantId : true;
+
     const matchesSearch = 
       user.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.last_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -519,7 +522,7 @@ export default function AdminUsersPage() {
     
     const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
     
-    return matchesSearch && matchesStatus;
+    return matchesTenant && matchesSearch && matchesStatus;
   });
 
   return (
