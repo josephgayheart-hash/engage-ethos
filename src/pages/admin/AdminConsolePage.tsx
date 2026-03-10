@@ -221,6 +221,7 @@ export default function AdminConsolePage() {
 
   const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    console.log('Logo upload triggered:', { file: file?.name, size: file?.size, type: file?.type, tenantId: effectiveTenant?.id });
     if (!file || !effectiveTenant?.id) return;
 
     if (file.size > MAX_LOGO_SIZE) {
