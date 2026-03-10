@@ -98,6 +98,8 @@ export function MyDraftsCard() {
     if (draft.draft_type === 'journey') return '/strategy';
     if (draft.draft_type === 'analysis') return '/web-analyzer';
     if (draft.draft_type === 'image') return '/image-generator';
+    if (draft.draft_type === 'campaign') return '/giving-day-planner';
+    if (draft.draft_type === 'stewardship') return '/stewardship-report';
     return '/build';
   };
 
@@ -106,6 +108,8 @@ export function MyDraftsCard() {
     if (type === 'journey') return Map;
     if (type === 'analysis') return Search;
     if (type === 'image') return ImageIcon;
+    if (type === 'campaign') return Calendar;
+    if (type === 'stewardship') return Heart;
     return PenTool;
   };
 
