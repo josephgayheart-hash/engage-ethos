@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Home, PenTool, Route, ClipboardCheck, Wrench, FolderOpen, Library, FileEdit,
   Sparkles, ImageIcon, Palette, CheckCircle, Settings, Building2, Layers, BarChart3,
-  Shield, Contact, LogOut, User, UserPlus, ChevronsUpDown, Search, Dna, Gift,
+  Shield, Contact, LogOut, User, UserPlus, ChevronsUpDown, Search, Dna, Gift, Heart,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -40,6 +40,7 @@ const createItems = [
   { title: "Message Builder", url: "/build", icon: PenTool },
   { title: "Journey Designer", url: "/strategy", icon: Route },
   { title: "Giving Day Planner", url: "/giving-day-planner", icon: Gift },
+  { title: "Stewardship Report", url: "/stewardship-report", icon: Heart },
   { title: "AI Copywriter", url: "/playground", icon: Sparkles },
   { title: "Image Studio", url: "/image-generator", icon: ImageIcon },
   { title: "Brand Studio", url: "/brand-studio", icon: Palette },
