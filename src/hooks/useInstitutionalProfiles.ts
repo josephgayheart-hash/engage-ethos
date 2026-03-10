@@ -266,7 +266,7 @@ export function useInstitutionalProfiles() {
     asSubUnit?: { parentProfileId: string; profileType: ProfileType }
   ): Promise<InstitutionalProfile | null> => {
     const original = profiles.find(p => p.id === id);
-    if (!original || !user || !tenant?.id) return null;
+    if (!original || !user || !effectiveTenantId) return null;
 
     try {
       const { data, error } = await supabase
