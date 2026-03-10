@@ -296,13 +296,13 @@ export default function ForAgenciesPage() {
               <div className="bg-muted/50 border-b px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Briefcase className="h-5 w-5 text-primary" />
-                  <span className="font-semibold">Your University Clients</span>
+                  <span className="font-semibold">Your Partner Institutions</span>
                   <Badge variant="secondary" className="ml-2">24 Active</Badge>
                   <Badge variant="outline" className="ml-1 text-xs text-muted-foreground border-muted-foreground/30">Example</Badge>
                 </div>
                 <Button size="sm" variant="outline" className="gap-2">
                   <Users className="h-4 w-4" />
-                  Add Client
+                  Add Institution
                 </Button>
               </div>
               <div className="divide-y max-h-[400px] overflow-y-auto">
