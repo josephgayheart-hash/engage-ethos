@@ -624,7 +624,7 @@ export default function AdminConsolePage() {
               <div className="space-y-6">
                 {/* Institution Name */}
                 <div className="space-y-2">
-                  <Label htmlFor="institutionName">{isAgency ? 'Agency Name' : 'Institution Name'}</Label>
+                  <Label htmlFor="institutionName">{isPlatformOwner ? 'Platform Name' : isEffectiveAgency ? 'Agency Name' : 'Institution Name'}</Label>
                   <Input
                     id="institutionName"
                     value={institutionName}
