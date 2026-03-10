@@ -295,6 +295,7 @@ export default function AdminConsolePage() {
 
       setLogoUrl(null);
       await refreshProfile();
+      await refreshWorkspaces();
 
       toast({
         title: 'Logo Removed',
