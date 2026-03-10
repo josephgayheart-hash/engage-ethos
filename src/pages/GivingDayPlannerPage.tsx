@@ -413,6 +413,7 @@ const GivingDayPlannerPage = () => {
           </div>
         </main>
       </div>
+      </>
     );
   }
 
