@@ -104,7 +104,7 @@ Given the website content and branding data below, extract as many of the follow
   "institutionName": "Full official name",
   "institutionAbbreviation": "Common abbreviation (e.g., OSU, UCLA)",
   "mascot": "Team mascot/nickname",
-  "institutionType": "one of: four-year-university, community-college, technical-college, graduate-school",
+  "institutionType": "one of: doctoral-university, masters-university, baccalaureate-college, associates-college, special-focus (use Carnegie Classification: doctoral-university for R1/R2, masters-university for master's-granting, baccalaureate-college for bachelor's-focused/liberal arts, associates-college for community/technical/two-year, special-focus for professional/medical/law/art schools)",
   "primaryColor": "#hex color",
   "secondaryColor": "#hex color",
   "tertiaryColor": "#hex color or null",

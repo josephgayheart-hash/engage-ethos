@@ -349,28 +349,34 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
 
   const institutionTypeOptions: { value: InstitutionType; label: string; description: string; icon: React.ReactNode }[] = [
     {
-      value: 'four-year-university',
-      label: 'Four-Year University',
-      description: 'Research universities, liberal arts colleges, comprehensive universities',
+      value: 'doctoral-university',
+      label: 'Doctoral University',
+      description: 'R1 & R2 research universities with high or very high research activity',
       icon: <GraduationCap className="w-6 h-6" />,
     },
     {
-      value: 'community-college',
-      label: 'Community College',
-      description: 'Two-year programs, workforce development, adult learners',
+      value: 'masters-university',
+      label: "Master's College or University",
+      description: "Institutions awarding at least 50 master's degrees annually across programs",
+      icon: <BookOpen className="w-6 h-6" />,
+    },
+    {
+      value: 'baccalaureate-college',
+      label: 'Baccalaureate College',
+      description: "Liberal arts colleges and institutions where bachelor's degrees represent the majority of conferrals",
+      icon: <Building2 className="w-6 h-6" />,
+    },
+    {
+      value: 'associates-college',
+      label: "Associate's College",
+      description: 'Community colleges, technical colleges, and two-year institutions',
       icon: <Users className="w-6 h-6" />,
     },
     {
-      value: 'technical-college',
-      label: 'Technical / Trade College',
-      description: 'Career-focused vocational and technical programs',
+      value: 'special-focus',
+      label: 'Special Focus Institution',
+      description: 'Professional schools, theological seminaries, medical schools, art & design schools',
       icon: <Briefcase className="w-6 h-6" />,
-    },
-    {
-      value: 'graduate-school',
-      label: 'Graduate / Professional School',
-      description: 'Law schools, medical schools, graduate programs',
-      icon: <BookOpen className="w-6 h-6" />,
     },
   ];
 
