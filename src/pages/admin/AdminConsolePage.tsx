@@ -607,9 +607,9 @@ export default function AdminConsolePage() {
               <div>
                 <CardTitle className="flex items-center gap-2 text-[hsl(222,47%,11%)]">
                   <Building2 className="w-5 h-5" />
-                  {isAgency ? 'Agency Partner Branding' : 'Institution Branding'}
-                </CardTitle>
-                <CardDescription>{isAgency ? "Manage your agency's name, logo, and colors" : "Manage your institution's name, logo, and colors"}</CardDescription>
+                   {brandingLabel}
+                 </CardTitle>
+                 <CardDescription>Manage your {entityTerm}'s name, logo, and colors</CardDescription>
               </div>
               {!isEditingInstitution && (
                 <Button variant="outline" size="sm" onClick={() => setIsEditingInstitution(true)}>
