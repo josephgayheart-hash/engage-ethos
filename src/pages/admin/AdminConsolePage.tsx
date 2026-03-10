@@ -69,6 +69,34 @@ export default function AdminConsolePage() {
 
   // Use active workspace when super admin is switching, otherwise own tenant
   const effectiveTenant = canSwitch ? activeWorkspace : tenant;
+  
+  // Derive workspace-aware labels from the effective tenant, not the logged-in user's tenant
+  const isOwnTenant = effectiveTenant?.id === tenant?.id;
+  const effectiveTenantType = (effectiveTenant as any)?.tenant_type as 'university' | 'agency' | null;
+  const isEffectiveAgency = effectiveTenantType === 'agency';
+  
+  // Platform Owner = super admin viewing their own (CampusVoice) workspace
+  const isPlatformOwner = isSuperAdmin && isOwnTenant;
+  
+  const adminLabel = isPlatformOwner
+    ? 'Platform Admin'
+    : isEffectiveAgency
+      ? 'Agency Partner Admin'
+      : 'Institution Admin';
+  
+  const adminDescription = isPlatformOwner
+    ? 'Manage platform-wide settings and operations'
+    : isEffectiveAgency
+      ? "Manage your agency's platform settings and partner institutions"
+      : "Manage your institution's platform settings";
+  
+  const brandingLabel = isPlatformOwner
+    ? 'Platform Branding'
+    : isEffectiveAgency
+      ? 'Agency Partner Branding'
+      : 'Institution Branding';
+  
+  const entityTerm = isPlatformOwner ? 'platform' : isEffectiveAgency ? 'agency' : 'institution';
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [userStats, setUserStats] = useState<UserStats>({ total: 0, active: 0, pending: 0, recentLogins: 0 });
   const [onboardingStats, setOnboardingStats] = useState<OnboardingStats>({ pending: 0, approved: 0, rejected: 0 });
