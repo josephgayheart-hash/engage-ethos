@@ -591,8 +591,10 @@ export default function AdminConsolePage() {
                   Welcome, {profile?.first_name}
                 </h2>
                 <p className="text-white/80">
-                  As an administrator for {effectiveTenant?.institution_name || 'your organization'}, you can manage users, 
-                  review access requests, and configure {isAgency ? 'partner institution' : 'institutional'} settings.
+                  {isPlatformOwner 
+                    ? `Welcome to the CampusVoice platform admin. Manage workspaces, users, and platform-wide configuration.`
+                    : `As an administrator for ${effectiveTenant?.institution_name || 'your organization'}, you can manage users, review access requests, and configure ${isEffectiveAgency ? 'partner institution' : 'institutional'} settings.`
+                  }
                 </p>
               </div>
             </div>
