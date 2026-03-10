@@ -97,7 +97,7 @@ export default function AgencyOnboardingPage() {
               />
               <Badge variant="outline" className="border-primary/30">
                 <Briefcase className="h-3 w-3 mr-1.5" />
-                Agency
+                Agency Partner
               </Badge>
             </div>
           </div>
