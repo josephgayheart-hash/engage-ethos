@@ -414,7 +414,7 @@ export default function AdminConsolePage() {
     };
 
     fetchStats();
-  }, [tenant?.id, isSuperAdmin]);
+  }, [effectiveTenant?.id, isSuperAdmin]);
 
   const formatLastLogin = (date: string | null) => {
     if (!date) return 'Never';
