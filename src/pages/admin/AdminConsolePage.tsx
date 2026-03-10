@@ -629,7 +629,7 @@ export default function AdminConsolePage() {
                     id="institutionName"
                     value={institutionName}
                     onChange={(e) => setInstitutionName(e.target.value)}
-                    placeholder={isAgency ? "Enter agency name" : "Enter institution name"}
+                    placeholder={`Enter ${entityTerm} name`}
                     className="max-w-md"
                   />
                 </div>
