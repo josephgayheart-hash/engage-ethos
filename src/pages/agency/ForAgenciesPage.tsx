@@ -29,25 +29,25 @@ const agencyValueProps = [
     icon: Layers,
     title: "Scale Without Sacrifice",
     description:
-      "Manage 5 clients or 50 from the same dashboard. Each university gets their own Content DNA workspace—no crossed wires, no brand confusion.",
+      "Manage 5 institutions or 50 from the same dashboard. Each gets their own Content DNA workspace—no crossed wires, no brand confusion.",
   },
   {
     icon: Sparkles,
     title: "Brand Precision at Scale",
     description:
-      "Every client's voice is unique. Our AI learns each institution's personality and generates content that sounds authentically theirs, not generic.",
+      "Every institution's voice is unique. Our AI learns each one's personality and generates content that sounds authentically theirs, not generic.",
   },
   {
     icon: Library,
     title: "Your Playbook, Their Brand",
     description:
-      "Build proven message templates once, deploy across clients with automatic brand adaptation. Keep your best ideas working harder.",
+      "Build proven message templates once, deploy across partner institutions with automatic brand adaptation. Keep your best ideas working harder.",
   },
   {
     icon: TrendingUp,
     title: "Prove Your Value",
     description:
-      "Per-client analytics show exactly how your messaging performs. Walk into every client meeting with data that demonstrates ROI.",
+      "Per-institution analytics show exactly how your messaging performs. Walk into every meeting with data that demonstrates ROI.",
   },
 ];
 
