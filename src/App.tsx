@@ -80,6 +80,7 @@ import ProspectOutreachPage from "./pages/ProspectOutreachPage";
 import CRMPage from "./pages/CRMPage";
 import NDALinksPage from "./pages/admin/NDALinksPage";
 import NDASignPage from "./pages/NDASignPage";
+import GivingDayPlannerPage from "./pages/GivingDayPlannerPage";
 
 const queryClient = new QueryClient();
 
