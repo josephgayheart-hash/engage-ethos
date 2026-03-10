@@ -39,8 +39,8 @@ export default function AgencyOnboardingPage() {
   const handleAddClient = async () => {
     if (!clientData.name.trim()) {
       toast({
-        title: "Client name required",
-        description: "Please enter a name for your first client.",
+        title: "Institution name required",
+        description: "Please enter a name for your first partner institution.",
         variant: "destructive",
       });
       return;
@@ -63,10 +63,10 @@ export default function AgencyOnboardingPage() {
 
       setCurrentStep("complete");
     } catch (error: any) {
-      console.error("Error creating client:", error);
+      console.error("Error creating institution:", error);
       toast({
         title: "Error",
-        description: "Failed to create client. Please try again.",
+        description: "Failed to create institution. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -82,7 +82,7 @@ export default function AgencyOnboardingPage() {
     <>
       <SEOHead
         title="Agency Setup | CampusVoice.AI"
-        description="Set up your agency account and add your first university client."
+        description="Set up your agency partner account and add your first partner institution."
       />
 
       <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background flex flex-col">
@@ -97,7 +97,7 @@ export default function AgencyOnboardingPage() {
               />
               <Badge variant="outline" className="border-primary/30">
                 <Briefcase className="h-3 w-3 mr-1.5" />
-                Agency
+                Agency Partner
               </Badge>
             </div>
           </div>
@@ -116,7 +116,7 @@ export default function AgencyOnboardingPage() {
                     Welcome to CampusVoice, {agencyName}!
                   </CardTitle>
                   <p className="text-muted-foreground mt-2">
-                    Let's get you set up to manage your university clients.
+                    Let's get you set up to manage your partner institutions.
                   </p>
                 </CardHeader>
                 <CardContent className="pt-6">
@@ -124,9 +124,9 @@ export default function AgencyOnboardingPage() {
                     <div className="flex items-start gap-4 p-4 rounded-lg bg-muted/50">
                       <Layers className="h-5 w-5 text-primary mt-0.5" />
                       <div>
-                        <h3 className="font-medium">Client Switcher</h3>
+                        <h3 className="font-medium">Institution Switcher</h3>
                         <p className="text-sm text-muted-foreground">
-                          Switch between university clients instantly from the
+                          Switch between partner institutions instantly from the
                           header.
                         </p>
                       </div>
@@ -134,9 +134,9 @@ export default function AgencyOnboardingPage() {
                     <div className="flex items-start gap-4 p-4 rounded-lg bg-muted/50">
                       <Sparkles className="h-5 w-5 text-primary mt-0.5" />
                       <div>
-                        <h3 className="font-medium">Per-Client Content DNA</h3>
+                        <h3 className="font-medium">Per-Institution Content DNA</h3>
                         <p className="text-sm text-muted-foreground">
-                          Each client gets their own voice profile and brand
+                          Each institution gets their own voice profile and brand
                           configuration.
                         </p>
                       </div>
@@ -144,9 +144,9 @@ export default function AgencyOnboardingPage() {
                     <div className="flex items-start gap-4 p-4 rounded-lg bg-muted/50">
                       <Users className="h-5 w-5 text-primary mt-0.5" />
                       <div>
-                        <h3 className="font-medium">Client-Tagged Workflows</h3>
+                        <h3 className="font-medium">Institution-Tagged Workflows</h3>
                         <p className="text-sm text-muted-foreground">
-                          All messages and drafts are organized by client
+                          All messages and drafts are organized by institution
                           automatically.
                         </p>
                       </div>
@@ -158,7 +158,7 @@ export default function AgencyOnboardingPage() {
                     size="lg"
                     onClick={() => setCurrentStep("add-client")}
                   >
-                    Add Your First Client
+                    Add Your First Institution
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </CardContent>
@@ -175,17 +175,17 @@ export default function AgencyOnboardingPage() {
                     </Badge>
                   </div>
                   <CardTitle className="text-2xl">
-                    Add Your First Client
+                    Add Your First Partner Institution
                   </CardTitle>
                   <p className="text-muted-foreground">
-                    Enter the details for your first university client. You can
-                    add more clients later.
+                    Enter the details for your first partner institution. You can
+                    add more later.
                   </p>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
                     <div className="space-y-2">
-                      <Label htmlFor="clientName">University Name *</Label>
+                      <Label htmlFor="clientName">Institution Name *</Label>
                       <div className="relative">
                         <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input

@@ -154,13 +154,13 @@ export default function AgencyDashboardPage() {
     }
   };
 
-  const agencyName = tenant?.institution_name || "Your Agency";
+  const agencyName = tenant?.institution_name || "Your Firm";
 
   return (
     <>
       <SEOHead
         title={`${agencyName} | CampusVoice.AI`}
-        description="Manage your university clients from the agency dashboard."
+        description="Manage your partner institutions from the agency partner dashboard."
       />
 
       <div className="bg-background">
@@ -173,20 +173,20 @@ export default function AgencyDashboardPage() {
                 <div className="flex items-center gap-2 mb-2">
                   <Badge variant="outline" className="border-primary/30">
                     <Briefcase className="h-3 w-3 mr-1.5" />
-                    Agency
+                    Agency Partner
                   </Badge>
                 </div>
                 <h1 className="text-3xl font-bold text-foreground">
-                  {agencyName} Client Hub
+                  {agencyName} Partner Hub
                 </h1>
                 <p className="text-muted-foreground mt-1">
-                  Manage your university clients and their content
+                  Manage your partner institutions and their content
                 </p>
               </div>
               <Link to="/agency/clients">
                 <Button className="gap-2">
                   <Plus className="h-4 w-4" />
-                  Add Client
+                  Add Institution
                 </Button>
               </Link>
             </div>
@@ -198,7 +198,7 @@ export default function AgencyDashboardPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">
-                        Active Clients
+                        Active Institutions
                       </p>
                       <p className="text-3xl font-bold">{stats.activeClients}</p>
                     </div>
@@ -248,7 +248,7 @@ export default function AgencyDashboardPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">
-                        Paused Clients
+                        Paused Institutions
                       </p>
                       <p className="text-3xl font-bold">{stats.pausedClients}</p>
                     </div>
@@ -263,7 +263,7 @@ export default function AgencyDashboardPage() {
             {/* Clients Grid */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Your Clients</CardTitle>
+                <CardTitle>Your Partner Institutions</CardTitle>
                 <Link to="/agency/clients">
                   <Button variant="ghost" size="sm" className="gap-1">
                     View All
@@ -274,21 +274,21 @@ export default function AgencyDashboardPage() {
               <CardContent>
                 {isLoading ? (
                   <div className="text-center py-8 text-muted-foreground">
-                    Loading clients...
+                    Loading institutions...
                   </div>
                 ) : clients.length === 0 ? (
                   <div className="text-center py-12">
                     <Building2 className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
                     <h3 className="font-medium text-foreground mb-2">
-                      No clients yet
+                      No partner institutions yet
                     </h3>
                     <p className="text-muted-foreground mb-4">
-                      Add your first university client to get started.
+                      Add your first partner institution to get started.
                     </p>
                     <Link to="/agency/clients">
                       <Button className="gap-2">
                         <Plus className="h-4 w-4" />
-                        Add First Client
+                        Add First Institution
                       </Button>
                     </Link>
                   </div>

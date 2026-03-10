@@ -96,7 +96,7 @@ export function AppSidebar() {
 
   const governItems = [
     { title: "Content DNA Studio", url: "/admin/content-dna", icon: Dna },
-    { title: isAgency ? "Client Settings" : "Institution Settings", url: isAgency ? "/agency/clients" : "/university-settings", icon: Building2 },
+    { title: isAgency ? "Partner Institutions" : "Institution Settings", url: isAgency ? "/agency/clients" : "/university-settings", icon: Building2 },
     ...(isAdmin ? [{ title: "Admin Console", url: "/admin/console", icon: Settings }] : []),
     ...(isAgency ? [{ title: "Analytics", url: "/agency/analytics", icon: BarChart3 }] : []),
   ];

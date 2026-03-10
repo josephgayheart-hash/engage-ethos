@@ -31,7 +31,7 @@ const processSteps = [
   {
     step: 1,
     title: "Submit Your Interest",
-    description: "Tell us about your agency and university clients",
+    description: "Tell us about your firm and the institutions you serve",
   },
   {
     step: 2,
@@ -41,7 +41,7 @@ const processSteps = [
   {
     step: 3,
     title: "Onboarding",
-    description: "Once approved, we set up your agency workspace",
+    description: "Once approved, we set up your agency partner workspace",
   },
 ];
 
@@ -142,7 +142,7 @@ export default function AgencyRequestAccessPage() {
     <>
       <SEOHead
         title="Become a Partner | CampusVoice.AI"
-        description="Apply to become a CampusVoice Agency Partner. Manage multiple university clients from one platform."
+        description="Apply to become a CampusVoice Agency Partner. Manage multiple partner institutions from one platform."
       />
 
       <div className="min-h-screen bg-background">
@@ -278,10 +278,10 @@ export default function AgencyRequestAccessPage() {
                       {/* Agency Info */}
                       <div className="space-y-4 pt-4 border-t">
                         <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
-                          Agency Information
+                          Firm Information
                         </h3>
                         <div className="space-y-2">
-                          <Label htmlFor="agencyName">Agency Name *</Label>
+                          <Label htmlFor="agencyName">Firm Name *</Label>
                           <div className="relative">
                             <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
@@ -320,7 +320,7 @@ export default function AgencyRequestAccessPage() {
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="estimatedClientCount">
-                            Estimated # of University Clients
+                            Estimated # of Partner Institutions
                           </Label>
                           <div className="relative">
                             <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

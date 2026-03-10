@@ -29,25 +29,25 @@ const agencyValueProps = [
     icon: Layers,
     title: "Scale Without Sacrifice",
     description:
-      "Manage 5 clients or 50 from the same dashboard. Each university gets their own Content DNA workspace—no crossed wires, no brand confusion.",
+      "Manage 5 institutions or 50 from the same dashboard. Each gets their own Content DNA workspace—no crossed wires, no brand confusion.",
   },
   {
     icon: Sparkles,
     title: "Brand Precision at Scale",
     description:
-      "Every client's voice is unique. Our AI learns each institution's personality and generates content that sounds authentically theirs, not generic.",
+      "Every institution's voice is unique. Our AI learns each one's personality and generates content that sounds authentically theirs, not generic.",
   },
   {
     icon: Library,
     title: "Your Playbook, Their Brand",
     description:
-      "Build proven message templates once, deploy across clients with automatic brand adaptation. Keep your best ideas working harder.",
+      "Build proven message templates once, deploy across partner institutions with automatic brand adaptation. Keep your best ideas working harder.",
   },
   {
     icon: TrendingUp,
     title: "Prove Your Value",
     description:
-      "Per-client analytics show exactly how your messaging performs. Walk into every client meeting with data that demonstrates ROI.",
+      "Per-institution analytics show exactly how your messaging performs. Walk into every meeting with data that demonstrates ROI.",
   },
 ];
 
@@ -59,7 +59,7 @@ const agencyBenefits = [
   },
   {
     title: "Higher Margins",
-    description: "Serve more clients without scaling headcount",
+    description: "Serve more institutions without scaling headcount",
     icon: DollarSign,
   },
   {
@@ -80,7 +80,7 @@ export default function ForAgenciesPage() {
     <>
       <SEOHead
         title="For Agencies | CampusVoice.AI"
-        description="Manage multiple university clients from one platform. Per-client Content DNA, unified templates, and client-tagged workflows for higher ed marketing agencies."
+        description="Manage multiple partner institutions from one platform. Per-institution Content DNA, unified templates, and institution-tagged workflows for higher ed marketing agencies."
       />
 
       <div className="min-h-screen bg-background">
@@ -134,7 +134,7 @@ export default function ForAgenciesPage() {
               </Badge>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold tracking-tight text-foreground mb-6">
-                Your Clients Deserve
+                Your Institutions Deserve
                 <br />
                 <span className="bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent">
                   Authentic Brand Voice
@@ -142,7 +142,7 @@ export default function ForAgenciesPage() {
               </h1>
 
               <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-                Manage multiple university clients without the context-switching chaos.
+                Manage multiple partner institutions without the context-switching chaos.
                 CampusVoice learns each institution's unique voice so every message
                 sounds authentically theirs—not templated.
               </p>
@@ -172,11 +172,11 @@ export default function ForAgenciesPage() {
               <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2 bg-background/60 backdrop-blur-sm px-4 py-2 rounded-full">
                   <Users className="h-4 w-4 text-primary" />
-                  <span>Multi-Client Support</span>
+                  <span>Multi-Institution Support</span>
                 </div>
                 <div className="flex items-center gap-2 bg-background/60 backdrop-blur-sm px-4 py-2 rounded-full">
                   <Shield className="h-4 w-4 text-primary" />
-                  <span>Per-Client Branding</span>
+                  <span>Per-Institution Branding</span>
                 </div>
                 <div className="flex items-center gap-2 bg-background/60 backdrop-blur-sm px-4 py-2 rounded-full">
                   <Zap className="h-4 w-4 text-primary" />
@@ -194,7 +194,7 @@ export default function ForAgenciesPage() {
               The Higher Ed Agency Challenge
             </h2>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Every university has a distinct voice. But when you're managing multiple clients,
+              Every university has a distinct voice. But when you're managing multiple institutions,
               keeping those voices separate is exhausting. One wrong tone, one mixed-up message,
               and you've undermined the trust you've spent years building.
             </p>
@@ -212,7 +212,7 @@ export default function ForAgenciesPage() {
                 Built for How Agencies Actually Work
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Everything you need to manage multiple university clients efficiently,
+                Everything you need to manage multiple partner institutions efficiently,
                 without the context-switching overhead.
               </p>
             </div>
@@ -286,7 +286,7 @@ export default function ForAgenciesPage() {
                 Manage Your Entire Portfolio
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Switch between university clients instantly. Each institution gets 
+                Switch between partner institutions instantly. Each institution gets 
                 dedicated Content DNA, messaging history, and brand settings.
               </p>
             </div>
@@ -296,13 +296,13 @@ export default function ForAgenciesPage() {
               <div className="bg-muted/50 border-b px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Briefcase className="h-5 w-5 text-primary" />
-                  <span className="font-semibold">Your University Clients</span>
+                  <span className="font-semibold">Your Partner Institutions</span>
                   <Badge variant="secondary" className="ml-2">24 Active</Badge>
                   <Badge variant="outline" className="ml-1 text-xs text-muted-foreground border-muted-foreground/30">Example</Badge>
                 </div>
                 <Button size="sm" variant="outline" className="gap-2">
                   <Users className="h-4 w-4" />
-                  Add Client
+                  Add Institution
                 </Button>
               </div>
               <div className="divide-y max-h-[400px] overflow-y-auto">

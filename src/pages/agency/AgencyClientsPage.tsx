@@ -68,7 +68,7 @@ const PROFILE_TYPE_ICONS: Record<ProfileType, React.ReactNode> = {
 };
 
 const PROFILE_TYPE_LABELS: Record<ProfileType, string> = {
-  university: 'University Client',
+  university: 'Partner Institution',
   college: 'College',
   division: 'Division',
   unit: 'Unit',
@@ -187,8 +187,8 @@ export default function AgencyClientsPage() {
     setShowWizard(false);
     if (profile) {
       toast({ 
-        title: "Client added", 
-        description: `${profile.name} has been added to your client roster.` 
+        title: "Institution added", 
+        description: `${profile.name} has been added as a partner institution.` 
       });
     }
   };
@@ -217,7 +217,7 @@ export default function AgencyClientsPage() {
     await updateProfile(editingProfile.id, { config: pendingConfig });
     setEditingProfile({ ...editingProfile, config: pendingConfig });
     setHasUnsavedChanges(false);
-    toast({ title: "Client updated", description: "Configuration has been saved." });
+    toast({ title: "Institution updated", description: "Configuration has been saved." });
   };
 
   const handleCloseConfigDialog = (open: boolean) => {
@@ -249,9 +249,9 @@ export default function AgencyClientsPage() {
         setShowConfigDialog(false);
       }
       
-      toast({ title: "Client deleted", description: "Client and all associated data have been removed." });
+      toast({ title: "Institution removed", description: "Institution and all associated data have been removed." });
     } catch (error: any) {
-      toast({ title: "Error", description: error.message || "Failed to delete client", variant: "destructive" });
+      toast({ title: "Error", description: error.message || "Failed to remove institution", variant: "destructive" });
     } finally {
       setDeleteDialogOpen(false);
       setProfileToDelete(null);
@@ -265,7 +265,7 @@ export default function AgencyClientsPage() {
     setProfileToDuplicate(null);
     setDuplicateName("");
     if (newProfile) {
-      toast({ title: "Client duplicated", description: `"${newProfile.name}" created.` });
+      toast({ title: "Institution duplicated", description: `"${newProfile.name}" created.` });
     }
   };
 
@@ -431,8 +431,8 @@ export default function AgencyClientsPage() {
   return (
     <>
       <SEOHead
-        title="Client Management | CampusVoice.AI"
-        description="Manage your university clients and their content."
+        title="Partner Institutions | CampusVoice.AI"
+        description="Manage your partner institutions and their content."
       />
 
       <div className="bg-background">
@@ -442,14 +442,14 @@ export default function AgencyClientsPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
               <div>
-                <h1 className="text-3xl font-bold text-foreground">Client Management</h1>
+                <h1 className="text-3xl font-bold text-foreground">Partner Institutions</h1>
                 <p className="text-muted-foreground mt-1">
-                  Manage your university clients, their branding, and organizational structure
+                  Manage the institutions you serve, their branding, and organizational structure
                 </p>
               </div>
               <Button onClick={() => setShowWizard(true)} className="gap-2">
                 <Plus className="h-4 w-4" />
-                Add University Client
+                Add Partner Institution
               </Button>
             </div>
 
@@ -461,7 +461,7 @@ export default function AgencyClientsPage() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       className="pl-10"
-                      placeholder="Search clients..."
+                      placeholder="Search institutions..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -473,24 +473,24 @@ export default function AgencyClientsPage() {
             {/* Clients List */}
             {isLoading ? (
               <div className="text-center py-12 text-muted-foreground">
-                Loading clients...
+                Loading institutions...
               </div>
             ) : filteredProfiles.length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">
                   <Building2 className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
                   <h3 className="font-medium text-foreground mb-2">
-                    {searchQuery ? "No matching clients" : "No clients yet"}
+                    {searchQuery ? "No matching institutions" : "No partner institutions yet"}
                   </h3>
                   <p className="text-muted-foreground mb-4">
                     {searchQuery
                       ? "Try adjusting your search."
-                      : "Add your first university client to get started. You'll be able to configure their branding, structure, and Content DNA."}
+                      : "Add your first partner institution to get started. You'll be able to configure their branding, structure, and Content DNA."}
                   </p>
                   {!searchQuery && (
                     <Button onClick={() => setShowWizard(true)} className="gap-2">
                       <Plus className="h-4 w-4" />
-                      Add First Client
+                      Add First Institution
                     </Button>
                   )}
                 </CardContent>

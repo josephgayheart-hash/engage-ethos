@@ -90,7 +90,7 @@ export function AppTopBar() {
             </span>
             {isAgency && (
               <Badge variant="outline" className="h-4 text-[9px] px-1 border-amber-500/30 text-amber-600">
-                Agency
+                Agency Partner
               </Badge>
             )}
           </div>
