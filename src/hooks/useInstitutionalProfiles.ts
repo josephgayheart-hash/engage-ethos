@@ -168,7 +168,7 @@ export function useInstitutionalProfiles() {
     parentProfileId?: string | null,
     profileType: ProfileType = 'university'
   ): Promise<InstitutionalProfile | null> => {
-    if (!user || !tenant?.id) return null;
+    if (!user || !effectiveTenantId) return null;
 
     try {
       const { data, error } = await supabase
