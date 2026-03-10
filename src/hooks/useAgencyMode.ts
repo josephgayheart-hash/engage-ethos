@@ -1,7 +1,4 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { useContext } from "react";
-
-// Import the context directly to avoid circular issues - we check if it exists
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 
 interface AgencyLabels {
@@ -59,18 +56,11 @@ interface AgencyModeResult {
 }
 
 export function useAgencyMode(): AgencyModeResult {
-  const { tenant, isSuperAdmin } = useAuth();
+  const { tenant } = useAuth();
+  const { activeWorkspace, canSwitch } = useWorkspace();
   
   // Use active workspace when super admin is switching workspaces
-  let effectiveTenant = tenant;
-  try {
-    const { activeWorkspace, canSwitch } = useWorkspace();
-    if (canSwitch && activeWorkspace) {
-      effectiveTenant = activeWorkspace;
-    }
-  } catch {
-    // WorkspaceProvider not mounted, use default tenant
-  }
+  const effectiveTenant = canSwitch && activeWorkspace ? activeWorkspace : tenant;
   
   const tenantType = (effectiveTenant as any)?.tenant_type as 'university' | 'agency' | null;
   const isAgency = tenantType === 'agency';
