@@ -90,8 +90,8 @@ export function AppSidebar() {
     navigate("/login");
   };
 
-  const libraryItems = [
-    { title: isAgency ? "Templates" : "University Library", url: "/shared-library", icon: Library },
+  const libraryItems = isAgency ? [] : [
+    { title: "University Library", url: "/shared-library", icon: Library },
   ];
 
   const governItems = [
