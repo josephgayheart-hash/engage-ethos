@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import {
   Sparkles, Copy, Check, BookmarkPlus, RefreshCw,
   Mail, MessageSquare, Megaphone, Phone, Globe,
-  Lock, ArrowRight
+  Lock, CheckCircle2
 } from "lucide-react";
 import type { CampaignTouchpoint } from "@/hooks/useAdvancementCampaigns";
 
@@ -22,16 +22,20 @@ interface QuickGenerateDialogProps {
   touchpoint: CampaignTouchpoint | null;
   campaignName: string;
   phase: string;
-  onStatusUpdate?: (touchpointId: string, status: string) => void;
+  onSaveDraft?: (touchpointId: string, content: string, updates: Partial<CampaignTouchpoint>) => void;
 }
 
-const CHANNEL_META: Record<string, { label: string; icon: React.ElementType }> = {
-  email: { label: "Email", icon: Mail },
-  sms: { label: "SMS", icon: MessageSquare },
-  "social-media": { label: "Social Media", icon: Megaphone },
-  "phone-call": { label: "Phone Script", icon: Phone },
-  "landing-page": { label: "Landing Page", icon: Globe },
-};
+const CHANNEL_OPTIONS = [
+  { value: "email", label: "Email", icon: Mail },
+  { value: "sms", label: "SMS", icon: MessageSquare },
+  { value: "social-media", label: "Social Media", icon: Megaphone },
+  { value: "phone-call", label: "Phone Script", icon: Phone },
+  { value: "landing-page", label: "Landing Page", icon: Globe },
+];
+
+const CHANNEL_META: Record<string, { label: string; icon: React.ElementType }> = Object.fromEntries(
+  CHANNEL_OPTIONS.map(c => [c.value, { label: c.label, icon: c.icon }])
+);
 
 const TONE_OPTIONS = [
   { value: "encouraging", label: "Encouraging" },
@@ -60,11 +64,12 @@ export function QuickGenerateDialog({
   touchpoint,
   campaignName,
   phase,
-  onStatusUpdate,
+  onSaveDraft,
 }: QuickGenerateDialogProps) {
   const { toast } = useToast();
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const [channel, setChannel] = useState(touchpoint?.channel || "email");
   const [tone, setTone] = useState(touchpoint?.tone || "encouraging");
   const [cta, setCta] = useState("");
   const [notes, setNotes] = useState("");
@@ -72,15 +77,18 @@ export function QuickGenerateDialog({
   const [generatedContent, setGeneratedContent] = useState("");
   const [streamingContent, setStreamingContent] = useState("");
   const [copied, setCopied] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   // Reset state when touchpoint changes
   useEffect(() => {
     if (touchpoint) {
+      setChannel(touchpoint.channel || "email");
       setTone(touchpoint.tone || "encouraging");
       setCta("");
       setNotes("");
       setGeneratedContent("");
       setStreamingContent("");
+      setSaved(false);
     }
   }, [touchpoint?.id]);
 
@@ -96,8 +104,9 @@ export function QuickGenerateDialog({
     setIsGenerating(true);
     setGeneratedContent("");
     setStreamingContent("");
+    setSaved(false);
 
-    const channelLabel = CHANNEL_META[touchpoint.channel]?.label || touchpoint.channel;
+    const channelLabel = CHANNEL_META[channel]?.label || channel;
     const contextStr = [
       `${campaignName} – ${phase} phase`,
       `Message type: ${touchpoint.messageType}`,
@@ -120,7 +129,7 @@ export function QuickGenerateDialog({
             type: "single",
             context: {
               audience: touchpoint.segment === "alumni" ? "alumni" : "donors",
-              channel: touchpoint.channel,
+              channel,
               moment: "giving-day",
               tone,
               context: contextStr,
@@ -190,15 +199,18 @@ export function QuickGenerateDialog({
     toast({ title: "Copied to clipboard" });
   };
 
-  const handleMarkDrafted = () => {
-    if (touchpoint && onStatusUpdate) {
-      onStatusUpdate(touchpoint.id, "drafted");
-      toast({ title: "Touchpoint marked as drafted" });
-    }
+  const handleAddToPlan = () => {
+    if (!touchpoint || !onSaveDraft || !generatedContent) return;
+    onSaveDraft(touchpoint.id, generatedContent, {
+      status: "drafted",
+      tone,
+      channel,
+    });
+    setSaved(true);
+    toast({ title: "Draft added to your campaign plan" });
   };
 
   if (!touchpoint) return null;
-  const ChannelIcon = CHANNEL_META[touchpoint.channel]?.icon || Mail;
   const hasResult = generatedContent.length > 0;
   const displayContent = streamingContent || generatedContent;
 
@@ -219,9 +231,6 @@ export function QuickGenerateDialog({
               <Lock className="w-2.5 h-2.5" /> {phase}
             </Badge>
             <Badge variant="secondary" className="gap-1 text-[11px]">
-              <ChannelIcon className="w-2.5 h-2.5" /> {CHANNEL_META[touchpoint.channel]?.label || touchpoint.channel}
-            </Badge>
-            <Badge variant="secondary" className="gap-1 text-[11px]">
               <Lock className="w-2.5 h-2.5" /> {touchpoint.segment}
             </Badge>
             <Badge variant="secondary" className="gap-1 text-[11px]">
@@ -234,7 +243,28 @@ export function QuickGenerateDialog({
           {/* Input fields — only show before generation or when regenerating */}
           {!hasResult && !isGenerating && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Channel</Label>
+                  <Select value={channel} onValueChange={setChannel}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CHANNEL_OPTIONS.map(c => {
+                        const Icon = c.icon;
+                        return (
+                          <SelectItem key={c.value} value={c.value}>
+                            <span className="flex items-center gap-2">
+                              <Icon className="w-3.5 h-3.5" />
+                              {c.label}
+                            </span>
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">Tone</Label>
                   <Select value={tone} onValueChange={setTone}>
@@ -251,7 +281,7 @@ export function QuickGenerateDialog({
                 <div className="space-y-1.5">
                   <Label className="text-xs">Call-to-Action</Label>
                   <Input
-                    placeholder="e.g., Donate now, Share your story"
+                    placeholder="e.g., Donate now"
                     value={cta}
                     onChange={e => setCta(e.target.value)}
                     className="h-9"
@@ -269,7 +299,7 @@ export function QuickGenerateDialog({
                 />
               </div>
               <Button onClick={handleGenerate} className="w-full gap-2">
-                <Sparkles className="w-4 h-4" /> Generate {CHANNEL_META[touchpoint.channel]?.label || "Content"}
+                <Sparkles className="w-4 h-4" /> Generate {CHANNEL_META[channel]?.label || "Content"}
               </Button>
             </div>
           )}
@@ -281,7 +311,7 @@ export function QuickGenerateDialog({
                 <Sparkles className="w-5 h-5 text-primary animate-pulse" />
               </div>
               <p className="text-sm text-muted-foreground">
-                Writing your {phase.toLowerCase()} {CHANNEL_META[touchpoint.channel]?.label?.toLowerCase() || "message"}...
+                Writing your {phase.toLowerCase()} {CHANNEL_META[channel]?.label?.toLowerCase() || "message"}...
               </p>
             </div>
           )}
@@ -312,6 +342,7 @@ export function QuickGenerateDialog({
               onClick={() => {
                 setGeneratedContent("");
                 setStreamingContent("");
+                setSaved(false);
               }}
               className="gap-1.5 text-muted-foreground"
             >
@@ -322,9 +353,15 @@ export function QuickGenerateDialog({
                 {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                 {copied ? "Copied" : "Copy"}
               </Button>
-              <Button size="sm" onClick={handleMarkDrafted} className="gap-1.5">
-                <BookmarkPlus className="w-3.5 h-3.5" /> Mark as Drafted
-              </Button>
+              {saved ? (
+                <Button size="sm" variant="secondary" disabled className="gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-primary" /> Added to Plan
+                </Button>
+              ) : (
+                <Button size="sm" onClick={handleAddToPlan} className="gap-1.5">
+                  <BookmarkPlus className="w-3.5 h-3.5" /> Add to Plan
+                </Button>
+              )}
             </div>
           </div>
         )}
