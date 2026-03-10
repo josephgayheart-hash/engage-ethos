@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 import {
   ArrowLeft, Heart, BookOpen, BarChart3, Users, Gift, Mail, MessageSquare,
   Megaphone, FileText, Copy, RefreshCw, Sparkles, Check, Star, TrendingUp,
-  DollarSign, Award, CheckCircle2
+  DollarSign, Award, CheckCircle2, Map, ArrowRight, Pen
 } from "lucide-react";
 
 const CHANNELS = [
