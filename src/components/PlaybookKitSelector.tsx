@@ -33,6 +33,7 @@ const categoryIcons: Record<string, React.ElementType> = {
   'enrollment-decline': AlertTriangle,
   'workforce': Briefcase,
   'belonging': Heart,
+  'advancement': Heart,
 };
 
 const categoryLabels: Record<string, string> = {
@@ -40,6 +41,7 @@ const categoryLabels: Record<string, string> = {
   'enrollment-decline': 'Enrollment Recovery',
   'workforce': 'Workforce Development',
   'belonging': 'Belonging & Community',
+  'advancement': 'Advancement & Giving',
 };
 
 const categoryColors: Record<string, string> = {
@@ -47,6 +49,7 @@ const categoryColors: Record<string, string> = {
   'enrollment-decline': 'bg-destructive/10 text-destructive border-destructive/20',
   'workforce': 'bg-pillar-authority/10 text-pillar-authority border-pillar-authority/20',
   'belonging': 'bg-pillar-consensus/10 text-pillar-consensus border-pillar-consensus/20',
+  'advancement': 'bg-primary/10 text-primary border-primary/20',
 };
 
 export function PlaybookKitSelector({ 
