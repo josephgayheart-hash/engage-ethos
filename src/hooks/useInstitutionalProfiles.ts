@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useActiveWorkspaceId } from '@/contexts/WorkspaceContext';
 import type { InstitutionalConfig } from '@/types/campusvoice';
 import type { Json } from '@/integrations/supabase/types';
 
@@ -113,12 +114,16 @@ const createEmptyConfig = (): InstitutionalConfig => ({
 
 export function useInstitutionalProfiles() {
   const { user, tenant } = useAuth();
+  const workspaceId = useActiveWorkspaceId();
   const [profiles, setProfiles] = useState<InstitutionalProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Use workspace id (super admin switched) or fall back to tenant id
+  const effectiveTenantId = workspaceId || tenant?.id;
+
   // Fetch profiles from database
   const fetchProfiles = useCallback(async () => {
-    if (!user || !tenant?.id) {
+    if (!user || !effectiveTenantId) {
       setProfiles([]);
       setIsLoading(false);
       return;
@@ -128,7 +133,7 @@ export function useInstitutionalProfiles() {
       const { data, error } = await supabase
         .from('institutional_profiles')
         .select('*')
-        .eq('tenant_id', tenant.id)
+        .eq('tenant_id', effectiveTenantId)
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
@@ -151,7 +156,7 @@ export function useInstitutionalProfiles() {
     } finally {
       setIsLoading(false);
     }
-  }, [user, tenant?.id]);
+  }, [user, effectiveTenantId]);
 
   useEffect(() => {
     fetchProfiles();
@@ -163,13 +168,13 @@ export function useInstitutionalProfiles() {
     parentProfileId?: string | null,
     profileType: ProfileType = 'university'
   ): Promise<InstitutionalProfile | null> => {
-    if (!user || !tenant?.id) return null;
+    if (!user || !effectiveTenantId) return null;
 
     try {
       const { data, error } = await supabase
         .from('institutional_profiles')
         .insert([{
-          tenant_id: tenant.id,
+          tenant_id: effectiveTenantId,
           created_by_user_id: user.id,
           name,
           config: JSON.parse(JSON.stringify(config || createEmptyConfig())) as Json,
@@ -198,7 +203,7 @@ export function useInstitutionalProfiles() {
       console.error('Error creating profile:', error);
       return null;
     }
-  }, [user, tenant?.id]);
+  }, [user, effectiveTenantId]);
 
   // Get children of a profile
   const getChildProfiles = useCallback((parentId: string): InstitutionalProfile[] => {
@@ -261,13 +266,13 @@ export function useInstitutionalProfiles() {
     asSubUnit?: { parentProfileId: string; profileType: ProfileType }
   ): Promise<InstitutionalProfile | null> => {
     const original = profiles.find(p => p.id === id);
-    if (!original || !user || !tenant?.id) return null;
+    if (!original || !user || !effectiveTenantId) return null;
 
     try {
       const { data, error } = await supabase
         .from('institutional_profiles')
         .insert([{
-          tenant_id: tenant.id,
+          tenant_id: effectiveTenantId,
           created_by_user_id: user.id,
           name: newName,
           config: JSON.parse(JSON.stringify(original.config)) as Json,
@@ -296,7 +301,7 @@ export function useInstitutionalProfiles() {
       console.error('Error duplicating profile:', error);
       return null;
     }
-  }, [profiles, user, tenant?.id]);
+  }, [profiles, user, effectiveTenantId]);
 
   const getProfile = useCallback((id: string): InstitutionalProfile | undefined => {
     return profiles.find(p => p.id === id);
