@@ -198,7 +198,7 @@ export default function AgencyDashboardPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">
-                        Active Clients
+                        Active Institutions
                       </p>
                       <p className="text-3xl font-bold">{stats.activeClients}</p>
                     </div>
