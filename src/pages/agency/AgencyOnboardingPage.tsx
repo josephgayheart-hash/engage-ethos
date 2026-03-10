@@ -144,9 +144,9 @@ export default function AgencyOnboardingPage() {
                     <div className="flex items-start gap-4 p-4 rounded-lg bg-muted/50">
                       <Users className="h-5 w-5 text-primary mt-0.5" />
                       <div>
-                        <h3 className="font-medium">Client-Tagged Workflows</h3>
+                        <h3 className="font-medium">Institution-Tagged Workflows</h3>
                         <p className="text-sm text-muted-foreground">
-                          All messages and drafts are organized by client
+                          All messages and drafts are organized by institution
                           automatically.
                         </p>
                       </div>
