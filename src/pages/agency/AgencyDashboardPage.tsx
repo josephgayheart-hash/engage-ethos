@@ -154,7 +154,7 @@ export default function AgencyDashboardPage() {
     }
   };
 
-  const agencyName = tenant?.institution_name || "Your Agency";
+  const agencyName = tenant?.institution_name || "Your Firm";
 
   return (
     <>
