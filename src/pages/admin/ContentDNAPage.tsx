@@ -1249,23 +1249,23 @@ export default function ContentDNAPage() {
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      {(selectedProfile?.config?.logoUrl || tenant?.logo_url) ? (
+                      {(selectedProfile?.config?.logoUrl || effectiveTenant?.logo_url) ? (
                         <img 
-                          src={selectedProfile?.config?.logoUrl || tenant?.logo_url || ''}
+                          src={selectedProfile?.config?.logoUrl || effectiveTenant?.logo_url || ''}
                           alt="Logo"
                           className="w-12 h-12 object-contain rounded-lg border bg-white p-1"
                         />
                       ) : (
                         <div 
                           className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg"
-                          style={{ backgroundColor: selectedProfile?.config?.primaryColor || tenant?.primary_color || '#1F2A44' }}
+                          style={{ backgroundColor: selectedProfile?.config?.primaryColor || effectiveTenant?.primary_color || '#1F2A44' }}
                         >
-                          {(selectedProfile?.name || tenant?.institution_name)?.charAt(0) || 'U'}
+                          {(selectedProfile?.name || effectiveTenant?.institution_name)?.charAt(0) || 'U'}
                         </div>
                       )}
                       <div>
                         <CardTitle className="text-lg">
-                          {selectedProfile?.name || tenant?.institution_name || 'Institution'} Content DNA
+                          {selectedProfile?.name || effectiveTenant?.institution_name || 'Institution'} Content DNA
                         </CardTitle>
                         <CardDescription>
                           {selectedProfile ? 'Profile-specific Content DNA' : 'Institution-wide Content DNA'}
