@@ -1,50 +1,58 @@
 
 
-# Advancement & Giving Day Calendar Concepts
+## Demo Readiness Improvements — ✅ COMPLETED (Phase 1)
 
-## What You Already Have
-- **CommunicationCalendar** page with month view, channel filtering, audience filtering
-- **CampaignDashboard** with campaign CRUD (currently localStorage-based)
-- **Journey Designer** that generates multi-week touchpoint sequences with cadence controls
-- **Message Builder** with advancement-specific audiences (`donors`, `alumni`) and moments (`giving-day`, `annual-fund`, `capital-campaign`, `stewardship`, `impact-report`, `alumni-giving-day`)
-- **Story Bank** with donor story types
-- **Content DNA** for voice consistency
-- **Playbook Kits** framework for pre-configured journey templates
+### What was implemented
 
-## Concepts Worth Building
+1. **Social Proof Strip** — Added `SocialProofStrip.tsx` to landing page below hero with platform stats (2,400+ messages, 12 institutions, 85+ users, 94% brand score)
+2. **Features Dropdown** — Added `FeaturesDropdown.tsx` to `LandingNav` with links to all 10 feature pages
+3. **Impact Metrics Card** — Added `ImpactMetricsCard.tsx` to dashboard showing messages created, estimated time saved, builds generated, evaluations run
+4. **Branded Loading States** — Replaced generic "Loading..." text with `BrandedLoader.tsx` (CampusVoice logo + bouncing dots) in all auth guards
+5. **Team Activity Feed** — Added `TeamActivityFeed.tsx` to dashboard (admin-only) showing recent team actions
 
-### 1. Giving Day Countdown Calendar
-A dedicated calendar view purpose-built for Giving Day campaigns. Instead of a generic month view, it shows a **countdown timeline** (T-minus 30, 14, 7, 3, 1, Day-of, +1, +3, +7) with pre-mapped touchpoints across channels. Each slot shows the message type (teaser, urgency, live update, thank-you), target segment (lapsed donors, first-time, major gift prospects), and channel. Users click a slot to generate copy directly via the existing Message Builder infrastructure.
+### Files created
+- `src/components/landing/SocialProofStrip.tsx`
+- `src/components/landing/FeaturesDropdown.tsx`
+- `src/components/dashboard/ImpactMetricsCard.tsx`
+- `src/components/dashboard/TeamActivityFeed.tsx`
+- `src/components/BrandedLoader.tsx`
 
-**Leverages:** Journey Designer cadence logic, channel/audience types, Message Builder generation
+### Files modified
+- `src/pages/LandingPage.tsx` — imported SocialProofStrip
+- `src/components/landing/LandingNav.tsx` — added FeaturesDropdown
+- `src/pages/Index.tsx` — added ImpactMetricsCard + TeamActivityFeed
+- `src/App.tsx` — replaced loading states with BrandedLoader
 
-### 2. Advancement Campaign Playbook Kit
-A new Playbook Kit specifically for advancement that pre-loads a journey template with phases like "Cultivation → Solicitation → Giving Day → Stewardship." It auto-selects donor/alumni audiences, locks relevant channels (email, social, phone, landing page), and sets escalating cadence. The kit includes pre-mapped `CommunicationMoment` values (`annual-fund`, `giving-day`, `stewardship`, `impact-report`).
+---
 
-**Leverages:** Existing PlaybookKit type system, CadenceSelector escalation patterns, StrategyJourney generation
+## Remaining Demo Readiness Items (Phase 2)
 
-### 3. Multi-Channel Drip Sequence Builder (Advancement Mode)
-Extend the Journey Designer with an "Advancement" mode that understands donor lifecycle stages. Instead of enrollment funnel phases, it uses: Awareness → Cultivation → Solicitation → Conversion → Stewardship → Renewal. Each phase maps to specific channel mixes and tone shifts. The sequence auto-generates a visual timeline that can be exported as a stakeholder-facing campaign plan PDF.
+| Priority | Item | Status |
+|----------|------|--------|
+| 1 | Demo mode with pre-seeded Content DNA | Todo |
+| 7 | "Try a sample" in Journey Designer | Todo |
+| 8 | Video/demo embed in hero | Todo (needs video asset) |
+| 9 | Guided tour for first login | Todo |
+| 10 | Analytics seed data for demo accounts | Todo |
 
-**Leverages:** StrategyPage phase logic, PDF export, channel selection, tone preferences
+---
 
-### 4. Saturation Heatmap & Fatigue Detector
-Overlay the existing calendar with a heatmap showing communication density per audience segment per week. Flag when donors are receiving more than N touches in a window, or when there's a gap longer than M days. This directly addresses the "prevent audience fatigue" positioning already in the calendar subtitle. Could pull from both the message library and any active journey touchpoints.
+## Previous Completed Work
 
-**Leverages:** CommunicationCalendar grid, useMessageLibrary data, journey touchpoint dates
+### Graphic Design Mode Toggle with Extended Prompts — ✅ COMPLETED
 
-### 5. Stewardship Impact Report Generator
-After a giving day or campaign concludes, generate a branded impact report that pulls from the Fact Book (dollars raised, donor counts, participation rates) and Story Bank (donor testimonials). Output as a multi-channel package: email version, landing page copy, social posts, and a PDF. This closes the loop on the donor lifecycle.
+1. **Extracted Graphic Design as a segmented toggle** — "Photo" | "Graphic Design" toggle group at the top of Image Settings
+2. **Removed `graphic-design` from the Style dropdown** — Photo mode shows photo styles only; Graphic Design mode hides the style dropdown entirely
+3. **Added 4 Graphic Design sub-controls** (visible only in Graphic Design mode):
+   - **Design Style** — radio group: Bold & Geometric, Gradient Flow, Typographic Poster, Collage / Mixed Media, Retro / Vintage, Abstract Minimal
+   - **Color Mood** — selectable badge chips: Brand Colors Only, Warm, Cool, Monochrome, High Contrast, Pastel
+   - **Typography Style** — radio group: Sans-Serif Modern, Serif Classic, Display / Decorative, Handwritten
+   - **Layout Density** — radio group: Spacious, Balanced, Dense
+4. **Updated edge function prompt** — accepts `designStyle`, `colorMood`, `typographyStyle`, `layoutDensity`
 
-**Leverages:** Fact Book data, Story Bank stories, Message Builder multi-channel generation, PDF export
+### NDA Links — Super Admin Feature — ✅ COMPLETED
 
-## Recommended Starting Point
-
-**Concept 1 (Giving Day Countdown Calendar)** is the highest-impact, most differentiated feature. It's visually compelling for demos, directly serves advancement offices, and reuses the most existing infrastructure (calendar UI, message generation, channel system). It could be built as a new route `/giving-day-planner` that composes the calendar grid with the journey touchpoint generation.
-
-## Implementation Approach
-- Persist campaigns in a new `advancement_campaigns` database table (not localStorage)
-- Reuse `generate-message` edge function with advancement-specific prompt context
-- Use the existing `CommunicationMoment` advancement values as the backbone
-- Filter by institutional profile so each partner institution gets their own campaign calendar
-
+1. **Database**: Created `nda_links` and `nda_responses` tables with full RLS
+2. **Storage**: Created `nda-signatures` bucket for drawn signature images
+3. **Public signing page** (`/nda/sign/:slug`): CampusVoice-branded page with wave emoji heading, agreement text, form fields, 3 required checkboxes, typed + optional drawn signature
+4. **Admin page** (`/admin/nda-links`): Two-tab layout — Links table + Responses table with detail drawer
