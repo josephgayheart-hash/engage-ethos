@@ -15,6 +15,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAdvancementCampaigns, CampaignTouchpoint } from "@/hooks/useAdvancementCampaigns";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
+import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
+import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { QuickGenerateDialog } from "@/components/giving-day/QuickGenerateDialog";
@@ -89,6 +91,7 @@ function buildDefaultTouchpoints(selectedChannels: string[]): CampaignTouchpoint
 const GivingDayPlannerPage = () => {
   const { campaigns, isLoading, createCampaign, updateCampaign, deleteCampaign } = useAdvancementCampaigns();
   const { tenant } = useAuth();
+  const { profiles } = useInstitutionalProfiles();
   const navigate = useNavigate();
 
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
@@ -108,6 +111,10 @@ const GivingDayPlannerPage = () => {
   const [addTpOpen, setAddTpOpen] = useState(false);
 
   const selectedCampaign = campaigns.find(c => c.id === selectedCampaignId);
+
+  // Get the institutional profile config for the selected campaign
+  const selectedProfile = profiles.find(p => p.id === selectedCampaign?.profile_id);
+  const { contentDNA } = useContentDNAForGeneration({ profileId: selectedCampaign?.profile_id });
 
   const toggleNewChannel = (ch: string) => {
     setNewChannels(prev =>
@@ -647,6 +654,10 @@ const GivingDayPlannerPage = () => {
             touchpoint={quickGenTouchpoint}
             campaignName={selectedCampaign?.name || "Giving Day"}
             phase={T_MINUS_MILESTONES.find(m => m.days === quickGenTouchpoint?.tMinusDays)?.phase || ""}
+            goalAmount={selectedCampaign?.goal_amount}
+            givingDayDate={selectedCampaign?.giving_day_date}
+            institutionalConfig={selectedProfile?.config}
+            contentDNA={contentDNA}
             onSaveDraft={(id, content, updates) => {
               handleTouchpointUpdate(id, {
                 ...updates,

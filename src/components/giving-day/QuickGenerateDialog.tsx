@@ -15,6 +15,8 @@ import {
   Lock, CheckCircle2
 } from "lucide-react";
 import type { CampaignTouchpoint } from "@/hooks/useAdvancementCampaigns";
+import type { InstitutionalConfig } from "@/types/campusvoice";
+import type { ContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 
 interface QuickGenerateDialogProps {
   open: boolean;
@@ -22,15 +24,19 @@ interface QuickGenerateDialogProps {
   touchpoint: CampaignTouchpoint | null;
   campaignName: string;
   phase: string;
+  goalAmount?: string | null;
+  givingDayDate?: string;
+  institutionalConfig?: InstitutionalConfig | null;
+  contentDNA?: ContentDNAForGeneration | null;
   onSaveDraft?: (touchpointId: string, content: string, updates: Partial<CampaignTouchpoint>) => void;
 }
 
-const CHANNEL_META: Record<string, { label: string; icon: React.ElementType }> = {
-  email: { label: "Email", icon: Mail },
-  sms: { label: "SMS", icon: MessageSquare },
-  "social-media": { label: "Social Media", icon: Megaphone },
-  "phone-call": { label: "Phone Script", icon: Phone },
-  "landing-page": { label: "Landing Page", icon: Globe },
+const CHANNEL_META: Record<string, { label: string; icon: React.ElementType; guide: string }> = {
+  email: { label: "Email", icon: Mail, guide: "Full email with subject line. Professional but warm. 150-250 words. Include greeting, body, CTA, and signature." },
+  sms: { label: "SMS", icon: MessageSquare, guide: "Short SMS message. 160 characters max. Direct and actionable." },
+  "social-media": { label: "Social Media", icon: Megaphone, guide: "Social media post. Engaging and shareable. 100-200 characters. Use emojis sparingly. Include hashtag suggestions." },
+  "phone-call": { label: "Phone Script", icon: Phone, guide: "Phone call script talking points. Bullet format. Include greeting, key message, and closing." },
+  "landing-page": { label: "Landing Page", icon: Globe, guide: "Landing page copy. Compelling headline and body. 100-200 words. Clear value proposition and CTA." },
 };
 
 const TONE_OPTIONS = [
@@ -60,6 +66,10 @@ export function QuickGenerateDialog({
   touchpoint,
   campaignName,
   phase,
+  goalAmount,
+  givingDayDate,
+  institutionalConfig,
+  contentDNA,
   onSaveDraft,
 }: QuickGenerateDialogProps) {
   const { toast } = useToast();
@@ -74,7 +84,6 @@ export function QuickGenerateDialog({
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  // Reset state when touchpoint changes
   useEffect(() => {
     if (touchpoint) {
       setTone(touchpoint.tone || "encouraging");
@@ -100,14 +109,70 @@ export function QuickGenerateDialog({
     setSaved(false);
 
     const channelLabel = CHANNEL_META[touchpoint.channel]?.label || touchpoint.channel;
-    const contextStr = [
-      `${campaignName} – ${phase} phase`,
-      `Message type: ${touchpoint.messageType}`,
+    const channelGuide = CHANNEL_META[touchpoint.channel]?.guide || "Professional message appropriate for the channel.";
+
+    // Build a rich context string for the AI
+    const contextParts = [
+      `Campaign: "${campaignName}" – ${phase} phase`,
       `Channel: ${channelLabel}`,
-      `Segment: ${touchpoint.segment}`,
+      `Message type: ${touchpoint.messageType}`,
+      `Target segment: ${touchpoint.segment}`,
+      `Tone: ${tone}`,
+      goalAmount ? `Campaign goal: $${goalAmount.replace(/^\$/, '')}` : null,
+      givingDayDate ? `Giving day date: ${givingDayDate}` : null,
       cta ? `Call-to-action: ${cta}` : null,
       notes ? `Additional context: ${notes}` : null,
     ].filter(Boolean).join(". ");
+
+    // Build the full additional context for the builder type
+    const additionalContext = `
+GIVING DAY CAMPAIGN CONTEXT:
+This is a Giving Day advancement campaign message. Generate content appropriate for the "${phase}" phase.
+
+${channelGuide ? `FORMAT: ${channelGuide}` : ""}
+
+CAMPAIGN DETAILS:
+- Campaign: ${campaignName}
+- Phase: ${phase}
+- Message Type: ${touchpoint.messageType}
+- Target Segment: ${touchpoint.segment}
+- Desired Tone: ${tone}
+${goalAmount ? `- Fundraising Goal: $${goalAmount.replace(/^\$/, '')}` : ""}
+${givingDayDate ? `- Giving Day Date: ${givingDayDate}` : ""}
+${cta ? `- Desired CTA: ${cta}` : ""}
+${notes ? `- Specific notes: ${notes}` : ""}
+
+PHASE-SPECIFIC GUIDANCE:
+${phase === "Cultivation" ? "Focus on awareness, excitement, and saving the date. Build anticipation without making a direct ask." : ""}
+${phase === "Solicitation" ? "Make a clear, compelling ask. Emphasize impact and matching gifts if applicable." : ""}
+${phase === "Urgency" ? "Create urgency with countdown language. Emphasize time-sensitivity and social proof." : ""}
+${phase === "Giving Day" ? "It's the big day! Maximum energy and excitement. Real-time updates and celebration." : ""}
+${phase === "Stewardship" ? "Express genuine gratitude. Share impact and results. Strengthen donor relationships." : ""}
+
+Generate a COMPLETE, ready-to-use ${channelLabel.toLowerCase()} message. Do NOT include explanations or meta-commentary - just the message content itself.`;
+
+    // Build institutional config object from profile
+    const instConfig = institutionalConfig ? {
+      institutionName: institutionalConfig.institutionName,
+      institutionAbbreviation: institutionalConfig.institutionAbbreviation,
+      mascot: institutionalConfig.mascot,
+      slogans: institutionalConfig.slogans,
+      primaryColor: institutionalConfig.primaryColor,
+      accentColor: institutionalConfig.accentColor,
+      emailDomain: institutionalConfig.emailDomain,
+      primaryContactEmail: institutionalConfig.primaryContactEmail,
+      primaryContactPhone: institutionalConfig.primaryContactPhone,
+      websiteLinks: institutionalConfig.websiteLinks,
+    } : undefined;
+
+    // Build Content DNA payload
+    const dnaPayload = contentDNA?.voiceAnalysis ? {
+      voiceAnalysis: contentDNA.voiceAnalysis,
+      brandPlatform: contentDNA.brandPlatform,
+      customInstructions: contentDNA.customInstructions,
+      sourceProfileName: contentDNA.sourceProfileName,
+      sourceProfileId: contentDNA.sourceProfileId,
+    } : undefined;
 
     try {
       const resp = await fetch(
@@ -119,14 +184,18 @@ export function QuickGenerateDialog({
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
           body: JSON.stringify({
-            type: "single",
+            type: "builder",
             context: {
               audience: touchpoint.segment === "alumni" ? "alumni" : "donors",
               channel: touchpoint.channel,
               moment: "giving-day",
               tone,
-              context: contextStr,
+              domain: "advancement",
+              goal: `Drive ${phase.toLowerCase()} engagement for giving day campaign`,
+              additionalContext,
             },
+            institutionalConfig: instConfig,
+            contentDNA: dnaPayload,
           }),
         }
       );
@@ -183,7 +252,6 @@ export function QuickGenerateDialog({
         }
       }
 
-      // If SSE yielded nothing, try parsing the whole buffer as JSON fallback
       if (!full && buffer.trim()) {
         try {
           const fallback = JSON.parse(buffer.trim());
@@ -240,7 +308,6 @@ export function QuickGenerateDialog({
           <DialogDescription className="sr-only">
             Generate AI copy for your campaign touchpoint
           </DialogDescription>
-          {/* Locked context chips */}
           <div className="flex flex-wrap gap-1.5 mt-3">
             <Badge variant="secondary" className="gap-1 text-[11px]">
               <Lock className="w-2.5 h-2.5" /> {campaignName}
@@ -257,6 +324,11 @@ export function QuickGenerateDialog({
             <Badge variant="secondary" className="gap-1 text-[11px]">
               <Lock className="w-2.5 h-2.5" /> {touchpoint.messageType}
             </Badge>
+            {institutionalConfig?.institutionName && (
+              <Badge variant="outline" className="gap-1 text-[11px] border-primary/30 text-primary">
+                {institutionalConfig.institutionName}
+              </Badge>
+            )}
           </div>
         </DialogHeader>
 
