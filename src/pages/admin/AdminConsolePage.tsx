@@ -252,6 +252,7 @@ export default function AdminConsolePage() {
 
       setLogoUrl(publicUrl);
       await refreshProfile();
+      await refreshWorkspaces();
 
       toast({
         title: 'Logo Uploaded',
