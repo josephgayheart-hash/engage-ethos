@@ -286,13 +286,14 @@ export default function AdminConsolePage() {
 
       if (updateError) throw updateError;
 
-      setLogoUrl(publicUrl);
+      const cacheBustedUrl = `${publicUrl}?t=${Date.now()}`;
+      setLogoUrl(cacheBustedUrl);
       await refreshProfile();
       await refreshWorkspaces();
 
       toast({
         title: 'Logo Uploaded',
-        description: 'Your institution logo has been updated.',
+        description: `Your ${entityTerm} logo has been updated.`,
       });
     } catch (error: any) {
       toast({
