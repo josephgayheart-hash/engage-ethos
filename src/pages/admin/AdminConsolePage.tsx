@@ -635,7 +635,16 @@ export default function AdminConsolePage() {
                 </Button>
               )}
             </div>
-          </CardHeader>
+          {/* Hidden file input - outside conditional so it persists */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml"
+            onChange={handleLogoUpload}
+            onClick={(e) => { (e.target as HTMLInputElement).value = ''; }}
+            className="hidden"
+            id="logo-upload"
+          />
           <CardContent>
             {isEditingInstitution ? (
               <div className="space-y-6">
