@@ -175,11 +175,11 @@ export default function AgencyOnboardingPage() {
                     </Badge>
                   </div>
                   <CardTitle className="text-2xl">
-                    Add Your First Client
+                    Add Your First Partner Institution
                   </CardTitle>
                   <p className="text-muted-foreground">
-                    Enter the details for your first university client. You can
-                    add more clients later.
+                    Enter the details for your first partner institution. You can
+                    add more later.
                   </p>
                 </CardHeader>
                 <CardContent>
