@@ -520,7 +520,7 @@ export default function AdminConsolePage() {
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="flex items-center gap-1">
                 <Building2 className="w-3 h-3" />
-                {tenant?.institution_name || 'Loading...'}
+                {effectiveTenant?.institution_name || 'Loading...'}
               </Badge>
               <Badge className="bg-[hsl(222,47%,14%)]">
                 <Shield className="w-3 h-3 mr-1" />
