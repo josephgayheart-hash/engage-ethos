@@ -91,6 +91,7 @@ function buildDefaultTouchpoints(selectedChannels: string[]): CampaignTouchpoint
 const GivingDayPlannerPage = () => {
   const { campaigns, isLoading, createCampaign, updateCampaign, deleteCampaign } = useAdvancementCampaigns();
   const { tenant } = useAuth();
+  const { profiles } = useInstitutionalProfiles();
   const navigate = useNavigate();
 
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
