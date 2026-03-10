@@ -376,7 +376,7 @@ export default function AdminUsersPage() {
           firstName: resendUser.first_name,
           lastName: resendUser.last_name,
           temporaryPassword: newPassword,
-          institutionName: tenant?.institution_name || 'Your Institution',
+          institutionName: effectiveTenant?.institution_name || tenant?.institution_name || 'Your Institution',
           role: resendUser.roles[0] || 'user',
           inviterName,
         },
