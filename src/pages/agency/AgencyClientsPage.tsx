@@ -187,8 +187,8 @@ export default function AgencyClientsPage() {
     setShowWizard(false);
     if (profile) {
       toast({ 
-        title: "Client added", 
-        description: `${profile.name} has been added to your client roster.` 
+        title: "Institution added", 
+        description: `${profile.name} has been added as a partner institution.` 
       });
     }
   };
