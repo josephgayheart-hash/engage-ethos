@@ -156,7 +156,7 @@ export function useInstitutionalProfiles() {
     } finally {
       setIsLoading(false);
     }
-  }, [user, tenant?.id]);
+  }, [user, effectiveTenantId]);
 
   useEffect(() => {
     fetchProfiles();
