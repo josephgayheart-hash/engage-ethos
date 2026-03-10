@@ -161,6 +161,29 @@ const StrategyPage = () => {
   const [selectedPlaybookKit, setSelectedPlaybookKit] = useState<PlaybookKit | null>(null);
   const [showAllPlaybookKits, setShowAllPlaybookKits] = useState(false);
   const [pendingKitKey, setPendingKitKey] = useState<string | null>(null);
+  const { kits: allPlaybookKits } = usePlaybookKits();
+
+  // Resolve pending kit key (from navigation state) once kits are loaded
+  useEffect(() => {
+    if (pendingKitKey && allPlaybookKits.length > 0) {
+      const kit = allPlaybookKits.find(k => k.kit_key === pendingKitKey);
+      if (kit) {
+        setSelectedPlaybookKit(kit);
+        if (kit.target_audiences && kit.target_audiences.length > 0) {
+          setContext(prev => ({ ...prev, audience: kit.target_audiences![0] as MessageContext['audience'] }));
+        }
+        // Pre-select advancement-appropriate channels
+        if (kit.category === 'advancement') {
+          setSelectedChannels(['email', 'direct-mail', 'landing-page', 'phone-call', 'case-for-care']);
+        }
+        toast({
+          title: "Playbook Selected",
+          description: `Using "${kit.name}" — customize timeline and channels below.`,
+        });
+      }
+      setPendingKitKey(null);
+    }
+  }, [pendingKitKey, allPlaybookKits, toast]);
 
   // Load journey data from navigation state (for edit/remix/resume)
   useEffect(() => {
