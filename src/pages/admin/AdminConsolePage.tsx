@@ -132,6 +132,7 @@ export default function AdminConsolePage() {
       if (error) throw error;
 
       await refreshProfile();
+      await refreshWorkspaces();
       setIsEditingInstitution(false);
       
       toast({
