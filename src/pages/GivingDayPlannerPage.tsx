@@ -654,6 +654,10 @@ const GivingDayPlannerPage = () => {
             touchpoint={quickGenTouchpoint}
             campaignName={selectedCampaign?.name || "Giving Day"}
             phase={T_MINUS_MILESTONES.find(m => m.days === quickGenTouchpoint?.tMinusDays)?.phase || ""}
+            goalAmount={selectedCampaign?.goal_amount}
+            givingDayDate={selectedCampaign?.giving_day_date}
+            institutionalConfig={selectedProfile?.config}
+            contentDNA={contentDNA}
             onSaveDraft={(id, content, updates) => {
               handleTouchpointUpdate(id, {
                 ...updates,
