@@ -171,7 +171,21 @@ const StrategyPage = () => {
       originalTitle?: string;
       originalId?: string;
       source?: 'personal' | 'university';
+      // Advancement integration: pre-select a playbook kit by key
+      preSelectKitKey?: string;
+      preSelectProfileId?: string | null;
     } | null;
+
+    // Pre-select advancement playbook kit from Stewardship Report
+    if (state?.preSelectKitKey) {
+      // We'll set kit once kits are loaded — store the key and handle in a separate effect
+      setPendingKitKey(state.preSelectKitKey);
+      if (state.preSelectProfileId) {
+        setSelectedProfileId(state.preSelectProfileId);
+      }
+      window.history.replaceState({}, document.title);
+      return;
+    }
 
     // Resume draft from dashboard
     if (state?.resumeDraftId) {
