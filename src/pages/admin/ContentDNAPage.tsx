@@ -1000,7 +1000,7 @@ export default function ContentDNAPage() {
                     <TooltipTrigger>
                       <div 
                         className="w-6 h-6 rounded-full border border-border"
-                        style={{ backgroundColor: tenant?.primary_color || 'hsl(222,47%,14%)' }}
+                        style={{ backgroundColor: effectiveTenant?.primary_color || 'hsl(222,47%,14%)' }}
                       />
                     </TooltipTrigger>
                     <TooltipContent>Primary Color</TooltipContent>
