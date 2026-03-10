@@ -249,11 +249,17 @@ export default function AdminConsolePage() {
 
       // Delete old logo if exists
       if (effectiveTenant.logo_url) {
-        const oldPath = effectiveTenant.logo_url.split('/').pop();
-        if (oldPath) {
-          await supabase.storage
-            .from('institution-logos')
-            .remove([`${effectiveTenant.id}/${oldPath}`]);
+        try {
+          const url = new URL(effectiveTenant.logo_url);
+          const pathParts = url.pathname.split('/institution-logos/');
+          if (pathParts[1]) {
+            const oldFilePath = pathParts[1].split('?')[0];
+            await supabase.storage
+              .from('institution-logos')
+              .remove([oldFilePath]);
+          }
+        } catch {
+          // ignore parse errors on old URL
         }
       }
 
