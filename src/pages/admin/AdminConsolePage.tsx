@@ -556,7 +556,7 @@ export default function AdminConsolePage() {
                   Welcome, {profile?.first_name}
                 </h2>
                 <p className="text-white/80">
-                  As an administrator for {tenant?.institution_name || 'your institution'}, you can manage users, 
+                  As an administrator for {effectiveTenant?.institution_name || 'your institution'}, you can manage users, 
                   review access requests, and configure institutional settings.
                 </p>
               </div>
