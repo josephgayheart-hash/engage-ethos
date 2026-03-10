@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { FeedbackButton } from "@/components/FeedbackButton";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { usePageTracking } from "@/hooks/usePageTracking";
@@ -105,9 +106,13 @@ function RequireAdmin({ children }: { children: React.ReactNode }) {
 }
 
 function RequireSuperAdmin({ children }: { children: React.ReactNode }) {
-  const { isSuperAdmin, isLoading } = useAuth();
+  const { isSuperAdmin, isLoading, tenant } = useAuth();
+  const { activeWorkspace, canSwitch } = useWorkspace();
   if (isLoading) return <BrandedLoader />;
   if (!isSuperAdmin) return <Navigate to="/dashboard" replace />;
+  // Block platform-admin routes when viewing another workspace
+  const isViewingOwnWorkspace = !canSwitch || !activeWorkspace || activeWorkspace.id === tenant?.id;
+  if (!isViewingOwnWorkspace) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 

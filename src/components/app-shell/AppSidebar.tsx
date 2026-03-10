@@ -30,6 +30,7 @@ import {
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAgencyMode } from "@/hooks/useAgencyMode";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { ReferColleagueDialog } from "@/components/ReferColleagueDialog";
 import campusvoiceLogo from "@/assets/campusvoice-logo-new.png";
 import {
@@ -78,12 +79,17 @@ const superAdminItems = [
 ];
 
 export function AppSidebar() {
-  const { profile, isAdmin, isSuperAdmin, isApprover, logout } = useAuth();
+  const { profile, tenant, isAdmin, isSuperAdmin, isApprover, logout } = useAuth();
   const { isAgency, labels } = useAgencyMode();
+  const { activeWorkspace, canSwitch } = useWorkspace();
   const { state } = useSidebar();
   const navigate = useNavigate();
   const [referDialogOpen, setReferDialogOpen] = useState(false);
   const collapsed = state === "collapsed";
+
+  // When a super admin switches to another workspace, hide platform-admin-only features
+  const isViewingOwnWorkspace = !canSwitch || !activeWorkspace || activeWorkspace.id === tenant?.id;
+  const showPlatformAdmin = isSuperAdmin && isViewingOwnWorkspace;
 
   const handleLogout = async () => {
     await logout();
@@ -225,7 +231,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {/* Super Admin */}
-        {isSuperAdmin && (
+        {showPlatformAdmin && (
           <>
             <SidebarSeparator className="my-0.5" />
             <SidebarGroup className="py-1">
