@@ -112,6 +112,10 @@ const GivingDayPlannerPage = () => {
 
   const selectedCampaign = campaigns.find(c => c.id === selectedCampaignId);
 
+  // Get the institutional profile config for the selected campaign
+  const selectedProfile = profiles.find(p => p.id === selectedCampaign?.profile_id);
+  const { contentDNA } = useContentDNAForGeneration({ profileId: selectedCampaign?.profile_id });
+
   const toggleNewChannel = (ch: string) => {
     setNewChannels(prev =>
       prev.includes(ch) ? prev.filter(c => c !== ch) : [...prev, ch]
