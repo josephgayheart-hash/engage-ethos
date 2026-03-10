@@ -254,6 +254,10 @@ const GivingDayPlannerPage = () => {
   // Campaign list view
   if (!selectedCampaignId) {
     return (
+      <SEOHead
+        title="Giving Day Planner | CampusVoice.AI"
+        description="Plan and execute giving day campaigns with countdown-driven content calendars for every college, division, and unit."
+      />
       <div className="bg-background">
         <main className="container mx-auto px-4 py-8">
           <div className="max-w-5xl mx-auto">
