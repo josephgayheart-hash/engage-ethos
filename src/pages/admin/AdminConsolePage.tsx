@@ -243,8 +243,14 @@ export default function AdminConsolePage() {
 
     setIsUploadingLogo(true);
     try {
-      // Resize the image
-      const resizedBlob = await resizeImage(file);
+      // For small files (< 100KB), skip resize to avoid canvas issues
+      let uploadBlob: Blob;
+      if (file.size < 100 * 1024) {
+        uploadBlob = file;
+      } else {
+        uploadBlob = await resizeImage(file);
+      }
+      
       const fileName = `${effectiveTenant.id}/logo-${Date.now()}.png`;
 
       // Delete old logo if exists
@@ -253,7 +259,7 @@ export default function AdminConsolePage() {
           const url = new URL(effectiveTenant.logo_url);
           const pathParts = url.pathname.split('/institution-logos/');
           if (pathParts[1]) {
-            const oldFilePath = pathParts[1].split('?')[0];
+            const oldFilePath = decodeURIComponent(pathParts[1].split('?')[0]);
             await supabase.storage
               .from('institution-logos')
               .remove([oldFilePath]);
@@ -264,13 +270,14 @@ export default function AdminConsolePage() {
       }
 
       // Upload new logo
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError, data: uploadData } = await supabase.storage
         .from('institution-logos')
-        .upload(fileName, resizedBlob, { 
-          contentType: 'image/png',
+        .upload(fileName, uploadBlob, { 
+          contentType: file.type || 'image/png',
           upsert: true 
         });
 
+      console.log('Logo upload result:', { uploadError, uploadData, fileName });
       if (uploadError) throw uploadError;
 
       // Get public URL
