@@ -476,7 +476,17 @@ const GivingDayPlannerPage = () => {
                 </div>
               );
             })}
-          </div>
+        </div>
+
+          {/* Quick Generate Dialog */}
+          <QuickGenerateDialog
+            open={quickGenOpen}
+            onOpenChange={setQuickGenOpen}
+            touchpoint={quickGenTouchpoint}
+            campaignName={selectedCampaign?.name || "Giving Day"}
+            phase={T_MINUS_MILESTONES.find(m => m.days === quickGenTouchpoint?.tMinusDays)?.phase || ""}
+            onStatusUpdate={(id, status) => handleTouchpointUpdate(id, { status: status as any })}
+          />
         </div>
       </main>
     </div>
