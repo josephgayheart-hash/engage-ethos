@@ -120,16 +120,9 @@ const GivingDayPlannerPage = () => {
   };
 
   const handleGenerateCopy = (touchpoint: CampaignTouchpoint) => {
-    // Navigate to message builder with pre-filled context
     const milestone = T_MINUS_MILESTONES.find(m => m.days === touchpoint.tMinusDays);
-    const params = new URLSearchParams({
-      audience: touchpoint.segment === 'alumni' ? 'alumni' : 'donors',
-      channel: touchpoint.channel,
-      moment: 'giving-day',
-      tone: touchpoint.tone,
-      context: `${selectedCampaign?.name || 'Giving Day'} campaign – ${milestone?.phase || ''} phase. Message type: ${touchpoint.messageType}. ${touchpoint.label}.`,
-    });
-    navigate(`/build?${params.toString()}`);
+    setQuickGenTouchpoint(touchpoint);
+    setQuickGenOpen(true);
   };
 
   // Group touchpoints by phase
