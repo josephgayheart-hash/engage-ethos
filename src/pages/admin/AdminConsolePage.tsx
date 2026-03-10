@@ -753,7 +753,7 @@ export default function AdminConsolePage() {
                   {logoUrl ? (
                     <img 
                       src={logoUrl} 
-                      alt={tenant?.institution_name || 'Institution'} 
+                      alt={effectiveTenant?.institution_name || 'Institution'} 
                       className="h-16 w-auto object-contain border rounded-lg p-2 bg-muted/30"
                       style={{ maxWidth: '150px' }}
                     />
