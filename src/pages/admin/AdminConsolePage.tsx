@@ -737,9 +737,9 @@ export default function AdminConsolePage() {
                     variant="outline" 
                     onClick={() => {
                       setIsEditingInstitution(false);
-                      setInstitutionName(tenant?.institution_name || '');
-                      setPrimaryColorInput(tenant?.primary_color || '#1F2A44');
-                      setAccentColorInput(tenant?.accent_color || '#2C7A7B');
+                      setInstitutionName(effectiveTenant?.institution_name || '');
+                      setPrimaryColorInput(effectiveTenant?.primary_color || '#1F2A44');
+                      setAccentColorInput(effectiveTenant?.accent_color || '#2C7A7B');
                     }}
                   >
                     <X className="w-4 h-4 mr-2" />
