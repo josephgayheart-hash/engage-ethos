@@ -689,14 +689,7 @@ export default function AdminConsolePage() {
                       </div>
                     )}
                     <div>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleLogoUpload}
-                        className="hidden"
-                        id="logo-upload"
-                      />
+                      {/* file input moved outside conditional */}
                       <Button
                         variant="outline"
                         onClick={() => fileInputRef.current?.click()}
