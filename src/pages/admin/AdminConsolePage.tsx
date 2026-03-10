@@ -285,7 +285,7 @@ export default function AdminConsolePage() {
       const { error } = await supabase
         .from('tenants')
         .update({ logo_url: null })
-        .eq('id', tenant.id);
+        .eq('id', effectiveTenant.id);
 
       if (error) throw error;
 
