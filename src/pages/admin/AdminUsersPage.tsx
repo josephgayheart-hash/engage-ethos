@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth, UserProfile, UserStatus } from '@/contexts/AuthContext';
+import { useWorkspace } from '@/contexts/WorkspaceContext';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -73,7 +74,12 @@ interface UserWithRole extends UserProfile {
 export default function AdminUsersPage() {
   const navigate = useNavigate();
   const { tenant, isSuperAdmin, startImpersonation, user: currentUser } = useAuth();
+  const { activeWorkspace, canSwitch } = useWorkspace();
   const { toast } = useToast();
+
+  // When super admin is switching workspaces, scope to that workspace
+  const effectiveTenant = canSwitch ? activeWorkspace : tenant;
+  const effectiveTenantId = effectiveTenant?.id ?? null;
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -214,6 +220,7 @@ export default function AdminUsersPage() {
           title: newUser.title || null,
           role: newUser.role,
           sendInvite: sendInviteEmail,
+          tenantId: effectiveTenantId, // Target the active workspace
         },
       });
 
@@ -369,7 +376,7 @@ export default function AdminUsersPage() {
           firstName: resendUser.first_name,
           lastName: resendUser.last_name,
           temporaryPassword: newPassword,
-          institutionName: tenant?.institution_name || 'Your Institution',
+          institutionName: effectiveTenant?.institution_name || tenant?.institution_name || 'Your Institution',
           role: resendUser.roles[0] || 'user',
           inviterName,
         },
@@ -504,6 +511,9 @@ export default function AdminUsersPage() {
   };
 
   const filteredUsers = users.filter(user => {
+    // When super admin has a workspace selected, filter to that workspace
+    const matchesTenant = effectiveTenantId ? user.tenant_id === effectiveTenantId : true;
+
     const matchesSearch = 
       user.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.last_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -512,7 +522,7 @@ export default function AdminUsersPage() {
     
     const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
     
-    return matchesSearch && matchesStatus;
+    return matchesTenant && matchesSearch && matchesStatus;
   });
 
   return (
@@ -544,7 +554,9 @@ export default function AdminUsersPage() {
               </div>
               <h1 className="font-serif text-2xl font-bold text-[hsl(222,47%,11%)]">User Management</h1>
               <p className="text-sm text-[hsl(220,14%,46%)]">
-                {isSuperAdmin ? 'Manage all user accounts across institutions' : 'View users in your institution (read-only)'}
+                {isSuperAdmin 
+                  ? `Managing users for ${effectiveTenant?.institution_name || 'all institutions'}` 
+                  : 'View users in your institution (read-only)'}
               </p>
             </div>
           </div>
@@ -557,9 +569,9 @@ export default function AdminUsersPage() {
             <CardTitle className="flex items-center gap-2 text-[hsl(222,47%,11%)]">
               <Users className="w-5 h-5" />
               Users
-              {tenant && (
+              {effectiveTenant && (
                 <Badge variant="outline" className="ml-2 font-normal">
-                  {tenant.institution_name}
+                  {effectiveTenant.institution_name}
                 </Badge>
               )}
             </CardTitle>
