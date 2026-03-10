@@ -1,7 +1,4 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { useContext } from "react";
-
-// Import the context directly to avoid circular issues - we check if it exists
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 
 interface AgencyLabels {
