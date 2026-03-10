@@ -41,7 +41,7 @@ const processSteps = [
   {
     step: 3,
     title: "Onboarding",
-    description: "Once approved, we set up your agency workspace",
+    description: "Once approved, we set up your agency partner workspace",
   },
 ];
 
