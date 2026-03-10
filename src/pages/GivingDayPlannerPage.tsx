@@ -721,6 +721,10 @@ const GivingDayPlannerPage = () => {
             givingDayDate={selectedCampaign?.giving_day_date}
             institutionalConfig={selectedProfile?.config}
             contentDNA={contentDNA}
+            profileFacts={profileFacts}
+            profileStories={profileStories}
+            profileName={selectedProfile?.name}
+            profileType={selectedProfile?.profileType}
             onSaveDraft={(id, content, updates) => {
               handleTouchpointUpdate(id, {
                 ...updates,
