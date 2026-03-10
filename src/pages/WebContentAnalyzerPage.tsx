@@ -10,7 +10,6 @@ import { DNAAlignmentPanel } from '@/components/analyzer/DNAAlignmentPanel';
 import { AnalysisActionsCard } from '@/components/analyzer/AnalysisActionsCard';
 import { InstitutionalProfileSelector } from '@/components/InstitutionalProfileSelector';
 import { useContentDNA } from '@/hooks/useContentDNA';
-import { useContentDNA } from '@/hooks/useContentDNA';
 import { useInstitutionalProfiles } from '@/hooks/useInstitutionalProfiles';
 import { useFactBook } from '@/hooks/useFactBook';
 import { useStoryBank } from '@/hooks/useStoryBank';

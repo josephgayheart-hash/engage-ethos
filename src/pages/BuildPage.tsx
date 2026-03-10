@@ -7,7 +7,6 @@ import { LibraryNav } from "@/components/LibraryNav";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
 import { ChannelPreview } from "@/components/ChannelPreview";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
-import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { ContentDNAExplainer } from "@/components/ContentDNAExplainer";
 import { BuilderStepSection, BuilderStepDivider } from "@/components/BuilderStepSection";
 import { WaveBackground } from "@/components/WaveBackground";
