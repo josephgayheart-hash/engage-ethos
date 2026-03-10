@@ -16,6 +16,7 @@ import { useAdvancementCampaigns, CampaignTouchpoint } from "@/hooks/useAdvancem
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import { QuickGenerateDialog } from "@/components/giving-day/QuickGenerateDialog";
 import {
   ArrowLeft, Plus, CalendarIcon, Target, Mail, MessageSquare, Megaphone, Phone,
   Globe, Heart, Users, Clock, ChevronRight, Sparkles, CheckCircle2, FileEdit,
