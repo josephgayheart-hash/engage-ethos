@@ -166,8 +166,8 @@ export default function AdminConsolePage() {
       setIsEditingInstitution(false);
       
       toast({
-        title: 'Institution Updated',
-        description: 'Your institution name has been saved successfully.',
+        title: `${isPlatformOwner ? 'Platform' : isEffectiveAgency ? 'Agency' : 'Institution'} Updated`,
+        description: `Your ${entityTerm} name has been saved successfully.`,
       });
     } catch (error: any) {
       toast({
@@ -249,11 +249,17 @@ export default function AdminConsolePage() {
 
       // Delete old logo if exists
       if (effectiveTenant.logo_url) {
-        const oldPath = effectiveTenant.logo_url.split('/').pop();
-        if (oldPath) {
-          await supabase.storage
-            .from('institution-logos')
-            .remove([`${effectiveTenant.id}/${oldPath}`]);
+        try {
+          const url = new URL(effectiveTenant.logo_url);
+          const pathParts = url.pathname.split('/institution-logos/');
+          if (pathParts[1]) {
+            const oldFilePath = pathParts[1].split('?')[0];
+            await supabase.storage
+              .from('institution-logos')
+              .remove([oldFilePath]);
+          }
+        } catch {
+          // ignore parse errors on old URL
         }
       }
 
@@ -280,13 +286,14 @@ export default function AdminConsolePage() {
 
       if (updateError) throw updateError;
 
-      setLogoUrl(publicUrl);
+      const cacheBustedUrl = `${publicUrl}?t=${Date.now()}`;
+      setLogoUrl(cacheBustedUrl);
       await refreshProfile();
       await refreshWorkspaces();
 
       toast({
         title: 'Logo Uploaded',
-        description: 'Your institution logo has been updated.',
+        description: `Your ${entityTerm} logo has been updated.`,
       });
     } catch (error: any) {
       toast({
@@ -644,7 +651,7 @@ export default function AdminConsolePage() {
                       <div className="relative">
                         <img 
                           src={logoUrl} 
-                          alt="Institution logo" 
+                          alt={`${entityTerm} logo`} 
                           className="h-20 w-auto object-contain border rounded-lg p-2 bg-muted/30"
                           style={{ maxWidth: '200px' }}
                         />
