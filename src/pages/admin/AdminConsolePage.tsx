@@ -166,8 +166,8 @@ export default function AdminConsolePage() {
       setIsEditingInstitution(false);
       
       toast({
-        title: 'Institution Updated',
-        description: 'Your institution name has been saved successfully.',
+        title: `${isPlatformOwner ? 'Platform' : isEffectiveAgency ? 'Agency' : 'Institution'} Updated`,
+        description: `Your ${entityTerm} name has been saved successfully.`,
       });
     } catch (error: any) {
       toast({
