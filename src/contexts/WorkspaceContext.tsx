@@ -15,6 +15,10 @@ interface WorkspaceContextType {
   isLoading: boolean;
   /** Whether the user can switch workspaces (super_admin only) */
   canSwitch: boolean;
+  /** Whether a workspace switch transition is in progress */
+  isSwitching: boolean;
+  /** The name of the workspace being switched to */
+  switchingToName: string | null;
   /** Change the active workspace */
   setActiveWorkspaceId: (id: string) => void;
   /** Re-fetch workspace data (call after updating tenant branding etc.) */
@@ -59,6 +63,8 @@ export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
   const [workspaces, setWorkspaces] = useState<Tenant[]>([]);
   const [activeWorkspaceId, setActiveWorkspaceIdState] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSwitching, setIsSwitching] = useState(false);
+  const [switchingToName, setSwitchingToName] = useState<string | null>(null);
 
   const loadWorkspaces = useCallback(async () => {
     if (authLoading || !user) {
@@ -112,9 +118,25 @@ export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
   }, [workspaces, tenant?.id]);
 
   const setActiveWorkspaceId = useCallback((id: string) => {
-    setActiveWorkspaceIdState(id);
-    localStorage.setItem(ACTIVE_WORKSPACE_KEY, id);
-  }, []);
+    if (id === activeWorkspaceId) return;
+
+    // Find the workspace name for the transition screen
+    const targetWorkspace = workspaces.find(w => w.id === id);
+    setSwitchingToName(targetWorkspace?.institution_name || 'workspace');
+    setIsSwitching(true);
+
+    // Brief delay to show the transition, then switch
+    setTimeout(() => {
+      setActiveWorkspaceIdState(id);
+      localStorage.setItem(ACTIVE_WORKSPACE_KEY, id);
+
+      // Hold the overlay a moment longer for context to propagate
+      setTimeout(() => {
+        setIsSwitching(false);
+        setSwitchingToName(null);
+      }, 600);
+    }, 400);
+  }, [activeWorkspaceId, workspaces]);
 
   const activeWorkspace = workspaces.find(w => w.id === activeWorkspaceId) || null;
   const canSwitch = isSuperAdmin && workspaces.length > 1;
@@ -126,6 +148,8 @@ export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
       activeWorkspace,
       isLoading,
       canSwitch,
+      isSwitching,
+      switchingToName,
       setActiveWorkspaceId,
       refreshWorkspaces,
     }}>
