@@ -56,10 +56,16 @@ export function PlaybookKitSelector({
   showAllKits = false,
   onToggleShowAll,
 }: PlaybookKitSelectorProps) {
-  // Map institution types to playbook kit institution_types values
-  const kitInstitutionType = institutionType === 'community-college' || institutionType === 'technical-college'
-    ? 'community-college'
-    : institutionType || 'community-college';
+  // Map Carnegie institution types to playbook kit institution_types values
+  const kitInstitutionType = (() => {
+    if (!institutionType) return 'community-college';
+    // Map new Carnegie types to existing kit filters
+    if (institutionType === 'associates-college' || institutionType === 'community-college' || institutionType === 'technical-college') return 'community-college';
+    if (institutionType === 'doctoral-university' || institutionType === 'masters-university' || institutionType === 'four-year-university') return 'four-year-university';
+    if (institutionType === 'baccalaureate-college') return 'four-year-university';
+    if (institutionType === 'special-focus' || institutionType === 'graduate-school' || institutionType === 'professional-school') return 'graduate-school';
+    return institutionType;
+  })();
     
   const { kits: allKits, isLoading, error } = usePlaybookKits(kitInstitutionType);
   const [activeCategory, setActiveCategory] = useState<string>('all');
