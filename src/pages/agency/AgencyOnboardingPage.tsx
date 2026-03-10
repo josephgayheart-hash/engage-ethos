@@ -158,7 +158,7 @@ export default function AgencyOnboardingPage() {
                     size="lg"
                     onClick={() => setCurrentStep("add-client")}
                   >
-                    Add Your First Client
+                    Add Your First Institution
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </CardContent>
