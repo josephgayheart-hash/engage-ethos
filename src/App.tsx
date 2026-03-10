@@ -105,9 +105,13 @@ function RequireAdmin({ children }: { children: React.ReactNode }) {
 }
 
 function RequireSuperAdmin({ children }: { children: React.ReactNode }) {
-  const { isSuperAdmin, isLoading } = useAuth();
+  const { isSuperAdmin, isLoading, tenant } = useAuth();
+  const { activeWorkspace, canSwitch } = useWorkspace();
   if (isLoading) return <BrandedLoader />;
   if (!isSuperAdmin) return <Navigate to="/dashboard" replace />;
+  // Block platform-admin routes when viewing another workspace
+  const isViewingOwnWorkspace = !canSwitch || !activeWorkspace || activeWorkspace.id === tenant?.id;
+  if (!isViewingOwnWorkspace) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 
