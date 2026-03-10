@@ -265,7 +265,7 @@ export default function AgencyClientsPage() {
     setProfileToDuplicate(null);
     setDuplicateName("");
     if (newProfile) {
-      toast({ title: "Client duplicated", description: `"${newProfile.name}" created.` });
+      toast({ title: "Institution duplicated", description: `"${newProfile.name}" created.` });
     }
   };
 
