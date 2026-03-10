@@ -492,8 +492,8 @@ export default function AdminConsolePage() {
       color: 'bg-[hsl(222,47%,14%)]',
       stat: `${userStats.total} users`
     },
-    // Only show onboarding requests to super admins
-    ...(isSuperAdmin ? [{
+    // Only show platform-level admin items when viewing own (platform) workspace
+    ...(isSuperAdmin && isOwnTenant ? [{
       title: 'Onboarding Requests',
       description: 'Review and approve access requests',
       icon: UserPlus,
