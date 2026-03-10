@@ -74,6 +74,10 @@ export function QuickGenerateDialog({
   givingDayDate,
   institutionalConfig,
   contentDNA,
+  profileFacts,
+  profileStories,
+  profileName,
+  profileType,
   onSaveDraft,
 }: QuickGenerateDialogProps) {
   const { toast } = useToast();
