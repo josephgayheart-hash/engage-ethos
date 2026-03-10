@@ -569,9 +569,9 @@ export default function AdminUsersPage() {
             <CardTitle className="flex items-center gap-2 text-[hsl(222,47%,11%)]">
               <Users className="w-5 h-5" />
               Users
-              {tenant && (
+              {effectiveTenant && (
                 <Badge variant="outline" className="ml-2 font-normal">
-                  {tenant.institution_name}
+                  {effectiveTenant.institution_name}
                 </Badge>
               )}
             </CardTitle>
