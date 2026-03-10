@@ -118,6 +118,7 @@ const GivingDayPlannerPage = () => {
   const { profiles } = useInstitutionalProfiles();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { saveDraft, currentDraft } = useUserDrafts('campaign');
 
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
   const [showNewDialog, setShowNewDialog] = useState(false);
