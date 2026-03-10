@@ -86,6 +86,8 @@ const GivingDayPlannerPage = () => {
   const [newDate, setNewDate] = useState<Date | undefined>();
   const [newGoal, setNewGoal] = useState("");
   const [newProfileId, setNewProfileId] = useState<string | null>(null);
+  const [quickGenTouchpoint, setQuickGenTouchpoint] = useState<CampaignTouchpoint | null>(null);
+  const [quickGenOpen, setQuickGenOpen] = useState(false);
 
   const selectedCampaign = campaigns.find(c => c.id === selectedCampaignId);
 
