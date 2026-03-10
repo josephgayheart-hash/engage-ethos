@@ -194,7 +194,7 @@ export default function ForAgenciesPage() {
               The Higher Ed Agency Challenge
             </h2>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Every university has a distinct voice. But when you're managing multiple clients,
+              Every university has a distinct voice. But when you're managing multiple institutions,
               keeping those voices separate is exhausting. One wrong tone, one mixed-up message,
               and you've undermined the trust you've spent years building.
             </p>
