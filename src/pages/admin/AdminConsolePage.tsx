@@ -361,7 +361,7 @@ export default function AdminConsolePage() {
         const { data: users } = await supabase
           .from('profiles')
           .select('*')
-          .eq('tenant_id', tenant.id)
+          .eq('tenant_id', effectiveTenant.id)
           .order('last_login_at', { ascending: false });
 
         if (users) {
