@@ -1,5 +1,6 @@
-import { Building2, ChevronDown, Check } from "lucide-react";
+import { Building2, ChevronDown, Check, LogOut } from "lucide-react";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,8 +14,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function WorkspaceSelector() {
   const { workspaces, activeWorkspaceId, activeWorkspace, canSwitch, setActiveWorkspaceId } = useWorkspace();
+  const { tenant } = useAuth();
 
   if (!canSwitch) return null;
+
+  const isImpersonating = activeWorkspaceId && tenant && activeWorkspaceId !== tenant.id;
 
   return (
     <DropdownMenu>
@@ -28,6 +32,18 @@ export function WorkspaceSelector() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-[260px]">
+        {isImpersonating && (
+          <>
+            <DropdownMenuItem
+              onSelect={() => setActiveWorkspaceId(tenant!.id)}
+              className="flex items-center gap-2 cursor-pointer text-primary font-medium"
+            >
+              <LogOut className="h-4 w-4 shrink-0" />
+              <span className="text-sm">Exit to Platform</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
         <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
           Switch workspace ({workspaces.length})
         </DropdownMenuLabel>
