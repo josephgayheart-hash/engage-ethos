@@ -96,13 +96,6 @@ export function AppTopBar() {
           </div>
         )}
 
-        {/* DNA Status */}
-        <Separator orientation="vertical" className="h-4 ml-1" />
-        <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-          <Dna className="w-3 h-3" />
-          <span className="hidden sm:inline">DNA</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-accent inline-block" />
-        </div>
 
         {/* Spacer */}
         <div className="flex-1" />
