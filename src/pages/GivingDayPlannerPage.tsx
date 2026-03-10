@@ -100,6 +100,7 @@ const GivingDayPlannerPage = () => {
   const [newChannels, setNewChannels] = useState<string[]>(["email", "social-media"]);
   const [quickGenTouchpoint, setQuickGenTouchpoint] = useState<CampaignTouchpoint | null>(null);
   const [quickGenOpen, setQuickGenOpen] = useState(false);
+  const [expandedTouchpoints, setExpandedTouchpoints] = useState<Set<string>>(new Set());
 
   // Add touchpoint dialog state
   const [addTpMilestone, setAddTpMilestone] = useState<typeof T_MINUS_MILESTONES[0] | null>(null);
