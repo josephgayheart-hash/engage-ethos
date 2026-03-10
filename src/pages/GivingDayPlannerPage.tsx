@@ -20,12 +20,13 @@ import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 import { QuickGenerateDialog } from "@/components/giving-day/QuickGenerateDialog";
 import { SEOHead } from "@/components/SEOHead";
 import {
   ArrowLeft, Plus, CalendarIcon, Target, Mail, MessageSquare, Megaphone, Phone,
   Globe, Clock, ChevronRight, ChevronDown, Sparkles, CheckCircle2, FileEdit,
-  Send, Trash2, Gift, DollarSign, LayoutList, PartyPopper, Timer,
+  Send, Trash2, Gift, DollarSign, LayoutList, PartyPopper, Timer, Copy,
   GraduationCap, Layers, Building, Briefcase, Building2
 } from "lucide-react";
 
@@ -104,6 +105,7 @@ const GivingDayPlannerPage = () => {
   const { tenant } = useAuth();
   const { profiles } = useInstitutionalProfiles();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
   const [showNewDialog, setShowNewDialog] = useState(false);
@@ -661,6 +663,20 @@ const GivingDayPlannerPage = () => {
                                     <div className="mt-3 pt-3 border-t">
                                       <div className="text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none bg-muted/30 rounded-lg p-3 [&_p]:my-1.5 [&_p]:leading-relaxed [&_ul]:my-1.5 [&_ul]:pl-5 [&_ul]:list-disc [&_ol]:my-1.5 [&_ol]:pl-5 [&_ol]:list-decimal [&_strong]:font-semibold [&_strong]:text-foreground [&_h1]:text-base [&_h1]:font-semibold [&_h2]:text-sm [&_h2]:font-semibold [&_h3]:text-sm [&_h3]:font-medium">
                                         <ReactMarkdown>{tp.generatedContent}</ReactMarkdown>
+                                      </div>
+                                      <div className="flex justify-end mt-2">
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className="h-7 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigator.clipboard.writeText(tp.generatedContent || '');
+                                            toast({ title: "Copied to clipboard" });
+                                          }}
+                                        >
+                                          <Copy className="w-3 h-3" /> Copy
+                                        </Button>
                                       </div>
                                     </div>
                                   )}

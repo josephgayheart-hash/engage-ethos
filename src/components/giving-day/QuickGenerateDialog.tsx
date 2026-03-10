@@ -319,6 +319,7 @@ Generate a COMPLETE, ready-to-use ${channelLabel.toLowerCase()} message. Do NOT 
     });
     setSaved(true);
     toast({ title: "Draft added to your campaign plan" });
+    onOpenChange(false);
   };
 
   if (!touchpoint) return null;
