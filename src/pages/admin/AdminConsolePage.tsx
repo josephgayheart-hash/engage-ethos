@@ -558,7 +558,8 @@ export default function AdminConsolePage() {
               </Badge>
               <Badge className="bg-[hsl(222,47%,14%)]">
                 <Shield className="w-3 h-3 mr-1" />
-                Admin
+                {isPlatformOwner ? 'Platform Owner' : 'Admin'}
+              </Badge>
               </Badge>
             </div>
           </div>
