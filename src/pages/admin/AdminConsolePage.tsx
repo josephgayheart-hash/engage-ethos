@@ -243,7 +243,7 @@ export default function AdminConsolePage() {
       const { error: updateError } = await supabase
         .from('tenants')
         .update({ logo_url: publicUrl })
-        .eq('id', tenant.id);
+        .eq('id', effectiveTenant.id);
 
       if (updateError) throw updateError;
 
