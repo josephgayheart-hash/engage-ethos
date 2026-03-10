@@ -521,7 +521,7 @@ const GivingDayPlannerPage = () => {
   return (
     <div className="bg-background">
       <main className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto" ref={campaignDetailRef}>
           {/* Header */}
           <div className="flex items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
