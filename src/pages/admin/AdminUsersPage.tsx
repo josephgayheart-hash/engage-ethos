@@ -510,9 +510,10 @@ export default function AdminUsersPage() {
     return <Badge className={variants[status].className}>{status}</Badge>;
   };
 
+  // When super admin is on their home tenant, show ALL platform users; when impersonating, scope to that workspace
+  const isOnHomeTenant = isSuperAdmin && effectiveTenantId === tenant?.id;
   const filteredUsers = users.filter(user => {
-    // When super admin has a workspace selected, filter to that workspace
-    const matchesTenant = effectiveTenantId ? user.tenant_id === effectiveTenantId : true;
+    const matchesTenant = isOnHomeTenant ? true : (effectiveTenantId ? user.tenant_id === effectiveTenantId : true);
 
     const matchesSearch = 
       user.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
