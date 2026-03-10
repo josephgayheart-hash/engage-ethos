@@ -91,21 +91,31 @@ export default function AdminConsolePage() {
   const [isSavingColors, setIsSavingColors] = useState(false);
 
   useEffect(() => {
-    if (tenant?.institution_name) {
-      setInstitutionName(tenant.institution_name);
+    if (effectiveTenant?.institution_name) {
+      setInstitutionName(effectiveTenant.institution_name);
+    } else {
+      setInstitutionName('');
     }
-    if (tenant?.logo_url) {
-      setLogoUrl(tenant.logo_url);
+    if (effectiveTenant?.logo_url) {
+      setLogoUrl(effectiveTenant.logo_url);
+    } else {
+      setLogoUrl(null);
     }
-    if (tenant?.primary_color) {
-      setPrimaryColor(tenant.primary_color);
-      setPrimaryColorInput(tenant.primary_color);
+    if (effectiveTenant?.primary_color) {
+      setPrimaryColor(effectiveTenant.primary_color);
+      setPrimaryColorInput(effectiveTenant.primary_color);
+    } else {
+      setPrimaryColor('#1F2A44');
+      setPrimaryColorInput('#1F2A44');
     }
-    if (tenant?.accent_color) {
-      setAccentColor(tenant.accent_color);
-      setAccentColorInput(tenant.accent_color);
+    if (effectiveTenant?.accent_color) {
+      setAccentColor(effectiveTenant.accent_color);
+      setAccentColorInput(effectiveTenant.accent_color);
+    } else {
+      setAccentColor('#2C7A7B');
+      setAccentColorInput('#2C7A7B');
     }
-  }, [tenant]);
+  }, [effectiveTenant]);
 
   const handleSaveInstitution = async () => {
     if (!tenant?.id || !institutionName.trim()) return;
