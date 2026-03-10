@@ -60,36 +60,38 @@ export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
   const [activeWorkspaceId, setActiveWorkspaceIdState] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load workspaces after auth is ready
-  useEffect(() => {
+  const loadWorkspaces = useCallback(async () => {
     if (authLoading || !user) {
       setIsLoading(false);
       return;
     }
 
-    const load = async () => {
-      setIsLoading(true);
+    setIsLoading(true);
 
-      if (isSuperAdmin) {
-        // Super admins can see all tenants
-        const { data, error } = await supabase
-          .from('tenants')
-          .select('*')
-          .order('institution_name');
+    if (isSuperAdmin) {
+      const { data, error } = await supabase
+        .from('tenants')
+        .select('*')
+        .order('institution_name');
 
-        if (!error && data) {
-          setWorkspaces(data as Tenant[]);
-        }
-      } else if (tenant) {
-        // Regular users only see their own tenant
-        setWorkspaces([tenant]);
+      if (!error && data) {
+        setWorkspaces(data as Tenant[]);
       }
+    } else if (tenant) {
+      setWorkspaces([tenant]);
+    }
 
-      setIsLoading(false);
-    };
-
-    load();
+    setIsLoading(false);
   }, [authLoading, user, isSuperAdmin, tenant]);
+
+  // Load workspaces after auth is ready
+  useEffect(() => {
+    loadWorkspaces();
+  }, [loadWorkspaces]);
+
+  const refreshWorkspaces = useCallback(async () => {
+    await loadWorkspaces();
+  }, [loadWorkspaces]);
 
   // Resolve activeWorkspaceId once workspaces are loaded
   useEffect(() => {
