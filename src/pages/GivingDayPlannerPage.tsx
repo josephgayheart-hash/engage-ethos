@@ -652,6 +652,7 @@ const GivingDayPlannerPage = () => {
                 ...updates,
                 generatedContent: content,
               } as any);
+              setExpandedTouchpoints(prev => new Set(prev).add(id));
             }}
           />
         </div>
