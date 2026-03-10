@@ -520,8 +520,8 @@ export default function AdminConsolePage() {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="font-serif text-2xl font-bold text-[hsl(222,47%,11%)]">Institution Admin</h1>
-              <p className="text-[hsl(220,14%,46%)]">Manage your institution's platform settings</p>
+              <h1 className="font-serif text-2xl font-bold text-[hsl(222,47%,11%)]">{isAgency ? 'Agency Partner Admin' : 'Institution Admin'}</h1>
+              <p className="text-[hsl(220,14%,46%)]">{isAgency ? "Manage your agency's platform settings and partner institutions" : "Manage your institution's platform settings"}</p>
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="flex items-center gap-1">
