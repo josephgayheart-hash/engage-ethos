@@ -62,7 +62,11 @@ const MAX_LOGO_DIMENSION = 400; // Max width/height in pixels
 
 export default function AdminConsolePage() {
   const { tenant, profile, isSuperAdmin, refreshProfile } = useAuth();
+  const { activeWorkspace, canSwitch } = useWorkspace();
   const { toast } = useToast();
+
+  // Use active workspace when super admin is switching, otherwise own tenant
+  const effectiveTenant = canSwitch ? activeWorkspace : tenant;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [userStats, setUserStats] = useState<UserStats>({ total: 0, active: 0, pending: 0, recentLogins: 0 });
   const [onboardingStats, setOnboardingStats] = useState<OnboardingStats>({ pending: 0, approved: 0, rejected: 0 });
