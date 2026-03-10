@@ -80,7 +80,7 @@ export default function ForAgenciesPage() {
     <>
       <SEOHead
         title="For Agencies | CampusVoice.AI"
-        description="Manage multiple university clients from one platform. Per-client Content DNA, unified templates, and client-tagged workflows for higher ed marketing agencies."
+        description="Manage multiple partner institutions from one platform. Per-institution Content DNA, unified templates, and institution-tagged workflows for higher ed marketing agencies."
       />
 
       <div className="min-h-screen bg-background">
