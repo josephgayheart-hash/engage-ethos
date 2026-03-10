@@ -651,7 +651,7 @@ export default function AdminConsolePage() {
                       <div className="relative">
                         <img 
                           src={logoUrl} 
-                          alt="Institution logo" 
+                          alt={`${entityTerm} logo`} 
                           className="h-20 w-auto object-contain border rounded-lg p-2 bg-muted/30"
                           style={{ maxWidth: '200px' }}
                         />
