@@ -20,12 +20,13 @@ import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 import { QuickGenerateDialog } from "@/components/giving-day/QuickGenerateDialog";
 import { SEOHead } from "@/components/SEOHead";
 import {
   ArrowLeft, Plus, CalendarIcon, Target, Mail, MessageSquare, Megaphone, Phone,
   Globe, Clock, ChevronRight, ChevronDown, Sparkles, CheckCircle2, FileEdit,
-  Send, Trash2, Gift, DollarSign, LayoutList, PartyPopper, Timer,
+  Send, Trash2, Gift, DollarSign, LayoutList, PartyPopper, Timer, Copy,
   GraduationCap, Layers, Building, Briefcase, Building2
 } from "lucide-react";
 
