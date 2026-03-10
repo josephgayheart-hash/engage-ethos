@@ -105,6 +105,7 @@ const GivingDayPlannerPage = () => {
   const { tenant } = useAuth();
   const { profiles } = useInstitutionalProfiles();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
   const [showNewDialog, setShowNewDialog] = useState(false);
