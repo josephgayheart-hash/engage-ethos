@@ -318,7 +318,7 @@ export default function AdminConsolePage() {
           primary_color: primaryColorInput,
           accent_color: accentColorInput 
         })
-        .eq('id', tenant.id);
+        .eq('id', effectiveTenant.id);
 
       if (error) throw error;
 
