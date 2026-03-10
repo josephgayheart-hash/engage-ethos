@@ -772,7 +772,7 @@ export default function AdminConsolePage() {
                     <p className="text-lg font-semibold text-[hsl(222,47%,11%)]">
                       {effectiveTenant?.institution_name || 'Loading...'}
                     </p>
-                    <p className="text-sm text-[hsl(220,14%,46%)]">Your institution's display name</p>
+                    <p className="text-sm text-[hsl(220,14%,46%)]">{isAgency ? "Your agency's display name" : "Your institution's display name"}</p>
                   </div>
                 </div>
                 {effectiveTenant?.accent_color && (
