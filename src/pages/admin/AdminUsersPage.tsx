@@ -554,7 +554,9 @@ export default function AdminUsersPage() {
               </div>
               <h1 className="font-serif text-2xl font-bold text-[hsl(222,47%,11%)]">User Management</h1>
               <p className="text-sm text-[hsl(220,14%,46%)]">
-                {isSuperAdmin ? 'Manage all user accounts across institutions' : 'View users in your institution (read-only)'}
+                {isSuperAdmin 
+                  ? `Managing users for ${effectiveTenant?.institution_name || 'all institutions'}` 
+                  : 'View users in your institution (read-only)'}
               </p>
             </div>
           </div>
