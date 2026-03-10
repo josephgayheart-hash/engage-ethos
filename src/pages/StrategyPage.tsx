@@ -977,6 +977,10 @@ const StrategyPage = () => {
                   if (kit.target_cohorts && kit.target_cohorts.length > 0) {
                     setContext(prev => ({ ...prev, cohort: kit.target_cohorts![0] as MessageContext['cohort'] }));
                   }
+                  // Auto-select advancement-appropriate channels
+                  if (kit.category === 'advancement') {
+                    setSelectedChannels(['email', 'direct-mail', 'landing-page', 'phone-call', 'case-for-care']);
+                  }
                   toast({
                     title: "Playbook Selected",
                     description: `Using "${kit.name}" as your starting template. Scroll down to customize timeline and channels.`,
