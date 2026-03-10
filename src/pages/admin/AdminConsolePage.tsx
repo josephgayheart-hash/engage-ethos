@@ -269,7 +269,7 @@ export default function AdminConsolePage() {
   };
 
   const handleRemoveLogo = async () => {
-    if (!tenant?.id || !tenant.logo_url) return;
+    if (!effectiveTenant?.id || !effectiveTenant.logo_url) return;
 
     setIsUploadingLogo(true);
     try {
