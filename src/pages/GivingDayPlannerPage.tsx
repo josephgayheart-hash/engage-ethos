@@ -24,11 +24,22 @@ import { useToast } from "@/hooks/use-toast";
 import { QuickGenerateDialog } from "@/components/giving-day/QuickGenerateDialog";
 import { SEOHead } from "@/components/SEOHead";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   ArrowLeft, Plus, CalendarIcon, Target, Mail, MessageSquare, Megaphone, Phone,
   Globe, Clock, ChevronRight, ChevronDown, Sparkles, CheckCircle2, FileEdit,
   Send, Trash2, Gift, DollarSign, LayoutList, PartyPopper, Timer, Copy,
-  GraduationCap, Layers, Building, Briefcase, Building2
+  GraduationCap, Layers, Building, Briefcase, Building2, Download, FileText,
+  ClipboardCopy, Loader2
 } from "lucide-react";
+import { campaignToText } from "@/lib/campaignExport";
+import { openInGoogleDocs } from "@/lib/googleDocsExport";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
 
 const PROFILE_TYPE_LABELS: Record<string, { label: string; icon: typeof Building2 }> = {
   university: { label: "University", icon: Building2 },
