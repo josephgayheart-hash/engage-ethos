@@ -114,12 +114,16 @@ const createEmptyConfig = (): InstitutionalConfig => ({
 
 export function useInstitutionalProfiles() {
   const { user, tenant } = useAuth();
+  const workspaceId = useActiveWorkspaceId();
   const [profiles, setProfiles] = useState<InstitutionalProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Use workspace id (super admin switched) or fall back to tenant id
+  const effectiveTenantId = workspaceId || tenant?.id;
+
   // Fetch profiles from database
   const fetchProfiles = useCallback(async () => {
-    if (!user || !tenant?.id) {
+    if (!user || !effectiveTenantId) {
       setProfiles([]);
       setIsLoading(false);
       return;
@@ -129,7 +133,7 @@ export function useInstitutionalProfiles() {
       const { data, error } = await supabase
         .from('institutional_profiles')
         .select('*')
-        .eq('tenant_id', tenant.id)
+        .eq('tenant_id', effectiveTenantId)
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
