@@ -14,6 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
+      advancement_campaigns: {
+        Row: {
+          campaign_type: string
+          created_at: string
+          created_by_user_id: string
+          giving_day_date: string
+          goal_amount: string | null
+          id: string
+          name: string
+          notes: string | null
+          profile_id: string | null
+          status: string
+          target_segments: Json | null
+          tenant_id: string
+          touchpoints: Json | null
+          updated_at: string
+        }
+        Insert: {
+          campaign_type?: string
+          created_at?: string
+          created_by_user_id: string
+          giving_day_date: string
+          goal_amount?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          profile_id?: string | null
+          status?: string
+          target_segments?: Json | null
+          tenant_id: string
+          touchpoints?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          campaign_type?: string
+          created_at?: string
+          created_by_user_id?: string
+          giving_day_date?: string
+          goal_amount?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          profile_id?: string | null
+          status?: string
+          target_segments?: Json | null
+          tenant_id?: string
+          touchpoints?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advancement_campaigns_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "institutional_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "advancement_campaigns_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action: string
