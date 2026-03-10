@@ -28,6 +28,10 @@ interface QuickGenerateDialogProps {
   givingDayDate?: string;
   institutionalConfig?: InstitutionalConfig | null;
   contentDNA?: ContentDNAForGeneration | null;
+  profileFacts?: { label: string; value: string; category: string }[];
+  profileStories?: { title: string; narrative: string; pull_quote: string | null; story_type: string }[];
+  profileName?: string;
+  profileType?: string;
   onSaveDraft?: (touchpointId: string, content: string, updates: Partial<CampaignTouchpoint>) => void;
 }
 
