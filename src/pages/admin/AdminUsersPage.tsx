@@ -74,7 +74,12 @@ interface UserWithRole extends UserProfile {
 export default function AdminUsersPage() {
   const navigate = useNavigate();
   const { tenant, isSuperAdmin, startImpersonation, user: currentUser } = useAuth();
+  const { activeWorkspace, canSwitch } = useWorkspace();
   const { toast } = useToast();
+
+  // When super admin is switching workspaces, scope to that workspace
+  const effectiveTenant = canSwitch ? activeWorkspace : tenant;
+  const effectiveTenantId = effectiveTenant?.id ?? null;
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
