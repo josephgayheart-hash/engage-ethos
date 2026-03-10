@@ -286,7 +286,7 @@ export default function ForAgenciesPage() {
                 Manage Your Entire Portfolio
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Switch between university clients instantly. Each institution gets 
+                Switch between partner institutions instantly. Each institution gets 
                 dedicated Content DNA, messaging history, and brand settings.
               </p>
             </div>
