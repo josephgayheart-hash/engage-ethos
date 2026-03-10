@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWorkspace } from '@/contexts/WorkspaceContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -61,7 +62,11 @@ const MAX_LOGO_DIMENSION = 400; // Max width/height in pixels
 
 export default function AdminConsolePage() {
   const { tenant, profile, isSuperAdmin, refreshProfile } = useAuth();
+  const { activeWorkspace, canSwitch } = useWorkspace();
   const { toast } = useToast();
+
+  // Use active workspace when super admin is switching, otherwise own tenant
+  const effectiveTenant = canSwitch ? activeWorkspace : tenant;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [userStats, setUserStats] = useState<UserStats>({ total: 0, active: 0, pending: 0, recentLogins: 0 });
   const [onboardingStats, setOnboardingStats] = useState<OnboardingStats>({ pending: 0, approved: 0, rejected: 0 });
@@ -86,31 +91,41 @@ export default function AdminConsolePage() {
   const [isSavingColors, setIsSavingColors] = useState(false);
 
   useEffect(() => {
-    if (tenant?.institution_name) {
-      setInstitutionName(tenant.institution_name);
+    if (effectiveTenant?.institution_name) {
+      setInstitutionName(effectiveTenant.institution_name);
+    } else {
+      setInstitutionName('');
     }
-    if (tenant?.logo_url) {
-      setLogoUrl(tenant.logo_url);
+    if (effectiveTenant?.logo_url) {
+      setLogoUrl(effectiveTenant.logo_url);
+    } else {
+      setLogoUrl(null);
     }
-    if (tenant?.primary_color) {
-      setPrimaryColor(tenant.primary_color);
-      setPrimaryColorInput(tenant.primary_color);
+    if (effectiveTenant?.primary_color) {
+      setPrimaryColor(effectiveTenant.primary_color);
+      setPrimaryColorInput(effectiveTenant.primary_color);
+    } else {
+      setPrimaryColor('#1F2A44');
+      setPrimaryColorInput('#1F2A44');
     }
-    if (tenant?.accent_color) {
-      setAccentColor(tenant.accent_color);
-      setAccentColorInput(tenant.accent_color);
+    if (effectiveTenant?.accent_color) {
+      setAccentColor(effectiveTenant.accent_color);
+      setAccentColorInput(effectiveTenant.accent_color);
+    } else {
+      setAccentColor('#2C7A7B');
+      setAccentColorInput('#2C7A7B');
     }
-  }, [tenant]);
+  }, [effectiveTenant]);
 
   const handleSaveInstitution = async () => {
-    if (!tenant?.id || !institutionName.trim()) return;
+    if (!effectiveTenant?.id || !institutionName.trim()) return;
     
     setIsSavingInstitution(true);
     try {
       const { error } = await supabase
         .from('tenants')
         .update({ institution_name: institutionName.trim() })
-        .eq('id', tenant.id);
+        .eq('id', effectiveTenant.id);
 
       if (error) throw error;
 
@@ -173,7 +188,7 @@ export default function AdminConsolePage() {
 
   const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !tenant?.id) return;
+    if (!file || !effectiveTenant?.id) return;
 
     if (file.size > MAX_LOGO_SIZE) {
       toast({
@@ -197,15 +212,15 @@ export default function AdminConsolePage() {
     try {
       // Resize the image
       const resizedBlob = await resizeImage(file);
-      const fileName = `${tenant.id}/logo-${Date.now()}.png`;
+      const fileName = `${effectiveTenant.id}/logo-${Date.now()}.png`;
 
       // Delete old logo if exists
-      if (tenant.logo_url) {
-        const oldPath = tenant.logo_url.split('/').pop();
+      if (effectiveTenant.logo_url) {
+        const oldPath = effectiveTenant.logo_url.split('/').pop();
         if (oldPath) {
           await supabase.storage
             .from('institution-logos')
-            .remove([`${tenant.id}/${oldPath}`]);
+            .remove([`${effectiveTenant.id}/${oldPath}`]);
         }
       }
 
@@ -228,7 +243,7 @@ export default function AdminConsolePage() {
       const { error: updateError } = await supabase
         .from('tenants')
         .update({ logo_url: publicUrl })
-        .eq('id', tenant.id);
+        .eq('id', effectiveTenant.id);
 
       if (updateError) throw updateError;
 
@@ -254,23 +269,23 @@ export default function AdminConsolePage() {
   };
 
   const handleRemoveLogo = async () => {
-    if (!tenant?.id || !tenant.logo_url) return;
+    if (!effectiveTenant?.id || !effectiveTenant.logo_url) return;
 
     setIsUploadingLogo(true);
     try {
       // Extract filename from URL and delete
-      const urlParts = tenant.logo_url.split('/');
+      const urlParts = effectiveTenant.logo_url!.split('/');
       const fileName = urlParts[urlParts.length - 1];
       
       await supabase.storage
         .from('institution-logos')
-        .remove([`${tenant.id}/${fileName}`]);
+        .remove([`${effectiveTenant.id}/${fileName}`]);
 
       // Update tenant to remove logo URL
       const { error } = await supabase
         .from('tenants')
         .update({ logo_url: null })
-        .eq('id', tenant.id);
+        .eq('id', effectiveTenant.id);
 
       if (error) throw error;
 
@@ -293,7 +308,7 @@ export default function AdminConsolePage() {
   };
 
   const handleSaveColors = async () => {
-    if (!tenant?.id) return;
+    if (!effectiveTenant?.id) return;
 
     setIsSavingColors(true);
     try {
@@ -303,7 +318,7 @@ export default function AdminConsolePage() {
           primary_color: primaryColorInput,
           accent_color: accentColorInput 
         })
-        .eq('id', tenant.id);
+        .eq('id', effectiveTenant.id);
 
       if (error) throw error;
 
@@ -339,14 +354,14 @@ export default function AdminConsolePage() {
 
   useEffect(() => {
     const fetchStats = async () => {
-      if (!tenant?.id) return;
+      if (!effectiveTenant?.id) return;
       
       try {
         // Fetch users in tenant
         const { data: users } = await supabase
           .from('profiles')
           .select('*')
-          .eq('tenant_id', tenant.id)
+          .eq('tenant_id', effectiveTenant.id)
           .order('last_login_at', { ascending: false });
 
         if (users) {
@@ -379,10 +394,10 @@ export default function AdminConsolePage() {
 
         // Fetch content stats for the tenant
         const [profilesResult, dnaSamplesResult, messagesResult, templatesResult] = await Promise.all([
-          supabase.from('institutional_profiles').select('id').eq('tenant_id', tenant.id),
-          supabase.from('content_dna_samples').select('id').eq('tenant_id', tenant.id),
-          supabase.from('personal_messages').select('id').eq('tenant_id', tenant.id),
-          supabase.from('shared_templates').select('id').eq('tenant_id', tenant.id),
+          supabase.from('institutional_profiles').select('id').eq('tenant_id', effectiveTenant.id),
+          supabase.from('content_dna_samples').select('id').eq('tenant_id', effectiveTenant.id),
+          supabase.from('personal_messages').select('id').eq('tenant_id', effectiveTenant.id),
+          supabase.from('shared_templates').select('id').eq('tenant_id', effectiveTenant.id),
         ]);
 
         setContentStats({
@@ -399,7 +414,7 @@ export default function AdminConsolePage() {
     };
 
     fetchStats();
-  }, [tenant?.id, isSuperAdmin]);
+  }, [effectiveTenant?.id, isSuperAdmin]);
 
   const formatLastLogin = (date: string | null) => {
     if (!date) return 'Never';
@@ -505,7 +520,7 @@ export default function AdminConsolePage() {
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="flex items-center gap-1">
                 <Building2 className="w-3 h-3" />
-                {tenant?.institution_name || 'Loading...'}
+                {effectiveTenant?.institution_name || 'Loading...'}
               </Badge>
               <Badge className="bg-[hsl(222,47%,14%)]">
                 <Shield className="w-3 h-3 mr-1" />
@@ -515,10 +530,10 @@ export default function AdminConsolePage() {
           </div>
         </div>
         {/* Accent color bar */}
-        {tenant?.accent_color && (
+        {effectiveTenant?.accent_color && (
           <div 
             className="h-1 w-full" 
-            style={{ backgroundColor: tenant.accent_color }}
+            style={{ backgroundColor: effectiveTenant.accent_color }}
           />
         )}
       </div>
@@ -531,7 +546,7 @@ export default function AdminConsolePage() {
               {logoUrl && (
                 <img 
                   src={logoUrl} 
-                  alt={tenant?.institution_name || 'Institution'} 
+                  alt={effectiveTenant?.institution_name || 'Institution'} 
                   className="h-16 w-auto object-contain bg-white/10 rounded-lg p-2"
                   style={{ maxWidth: '150px' }}
                 />
@@ -541,7 +556,7 @@ export default function AdminConsolePage() {
                   Welcome, {profile?.first_name}
                 </h2>
                 <p className="text-white/80">
-                  As an administrator for {tenant?.institution_name || 'your institution'}, you can manage users, 
+                  As an administrator for {effectiveTenant?.institution_name || 'your institution'}, you can manage users, 
                   review access requests, and configure institutional settings.
                 </p>
               </div>
@@ -722,9 +737,9 @@ export default function AdminConsolePage() {
                     variant="outline" 
                     onClick={() => {
                       setIsEditingInstitution(false);
-                      setInstitutionName(tenant?.institution_name || '');
-                      setPrimaryColorInput(tenant?.primary_color || '#1F2A44');
-                      setAccentColorInput(tenant?.accent_color || '#2C7A7B');
+                      setInstitutionName(effectiveTenant?.institution_name || '');
+                      setPrimaryColorInput(effectiveTenant?.primary_color || '#1F2A44');
+                      setAccentColorInput(effectiveTenant?.accent_color || '#2C7A7B');
                     }}
                   >
                     <X className="w-4 h-4 mr-2" />
@@ -738,7 +753,7 @@ export default function AdminConsolePage() {
                   {logoUrl ? (
                     <img 
                       src={logoUrl} 
-                      alt={tenant?.institution_name || 'Institution'} 
+                      alt={effectiveTenant?.institution_name || 'Institution'} 
                       className="h-16 w-auto object-contain border rounded-lg p-2 bg-muted/30"
                       style={{ maxWidth: '150px' }}
                     />
@@ -749,19 +764,19 @@ export default function AdminConsolePage() {
                   )}
                   <div>
                     <p className="text-lg font-semibold text-[hsl(222,47%,11%)]">
-                      {tenant?.institution_name || 'Loading...'}
+                      {effectiveTenant?.institution_name || 'Loading...'}
                     </p>
                     <p className="text-sm text-[hsl(220,14%,46%)]">Your institution's display name</p>
                   </div>
                 </div>
-                {tenant?.accent_color && (
+                {effectiveTenant?.accent_color && (
                   <div className="flex items-center gap-2 text-sm">
                     <span className="text-muted-foreground">Header accent:</span>
                     <div 
                       className="h-4 w-24 rounded" 
-                      style={{ backgroundColor: tenant.accent_color }}
+                      style={{ backgroundColor: effectiveTenant.accent_color }}
                     />
-                    <span className="text-xs text-muted-foreground font-mono">{tenant.accent_color}</span>
+                    <span className="text-xs text-muted-foreground font-mono">{effectiveTenant.accent_color}</span>
                   </div>
                 )}
               </div>
