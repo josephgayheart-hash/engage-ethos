@@ -134,7 +134,7 @@ export default function ForAgenciesPage() {
               </Badge>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold tracking-tight text-foreground mb-6">
-                Your Clients Deserve
+                Your Institutions Deserve
                 <br />
                 <span className="bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent">
                   Authentic Brand Voice
