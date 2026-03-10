@@ -274,21 +274,21 @@ export default function AgencyDashboardPage() {
               <CardContent>
                 {isLoading ? (
                   <div className="text-center py-8 text-muted-foreground">
-                    Loading clients...
+                    Loading institutions...
                   </div>
                 ) : clients.length === 0 ? (
                   <div className="text-center py-12">
                     <Building2 className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
                     <h3 className="font-medium text-foreground mb-2">
-                      No clients yet
+                      No partner institutions yet
                     </h3>
                     <p className="text-muted-foreground mb-4">
-                      Add your first university client to get started.
+                      Add your first partner institution to get started.
                     </p>
                     <Link to="/agency/clients">
                       <Button className="gap-2">
                         <Plus className="h-4 w-4" />
-                        Add First Client
+                        Add First Institution
                       </Button>
                     </Link>
                   </div>
