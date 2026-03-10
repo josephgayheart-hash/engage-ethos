@@ -231,7 +231,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {/* Super Admin */}
-        {isSuperAdmin && (
+        {showPlatformAdmin && (
           <>
             <SidebarSeparator className="my-0.5" />
             <SidebarGroup className="py-1">
