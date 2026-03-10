@@ -127,6 +127,40 @@ const GivingDayPlannerPage = () => {
   const selectedProfile = profiles.find(p => p.id === selectedCampaign?.profile_id);
   const { contentDNA } = useContentDNAForGeneration({ profileId: selectedCampaign?.profile_id });
 
+  // Fetch facts & stories for the selected campaign's profile for AI context
+  const [profileFacts, setProfileFacts] = useState<{ label: string; value: string; category: string }[]>([]);
+  const [profileStories, setProfileStories] = useState<{ title: string; narrative: string; pull_quote: string | null; story_type: string }[]>([]);
+
+  useEffect(() => {
+    if (!selectedCampaign?.profile_id) {
+      setProfileFacts([]);
+      setProfileStories([]);
+      return;
+    }
+    const pid = selectedCampaign.profile_id;
+    // Fetch facts
+    supabase
+      .from('fact_book')
+      .select('label, value, category, is_highlight')
+      .eq('profile_id', pid)
+      .order('is_highlight', { ascending: false })
+      .limit(20)
+      .then(({ data }) => {
+        setProfileFacts((data || []).map(f => ({ label: f.label, value: f.value, category: f.category })));
+      });
+    // Fetch stories
+    supabase
+      .from('story_bank')
+      .select('title, narrative, pull_quote, story_type')
+      .eq('profile_id', pid)
+      .eq('is_approved', true)
+      .order('is_featured', { ascending: false })
+      .limit(10)
+      .then(({ data }) => {
+        setProfileStories((data || []).map(s => ({ title: s.title, narrative: s.narrative, pull_quote: s.pull_quote, story_type: s.story_type })));
+      });
+  }, [selectedCampaign?.profile_id]);
+
   const toggleNewChannel = (ch: string) => {
     setNewChannels(prev =>
       prev.includes(ch) ? prev.filter(c => c !== ch) : [...prev, ch]
