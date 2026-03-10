@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import { Link, useNavigate } from "react-router-dom";
 import { format, differenceInDays, addDays, parseISO, isBefore, isToday } from "date-fns";
@@ -24,11 +24,22 @@ import { useToast } from "@/hooks/use-toast";
 import { QuickGenerateDialog } from "@/components/giving-day/QuickGenerateDialog";
 import { SEOHead } from "@/components/SEOHead";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   ArrowLeft, Plus, CalendarIcon, Target, Mail, MessageSquare, Megaphone, Phone,
   Globe, Clock, ChevronRight, ChevronDown, Sparkles, CheckCircle2, FileEdit,
   Send, Trash2, Gift, DollarSign, LayoutList, PartyPopper, Timer, Copy,
-  GraduationCap, Layers, Building, Briefcase, Building2
+  GraduationCap, Layers, Building, Briefcase, Building2, Download, FileText,
+  ClipboardCopy, Loader2
 } from "lucide-react";
+import { campaignToText } from "@/lib/campaignExport";
+import { openInGoogleDocs } from "@/lib/googleDocsExport";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
 
 const PROFILE_TYPE_LABELS: Record<string, { label: string; icon: typeof Building2 }> = {
   university: { label: "University", icon: Building2 },
@@ -117,6 +128,8 @@ const GivingDayPlannerPage = () => {
   const [quickGenTouchpoint, setQuickGenTouchpoint] = useState<CampaignTouchpoint | null>(null);
   const [quickGenOpen, setQuickGenOpen] = useState(false);
   const [expandedTouchpoints, setExpandedTouchpoints] = useState<Set<string>>(new Set());
+  const [isExporting, setIsExporting] = useState(false);
+  const campaignDetailRef = useRef<HTMLDivElement>(null);
 
   // Add touchpoint dialog state
   const [addTpMilestone, setAddTpMilestone] = useState<typeof T_MINUS_MILESTONES[0] | null>(null);
@@ -227,7 +240,79 @@ const GivingDayPlannerPage = () => {
     setAddTpOpen(true);
   };
 
-  // Group touchpoints by phase
+  const getCampaignText = useCallback(() => {
+    if (!selectedCampaign) return "";
+    return campaignToText(selectedCampaign, selectedProfile?.name);
+  }, [selectedCampaign, selectedProfile]);
+
+  const handleCopyToClipboard = useCallback(async () => {
+    const text = getCampaignText();
+    await navigator.clipboard.writeText(text);
+    toast({ title: "Copied!", description: "Campaign plan copied to clipboard. Paste it anywhere." });
+  }, [getCampaignText, toast]);
+
+  const handleExportGoogleDocs = useCallback(async () => {
+    const text = getCampaignText();
+    const success = await openInGoogleDocs(text, selectedCampaign?.name);
+    if (success) {
+      toast({ title: "Opening Google Docs", description: "Your campaign plan is on the clipboard — paste it in the new doc." });
+    }
+  }, [getCampaignText, selectedCampaign?.name, toast]);
+
+  const handleExportPdf = useCallback(async () => {
+    if (!campaignDetailRef.current) return;
+    setIsExporting(true);
+    try {
+      await (document as any).fonts?.ready;
+      const canvas = await html2canvas(campaignDetailRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+        scrollX: 0,
+        scrollY: -window.scrollY,
+      });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const margin = 40;
+      const availW = pageW - margin * 2;
+      const imgH = (canvas.height * availW) / canvas.width;
+
+      // Paginate if needed
+      let offset = 0;
+      const srcW = canvas.width;
+      const srcH = canvas.height;
+      const availH = pageH - margin * 2;
+      let page = 0;
+
+      while (offset < srcH) {
+        if (page > 0) pdf.addPage();
+        const sliceH = Math.min(srcH - offset, (availH * srcW) / availW);
+        const sliceRealH = (sliceH * availW) / srcW;
+        const sliceCanvas = document.createElement("canvas");
+        sliceCanvas.width = srcW;
+        sliceCanvas.height = sliceH;
+        const ctx = sliceCanvas.getContext("2d");
+        if (ctx) ctx.drawImage(canvas, 0, offset, srcW, sliceH, 0, 0, srcW, sliceH);
+        pdf.addImage(sliceCanvas.toDataURL("image/png"), "PNG", margin, margin, availW, sliceRealH, undefined, "FAST");
+        offset += sliceH;
+        page++;
+      }
+
+      const fileName = `${(selectedCampaign?.name || "campaign").replace(/\s+/g, "-").toLowerCase()}-${format(new Date(), "yyyy-MM-dd")}.pdf`;
+      pdf.save(fileName);
+      toast({ title: "PDF exported", description: `Saved as ${fileName}` });
+    } catch (err) {
+      console.error("PDF export error:", err);
+      toast({ title: "Export failed", description: "Could not generate PDF.", variant: "destructive" });
+    } finally {
+      setIsExporting(false);
+    }
+  }, [selectedCampaign?.name, toast]);
+
+
   const groupedTouchpoints = useMemo(() => {
     if (!selectedCampaign) return {};
     const groups: Record<string, { milestone: typeof T_MINUS_MILESTONES[0]; touchpoints: CampaignTouchpoint[] }> = {};
@@ -436,7 +521,7 @@ const GivingDayPlannerPage = () => {
   return (
     <div className="bg-background">
       <main className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto" ref={campaignDetailRef}>
           {/* Header */}
           <div className="flex items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
@@ -465,6 +550,25 @@ const GivingDayPlannerPage = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" disabled={isExporting}>
+                    {isExporting ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Download className="w-4 h-4 mr-1.5" />}
+                    Share / Export
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleCopyToClipboard}>
+                    <ClipboardCopy className="w-4 h-4 mr-2" /> Copy to Clipboard
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleExportGoogleDocs}>
+                    <FileText className="w-4 h-4 mr-2" /> Open in Google Docs
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleExportPdf}>
+                    <Download className="w-4 h-4 mr-2" /> Download PDF
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button variant="outline" size="sm" className="text-destructive" onClick={async () => {
                 if (selectedCampaign && confirm('Delete this campaign?')) {
                   await deleteCampaign(selectedCampaign.id);
