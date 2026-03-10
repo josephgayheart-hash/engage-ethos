@@ -307,6 +307,10 @@ export function MyDraftsCard() {
                       ? 'bg-pillar-consensus/10'
                       : draft.draft_type === 'image'
                       ? 'bg-violet-500/10'
+                      : draft.draft_type === 'campaign'
+                      ? 'bg-amber-500/10'
+                      : draft.draft_type === 'stewardship'
+                      ? 'bg-rose-500/10'
                       : 'bg-cyan-500/10'
                   }`}>
                     <Icon className={`w-4 h-4 ${
@@ -316,6 +320,10 @@ export function MyDraftsCard() {
                         ? 'text-pillar-consensus'
                         : draft.draft_type === 'image'
                         ? 'text-violet-600'
+                        : draft.draft_type === 'campaign'
+                        ? 'text-amber-600'
+                        : draft.draft_type === 'stewardship'
+                        ? 'text-rose-600'
                         : 'text-cyan-600'
                     }`} />
                   </div>
