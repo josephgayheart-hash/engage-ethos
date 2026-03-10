@@ -125,7 +125,7 @@ export default function AdminConsolePage() {
       const { error } = await supabase
         .from('tenants')
         .update({ institution_name: institutionName.trim() })
-        .eq('id', tenant.id);
+        .eq('id', effectiveTenant.id);
 
       if (error) throw error;
 
