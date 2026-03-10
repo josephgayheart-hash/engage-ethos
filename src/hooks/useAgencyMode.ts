@@ -65,49 +65,49 @@ export function useAgencyMode(): AgencyModeResult {
   const labels: AgencyLabels = isAgency
     ? {
         // Navigation & Header
-        profile: 'Client',
-        profiles: 'Clients',
-        addProfile: 'Add Client',
-        settings: 'Clients',
+        profile: 'Partner Institution',
+        profiles: 'Partner Institutions',
+        addProfile: 'Add Partner Institution',
+        settings: 'Partner Institutions',
         settingsPath: '/agency/clients',
         library: 'Templates',
-        selectProfile: 'Select Client',
-        noProfiles: 'No clients configured yet',
-        profileType: 'client',
-        dashboard: 'Client Hub',
+        selectProfile: 'Select Institution',
+        noProfiles: 'No partner institutions configured yet',
+        profileType: 'partner',
+        dashboard: 'Partner Hub',
         dashboardPath: '/agency/dashboard',
         
         // Settings Page
-        settingsPageTitle: 'Client Management',
-        settingsPageDescription: 'Manage your client universities and their accounts',
-        createProfileButton: 'Add University Client',
-        profileTerm: 'University Account',
-        subUnitTerm: 'Sub-account',
-        manageProfilesLabel: 'Manage Client Accounts',
+        settingsPageTitle: 'Partner Institutions',
+        settingsPageDescription: 'Manage the institutions you serve and their brand configurations',
+        createProfileButton: 'Add Partner Institution',
+        profileTerm: 'Institution Profile',
+        subUnitTerm: 'Sub-unit',
+        manageProfilesLabel: 'Manage Partner Institutions',
         
         // Wizard
-        wizardTitle: 'Add University Client',
-        wizardDescription: 'Set up a new university client account with their brand identity',
-        identityStepTitle: 'Client Identity',
-        identityStepDescription: 'Enter the university client\'s basic information',
-        institutionNameLabel: 'University Name',
-        institutionNamePlaceholder: 'Enter client university name',
-        institutionNameHelper: 'The official name of the university you\'re adding as a client',
-        logoLabel: 'Client Logo',
-        logoHelper: 'Upload the university\'s official logo',
+        wizardTitle: 'Add Partner Institution',
+        wizardDescription: 'Set up a new partner institution with their brand identity',
+        identityStepTitle: 'Institution Identity',
+        identityStepDescription: 'Enter the institution\'s basic information',
+        institutionNameLabel: 'Institution Name',
+        institutionNamePlaceholder: 'Enter institution name',
+        institutionNameHelper: 'The official name of the institution you\'re partnering with',
+        logoLabel: 'Institution Logo',
+        logoHelper: 'Upload the institution\'s official logo',
         
         // Sub-unit wizard
-        subUnitWizardTitle: 'Add Sub-account',
-        subUnitWizardDescription: 'Create a sub-account within this university client',
+        subUnitWizardTitle: 'Add Sub-unit',
+        subUnitWizardDescription: 'Create a sub-unit within this partner institution',
         
         // Profile selector
-        selectorLabel: 'Select Client',
-        selectorPlaceholder: 'Choose a client university',
-        selectorEmptyState: 'No client accounts configured. Add a client to get started.',
+        selectorLabel: 'Select Institution',
+        selectorPlaceholder: 'Choose a partner institution',
+        selectorEmptyState: 'No partner institutions configured. Add one to get started.',
         
         // Account type
         accountType: 'Agency Partner',
-        accountTypeLabel: 'Partner Account',
+        accountTypeLabel: 'Agency Partner Account',
       }
     : {
         // Navigation & Header
