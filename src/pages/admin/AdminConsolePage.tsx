@@ -516,7 +516,7 @@ export default function AdminConsolePage() {
               <Home className="w-4 h-4" />
             </Link>
             <span>/</span>
-            <span className="text-[hsl(222,47%,11%)]">Institution Admin</span>
+            <span className="text-[hsl(222,47%,11%)]">{isAgency ? 'Agency Partner Admin' : 'Institution Admin'}</span>
           </div>
           <div className="flex items-center justify-between">
             <div>
