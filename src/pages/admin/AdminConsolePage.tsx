@@ -635,6 +635,7 @@ export default function AdminConsolePage() {
                 </Button>
               )}
             </div>
+          </CardHeader>
           {/* Hidden file input - outside conditional so it persists */}
           <input
             ref={fileInputRef}
