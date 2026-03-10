@@ -46,6 +46,7 @@ interface GeneratedOutput {
 const StewardshipReportPage = () => {
   const { toast } = useToast();
   const { tenant } = useAuth();
+  const navigate = useNavigate();
 
   // Profile selection
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
