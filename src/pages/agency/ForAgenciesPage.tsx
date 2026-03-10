@@ -59,7 +59,7 @@ const agencyBenefits = [
   },
   {
     title: "Higher Margins",
-    description: "Serve more clients without scaling headcount",
+    description: "Serve more institutions without scaling headcount",
     icon: DollarSign,
   },
   {
