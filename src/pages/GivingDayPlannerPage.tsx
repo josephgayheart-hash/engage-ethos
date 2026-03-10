@@ -38,7 +38,7 @@ import {
 } from "lucide-react";
 import { campaignToText } from "@/lib/campaignExport";
 import { openInGoogleDocs } from "@/lib/googleDocsExport";
-import html2canvas from "html2canvas";
+
 import { jsPDF } from "jspdf";
 
 const PROFILE_TYPE_LABELS: Record<string, { label: string; icon: typeof Building2 }> = {
