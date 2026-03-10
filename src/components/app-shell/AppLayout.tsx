@@ -3,6 +3,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { AppTopBar } from "./AppTopBar";
 import { ImpersonationBanner } from "@/components/ImpersonationBanner";
+import { WorkspaceSwitchOverlay } from "./WorkspaceSwitchOverlay";
 import { useAuth } from "@/contexts/AuthContext";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
 
@@ -11,6 +12,7 @@ export function AppLayout() {
 
   return (
     <WorkspaceProvider>
+      <WorkspaceSwitchOverlay />
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
