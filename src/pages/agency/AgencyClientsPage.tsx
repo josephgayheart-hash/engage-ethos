@@ -461,7 +461,7 @@ export default function AgencyClientsPage() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       className="pl-10"
-                      placeholder="Search clients..."
+                      placeholder="Search institutions..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
