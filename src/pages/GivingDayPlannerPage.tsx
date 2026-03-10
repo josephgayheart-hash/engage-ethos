@@ -16,6 +16,7 @@ import { useAdvancementCampaigns, CampaignTouchpoint } from "@/hooks/useAdvancem
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import { QuickGenerateDialog } from "@/components/giving-day/QuickGenerateDialog";
 import {
   ArrowLeft, Plus, CalendarIcon, Target, Mail, MessageSquare, Megaphone, Phone,
   Globe, Heart, Users, Clock, ChevronRight, Sparkles, CheckCircle2, FileEdit,
@@ -85,6 +86,8 @@ const GivingDayPlannerPage = () => {
   const [newDate, setNewDate] = useState<Date | undefined>();
   const [newGoal, setNewGoal] = useState("");
   const [newProfileId, setNewProfileId] = useState<string | null>(null);
+  const [quickGenTouchpoint, setQuickGenTouchpoint] = useState<CampaignTouchpoint | null>(null);
+  const [quickGenOpen, setQuickGenOpen] = useState(false);
 
   const selectedCampaign = campaigns.find(c => c.id === selectedCampaignId);
 
@@ -117,16 +120,9 @@ const GivingDayPlannerPage = () => {
   };
 
   const handleGenerateCopy = (touchpoint: CampaignTouchpoint) => {
-    // Navigate to message builder with pre-filled context
     const milestone = T_MINUS_MILESTONES.find(m => m.days === touchpoint.tMinusDays);
-    const params = new URLSearchParams({
-      audience: touchpoint.segment === 'alumni' ? 'alumni' : 'donors',
-      channel: touchpoint.channel,
-      moment: 'giving-day',
-      tone: touchpoint.tone,
-      context: `${selectedCampaign?.name || 'Giving Day'} campaign – ${milestone?.phase || ''} phase. Message type: ${touchpoint.messageType}. ${touchpoint.label}.`,
-    });
-    navigate(`/build?${params.toString()}`);
+    setQuickGenTouchpoint(touchpoint);
+    setQuickGenOpen(true);
   };
 
   // Group touchpoints by phase
@@ -480,7 +476,17 @@ const GivingDayPlannerPage = () => {
                 </div>
               );
             })}
-          </div>
+        </div>
+
+          {/* Quick Generate Dialog */}
+          <QuickGenerateDialog
+            open={quickGenOpen}
+            onOpenChange={setQuickGenOpen}
+            touchpoint={quickGenTouchpoint}
+            campaignName={selectedCampaign?.name || "Giving Day"}
+            phase={T_MINUS_MILESTONES.find(m => m.days === quickGenTouchpoint?.tMinusDays)?.phase || ""}
+            onStatusUpdate={(id, status) => handleTouchpointUpdate(id, { status: status as any })}
+          />
         </div>
       </main>
     </div>
