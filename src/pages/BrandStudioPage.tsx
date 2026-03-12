@@ -737,7 +737,6 @@ const BrandStudioPage = () => {
                   </Button>
                 </div>
               </div>
-            )}
           </div>
         </div>
       </div>
