@@ -7,6 +7,10 @@ export type OverlayPatternId =
   | "gradient-horizontal"
   | "gradient-diagonal"
   | "gradient-radial"
+  | "gradient-radial-top-left"
+  | "gradient-radial-top-right"
+  | "gradient-radial-bottom-left"
+  | "gradient-radial-bottom-right"
   | "gradient-split"
   | "slice-diagonal"
   | "corner-triangle"
@@ -38,7 +42,11 @@ export const OVERLAY_PATTERNS: OverlayPatternMeta[] = [
   { id: "gradient-vertical", label: "Vertical", category: "Gradients" },
   { id: "gradient-horizontal", label: "Horizontal", category: "Gradients" },
   { id: "gradient-diagonal", label: "Diagonal", category: "Gradients" },
-  { id: "gradient-radial", label: "Radial", category: "Gradients" },
+  { id: "gradient-radial", label: "Radial Center", category: "Gradients" },
+  { id: "gradient-radial-top-left", label: "Radial Top Left", category: "Gradients" },
+  { id: "gradient-radial-top-right", label: "Radial Top Right", category: "Gradients" },
+  { id: "gradient-radial-bottom-left", label: "Radial Bottom Left", category: "Gradients" },
+  { id: "gradient-radial-bottom-right", label: "Radial Bottom Right", category: "Gradients" },
   { id: "gradient-split", label: "Split", category: "Gradients" },
   { id: "slice-diagonal", label: "Diagonal Slice", category: "Geometric" },
   { id: "corner-triangle", label: "Corner Triangle", category: "Geometric" },
@@ -100,6 +108,30 @@ export function getOverlayStyle(
     case "gradient-radial":
       return {
         background: `radial-gradient(circle at center, ${color}, ${c2})`,
+        opacity,
+      };
+
+    case "gradient-radial-top-left":
+      return {
+        background: `radial-gradient(circle at top left, ${color}, ${c2})`,
+        opacity,
+      };
+
+    case "gradient-radial-top-right":
+      return {
+        background: `radial-gradient(circle at top right, ${color}, ${c2})`,
+        opacity,
+      };
+
+    case "gradient-radial-bottom-left":
+      return {
+        background: `radial-gradient(circle at bottom left, ${color}, ${c2})`,
+        opacity,
+      };
+
+    case "gradient-radial-bottom-right":
+      return {
+        background: `radial-gradient(circle at bottom right, ${color}, ${c2})`,
         opacity,
       };
 

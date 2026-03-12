@@ -203,9 +203,6 @@ const BrandStudioPage = () => {
   const [bottomBarText, setBottomBarText] = useState(restore?.bottomBarText || "");
   const [bottomBarColor, setBottomBarColor] = useState(restore?.bottomBarColor || primary);
 
-  // Smart Layer state
-  const [isSmartLayering, setIsSmartLayering] = useState(false);
-  const [smartLayerImageUrl, setSmartLayerImageUrl] = useState<string | null>(null);
 
   useGoogleFont(headlineFont);
 
@@ -219,7 +216,7 @@ const BrandStudioPage = () => {
 
   useEffect(() => {
     draftDataRef.current = imageUrl ? {
-      imageUrl: smartLayerImageUrl || imageUrl,
+      imageUrl,
       brandColors,
       channel,
       audience,
@@ -249,50 +246,6 @@ const BrandStudioPage = () => {
       );
     };
   }, []);
-
-  const handleSmartLayer = useCallback(async () => {
-    const canvas = document.getElementById("brand-overlay-canvas");
-    if (!canvas) return;
-
-    setIsSmartLayering(true);
-    const loadingToast = toast.loading("Applying AI Smart Layer — this takes a few seconds…");
-
-    try {
-      // Use lower pixelRatio for faster capture & smaller payload
-      const dataUrl = await captureToDataUrl(canvas as HTMLElement, 1);
-      const { data, error } = await supabase.functions.invoke("smart-layer-image", {
-        body: {
-          imageDataUrl: dataUrl,
-          overlayPattern,
-          overlayColor,
-          overlayOpacity,
-          brandColors,
-          institutionName,
-        },
-      });
-
-      toast.dismiss(loadingToast);
-
-      if (error) {
-        console.error("Smart layer error:", error);
-        toast.error("Smart Layer failed. Try again.");
-        return;
-      }
-
-      if (data?.imageUrl) {
-        setSmartLayerImageUrl(data.imageUrl);
-        toast.success("Smart Layer applied! The pattern now wraps around your subject.");
-      } else if (data?.error) {
-        toast.error(data.error);
-      }
-    } catch (err) {
-      toast.dismiss(loadingToast);
-      console.error("Smart layer error:", err);
-      toast.error("Smart Layer failed. Try again.");
-    } finally {
-      setIsSmartLayering(false);
-    }
-  }, [overlayPattern, overlayColor, overlayOpacity, brandColors, institutionName]);
 
   // Drag handlers
   const handlePointerDown = useCallback(
@@ -378,7 +331,7 @@ const BrandStudioPage = () => {
           tags: ["branded-image", channel || "image"].filter(Boolean),
           metadata: {
             source: "brand-studio",
-            originalImageUrl: smartLayerImageUrl || state.imageUrl || null,
+            originalImageUrl: state.imageUrl || null,
             brandColors,
             overlayPattern,
             overlayColor,
@@ -702,10 +655,6 @@ const BrandStudioPage = () => {
                 tone={tone}
                 goal={goal}
                 sceneDescription={sceneDescription}
-                onSmartLayer={imageUrl ? handleSmartLayer : undefined}
-                isSmartLayering={isSmartLayering}
-                smartLayerImageUrl={smartLayerImageUrl}
-                onClearSmartLayer={() => setSmartLayerImageUrl(null)}
                 hasImage={!!imageUrl}
                 canvasBackgroundType={canvasBackgroundType}
                 onCanvasBackgroundTypeChange={setCanvasBackgroundType}
@@ -722,19 +671,19 @@ const BrandStudioPage = () => {
         {/* Right: Canvas */}
         <div className="flex-1 flex items-center justify-center p-8 bg-muted/30 overflow-hidden">
           <div className="max-w-2xl w-full relative group">
-            {/* Always show editable canvas — use smart layer image as base when available */}
+            {/* Always show editable canvas */}
             <BrandOverlayCanvas
               ref={canvasRef}
-              imageUrl={smartLayerImageUrl || imageUrl}
+              imageUrl={imageUrl}
               primaryColor={primary}
               secondaryColor={secondary}
               canvasBackgroundType={canvasBackgroundType}
               canvasBackgroundColor={canvasBackgroundColor}
               canvasBackgroundSecondaryColor={canvasBackgroundSecondaryColor}
-              overlayPattern={smartLayerImageUrl ? "none" : overlayPattern}
+              overlayPattern={overlayPattern}
               overlayColor={overlayColor}
-              overlayOpacity={smartLayerImageUrl ? 0 : overlayOpacity}
-              customOverlayUrl={smartLayerImageUrl ? null : customOverlayUrl}
+              overlayOpacity={overlayOpacity}
+              customOverlayUrl={customOverlayUrl}
               showLogo={showLogo}
               activeLogo={activeLogo}
               logoPosition={logoPosition}
@@ -762,50 +711,32 @@ const BrandStudioPage = () => {
               institutionName={institutionName}
             />
 
-            {/* Loading overlay */}
-            {isSmartLayering && (
-              <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg z-10">
-                <div className="flex flex-col items-center gap-3 text-white">
-                  <Loader2 className="w-8 h-8 animate-spin" />
-                  <span className="text-sm font-medium">Applying Smart Layer…</span>
-                </div>
-              </div>
-            )}
-
             {/* Hover overlay actions — only at bottom, not covering canvas interaction area */}
-            {!isSmartLayering && (
-              <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-5 pt-12 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-b-lg pointer-events-none z-20">
-                <div className="flex flex-wrap gap-2 pointer-events-auto justify-center px-4">
-                  <DownloadFormatPicker
-                    targetId="brand-overlay-canvas"
-                    filenameBase={`branded-${channel || "image"}`}
-                    size="sm"
-                    variant="outline"
-                    label="Download"
-                  />
-                  <Button size="sm" variant="secondary" onClick={() => setSaveDialogOpen(true)}>
-                    <FolderPlus className="w-4 h-4 mr-1" />
-                    Save to Library
+            <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-5 pt-12 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-b-lg pointer-events-none z-20">
+              <div className="flex flex-wrap gap-2 pointer-events-auto justify-center px-4">
+                <DownloadFormatPicker
+                  targetId="brand-overlay-canvas"
+                  filenameBase={`branded-${channel || "image"}`}
+                  size="sm"
+                  variant="outline"
+                  label="Download"
+                />
+                <Button size="sm" variant="secondary" onClick={() => setSaveDialogOpen(true)}>
+                  <FolderPlus className="w-4 h-4 mr-1" />
+                  Save to Library
+                </Button>
+                {lastSavedMessageId && (
+                  <Button size="sm" variant="secondary" onClick={() => setCollectionDialogOpen(true)}>
+                    <Folder className="w-4 h-4 mr-1" />
+                    Add to Collection
                   </Button>
-                  {lastSavedMessageId && (
-                    <Button size="sm" variant="secondary" onClick={() => setCollectionDialogOpen(true)}>
-                      <Folder className="w-4 h-4 mr-1" />
-                      Add to Collection
-                    </Button>
-                  )}
-                  {smartLayerImageUrl && (
-                    <Button size="sm" variant="secondary" onClick={() => setSmartLayerImageUrl(null)}>
-                      <RefreshCw className="w-4 h-4 mr-1" />
-                      Back to Editor
-                    </Button>
-                  )}
+                )}
                   <Button size="sm" variant="secondary" onClick={() => navigate("/image-generator")}>
                     <RefreshCw className="w-4 h-4 mr-1" />
                     Regenerate
                   </Button>
                 </div>
               </div>
-            )}
           </div>
         </div>
       </div>

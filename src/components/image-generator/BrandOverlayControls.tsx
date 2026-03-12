@@ -87,12 +87,6 @@ export interface BrandOverlayControlsProps {
   goal?: string;
   sceneDescription?: string;
 
-  // Smart Layer
-  onSmartLayer?: () => void;
-  isSmartLayering?: boolean;
-  smartLayerImageUrl?: string | null;
-  onClearSmartLayer?: () => void;
-
   // Canvas background (no-image mode)
   hasImage?: boolean;
   canvasBackgroundType?: CanvasBackgroundType;
@@ -153,10 +147,6 @@ export function BrandOverlayControls({
   tone,
   goal,
   sceneDescription,
-  onSmartLayer,
-  isSmartLayering,
-  smartLayerImageUrl,
-  onClearSmartLayer,
   hasImage,
   canvasBackgroundType,
   onCanvasBackgroundTypeChange,
@@ -334,45 +324,6 @@ export function BrandOverlayControls({
         />
       </div>
 
-      {/* AI Smart Layer */}
-      {onSmartLayer && (
-        <div className="space-y-2 border-t border-border pt-4">
-          <div className="flex items-center justify-between">
-            <Label className="text-xs font-medium flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-primary" /> AI Smart Layer
-            </Label>
-          </div>
-          <p className="text-[10px] text-muted-foreground leading-relaxed">
-            Uses AI to layer your chosen pattern and brand elements behind the subject, creating a dramatic depth effect where the subject pops forward.
-          </p>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 text-xs gap-1.5"
-              onClick={onSmartLayer}
-              disabled={isSmartLayering}
-            >
-              {isSmartLayering ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Sparkles className="w-3.5 h-3.5" />
-              )}
-              {isSmartLayering ? "Applying…" : smartLayerImageUrl ? "Re-apply Smart Layer" : "Apply Smart Layer"}
-            </Button>
-            {smartLayerImageUrl && onClearSmartLayer && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-xs"
-                onClick={onClearSmartLayer}
-              >
-                Reset
-              </Button>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Logo Controls */}
       {allLogos.length > 0 && (
