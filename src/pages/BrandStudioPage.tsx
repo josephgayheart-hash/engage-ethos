@@ -14,6 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BrandOverlayCanvas } from "@/components/image-generator/BrandOverlayCanvas";
 import { BrandOverlayControls } from "@/components/image-generator/BrandOverlayControls";
+import { CanvasRuler } from "@/components/image-generator/CanvasRuler";
 import { useGoogleFont } from "@/components/image-generator/BrandOverlayEditor";
 import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
 import { AddToCollectionDialog } from "@/components/library/AddToCollectionDialog";
@@ -669,8 +670,8 @@ const BrandStudioPage = () => {
         </div>
 
         {/* Right: Canvas */}
-        <div className="flex-1 flex items-center justify-center p-8 bg-muted/30 overflow-hidden">
-          <div className="max-w-2xl w-full relative group">
+        <div className="flex-1 flex items-center justify-center p-12 bg-muted/30 overflow-hidden">
+          <div className="max-w-2xl w-full relative group" style={{ margin: '22px' }}>
             {/* Always show editable canvas */}
             <BrandOverlayCanvas
               ref={canvasRef}
@@ -710,6 +711,8 @@ const BrandStudioPage = () => {
               bottomBarColor={bottomBarColor}
               institutionName={institutionName}
             />
+
+            <CanvasRuler targetRef={canvasRef} />
 
             {/* Hover overlay actions — only at bottom, not covering canvas interaction area */}
             <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-5 pt-12 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-b-lg pointer-events-none z-20">
