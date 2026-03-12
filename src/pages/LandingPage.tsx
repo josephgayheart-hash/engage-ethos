@@ -137,7 +137,7 @@ const valueProps = [
   },
   {
     title: 'Audience-First Messaging',
-    description: 'Start with who you're reaching. Align to brand pillars automatically.',
+    description: "Start with who you\u2019re reaching. Align to brand pillars automatically.",
   },
   {
     title: 'Journey Planning',
