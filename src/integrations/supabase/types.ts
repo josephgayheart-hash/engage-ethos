@@ -413,6 +413,60 @@ export type Database = {
           },
         ]
       }
+      content_dna_activity: {
+        Row: {
+          action: string
+          artifact_count: number | null
+          artifact_name: string | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          profile_id: string | null
+          section: string
+          tenant_id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          artifact_count?: number | null
+          artifact_name?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          profile_id?: string | null
+          section: string
+          tenant_id: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          artifact_count?: number | null
+          artifact_name?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          profile_id?: string | null
+          section?: string
+          tenant_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_dna_activity_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "institutional_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_dna_activity_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_dna_adjustments: {
         Row: {
           content_dna_id: string
