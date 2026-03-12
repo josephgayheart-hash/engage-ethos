@@ -436,7 +436,15 @@ export async function exportTalkingPointsToPDF(
   // Add footer to last page
   addFooter();
 
-  doc.save('executive-talking-points.pdf');
+  const pdfBlob = doc.output("blob");
+  const blobUrl = URL.createObjectURL(pdfBlob);
+  const link = document.createElement("a");
+  link.href = blobUrl;
+  link.download = "executive-talking-points.pdf";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
 }
 
 // Generate AI images for the Case for Support PDF
