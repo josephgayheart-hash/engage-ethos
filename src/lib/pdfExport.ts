@@ -1169,8 +1169,8 @@ export async function exportCaseForSupportToPDF(
     // Left side: Page numbers
     doc.text(`Page ${i} of ${pageCount}`, margin, pageHeight - 8);
     
-    // Center: Page numbers
-    doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, pageHeight - 8, { align: "center" });
+    // Center: CampusVoice branding
+    doc.text("Powered by CampusVoice.AI", pageWidth / 2, pageHeight - 8, { align: "center" });
     
     // Right side: CampusVoice branding
     doc.text("Powered by CampusVoice.AI", pageWidth - margin, pageHeight - 8, { align: "right" });
