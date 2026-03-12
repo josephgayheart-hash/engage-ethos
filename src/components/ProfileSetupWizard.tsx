@@ -144,7 +144,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
     logoUrlPresidential: '',
     primaryColor: '#1F2A44',
     secondaryColor: '#2C7A7B',
-    tertiaryColor: '#D4AF37',
+    tertiaryColor: '',
     tertiaryColorNA: false,
     accentColor: '#2C7A7B', // Legacy - keep for backward compatibility
     emailDomain: '',
