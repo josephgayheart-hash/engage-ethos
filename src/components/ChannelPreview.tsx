@@ -232,7 +232,7 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
       }
 
       if (channel === "case-for-care") {
-        await exportCaseForSupportToPDF(editedContent as CaseForCareDraft, institutionName, branding);
+        await exportCaseForSupportToPDF(editedContent as CaseForCareDraft, institutionName, branding, profileId);
         toast({
           title: "PDF Downloaded",
           description: "Case for Support exported successfully.",

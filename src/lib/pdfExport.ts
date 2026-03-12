@@ -448,7 +448,7 @@ export async function exportTalkingPointsToPDF(
 }
 
 // Fetch real campus photos from Content DNA to use directly in the PDF
-async function fetchCampusPhotosForPdf(): Promise<(LoadedImageData | null)[]> {
+async function fetchCampusPhotosForPdf(profileId?: string): Promise<(LoadedImageData | null)[]> {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [null, null, null];
@@ -461,13 +461,19 @@ async function fetchCampusPhotosForPdf(): Promise<(LoadedImageData | null)[]> {
 
     if (!profile?.tenant_id) return [null, null, null];
 
-    const { data: photos } = await supabase
+    let query = supabase
       .from("campus_photo_samples")
       .select("file_url, photo_category")
       .eq("tenant_id", profile.tenant_id)
       .eq("is_active", true)
       .order("created_at", { ascending: false })
       .limit(6);
+
+    if (profileId) {
+      query = query.eq("profile_id", profileId);
+    }
+
+    const { data: photos } = await query;
 
     if (!photos || photos.length === 0) return [null, null, null];
 
@@ -516,7 +522,8 @@ async function fetchCampusPhotosForPdf(): Promise<(LoadedImageData | null)[]> {
 export async function exportCaseForSupportToPDF(
   cfc: CaseForCareDraft, 
   institutionName?: string,
-  branding?: BrandingOptions
+  branding?: BrandingOptions,
+  profileId?: string
 ): Promise<void> {
   const doc = new jsPDF();
   try {
@@ -550,7 +557,7 @@ export async function exportCaseForSupportToPDF(
 
   // Fetch campus photos directly (fast, no AI generation needed)
   const imagesPromise = Promise.race([
-    fetchCampusPhotosForPdf(),
+    fetchCampusPhotosForPdf(profileId),
     new Promise<(LoadedImageData | null)[]>((resolve) =>
       setTimeout(() => {
         console.warn("Campus photo loading timed out after 10s, proceeding without images");
