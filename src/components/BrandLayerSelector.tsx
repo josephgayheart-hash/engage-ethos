@@ -303,6 +303,11 @@ function BrandPlatformTabs({
     { id: 'pathways', label: 'Pathways', icon: Route, count: pathwayCount, selected: selection.pathways.length },
   ].filter(tab => tab.count > 0);
 
+  // Ensure activeTab is valid — if current tab has no items, switch to first available
+  const effectiveTab = availableTabs.some(t => t.id === activeTab) 
+    ? activeTab 
+    : availableTabs[0]?.id || 'pillars';
+
   return (
     <div className="space-y-4">
       {/* Select All / Clear All Buttons - Always visible at top */}
@@ -320,7 +325,7 @@ function BrandPlatformTabs({
 
       {/* Tabbed interface for other elements - Moved to top for prominence */}
       {availableTabs.length > 0 && (
-        <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
+        <Tabs value={effectiveTab} onValueChange={onTabChange} className="w-full">
           <TabsList 
             className="grid w-full h-auto p-1 bg-muted/50 border border-border/60 rounded-lg" 
             style={{ gridTemplateColumns: `repeat(${availableTabs.length}, 1fr)` }}
