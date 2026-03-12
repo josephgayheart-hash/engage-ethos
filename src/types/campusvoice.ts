@@ -512,13 +512,18 @@ export interface MapperResult {
 
 export type ProfileType = 'university' | 'college' | 'division' | 'unit' | 'department';
 
-// Institution classification based on Carnegie Classifications for Higher Education
+// Institution classification based on Carnegie Classifications + extended org types
 export type InstitutionType = 
   | 'doctoral-university'
   | 'masters-university'
   | 'baccalaureate-college'
   | 'associates-college'
   | 'special-focus'
+  // Non-higher-ed organization types
+  | 'nonprofit-organization'
+  | 'k12-school-district'
+  | 'government-agency'
+  | 'private-enterprise'
   // Legacy values kept for backward compatibility
   | 'four-year-university'
   | 'community-college'
