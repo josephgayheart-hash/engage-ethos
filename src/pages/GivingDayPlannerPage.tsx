@@ -133,6 +133,14 @@ const GivingDayPlannerPage = () => {
   const [isExporting, setIsExporting] = useState(false);
   const campaignDetailRef = useRef<HTMLDivElement>(null);
 
+  // Edit campaign dialog state
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editDate, setEditDate] = useState<Date | undefined>();
+  const [editGoal, setEditGoal] = useState("");
+  const [editProfileId, setEditProfileId] = useState<string | null>(null);
+  const [editNotes, setEditNotes] = useState("");
+
   // Add touchpoint dialog state
   const [addTpMilestone, setAddTpMilestone] = useState<typeof T_MINUS_MILESTONES[0] | null>(null);
   const [addTpChannel, setAddTpChannel] = useState("email");
