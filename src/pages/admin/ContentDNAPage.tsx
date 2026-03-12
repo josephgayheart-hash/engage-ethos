@@ -1957,7 +1957,7 @@ export default function ContentDNAPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="flex flex-wrap gap-2">
-                        {analysis.voice_analysis.messagingTactics.map((tactic, i) => (
+                        {(analysis.voice_analysis.messagingTactics || []).map((tactic, i) => (
                           <Badge key={i} className="bg-[hsl(173,58%,39%)]">
                             {tactic}
                           </Badge>
