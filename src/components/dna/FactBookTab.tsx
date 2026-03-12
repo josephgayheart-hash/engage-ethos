@@ -68,6 +68,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { extractTextFromFile, getAcceptString } from '@/lib/documentParser';
 import { firecrawlApi } from '@/lib/api/firecrawl';
+import { toast } from 'sonner';
 
 interface FactBookTabProps {
   profileId?: string | null;
