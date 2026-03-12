@@ -1920,7 +1920,7 @@ export default function ContentDNAPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="flex flex-wrap gap-2">
-                        {analysis.voice_analysis.keyCharacteristics.map((char, i) => (
+                        {(analysis.voice_analysis.keyCharacteristics || []).map((char, i) => (
                           <Badge key={i} variant="secondary" className="bg-[hsl(210,20%,94%)]">
                             <CheckCircle2 className="w-3 h-3 mr-1" />
                             {char}
@@ -1939,7 +1939,7 @@ export default function ContentDNAPage() {
                     </CardHeader>
                     <CardContent>
                       <ul className="space-y-2">
-                        {analysis.voice_analysis.commonPhrases.map((phrase, i) => (
+                        {(analysis.voice_analysis.commonPhrases || []).map((phrase, i) => (
                           <li key={i} className="text-sm text-[hsl(222,47%,11%)] italic">
                             "{phrase}"
                           </li>
@@ -1957,7 +1957,7 @@ export default function ContentDNAPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="flex flex-wrap gap-2">
-                        {analysis.voice_analysis.messagingTactics.map((tactic, i) => (
+                        {(analysis.voice_analysis.messagingTactics || []).map((tactic, i) => (
                           <Badge key={i} className="bg-[hsl(173,58%,39%)]">
                             {tactic}
                           </Badge>
