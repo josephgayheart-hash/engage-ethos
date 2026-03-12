@@ -160,6 +160,12 @@ export function useCampusPhotography({ profileId }: { profileId: string | null }
         setPhotos(prev => [...uploaded, ...prev]);
         toast.success(`${uploaded.length} photo${uploaded.length > 1 ? 's' : ''} uploaded successfully.`);
 
+        logDNAActivity(workspaceId, user.id, {
+          section: 'photos', action: 'added', profileId,
+          artifactCount: uploaded.length,
+          artifactName: uploaded.map(p => p.file_name).join(', '),
+        });
+
         // Auto-analyze the new photos
         analyzePhotos(uploaded.map(p => p.id));
       }
