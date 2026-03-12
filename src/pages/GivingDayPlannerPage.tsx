@@ -283,6 +283,7 @@ const GivingDayPlannerPage = () => {
     toast({ title: "Campaign updated", description: "Your changes have been saved." });
   };
 
+  const getCampaignText = useCallback(() => {
     if (!selectedCampaign) return "";
     return campaignToText(selectedCampaign, selectedProfile?.name);
   }, [selectedCampaign, selectedProfile]);
