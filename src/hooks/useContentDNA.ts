@@ -270,6 +270,13 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
       if (error) throw error;
 
       setSamples(prev => [data as ContentDNASample, ...prev]);
+      
+      logDNAActivity(workspaceId, profile.id, {
+        section: 'samples', action: 'added', profileId: profileId || null,
+        artifactName: options.title || fileName,
+        metadata: { sampleType: options.sampleType },
+      });
+      
       toast({
         title: 'Sample Added',
         description: 'Content sample has been saved.',
