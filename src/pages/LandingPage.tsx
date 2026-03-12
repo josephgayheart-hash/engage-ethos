@@ -371,7 +371,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <ul className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8" aria-label="Core value propositions">
             {valueProps.map((prop, index) => {
               const colors = [
                 { bg: 'bg-[hsl(82_85%_55%_/_0.2)]', icon: 'text-[hsl(82_70%_40%)]' },
@@ -381,16 +381,16 @@ export default function LandingPage() {
               ];
               const color = colors[index % 4];
               return (
-                <div key={prop.title} className="text-center">
+                <li key={prop.title} className="text-center list-none">
                   <div className={`w-12 h-12 rounded-2xl ${color.bg} flex items-center justify-center mx-auto mb-4 rotate-3 hover:rotate-0 transition-transform`}>
                     <CheckCircle2 className={`w-6 h-6 ${color.icon}`} />
                   </div>
                   <h3 className="font-semibold text-foreground mb-2">{prop.title}</h3>
                   <p className="text-sm text-muted-foreground">{prop.description}</p>
-                </div>
+                </li>
               );
             })}
-          </div>
+          </ul>
         </div>
       </section>
 
