@@ -401,7 +401,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
       value: 'private-enterprise',
       label: 'Private Enterprise',
       description: 'Corporations, startups, consultancies, and for-profit businesses',
-      icon: <Building className="w-6 h-6" />,
+      icon: <Building2 className="w-6 h-6" />,
     },
   ];
 
