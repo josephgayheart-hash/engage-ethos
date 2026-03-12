@@ -985,7 +985,15 @@ const ImageGeneratorPage = () => {
                             alt="Generated campus image"
                             className="w-full rounded-lg"
                           />
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100">
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                            <button
+                              onClick={() => setIsLightboxOpen(true)}
+                              className="bg-background/90 backdrop-blur-sm rounded-full p-3 shadow-lg border border-border/50 opacity-0 group-hover:opacity-100 transition-all duration-200 scale-90 group-hover:scale-100 hover:bg-background"
+                            >
+                              <ZoomIn className="w-5 h-5 text-foreground" />
+                            </button>
+                          </div>
+                          <div className="absolute bottom-0 inset-x-0 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100 transition-opacity">
                             <div className="flex gap-2">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
