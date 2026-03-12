@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import type { TalkingPointsDraft, CaseForCareDraft } from "@/types/campusvoice";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface BrandingOptions {
   primaryColor?: string;
