@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import type { TalkingPointsDraft, CaseForCareDraft } from "@/types/campusvoice";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface BrandingOptions {
   primaryColor?: string;
@@ -142,9 +143,10 @@ export async function exportTalkingPointsToPDF(
         const logoX = margin;
         const logoY = (headerHeight - logoSize) / 2;
         
-        // White background circle for logo
+        // White rounded rectangle behind logo for contrast
+        const pad = 5;
         doc.setFillColor(255, 255, 255);
-        doc.circle(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2 + 2, 'F');
+        doc.roundedRect(logoX - pad / 2, logoY - pad / 2, logoSize + pad, logoSize + pad, 3, 3, 'F');
         
         doc.addImage(logoData.dataUrl, logoData.format, logoX, logoY, logoSize, logoSize);
         textStartX = margin + logoSize + 12;
@@ -437,6 +439,76 @@ export async function exportTalkingPointsToPDF(
   doc.save('executive-talking-points.pdf');
 }
 
+// Generate AI images for the Case for Support PDF
+async function generatePdfImages(
+  cfc: CaseForCareDraft,
+  institutionName?: string,
+  branding?: BrandingOptions
+): Promise<(LoadedImageData | null)[]> {
+  const prompts: string[] = [];
+
+  // 1. Hero/opening image — campus life
+  prompts.push(
+    "A warm, cinematic wide shot of a beautiful university campus at golden hour with students walking among historic buildings, green lawns, and mature trees"
+  );
+
+  // 2. Impact/community image
+  const impactSubject = cfc.strategicPillars?.[0]?.name || "student success";
+  prompts.push(
+    `A candid photograph of diverse university students collaborating together in a modern learning space, representing ${impactSubject}`
+  );
+
+  // 3. Vision/future image
+  prompts.push(
+    "An inspiring aerial photograph of a university graduation ceremony, with graduates in caps and gowns celebrating on a sunlit quad"
+  );
+
+  try {
+    const { data, error } = await supabase.functions.invoke("generate-pdf-images", {
+      body: {
+        prompts,
+        institutionName,
+        primaryColor: branding?.primaryColor,
+        accentColor: branding?.accentColor,
+      },
+    });
+
+    if (error || !data?.images) {
+      console.warn("Failed to generate PDF images:", error);
+      return [null, null, null];
+    }
+
+    // Convert base64 data URLs to LoadedImageData
+    const loaded = await Promise.all(
+      (data.images as (string | null)[]).map(async (dataUrl) => {
+        if (!dataUrl) return null;
+        try {
+          const dims = await new Promise<{ width: number; height: number }>((resolve) => {
+            const img = new Image();
+            img.onload = () =>
+              resolve({ width: img.naturalWidth || 800, height: img.naturalHeight || 600 });
+            img.onerror = () => resolve({ width: 800, height: 600 });
+            img.src = dataUrl;
+          });
+          return {
+            dataUrl,
+            format: "PNG" as const,
+            width: dims.width,
+            height: dims.height,
+          };
+        } catch {
+          return null;
+        }
+      })
+    );
+
+    return loaded;
+  } catch (e) {
+    console.warn("PDF image generation failed:", e);
+    return [null, null, null];
+  }
+}
+
 export async function exportCaseForSupportToPDF(
   cfc: CaseForCareDraft, 
   institutionName?: string,
@@ -460,20 +532,51 @@ export async function exportCaseForSupportToPDF(
   const primaryLight = lightenColor(primaryRgb, 0.92);
   const accentLight = lightenColor(accentRgb, 0.92);
 
-  // Pre-load logo if available
+  // Load logo and generate AI images in parallel
   let logoData: LoadedImageData | null = null;
-  if (branding?.logoUrl) {
-    try {
-      logoData = await loadImageAsDataUrl(branding.logoUrl);
-    } catch (e) {
-      console.error("Failed to load logo for PDF:", e);
-    }
-  }
+  let aiImages: (LoadedImageData | null)[] = [null, null, null];
+
+  const logoPromise = branding?.logoUrl
+    ? loadImageAsDataUrl(branding.logoUrl).catch((e) => {
+        console.error("Failed to load logo for PDF:", e);
+        return null;
+      })
+    : Promise.resolve(null);
+
+  const imagesPromise = generatePdfImages(cfc, institutionName, branding);
+
+  [logoData, aiImages] = await Promise.all([logoPromise, imagesPromise]);
 
   const checkPageBreak = (requiredSpace: number) => {
     if (y + requiredSpace > pageHeight - 30) {
       doc.addPage();
       y = 30;
+    }
+  };
+
+  // Helper to place an AI image spanning the content width
+  const placeImage = (imgData: LoadedImageData | null) => {
+    if (!imgData) return;
+    try {
+      const aspect = (imgData.width || 800) / (imgData.height || 600);
+      const imgWidth = contentWidth;
+      const imgHeight = imgWidth / aspect;
+      const maxH = 65; // cap height so it doesn't dominate a page
+      const finalH = Math.min(imgHeight, maxH);
+      const finalW = finalH * aspect;
+      const xOffset = margin + (contentWidth - finalW) / 2;
+
+      checkPageBreak(finalH + 10);
+
+      // Subtle rounded border
+      doc.setDrawColor(220, 220, 220);
+      doc.setLineWidth(0.3);
+      doc.roundedRect(xOffset - 1, y - 1, finalW + 2, finalH + 2, 2, 2, "S");
+
+      doc.addImage(imgData.dataUrl, imgData.format, xOffset, y, finalW, finalH);
+      y += finalH + 8;
+    } catch (e) {
+      console.warn("Failed to place image in PDF:", e);
     }
   };
 
@@ -516,8 +619,19 @@ export async function exportCaseForSupportToPDF(
       const logoWidth = logoHeight * aspect;
       const logoY = (70 - logoHeight) / 2;
 
+      // White rounded rectangle behind logo for contrast
+      const pad = 5;
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(
+        margin - pad / 2,
+        logoY - pad / 2,
+        logoWidth + pad,
+        logoHeight + pad,
+        3, 3, "F"
+      );
+
       doc.addImage(logoData.dataUrl, logoData.format, margin, logoY, logoWidth, logoHeight);
-      textStartX = margin + logoWidth + 8;
+      textStartX = margin + logoWidth + 12;
     } catch (e) {
       console.error("Failed to add logo to PDF:", e);
     }
@@ -640,6 +754,9 @@ export async function exportCaseForSupportToPDF(
     y += boxHeight + 10;
   }
 
+  // AI Image 1: Campus hero image after target amount
+  placeImage(aiImages[0]);
+
   // Leader Message - dynamic height
   if (cfc.leaderMessage) {
     const messageText = cfc.leaderMessage.message || "";
@@ -717,6 +834,9 @@ export async function exportCaseForSupportToPDF(
     }
     y += boxHeight + 5;
   }
+
+  // AI Image 2: Impact/community image after opening story
+  placeImage(aiImages[1]);
 
   // Vision Statement
   if (cfc.visionStatement) {
@@ -970,6 +1090,9 @@ export async function exportCaseForSupportToPDF(
       y += boxHeight + 5;
     });
   }
+
+  // AI Image 3: Graduation/vision image before CTA
+  placeImage(aiImages[2]);
 
   // Call to Action - dynamic height based on content
   if (cfc.callToAction) {
