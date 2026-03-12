@@ -91,7 +91,9 @@ const BrandStudioPage = () => {
     const p = profiles.find(pr => pr.id === pid);
     if (!p) return;
     const cfg = p.config;
-    const colors: string[] = [cfg.primaryColor, cfg.accentColor].filter(Boolean) as string[];
+    const APP_DEFAULT_COLORS = ["#1f2a44", "#2c7a7b"];
+    const isReal = (c: unknown): c is string => typeof c === 'string' && c.length > 0 && !APP_DEFAULT_COLORS.includes(c.trim().toLowerCase());
+    const colors: string[] = [cfg.primaryColor, cfg.secondaryColor, cfg.accentColor, cfg.tertiaryColor].filter(isReal) as string[];
     setBrandColors(colors.length > 0 ? colors : ["#1e3a5f"]);
     setLogoUrl(cfg.logoUrl || undefined);
     setLogoUrls([cfg.logoUrl, cfg.logoUrlSecondary, cfg.logoUrlAthletic, cfg.logoUrlPresidential].filter(Boolean) as string[]);
