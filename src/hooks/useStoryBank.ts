@@ -134,6 +134,11 @@ export function useStoryBank(options: UseStoryBankOptions = {}) {
       const newStory = data as unknown as Story;
       setStories(prev => [newStory, ...prev]);
       
+      logDNAActivity(workspaceId, user.id, {
+        section: 'stories', action: 'added', profileId: profileId || null,
+        artifactName: input.title, metadata: { story_type: input.story_type },
+      });
+      
       toast({
         title: 'Story added',
         description: `"${input.title}" has been added to your Story Bank.`,
