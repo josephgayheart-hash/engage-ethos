@@ -266,7 +266,15 @@ export function useFactBook(options: UseFactBookOptions = {}) {
       
       if (error) throw error;
       
+      const deletedFact = facts.find(f => f.id === id);
       setFacts(prev => prev.filter(f => f.id !== id));
+      
+      if (workspaceId && user?.id) {
+        logDNAActivity(workspaceId, user.id, {
+          section: 'facts', action: 'removed', profileId: profileId || null,
+          artifactName: deletedFact?.label,
+        });
+      }
       
       toastSuccess('Fact deleted', 'The fact has been removed from your Fact Book.');
       
