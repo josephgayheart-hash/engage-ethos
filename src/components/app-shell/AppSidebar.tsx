@@ -49,6 +49,7 @@ const createItems = [
 
 const manageItems = [
   { title: "My Library", url: "/library", icon: FolderOpen },
+  { title: "Collections", url: "/shared-library", icon: Layers },
   { title: "My Drafts", url: "/dashboard#my-drafts", icon: FileEdit },
   { title: "Tools", url: "/tools", icon: Wrench },
 ];
