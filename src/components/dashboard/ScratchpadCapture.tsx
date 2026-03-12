@@ -96,10 +96,7 @@ export function ScratchpadCapture() {
     try { localStorage.setItem(STORAGE_KEY, rawText); } catch {}
   }, [rawText]);
 
-  // Auto-expand if there's saved text
-  useEffect(() => {
-    if (rawText.length > 0) setIsExpanded(true);
-  }, []);
+  // Don't auto-expand — keep it cozy and collapsed by default
 
   // Debounced classify
   const classifyNotes = useCallback(async (text: string) => {
