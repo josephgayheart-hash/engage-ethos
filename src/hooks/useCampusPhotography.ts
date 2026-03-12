@@ -243,6 +243,14 @@ export function useCampusPhotography({ profileId }: { profileId: string | null }
       if (error) throw error;
 
       setPhotos(prev => prev.filter(p => p.id !== photoId));
+      
+      if (workspaceId && user?.id) {
+        logDNAActivity(workspaceId, user.id, {
+          section: 'photos', action: 'removed', profileId,
+          artifactName: photo?.file_name,
+        });
+      }
+      
       toast.success('Photo removed.');
     } catch (e: any) {
       console.error('Delete error:', e);
