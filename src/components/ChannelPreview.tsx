@@ -212,30 +212,39 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
 
   const handleExportToPDF = async () => {
     setIsPdfExporting(true);
-    const loadingToastId = toast.loading(
-      channel === "case-for-care"
-        ? "Generating Case for Support PDF with AI images… This may take 15–30 seconds."
+    const { id: loadingToastId } = toast({
+      title: channel === "case-for-care"
+        ? "Generating Case for Support PDF…"
         : "Generating PDF…",
-      { duration: Infinity }
-    );
+      description: channel === "case-for-care"
+        ? "Creating AI images and building your branded document. This may take 15–30 seconds."
+        : "Please wait while we build your document.",
+    });
     try {
       if (channel === "talking-points") {
         await exportTalkingPointsToPDF(editedContent as TalkingPointsDraft, institutionName, branding);
-        toast.dismiss(loadingToastId);
-        toast.success("Executive Talking Points exported successfully.");
+        toast({
+          title: "PDF Downloaded",
+          description: "Executive Talking Points exported successfully.",
+        });
         return;
       }
 
       if (channel === "case-for-care") {
         await exportCaseForSupportToPDF(editedContent as CaseForCareDraft, institutionName, branding);
-        toast.dismiss(loadingToastId);
-        toast.success("Case for Support exported successfully.");
+        toast({
+          title: "PDF Downloaded",
+          description: "Case for Support exported successfully.",
+        });
         return;
       }
     } catch (error) {
       console.error("PDF export error:", error);
-      toast.dismiss(loadingToastId);
-      toast.error(error instanceof Error ? error.message : "Could not generate PDF. Please try again.");
+      toast({
+        variant: "destructive",
+        title: "Export Failed",
+        description: error instanceof Error ? error.message : "Could not generate PDF. Please try again.",
+      });
     } finally {
       setIsPdfExporting(false);
     }
