@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveWorkspaceId } from '@/contexts/WorkspaceContext';
 import { toast } from 'sonner';
+import { logDNAActivity } from '@/hooks/useContentDNAActivity';
 
 export interface PhotoAIAnalysis {
   scene_type?: string;
