@@ -203,9 +203,6 @@ const BrandStudioPage = () => {
   const [bottomBarText, setBottomBarText] = useState(restore?.bottomBarText || "");
   const [bottomBarColor, setBottomBarColor] = useState(restore?.bottomBarColor || primary);
 
-  // Smart Layer state
-  const [isSmartLayering, setIsSmartLayering] = useState(false);
-  const [smartLayerImageUrl, setSmartLayerImageUrl] = useState<string | null>(null);
 
   useGoogleFont(headlineFont);
 
