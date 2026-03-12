@@ -139,6 +139,8 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
   const [parsedFacts, setParsedFacts] = useState<CreateFactInput[]>([]);
   const [selectedParsedFacts, setSelectedParsedFacts] = useState<Set<number>>(new Set());
   const [isExtractingFile, setIsExtractingFile] = useState(false);
+  const [scrapeUrl, setScrapeUrl] = useState('');
+  const [isScraping, setIsScraping] = useState(false);
 
   const categories = getCategories();
   const highlightedCount = facts.filter(f => f.is_highlight).length;
