@@ -404,7 +404,7 @@ export function ScratchpadCapture() {
                       if (text.includes(key) || text.includes(route.label.toLowerCase())) {
                         const ToolIcon = route.icon;
                         return (
-                          <h3 className="flex items-center gap-2 text-[12.5px] font-semibold text-foreground/90 mt-3.5 mb-1.5 pl-1 border-l-2 border-accent/40 ml-0.5">
+                          <h3 className="flex items-center gap-2.5 text-sm font-semibold text-foreground/90 mt-4 mb-2 pl-1.5 border-l-2 border-accent/40 ml-0.5">
                             <div className="h-5 w-5 rounded-md bg-accent/10 flex items-center justify-center flex-shrink-0">
                               <ToolIcon className="h-3 w-3 text-accent" />
                             </div>
@@ -414,7 +414,7 @@ export function ScratchpadCapture() {
                       }
                     }
                     return (
-                      <h3 className="flex items-center gap-2 text-[12.5px] font-semibold text-foreground/90 mt-3.5 mb-1.5 pl-1 border-l-2 border-accent/40 ml-0.5">
+                      <h3 className="flex items-center gap-2.5 text-sm font-semibold text-foreground/90 mt-4 mb-2 pl-1.5 border-l-2 border-accent/40 ml-0.5">
                         <ArrowRight className="h-3 w-3 text-accent flex-shrink-0" />
                         {children}
                       </h3>
