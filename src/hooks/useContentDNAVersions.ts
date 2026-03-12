@@ -43,14 +43,13 @@ export function useContentDNAVersions(options: UseContentDNAVersionsOptions = {}
         .order('version_number', { ascending: false });
       
       if (contentDnaId) {
+        // When we have the exact DNA id, filter by it (profileId is redundant)
         query = query.eq('content_dna_id', contentDnaId);
-      }
-      
-      if (profileId) {
+      } else if (profileId) {
+        // Filter by profile when no specific DNA id
         query = query.eq('profile_id', profileId);
-      } else if (profileId === null) {
-        query = query.is('profile_id', null);
       }
+      // When neither is provided, return all versions for the tenant
 
       const { data, error } = await query;
 
