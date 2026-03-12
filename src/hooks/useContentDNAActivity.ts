@@ -42,7 +42,7 @@ export function useContentDNAActivity() {
     if (!workspaceId || !user?.id) return;
 
     try {
-      await supabase.from('content_dna_activity').insert({
+      await supabase.from('content_dna_activity').insert([{
         tenant_id: workspaceId,
         profile_id: params.profileId || null,
         user_id: user.id,
@@ -51,7 +51,7 @@ export function useContentDNAActivity() {
         artifact_name: params.artifactName || null,
         artifact_count: params.artifactCount || null,
         metadata: params.metadata || {},
-      });
+      }]);
     } catch (err) {
       // Activity logging is non-critical — don't block the user
       console.error('Failed to log DNA activity:', err);
