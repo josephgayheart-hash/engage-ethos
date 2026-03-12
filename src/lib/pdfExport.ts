@@ -448,7 +448,7 @@ export async function exportTalkingPointsToPDF(
 }
 
 // Fetch real campus photos from Content DNA to use directly in the PDF
-async function fetchCampusPhotosForPdf(): Promise<(LoadedImageData | null)[]> {
+async function fetchCampusPhotosForPdf(profileId?: string): Promise<(LoadedImageData | null)[]> {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [null, null, null];
