@@ -127,7 +127,7 @@ export function useContentDNAForGeneration(options: UseContentDNAForGenerationOp
           const { data: parentDNA } = await supabase
             .from('content_dna_analysis')
             .select('id, voice_analysis, brand_platform, custom_instructions')
-            .eq('tenant_id', tenant.id)
+            .eq('tenant_id', profileTenantId)
             .eq('profile_id', profileData.parent_profile_id)
             .maybeSingle();
 
