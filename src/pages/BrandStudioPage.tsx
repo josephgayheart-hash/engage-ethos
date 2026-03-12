@@ -247,50 +247,6 @@ const BrandStudioPage = () => {
     };
   }, []);
 
-  const handleSmartLayer = useCallback(async () => {
-    const canvas = document.getElementById("brand-overlay-canvas");
-    if (!canvas) return;
-
-    setIsSmartLayering(true);
-    const loadingToast = toast.loading("Applying AI Smart Layer — this takes a few seconds…");
-
-    try {
-      // Use lower pixelRatio for faster capture & smaller payload
-      const dataUrl = await captureToDataUrl(canvas as HTMLElement, 1);
-      const { data, error } = await supabase.functions.invoke("smart-layer-image", {
-        body: {
-          imageDataUrl: dataUrl,
-          overlayPattern,
-          overlayColor,
-          overlayOpacity,
-          brandColors,
-          institutionName,
-        },
-      });
-
-      toast.dismiss(loadingToast);
-
-      if (error) {
-        console.error("Smart layer error:", error);
-        toast.error("Smart Layer failed. Try again.");
-        return;
-      }
-
-      if (data?.imageUrl) {
-        setSmartLayerImageUrl(data.imageUrl);
-        toast.success("Smart Layer applied! The pattern now wraps around your subject.");
-      } else if (data?.error) {
-        toast.error(data.error);
-      }
-    } catch (err) {
-      toast.dismiss(loadingToast);
-      console.error("Smart layer error:", err);
-      toast.error("Smart Layer failed. Try again.");
-    } finally {
-      setIsSmartLayering(false);
-    }
-  }, [overlayPattern, overlayColor, overlayOpacity, brandColors, institutionName]);
-
   // Drag handlers
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
