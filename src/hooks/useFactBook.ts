@@ -213,6 +213,11 @@ export function useFactBook(options: UseFactBookOptions = {}) {
       const newFacts = (data || []) as unknown as Fact[];
       setFacts(prev => [...newFacts, ...prev]);
       
+      logDNAActivity(workspaceId, user.id, {
+        section: 'facts', action: 'imported', profileId: profileId || null,
+        artifactCount: newFacts.length,
+      });
+      
       toastSuccess('Facts imported', `${newFacts.length} facts have been added to your Fact Book.`);
       
       return newFacts.length;
