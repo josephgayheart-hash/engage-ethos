@@ -175,6 +175,14 @@ export function useStoryBank(options: UseStoryBankOptions = {}) {
         s.id === id ? { ...s, ...updates, updated_at: new Date().toISOString() } : s
       ));
       
+      if (workspaceId && user?.id) {
+        const story = stories.find(s => s.id === id);
+        logDNAActivity(workspaceId, user.id, {
+          section: 'stories', action: 'updated', profileId: profileId || null,
+          artifactName: story?.title || updates.title,
+        });
+      }
+      
       toast({
         title: 'Story updated',
         description: 'Your changes have been saved.',
