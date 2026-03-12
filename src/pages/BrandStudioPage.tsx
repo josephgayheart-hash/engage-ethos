@@ -711,43 +711,26 @@ const BrandStudioPage = () => {
               institutionName={institutionName}
             />
 
-            {/* Loading overlay */}
-            {isSmartLayering && (
-              <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg z-10">
-                <div className="flex flex-col items-center gap-3 text-white">
-                  <Loader2 className="w-8 h-8 animate-spin" />
-                  <span className="text-sm font-medium">Applying Smart Layer…</span>
-                </div>
-              </div>
-            )}
-
             {/* Hover overlay actions — only at bottom, not covering canvas interaction area */}
-            {!isSmartLayering && (
-              <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-5 pt-12 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-b-lg pointer-events-none z-20">
-                <div className="flex flex-wrap gap-2 pointer-events-auto justify-center px-4">
-                  <DownloadFormatPicker
-                    targetId="brand-overlay-canvas"
-                    filenameBase={`branded-${channel || "image"}`}
-                    size="sm"
-                    variant="outline"
-                    label="Download"
-                  />
-                  <Button size="sm" variant="secondary" onClick={() => setSaveDialogOpen(true)}>
-                    <FolderPlus className="w-4 h-4 mr-1" />
-                    Save to Library
+            <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-5 pt-12 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-b-lg pointer-events-none z-20">
+              <div className="flex flex-wrap gap-2 pointer-events-auto justify-center px-4">
+                <DownloadFormatPicker
+                  targetId="brand-overlay-canvas"
+                  filenameBase={`branded-${channel || "image"}`}
+                  size="sm"
+                  variant="outline"
+                  label="Download"
+                />
+                <Button size="sm" variant="secondary" onClick={() => setSaveDialogOpen(true)}>
+                  <FolderPlus className="w-4 h-4 mr-1" />
+                  Save to Library
+                </Button>
+                {lastSavedMessageId && (
+                  <Button size="sm" variant="secondary" onClick={() => setCollectionDialogOpen(true)}>
+                    <Folder className="w-4 h-4 mr-1" />
+                    Add to Collection
                   </Button>
-                  {lastSavedMessageId && (
-                    <Button size="sm" variant="secondary" onClick={() => setCollectionDialogOpen(true)}>
-                      <Folder className="w-4 h-4 mr-1" />
-                      Add to Collection
-                    </Button>
-                  )}
-                  {smartLayerImageUrl && (
-                    <Button size="sm" variant="secondary" onClick={() => setSmartLayerImageUrl(null)}>
-                      <RefreshCw className="w-4 h-4 mr-1" />
-                      Back to Editor
-                    </Button>
-                  )}
+                )}
                   <Button size="sm" variant="secondary" onClick={() => navigate("/image-generator")}>
                     <RefreshCw className="w-4 h-4 mr-1" />
                     Regenerate
