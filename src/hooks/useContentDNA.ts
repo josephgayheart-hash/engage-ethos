@@ -484,6 +484,12 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
         } as ContentDNAAnalysis);
       }
 
+      if (workspaceId && profile?.id) {
+        logDNAActivity(workspaceId, profile.id, {
+          section: 'custom_instructions', action: 'updated', profileId: profileId || null,
+        });
+      }
+
       toast({
         title: 'Instructions Saved',
         description: 'Your custom brand guidelines have been updated.',
