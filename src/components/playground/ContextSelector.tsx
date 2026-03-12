@@ -112,11 +112,26 @@ export function ContextSelector({
     return allDnaOptions.filter(dna => dna.profile_id === selectedProfileId || dna.profile_id === null);
   }, [allDnaOptions, selectedProfileId]);
 
+  // When profile changes, auto-select matching DNA or clear mismatched DNA
   useEffect(() => {
-    if (selectedDNAId && selectedProfileId) {
+    if (!selectedProfileId) return;
+    
+    // If current DNA doesn't belong to this profile, clear it
+    if (selectedDNAId) {
       const currentDna = allDnaOptions.find(d => d.id === selectedDNAId);
       if (currentDna && currentDna.profile_id !== null && currentDna.profile_id !== selectedProfileId) {
-        onDNAChange(null);
+        // Auto-select the profile's DNA if available
+        const profileDna = allDnaOptions.find(d => d.profile_id === selectedProfileId);
+        onDNAChange(profileDna?.id || null);
+        return;
+      }
+    }
+    
+    // No DNA selected yet — auto-select if this profile has DNA
+    if (!selectedDNAId) {
+      const profileDna = allDnaOptions.find(d => d.profile_id === selectedProfileId);
+      if (profileDna) {
+        onDNAChange(profileDna.id);
       }
     }
   }, [selectedProfileId, selectedDNAId, allDnaOptions, onDNAChange]);
