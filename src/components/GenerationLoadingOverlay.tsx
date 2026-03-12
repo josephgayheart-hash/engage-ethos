@@ -356,9 +356,12 @@ export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown
                       {isComplete ? p.completedMessage : p.message}
                     </p>
                     {p.detail && (
-                      <p className={`text-[11px] mt-0.5 transition-all duration-500 ${
-                        isCurrent ? "text-primary/70 font-medium" : "text-muted-foreground/50"
-                      }`}>
+                      <p
+                        className={`text-[11px] mt-0.5 transition-all duration-500 ${
+                          isCurrent ? (hasBrandColors ? "font-medium" : "text-primary/70 font-medium") : "text-muted-foreground/50"
+                        }`}
+                        style={isCurrent && hasBrandColors ? { color: `${brandPrimary}b3` } : {}}
+                      >
                         {p.detail}
                       </p>
                     )}
