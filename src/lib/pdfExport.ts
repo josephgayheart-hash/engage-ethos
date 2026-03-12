@@ -557,7 +557,7 @@ export async function exportCaseForSupportToPDF(
 
   // Fetch campus photos directly (fast, no AI generation needed)
   const imagesPromise = Promise.race([
-    fetchCampusPhotosForPdf(),
+    fetchCampusPhotosForPdf(profileId),
     new Promise<(LoadedImageData | null)[]>((resolve) =>
       setTimeout(() => {
         console.warn("Campus photo loading timed out after 10s, proceeding without images");
