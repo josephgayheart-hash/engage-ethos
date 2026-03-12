@@ -53,6 +53,7 @@ import {
   Sparkles,
   Database,
   Trash2
+  Globe,
 } from 'lucide-react';
 import {
   AlertDialog,
