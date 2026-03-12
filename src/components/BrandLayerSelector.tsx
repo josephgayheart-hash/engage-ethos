@@ -325,7 +325,7 @@ function BrandPlatformTabs({
 
       {/* Tabbed interface for other elements - Moved to top for prominence */}
       {availableTabs.length > 0 && (
-        <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
+        <Tabs value={effectiveTab} onValueChange={onTabChange} className="w-full">
           <TabsList 
             className="grid w-full h-auto p-1 bg-muted/50 border border-border/60 rounded-lg" 
             style={{ gridTemplateColumns: `repeat(${availableTabs.length}, 1fr)` }}
