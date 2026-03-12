@@ -242,8 +242,21 @@ export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown
     readbackTags.push({ label: `${context.journeyWeeks}-week journey`, icon: Map });
   }
 
+  // Brand-aware color helpers — use institution colors when available, fall back to CSS primary
+  const brandPrimary = context.primaryColor;
+  const brandAccent = context.accentColor || brandPrimary;
+  const hasBrandColors = !!brandPrimary;
+
+  // Inline style helpers for brand-colored elements
+  const brandBg = (opacity: number) => hasBrandColors ? { backgroundColor: `${brandPrimary}${Math.round(opacity * 255).toString(16).padStart(2, '0')}` } : {};
+  const brandText = hasBrandColors ? { color: brandPrimary } : {};
+  const brandBorder = (opacity: number) => hasBrandColors ? { borderColor: `${brandPrimary}${Math.round(opacity * 255).toString(16).padStart(2, '0')}` } : {};
+
   return (
-    <div className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/[0.03] to-card p-8 shadow-sm overflow-hidden">
+    <div
+      className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/[0.03] to-card p-8 shadow-sm overflow-hidden"
+      style={hasBrandColors ? { borderColor: `${brandPrimary}30`, background: `linear-gradient(to bottom, ${brandPrimary}08, var(--card))` } : {}}
+    >
       <div className="flex flex-col items-center gap-5">
 
         {/* Profile identity header */}
@@ -308,20 +321,24 @@ export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown
                 <div
                   className={`flex items-start gap-3 px-3 py-2.5 rounded-lg transition-all duration-400 ${
                     isCurrent
-                      ? "bg-primary/[0.07] border border-primary/20 shadow-sm"
+                      ? (hasBrandColors ? "shadow-sm" : "bg-primary/[0.07] border border-primary/20 shadow-sm")
                       : isComplete
                         ? "border border-transparent"
                         : ""
                   }`}
+                  style={isCurrent && hasBrandColors ? { backgroundColor: `${brandPrimary}12`, border: `1px solid ${brandPrimary}33` } : {}}
                 >
                   {/* Status icon */}
-                  <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center mt-0.5 transition-all duration-500 ${
-                    isComplete
-                      ? "bg-primary/15 text-primary scale-100"
-                      : isCurrent
-                        ? "bg-primary/10 text-primary scale-110"
-                        : "bg-muted text-muted-foreground"
-                  }`}>
+                  <div
+                    className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center mt-0.5 transition-all duration-500 ${
+                      isComplete ? "scale-100" : isCurrent ? "scale-110" : ""
+                    } ${
+                      !hasBrandColors
+                        ? (isComplete ? "bg-primary/15 text-primary" : isCurrent ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")
+                        : (isComplete || isCurrent ? "" : "bg-muted text-muted-foreground")
+                    }`}
+                    style={(isComplete || isCurrent) && hasBrandColors ? { backgroundColor: `${brandPrimary}${isComplete ? '26' : '1a'}`, color: brandPrimary } : {}}
+                  >
                     {isComplete ? (
                       <Check className="w-3.5 h-3.5" style={{ animation: "popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards" }} />
                     ) : isCurrent ? (
@@ -339,9 +356,12 @@ export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown
                       {isComplete ? p.completedMessage : p.message}
                     </p>
                     {p.detail && (
-                      <p className={`text-[11px] mt-0.5 transition-all duration-500 ${
-                        isCurrent ? "text-primary/70 font-medium" : "text-muted-foreground/50"
-                      }`}>
+                      <p
+                        className={`text-[11px] mt-0.5 transition-all duration-500 ${
+                          isCurrent ? (hasBrandColors ? "font-medium" : "text-primary/70 font-medium") : "text-muted-foreground/50"
+                        }`}
+                        style={isCurrent && hasBrandColors ? { color: `${brandPrimary}b3` } : {}}
+                      >
                         {p.detail}
                       </p>
                     )}
@@ -368,10 +388,11 @@ export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown
                               className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all ${
                                 isComplete
                                   ? "bg-muted/60 text-muted-foreground/70"
-                                  : "bg-primary/[0.08] text-primary/80 border border-primary/10"
+                                  : (hasBrandColors ? "" : "bg-primary/[0.08] text-primary/80 border border-primary/10")
                               }`}
                               style={{
                                 animation: isComplete ? "none" : "proofFlashIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+                                ...(!isComplete && hasBrandColors ? { backgroundColor: `${brandPrimary}14`, color: `${brandPrimary}cc`, border: `1px solid ${brandPrimary}1a` } : {}),
                               }}
                             >
                               <ProofIcon className="w-2.5 h-2.5 flex-shrink-0" />
@@ -387,8 +408,11 @@ export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown
                   {/* Completion check */}
                   {isComplete && (
                     <div className="flex-shrink-0 mt-0.5" style={{ animation: "popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards" }}>
-                      <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Check className="w-3 h-3 text-primary" />
+                      <div
+                        className={hasBrandColors ? "w-5 h-5 rounded-full flex items-center justify-center" : "w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center"}
+                        style={hasBrandColors ? { backgroundColor: `${brandPrimary}1a` } : {}}
+                      >
+                        <Check className={hasBrandColors ? "w-3 h-3" : "w-3 h-3 text-primary"} style={hasBrandColors ? { color: brandPrimary } : {}} />
                       </div>
                     </div>
                   )}
@@ -406,15 +430,16 @@ export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown
               <Badge
                 key={i}
                 variant="outline"
-                className="text-[10px] gap-1 border-primary/20"
+                className={hasBrandColors ? "text-[10px] gap-1" : "text-[10px] gap-1 border-primary/20"}
                 style={{
                   animation: "slideInTag 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards",
                   animationDelay: `${300 + i * 100}ms`,
                   opacity: 0,
                   transform: "translateY(8px)",
+                  ...(hasBrandColors ? { borderColor: `${brandPrimary}33` } : {}),
                 }}
               >
-                <TagIcon className="w-3 h-3 text-primary/60" />
+                <TagIcon className={hasBrandColors ? "w-3 h-3" : "w-3 h-3 text-primary/60"} style={hasBrandColors ? { color: `${brandPrimary}99` } : {}} />
                 {tag.label}
               </Badge>
             );
@@ -425,8 +450,11 @@ export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown
         <div className="w-full max-w-xs">
           <div className="h-1.5 bg-muted rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-primary/80 to-primary rounded-full transition-all duration-1000 ease-out"
-              style={{ width: allDone ? "100%" : `${Math.min(8 + (phase / maxPhase) * 90, 95)}%` }}
+              className={hasBrandColors ? "h-full rounded-full transition-all duration-1000 ease-out" : "h-full bg-gradient-to-r from-primary/80 to-primary rounded-full transition-all duration-1000 ease-out"}
+              style={{
+                width: allDone ? "100%" : `${Math.min(8 + (phase / maxPhase) * 90, 95)}%`,
+                ...(hasBrandColors ? { background: `linear-gradient(to right, ${brandPrimary}cc, ${brandAccent || brandPrimary})` } : {}),
+              }}
             />
           </div>
         </div>
@@ -434,8 +462,14 @@ export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown
         {/* Completion pop or estimated time */}
         {showCompletion ? (
           <div className="flex flex-col items-center gap-3 py-2" style={{ animation: "completionPop 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards" }}>
-            <div className="w-14 h-14 rounded-full bg-primary/15 flex items-center justify-center border-2 border-primary/30 shadow-lg" style={{ animation: "completionRing 1.5s ease-out forwards" }}>
-              <Check className="w-7 h-7 text-primary" style={{ animation: "completionCheck 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards", opacity: 0 }} />
+            <div
+              className={hasBrandColors ? "w-14 h-14 rounded-full flex items-center justify-center shadow-lg" : "w-14 h-14 rounded-full bg-primary/15 flex items-center justify-center border-2 border-primary/30 shadow-lg"}
+              style={{
+                animation: "completionRing 1.5s ease-out forwards",
+                ...(hasBrandColors ? { backgroundColor: `${brandPrimary}26`, border: `2px solid ${brandPrimary}4d` } : {}),
+              }}
+            >
+              <Check className={hasBrandColors ? "w-7 h-7" : "w-7 h-7 text-primary"} style={{ animation: "completionCheck 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards", opacity: 0, ...(hasBrandColors ? { color: brandPrimary } : {}) }} />
             </div>
             <p className="text-base font-bold text-foreground" style={{ animation: "completionPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.6s forwards", opacity: 0 }}>Ready!</p>
           </div>
