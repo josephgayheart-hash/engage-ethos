@@ -14,6 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BrandOverlayCanvas } from "@/components/image-generator/BrandOverlayCanvas";
 import { BrandOverlayControls } from "@/components/image-generator/BrandOverlayControls";
+import { CanvasRuler } from "@/components/image-generator/CanvasRuler";
 import { useGoogleFont } from "@/components/image-generator/BrandOverlayEditor";
 import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
 import { AddToCollectionDialog } from "@/components/library/AddToCollectionDialog";
