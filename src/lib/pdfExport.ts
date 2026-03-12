@@ -515,6 +515,7 @@ export async function exportCaseForSupportToPDF(
   branding?: BrandingOptions
 ): Promise<void> {
   const doc = new jsPDF();
+  try {
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 25; // Increased margin for better readability
@@ -543,7 +544,16 @@ export async function exportCaseForSupportToPDF(
       })
     : Promise.resolve(null);
 
-  const imagesPromise = generatePdfImages(cfc, institutionName, branding);
+  // Race image generation against a 25s timeout so the PDF always downloads
+  const imagesPromise = Promise.race([
+    generatePdfImages(cfc, institutionName, branding),
+    new Promise<(LoadedImageData | null)[]>((resolve) =>
+      setTimeout(() => {
+        console.warn("PDF image generation timed out after 25s, proceeding without images");
+        resolve([null, null, null]);
+      }, 25_000)
+    ),
+  ]);
 
   [logoData, aiImages] = await Promise.all([logoPromise, imagesPromise]);
 
@@ -1175,4 +1185,9 @@ export async function exportCaseForSupportToPDF(
   }
 
   doc.save("case-for-support.pdf");
+  } catch (err) {
+    console.error("Error building Case for Support PDF:", err);
+    // Always attempt to save whatever was built
+    doc.save("case-for-support.pdf");
+  }
 }
