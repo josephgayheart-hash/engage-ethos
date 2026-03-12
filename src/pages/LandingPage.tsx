@@ -371,7 +371,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <ul className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8" aria-label="Core value propositions">
             {valueProps.map((prop, index) => {
               const colors = [
                 { bg: 'bg-[hsl(82_85%_55%_/_0.2)]', icon: 'text-[hsl(82_70%_40%)]' },
@@ -381,16 +381,16 @@ export default function LandingPage() {
               ];
               const color = colors[index % 4];
               return (
-                <div key={prop.title} className="text-center">
+                <li key={prop.title} className="text-center list-none">
                   <div className={`w-12 h-12 rounded-2xl ${color.bg} flex items-center justify-center mx-auto mb-4 rotate-3 hover:rotate-0 transition-transform`}>
                     <CheckCircle2 className={`w-6 h-6 ${color.icon}`} />
                   </div>
                   <h3 className="font-semibold text-foreground mb-2">{prop.title}</h3>
                   <p className="text-sm text-muted-foreground">{prop.description}</p>
-                </div>
+                </li>
               );
             })}
-          </div>
+          </ul>
         </div>
       </section>
 
@@ -413,7 +413,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5" aria-label="CampusVoice feature list">
             {features.map((feature, index) => {
               const cardColors = [
                 { bg: 'bg-white', border: 'border-[hsl(82_85%_55%_/_0.4)]', iconBg: 'bg-[hsl(82_85%_55%_/_0.2)]', iconColor: 'text-[hsl(82_70%_35%)]', hoverBorder: 'hover:border-[hsl(82_85%_55%)]' },
@@ -423,25 +423,26 @@ export default function LandingPage() {
               ];
               const colors = cardColors[index % 4];
               return (
-                <Link 
-                  to={feature.link}
-                  key={feature.title}
-                  className={`group ${colors.bg} ${colors.border} border-2 rounded-2xl p-6 ${colors.hoverBorder} hover:shadow-2xl hover:-translate-y-3 hover:scale-[1.02] transition-all duration-500 ease-out cursor-pointer block`}
-                  style={{ transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }}
-                >
-                  <div className={`p-3 rounded-xl ${colors.iconBg} w-fit mb-4 group-hover:scale-110 transition-transform`}>
-                    <feature.icon className={`w-6 h-6 ${colors.iconColor}`} />
-                  </div>
-                  <h3 className="font-semibold text-foreground mb-2">{feature.title}</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
-                  <div className="mt-4 flex items-center gap-1 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: colors.iconColor.replace('text-[', '').replace(']', '') }}>
-                    <span className={colors.iconColor}>Learn more</span>
-                    <ArrowRight className={`w-4 h-4 ${colors.iconColor}`} />
-                  </div>
-                </Link>
+                <li key={feature.title} className="list-none">
+                  <Link 
+                    to={feature.link}
+                    className={`group ${colors.bg} ${colors.border} border-2 rounded-2xl p-6 ${colors.hoverBorder} hover:shadow-2xl hover:-translate-y-3 hover:scale-[1.02] transition-all duration-500 ease-out cursor-pointer block h-full`}
+                    style={{ transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+                  >
+                    <div className={`p-3 rounded-xl ${colors.iconBg} w-fit mb-4 group-hover:scale-110 transition-transform`}>
+                      <feature.icon className={`w-6 h-6 ${colors.iconColor}`} />
+                    </div>
+                    <h3 className="font-semibold text-foreground mb-2">{feature.title}</h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
+                    <div className="mt-4 flex items-center gap-1 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: colors.iconColor.replace('text-[', '').replace(']', '') }}>
+                      <span className={colors.iconColor}>Learn more</span>
+                      <ArrowRight className={`w-4 h-4 ${colors.iconColor}`} />
+                    </div>
+                  </Link>
+                </li>
               );
             })}
-          </div>
+          </ul>
         </div>
         
         {/* Wave transition to pricing section */}
