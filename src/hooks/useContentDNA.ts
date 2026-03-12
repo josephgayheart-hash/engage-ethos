@@ -410,6 +410,14 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
         } as ContentDNAAnalysis);
       }
 
+      if (workspaceId && profile?.id) {
+        logDNAActivity(workspaceId, profile.id, {
+          section: 'analysis', action: 'analyzed', profileId: profileId || null,
+          artifactCount: sampleTexts.length,
+          metadata: { pillarsExtracted: brandPlatform?.brandPillars?.length || 0 },
+        });
+      }
+
       const brandPlatformMsg = brandPlatform?.brandPillars?.length 
         ? ` Extracted ${brandPlatform.brandPillars.length} brand pillars.`
         : '';
