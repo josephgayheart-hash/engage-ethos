@@ -257,6 +257,36 @@ export function getOverlayStyle(
         opacity,
       };
 
+    case "spotlight-center":
+      return {
+        background: `radial-gradient(circle at 50% 50%, transparent 30%, ${color} 70%)`,
+        opacity,
+      };
+
+    case "spotlight-top-left":
+      return {
+        background: `radial-gradient(circle at 20% 20%, transparent 30%, ${color} 70%)`,
+        opacity,
+      };
+
+    case "spotlight-top-right":
+      return {
+        background: `radial-gradient(circle at 80% 20%, transparent 30%, ${color} 70%)`,
+        opacity,
+      };
+
+    case "spotlight-bottom-left":
+      return {
+        background: `radial-gradient(circle at 20% 80%, transparent 30%, ${color} 70%)`,
+        opacity,
+      };
+
+    case "spotlight-bottom-right":
+      return {
+        background: `radial-gradient(circle at 80% 80%, transparent 30%, ${color} 70%)`,
+        opacity,
+      };
+
     case "diamond-grid":
       return {
         backgroundImage: `
