@@ -81,7 +81,7 @@ export function ScratchpadCapture() {
   const [rawText, setRawText] = useState(() => {
     try { return localStorage.getItem(STORAGE_KEY) || ""; } catch { return ""; }
   });
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false); // always start collapsed
   const [classifyResult, setClassifyResult] = useState<ClassifyResult | null>(null);
   const [isClassifying, setIsClassifying] = useState(false);
   const [isOrganizing, setIsOrganizing] = useState(false);
