@@ -35,7 +35,7 @@ import {
   Globe, Clock, ChevronRight, ChevronDown, Sparkles, CheckCircle2, FileEdit,
   Send, Trash2, Gift, DollarSign, LayoutList, PartyPopper, Timer, Copy,
   GraduationCap, Layers, Building, Briefcase, Building2, Download, FileText,
-  ClipboardCopy, Loader2
+  ClipboardCopy, Loader2, Pencil
 } from "lucide-react";
 import { campaignToText } from "@/lib/campaignExport";
 import { openInGoogleDocs } from "@/lib/googleDocsExport";
