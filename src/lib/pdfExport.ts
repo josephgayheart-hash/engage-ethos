@@ -447,103 +447,68 @@ export async function exportTalkingPointsToPDF(
   setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
 }
 
-// Generate AI images for the Case for Support PDF
-// Prioritizes real campus photography from Content DNA, enhanced with AI
-async function generatePdfImages(
-  cfc: CaseForCareDraft,
-  institutionName?: string,
-  branding?: BrandingOptions
-): Promise<(LoadedImageData | null)[]> {
-  // Fetch campus photos from the user's Content DNA library
-  let campusPhotoUrls: string[] = [];
+// Fetch real campus photos from Content DNA to use directly in the PDF
+async function fetchCampusPhotosForPdf(): Promise<(LoadedImageData | null)[]> {
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("tenant_id")
-        .eq("id", user.id)
-        .single();
+    if (!user) return [null, null, null];
 
-      if (profile?.tenant_id) {
-        const { data: photos } = await supabase
-          .from("campus_photo_samples")
-          .select("file_url, photo_category, ai_analysis")
-          .eq("tenant_id", profile.tenant_id)
-          .eq("is_active", true)
-          .limit(6);
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("tenant_id")
+      .eq("id", user.id)
+      .single();
 
-        if (photos && photos.length > 0) {
-          campusPhotoUrls = photos.map((p) => p.file_url);
-        }
+    if (!profile?.tenant_id) return [null, null, null];
+
+    const { data: photos } = await supabase
+      .from("campus_photo_samples")
+      .select("file_url, photo_category")
+      .eq("tenant_id", profile.tenant_id)
+      .eq("is_active", true)
+      .order("created_at", { ascending: false })
+      .limit(6);
+
+    if (!photos || photos.length === 0) return [null, null, null];
+
+    // Pick up to 3 diverse photos, preferring different categories
+    const categories = ["campus-life", "architecture", "landscape", "athletics", "traditions", "aerial"];
+    const selected: string[] = [];
+    const used = new Set<string>();
+
+    // First pass: one per category
+    for (const cat of categories) {
+      if (selected.length >= 3) break;
+      const photo = photos.find((p) => p.photo_category === cat && !used.has(p.file_url));
+      if (photo) {
+        selected.push(photo.file_url);
+        used.add(photo.file_url);
       }
     }
-  } catch (e) {
-    console.warn("Could not fetch campus photos for PDF:", e);
-  }
-
-  // Build improved prompts — close-ups and generic campus life, never identifiable buildings
-  const prompts: string[] = [];
-
-  // 1. Student engagement close-up
-  prompts.push(
-    "A warm, shallow depth-of-field close-up of a small group of diverse college students laughing and studying together at an outdoor table, soft bokeh background, golden hour light, candid and authentic"
-  );
-
-  // 2. Impact/activity image — tied to content
-  const impactSubject = cfc.strategicPillars?.[0]?.name || "student success";
-  prompts.push(
-    `A close-up editorial photograph of a university student focused on hands-on work — lab research, painting, or creative collaboration — representing ${impactSubject}. Shallow depth of field, warm natural light, no text or logos`
-  );
-
-  // 3. Aspirational campus life — generic wide shot
-  prompts.push(
-    "A dramatic wide-angle nighttime photograph of a packed college football stadium with bright lights, cheering fans, and a vibrant atmosphere. No identifiable team logos or mascots, generic university spirit scene"
-  );
-
-  try {
-    const { data, error } = await supabase.functions.invoke("generate-pdf-images", {
-      body: {
-        prompts,
-        institutionName,
-        primaryColor: branding?.primaryColor,
-        accentColor: branding?.accentColor,
-        campusPhotoUrls: campusPhotoUrls.slice(0, 3), // Send up to 3 reference photos
-      },
-    });
-
-    if (error || !data?.images) {
-      console.warn("Failed to generate PDF images:", error);
-      return [null, null, null];
+    // Fill remaining slots with any unused photos
+    for (const photo of photos) {
+      if (selected.length >= 3) break;
+      if (!used.has(photo.file_url)) {
+        selected.push(photo.file_url);
+        used.add(photo.file_url);
+      }
     }
 
-    // Convert base64 data URLs to LoadedImageData
+    // Load them as data URLs in parallel
     const loaded = await Promise.all(
-      (data.images as (string | null)[]).map(async (dataUrl) => {
-        if (!dataUrl) return null;
-        try {
-          const dims = await new Promise<{ width: number; height: number }>((resolve) => {
-            const img = new Image();
-            img.onload = () =>
-              resolve({ width: img.naturalWidth || 800, height: img.naturalHeight || 600 });
-            img.onerror = () => resolve({ width: 800, height: 600 });
-            img.src = dataUrl;
-          });
-          return {
-            dataUrl,
-            format: "PNG" as const,
-            width: dims.width,
-            height: dims.height,
-          };
-        } catch {
+      selected.map((url) =>
+        loadImageAsDataUrl(url).catch((e) => {
+          console.warn("Failed to load campus photo for PDF:", e);
           return null;
-        }
-      })
+        })
+      )
     );
 
+    // Pad to 3
+    while (loaded.length < 3) loaded.push(null);
     return loaded;
   } catch (e) {
-    console.warn("PDF image generation failed:", e);
+    console.warn("Could not fetch campus photos for PDF:", e);
     return [null, null, null];
   }
 }
