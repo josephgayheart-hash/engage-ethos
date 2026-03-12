@@ -97,7 +97,7 @@ CHANNEL-SPECIFIC REQUIREMENTS:
 - SMS: Keep under 160 characters when possible, direct and actionable, no subject line needed
 - SOCIAL MEDIA: Platform-appropriate tone, engaging, may include hashtag suggestions, under 280 characters
 - PORTAL: Dashboard-style notification, clear and scannable, action-oriented
-- LANDING PAGE: Include compelling headline, subheadline, body copy, and clear CTA button text
+- LANDING PAGE: Write conversion-optimized landing page content following best practices. Include: a concise, benefit-driven H1 headline (under 10 words), a supporting H2 subheadline that expands the value proposition, a suggested URL slug (lowercase, hyphenated, 2-4 words), short-form body copy (2-3 punchy paragraphs, scannable, benefit-focused), optional content sections with clear H2 headings and brief text, and a strong single CTA with action-oriented button text (e.g. "Apply Now", "Get Started", "Request Info"). Keep all copy concise—every word must earn its place.
 - DIRECT MAIL: Formal letter format with salutation, body paragraphs, and closing
 - PHONE CALL: Include opening statement, purpose statement, 3-5 talking points, objection handlers, closing options, and voicemail script
 - DIGITAL-AD-SEARCH: Google/Bing search ad with 3 headlines (max 30 chars each) and 2 descriptions (max 90 chars each)
