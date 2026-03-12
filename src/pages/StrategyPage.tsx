@@ -414,6 +414,7 @@ const StrategyPage = () => {
     setIsProcessing(true);
     setShowOverlay(true);
     setMapperResult(null);
+    setTimeout(() => overlayRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 100);
     
     try {
       // Use the first selected channel for the context
