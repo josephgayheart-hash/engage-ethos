@@ -64,7 +64,7 @@ export function useContentDNAVersions(options: UseContentDNAVersionsOptions = {}
     } finally {
       setIsLoading(false);
     }
-  }, [tenant?.id, contentDnaId, profileId]);
+  }, [workspaceId, contentDnaId, profileId]);
 
   useEffect(() => {
     fetchVersions();
