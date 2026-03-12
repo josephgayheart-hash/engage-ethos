@@ -507,8 +507,8 @@ export async function exportCaseForSupportToPDF(
   };
 
   // Calculate available width for title (accounting for logo if present)
-  const titleAvailableWidth = logoData 
-    ? contentWidth - logoWidth - 18 
+  const titleAvailableWidth = textStartX > margin
+    ? contentWidth - (textStartX - margin) - 10
     : contentWidth - 10;
 
   // Title with dynamic font sizing - position after logo if present
