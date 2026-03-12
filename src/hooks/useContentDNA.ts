@@ -301,7 +301,16 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
 
       if (error) throw error;
 
+      const deletedSample = samples.find(s => s.id === sampleId);
       setSamples(prev => prev.filter(s => s.id !== sampleId));
+      
+      if (workspaceId && profile?.id) {
+        logDNAActivity(workspaceId, profile.id, {
+          section: 'samples', action: 'removed', profileId: profileId || null,
+          artifactName: deletedSample?.title || deletedSample?.file_name,
+        });
+      }
+      
       toast({
         title: 'Sample Deleted',
         description: 'Content sample has been removed.',
