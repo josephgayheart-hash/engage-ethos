@@ -1071,6 +1071,27 @@ const ImageGeneratorPage = () => {
         contentType="image"
         defaultName={`${profileInstitutionName || 'Campus Image'} — ${channelOptions.find(c => c.value === channel)?.label || channel}`}
       />
+
+      {/* Lightbox / Expanded View Dialog */}
+      <Dialog open={isLightboxOpen} onOpenChange={setIsLightboxOpen}>
+        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 border-none bg-black/95 overflow-hidden [&>button]:hidden">
+          <div className="relative flex items-center justify-center w-full h-full min-h-[60vh]">
+            <button
+              onClick={() => setIsLightboxOpen(false)}
+              className="absolute top-3 right-3 z-10 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full p-2 transition-colors"
+            >
+              <X className="w-5 h-5 text-white" />
+            </button>
+            {imageUrl && (
+              <img
+                src={imageUrl}
+                alt="Generated image — expanded view"
+                className="max-w-full max-h-[85vh] object-contain rounded-md"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
