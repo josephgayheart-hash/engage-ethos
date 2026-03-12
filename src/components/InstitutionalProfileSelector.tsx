@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 import { 
   Building2, 
   Settings, 
@@ -149,15 +149,20 @@ export function InstitutionalProfileSelector({
 
       {selectedProfile && !compact && (
         <div className="flex items-center gap-3 mt-3 p-3 rounded-lg bg-secondary/10 border border-secondary/20">
-          {/* Institution Logo/Avatar */}
-          <Avatar className="h-10 w-10 border-2 border-secondary/30">
-            {logoUrl ? (
-              <AvatarImage src={logoUrl} alt={institutionName || 'Institution'} />
-            ) : null}
-            <AvatarFallback className="bg-secondary/20 text-secondary font-semibold text-sm">
-              {institutionName ? getInitials(institutionName) : <Building2 className="w-4 h-4" />}
-            </AvatarFallback>
-          </Avatar>
+          {/* Institution Logo */}
+          {logoUrl ? (
+            <img 
+              src={logoUrl} 
+              alt={institutionName || 'Institution'} 
+              className="h-10 w-auto max-w-[60px] object-contain flex-shrink-0"
+            />
+          ) : (
+            <div className="h-10 w-10 rounded-md bg-secondary/20 flex items-center justify-center flex-shrink-0">
+              <span className="text-secondary font-semibold text-sm">
+                {institutionName ? getInitials(institutionName) : <Building2 className="w-4 h-4" />}
+              </span>
+            </div>
+          )}
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
