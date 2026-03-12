@@ -46,7 +46,8 @@ import {
   RefreshCw,
   FileDown,
   AlertCircle,
-  Settings
+  Settings,
+  Loader2
 } from "lucide-react";
 import { AIResultsGuidance } from "@/components/AIResultsGuidance";
 import type { 
