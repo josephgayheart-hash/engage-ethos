@@ -378,6 +378,30 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
       description: 'Professional schools, theological seminaries, medical schools, art & design schools',
       icon: <Briefcase className="w-6 h-6" />,
     },
+    {
+      value: 'nonprofit-organization',
+      label: 'Nonprofit Organization',
+      description: 'Foundations, 501(c)(3) nonprofits, NGOs, and mission-driven organizations',
+      icon: <Heart className="w-6 h-6" />,
+    },
+    {
+      value: 'k12-school-district',
+      label: 'K–12 School or District',
+      description: 'Public or private K–12 schools, school districts, and charter networks',
+      icon: <School className="w-6 h-6" />,
+    },
+    {
+      value: 'government-agency',
+      label: 'Government Agency',
+      description: 'Municipal, state, federal, or tribal government bodies and public agencies',
+      icon: <Landmark className="w-6 h-6" />,
+    },
+    {
+      value: 'private-enterprise',
+      label: 'Private Enterprise',
+      description: 'Corporations, startups, consultancies, and for-profit businesses',
+      icon: <Building className="w-6 h-6" />,
+    },
   ];
 
   const renderStepContent = () => {
