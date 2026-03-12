@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { useActiveWorkspaceId } from '@/contexts/WorkspaceContext';
 import type { Json } from '@/integrations/supabase/types';
 
 export interface ContentDNAVersion {
@@ -25,21 +25,21 @@ interface UseContentDNAVersionsOptions {
 
 export function useContentDNAVersions(options: UseContentDNAVersionsOptions = {}) {
   const { contentDnaId, profileId } = options;
-  const { tenant } = useAuth();
+  const workspaceId = useActiveWorkspaceId();
   
   const [versions, setVersions] = useState<ContentDNAVersion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRestoring, setIsRestoring] = useState(false);
 
   const fetchVersions = useCallback(async () => {
-    if (!tenant?.id) return;
+    if (!workspaceId) return;
     
     setIsLoading(true);
     try {
       let query = supabase
         .from('content_dna_versions')
         .select('*')
-        .eq('tenant_id', tenant.id)
+        .eq('tenant_id', workspaceId)
         .order('version_number', { ascending: false });
       
       if (contentDnaId) {
@@ -64,7 +64,7 @@ export function useContentDNAVersions(options: UseContentDNAVersionsOptions = {}
     } finally {
       setIsLoading(false);
     }
-  }, [tenant?.id, contentDnaId, profileId]);
+  }, [workspaceId, contentDnaId, profileId]);
 
   useEffect(() => {
     fetchVersions();
