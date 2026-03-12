@@ -1090,6 +1090,9 @@ export async function exportCaseForSupportToPDF(
     });
   }
 
+  // AI Image 3: Graduation/vision image before CTA
+  placeImage(aiImages[2]);
+
   // Call to Action - dynamic height based on content
   if (cfc.callToAction) {
     doc.setFontSize(11);
