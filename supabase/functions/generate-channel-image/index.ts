@@ -391,7 +391,9 @@ serve(async (req) => {
             brandContext += `Institution: ${tenant.institution_name}.`;
           }
         }
-        if (!profileId) {
+        // Only use tenant-level colors when no profile is selected AND tenant is NOT an agency
+        // Agency tenant colors belong to the agency itself, not to client institutions
+        if (!profileId && tenant.tenant_type !== "agency") {
           if (tenant.primary_color) addColor(brandColors, tenant.primary_color);
           if (tenant.accent_color) addColor(brandColors, tenant.accent_color);
         }
