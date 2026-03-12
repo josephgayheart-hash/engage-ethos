@@ -578,12 +578,12 @@ export default function UniversitySettingsPage() {
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2">
-                    {isAgency ? <Users className="w-5 h-5" /> : <Building2 className="w-5 h-5" />}
-                    {isAgency ? 'Agency Branding' : 'Institution Branding'}
+                    {isAgency ? <Users className="w-5 h-5 text-amber-600" /> : <Building2 className="w-5 h-5" />}
+                    {isAgency ? `${tenant?.institution_name || 'Agency'} Branding` : 'Institution Branding'}
                   </CardTitle>
                   <CardDescription>
                     {isAgency 
-                      ? 'Your agency identity and per-client visual branding at a glance'
+                      ? 'Your agency\'s visual identity — logo, colors, and brand assets'
                       : 'Your institution identity and per-profile visual branding at a glance'
                     }
                   </CardDescription>
