@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveWorkspaceId } from '@/contexts/WorkspaceContext';
 import { toastError, toastSuccess } from '@/lib/errors';
+import { logDNAActivity } from '@/hooks/useContentDNAActivity';
 
 export interface Fact {
   id: string;
