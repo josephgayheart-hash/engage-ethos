@@ -448,27 +448,57 @@ export async function exportTalkingPointsToPDF(
 }
 
 // Generate AI images for the Case for Support PDF
+// Prioritizes real campus photography from Content DNA, enhanced with AI
 async function generatePdfImages(
   cfc: CaseForCareDraft,
   institutionName?: string,
   branding?: BrandingOptions
 ): Promise<(LoadedImageData | null)[]> {
+  // Fetch campus photos from the user's Content DNA library
+  let campusPhotoUrls: string[] = [];
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("tenant_id")
+        .eq("id", user.id)
+        .single();
+
+      if (profile?.tenant_id) {
+        const { data: photos } = await supabase
+          .from("campus_photo_samples")
+          .select("file_url, photo_category, ai_analysis")
+          .eq("tenant_id", profile.tenant_id)
+          .eq("is_active", true)
+          .limit(6);
+
+        if (photos && photos.length > 0) {
+          campusPhotoUrls = photos.map((p) => p.file_url);
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("Could not fetch campus photos for PDF:", e);
+  }
+
+  // Build improved prompts — close-ups and generic campus life, never identifiable buildings
   const prompts: string[] = [];
 
-  // 1. Hero/opening image — campus life
+  // 1. Student engagement close-up
   prompts.push(
-    "A warm, cinematic wide shot of a beautiful university campus at golden hour with students walking among historic buildings, green lawns, and mature trees"
+    "A warm, shallow depth-of-field close-up of a small group of diverse college students laughing and studying together at an outdoor table, soft bokeh background, golden hour light, candid and authentic"
   );
 
-  // 2. Impact/community image
+  // 2. Impact/activity image — tied to content
   const impactSubject = cfc.strategicPillars?.[0]?.name || "student success";
   prompts.push(
-    `A candid photograph of diverse university students collaborating together in a modern learning space, representing ${impactSubject}`
+    `A close-up editorial photograph of a university student focused on hands-on work — lab research, painting, or creative collaboration — representing ${impactSubject}. Shallow depth of field, warm natural light, no text or logos`
   );
 
-  // 3. Vision/future image
+  // 3. Aspirational campus life — generic wide shot
   prompts.push(
-    "An inspiring aerial photograph of a university graduation ceremony, with graduates in caps and gowns celebrating on a sunlit quad"
+    "A dramatic wide-angle nighttime photograph of a packed college football stadium with bright lights, cheering fans, and a vibrant atmosphere. No identifiable team logos or mascots, generic university spirit scene"
   );
 
   try {
@@ -478,6 +508,7 @@ async function generatePdfImages(
         institutionName,
         primaryColor: branding?.primaryColor,
         accentColor: branding?.accentColor,
+        campusPhotoUrls: campusPhotoUrls.slice(0, 3), // Send up to 3 reference photos
       },
     });
 

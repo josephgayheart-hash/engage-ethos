@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { prompts, institutionName, primaryColor, accentColor } = await req.json();
+    const { prompts, institutionName, primaryColor, accentColor, campusPhotoUrls } = await req.json();
 
     if (!prompts || !Array.isArray(prompts) || prompts.length === 0) {
       return new Response(JSON.stringify({ error: "Missing prompts array" }), {
@@ -37,9 +37,34 @@ serve(async (req) => {
       ? `This is for ${institutionName}. `
       : "";
 
+    const hasCampusPhotos = Array.isArray(campusPhotoUrls) && campusPhotoUrls.length > 0;
+
     // Generate all images in parallel
-    const imagePromises = prompts.map(async (promptText: string) => {
+    const imagePromises = prompts.map(async (promptText: string, index: number) => {
       try {
+        // If we have a campus photo for this slot, use it as a reference for AI enhancement
+        const campusPhotoUrl = hasCampusPhotos ? campusPhotoUrls[index % campusPhotoUrls.length] : null;
+
+        const baseInstruction = `Create a professional, editorial-quality photograph for a university advancement Case for Support document. ${institutionContext}${colorContext}Style: warm, aspirational, university viewbook quality. CRITICAL RULES: NO text, NO logos, NO watermarks, NO overlays, NO university names or letters on clothing/banners/buildings. Keep clothing plain. The image should be clean, elegant, and could belong to any university. Use shallow depth-of-field and close/medium framing to keep the scene generic and universally appealing. Subject: ${promptText}`;
+
+        let messageContent: any;
+
+        if (campusPhotoUrl) {
+          // Use the campus photo as a style/scene reference for AI enhancement
+          messageContent = [
+            {
+              type: "text",
+              text: `Using this campus photograph as a visual reference for style, lighting, and mood, create an enhanced editorial version suitable for a Case for Support document. Match the warmth, color palette, and atmosphere of the reference photo. ${baseInstruction}`,
+            },
+            {
+              type: "image_url",
+              image_url: { url: campusPhotoUrl },
+            },
+          ];
+        } else {
+          messageContent = baseInstruction;
+        }
+
         const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
           headers: {
@@ -51,7 +76,7 @@ serve(async (req) => {
             messages: [
               {
                 role: "user",
-                content: `Create a professional, editorial-quality photograph for a university advancement Case for Support document. ${institutionContext}${colorContext}Style: warm, aspirational, university viewbook quality. NO text, NO logos, NO watermarks, NO overlays. The image should be clean and elegant. Subject: ${promptText}`,
+                content: messageContent,
               },
             ],
             modalities: ["image", "text"],
