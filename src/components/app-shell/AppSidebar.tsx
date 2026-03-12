@@ -10,7 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAgencyMode } from "@/hooks/useAgencyMode";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { ReferColleagueDialog } from "@/components/ReferColleagueDialog";
-import campusvoiceLogo from "@/assets/campusvoice-logo-new.png";
+
 import {
   Sidebar,
   SidebarContent,
