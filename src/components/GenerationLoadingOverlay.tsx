@@ -457,8 +457,14 @@ export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown
         {/* Completion pop or estimated time */}
         {showCompletion ? (
           <div className="flex flex-col items-center gap-3 py-2" style={{ animation: "completionPop 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards" }}>
-            <div className="w-14 h-14 rounded-full bg-primary/15 flex items-center justify-center border-2 border-primary/30 shadow-lg" style={{ animation: "completionRing 1.5s ease-out forwards" }}>
-              <Check className="w-7 h-7 text-primary" style={{ animation: "completionCheck 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards", opacity: 0 }} />
+            <div
+              className={hasBrandColors ? "w-14 h-14 rounded-full flex items-center justify-center shadow-lg" : "w-14 h-14 rounded-full bg-primary/15 flex items-center justify-center border-2 border-primary/30 shadow-lg"}
+              style={{
+                animation: "completionRing 1.5s ease-out forwards",
+                ...(hasBrandColors ? { backgroundColor: `${brandPrimary}26`, border: `2px solid ${brandPrimary}4d` } : {}),
+              }}
+            >
+              <Check className={hasBrandColors ? "w-7 h-7" : "w-7 h-7 text-primary"} style={{ animation: "completionCheck 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards", opacity: 0, ...(hasBrandColors ? { color: brandPrimary } : {}) }} />
             </div>
             <p className="text-base font-bold text-foreground" style={{ animation: "completionPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.6s forwards", opacity: 0 }}>Ready!</p>
           </div>
