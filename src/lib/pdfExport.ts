@@ -635,34 +635,47 @@ export async function exportCaseForSupportToPDF(
     y += boxHeight + 5;
   }
 
-  // Opening Story
+  // Opening Story - dynamic height
   if (cfc.openingStory) {
-    checkPageBreak(50);
+    const narrativeText = cfc.openingStory.narrative || "";
+    const truncatedNarrative = narrativeText.length > 300 ? narrativeText.substring(0, 300) + "..." : narrativeText;
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "italic");
+    const narrativeLines = doc.splitTextToSize(truncatedNarrative, contentWidth - 15);
+    const lineH = 5;
+    const hasHeadline = !!cfc.openingStory.headline;
+    const hasAttribution = !!cfc.openingStory.attribution;
+    const boxHeight = Math.max(30, (hasHeadline ? 14 : 8) + (narrativeLines?.length || 1) * lineH + (hasAttribution ? 14 : 4));
+    
+    checkPageBreak(boxHeight + 5);
     doc.setFillColor(...accentLight);
-    doc.roundedRect(margin, y - 5, contentWidth, 42, 3, 3, "F");
+    doc.roundedRect(margin, y - 5, contentWidth, boxHeight, 3, 3, "F");
+    
+    let storyY = y + 5;
     
     doc.setTextColor(...accentRgb);
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
-    doc.text(cfc.openingStory.headline || "A Story of Impact", margin + 8, y + 5);
+    doc.text(cfc.openingStory.headline || "A Story of Impact", margin + 8, storyY);
+    storyY += hasHeadline ? 10 : 6;
     
     doc.setFontSize(10);
     doc.setFont("helvetica", "italic");
     doc.setTextColor(60, 60, 60);
-    const narrativeText = cfc.openingStory.narrative || "";
-    const truncatedNarrative = narrativeText.length > 180 ? narrativeText.substring(0, 180) + "..." : narrativeText;
-    const narrativeLines = doc.splitTextToSize(truncatedNarrative, contentWidth - 15);
     if (narrativeLines && narrativeLines.length > 0) {
-      doc.text(narrativeLines, margin + 8, y + 15);
+      narrativeLines.forEach((line: string, idx: number) => {
+        if (line) doc.text(line, margin + 8, storyY + idx * lineH);
+      });
     }
     
     if (cfc.openingStory.attribution) {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9);
       doc.setTextColor(...accentRgb);
-      doc.text(`— ${cfc.openingStory.attribution}`, margin + 8, y + 35);
+      doc.text(`— ${cfc.openingStory.attribution}`, margin + 8, y - 5 + boxHeight - 6);
     }
-    y += 52;
+    y += boxHeight + 5;
   }
 
   // Vision Statement
