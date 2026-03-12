@@ -136,6 +136,7 @@ const ImageGeneratorPage = () => {
   const [generationPhase, setGenerationPhase] = useState(0);
   const [viewMode, setViewMode] = useState<"raw" | "mockup" | "overlay">("mockup");
   const [blankCanvasMode, setBlankCanvasMode] = useState(false);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const { campusPhotoCount } = useCampusPhotoCount(selectedProfileId || null);
   const { references: designRefs } = useDesignReferences({ profileId: selectedProfileId || null });
   const designRefCount = designRefs?.length || 0;
