@@ -73,8 +73,15 @@ import {
   Heart,
   BookMarked,
   type LucideIcon,
-  Folder
+  Folder,
+  Zap,
+  Camera,
+  Film,
+  Palette,
+  Droplets,
+  Square,
 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { buildMessage } from "@/lib/evaluateMessage";
 import { useAuth } from "@/contexts/AuthContext";
 import type { MessageContext, BuilderResult, InstitutionalConfig, Channel, ChannelDrafts } from "@/types/campusvoice";
@@ -1353,43 +1360,80 @@ const BuildPage = () => {
 
               {/* AI Image Generation Settings */}
               {selectedChannels.some(ch => ['social-media', 'digital-ad-social', 'email', 'landing-page', 'direct-mail', 'news-article'].includes(ch)) && (
-                <div className="flex flex-col items-center gap-2 py-3 px-4 rounded-lg border border-border/60 bg-muted/30">
+                <div className="flex flex-col items-center gap-3 py-3 px-4 rounded-lg border border-border/60 bg-muted/30">
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-3.5 h-3.5 text-primary" />
                     <span className="text-xs font-semibold text-foreground tracking-wide">AI Image Generation</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="flex flex-col items-center gap-1">
+                    <div className="flex flex-col items-center gap-1 min-w-[120px]">
                       <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Engine</Label>
-                      <select
-                        value={imageEngine}
-                        onChange={(e) => setImageEngine(e.target.value)}
-                        className="text-xs border border-border rounded-md px-3 py-1.5 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
-                      >
-                        <option value="fast">⚡ Fast</option>
-                        <option value="premium">✨ Premium</option>
-                      </select>
+                      <Select value={imageEngine} onValueChange={setImageEngine}>
+                        <SelectTrigger className="text-xs h-8 w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="fast">
+                            <span className="flex items-center gap-1.5">
+                              <Zap className="w-3.5 h-3.5 text-amber-500" />
+                              Fast
+                            </span>
+                          </SelectItem>
+                          <SelectItem value="premium">
+                            <span className="flex items-center gap-1.5">
+                              <Sparkles className="w-3.5 h-3.5 text-primary" />
+                              Premium
+                            </span>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="w-px h-8 bg-border" />
-                    <div className="flex flex-col items-center gap-1">
+                    <div className="flex flex-col items-center gap-1 min-w-[150px]">
                       <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Style</Label>
-                      <select
-                        value={imageStyle}
-                        onChange={(e) => setImageStyle(e.target.value)}
-                        className="text-xs border border-border rounded-md px-3 py-1.5 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
-                      >
-                        <option value="photorealistic">📷 Photorealistic</option>
-                        <option value="cinematic">🎬 Cinematic</option>
-                        <option value="illustrated">🎨 Illustrated</option>
-                        <option value="watercolor">🖌️ Watercolor</option>
-                        <option value="minimal">◻️ Minimal / Flat</option>
-                      </select>
+                      <Select value={imageStyle} onValueChange={setImageStyle}>
+                        <SelectTrigger className="text-xs h-8 w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="photorealistic">
+                            <span className="flex items-center gap-1.5">
+                              <Camera className="w-3.5 h-3.5 text-sky-500" />
+                              Photorealistic
+                            </span>
+                          </SelectItem>
+                          <SelectItem value="cinematic">
+                            <span className="flex items-center gap-1.5">
+                              <Film className="w-3.5 h-3.5 text-violet-500" />
+                              Cinematic
+                            </span>
+                          </SelectItem>
+                          <SelectItem value="illustrated">
+                            <span className="flex items-center gap-1.5">
+                              <Palette className="w-3.5 h-3.5 text-rose-500" />
+                              Illustrated
+                            </span>
+                          </SelectItem>
+                          <SelectItem value="watercolor">
+                            <span className="flex items-center gap-1.5">
+                              <Droplets className="w-3.5 h-3.5 text-teal-500" />
+                              Watercolor
+                            </span>
+                          </SelectItem>
+                          <SelectItem value="minimal">
+                            <span className="flex items-center gap-1.5">
+                              <Square className="w-3.5 h-3.5 text-muted-foreground" />
+                              Minimal / Flat
+                            </span>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="w-px h-8 bg-border" />
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-xs h-7 gap-1"
+                      className="text-xs h-8 gap-1"
                       onClick={() => setImageRegenerateKey(k => k + 1)}
                     >
                       <RefreshCw className="w-3 h-3" />
