@@ -1000,6 +1000,49 @@ const GivingDayPlannerPage = () => {
               setExpandedTouchpoints(prev => new Set(prev).add(id));
             }}
           />
+
+          {/* Edit Campaign Dialog */}
+          <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+            <DialogContent className="sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Edit Campaign</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label>Campaign Name</Label>
+                  <Input value={editName} onChange={e => setEditName(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Giving Day Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className={cn("w-full justify-start text-left", !editDate && "text-muted-foreground")}>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {editDate ? format(editDate, 'PPP') : "Select date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={editDate} onSelect={setEditDate} /></PopoverContent>
+                  </Popover>
+                </div>
+                <div className="space-y-2">
+                  <Label>Fundraising Goal (optional)</Label>
+                  <Input placeholder="e.g., $250,000" value={editGoal} onChange={e => setEditGoal(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Institutional Profile</Label>
+                  <InstitutionalProfileSelector selectedProfileId={editProfileId} onProfileChange={(id) => setEditProfileId(id)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Notes (optional)</Label>
+                  <Input placeholder="Internal notes about this campaign" value={editNotes} onChange={e => setEditNotes(e.target.value)} />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowEditDialog(false)}>Cancel</Button>
+                <Button onClick={handleEditSave} disabled={!editName || !editDate}>Save Changes</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </main>
     </div>
