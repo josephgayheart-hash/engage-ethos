@@ -417,9 +417,9 @@ export async function exportCaseForSupportToPDF(
   const contentWidth = pageWidth - margin * 2;
   let y = 25;
 
-  // Extract branding colors - use provided colors or sensible defaults
+  // Extract branding colors - strictly from institution profile, no platform defaults
   const primaryRgb = hexToRgb(branding?.primaryColor || '#1F2A44');
-  const accentRgb = hexToRgb(branding?.accentColor || '#2C7A7B');
+  const accentRgb = hexToRgb(branding?.accentColor || branding?.primaryColor || '#1F2A44');
   const primaryLight = lightenColor(primaryRgb, 0.92);
   const accentLight = lightenColor(accentRgb, 0.92);
 
@@ -464,15 +464,25 @@ export async function exportCaseForSupportToPDF(
   doc.setFillColor(...primaryRgb);
   doc.rect(0, 0, pageWidth, 70, "F");
 
-  // Add logo in top-left of header if available
-  const logoWidth = 25;
-  const logoHeight = 25;
+  // Add logo in top-left of header if available — preserve aspect ratio
   let textStartX = margin;
   
   if (logoData) {
     try {
+      // Load image to get natural dimensions for aspect ratio
+      const img = new Image();
+      img.src = logoData.dataUrl;
+      const naturalW = img.naturalWidth || 1;
+      const naturalH = img.naturalHeight || 1;
+      const aspect = naturalW / naturalH;
+      
+      const maxLogoH = 25;
+      const maxLogoW = 50;
+      const logoHeight = Math.min(maxLogoH, maxLogoW / aspect);
+      const logoWidth = logoHeight * aspect;
+      
       doc.addImage(logoData.dataUrl, logoData.format, margin, 10, logoWidth, logoHeight);
-      textStartX = margin + logoWidth + 8; // Shift text to the right of logo
+      textStartX = margin + logoWidth + 8;
     } catch (e) {
       console.error("Failed to add logo to PDF:", e);
     }
@@ -497,8 +507,8 @@ export async function exportCaseForSupportToPDF(
   };
 
   // Calculate available width for title (accounting for logo if present)
-  const titleAvailableWidth = logoData 
-    ? contentWidth - logoWidth - 18 
+  const titleAvailableWidth = textStartX > margin
+    ? contentWidth - (textStartX - margin) - 10
     : contentWidth - 10;
 
   // Title with dynamic font sizing - position after logo if present
@@ -537,9 +547,14 @@ export async function exportCaseForSupportToPDF(
     headerY += taglineLines.length * 5 + 2;
   }
 
-  // Institution name BELOW tagline in left-aligned area (sub-unit/college name)
-  if (institutionName) {
-    doc.setTextColor(200, 200, 200);  // Lighter text for sub-unit
+  // Institution name BELOW tagline — skip if it duplicates the document title or campaign name
+  const titleLower = (cfc.documentTitle || "").toLowerCase();
+  const campaignLower = (cfc.campaignName || "").toLowerCase();
+  const instLower = (institutionName || "").toLowerCase();
+  const isDuplicateName = instLower && (titleLower.includes(instLower) || campaignLower.includes(instLower) || instLower.includes(campaignLower));
+  
+  if (institutionName && !isDuplicateName) {
+    doc.setTextColor(200, 200, 200);
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
     const instLines = doc.splitTextToSize(institutionName, titleAvailableWidth);
@@ -590,61 +605,82 @@ export async function exportCaseForSupportToPDF(
     y += boxHeight + 10;
   }
 
-  // Leader Message
+  // Leader Message - dynamic height
   if (cfc.leaderMessage) {
-    checkPageBreak(55);
+    const messageText = cfc.leaderMessage.message || "";
+    const truncatedMessage = messageText.length > 400 ? messageText.substring(0, 400) + "..." : messageText;
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "italic");
+    const messageLines = doc.splitTextToSize(truncatedMessage, contentWidth - 15);
+    const lineH = 5;
+    const boxHeight = Math.max(30, 14 + (messageLines?.length || 1) * lineH + 12);
+    
+    checkPageBreak(boxHeight + 5);
     doc.setFillColor(...primaryLight);
-    doc.roundedRect(margin, y - 5, contentWidth, 45, 3, 3, "F");
+    doc.roundedRect(margin, y - 5, contentWidth, boxHeight, 3, 3, "F");
     doc.setDrawColor(...primaryRgb);
     doc.setLineWidth(0.3);
-    doc.roundedRect(margin, y - 5, contentWidth, 45, 3, 3, "S");
+    doc.roundedRect(margin, y - 5, contentWidth, boxHeight, 3, 3, "S");
     
     doc.setTextColor(60, 60, 60);
     doc.setFontSize(10);
     doc.setFont("helvetica", "italic");
-    const messageText = cfc.leaderMessage.message || "";
-    const truncatedMessage = messageText.length > 280 ? messageText.substring(0, 280) + "..." : messageText;
-    const messageLines = doc.splitTextToSize(truncatedMessage, contentWidth - 15);
     if (messageLines && messageLines.length > 0) {
-      doc.text(messageLines, margin + 8, y + 5);
+      messageLines.forEach((line: string, idx: number) => {
+        if (line) doc.text(line, margin + 8, y + 5 + idx * lineH);
+      });
     }
     
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
     doc.setTextColor(...primaryRgb);
     const leaderAttribution = `— ${cfc.leaderMessage.leaderName || "Leadership"}, ${cfc.leaderMessage.leaderTitle || ""}`.replace(/, $/, "");
-    doc.text(leaderAttribution, margin + 8, y + 37);
-    y += 55;
+    doc.text(leaderAttribution, margin + 8, y - 5 + boxHeight - 6);
+    y += boxHeight + 5;
   }
 
-  // Opening Story
+  // Opening Story - dynamic height
   if (cfc.openingStory) {
-    checkPageBreak(50);
+    const narrativeText = cfc.openingStory.narrative || "";
+    const truncatedNarrative = narrativeText.length > 300 ? narrativeText.substring(0, 300) + "..." : narrativeText;
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "italic");
+    const narrativeLines = doc.splitTextToSize(truncatedNarrative, contentWidth - 15);
+    const lineH = 5;
+    const hasHeadline = !!cfc.openingStory.headline;
+    const hasAttribution = !!cfc.openingStory.attribution;
+    const boxHeight = Math.max(30, (hasHeadline ? 14 : 8) + (narrativeLines?.length || 1) * lineH + (hasAttribution ? 14 : 4));
+    
+    checkPageBreak(boxHeight + 5);
     doc.setFillColor(...accentLight);
-    doc.roundedRect(margin, y - 5, contentWidth, 42, 3, 3, "F");
+    doc.roundedRect(margin, y - 5, contentWidth, boxHeight, 3, 3, "F");
+    
+    let storyY = y + 5;
     
     doc.setTextColor(...accentRgb);
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
-    doc.text(cfc.openingStory.headline || "A Story of Impact", margin + 8, y + 5);
+    doc.text(cfc.openingStory.headline || "A Story of Impact", margin + 8, storyY);
+    storyY += hasHeadline ? 10 : 6;
     
     doc.setFontSize(10);
     doc.setFont("helvetica", "italic");
     doc.setTextColor(60, 60, 60);
-    const narrativeText = cfc.openingStory.narrative || "";
-    const truncatedNarrative = narrativeText.length > 180 ? narrativeText.substring(0, 180) + "..." : narrativeText;
-    const narrativeLines = doc.splitTextToSize(truncatedNarrative, contentWidth - 15);
     if (narrativeLines && narrativeLines.length > 0) {
-      doc.text(narrativeLines, margin + 8, y + 15);
+      narrativeLines.forEach((line: string, idx: number) => {
+        if (line) doc.text(line, margin + 8, storyY + idx * lineH);
+      });
     }
     
     if (cfc.openingStory.attribution) {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9);
       doc.setTextColor(...accentRgb);
-      doc.text(`— ${cfc.openingStory.attribution}`, margin + 8, y + 35);
+      doc.text(`— ${cfc.openingStory.attribution}`, margin + 8, y - 5 + boxHeight - 6);
     }
-    y += 52;
+    y += boxHeight + 5;
   }
 
   // Vision Statement
