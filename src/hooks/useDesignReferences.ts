@@ -113,6 +113,12 @@ export function useDesignReferences({ profileId }: { profileId: string | null })
         if (insertError) throw insertError;
       }
 
+      logDNAActivity(workspaceId, user.id, {
+        section: 'design_refs', action: 'added', profileId,
+        artifactCount: files.length,
+        artifactName: name || files.map(f => f.name).join(', '),
+      });
+      
       toast.success(`${files.length} design reference${files.length > 1 ? 's' : ''} uploaded`);
       await fetchReferences();
     } catch (err: any) {
