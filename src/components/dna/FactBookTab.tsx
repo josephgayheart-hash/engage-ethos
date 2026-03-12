@@ -52,7 +52,7 @@ import {
   FileSearch,
   Sparkles,
   Database,
-  Trash2
+  Trash2,
   Globe,
 } from 'lucide-react';
 import {
