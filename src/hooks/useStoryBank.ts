@@ -211,7 +211,15 @@ export function useStoryBank(options: UseStoryBankOptions = {}) {
       
       if (error) throw error;
       
+      const deletedStory = stories.find(s => s.id === id);
       setStories(prev => prev.filter(s => s.id !== id));
+      
+      if (workspaceId && user?.id) {
+        logDNAActivity(workspaceId, user.id, {
+          section: 'stories', action: 'removed', profileId: profileId || null,
+          artifactName: deletedStory?.title,
+        });
+      }
       
       toast({
         title: 'Story deleted',
