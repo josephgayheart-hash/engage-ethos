@@ -44,12 +44,12 @@ const createItems = [
   { title: "AI Copywriter", url: "/playground", icon: Sparkles },
   { title: "Image Studio", url: "/image-generator", icon: ImageIcon },
   { title: "Brand Studio", url: "/brand-studio", icon: Palette },
+  { title: "Evaluator", url: "/evaluate", icon: ClipboardCheck },
 ];
 
 const manageItems = [
   { title: "My Library", url: "/library", icon: FolderOpen },
   { title: "My Drafts", url: "/dashboard#my-drafts", icon: FileEdit },
-  { title: "Evaluator", url: "/evaluate", icon: ClipboardCheck },
   { title: "Tools", url: "/tools", icon: Wrench },
 ];
 
