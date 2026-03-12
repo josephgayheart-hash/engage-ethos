@@ -849,7 +849,6 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                               ? 'Reading and parsing your document content' 
                               : 'Identifying and categorizing facts from your content'}
                           </p>
-                          </p>
                         </div>
                       </div>
                       {/* Progress Steps */}
