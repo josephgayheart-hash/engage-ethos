@@ -27,17 +27,33 @@ interface ContentDNAExplainerProps {
   defaultOpen?: boolean;
   collapsible?: boolean;
   showManageLink?: boolean;
+  dismissable?: boolean;
   className?: string;
 }
+
+const DISMISS_KEY = 'campusvoice_dna_explainer_dismissed';
 
 export function ContentDNAExplainer({
   context,
   defaultOpen = false,
   collapsible = true,
   showManageLink = true,
+  dismissable = true,
   className,
 }: ContentDNAExplainerProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [isDismissed, setIsDismissed] = useState(() => {
+    if (!dismissable) return false;
+    return localStorage.getItem(DISMISS_KEY) === 'true';
+  });
+
+  const handleDismiss = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    localStorage.setItem(DISMISS_KEY, 'true');
+    setIsDismissed(true);
+  };
+
+  if (isDismissed && dismissable) return null;
 
   const isBuilderContext = context === 'message-builder' || context === 'journey-designer';
   const isContentDNAPage = context === 'content-dna-page';
