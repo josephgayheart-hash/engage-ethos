@@ -33,6 +33,7 @@ import {
   Target,
   Briefcase,
   School,
+  Landmark,
   BookOpen,
   Search,
   CheckCircle2,
