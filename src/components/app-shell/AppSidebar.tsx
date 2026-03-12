@@ -77,9 +77,7 @@ export function AppSidebar() {
     navigate("/login");
   };
 
-  const libraryItems = isAgency ? [] : [
-    { title: "University Library", url: "/shared-library", icon: Library },
-  ];
+  const libraryItems: typeof manageItems = [];
 
   const governItems = [
     { title: "Content DNA Studio", url: "/admin/content-dna", icon: Dna },
