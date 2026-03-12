@@ -260,7 +260,29 @@ const GivingDayPlannerPage = () => {
     setAddTpOpen(true);
   };
 
-  const getCampaignText = useCallback(() => {
+  const openEditDialog = () => {
+    if (!selectedCampaign) return;
+    setEditName(selectedCampaign.name);
+    setEditDate(parseISO(selectedCampaign.giving_day_date));
+    setEditGoal(selectedCampaign.goal_amount || "");
+    setEditProfileId(selectedCampaign.profile_id);
+    setEditNotes(selectedCampaign.notes || "");
+    setShowEditDialog(true);
+  };
+
+  const handleEditSave = async () => {
+    if (!selectedCampaign || !editName || !editDate) return;
+    await updateCampaign(selectedCampaign.id, {
+      name: editName,
+      giving_day_date: format(editDate, 'yyyy-MM-dd'),
+      goal_amount: editGoal || null,
+      profile_id: editProfileId,
+      notes: editNotes || null,
+    } as any);
+    setShowEditDialog(false);
+    toast({ title: "Campaign updated", description: "Your changes have been saved." });
+  };
+
     if (!selectedCampaign) return "";
     return campaignToText(selectedCampaign, selectedProfile?.name);
   }, [selectedCampaign, selectedProfile]);
