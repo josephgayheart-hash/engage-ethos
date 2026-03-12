@@ -35,7 +35,7 @@ import {
   Globe, Clock, ChevronRight, ChevronDown, Sparkles, CheckCircle2, FileEdit,
   Send, Trash2, Gift, DollarSign, LayoutList, PartyPopper, Timer, Copy,
   GraduationCap, Layers, Building, Briefcase, Building2, Download, FileText,
-  ClipboardCopy, Loader2
+  ClipboardCopy, Loader2, Pencil
 } from "lucide-react";
 import { campaignToText } from "@/lib/campaignExport";
 import { openInGoogleDocs } from "@/lib/googleDocsExport";
@@ -132,6 +132,14 @@ const GivingDayPlannerPage = () => {
   const [expandedTouchpoints, setExpandedTouchpoints] = useState<Set<string>>(new Set());
   const [isExporting, setIsExporting] = useState(false);
   const campaignDetailRef = useRef<HTMLDivElement>(null);
+
+  // Edit campaign dialog state
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editDate, setEditDate] = useState<Date | undefined>();
+  const [editGoal, setEditGoal] = useState("");
+  const [editProfileId, setEditProfileId] = useState<string | null>(null);
+  const [editNotes, setEditNotes] = useState("");
 
   // Add touchpoint dialog state
   const [addTpMilestone, setAddTpMilestone] = useState<typeof T_MINUS_MILESTONES[0] | null>(null);
@@ -250,6 +258,29 @@ const GivingDayPlannerPage = () => {
     setAddTpMilestone(milestone);
     setAddTpChannel("email");
     setAddTpOpen(true);
+  };
+
+  const openEditDialog = () => {
+    if (!selectedCampaign) return;
+    setEditName(selectedCampaign.name);
+    setEditDate(parseISO(selectedCampaign.giving_day_date));
+    setEditGoal(selectedCampaign.goal_amount || "");
+    setEditProfileId(selectedCampaign.profile_id);
+    setEditNotes(selectedCampaign.notes || "");
+    setShowEditDialog(true);
+  };
+
+  const handleEditSave = async () => {
+    if (!selectedCampaign || !editName || !editDate) return;
+    await updateCampaign(selectedCampaign.id, {
+      name: editName,
+      giving_day_date: format(editDate, 'yyyy-MM-dd'),
+      goal_amount: editGoal || null,
+      profile_id: editProfileId,
+      notes: editNotes || null,
+    } as any);
+    setShowEditDialog(false);
+    toast({ title: "Campaign updated", description: "Your changes have been saved." });
   };
 
   const getCampaignText = useCallback(() => {
@@ -650,6 +681,9 @@ const GivingDayPlannerPage = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={openEditDialog}>
+                <Pencil className="w-4 h-4 mr-1.5" /> Edit
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" disabled={isExporting}>
@@ -966,6 +1000,49 @@ const GivingDayPlannerPage = () => {
               setExpandedTouchpoints(prev => new Set(prev).add(id));
             }}
           />
+
+          {/* Edit Campaign Dialog */}
+          <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+            <DialogContent className="sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Edit Campaign</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label>Campaign Name</Label>
+                  <Input value={editName} onChange={e => setEditName(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Giving Day Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className={cn("w-full justify-start text-left", !editDate && "text-muted-foreground")}>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {editDate ? format(editDate, 'PPP') : "Select date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={editDate} onSelect={setEditDate} /></PopoverContent>
+                  </Popover>
+                </div>
+                <div className="space-y-2">
+                  <Label>Fundraising Goal (optional)</Label>
+                  <Input placeholder="e.g., $250,000" value={editGoal} onChange={e => setEditGoal(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Institutional Profile</Label>
+                  <InstitutionalProfileSelector selectedProfileId={editProfileId} onProfileChange={(id) => setEditProfileId(id)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Notes (optional)</Label>
+                  <Input placeholder="Internal notes about this campaign" value={editNotes} onChange={e => setEditNotes(e.target.value)} />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowEditDialog(false)}>Cancel</Button>
+                <Button onClick={handleEditSave} disabled={!editName || !editDate}>Save Changes</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </main>
     </div>
