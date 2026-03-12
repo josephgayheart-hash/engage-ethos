@@ -523,7 +523,7 @@ export function ScratchpadCapture() {
                         const after = text.slice((inlineToolMatch.index || 0) + inlineToolMatch[0].length);
                         const whyMatch = after.match(/^\s*Why:\s*(.*)/i);
                         return (
-                          <div className="text-sm leading-relaxed text-foreground/85 my-2 flex items-center flex-wrap gap-1.5">
+                          <div className="text-[15px] leading-relaxed text-foreground/85 my-3 flex items-center flex-wrap gap-1.5">
                             {before && <span>{before}</span>}
                             <Link to={route.path} className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-xs hover:bg-primary/20 hover:shadow-sm transition-all border border-primary/15">
                               <ToolIcon className="h-3 w-3" />
