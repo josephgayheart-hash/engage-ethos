@@ -67,13 +67,13 @@ const features = [
   {
     icon: MessageSquare,
     title: 'Brand-Aligned Messaging',
-    description: 'Generate content grounded in your brand promise, pillars, and positioning. Not just voice.',
+    description: 'Generate content grounded in your brand promise and positioning.',
     link: '/features/message-builder',
   },
   {
     icon: BarChart3,
     title: 'Content DNA Studio',
-    description: 'Upload samples or scrape your website. AI extracts voice profiles and brand platform elements for every generation.',
+    description: 'Upload samples or scrape your site. AI extracts voice and brand elements.',
     link: '/features/content-dna',
   },
   {
