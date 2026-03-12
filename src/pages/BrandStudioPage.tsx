@@ -671,16 +671,16 @@ const BrandStudioPage = () => {
         {/* Right: Canvas */}
         <div className="flex-1 flex items-center justify-center p-8 bg-muted/30 overflow-hidden">
           <div className="max-w-2xl w-full relative group">
-            {/* Always show editable canvas — use smart layer image as base when available */}
+            {/* Always show editable canvas */}
             <BrandOverlayCanvas
               ref={canvasRef}
-              imageUrl={smartLayerImageUrl || imageUrl}
+              imageUrl={imageUrl}
               primaryColor={primary}
               secondaryColor={secondary}
               canvasBackgroundType={canvasBackgroundType}
               canvasBackgroundColor={canvasBackgroundColor}
               canvasBackgroundSecondaryColor={canvasBackgroundSecondaryColor}
-              overlayPattern={smartLayerImageUrl ? "none" : overlayPattern}
+              overlayPattern={overlayPattern}
               overlayColor={overlayColor}
               overlayOpacity={smartLayerImageUrl ? 0 : overlayOpacity}
               customOverlayUrl={smartLayerImageUrl ? null : customOverlayUrl}
