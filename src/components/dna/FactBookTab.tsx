@@ -823,7 +823,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                 Import Fact Book
               </DialogTitle>
               <DialogDescription>
-                Upload a PDF or paste text to extract facts automatically
+                Scrape a URL, upload a PDF, or paste text to extract facts automatically
               </DialogDescription>
             </DialogHeader>
             <div className="flex-1 overflow-y-auto space-y-4 py-4">
