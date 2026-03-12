@@ -1365,7 +1365,7 @@ const BuildPage = () => {
                     <Sparkles className="w-3.5 h-3.5 text-primary" />
                     <span className="text-xs font-semibold text-foreground tracking-wide">AI Image Generation</span>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-end gap-3">
                     <div className="flex flex-col items-center gap-1 min-w-[120px]">
                       <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Engine</Label>
                       <Select value={imageEngine} onValueChange={setImageEngine}>
@@ -1388,7 +1388,7 @@ const BuildPage = () => {
                         </SelectContent>
                       </Select>
                     </div>
-                    <div className="w-px h-8 bg-border" />
+                    <div className="w-px h-8 bg-border self-end" />
                     <div className="flex flex-col items-center gap-1 min-w-[150px]">
                       <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Style</Label>
                       <Select value={imageStyle} onValueChange={setImageStyle}>
@@ -1429,16 +1429,19 @@ const BuildPage = () => {
                         </SelectContent>
                       </Select>
                     </div>
-                    <div className="w-px h-8 bg-border" />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-xs h-8 gap-1"
-                      onClick={() => setImageRegenerateKey(k => k + 1)}
-                    >
-                      <RefreshCw className="w-3 h-3" />
-                      Regenerate All
-                    </Button>
+                    <div className="w-px h-8 bg-border self-end" />
+                    <div className="flex flex-col items-center gap-1">
+                      <Label className="text-[10px] text-muted-foreground uppercase tracking-wider invisible">Action</Label>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-xs h-8 gap-1"
+                        onClick={() => setImageRegenerateKey(k => k + 1)}
+                      >
+                        <RefreshCw className="w-3 h-3" />
+                        Regenerate All
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )}
