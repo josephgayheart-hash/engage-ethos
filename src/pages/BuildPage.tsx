@@ -271,6 +271,7 @@ const BuildPage = () => {
   const [builderResult, setBuilderResult] = useState<BuilderResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
+  const overlayRef = useRef<HTMLDivElement>(null);
   const [autoSave, setAutoSave] = useState(true);
   const [saveToLibraryOpen, setSaveToLibraryOpen] = useState(false);
   const [saveToLibraryChannel, setSaveToLibraryChannel] = useState<Channel | null>(null);
