@@ -294,6 +294,19 @@ const BuildPage = () => {
   const resultsRef = useRef<HTMLDivElement>(null);
   const canProcess = context.audience && context.moment && selectedChannels.length > 0;
 
+  const selectedProfileConfig = selectedProfileId
+    ? profiles.find((p) => p.id === selectedProfileId)?.config ?? null
+    : null;
+  const activeProfileConfig = institutionalConfig ?? selectedProfileConfig;
+  const loadingOverlayBranding = {
+    primaryColor: activeProfileConfig?.primaryColor || (selectedProfileId ? undefined : tenant?.primary_color || undefined),
+    accentColor:
+      activeProfileConfig?.secondaryColor ||
+      activeProfileConfig?.accentColor ||
+      (selectedProfileId ? undefined : tenant?.accent_color || undefined),
+    logoUrl: activeProfileConfig?.logoUrl || (selectedProfileId ? undefined : tenant?.logo_url || undefined),
+  };
+
   // If remix mode, show the original content as a starting point
   const [remixOriginalContent, setRemixOriginalContent] = useState<string | null>(
     remixState?.remixContent || null
