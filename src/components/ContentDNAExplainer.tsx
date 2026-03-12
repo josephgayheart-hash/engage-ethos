@@ -18,6 +18,7 @@ import {
   Layers,
   Sliders,
   Library,
+  X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import DNATuningDiagram from './DNATuningDiagram';
