@@ -1185,4 +1185,9 @@ export async function exportCaseForSupportToPDF(
   }
 
   doc.save("case-for-support.pdf");
+  } catch (err) {
+    console.error("Error building Case for Support PDF:", err);
+    // Always attempt to save whatever was built
+    doc.save("case-for-support.pdf");
+  }
 }
