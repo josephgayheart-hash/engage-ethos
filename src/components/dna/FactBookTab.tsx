@@ -875,8 +875,47 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                   )}
 
                   {/* File Upload */}
-                  {!isExtractingFile && !isParsing && (
+                  {!isExtractingFile && !isParsing && !isScraping && (
                     <>
+                      {/* URL Scrape Section */}
+                      <div className="border rounded-lg p-4 space-y-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Globe className="w-4 h-4 text-primary" />
+                          <Label className="font-medium">Scrape from URL</Label>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Paste a link to your institution's facts page and we'll extract the content automatically
+                        </p>
+                        <div className="flex gap-2">
+                          <Input
+                            value={scrapeUrl}
+                            onChange={e => setScrapeUrl(e.target.value)}
+                            placeholder="https://yourschool.edu/facts"
+                            className="flex-1"
+                          />
+                          <Button 
+                            onClick={handleScrapeUrl} 
+                            disabled={!scrapeUrl.trim() || isScraping}
+                            variant="secondary"
+                          >
+                            {isScraping ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <>
+                                <Globe className="w-4 h-4 mr-2" />
+                                Scrape
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4">
+                        <div className="h-px flex-1 bg-border" />
+                        <span className="text-sm text-muted-foreground">or upload a file</span>
+                        <div className="h-px flex-1 bg-border" />
+                      </div>
+
                       <div 
                         className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
                         onClick={() => fileInputRef.current?.click()}
