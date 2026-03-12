@@ -461,7 +461,7 @@ export async function exportCaseForSupportToPDF(
   const accentLight = lightenColor(accentRgb, 0.92);
 
   // Pre-load logo if available
-  let logoData: { dataUrl: string; format: "PNG" | "JPEG" } | null = null;
+  let logoData: LoadedImageData | null = null;
   if (branding?.logoUrl) {
     try {
       logoData = await loadImageAsDataUrl(branding.logoUrl);
