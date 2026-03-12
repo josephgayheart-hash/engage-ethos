@@ -537,16 +537,19 @@ export default function UniversitySettingsPage() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h1 className="font-serif text-2xl md:text-3xl font-bold">
-                      {isAgency ? labels.settingsPageTitle : tenant?.institution_name || 'University Settings'}
+                      {tenant?.institution_name || (isAgency ? 'Agency Settings' : 'University Settings')}
                     </h1>
                     {isAgency && (
                       <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400">
-                        Agency
+                        Agency Partner
                       </Badge>
                     )}
                   </div>
                   <p className="text-muted-foreground text-sm">
-                    {labels.settingsPageDescription}
+                    {isAgency 
+                      ? 'Manage your agency branding and partner institution configurations'
+                      : labels.settingsPageDescription
+                    }
                   </p>
                 </div>
               </div>
