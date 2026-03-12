@@ -50,7 +50,7 @@ export function useContentDNAActivity() {
         action: params.action,
         artifact_name: params.artifactName || null,
         artifact_count: params.artifactCount || null,
-        metadata: params.metadata || {},
+        metadata: (params.metadata || {}) as any,
       }]);
     } catch (err) {
       // Activity logging is non-critical — don't block the user
