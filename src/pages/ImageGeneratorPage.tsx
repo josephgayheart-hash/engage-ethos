@@ -167,7 +167,9 @@ const ImageGeneratorPage = () => {
   // Extract brand info from selected profile
   const selectedProfile = profiles?.find(p => p.id === selectedProfileId);
   const profileConfig = selectedProfile?.config as Record<string, any> | undefined;
-  const brandColors = [profileConfig?.primaryColor, profileConfig?.secondaryColor, profileConfig?.tertiaryColor, profileConfig?.accentColor].filter(Boolean) as string[];
+  const APP_DEFAULT_COLORS = ["#1f2a44", "#2c7a7b"];
+  const isRealColor = (c: unknown): c is string => typeof c === 'string' && c.length > 0 && !APP_DEFAULT_COLORS.includes(c.trim().toLowerCase());
+  const brandColors = [profileConfig?.primaryColor, profileConfig?.secondaryColor, profileConfig?.tertiaryColor, profileConfig?.accentColor].filter(isRealColor) as string[];
   const profileLogoUrl = profileConfig?.logoUrl as string | undefined;
   const profileLogoUrls = [profileConfig?.logoUrl, profileConfig?.logoUrlSecondary, profileConfig?.logoUrlAthletic, profileConfig?.logoUrlPresidential].filter(Boolean) as string[];
   const profileInstitutionName = selectedProfile?.name || profileConfig?.institutionName as string | undefined;
@@ -727,7 +729,7 @@ const ImageGeneratorPage = () => {
                   const cfg = selectedProfile?.config as Record<string, any> | undefined;
                   const logoUrl = cfg?.logoUrl;
                   const profileName = selectedProfile?.name || cfg?.institutionName;
-                  const colors = [cfg?.primaryColor, cfg?.secondaryColor, cfg?.accentColor, cfg?.tertiaryColor].filter(Boolean) as string[];
+                  const colors = [cfg?.primaryColor, cfg?.secondaryColor, cfg?.accentColor, cfg?.tertiaryColor].filter(isRealColor) as string[];
                   const selectedChannelLabel = channelOptions.find(c => c.value === channel)?.label || channel;
                   const selectedStyleLabel = creationMode === "graphic-design" ? "Graphic Design" : (styleOptions.find(s => s.value === style)?.label || style);
                   const selectedEngineLabel = engineOptions.find(e => e.value === engine)?.label || engine;
