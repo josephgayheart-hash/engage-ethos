@@ -506,19 +506,17 @@ export async function exportCaseForSupportToPDF(
   
   if (logoData) {
     try {
-      // Load image to get natural dimensions for aspect ratio
-      const img = new Image();
-      img.src = logoData.dataUrl;
-      const naturalW = img.naturalWidth || 1;
-      const naturalH = img.naturalHeight || 1;
+      const naturalW = logoData.width || 1;
+      const naturalH = logoData.height || 1;
       const aspect = naturalW / naturalH;
-      
+
       const maxLogoH = 25;
       const maxLogoW = 50;
       const logoHeight = Math.min(maxLogoH, maxLogoW / aspect);
       const logoWidth = logoHeight * aspect;
-      
-      doc.addImage(logoData.dataUrl, logoData.format, margin, 10, logoWidth, logoHeight);
+      const logoY = (70 - logoHeight) / 2;
+
+      doc.addImage(logoData.dataUrl, logoData.format, margin, logoY, logoWidth, logoHeight);
       textStartX = margin + logoWidth + 8;
     } catch (e) {
       console.error("Failed to add logo to PDF:", e);

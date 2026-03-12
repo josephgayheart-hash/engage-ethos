@@ -1419,34 +1419,7 @@ const BuildPage = () => {
                         if (unit && inst) return `${unit}\n${inst}`;
                         return inst || unit || undefined;
                       })()}
-                      branding={(() => {
-                        // Default colors that should be treated as "not set" (legacy defaults)
-                        const defaultPrimary = ['#1F2A44', '#1f2a44'];
-                        const defaultAccent = ['#2C7A7B', '#2c7a7b'];
-                        const defaultTertiary = ['#E2E8F0', '#e2e8f0'];
-                        
-                        // Only use profile color if it's explicitly set and NOT a default value
-                        const profilePrimary = institutionalConfig?.primaryColor;
-                        const profileAccent = institutionalConfig?.accentColor;
-                        const profileTertiary = institutionalConfig?.tertiaryColor;
-                        
-                        const effectivePrimary = (profilePrimary && !defaultPrimary.includes(profilePrimary)) 
-                          ? profilePrimary 
-                          : (tenant?.primary_color || undefined);
-                        const effectiveAccent = (profileAccent && !defaultAccent.includes(profileAccent)) 
-                          ? profileAccent 
-                          : (tenant?.accent_color || undefined);
-                        const effectiveTertiary = (profileTertiary && !defaultTertiary.includes(profileTertiary)) 
-                          ? profileTertiary 
-                          : undefined;
-                        
-                        return {
-                          primaryColor: effectivePrimary,
-                          accentColor: effectiveAccent,
-                          tertiaryColor: effectiveTertiary,
-                          logoUrl: institutionalConfig?.logoUrl || tenant?.logo_url || undefined,
-                        };
-                      })()}
+                      branding={resolvedBranding}
                       tenantId={profile?.tenant_id}
                       profileId={selectedProfileId || undefined}
                       audience={context.audience || undefined}
