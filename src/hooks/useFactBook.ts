@@ -161,6 +161,11 @@ export function useFactBook(options: UseFactBookOptions = {}) {
       const newFact = data as unknown as Fact;
       setFacts(prev => [newFact, ...prev]);
       
+      logDNAActivity(workspaceId, user.id, {
+        section: 'facts', action: 'added', profileId: profileId || null,
+        artifactName: input.label, metadata: { category: input.category },
+      });
+      
       toastSuccess('Fact added', `"${input.label}" has been added to your Fact Book.`);
       
       return newFact;
