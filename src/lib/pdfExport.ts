@@ -25,7 +25,28 @@ function lightenColor(rgb: [number, number, number], factor: number = 0.9): [num
   ];
 }
 
-async function loadImageAsDataUrl(url: string): Promise<{ dataUrl: string; format: "PNG" | "JPEG" }> {
+const PLACEHOLDER_BRAND_COLORS = new Set(["#1f2a44", "#2c7a7b", "#d4af37", "#e2e8f0"]);
+
+function isUsableBrandColor(color?: string, allowPlaceholder = false): color is string {
+  if (!color) return false;
+  const trimmed = color.trim();
+  if (!/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/.test(trimmed)) return false;
+  if (allowPlaceholder) return true;
+  return !PLACEHOLDER_BRAND_COLORS.has(trimmed.toLowerCase());
+}
+
+function pickFirstBrandColor(candidates: Array<string | undefined>, allowPlaceholder = false): string | undefined {
+  return candidates.find((color) => isUsableBrandColor(color, allowPlaceholder));
+}
+
+type LoadedImageData = {
+  dataUrl: string;
+  format: "PNG" | "JPEG";
+  width: number;
+  height: number;
+};
+
+async function loadImageAsDataUrl(url: string): Promise<LoadedImageData> {
   const res = await fetch(url, { mode: "cors" });
   if (!res.ok) throw new Error(`Failed to fetch logo (HTTP ${res.status})`);
 
@@ -47,7 +68,18 @@ async function loadImageAsDataUrl(url: string): Promise<{ dataUrl: string; forma
     reader.readAsDataURL(blob);
   });
 
-  return { dataUrl, format };
+  const dimensions = await new Promise<{ width: number; height: number }>((resolve) => {
+    const img = new Image();
+    img.onload = () =>
+      resolve({
+        width: img.naturalWidth || img.width || 1,
+        height: img.naturalHeight || img.height || 1,
+      });
+    img.onerror = () => resolve({ width: 1, height: 1 });
+    img.src = dataUrl;
+  });
+
+  return { dataUrl, format, width: dimensions.width, height: dimensions.height };
 }
 export async function exportTalkingPointsToPDF(
   draft: TalkingPointsDraft,
@@ -417,14 +449,19 @@ export async function exportCaseForSupportToPDF(
   const contentWidth = pageWidth - margin * 2;
   let y = 25;
 
-  // Extract branding colors - strictly from institution profile, no platform defaults
-  const primaryRgb = hexToRgb(branding?.primaryColor || '#1F2A44');
-  const accentRgb = hexToRgb(branding?.accentColor || branding?.primaryColor || '#1F2A44');
+  // Extract branding colors with profile-first resolution
+  const resolvedPrimaryHex =
+    pickFirstBrandColor([branding?.primaryColor, branding?.accentColor, branding?.tertiaryColor]) || "#1F2A44";
+  const resolvedAccentHex =
+    pickFirstBrandColor([branding?.accentColor, branding?.tertiaryColor, branding?.primaryColor]) || resolvedPrimaryHex;
+
+  const primaryRgb = hexToRgb(resolvedPrimaryHex);
+  const accentRgb = hexToRgb(resolvedAccentHex);
   const primaryLight = lightenColor(primaryRgb, 0.92);
   const accentLight = lightenColor(accentRgb, 0.92);
 
   // Pre-load logo if available
-  let logoData: { dataUrl: string; format: "PNG" | "JPEG" } | null = null;
+  let logoData: LoadedImageData | null = null;
   if (branding?.logoUrl) {
     try {
       logoData = await loadImageAsDataUrl(branding.logoUrl);
@@ -469,19 +506,17 @@ export async function exportCaseForSupportToPDF(
   
   if (logoData) {
     try {
-      // Load image to get natural dimensions for aspect ratio
-      const img = new Image();
-      img.src = logoData.dataUrl;
-      const naturalW = img.naturalWidth || 1;
-      const naturalH = img.naturalHeight || 1;
+      const naturalW = logoData.width || 1;
+      const naturalH = logoData.height || 1;
       const aspect = naturalW / naturalH;
-      
+
       const maxLogoH = 25;
       const maxLogoW = 50;
       const logoHeight = Math.min(maxLogoH, maxLogoW / aspect);
       const logoWidth = logoHeight * aspect;
-      
-      doc.addImage(logoData.dataUrl, logoData.format, margin, 10, logoWidth, logoHeight);
+      const logoY = (70 - logoHeight) / 2;
+
+      doc.addImage(logoData.dataUrl, logoData.format, margin, logoY, logoWidth, logoHeight);
       textStartX = margin + logoWidth + 8;
     } catch (e) {
       console.error("Failed to add logo to PDF:", e);
