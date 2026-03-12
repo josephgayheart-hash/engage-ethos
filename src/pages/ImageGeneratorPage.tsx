@@ -729,7 +729,7 @@ const ImageGeneratorPage = () => {
                   const cfg = selectedProfile?.config as Record<string, any> | undefined;
                   const logoUrl = cfg?.logoUrl;
                   const profileName = selectedProfile?.name || cfg?.institutionName;
-                  const colors = [cfg?.primaryColor, cfg?.secondaryColor, cfg?.accentColor, cfg?.tertiaryColor].filter(Boolean) as string[];
+                  const colors = [cfg?.primaryColor, cfg?.secondaryColor, cfg?.accentColor, cfg?.tertiaryColor].filter(isRealColor) as string[];
                   const selectedChannelLabel = channelOptions.find(c => c.value === channel)?.label || channel;
                   const selectedStyleLabel = creationMode === "graphic-design" ? "Graphic Design" : (styleOptions.find(s => s.value === style)?.label || style);
                   const selectedEngineLabel = engineOptions.find(e => e.value === engine)?.label || engine;
