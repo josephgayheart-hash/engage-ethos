@@ -461,13 +461,19 @@ async function fetchCampusPhotosForPdf(profileId?: string): Promise<(LoadedImage
 
     if (!profile?.tenant_id) return [null, null, null];
 
-    const { data: photos } = await supabase
+    let query = supabase
       .from("campus_photo_samples")
       .select("file_url, photo_category")
       .eq("tenant_id", profile.tenant_id)
       .eq("is_active", true)
       .order("created_at", { ascending: false })
       .limit(6);
+
+    if (profileId) {
+      query = query.eq("profile_id", profileId);
+    }
+
+    const { data: photos } = await query;
 
     if (!photos || photos.length === 0) return [null, null, null];
 
