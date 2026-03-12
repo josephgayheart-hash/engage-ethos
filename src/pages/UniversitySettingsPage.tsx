@@ -537,16 +537,19 @@ export default function UniversitySettingsPage() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h1 className="font-serif text-2xl md:text-3xl font-bold">
-                      {isAgency ? labels.settingsPageTitle : tenant?.institution_name || 'University Settings'}
+                      {tenant?.institution_name || (isAgency ? 'Agency Settings' : 'University Settings')}
                     </h1>
                     {isAgency && (
                       <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400">
-                        Agency
+                        Agency Partner
                       </Badge>
                     )}
                   </div>
                   <p className="text-muted-foreground text-sm">
-                    {labels.settingsPageDescription}
+                    {isAgency 
+                      ? 'Manage your agency branding and partner institution configurations'
+                      : labels.settingsPageDescription
+                    }
                   </p>
                 </div>
               </div>
@@ -575,12 +578,12 @@ export default function UniversitySettingsPage() {
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2">
-                    {isAgency ? <Users className="w-5 h-5" /> : <Building2 className="w-5 h-5" />}
-                    {isAgency ? 'Agency Branding' : 'Institution Branding'}
+                    {isAgency ? <Users className="w-5 h-5 text-amber-600" /> : <Building2 className="w-5 h-5" />}
+                    {isAgency ? `${tenant?.institution_name || 'Agency'} Branding` : 'Institution Branding'}
                   </CardTitle>
                   <CardDescription>
                     {isAgency 
-                      ? 'Your agency identity and per-client visual branding at a glance'
+                      ? 'Your agency\'s visual identity — logo, colors, and brand assets'
                       : 'Your institution identity and per-profile visual branding at a glance'
                     }
                   </CardDescription>
@@ -675,16 +678,32 @@ export default function UniversitySettingsPage() {
               </Card>
 
               {/* Per-profile branding cards */}
+              {isAgency && profiles.length > 0 && (
+                <div className="relative flex items-center gap-4 pt-2">
+                  <div className="h-px flex-1 bg-border" />
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/60 border">
+                    <Building2 className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                      Partner Institutions
+                    </span>
+                    <Badge variant="secondary" className="text-[10px] h-5">{profiles.length}</Badge>
+                  </div>
+                  <div className="h-px flex-1 bg-border" />
+                </div>
+              )}
               {profiles.length === 0 ? (
                 <Card className="border-dashed">
                   <CardContent className="flex flex-col items-center justify-center py-10 text-center">
                     <Palette className="w-10 h-10 text-muted-foreground/30 mb-3" />
                     <p className="text-sm text-muted-foreground mb-3">
-                      No profiles yet. Create a profile to manage per-profile branding.
+                      {isAgency 
+                        ? 'No partner institutions yet. Add one to manage their branding.'
+                        : 'No profiles yet. Create a profile to manage per-profile branding.'
+                      }
                     </p>
                     <Button size="sm" variant="outline" onClick={() => { setActiveTab('profiles'); setShowWizard(true); }}>
                       <Plus className="w-3 h-3 mr-1" />
-                      Create Profile
+                      {isAgency ? 'Add Partner Institution' : 'Create Profile'}
                     </Button>
                   </CardContent>
                 </Card>
