@@ -685,10 +685,11 @@ Photography/art direction — follow the style of real university marketing imag
 - ANTI-CLONE RULE: NEVER generate twins, duplicates, or people who look similar — every person MUST have a distinctly different face shape, skin tone, hairstyle, hair color, hair length, body type (height, build, weight), and apparent age. If you cannot make them look like completely different individuals, reduce the number of people in the scene.
 - Vary body language, posture, and gaze direction — people should look naturally occupied, not aware of the camera
 - CLOTHING VARIETY IS CRITICAL: Each person MUST wear a distinctly different outfit — vary garment types (t-shirt vs hoodie vs button-down vs jacket vs sweater), colors, layers, and styles. Never put multiple people in the same type and color of clothing. Mix brand-colored items with neutral everyday clothing so it looks like a real campus, not a uniform. EXCEPTION: If the scene explicitly depicts a sports team, athletic squad, marching band, or other organized team concept, matching uniforms/jerseys are appropriate and expected.
+- ALL CLOTHING MUST BE PLAIN: No letters, monograms, logos, crests, numbers, or marks of ANY kind on any garment. Hoodies, t-shirts, and jerseys should be solid brand colors with ZERO markings. The AI will hallucinate wrong university marks — a plain garment is always correct.
 - Use natural light — golden hour warmth, dappled shade under trees, soft overcast — avoid flat studio lighting
 - Include environmental storytelling: backpacks, laptops, coffee cups, notebooks, lab equipment, sports gear
 - People should be diverse in a way that feels organic to a real campus — different backgrounds, ages, body types, clothing styles — without appearing curated or posed as a diversity photo
-- Brand colors MUST appear on clothing items (t-shirts, hoodies, scarves), campus banners, pennants, or architectural details — use ONLY the exact hex values from the palette above, never approximate or invent new colors
+- Brand colors MUST appear on clothing items (t-shirts, hoodies, scarves), campus banners, pennants, or architectural details — use ONLY the exact hex values from the palette above, never approximate or invent new colors. Keep all items PLAIN solid colors — no marks.
 
 SETTING & ENVIRONMENT RULES — READ CAREFULLY:
 - If the scene description mentions "at home", "in their home", "living room", "kitchen", "apartment", "dorm room", or any domestic setting, depict a REAL HOME or RESIDENTIAL INTERIOR — do NOT add campus buildings visible through windows, do NOT place institutional architecture in the background, do NOT make it look like a campus building. It should look like someone's actual living space.
@@ -701,14 +702,15 @@ SETTING & ENVIRONMENT RULES — READ CAREFULLY:
 
 CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
 - ABSOLUTELY NO TEXT of any kind in the image. No words, letters, numbers, symbols, abbreviations, university names, or institution names.
-- Do NOT put text on clothing — no "University", no school names, no abbreviations, no letters. Show PLAIN solid-color clothing in the brand palette instead.
+- Do NOT put text on clothing — no "University", no school names, no abbreviations, no single letters, no letter marks, no monograms. Show PLAIN solid-color clothing in the brand palette instead. A plain hoodie in the brand color is ALWAYS better than one with any mark on it.
+- ANTI-HALLUCINATION: Do NOT render ANY recognizable university marks, letter logos, or symbols from ANY institution — not from this institution and not from any other institution. The AI does not know what any university's actual logo or mark looks like and WILL hallucinate the wrong one (e.g., rendering a Minnesota "M" for Arizona State, or a Michigan "M" for Maryland). This is brand-damaging. ALL clothing, banners, and surfaces must be PLAIN with no marks whatsoever.
 - Do NOT put text on banners, signs, buildings, flags, or any surface. All signage and banners should be BLANK or show only solid brand colors / abstract patterns.
-- Do NOT render any logos, crests, seals, emblems, wordmarks, or the institution's name as text. AI cannot accurately reproduce these — any attempt will look wrong and damage the brand. The user will add these in Brand Studio.
+- Do NOT render any logos, crests, seals, emblems, wordmarks, letter marks, monograms, or the institution's name as text. AI cannot accurately reproduce these — any attempt will look wrong and damage the brand. The user will add these in Brand Studio.
 - Do NOT render any mascot, mascot costume, cartoon character, or animal figure.
-- If you feel the urge to add text anywhere — DON'T. A plain scarlet hoodie is better than one with garbled "Uhiversity" on it.
-- The institution's identity should come through via COLORS, ARCHITECTURE, and ENVIRONMENT — never through rendered text or logos.
+- If you feel the urge to add ANY letter, symbol, or mark anywhere — DON'T. A plain scarlet hoodie is ALWAYS better than one with any mark on it, even if you think the mark is correct — it isn't.
+- The institution's identity should come through via COLORS, ARCHITECTURE, and ENVIRONMENT — never through rendered text, logos, or letter marks.
 - ABSOLUTELY NO QR codes — never generate a QR code under any circumstances.
-- NEVER include "CampusVoice" or any platform/SaaS branding — only the institution's own brand identity.
+- NEVER include "CampusVoice" or any platform/SaaS branding — only the institution's own brand identity expressed through colors and environment.
 - Professional quality: sharp focus on subject, creamy bokeh backgrounds, rich color depth
 - Feel warm, authentic, and aspirational — like a spread in a top university's viewbook
 - Match the tone and energy of the communication moment${toneContext ? ` — the visual should feel ${tone}` : ''}
