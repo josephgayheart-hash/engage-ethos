@@ -834,6 +834,9 @@ export async function exportCaseForSupportToPDF(
     y += boxHeight + 5;
   }
 
+  // AI Image 2: Impact/community image after opening story
+  placeImage(aiImages[1]);
+
   // Vision Statement
   if (cfc.visionStatement) {
     checkPageBreak(30);
