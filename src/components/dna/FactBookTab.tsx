@@ -389,7 +389,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
             )}
             <Button variant="outline" onClick={() => setShowImportDialog(true)}>
               <Wand2 className="w-4 h-4 mr-2" />
-              Import from PDF
+              Import Facts
             </Button>
             <Button onClick={() => setShowAddDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
