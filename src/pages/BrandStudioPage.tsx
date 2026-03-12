@@ -682,8 +682,8 @@ const BrandStudioPage = () => {
               canvasBackgroundSecondaryColor={canvasBackgroundSecondaryColor}
               overlayPattern={overlayPattern}
               overlayColor={overlayColor}
-              overlayOpacity={smartLayerImageUrl ? 0 : overlayOpacity}
-              customOverlayUrl={smartLayerImageUrl ? null : customOverlayUrl}
+              overlayOpacity={overlayOpacity}
+              customOverlayUrl={customOverlayUrl}
               showLogo={showLogo}
               activeLogo={activeLogo}
               logoPosition={logoPosition}
