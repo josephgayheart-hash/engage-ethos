@@ -111,6 +111,30 @@ export function getOverlayStyle(
         opacity,
       };
 
+    case "gradient-radial-top-left":
+      return {
+        background: `radial-gradient(circle at top left, ${color}, ${c2})`,
+        opacity,
+      };
+
+    case "gradient-radial-top-right":
+      return {
+        background: `radial-gradient(circle at top right, ${color}, ${c2})`,
+        opacity,
+      };
+
+    case "gradient-radial-bottom-left":
+      return {
+        background: `radial-gradient(circle at bottom left, ${color}, ${c2})`,
+        opacity,
+      };
+
+    case "gradient-radial-bottom-right":
+      return {
+        background: `radial-gradient(circle at bottom right, ${color}, ${c2})`,
+        opacity,
+      };
+
     case "gradient-split":
       return {
         background: `linear-gradient(to right, ${color} 50%, ${c2} 50%)`,
