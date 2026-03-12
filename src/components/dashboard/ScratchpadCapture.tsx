@@ -490,13 +490,13 @@ export function ScratchpadCapture() {
                       if (route) {
                         const ToolIcon = route.icon;
                         return (
-                          <div className="my-2.5 rounded-lg border border-primary/15 bg-primary/5 p-3 flex items-center gap-3">
-                            <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary/10 flex-shrink-0">
-                              <ToolIcon className="h-4 w-4 text-primary" />
+                          <div className="my-3 rounded-lg border border-primary/15 bg-primary/5 p-4 flex items-center gap-3">
+                            <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-primary/10 flex-shrink-0">
+                              <ToolIcon className="h-4.5 w-4.5 text-primary" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Recommended Tool</span>
-                              <p className="text-sm font-bold text-foreground leading-tight">{route.label}</p>
+                              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Recommended Tool</span>
+                              <p className="text-[15px] font-bold text-foreground leading-tight">{route.label}</p>
                             </div>
                             <Link to={route.path}>
                               <Button
