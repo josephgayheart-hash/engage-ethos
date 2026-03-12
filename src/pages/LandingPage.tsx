@@ -476,7 +476,7 @@ export default function LandingPage() {
             Ready to become your institution's <span className="text-[hsl(82_85%_65%)]">digital brand enforcer</span>?
           </h2>
           <p className="text-white/80 mb-8 text-lg">
-            Small comms teams. Big brand protection. AI that keeps everyone on-brand while still allowing human edits.
+            Small teams. Big brand protection. AI that keeps everyone on-brand.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
