@@ -143,9 +143,10 @@ export async function exportTalkingPointsToPDF(
         const logoX = margin;
         const logoY = (headerHeight - logoSize) / 2;
         
-        // White background circle for logo
+        // White rounded rectangle behind logo for contrast
+        const pad = 5;
         doc.setFillColor(255, 255, 255);
-        doc.circle(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2 + 2, 'F');
+        doc.roundedRect(logoX - pad / 2, logoY - pad / 2, logoSize + pad, logoSize + pad, 3, 3, 'F');
         
         doc.addImage(logoData.dataUrl, logoData.format, logoX, logoY, logoSize, logoSize);
         textStartX = margin + logoSize + 12;
