@@ -10,7 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAgencyMode } from "@/hooks/useAgencyMode";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { ReferColleagueDialog } from "@/components/ReferColleagueDialog";
-import campusvoiceLogo from "@/assets/campusvoice-logo-new.png";
+
 import {
   Sidebar,
   SidebarContent,
@@ -95,17 +95,13 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       {/* Logo Header */}
-      <SidebarHeader className="border-b border-sidebar-border px-3 py-2">
+      <SidebarHeader className="border-b border-sidebar-border px-3 py-3">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild tooltip="CampusVoice">
-              <NavLink to="/dashboard">
-                <img
-                  src={campusvoiceLogo}
-                  alt="CampusVoice"
-                  className="h-5 w-5 object-contain shrink-0"
-                />
-                <span className="font-semibold text-sm truncate">CampusVoice</span>
+            <SidebarMenuButton size="lg" asChild tooltip="CampusVoice.ai">
+              <NavLink to="/dashboard" className="flex items-center gap-0">
+                <span className="font-bold text-sm tracking-tight text-foreground">CampusVoice.ai</span>
+                <span className="text-[7px] text-muted-foreground -mt-2 ml-0.5">®</span>
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
