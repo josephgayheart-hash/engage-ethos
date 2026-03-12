@@ -73,8 +73,15 @@ import {
   Heart,
   BookMarked,
   type LucideIcon,
-  Folder
+  Folder,
+  Zap,
+  Camera,
+  Film,
+  Palette,
+  Droplets,
+  Square,
 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { buildMessage } from "@/lib/evaluateMessage";
 import { useAuth } from "@/contexts/AuthContext";
 import type { MessageContext, BuilderResult, InstitutionalConfig, Channel, ChannelDrafts } from "@/types/campusvoice";
