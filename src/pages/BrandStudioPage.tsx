@@ -670,8 +670,8 @@ const BrandStudioPage = () => {
         </div>
 
         {/* Right: Canvas */}
-        <div className="flex-1 flex items-center justify-center p-8 bg-muted/30 overflow-hidden">
-          <div className="max-w-2xl w-full relative group">
+        <div className="flex-1 flex items-center justify-center p-12 bg-muted/30 overflow-hidden">
+          <div className="max-w-2xl w-full relative group" style={{ margin: '22px' }}>
             {/* Always show editable canvas */}
             <BrandOverlayCanvas
               ref={canvasRef}
