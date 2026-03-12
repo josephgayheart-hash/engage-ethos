@@ -258,13 +258,26 @@ export function ContentDNAExplainer({
                   </p>
                 </div>
               </div>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 shrink-0">
-                {isOpen ? (
-                  <ChevronUp className="w-4 h-4 text-muted-foreground" />
-                ) : (
-                  <ChevronDown className="w-4 h-4 text-muted-foreground" />
+              <div className="flex items-center gap-1 shrink-0">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  {isOpen ? (
+                    <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                  )}
+                </Button>
+                {dismissable && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground" 
+                    onClick={handleDismiss}
+                    title="Dismiss"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </Button>
                 )}
-              </Button>
+              </div>
             </div>
           </CardContent>
         </CollapsibleTrigger>
