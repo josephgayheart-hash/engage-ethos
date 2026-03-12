@@ -67,81 +67,81 @@ const features = [
   {
     icon: MessageSquare,
     title: 'Brand-Aligned Messaging',
-    description: 'Generate content grounded in your brand promise, pillars, and positioning. Not just voice.',
+    description: 'Generate content grounded in your brand promise and positioning.',
     link: '/features/message-builder',
   },
   {
     icon: BarChart3,
     title: 'Content DNA Studio',
-    description: 'Upload samples or scrape your website. AI extracts voice profiles and brand platform elements for every generation.',
+    description: 'Upload samples or scrape your site. AI extracts voice and brand elements.',
     link: '/features/content-dna',
   },
   {
     icon: Image,
     title: 'AI Image Studio',
-    description: 'Generate on-brand photography and graphic design across 19 formats — photo, poster, social, and more.',
+    description: 'Generate on-brand photography and graphics across 19 formats.',
     link: '/features/image-studio',
   },
   {
     icon: Palette,
     title: 'Brand It Studio',
-    description: 'Layer logos, headlines, CTAs, and brand patterns onto any image. AI-generated copy that matches your tone.',
+    description: 'Layer logos, headlines, and brand patterns onto any image with AI copy.',
     link: '/features/brand-studio',
   },
   {
     icon: Bot,
     title: 'AI Copywriter',
-    description: 'A brand-aware messaging assistant that knows your voice, facts, and stories. Chat your way to on-brand copy.',
+    description: 'A brand-aware assistant that knows your voice, facts, and stories.',
     link: '/features/ai-copywriter',
   },
   {
     icon: Target,
     title: 'Journey Flow Builder',
-    description: 'Map multi-channel strategies with duration, intensity, and ramp-up controls. The differentiator for comms leaders.',
+    description: 'Map multi-channel strategies with duration and intensity controls.',
     link: '/features/journey-designer',
   },
   {
     icon: PenTool,
     title: 'Message Evaluator',
-    description: 'Score any piece of content against your brand platform, voice profile, and terminology standards.',
+    description: 'Score content against your brand platform and voice profile.',
     link: '/features/evaluate',
   },
   {
     icon: Globe,
     title: 'WebCrawl Intelligence',
-    description: 'Automatically extract brand voice from your website. Our AI crawls your pages to understand your unique tone.',
+    description: 'Extract brand voice from your website automatically.',
     link: '/features/webcrawl',
   },
   {
     icon: BookOpen,
     title: 'University Library',
-    description: 'Governed content with approval workflows. Personal drafts, shared libraries, and collections for on-brand plays.',
+    description: 'Governed content with approval workflows and shared collections.',
     link: '/features/library',
   },
   {
     icon: BarChart,
     title: 'Brand Audit & Scoring',
-    description: 'Audit touchpoints across your institution. Track brand consistency scores and remediation progress over time.',
+    description: 'Audit touchpoints and track brand consistency over time.',
     link: '/features/brand-audit',
   },
 ];
 
 const valueProps = [
   {
-    title: 'Brand protection at scale',
-    description: 'Protect your brand across every college, every department — without being in every meeting.',
+    title: 'Brand Protection at Scale',
+    description: 'Guard your brand across every department — no extra meetings required.',
   },
   {
-    title: 'University-to-subunit governance',
-    description: 'Build your institution profile once. Subunits inherit or customize brand elements with clear hierarchy and control.',
+    title: 'Subunit Governance',
+    description: 'One institutional profile. Subunits inherit or customize as needed.',
   },
   {
-    title: 'Audience-first, brand-aligned',
-    description: 'Start with your audience. Align to brand pillars. Then craft messages that resonate.',
+    title: 'Audience-First Messaging',
+    description: "Start with who you\u2019re reaching. Align to brand pillars automatically.",
   },
   {
-    title: 'Journey planning that solves real problems',
-    description: 'Map multi-week communication flows with intensity controls, ramp-up patterns, and visual timelines your team will actually use.',
+    title: 'Journey Planning',
+    description: 'Map multi-week flows with intensity controls and visual timelines.',
   },
 ];
 
@@ -367,8 +367,7 @@ export default function LandingPage() {
               <span className="text-[hsl(270_70%_55%)]">Stop Reacting.</span> Start Planning.
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Most institutional communications are written on instinct. CampusVoice gives you 
-              the research-backed playbook to plan, organize, and execute with confidence.
+              Most comms are written on instinct. CampusVoice gives you the playbook to plan and execute with confidence.
             </p>
           </div>
 
@@ -477,7 +476,7 @@ export default function LandingPage() {
             Ready to become your institution's <span className="text-[hsl(82_85%_65%)]">digital brand enforcer</span>?
           </h2>
           <p className="text-white/80 mb-8 text-lg">
-            Small comms teams. Big brand protection. AI that keeps everyone on-brand while still allowing human edits.
+            Small teams. Big brand protection. AI that keeps everyone on-brand.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
