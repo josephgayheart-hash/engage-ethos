@@ -464,15 +464,25 @@ export async function exportCaseForSupportToPDF(
   doc.setFillColor(...primaryRgb);
   doc.rect(0, 0, pageWidth, 70, "F");
 
-  // Add logo in top-left of header if available
-  const logoWidth = 25;
-  const logoHeight = 25;
+  // Add logo in top-left of header if available — preserve aspect ratio
   let textStartX = margin;
   
   if (logoData) {
     try {
+      // Load image to get natural dimensions for aspect ratio
+      const img = new Image();
+      img.src = logoData.dataUrl;
+      const naturalW = img.naturalWidth || 1;
+      const naturalH = img.naturalHeight || 1;
+      const aspect = naturalW / naturalH;
+      
+      const maxLogoH = 25;
+      const maxLogoW = 50;
+      const logoHeight = Math.min(maxLogoH, maxLogoW / aspect);
+      const logoWidth = logoHeight * aspect;
+      
       doc.addImage(logoData.dataUrl, logoData.format, margin, 10, logoWidth, logoHeight);
-      textStartX = margin + logoWidth + 8; // Shift text to the right of logo
+      textStartX = margin + logoWidth + 8;
     } catch (e) {
       console.error("Failed to add logo to PDF:", e);
     }
