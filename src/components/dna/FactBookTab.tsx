@@ -52,7 +52,8 @@ import {
   FileSearch,
   Sparkles,
   Database,
-  Trash2
+  Trash2,
+  Globe,
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -66,6 +67,8 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { extractTextFromFile, getAcceptString } from '@/lib/documentParser';
+import { firecrawlApi } from '@/lib/api/firecrawl';
+import { toast } from 'sonner';
 
 interface FactBookTabProps {
   profileId?: string | null;
@@ -137,6 +140,8 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
   const [parsedFacts, setParsedFacts] = useState<CreateFactInput[]>([]);
   const [selectedParsedFacts, setSelectedParsedFacts] = useState<Set<number>>(new Set());
   const [isExtractingFile, setIsExtractingFile] = useState(false);
+  const [scrapeUrl, setScrapeUrl] = useState('');
+  const [isScraping, setIsScraping] = useState(false);
 
   const categories = getCategories();
   const highlightedCount = facts.filter(f => f.is_highlight).length;
@@ -251,6 +256,40 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
     }
   };
 
+  const handleScrapeUrl = async () => {
+    if (!scrapeUrl.trim()) return;
+    
+    setIsScraping(true);
+    try {
+      const response = await firecrawlApi.scrape(scrapeUrl, { 
+        formats: ['markdown'],
+        onlyMainContent: true 
+      });
+      
+      if (response.success) {
+        const markdown = (response.data as any)?.markdown || '';
+        if (markdown) {
+          setImportText(markdown);
+          // Auto-set source document from URL
+          try {
+            const urlObj = new URL(scrapeUrl.startsWith('http') ? scrapeUrl : `https://${scrapeUrl}`);
+            setSourceDocument(urlObj.hostname + ' Facts Page');
+          } catch {
+            setSourceDocument('Web Page');
+          }
+        } else {
+          toast.error('No content found', { description: 'The URL did not return any extractable text content.' });
+        }
+      } else {
+        toast.error('Scrape failed', { description: response.error || 'Could not scrape the URL' });
+      }
+    } catch (error) {
+      toast.error('Error scraping URL', { description: error instanceof Error ? error.message : 'Unknown error' });
+    } finally {
+      setIsScraping(false);
+    }
+  };
+
   const handleImportSelected = async () => {
     const factsToImport = parsedFacts.filter((_, i) => selectedParsedFacts.has(i));
     if (factsToImport.length === 0) return;
@@ -350,7 +389,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
             )}
             <Button variant="outline" onClick={() => setShowImportDialog(true)}>
               <Wand2 className="w-4 h-4 mr-2" />
-              Import from PDF
+              Import Facts
             </Button>
             <Button onClick={() => setShowAddDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
@@ -430,7 +469,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
             <div className="flex justify-center gap-2">
               <Button variant="outline" onClick={() => setShowImportDialog(true)}>
                 <Upload className="w-4 h-4 mr-2" />
-                Import PDF
+                Import Facts
               </Button>
               <Button onClick={() => setShowAddDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -784,14 +823,14 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                 Import Fact Book
               </DialogTitle>
               <DialogDescription>
-                Upload a PDF or paste text to extract facts automatically
+                Scrape a URL, upload a PDF, or paste text to extract facts automatically
               </DialogDescription>
             </DialogHeader>
             <div className="flex-1 overflow-y-auto space-y-4 py-4">
               {parsedFacts.length === 0 ? (
                 <>
                   {/* Processing Status Indicator */}
-                  {(isExtractingFile || isParsing) && (
+                  {(isExtractingFile || isParsing || isScraping) && (
                     <div className="bg-primary/5 border border-primary/20 rounded-lg p-6">
                       <div className="flex items-center gap-4 mb-4">
                         <div className="relative">
@@ -801,10 +840,12 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                         </div>
                         <div className="flex-1">
                           <h4 className="font-semibold text-foreground">
-                            {isExtractingFile ? 'Extracting Document Text...' : 'AI Processing Facts...'}
+                            {isScraping ? 'Scraping Web Page...' : isExtractingFile ? 'Extracting Document Text...' : 'AI Processing Facts...'}
                           </h4>
                           <p className="text-sm text-muted-foreground">
-                            {isExtractingFile 
+                            {isScraping 
+                              ? 'Fetching and extracting content from the web page'
+                              : isExtractingFile 
                               ? 'Reading and parsing your document content' 
                               : 'Identifying and categorizing facts from your content'}
                           </p>
@@ -836,8 +877,47 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                   )}
 
                   {/* File Upload */}
-                  {!isExtractingFile && !isParsing && (
+                  {!isExtractingFile && !isParsing && !isScraping && (
                     <>
+                      {/* URL Scrape Section */}
+                      <div className="border rounded-lg p-4 space-y-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Globe className="w-4 h-4 text-primary" />
+                          <Label className="font-medium">Scrape from URL</Label>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Paste a link to your institution's facts page and we'll extract the content automatically
+                        </p>
+                        <div className="flex gap-2">
+                          <Input
+                            value={scrapeUrl}
+                            onChange={e => setScrapeUrl(e.target.value)}
+                            placeholder="https://yourschool.edu/facts"
+                            className="flex-1"
+                          />
+                          <Button 
+                            onClick={handleScrapeUrl} 
+                            disabled={!scrapeUrl.trim() || isScraping}
+                            variant="secondary"
+                          >
+                            {isScraping ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <>
+                                <Globe className="w-4 h-4 mr-2" />
+                                Scrape
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4">
+                        <div className="h-px flex-1 bg-border" />
+                        <span className="text-sm text-muted-foreground">or upload a file</span>
+                        <div className="h-px flex-1 bg-border" />
+                      </div>
+
                       <div 
                         className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
                         onClick={() => fileInputRef.current?.click()}
