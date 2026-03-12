@@ -573,9 +573,9 @@ export function ScratchpadCapture() {
                       if (lastIndex < plainText.length) {
                         parts.push(plainText.slice(lastIndex));
                       }
-                      return <p className="text-sm leading-relaxed text-foreground/85 my-2">{parts}</p>;
+                      return <p className="text-[15px] leading-relaxed text-foreground/85 my-3">{parts}</p>;
                     }
-                    return <p className="text-sm leading-relaxed text-foreground/85 my-2">{children}</p>;
+                    return <p className="text-[15px] leading-relaxed text-foreground/85 my-3">{children}</p>;
                   },
                   hr: () => <div className="h-px bg-border/50 my-5" />,
                 }}
