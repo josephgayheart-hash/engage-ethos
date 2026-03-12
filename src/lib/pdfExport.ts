@@ -449,9 +449,14 @@ export async function exportCaseForSupportToPDF(
   const contentWidth = pageWidth - margin * 2;
   let y = 25;
 
-  // Extract branding colors - strictly from institution profile, no platform defaults
-  const primaryRgb = hexToRgb(branding?.primaryColor || '#1F2A44');
-  const accentRgb = hexToRgb(branding?.accentColor || branding?.primaryColor || '#1F2A44');
+  // Extract branding colors with profile-first resolution
+  const resolvedPrimaryHex =
+    pickFirstBrandColor([branding?.primaryColor, branding?.accentColor, branding?.tertiaryColor]) || "#1F2A44";
+  const resolvedAccentHex =
+    pickFirstBrandColor([branding?.accentColor, branding?.tertiaryColor, branding?.primaryColor]) || resolvedPrimaryHex;
+
+  const primaryRgb = hexToRgb(resolvedPrimaryHex);
+  const accentRgb = hexToRgb(resolvedAccentHex);
   const primaryLight = lightenColor(primaryRgb, 0.92);
   const accentLight = lightenColor(accentRgb, 0.92);
 
