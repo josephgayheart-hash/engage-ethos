@@ -462,7 +462,7 @@ export function ScratchpadCapture() {
                       const regex = new RegExp(`^${field}:`, "i");
                       if (regex.test(text.trim())) {
                         return (
-                          <li className="flex items-start gap-2.5 text-sm text-foreground/90 list-none py-1 pl-1">
+                          <li className="flex items-start gap-3 text-[15px] text-foreground/90 list-none py-1.5 pl-1">
                             <div className="h-5 w-5 rounded-md bg-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                               <IconComp className="h-3 w-3 text-accent" />
                             </div>
@@ -472,14 +472,14 @@ export function ScratchpadCapture() {
                       }
                     }
                     return (
-                      <li className="text-sm text-foreground/85 py-1 ml-1 flex items-start gap-2 list-none">
-                        <span className="mt-2 h-1 w-1 rounded-full bg-muted-foreground/50 flex-shrink-0" />
+                      <li className="text-[15px] text-foreground/85 py-1.5 ml-1 flex items-start gap-2.5 list-none">
+                        <span className="mt-2.5 h-1 w-1 rounded-full bg-muted-foreground/50 flex-shrink-0" />
                         <span className="leading-relaxed">{children}</span>
                       </li>
                     );
                   },
-                  ul: ({ children }) => <ul className="my-2 space-y-0.5">{children}</ul>,
-                  ol: ({ children }) => <ol className="my-2 space-y-0.5 list-decimal list-inside">{children}</ol>,
+                  ul: ({ children }) => <ul className="my-3 space-y-1">{children}</ul>,
+                  ol: ({ children }) => <ol className="my-3 space-y-1 list-decimal list-inside">{children}</ol>,
                   p: ({ children }) => {
                     const text = extractText(children);
                     // Tool recommendation card
