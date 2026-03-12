@@ -681,6 +681,9 @@ const GivingDayPlannerPage = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={openEditDialog}>
+                <Pencil className="w-4 h-4 mr-1.5" /> Edit
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" disabled={isExporting}>
