@@ -267,7 +267,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
       });
       
       if (response.success) {
-        const markdown = response.data?.markdown || response.data?.content || '';
+        const markdown = (response.data as any)?.markdown || '';
         if (markdown) {
           setImportText(markdown);
           // Auto-set source document from URL
