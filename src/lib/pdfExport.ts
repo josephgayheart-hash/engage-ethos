@@ -436,7 +436,15 @@ export async function exportTalkingPointsToPDF(
   // Add footer to last page
   addFooter();
 
-  doc.save('executive-talking-points.pdf');
+  const pdfBlob = doc.output("blob");
+  const blobUrl = URL.createObjectURL(pdfBlob);
+  const link = document.createElement("a");
+  link.href = blobUrl;
+  link.download = "executive-talking-points.pdf";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
 }
 
 // Generate AI images for the Case for Support PDF
@@ -1184,10 +1192,27 @@ export async function exportCaseForSupportToPDF(
     doc.text("Powered by CampusVoice.AI", pageWidth - margin, pageHeight - 8, { align: "right" });
   }
 
-  doc.save("case-for-support.pdf");
+  // Force download via explicit blob URL + anchor click
+  const pdfBlob = doc.output("blob");
+  const blobUrl = URL.createObjectURL(pdfBlob);
+  const link = document.createElement("a");
+  link.href = blobUrl;
+  link.download = "case-for-support.pdf";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
   } catch (err) {
     console.error("Error building Case for Support PDF:", err);
     // Always attempt to save whatever was built
-    doc.save("case-for-support.pdf");
+    const pdfBlob = doc.output("blob");
+    const blobUrl = URL.createObjectURL(pdfBlob);
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = "case-for-support.pdf";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
   }
 }
