@@ -67,6 +67,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { extractTextFromFile, getAcceptString } from '@/lib/documentParser';
+import { firecrawlApi } from '@/lib/api/firecrawl';
 
 interface FactBookTabProps {
   profileId?: string | null;
