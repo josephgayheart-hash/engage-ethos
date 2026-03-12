@@ -367,8 +367,7 @@ export default function LandingPage() {
               <span className="text-[hsl(270_70%_55%)]">Stop Reacting.</span> Start Planning.
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Most institutional communications are written on instinct. CampusVoice gives you 
-              the research-backed playbook to plan, organize, and execute with confidence.
+              Most comms are written on instinct. CampusVoice gives you the playbook to plan and execute with confidence.
             </p>
           </div>
 
