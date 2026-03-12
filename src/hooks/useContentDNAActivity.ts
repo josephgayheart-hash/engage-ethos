@@ -71,7 +71,7 @@ export async function logDNAActivity(
   params: Omit<LogActivityParams, 'profileId'> & { profileId?: string | null }
 ) {
   try {
-    await supabase.from('content_dna_activity').insert({
+    await supabase.from('content_dna_activity').insert([{
       tenant_id: workspaceId,
       profile_id: params.profileId || null,
       user_id: userId,
@@ -80,7 +80,7 @@ export async function logDNAActivity(
       artifact_name: params.artifactName || null,
       artifact_count: params.artifactCount || null,
       metadata: params.metadata || {},
-    });
+    }]);
   } catch (err) {
     console.error('Failed to log DNA activity:', err);
   }
