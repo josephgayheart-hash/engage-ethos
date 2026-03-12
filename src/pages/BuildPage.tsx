@@ -345,11 +345,7 @@ const BuildPage = () => {
     try {
       const contextWithChannels = { ...context, channel: selectedChannels[0], channels: selectedChannels };
 
-      const selectedProfileConfig = selectedProfileId
-        ? profiles.find(p => p.id === selectedProfileId)?.config ?? null
-        : null;
-
-      const baseConfig = institutionalConfig ?? selectedProfileConfig;
+      const baseConfig = activeProfileConfig;
 
       // Always send an institutionalConfig to generation when we have *any* source of truth.
       // This prevents placeholder fallbacks like "[University Name]".
@@ -364,7 +360,7 @@ const BuildPage = () => {
               "our institution",
             unitName: (baseConfig.unitName || selectedProfileName)?.trim() || undefined,
             primaryColor: baseConfig.primaryColor || tenant?.primary_color,
-            accentColor: baseConfig.accentColor || tenant?.accent_color,
+            accentColor: baseConfig.secondaryColor || baseConfig.accentColor || tenant?.accent_color,
             logoUrl: baseConfig.logoUrl || tenant?.logo_url || undefined,
           }
         : tenant
