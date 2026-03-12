@@ -678,16 +678,32 @@ export default function UniversitySettingsPage() {
               </Card>
 
               {/* Per-profile branding cards */}
+              {isAgency && profiles.length > 0 && (
+                <div className="relative flex items-center gap-4 pt-2">
+                  <div className="h-px flex-1 bg-border" />
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/60 border">
+                    <Building2 className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                      Partner Institutions
+                    </span>
+                    <Badge variant="secondary" className="text-[10px] h-5">{profiles.length}</Badge>
+                  </div>
+                  <div className="h-px flex-1 bg-border" />
+                </div>
+              )}
               {profiles.length === 0 ? (
                 <Card className="border-dashed">
                   <CardContent className="flex flex-col items-center justify-center py-10 text-center">
                     <Palette className="w-10 h-10 text-muted-foreground/30 mb-3" />
                     <p className="text-sm text-muted-foreground mb-3">
-                      No profiles yet. Create a profile to manage per-profile branding.
+                      {isAgency 
+                        ? 'No partner institutions yet. Add one to manage their branding.'
+                        : 'No profiles yet. Create a profile to manage per-profile branding.'
+                      }
                     </p>
                     <Button size="sm" variant="outline" onClick={() => { setActiveTab('profiles'); setShowWizard(true); }}>
                       <Plus className="w-3 h-3 mr-1" />
-                      Create Profile
+                      {isAgency ? 'Add Partner Institution' : 'Create Profile'}
                     </Button>
                   </CardContent>
                 </Card>
