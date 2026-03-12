@@ -553,6 +553,32 @@ export async function exportCaseForSupportToPDF(
     }
   };
 
+  // Helper to place an AI image spanning the content width
+  const placeImage = (imgData: LoadedImageData | null) => {
+    if (!imgData) return;
+    try {
+      const aspect = (imgData.width || 800) / (imgData.height || 600);
+      const imgWidth = contentWidth;
+      const imgHeight = imgWidth / aspect;
+      const maxH = 65; // cap height so it doesn't dominate a page
+      const finalH = Math.min(imgHeight, maxH);
+      const finalW = finalH * aspect;
+      const xOffset = margin + (contentWidth - finalW) / 2;
+
+      checkPageBreak(finalH + 10);
+
+      // Subtle rounded border
+      doc.setDrawColor(220, 220, 220);
+      doc.setLineWidth(0.3);
+      doc.roundedRect(xOffset - 1, y - 1, finalW + 2, finalH + 2, 2, 2, "S");
+
+      doc.addImage(imgData.dataUrl, imgData.format, xOffset, y, finalW, finalH);
+      y += finalH + 8;
+    } catch (e) {
+      console.warn("Failed to place image in PDF:", e);
+    }
+  };
+
   const addText = (
     text: string | undefined | null, 
     size: number, 
