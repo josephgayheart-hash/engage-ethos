@@ -753,6 +753,9 @@ export async function exportCaseForSupportToPDF(
     y += boxHeight + 10;
   }
 
+  // AI Image 1: Campus hero image after target amount
+  placeImage(aiImages[0]);
+
   // Leader Message - dynamic height
   if (cfc.leaderMessage) {
     const messageText = cfc.leaderMessage.message || "";
