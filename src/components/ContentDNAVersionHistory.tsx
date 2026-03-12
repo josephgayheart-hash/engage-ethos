@@ -59,8 +59,12 @@ export function ContentDNAVersionHistory({
   };
 
   const getVersionChanges = (version: ContentDNAVersion, index: number) => {
+    // Use the stored change_summary if available
+    if (version.change_summary) {
+      return version.change_summary.split('; ');
+    }
     if (index === versions.length - 1) {
-      return ['Initial version'];
+      return ['Initial Content DNA analysis'];
     }
     const previousVersion = versions[index + 1];
     return compareVersions(previousVersion, version);
