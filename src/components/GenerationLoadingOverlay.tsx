@@ -408,8 +408,11 @@ export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown
                   {/* Completion check */}
                   {isComplete && (
                     <div className="flex-shrink-0 mt-0.5" style={{ animation: "popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards" }}>
-                      <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Check className="w-3 h-3 text-primary" />
+                      <div
+                        className={hasBrandColors ? "w-5 h-5 rounded-full flex items-center justify-center" : "w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center"}
+                        style={hasBrandColors ? { backgroundColor: `${brandPrimary}1a` } : {}}
+                      >
+                        <Check className={hasBrandColors ? "w-3 h-3" : "w-3 h-3 text-primary"} style={hasBrandColors ? { color: brandPrimary } : {}} />
                       </div>
                     </div>
                   )}
