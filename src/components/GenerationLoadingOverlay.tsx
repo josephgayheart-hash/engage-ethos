@@ -242,8 +242,21 @@ export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown
     readbackTags.push({ label: `${context.journeyWeeks}-week journey`, icon: Map });
   }
 
+  // Brand-aware color helpers — use institution colors when available, fall back to CSS primary
+  const brandPrimary = context.primaryColor;
+  const brandAccent = context.accentColor || brandPrimary;
+  const hasBrandColors = !!brandPrimary;
+
+  // Inline style helpers for brand-colored elements
+  const brandBg = (opacity: number) => hasBrandColors ? { backgroundColor: `${brandPrimary}${Math.round(opacity * 255).toString(16).padStart(2, '0')}` } : {};
+  const brandText = hasBrandColors ? { color: brandPrimary } : {};
+  const brandBorder = (opacity: number) => hasBrandColors ? { borderColor: `${brandPrimary}${Math.round(opacity * 255).toString(16).padStart(2, '0')}` } : {};
+
   return (
-    <div className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/[0.03] to-card p-8 shadow-sm overflow-hidden">
+    <div
+      className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/[0.03] to-card p-8 shadow-sm overflow-hidden"
+      style={hasBrandColors ? { borderColor: `${brandPrimary}30`, background: `linear-gradient(to bottom, ${brandPrimary}08, var(--card))` } : {}}
+    >
       <div className="flex flex-col items-center gap-5">
 
         {/* Profile identity header */}
