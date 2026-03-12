@@ -60,17 +60,34 @@ export function ContextSelector({
   const [allDnaOptions, setAllDnaOptions] = useState<ContentDNAOption[]>([]);
   const [dnaLoading, setDnaLoading] = useState(false);
 
-  // Fetch all Content DNA options
+  // Fetch all Content DNA options — scope to selected profile's tenant when available
   useEffect(() => {
     const fetchDNAOptions = async () => {
-      if (!tenant) return;
-      const tenantId = typeof tenant === 'string' ? tenant : tenant.id;
+      if (!tenant && profiles.length === 0) return;
       setDnaLoading(true);
       try {
-        const { data, error } = await supabase
+        // Build query — if a profile is selected, scope to that profile's tenant
+        // This ensures cross-tenant super-admin workflows see the correct DNA
+        let query = supabase
           .from('content_dna_analysis')
-          .select('id, profile_id, sample_count, voice_analysis')
-          .eq('tenant_id', tenantId);
+          .select('id, profile_id, sample_count, voice_analysis, tenant_id');
+
+        if (selectedProfileId) {
+          // Find the selected profile to get its tenant_id
+          const selectedProfile = profiles.find(p => p.id === selectedProfileId);
+          if (selectedProfile) {
+            // Query by profile_id directly — RLS will handle access
+            query = query.eq('profile_id', selectedProfileId);
+          }
+        } else {
+          // No profile selected — fall back to user's tenant
+          const tenantId = typeof tenant === 'string' ? tenant : tenant?.id;
+          if (tenantId) {
+            query = query.eq('tenant_id', tenantId);
+          }
+        }
+
+        const { data, error } = await query;
         if (error) throw error;
         const options: ContentDNAOption[] = (data || []).map(d => {
           const profile = profiles.find(p => p.id === d.profile_id);
@@ -88,7 +105,7 @@ export function ContextSelector({
       }
     };
     fetchDNAOptions();
-  }, [tenant, profiles]);
+  }, [tenant, profiles, selectedProfileId]);
 
   const filteredDnaOptions = useMemo(() => {
     if (!selectedProfileId) return allDnaOptions;
