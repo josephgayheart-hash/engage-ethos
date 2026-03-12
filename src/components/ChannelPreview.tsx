@@ -46,7 +46,8 @@ import {
   RefreshCw,
   FileDown,
   AlertCircle,
-  Settings
+  Settings,
+  Loader2
 } from "lucide-react";
 import { AIResultsGuidance } from "@/components/AIResultsGuidance";
 import type { 
@@ -208,7 +209,18 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const [isPdfExporting, setIsPdfExporting] = useState(false);
+
   const handleExportToPDF = async () => {
+    setIsPdfExporting(true);
+    const { id: loadingToastId } = toast({
+      title: channel === "case-for-care"
+        ? "Generating Case for Support PDF…"
+        : "Generating PDF…",
+      description: channel === "case-for-care"
+        ? "Creating AI images and building your branded document. This may take 15–30 seconds."
+        : "Please wait while we build your document.",
+    });
     try {
       if (channel === "talking-points") {
         await exportTalkingPointsToPDF(editedContent as TalkingPointsDraft, institutionName, branding);
@@ -234,6 +246,8 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
         title: "Export Failed",
         description: error instanceof Error ? error.message : "Could not generate PDF. Please try again.",
       });
+    } finally {
+      setIsPdfExporting(false);
     }
   };
 
@@ -2069,9 +2083,14 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
                     variant="ghost"
                     size="sm"
                     onClick={handleExportToPDF}
+                    disabled={isPdfExporting}
                     title="Export to PDF"
                   >
-                    <FileDown className="w-4 h-4 text-red-500" />
+                    {isPdfExporting ? (
+                      <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                    ) : (
+                      <FileDown className="w-4 h-4 text-red-500" />
+                    )}
                   </Button>
                 )}
                 <Button
