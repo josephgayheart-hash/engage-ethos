@@ -294,6 +294,19 @@ const BuildPage = () => {
   const resultsRef = useRef<HTMLDivElement>(null);
   const canProcess = context.audience && context.moment && selectedChannels.length > 0;
 
+  const selectedProfileConfig = selectedProfileId
+    ? profiles.find((p) => p.id === selectedProfileId)?.config ?? null
+    : null;
+  const activeProfileConfig = institutionalConfig ?? selectedProfileConfig;
+  const loadingOverlayBranding = {
+    primaryColor: activeProfileConfig?.primaryColor || (selectedProfileId ? undefined : tenant?.primary_color || undefined),
+    accentColor:
+      activeProfileConfig?.secondaryColor ||
+      activeProfileConfig?.accentColor ||
+      (selectedProfileId ? undefined : tenant?.accent_color || undefined),
+    logoUrl: activeProfileConfig?.logoUrl || (selectedProfileId ? undefined : tenant?.logo_url || undefined),
+  };
+
   // If remix mode, show the original content as a starting point
   const [remixOriginalContent, setRemixOriginalContent] = useState<string | null>(
     remixState?.remixContent || null
@@ -332,11 +345,7 @@ const BuildPage = () => {
     try {
       const contextWithChannels = { ...context, channel: selectedChannels[0], channels: selectedChannels };
 
-      const selectedProfileConfig = selectedProfileId
-        ? profiles.find(p => p.id === selectedProfileId)?.config ?? null
-        : null;
-
-      const baseConfig = institutionalConfig ?? selectedProfileConfig;
+      const baseConfig = activeProfileConfig;
 
       // Always send an institutionalConfig to generation when we have *any* source of truth.
       // This prevents placeholder fallbacks like "[University Name]".
@@ -351,7 +360,7 @@ const BuildPage = () => {
               "our institution",
             unitName: (baseConfig.unitName || selectedProfileName)?.trim() || undefined,
             primaryColor: baseConfig.primaryColor || tenant?.primary_color,
-            accentColor: baseConfig.accentColor || tenant?.accent_color,
+            accentColor: baseConfig.secondaryColor || baseConfig.accentColor || tenant?.accent_color,
             logoUrl: baseConfig.logoUrl || tenant?.logo_url || undefined,
           }
         : tenant
@@ -1130,9 +1139,9 @@ const BuildPage = () => {
                 cohort: context.cohort && context.cohort !== 'none' ? cohortLabels[context.cohort] || context.cohort : undefined,
                 moment: context.moment,
                 channels: selectedChannels,
-                primaryColor: institutionalConfig?.primaryColor || tenant?.primary_color || undefined,
-                accentColor: institutionalConfig?.accentColor || tenant?.accent_color || undefined,
-                logoUrl: institutionalConfig?.logoUrl || tenant?.logo_url || undefined,
+                primaryColor: loadingOverlayBranding.primaryColor,
+                accentColor: loadingOverlayBranding.accentColor,
+                logoUrl: loadingOverlayBranding.logoUrl,
                 dnaStats: useContentDNA && contentDNA ? {
                   overallTone: contentDNA.voiceAnalysis?.overallTone,
                   formalityLevel: contentDNA.voiceAnalysis?.formalityLevel,
