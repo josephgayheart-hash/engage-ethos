@@ -58,7 +58,7 @@ export function WorkflowHero({ context }: WorkflowHeroProps) {
   // Workspace-aware: if super admin is viewing another workspace, show that workspace name
   const isImpersonating = canSwitch && activeWorkspace && activeWorkspace.id !== tenant?.id;
   const displayName = isImpersonating
-    ? (activeWorkspace?.institution_name || activeWorkspace?.name || 'Workspace')
+    ? (activeWorkspace?.institution_name || 'Workspace')
     : isAgency
       ? (tenant?.institution_name || firstName)
       : firstName;
