@@ -45,7 +45,7 @@ serve(async (req) => {
         // If we have a campus photo for this slot, use it as a reference for AI enhancement
         const campusPhotoUrl = hasCampusPhotos ? campusPhotoUrls[index % campusPhotoUrls.length] : null;
 
-        const baseInstruction = `Create a professional, editorial-quality photograph for a university advancement Case for Support document. ${institutionContext}${colorContext}Style: warm, aspirational, university viewbook quality. CRITICAL RULES: NO text, NO logos, NO watermarks, NO overlays, NO university names or letters on clothing/banners/buildings. Keep clothing plain. The image should be clean, elegant, and could belong to any university. Use shallow depth-of-field and close/medium framing to keep the scene generic and universally appealing. Subject: ${promptText}`;
+        const baseInstruction = `Create a professional, editorial-quality photograph for a university advancement Case for Support document. ${institutionContext}${colorContext}Style: warm, aspirational, university viewbook quality. NO text, NO watermarks, NO overlays. The image should be clean and elegant. Use shallow depth-of-field and close/medium framing for an intimate, authentic feel. Subject: ${promptText}`;
 
         let messageContent: any;
 
