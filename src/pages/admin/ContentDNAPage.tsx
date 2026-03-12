@@ -1939,7 +1939,7 @@ export default function ContentDNAPage() {
                     </CardHeader>
                     <CardContent>
                       <ul className="space-y-2">
-                        {analysis.voice_analysis.commonPhrases.map((phrase, i) => (
+                        {(analysis.voice_analysis.commonPhrases || []).map((phrase, i) => (
                           <li key={i} className="text-sm text-[hsl(222,47%,11%)] italic">
                             "{phrase}"
                           </li>
