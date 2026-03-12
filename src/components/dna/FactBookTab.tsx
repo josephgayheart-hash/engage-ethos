@@ -278,19 +278,19 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
             setSourceDocument('Web Page');
           }
         } else {
-          toastError('No content found', 'The URL did not return any extractable text content.');
+          toast.error('No content found', { description: 'The URL did not return any extractable text content.' });
         }
       } else {
-        toastError('Scrape failed', response.error || 'Could not scrape the URL');
+        toast.error('Scrape failed', { description: response.error || 'Could not scrape the URL' });
       }
     } catch (error) {
-      toastError('Error scraping URL', error);
+      toast.error('Error scraping URL', { description: error instanceof Error ? error.message : 'Unknown error' });
     } finally {
       setIsScraping(false);
     }
   };
 
-
+  const handleImportSelected = async () => {
     const factsToImport = parsedFacts.filter((_, i) => selectedParsedFacts.has(i));
     if (factsToImport.length === 0) return;
     
