@@ -415,7 +415,7 @@ const BuildPage = () => {
     setIsProcessing(true);
     setShowOverlay(true);
     setBuilderResult(null);
-    setTimeout(() => overlayRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 100);
+    setTimeout(() => overlayRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
     
     try {
       const contextWithChannels = { ...context, channel: selectedChannels[0], channels: selectedChannels };
