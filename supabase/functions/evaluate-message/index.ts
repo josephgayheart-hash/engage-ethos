@@ -763,18 +763,27 @@ Provide your evaluation as JSON.`;
 
     console.log("AI response received, parsing JSON...");
 
-    let jsonContent = content.trim();
-    
-    // Strip markdown code fences if present (AI sometimes wraps response)
-    const jsonMatch = jsonContent.match(/```(?:json)?\s*\n?([\s\S]*?)\n?\s*```/);
-    if (jsonMatch) {
-      jsonContent = jsonMatch[1].trim();
-    }
-    
-    // Also strip if it just starts/ends with backtick fences on their own lines
-    if (jsonContent.startsWith('```')) {
-      jsonContent = jsonContent.replace(/^```(?:json)?\s*\n/, '').replace(/\n\s*```\s*$/, '').trim();
-    }
+    const extractJson = (raw: string) => {
+      let cleaned = raw.trim();
+      // Strip markdown code fences if present
+      const fenceMatch = cleaned.match(/```(?:json)?\s*\n?([\s\S]*?)\n?\s*```/);
+      if (fenceMatch) {
+        cleaned = fenceMatch[1].trim();
+      } else if (cleaned.startsWith('```')) {
+        cleaned = cleaned.replace(/^```(?:json)?\s*\n/, '').replace(/\n\s*```\s*$/, '').trim();
+      }
+      // Try to find the outermost JSON object if there's leading/trailing text
+      const firstBrace = cleaned.indexOf('{');
+      const lastBrace = cleaned.lastIndexOf('}');
+      if (firstBrace !== -1 && lastBrace > firstBrace) {
+        cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+      }
+      // Fix common JSON issues: trailing commas before closing braces/brackets
+      cleaned = cleaned.replace(/,\s*([}\]])/g, '$1');
+      return cleaned;
+    };
+
+    let jsonContent = extractJson(content);
 
     try {
       const result = JSON.parse(jsonContent);
