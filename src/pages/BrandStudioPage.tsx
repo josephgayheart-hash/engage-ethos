@@ -331,7 +331,7 @@ const BrandStudioPage = () => {
           tags: ["branded-image", channel || "image"].filter(Boolean),
           metadata: {
             source: "brand-studio",
-            originalImageUrl: smartLayerImageUrl || state.imageUrl || null,
+            originalImageUrl: state.imageUrl || null,
             brandColors,
             overlayPattern,
             overlayColor,
