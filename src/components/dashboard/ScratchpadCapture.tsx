@@ -275,25 +275,39 @@ export function ScratchpadCapture() {
   return (
     <div className="space-y-3">
       {/* Prompt box — modern floating AI input style */}
-      <div className="relative rounded-2xl border border-border/60 bg-card shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-primary/20">
+      <div className={cn(
+        "relative rounded-2xl border border-border/60 bg-card overflow-hidden transition-all duration-300",
+        isExpanded
+          ? "shadow-lg hover:shadow-xl hover:border-primary/20"
+          : "shadow-sm hover:shadow-md hover:border-primary/15"
+      )}>
         {/* Subtle top accent line */}
         <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-primary/60 via-accent/40 to-secondary/60" />
 
-        <div className="p-3 pt-3.5">
+        <div className={cn(isExpanded ? "p-5 pt-5" : "px-4 py-2.5 pt-3")}>
           {/* Header row */}
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between">
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="flex items-center gap-2 text-sm font-semibold text-foreground hover:text-primary transition-colors"
+              className={cn(
+                "flex items-center gap-2 font-semibold text-foreground hover:text-primary transition-colors",
+                isExpanded ? "text-sm mb-3" : "text-xs"
+              )}
             >
-              <div className="h-6 w-6 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Sparkles className="h-3.5 w-3.5 text-primary" />
+              <div className={cn(
+                "rounded-lg bg-primary/10 flex items-center justify-center",
+                isExpanded ? "h-6 w-6" : "h-5 w-5"
+              )}>
+                <Sparkles className={cn("text-primary", isExpanded ? "h-3.5 w-3.5" : "h-3 w-3")} />
               </div>
               <span>Quick Brief</span>
-              {isExpanded ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+              {rawText.length > 0 && !isExpanded && (
+                <span className="text-[10px] font-normal text-muted-foreground ml-1">— draft saved</span>
+              )}
+              {isExpanded ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3 w-3 text-muted-foreground" />}
             </button>
 
-            {rawText.length > 0 && (
+            {rawText.length > 0 && isExpanded && (
               <button
                 onClick={handleClear}
                 className="text-xs text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1"
@@ -302,16 +316,6 @@ export function ScratchpadCapture() {
               </button>
             )}
           </div>
-
-          {/* Collapsed: clickable placeholder */}
-          {!isExpanded && (
-            <div
-              className="cursor-text rounded-xl bg-muted/40 px-4 py-3 text-sm text-muted-foreground hover:bg-muted/60 transition-colors"
-              onClick={() => setIsExpanded(true)}
-            >
-              {rawText || "Drop your notes, talking points, or rough ideas here..."}
-            </div>
-          )}
 
           {/* Expanded: textarea with inline send */}
           {isExpanded && (
