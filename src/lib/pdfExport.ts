@@ -543,7 +543,16 @@ export async function exportCaseForSupportToPDF(
       })
     : Promise.resolve(null);
 
-  const imagesPromise = generatePdfImages(cfc, institutionName, branding);
+  // Race image generation against a 25s timeout so the PDF always downloads
+  const imagesPromise = Promise.race([
+    generatePdfImages(cfc, institutionName, branding),
+    new Promise<(LoadedImageData | null)[]>((resolve) =>
+      setTimeout(() => {
+        console.warn("PDF image generation timed out after 25s, proceeding without images");
+        resolve([null, null, null]);
+      }, 25_000)
+    ),
+  ]);
 
   [logoData, aiImages] = await Promise.all([logoPromise, imagesPromise]);
 
