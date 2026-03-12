@@ -25,7 +25,28 @@ function lightenColor(rgb: [number, number, number], factor: number = 0.9): [num
   ];
 }
 
-async function loadImageAsDataUrl(url: string): Promise<{ dataUrl: string; format: "PNG" | "JPEG" }> {
+const PLACEHOLDER_BRAND_COLORS = new Set(["#1f2a44", "#2c7a7b", "#d4af37", "#e2e8f0"]);
+
+function isUsableBrandColor(color?: string, allowPlaceholder = false): color is string {
+  if (!color) return false;
+  const trimmed = color.trim();
+  if (!/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/.test(trimmed)) return false;
+  if (allowPlaceholder) return true;
+  return !PLACEHOLDER_BRAND_COLORS.has(trimmed.toLowerCase());
+}
+
+function pickFirstBrandColor(candidates: Array<string | undefined>, allowPlaceholder = false): string | undefined {
+  return candidates.find((color) => isUsableBrandColor(color, allowPlaceholder));
+}
+
+type LoadedImageData = {
+  dataUrl: string;
+  format: "PNG" | "JPEG";
+  width: number;
+  height: number;
+};
+
+async function loadImageAsDataUrl(url: string): Promise<LoadedImageData> {
   const res = await fetch(url, { mode: "cors" });
   if (!res.ok) throw new Error(`Failed to fetch logo (HTTP ${res.status})`);
 
@@ -47,7 +68,18 @@ async function loadImageAsDataUrl(url: string): Promise<{ dataUrl: string; forma
     reader.readAsDataURL(blob);
   });
 
-  return { dataUrl, format };
+  const dimensions = await new Promise<{ width: number; height: number }>((resolve) => {
+    const img = new Image();
+    img.onload = () =>
+      resolve({
+        width: img.naturalWidth || img.width || 1,
+        height: img.naturalHeight || img.height || 1,
+      });
+    img.onerror = () => resolve({ width: 1, height: 1 });
+    img.src = dataUrl;
+  });
+
+  return { dataUrl, format, width: dimensions.width, height: dimensions.height };
 }
 export async function exportTalkingPointsToPDF(
   draft: TalkingPointsDraft,

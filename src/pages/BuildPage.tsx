@@ -294,17 +294,83 @@ const BuildPage = () => {
   const resultsRef = useRef<HTMLDivElement>(null);
   const canProcess = context.audience && context.moment && selectedChannels.length > 0;
 
-  const selectedProfileConfig = selectedProfileId
-    ? profiles.find((p) => p.id === selectedProfileId)?.config ?? null
+  const selectedProfile = selectedProfileId
+    ? profiles.find((p) => p.id === selectedProfileId) ?? null
     : null;
+  const selectedProfileConfig = selectedProfile?.config ?? null;
   const activeProfileConfig = institutionalConfig ?? selectedProfileConfig;
-  const loadingOverlayBranding = {
-    primaryColor: activeProfileConfig?.primaryColor || (selectedProfileId ? undefined : tenant?.primary_color || undefined),
+
+  const placeholderBrandColors = new Set(["#1f2a44", "#2c7a7b", "#d4af37", "#e2e8f0"]);
+  const isValidHexColor = (value?: string) =>
+    !!value && /^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/.test(value.trim());
+  const isUsableBrandColor = (value?: string) => {
+    if (!value || !isValidHexColor(value)) return false;
+    return !placeholderBrandColors.has(value.trim().toLowerCase());
+  };
+
+  const profileConfigLineage: InstitutionalConfig[] = (() => {
+    if (!selectedProfileId) return [];
+
+    const lineage: InstitutionalConfig[] = [];
+    const seenIds = new Set<string>();
+
+    if (activeProfileConfig) lineage.push(activeProfileConfig);
+
+    let cursorId = selectedProfileId;
+    let guard = 0;
+
+    while (cursorId && guard < 10) {
+      const profileNode = profiles.find((p) => p.id === cursorId);
+      if (!profileNode || seenIds.has(profileNode.id)) break;
+      seenIds.add(profileNode.id);
+      if (profileNode.config) lineage.push(profileNode.config);
+      cursorId = profileNode.parentProfileId || "";
+      guard += 1;
+    }
+
+    return lineage;
+  })();
+
+  const pickColorFromLineage = (selector: (cfg: InstitutionalConfig) => string | undefined) => {
+    for (const cfg of profileConfigLineage) {
+      const value = selector(cfg);
+      if (isUsableBrandColor(value)) return value?.trim();
+    }
+    return undefined;
+  };
+
+  const pickLogoFromLineage = () => {
+    for (const cfg of profileConfigLineage) {
+      const logo = [
+        cfg.logoUrl,
+        cfg.logoUrlSecondary,
+        cfg.logoUrlPresidential,
+        cfg.logoUrlAthletic,
+        cfg.logoUrlAlt,
+        cfg.logoUrlIcon,
+      ].find((candidate) => typeof candidate === "string" && candidate.trim().length > 0);
+
+      if (logo) return logo;
+    }
+
+    return undefined;
+  };
+
+  const resolvedBranding = {
+    primaryColor:
+      pickColorFromLineage((cfg) => cfg.primaryColor) ||
+      (selectedProfileId ? undefined : tenant?.primary_color || undefined),
     accentColor:
-      activeProfileConfig?.secondaryColor ||
-      activeProfileConfig?.accentColor ||
+      pickColorFromLineage((cfg) => cfg.secondaryColor || cfg.accentColor) ||
       (selectedProfileId ? undefined : tenant?.accent_color || undefined),
-    logoUrl: activeProfileConfig?.logoUrl || (selectedProfileId ? undefined : tenant?.logo_url || undefined),
+    tertiaryColor: pickColorFromLineage((cfg) => cfg.tertiaryColor),
+    logoUrl: pickLogoFromLineage() || (selectedProfileId ? undefined : tenant?.logo_url || undefined),
+  };
+
+  const loadingOverlayBranding = {
+    primaryColor: resolvedBranding.primaryColor,
+    accentColor: resolvedBranding.accentColor,
+    logoUrl: resolvedBranding.logoUrl,
   };
 
   // If remix mode, show the original content as a starting point
