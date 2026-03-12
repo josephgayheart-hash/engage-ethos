@@ -517,8 +517,19 @@ export async function exportCaseForSupportToPDF(
       const logoWidth = logoHeight * aspect;
       const logoY = (70 - logoHeight) / 2;
 
+      // White rounded rectangle behind logo for contrast
+      const pad = 5;
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(
+        margin - pad / 2,
+        logoY - pad / 2,
+        logoWidth + pad,
+        logoHeight + pad,
+        3, 3, "F"
+      );
+
       doc.addImage(logoData.dataUrl, logoData.format, margin, logoY, logoWidth, logoHeight);
-      textStartX = margin + logoWidth + 8;
+      textStartX = margin + logoWidth + 12;
     } catch (e) {
       console.error("Failed to add logo to PDF:", e);
     }
