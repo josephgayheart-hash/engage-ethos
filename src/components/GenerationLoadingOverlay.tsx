@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, forwardRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import {
@@ -56,7 +56,6 @@ interface GenerationContext {
 interface GenerationLoadingOverlayProps {
   isVisible: boolean;
   context: GenerationContext;
-  /** Called after the "Ready!" celebration has played; parent can then dismiss. */
   onCompletionShown?: () => void;
 }
 
@@ -145,13 +144,15 @@ function buildPhases(ctx: GenerationContext): (PhaseItem & { key: string })[] {
   ];
 }
 
-export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown }: GenerationLoadingOverlayProps) {
+export const GenerationLoadingOverlay = forwardRef<HTMLDivElement, GenerationLoadingOverlayProps>(
+  function GenerationLoadingOverlay({ isVisible, context, onCompletionShown }, ref) {
   const [phase, setPhase] = useState(0);
   const [showTags, setShowTags] = useState(false);
   const [revealedPhases, setRevealedPhases] = useState<number[]>([]);
   const [revealedProofByPhase, setRevealedProofByPhase] = useState<Record<number, number>>({});
   const [allDone, setAllDone] = useState(false);
   const [showCompletion, setShowCompletion] = useState(false);
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   const phases = useMemo(() => buildPhases(context), [context]);
   const maxPhase = phases.length - 1;
@@ -188,6 +189,15 @@ export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown
     };
   }, [isVisible, context.mode, maxPhase]);
 
+  // Scroll the carousel to keep the active phase centered
+  useEffect(() => {
+    if (!carouselRef.current) return;
+    const activeCard = carouselRef.current.querySelector(`[data-phase-index="${phase}"]`) as HTMLElement | null;
+    if (activeCard) {
+      activeCard.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    }
+  }, [phase]);
+
   // Reveal proof items one-by-one for the current phase
   useEffect(() => {
     if (!isVisible) return;
@@ -195,7 +205,6 @@ export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown
     const proofCount = currentPhase?.proofItems?.length || 0;
     if (proofCount === 0) return;
 
-    // Start revealing proof items with staggered delay
     let count = 0;
     const proofInterval = setInterval(() => {
       count++;
@@ -206,10 +215,9 @@ export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown
     return () => clearInterval(proofInterval);
   }, [phase, isVisible, phases]);
 
-  // When allDone fires, show completion celebration for 2.5s before notifying parent
+  // When allDone fires, show completion celebration
   useEffect(() => {
     if (!allDone) return;
-    // Small delay so the pop animation is visible before we declare showCompletion
     const showTimer = setTimeout(() => setShowCompletion(true), 100);
     const doneTimer = setTimeout(() => {
       onCompletionShown?.();
@@ -234,7 +242,6 @@ export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown
   if (context.moment) readbackTags.push({ label: context.moment, icon: MessageSquare });
   if (context.hasStories) readbackTags.push({ label: `${context.storyCount || 0} Stories`, icon: FileText });
   if (context.hasFacts) readbackTags.push({ label: `${context.factCount || 0} Facts`, icon: Zap });
-  // Campus photos readback tag removed — only relevant for image generation, not text content
   if (context.channels && context.channels.length > 0) {
     readbackTags.push({ label: `${context.channels.length} Channel${context.channels.length > 1 ? "s" : ""}`, icon: Mail });
   }
@@ -242,22 +249,17 @@ export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown
     readbackTags.push({ label: `${context.journeyWeeks}-week journey`, icon: Map });
   }
 
-  // Brand-aware color helpers — use institution colors when available, fall back to CSS primary
   const brandPrimary = context.primaryColor;
   const brandAccent = context.accentColor || brandPrimary;
   const hasBrandColors = !!brandPrimary;
 
-  // Inline style helpers for brand-colored elements
-  const brandBg = (opacity: number) => hasBrandColors ? { backgroundColor: `${brandPrimary}${Math.round(opacity * 255).toString(16).padStart(2, '0')}` } : {};
-  const brandText = hasBrandColors ? { color: brandPrimary } : {};
-  const brandBorder = (opacity: number) => hasBrandColors ? { borderColor: `${brandPrimary}${Math.round(opacity * 255).toString(16).padStart(2, '0')}` } : {};
-
   return (
     <div
-      className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/[0.03] to-card p-8 shadow-sm overflow-hidden"
+      ref={ref}
+      className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/[0.03] to-card p-6 shadow-sm overflow-hidden"
       style={hasBrandColors ? { borderColor: `${brandPrimary}30`, background: `linear-gradient(to bottom, ${brandPrimary}08, var(--card))` } : {}}
     >
-      <div className="flex flex-col items-center gap-5">
+      <div className="flex flex-col items-center gap-4">
 
         {/* Profile identity header */}
         {(context.profileName || context.logoUrl) && (
@@ -296,128 +298,153 @@ export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown
           </div>
         )}
 
-        {/* Phase list — slides each item in one at a time, all stay visible */}
-        <div className="w-full max-w-lg space-y-0">
-          {phases.map((p, i) => {
-            const isRevealed = revealedPhases.includes(i);
-            const isComplete = i < phase;
-            const isCurrent = i === phase;
-            const PhaseIcon = p.icon;
-            const proofItems = p.proofItems || [];
-            const revealedProofCount = revealedProofByPhase[i] || 0;
-            // Show all proof items for completed phases
-            const visibleProofCount = isComplete ? proofItems.length : (isCurrent ? revealedProofCount : 0);
+        {/* Horizontal phase carousel */}
+        <div className="w-full relative">
+          {/* Gradient fade edges */}
+          <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-r from-card to-transparent" style={hasBrandColors ? { background: `linear-gradient(to right, var(--card), transparent)` } : {}} />
+          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-l from-card to-transparent" style={hasBrandColors ? { background: `linear-gradient(to left, var(--card), transparent)` } : {}} />
+          
+          <div
+            ref={carouselRef}
+            className="flex gap-3 overflow-x-auto scroll-smooth px-8 py-2 no-scrollbar"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            {phases.map((p, i) => {
+              const isRevealed = revealedPhases.includes(i);
+              const isComplete = i < phase;
+              const isCurrent = i === phase;
+              const PhaseIcon = p.icon;
+              const proofItems = p.proofItems || [];
+              const revealedProofCount = revealedProofByPhase[i] || 0;
+              const visibleProofCount = isComplete ? proofItems.length : (isCurrent ? revealedProofCount : 0);
 
-            if (!isRevealed) return null;
-
-            return (
-              <div
-                key={i}
-                className="overflow-hidden"
-                style={{
-                  animation: "slideInPhase 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards",
-                }}
-              >
+              return (
                 <div
-                  className={`flex items-start gap-3 px-3 py-2.5 rounded-lg transition-all duration-400 ${
+                  key={i}
+                  data-phase-index={i}
+                  className={`flex-shrink-0 w-56 rounded-xl border p-4 transition-all duration-500 ${
+                    isRevealed ? "opacity-100" : "opacity-0 translate-x-8"
+                  } ${
                     isCurrent
-                      ? (hasBrandColors ? "shadow-sm" : "bg-primary/[0.07] border border-primary/20 shadow-sm")
+                      ? (hasBrandColors ? "shadow-md scale-105" : "bg-primary/[0.07] border-primary/25 shadow-md scale-105")
                       : isComplete
-                        ? "border border-transparent"
-                        : ""
+                        ? "border-border/40 bg-muted/30"
+                        : "border-border/20 bg-muted/10"
                   }`}
-                  style={isCurrent && hasBrandColors ? { backgroundColor: `${brandPrimary}12`, border: `1px solid ${brandPrimary}33` } : {}}
+                  style={{
+                    ...(isCurrent && hasBrandColors ? { backgroundColor: `${brandPrimary}12`, borderColor: `${brandPrimary}40`, boxShadow: `0 4px 20px ${brandPrimary}15` } : {}),
+                    ...(isRevealed ? { animation: "slideInFromRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards" } : {}),
+                  }}
                 >
-                  {/* Status icon */}
-                  <div
-                    className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center mt-0.5 transition-all duration-500 ${
-                      isComplete ? "scale-100" : isCurrent ? "scale-110" : ""
-                    } ${
-                      !hasBrandColors
-                        ? (isComplete ? "bg-primary/15 text-primary" : isCurrent ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")
-                        : (isComplete || isCurrent ? "" : "bg-muted text-muted-foreground")
-                    }`}
-                    style={(isComplete || isCurrent) && hasBrandColors ? { backgroundColor: `${brandPrimary}${isComplete ? '26' : '1a'}`, color: brandPrimary } : {}}
-                  >
-                    {isComplete ? (
-                      <Check className="w-3.5 h-3.5" style={{ animation: "popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards" }} />
-                    ) : isCurrent ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <PhaseIcon className="w-3.5 h-3.5" />
-                    )}
-                  </div>
-
-                  {/* Message text + proof items */}
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm leading-tight transition-all duration-300 ${
-                      isCurrent ? "font-semibold text-foreground" : isComplete ? "font-medium text-foreground/70" : "font-medium text-muted-foreground"
-                    }`}>
-                      {isComplete ? p.completedMessage : p.message}
-                    </p>
-                    {p.detail && (
-                      <p
-                        className={`text-[11px] mt-0.5 transition-all duration-500 ${
-                          isCurrent ? (hasBrandColors ? "font-medium" : "text-primary/70 font-medium") : "text-muted-foreground/50"
-                        }`}
-                        style={isCurrent && hasBrandColors ? { color: `${brandPrimary}b3` } : {}}
-                      >
-                        {p.detail}
-                      </p>
-                    )}
-                    {/* No campus photos CTA */}
-                    {(p as any).hasNoPhotos && (isCurrent || isComplete) && (
-                      <p className="text-[10px] text-muted-foreground/70 mt-0.5">
-                        Imagery is guided by your institutional profile &amp; brand.{" "}
-                        <Link
-                          to="/admin/content-dna"
-                          className="inline-flex items-center gap-0.5 text-primary hover:text-primary/80 font-medium transition-colors"
+                  {/* Phase icon + status */}
+                  <div className="flex items-center justify-between mb-2.5">
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 ${
+                        !hasBrandColors
+                          ? (isComplete ? "bg-primary/15 text-primary" : isCurrent ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")
+                          : (isComplete || isCurrent ? "" : "bg-muted text-muted-foreground")
+                      }`}
+                      style={(isComplete || isCurrent) && hasBrandColors ? { backgroundColor: `${brandPrimary}${isComplete ? '26' : '1a'}`, color: brandPrimary } : {}}
+                    >
+                      {isComplete ? (
+                        <Check className="w-4 h-4" style={{ animation: "popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards" }} />
+                      ) : isCurrent ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <PhaseIcon className="w-4 h-4" />
+                      )}
+                    </div>
+                    {isComplete && (
+                      <div style={{ animation: "popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards" }}>
+                        <div
+                          className={hasBrandColors ? "w-5 h-5 rounded-full flex items-center justify-center" : "w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center"}
+                          style={hasBrandColors ? { backgroundColor: `${brandPrimary}1a` } : {}}
                         >
-                          Add photos for more accuracy <ExternalLink className="w-2.5 h-2.5" />
-                        </Link>
-                      </p>
-                    )}
-                    {/* Proof items — flash in one by one */}
-                    {proofItems.length > 0 && visibleProofCount > 0 && (
-                      <div className="mt-1.5 flex flex-wrap gap-1">
-                        {proofItems.slice(0, visibleProofCount).map((proof, pi) => {
-                          const ProofIcon = proof.icon;
-                          return (
-                            <div
-                              key={pi}
-                              className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all ${
-                                isComplete
-                                  ? "bg-muted/60 text-muted-foreground/70"
-                                  : (hasBrandColors ? "" : "bg-primary/[0.08] text-primary/80 border border-primary/10")
-                              }`}
-                              style={{
-                                animation: isComplete ? "none" : "proofFlashIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards",
-                                ...(!isComplete && hasBrandColors ? { backgroundColor: `${brandPrimary}14`, color: `${brandPrimary}cc`, border: `1px solid ${brandPrimary}1a` } : {}),
-                              }}
-                            >
-                              <ProofIcon className="w-2.5 h-2.5 flex-shrink-0" />
-                              <span className="text-muted-foreground/60">{proof.label}:</span>
-                              <span className="truncate max-w-[160px]">{proof.value}</span>
-                            </div>
-                          );
-                        })}
+                          <Check className={hasBrandColors ? "w-3 h-3" : "w-3 h-3 text-primary"} style={hasBrandColors ? { color: brandPrimary } : {}} />
+                        </div>
                       </div>
                     )}
                   </div>
 
-                  {/* Completion check */}
-                  {isComplete && (
-                    <div className="flex-shrink-0 mt-0.5" style={{ animation: "popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards" }}>
-                      <div
-                        className={hasBrandColors ? "w-5 h-5 rounded-full flex items-center justify-center" : "w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center"}
-                        style={hasBrandColors ? { backgroundColor: `${brandPrimary}1a` } : {}}
+                  {/* Message text */}
+                  <p className={`text-xs leading-snug transition-all duration-300 ${
+                    isCurrent ? "font-semibold text-foreground" : isComplete ? "font-medium text-foreground/70" : "font-medium text-muted-foreground"
+                  }`}>
+                    {isComplete ? p.completedMessage : p.message}
+                  </p>
+                  {p.detail && (
+                    <p
+                      className={`text-[10px] mt-1 transition-all duration-500 ${
+                        isCurrent ? (hasBrandColors ? "font-medium" : "text-primary/70 font-medium") : "text-muted-foreground/50"
+                      }`}
+                      style={isCurrent && hasBrandColors ? { color: `${brandPrimary}b3` } : {}}
+                    >
+                      {p.detail}
+                    </p>
+                  )}
+
+                  {/* No campus photos CTA */}
+                  {(p as any).hasNoPhotos && (isCurrent || isComplete) && (
+                    <p className="text-[9px] text-muted-foreground/70 mt-1">
+                      Imagery guided by profile &amp; brand.{" "}
+                      <Link
+                        to="/admin/content-dna"
+                        className="inline-flex items-center gap-0.5 text-primary hover:text-primary/80 font-medium transition-colors"
                       >
-                        <Check className={hasBrandColors ? "w-3 h-3" : "w-3 h-3 text-primary"} style={hasBrandColors ? { color: brandPrimary } : {}} />
-                      </div>
+                        Add photos <ExternalLink className="w-2 h-2" />
+                      </Link>
+                    </p>
+                  )}
+
+                  {/* Proof items */}
+                  {proofItems.length > 0 && visibleProofCount > 0 && (
+                    <div className="mt-2 flex flex-col gap-1">
+                      {proofItems.slice(0, visibleProofCount).map((proof, pi) => {
+                        const ProofIcon = proof.icon;
+                        return (
+                          <div
+                            key={pi}
+                            className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[9px] font-medium transition-all ${
+                              isComplete
+                                ? "bg-muted/60 text-muted-foreground/70"
+                                : (hasBrandColors ? "" : "bg-primary/[0.08] text-primary/80 border border-primary/10")
+                            }`}
+                            style={{
+                              animation: isComplete ? "none" : "proofFlashIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+                              ...(!isComplete && hasBrandColors ? { backgroundColor: `${brandPrimary}14`, color: `${brandPrimary}cc`, border: `1px solid ${brandPrimary}1a` } : {}),
+                            }}
+                          >
+                            <ProofIcon className="w-2.5 h-2.5 flex-shrink-0" />
+                            <span className="text-muted-foreground/60">{proof.label}:</span>
+                            <span className="truncate max-w-[120px]">{proof.value}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
-              </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Phase indicator dots */}
+        <div className="flex items-center gap-1.5">
+          {phases.map((_, i) => {
+            const isComplete = i < phase;
+            const isCurrent = i === phase;
+            return (
+              <div
+                key={i}
+                className={`rounded-full transition-all duration-500 ${
+                  isCurrent ? "w-6 h-1.5" : "w-1.5 h-1.5"
+                } ${
+                  !hasBrandColors
+                    ? (isComplete ? "bg-primary/40" : isCurrent ? "bg-primary" : "bg-muted-foreground/20")
+                    : (isComplete || isCurrent ? "" : "bg-muted-foreground/20")
+                }`}
+                style={(isComplete || isCurrent) && hasBrandColors ? { backgroundColor: isCurrent ? brandPrimary : `${brandPrimary}66` } : {}}
+              />
             );
           })}
         </div>
@@ -484,117 +511,53 @@ export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown
 
       {/* Keyframe animations */}
       <style>{`
-        @keyframes slideInPhase {
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        @keyframes slideInFromRight {
           0% {
             opacity: 0;
-            transform: translateY(16px);
-            max-height: 0;
-          }
-          30% {
-            max-height: 120px;
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0);
-            max-height: 120px;
-          }
-        }
-        @keyframes popIn {
-          0% {
-            opacity: 0;
-            transform: scale(0);
-          }
-          40% {
-            opacity: 1;
-            transform: scale(1.35);
-          }
-          65% {
-            transform: scale(0.9);
-          }
-          80% {
-            transform: scale(1.1);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        @keyframes slideInTag {
-          0% {
-            opacity: 0;
-            transform: translateY(8px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        @keyframes completionPop {
-          0% {
-            opacity: 0;
-            transform: scale(0);
-          }
-          35% {
-            opacity: 1;
-            transform: scale(1.4);
-          }
-          55% {
-            transform: scale(0.85);
-          }
-          70% {
-            transform: scale(1.15);
-          }
-          85% {
-            transform: scale(0.95);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        @keyframes completionRing {
-          0% {
-            box-shadow: 0 0 0 0 hsl(var(--primary) / 0.5);
-          }
-          40% {
-            box-shadow: 0 0 0 16px hsl(var(--primary) / 0.15);
-          }
-          100% {
-            box-shadow: 0 0 0 24px hsl(var(--primary) / 0);
-          }
-        }
-        @keyframes completionCheck {
-          0% {
-            opacity: 0;
-            transform: scale(0) rotate(-45deg);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.3) rotate(0deg);
-          }
-          75% {
-            transform: scale(0.9) rotate(0deg);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1) rotate(0deg);
-          }
-        }
-        @keyframes proofFlashIn {
-          0% {
-            opacity: 0;
-            transform: translateX(-8px) scale(0.95);
-          }
-          50% {
-            opacity: 1;
-            transform: translateX(2px) scale(1.02);
+            transform: translateX(40px) scale(0.95);
           }
           100% {
             opacity: 1;
             transform: translateX(0) scale(1);
           }
         }
+        @keyframes popIn {
+          0% { opacity: 0; transform: scale(0); }
+          40% { opacity: 1; transform: scale(1.35); }
+          65% { transform: scale(0.9); }
+          80% { transform: scale(1.1); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes slideInTag {
+          0% { opacity: 0; transform: translateY(8px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes completionPop {
+          0% { opacity: 0; transform: scale(0); }
+          35% { opacity: 1; transform: scale(1.4); }
+          55% { transform: scale(0.85); }
+          70% { transform: scale(1.15); }
+          85% { transform: scale(0.95); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes completionRing {
+          0% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.5); }
+          40% { box-shadow: 0 0 0 16px hsl(var(--primary) / 0.15); }
+          100% { box-shadow: 0 0 0 24px hsl(var(--primary) / 0); }
+        }
+        @keyframes completionCheck {
+          0% { opacity: 0; transform: scale(0) rotate(-45deg); }
+          50% { opacity: 1; transform: scale(1.3) rotate(0deg); }
+          75% { transform: scale(0.9) rotate(0deg); }
+          100% { opacity: 1; transform: scale(1) rotate(0deg); }
+        }
+        @keyframes proofFlashIn {
+          0% { opacity: 0; transform: translateX(-8px) scale(0.95); }
+          50% { opacity: 1; transform: translateX(2px) scale(1.02); }
+          100% { opacity: 1; transform: translateX(0) scale(1); }
+        }
       `}</style>
     </div>
   );
-}
+});

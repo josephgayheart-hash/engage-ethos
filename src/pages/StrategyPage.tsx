@@ -133,6 +133,7 @@ const StrategyPage = () => {
   const [mapperResult, setMapperResult] = useState<MapperResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
+  const overlayRef = useRef<HTMLDivElement>(null);
   const [buildDiagram, setBuildDiagram] = useState(true);
   const [cadence, setCadence] = useState<CadenceFrequency>('weekly');
   const [escalation, setEscalation] = useState<EscalationPattern>('none');
@@ -413,6 +414,7 @@ const StrategyPage = () => {
     setIsProcessing(true);
     setShowOverlay(true);
     setMapperResult(null);
+    setTimeout(() => overlayRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 100);
     
     try {
       // Use the first selected channel for the context
@@ -1341,6 +1343,7 @@ const StrategyPage = () => {
           {/* Generation Loading Overlay */}
           {showOverlay && (
             <GenerationLoadingOverlay
+              ref={overlayRef}
               isVisible={showOverlay}
               onCompletionShown={() => setShowOverlay(false)}
               context={{

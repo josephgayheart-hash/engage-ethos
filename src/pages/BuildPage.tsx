@@ -271,6 +271,7 @@ const BuildPage = () => {
   const [builderResult, setBuilderResult] = useState<BuilderResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
+  const overlayRef = useRef<HTMLDivElement>(null);
   const [autoSave, setAutoSave] = useState(true);
   const [saveToLibraryOpen, setSaveToLibraryOpen] = useState(false);
   const [saveToLibraryChannel, setSaveToLibraryChannel] = useState<Channel | null>(null);
@@ -407,6 +408,7 @@ const BuildPage = () => {
     setIsProcessing(true);
     setShowOverlay(true);
     setBuilderResult(null);
+    setTimeout(() => overlayRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 100);
     
     try {
       const contextWithChannels = { ...context, channel: selectedChannels[0], channels: selectedChannels };
@@ -1189,6 +1191,7 @@ const BuildPage = () => {
           {/* Generation Loading Overlay */}
           {showOverlay && (
             <GenerationLoadingOverlay
+              ref={overlayRef}
               isVisible={showOverlay}
               onCompletionShown={() => setShowOverlay(false)}
               context={{
