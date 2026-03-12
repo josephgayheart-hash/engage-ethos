@@ -79,7 +79,7 @@ export async function logDNAActivity(
       action: params.action,
       artifact_name: params.artifactName || null,
       artifact_count: params.artifactCount || null,
-      metadata: params.metadata || {},
+      metadata: (params.metadata || {}) as any,
     }]);
   } catch (err) {
     console.error('Failed to log DNA activity:', err);
