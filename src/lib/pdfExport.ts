@@ -600,31 +600,39 @@ export async function exportCaseForSupportToPDF(
     y += boxHeight + 10;
   }
 
-  // Leader Message
+  // Leader Message - dynamic height
   if (cfc.leaderMessage) {
-    checkPageBreak(55);
+    const messageText = cfc.leaderMessage.message || "";
+    const truncatedMessage = messageText.length > 400 ? messageText.substring(0, 400) + "..." : messageText;
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "italic");
+    const messageLines = doc.splitTextToSize(truncatedMessage, contentWidth - 15);
+    const lineH = 5;
+    const boxHeight = Math.max(30, 14 + (messageLines?.length || 1) * lineH + 12);
+    
+    checkPageBreak(boxHeight + 5);
     doc.setFillColor(...primaryLight);
-    doc.roundedRect(margin, y - 5, contentWidth, 45, 3, 3, "F");
+    doc.roundedRect(margin, y - 5, contentWidth, boxHeight, 3, 3, "F");
     doc.setDrawColor(...primaryRgb);
     doc.setLineWidth(0.3);
-    doc.roundedRect(margin, y - 5, contentWidth, 45, 3, 3, "S");
+    doc.roundedRect(margin, y - 5, contentWidth, boxHeight, 3, 3, "S");
     
     doc.setTextColor(60, 60, 60);
     doc.setFontSize(10);
     doc.setFont("helvetica", "italic");
-    const messageText = cfc.leaderMessage.message || "";
-    const truncatedMessage = messageText.length > 280 ? messageText.substring(0, 280) + "..." : messageText;
-    const messageLines = doc.splitTextToSize(truncatedMessage, contentWidth - 15);
     if (messageLines && messageLines.length > 0) {
-      doc.text(messageLines, margin + 8, y + 5);
+      messageLines.forEach((line: string, idx: number) => {
+        if (line) doc.text(line, margin + 8, y + 5 + idx * lineH);
+      });
     }
     
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
     doc.setTextColor(...primaryRgb);
     const leaderAttribution = `— ${cfc.leaderMessage.leaderName || "Leadership"}, ${cfc.leaderMessage.leaderTitle || ""}`.replace(/, $/, "");
-    doc.text(leaderAttribution, margin + 8, y + 37);
-    y += 55;
+    doc.text(leaderAttribution, margin + 8, y - 5 + boxHeight - 6);
+    y += boxHeight + 5;
   }
 
   // Opening Story
