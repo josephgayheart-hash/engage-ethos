@@ -830,7 +830,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
               {parsedFacts.length === 0 ? (
                 <>
                   {/* Processing Status Indicator */}
-                  {(isExtractingFile || isParsing) && (
+                  {(isExtractingFile || isParsing || isScraping) && (
                     <div className="bg-primary/5 border border-primary/20 rounded-lg p-6">
                       <div className="flex items-center gap-4 mb-4">
                         <div className="relative">
@@ -840,7 +840,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                         </div>
                         <div className="flex-1">
                           <h4 className="font-semibold text-foreground">
-                            {isExtractingFile ? 'Extracting Document Text...' : 'AI Processing Facts...'}
+                            {isScraping ? 'Scraping Web Page...' : isExtractingFile ? 'Extracting Document Text...' : 'AI Processing Facts...'}
                           </h4>
                           <p className="text-sm text-muted-foreground">
                             {isExtractingFile 
