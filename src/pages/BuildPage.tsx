@@ -1139,9 +1139,9 @@ const BuildPage = () => {
                 cohort: context.cohort && context.cohort !== 'none' ? cohortLabels[context.cohort] || context.cohort : undefined,
                 moment: context.moment,
                 channels: selectedChannels,
-                primaryColor: institutionalConfig?.primaryColor || tenant?.primary_color || undefined,
-                accentColor: institutionalConfig?.accentColor || tenant?.accent_color || undefined,
-                logoUrl: institutionalConfig?.logoUrl || tenant?.logo_url || undefined,
+                primaryColor: loadingOverlayBranding.primaryColor,
+                accentColor: loadingOverlayBranding.accentColor,
+                logoUrl: loadingOverlayBranding.logoUrl,
                 dnaStats: useContentDNA && contentDNA ? {
                   overallTone: contentDNA.voiceAnalysis?.overallTone,
                   formalityLevel: contentDNA.voiceAnalysis?.formalityLevel,
