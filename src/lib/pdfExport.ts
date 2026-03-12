@@ -1172,8 +1172,6 @@ export async function exportCaseForSupportToPDF(
     // Center: CampusVoice branding
     doc.text("Powered by CampusVoice.AI", pageWidth / 2, pageHeight - 8, { align: "center" });
     
-    // Right side: CampusVoice branding
-    doc.text("Powered by CampusVoice.AI", pageWidth - margin, pageHeight - 8, { align: "right" });
   }
 
   // Force download via explicit blob URL + anchor click
