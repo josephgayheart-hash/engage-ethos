@@ -1343,6 +1343,7 @@ const StrategyPage = () => {
           {/* Generation Loading Overlay */}
           {showOverlay && (
             <GenerationLoadingOverlay
+              ref={overlayRef}
               isVisible={showOverlay}
               onCompletionShown={() => setShowOverlay(false)}
               context={{
