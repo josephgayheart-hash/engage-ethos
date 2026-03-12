@@ -11,7 +11,8 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { supabase } from "@/integrations/supabase/client";
-import { ImageIcon, Download, RefreshCw, Loader2, Sparkles, Palette, Camera, Users, Target, Eye, Image, ExternalLink, PaintBucket, Maximize2, FolderPlus, Library, ChevronDown, Trash2 } from "lucide-react";
+import { ImageIcon, Download, RefreshCw, Loader2, Sparkles, Palette, Camera, Users, Target, Eye, Image, ExternalLink, PaintBucket, Maximize2, FolderPlus, Library, ChevronDown, Trash2, ZoomIn, X } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link, useLocation } from "react-router-dom";
@@ -135,6 +136,7 @@ const ImageGeneratorPage = () => {
   const [generationPhase, setGenerationPhase] = useState(0);
   const [viewMode, setViewMode] = useState<"raw" | "mockup" | "overlay">("mockup");
   const [blankCanvasMode, setBlankCanvasMode] = useState(false);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const { campusPhotoCount } = useCampusPhotoCount(selectedProfileId || null);
   const { references: designRefs } = useDesignReferences({ profileId: selectedProfileId || null });
   const designRefCount = designRefs?.length || 0;
@@ -964,11 +966,18 @@ const ImageGeneratorPage = () => {
                           goal={goal}
                         />
                       ) : viewMode === "mockup" && imageUrl ? (
-                        <ChannelMockup
-                          channel={channel}
-                          imageUrl={imageUrl}
-                          profileName={profiles?.find(p => p.id === selectedProfileId)?.name}
-                        />
+                        <div className="relative group cursor-pointer" onClick={() => setIsLightboxOpen(true)}>
+                          <ChannelMockup
+                            channel={channel}
+                            imageUrl={imageUrl}
+                            profileName={profiles?.find(p => p.id === selectedProfileId)?.name}
+                          />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100 rounded-lg">
+                            <div className="bg-background/90 backdrop-blur-sm rounded-full p-3 shadow-lg border border-border/50 transition-transform duration-200 group-hover:scale-100 scale-90">
+                              <ZoomIn className="w-5 h-5 text-foreground" />
+                            </div>
+                          </div>
+                        </div>
                       ) : imageUrl ? (
                         <div className="relative group rounded-lg overflow-hidden">
                           <img
@@ -976,7 +985,15 @@ const ImageGeneratorPage = () => {
                             alt="Generated campus image"
                             className="w-full rounded-lg"
                           />
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100">
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                            <button
+                              onClick={() => setIsLightboxOpen(true)}
+                              className="bg-background/90 backdrop-blur-sm rounded-full p-3 shadow-lg border border-border/50 opacity-0 group-hover:opacity-100 transition-all duration-200 scale-90 group-hover:scale-100 hover:bg-background"
+                            >
+                              <ZoomIn className="w-5 h-5 text-foreground" />
+                            </button>
+                          </div>
+                          <div className="absolute bottom-0 inset-x-0 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100 transition-opacity">
                             <div className="flex gap-2">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -1054,6 +1071,27 @@ const ImageGeneratorPage = () => {
         contentType="image"
         defaultName={`${profileInstitutionName || 'Campus Image'} — ${channelOptions.find(c => c.value === channel)?.label || channel}`}
       />
+
+      {/* Lightbox / Expanded View Dialog */}
+      <Dialog open={isLightboxOpen} onOpenChange={setIsLightboxOpen}>
+        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 border-none bg-black/95 overflow-hidden [&>button]:hidden">
+          <div className="relative flex items-center justify-center w-full h-full min-h-[60vh]">
+            <button
+              onClick={() => setIsLightboxOpen(false)}
+              className="absolute top-3 right-3 z-10 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full p-2 transition-colors"
+            >
+              <X className="w-5 h-5 text-white" />
+            </button>
+            {imageUrl && (
+              <img
+                src={imageUrl}
+                alt="Generated image — expanded view"
+                className="max-w-full max-h-[85vh] object-contain rounded-md"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
