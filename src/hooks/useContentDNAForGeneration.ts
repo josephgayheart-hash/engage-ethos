@@ -81,11 +81,19 @@ export function useContentDNAForGeneration(options: UseContentDNAForGenerationOp
 
       // If a profileId is specified, look for that specific profile's DNA
       if (profileId) {
+        // Look up the profile's tenant_id first — super_admins may be in a different tenant
+        const { data: profileRow } = await supabase
+          .from('institutional_profiles')
+          .select('tenant_id')
+          .eq('id', profileId)
+          .single();
+        const profileTenantId = profileRow?.tenant_id || tenant.id;
+
         // First, try to get the selected profile's DNA
         const { data, error } = await supabase
           .from('content_dna_analysis')
           .select('id, voice_analysis, brand_platform, custom_instructions')
-          .eq('tenant_id', tenant.id)
+          .eq('tenant_id', profileTenantId)
           .eq('profile_id', profileId)
           .maybeSingle();
 
