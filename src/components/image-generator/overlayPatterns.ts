@@ -23,6 +23,11 @@ export type OverlayPatternId =
   | "box-left"
   | "box-right"
   | "spotlight"
+  | "spotlight-center"
+  | "spotlight-top-left"
+  | "spotlight-top-right"
+  | "spotlight-bottom-left"
+  | "spotlight-bottom-right"
   | "stripes"
   | "dots"
   | "crosshatch"
@@ -59,6 +64,11 @@ export const OVERLAY_PATTERNS: OverlayPatternMeta[] = [
   { id: "box-left", label: "Box Left", category: "Geometric" },
   { id: "box-right", label: "Box Right", category: "Geometric" },
   { id: "spotlight", label: "Spotlight", category: "Geometric" },
+  { id: "spotlight-center", label: "Spotlight Center", category: "Geometric" },
+  { id: "spotlight-top-left", label: "Spotlight Top Left", category: "Geometric" },
+  { id: "spotlight-top-right", label: "Spotlight Top Right", category: "Geometric" },
+  { id: "spotlight-bottom-left", label: "Spotlight Bottom Left", category: "Geometric" },
+  { id: "spotlight-bottom-right", label: "Spotlight Bottom Right", category: "Geometric" },
   { id: "stripes", label: "Stripes", category: "Patterns" },
   { id: "dots", label: "Dot Grid", category: "Patterns" },
   { id: "crosshatch", label: "Crosshatch", category: "Patterns" },
@@ -244,6 +254,36 @@ export function getOverlayStyle(
     case "spotlight":
       return {
         background: `radial-gradient(circle at 30% 40%, transparent 30%, ${color} 70%)`,
+        opacity,
+      };
+
+    case "spotlight-center":
+      return {
+        background: `radial-gradient(circle at 50% 50%, transparent 30%, ${color} 70%)`,
+        opacity,
+      };
+
+    case "spotlight-top-left":
+      return {
+        background: `radial-gradient(circle at 20% 20%, transparent 30%, ${color} 70%)`,
+        opacity,
+      };
+
+    case "spotlight-top-right":
+      return {
+        background: `radial-gradient(circle at 80% 20%, transparent 30%, ${color} 70%)`,
+        opacity,
+      };
+
+    case "spotlight-bottom-left":
+      return {
+        background: `radial-gradient(circle at 20% 80%, transparent 30%, ${color} 70%)`,
+        opacity,
+      };
+
+    case "spotlight-bottom-right":
+      return {
+        background: `radial-gradient(circle at 80% 80%, transparent 30%, ${color} 70%)`,
         opacity,
       };
 
