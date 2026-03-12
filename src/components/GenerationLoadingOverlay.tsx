@@ -388,10 +388,11 @@ export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown
                               className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-all ${
                                 isComplete
                                   ? "bg-muted/60 text-muted-foreground/70"
-                                  : "bg-primary/[0.08] text-primary/80 border border-primary/10"
+                                  : (hasBrandColors ? "" : "bg-primary/[0.08] text-primary/80 border border-primary/10")
                               }`}
                               style={{
                                 animation: isComplete ? "none" : "proofFlashIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+                                ...(!isComplete && hasBrandColors ? { backgroundColor: `${brandPrimary}14`, color: `${brandPrimary}cc`, border: `1px solid ${brandPrimary}1a` } : {}),
                               }}
                             >
                               <ProofIcon className="w-2.5 h-2.5 flex-shrink-0" />
