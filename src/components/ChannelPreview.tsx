@@ -1608,18 +1608,24 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
   };
 
   const renderCaseForCarePreview = (cfc: CaseForCareDraft) => {
-    // Use branding colors or fallback to defaults
-    const primaryColor = branding?.primaryColor || '#be123c'; // rose-600
-    const accentColor = branding?.accentColor || '#9333ea'; // purple-600
+    // Use branding colors — strictly from the selected institution profile
+    const primaryColor = branding?.primaryColor || '#1F2A44';
+    const accentColor = branding?.accentColor || branding?.primaryColor || '#1F2A44';
+    const tertiaryColor = branding?.tertiaryColor || accentColor;
     const logoUrl = branding?.logoUrl;
     
-    // Create gradient style using brand colors
+    // Create style helpers using ONLY brand colors
     const heroGradientStyle = {
       background: `linear-gradient(135deg, ${primaryColor} 0%, ${accentColor} 100%)`,
     };
     const ctaGradientStyle = {
       background: `linear-gradient(90deg, ${primaryColor} 0%, ${accentColor} 100%)`,
     };
+    const sectionHeaderStyle = { color: primaryColor };
+    const accentTextStyle = { color: accentColor };
+    const lightBgStyle = (color: string) => ({ backgroundColor: `${color}12`, borderColor: `${color}30` });
+    const accentBgStyle = { backgroundColor: `${accentColor}15`, borderColor: `${accentColor}35` };
+    const primaryBgStyle = { backgroundColor: `${primaryColor}10`, borderColor: `${primaryColor}30` };
     
     return (
     <div className="space-y-6 -mx-2">
@@ -1628,12 +1634,13 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
         <div className="relative">
           {/* Logo + Label Row */}
-          <div className="flex items-center gap-3 mb-3">
+          <div className="flex items-center gap-4 mb-3">
             {logoUrl && (
               <img 
                 src={logoUrl} 
                 alt="Institution logo" 
-                className="w-12 h-12 object-contain bg-white/20 rounded-lg p-1"
+                className="h-14 w-auto max-w-[120px] object-contain flex-shrink-0"
+                style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}
               />
             )}
             <div className="flex items-center gap-2 opacity-90">
@@ -1642,19 +1649,19 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
             </div>
           </div>
           {cfc.documentTitle && (
-            <h2 className="text-2xl md:text-3xl font-bold mb-2">{cfc.documentTitle}</h2>
+            <h1 className="text-2xl md:text-3xl font-bold mb-2">{cfc.documentTitle}</h1>
+          )}
+          {cfc.campaignName && (
+            <h2 className="text-base font-medium opacity-90 mb-1">{cfc.campaignName}</h2>
           )}
           {cfc.campaignTagline && (
-            <p className="text-lg italic opacity-90 mb-3">{cfc.campaignTagline}</p>
+            <p className="text-lg italic opacity-90 mb-3">"{cfc.campaignTagline}"</p>
           )}
           <div className="flex flex-wrap gap-3 mt-4">
-            {cfc.campaignName && (
-              <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30">{cfc.campaignName}</Badge>
-            )}
             {cfc.targetAmount ? (
               <Badge className="bg-white text-foreground hover:bg-white/90 font-bold">{cfc.targetAmount} Goal</Badge>
             ) : (
-              <Badge className="bg-amber-500/90 text-white border-amber-300 hover:bg-amber-500 animate-pulse">
+              <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30 animate-pulse">
                 <AlertCircle className="w-3 h-3 mr-1" />
                 Add Support Goal
               </Badge>
@@ -1677,22 +1684,30 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
         </div>
       </div>
 
+      {/* Target Amount Highlight */}
+      {cfc.targetAmount && (
+        <div className="rounded-2xl p-6 text-center border" style={accentBgStyle}>
+          <p className="text-3xl font-bold mb-1" style={accentTextStyle}>{cfc.targetAmount}</p>
+          <p className="text-sm font-medium" style={accentTextStyle}>Campaign Goal</p>
+        </div>
+      )}
+
       {/* Leader's Message */}
       {cfc.leaderMessage && (
-        <div className="bg-gradient-to-br from-slate-50 to-stone-50 dark:from-slate-950/50 dark:to-stone-950/50 rounded-2xl p-6 border border-slate-200 dark:border-slate-700">
+        <div className="rounded-2xl p-6 border" style={primaryBgStyle}>
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-slate-600 to-slate-800 flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: primaryColor }}>
               <User className="w-6 h-6 text-white" />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">A Message from Leadership</h3>
               <p className="text-sm font-semibold text-foreground">{cfc.leaderMessage.leaderName}</p>
               <p className="text-xs text-muted-foreground mb-4">{cfc.leaderMessage.leaderTitle}</p>
-              <p className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap italic">
+              <p className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap italic break-words">
                 {cfc.leaderMessage.message}
               </p>
               {cfc.leaderMessage.signature && (
-                <p className="text-sm font-medium text-foreground mt-4 pt-2 border-t border-slate-200 dark:border-slate-700">
+                <p className="text-sm font-medium text-foreground mt-4 pt-2" style={{ borderTopColor: `${primaryColor}30`, borderTopWidth: 1 }}>
                   — {cfc.leaderMessage.signature}
                 </p>
               )}
@@ -1704,25 +1719,16 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
       {/* Strategic Pillars */}
       {cfc.strategicPillars && cfc.strategicPillars.length > 0 && (
         <div className="space-y-4">
-          <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-primary" />
+          <h3 className="text-sm font-bold uppercase tracking-wider flex items-center gap-2" style={sectionHeaderStyle}>
+            <Sparkles className="w-4 h-4" />
             Our Strategic Vision
           </h3>
           <div className="grid md:grid-cols-3 gap-4">
             {cfc.strategicPillars.map((pillar, i) => {
-              const pillarColors = [
-                'from-blue-500 to-cyan-500',
-                'from-purple-500 to-pink-500', 
-                'from-emerald-500 to-teal-500'
-              ];
-              const bgColors = [
-                'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800',
-                'bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800',
-                'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800'
-              ];
+              const pillarColor = i === 0 ? primaryColor : i === 1 ? accentColor : tertiaryColor;
               return (
-                <div key={i} className={`rounded-xl p-5 border ${bgColors[i % 3]}`}>
-                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${pillarColors[i % 3]} flex items-center justify-center mb-3`}>
+                <div key={i} className="rounded-xl p-5 border" style={lightBgStyle(pillarColor)}>
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ backgroundColor: pillarColor }}>
                     {i === 0 && <GraduationCap className="w-5 h-5 text-white" />}
                     {i === 1 && <Lightbulb className="w-5 h-5 text-white" />}
                     {i === 2 && <Users className="w-5 h-5 text-white" />}
@@ -1738,29 +1744,29 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
 
       {/* Opening Story Block */}
       {(cfc.openingStory || cfc.openingNarrative) && (
-        <div className="relative bg-amber-50/50 dark:bg-amber-950/20 rounded-2xl p-6 border border-amber-200 dark:border-amber-800">
-          <div className="absolute -top-3 left-6 text-6xl text-amber-400/60 font-serif leading-none">"</div>
+        <div className="relative rounded-2xl p-6 border" style={accentBgStyle}>
+          <div className="absolute -top-3 left-6 text-6xl font-serif leading-none" style={{ color: `${accentColor}40` }}>"</div>
           <div className="relative pt-4">
             {cfc.openingStory?.headline && (
-              <h3 className="text-lg font-semibold text-amber-900 dark:text-amber-200 mb-3">{cfc.openingStory.headline}</h3>
+              <h3 className="text-lg font-semibold mb-3" style={accentTextStyle}>{cfc.openingStory.headline}</h3>
             )}
-            <p className="text-base leading-relaxed text-foreground/90 whitespace-pre-wrap font-serif">
+            <p className="text-base leading-relaxed text-foreground/90 whitespace-pre-wrap font-serif break-words">
               {cfc.openingStory?.narrative || cfc.openingNarrative}
             </p>
             {cfc.openingStory?.attribution && (
               <p className="text-sm text-muted-foreground mt-4 font-medium">— {cfc.openingStory.attribution}</p>
             )}
           </div>
-          <div className="absolute -bottom-3 right-6 text-6xl text-amber-400/60 font-serif leading-none rotate-180">"</div>
+          <div className="absolute -bottom-3 right-6 text-6xl font-serif leading-none rotate-180" style={{ color: `${accentColor}40` }}>"</div>
         </div>
       )}
 
       {/* Pull Quote Band */}
       {cfc.pullQuotes && cfc.pullQuotes.length > 0 && (
-        <div className="bg-primary/5 border-l-4 border-primary rounded-r-xl p-6">
+        <div className="rounded-r-xl p-6 border-l-4" style={{ backgroundColor: `${primaryColor}08`, borderLeftColor: primaryColor }}>
           {cfc.pullQuotes.map((pq, i) => (
-            <div key={i} className={i > 0 ? 'mt-4 pt-4 border-t border-primary/20' : ''}>
-              <p className="text-xl md:text-2xl italic font-medium text-primary/90">"{pq.quote}"</p>
+            <div key={i} className={i > 0 ? 'mt-4 pt-4' : ''} style={i > 0 ? { borderTopColor: `${primaryColor}20`, borderTopWidth: 1 } : {}}>
+              <p className="text-xl md:text-2xl italic font-medium" style={{ color: `${primaryColor}dd` }}>"{pq.quote}"</p>
               {pq.attribution && (
                 <p className="text-sm text-muted-foreground mt-2 text-right">— {pq.attribution}</p>
               )}
@@ -1771,9 +1777,9 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
 
       {/* Impact Statistics Grid */}
       {cfc.impactStatistics && cfc.impactStatistics.length > 0 && (
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-2xl p-6 border border-blue-200 dark:border-blue-800">
-          <h3 className="text-sm font-bold text-blue-700 dark:text-blue-400 mb-4 uppercase tracking-wider flex items-center gap-2">
-            <span className="w-8 h-0.5 bg-blue-400" />
+        <div className="rounded-2xl p-6 border" style={lightBgStyle(accentColor)}>
+          <h3 className="text-sm font-bold mb-4 uppercase tracking-wider flex items-center gap-2" style={accentTextStyle}>
+            <span className="w-8 h-0.5" style={{ backgroundColor: accentColor }} />
             Impact by the Numbers
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -1786,23 +1792,23 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
       {(cfc.visionStatement || cfc.missionConnection) && (
         <div className="grid md:grid-cols-2 gap-4">
           {cfc.visionStatement && (
-            <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 rounded-xl p-5 border border-purple-200 dark:border-purple-800">
+            <div className="rounded-xl p-5 border" style={lightBgStyle(primaryColor)}>
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: primaryColor }}>
                   <Target className="w-4 h-4 text-white" />
                 </div>
-                <span className="text-xs font-bold uppercase tracking-wider text-purple-700 dark:text-purple-400">Vision</span>
+                <span className="text-xs font-bold uppercase tracking-wider" style={sectionHeaderStyle}>Vision</span>
               </div>
               <p className="text-sm font-medium text-foreground">{cfc.visionStatement}</p>
             </div>
           )}
           {cfc.missionConnection && (
-            <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 rounded-xl p-5 border border-emerald-200 dark:border-emerald-800">
+            <div className="rounded-xl p-5 border" style={lightBgStyle(accentColor)}>
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: accentColor }}>
                   <Heart className="w-4 h-4 text-white" />
                 </div>
-                <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Mission</span>
+                <span className="text-xs font-bold uppercase tracking-wider" style={accentTextStyle}>Mission</span>
               </div>
               <p className="text-sm font-medium text-foreground">{cfc.missionConnection}</p>
             </div>
@@ -1812,8 +1818,8 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
 
       {/* Problem Statement */}
       {cfc.problemStatement && (
-        <div className="bg-rose-50/50 dark:bg-rose-950/20 rounded-xl p-5 border-l-4 border-rose-400">
-          <p className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 mb-2">The Challenge</p>
+        <div className="rounded-xl p-5 border-l-4" style={{ backgroundColor: `${primaryColor}08`, borderLeftColor: primaryColor }}>
+          <p className="text-xs font-bold uppercase tracking-wider mb-2" style={sectionHeaderStyle}>The Challenge</p>
           <p className="text-sm text-foreground">{cfc.problemStatement}</p>
         </div>
       )}
@@ -1826,9 +1832,9 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
             {cfc.keyPrograms.map((p, i) => (
               <div key={i} className="bg-card rounded-xl p-4 border shadow-sm hover:shadow-md transition-shadow">
                 <h4 className="font-semibold text-foreground mb-1">{p.name}</h4>
-                <p className="text-sm text-muted-foreground mb-2">{p.description}</p>
+                <p className="text-sm text-muted-foreground mb-2 break-words">{p.description}</p>
                 <div className="flex items-center gap-2 text-xs">
-                  <Badge variant="outline" className="text-primary border-primary/30 bg-primary/5">
+                  <Badge variant="outline" style={{ color: primaryColor, borderColor: `${primaryColor}40`, backgroundColor: `${primaryColor}08` }}>
                     Impact: {p.impact}
                   </Badge>
                 </div>
@@ -1844,11 +1850,11 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
           <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Voices of Impact</h3>
           <div className="grid gap-3">
             {cfc.testimonials.map((t, i) => (
-              <div key={i} className="bg-card rounded-xl p-5 border-l-4 border-rose-400 shadow-sm">
-                <p className="text-sm italic text-foreground mb-3">"{t.quote}"</p>
+              <div key={i} className="bg-card rounded-xl p-5 border-l-4 shadow-sm" style={{ borderLeftColor: accentColor }}>
+                <p className="text-sm italic text-foreground mb-3 break-words">"{t.quote}"</p>
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900 flex items-center justify-center">
-                    <User className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${accentColor}15` }}>
+                    <User className="w-4 h-4" style={{ color: accentColor }} />
                   </div>
                   <div>
                     <p className="text-sm font-medium">{t.attribution}</p>
@@ -1861,34 +1867,25 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
         </div>
       )}
 
-      {/* Giving Opportunities Table (UC Davis style) */}
+      {/* Giving Opportunities Table */}
       {cfc.givingOpportunities && cfc.givingOpportunities.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-primary" />
+            <Building2 className="w-4 h-4" style={{ color: primaryColor }} />
             Philanthropic Opportunities
           </h3>
           <div className="grid md:grid-cols-3 gap-4">
             {cfc.givingOpportunities.map((cat, i) => {
-              const catColors = [
-                'border-t-blue-500 bg-blue-50/50 dark:bg-blue-950/20',
-                'border-t-purple-500 bg-purple-50/50 dark:bg-purple-950/20',
-                'border-t-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20'
-              ];
-              const textColors = [
-                'text-blue-700 dark:text-blue-400',
-                'text-purple-700 dark:text-purple-400',
-                'text-emerald-700 dark:text-emerald-400'
-              ];
+              const catColor = i === 0 ? primaryColor : i === 1 ? accentColor : tertiaryColor;
               return (
-                <div key={i} className={`rounded-xl border border-t-4 ${catColors[i % 3]} p-4`}>
-                  <h4 className={`font-semibold text-sm mb-3 ${textColors[i % 3]}`}>{cat.category}</h4>
+                <div key={i} className="rounded-xl border border-t-4 p-4" style={{ borderTopColor: catColor, backgroundColor: `${catColor}06` }}>
+                  <h4 className="font-semibold text-sm mb-3" style={{ color: catColor }}>{cat.category}</h4>
                   <div className="space-y-3">
                     {cat.opportunities.map((opp, j) => (
                       <div key={j} className="bg-white/60 dark:bg-black/20 rounded-lg p-3">
                         <p className="font-medium text-sm text-foreground">{opp.name}</p>
-                        <p className="text-lg font-bold text-primary">{opp.amount}</p>
-                        <p className="text-xs text-muted-foreground">{opp.description}</p>
+                        <p className="text-lg font-bold" style={{ color: primaryColor }}>{opp.amount}</p>
+                        <p className="text-xs text-muted-foreground break-words">{opp.description}</p>
                       </div>
                     ))}
                   </div>
@@ -1905,16 +1902,14 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
           <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Ways to Give</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {cfc.givingLevels.map((g, i) => {
-              // Make larger amounts more prominent
               const isLarge = g.amount.includes('100') || g.amount.includes('million') || i === cfc.givingLevels!.length - 1;
               return (
                 <div 
                   key={i} 
                   className={`rounded-xl p-4 text-center border transition-all hover:scale-105 ${
-                    isLarge 
-                      ? 'bg-gradient-to-br from-amber-400 to-orange-500 text-white border-amber-300 col-span-2 md:col-span-1' 
-                      : 'bg-card border-border'
+                    isLarge ? 'text-white col-span-2 md:col-span-1' : 'bg-card border-border'
                   }`}
+                  style={isLarge ? { background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})`, borderColor: primaryColor } : {}}
                 >
                   <p className={`text-lg font-bold mb-1 ${isLarge ? 'text-white' : 'text-foreground'}`}>{g.amount}</p>
                   <p className={`text-xs ${isLarge ? 'text-white/90' : 'text-muted-foreground'}`}>{g.impact}</p>
@@ -1928,7 +1923,7 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
       {/* Call to Action Banner with Brand Colors */}
       {cfc.callToAction && (
         <div className="rounded-2xl p-6 text-white text-center" style={ctaGradientStyle}>
-          <p className="text-lg md:text-xl font-semibold mb-4">{cfc.callToAction}</p>
+          <p className="text-lg md:text-xl font-semibold mb-4 break-words">{cfc.callToAction}</p>
           {cfc.contactInfo && (
             <div className="flex flex-wrap justify-center gap-4 text-sm opacity-90">
               <span className="flex items-center gap-1">
@@ -1955,7 +1950,7 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
       {/* Closing Statement */}
       {cfc.closingStatement && (
         <div className="border-t-2 border-dashed border-muted pt-6 text-center">
-          <p className="text-base italic text-muted-foreground font-serif">{cfc.closingStatement}</p>
+          <p className="text-base italic text-muted-foreground font-serif break-words">{cfc.closingStatement}</p>
         </div>
       )}
 
