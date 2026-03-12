@@ -81,7 +81,7 @@ export function ScratchpadCapture() {
   const [rawText, setRawText] = useState(() => {
     try { return localStorage.getItem(STORAGE_KEY) || ""; } catch { return ""; }
   });
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false); // always start collapsed
   const [classifyResult, setClassifyResult] = useState<ClassifyResult | null>(null);
   const [isClassifying, setIsClassifying] = useState(false);
   const [isOrganizing, setIsOrganizing] = useState(false);
@@ -96,10 +96,7 @@ export function ScratchpadCapture() {
     try { localStorage.setItem(STORAGE_KEY, rawText); } catch {}
   }, [rawText]);
 
-  // Auto-expand if there's saved text
-  useEffect(() => {
-    if (rawText.length > 0) setIsExpanded(true);
-  }, []);
+  // Don't auto-expand — keep it cozy and collapsed by default
 
   // Debounced classify
   const classifyNotes = useCallback(async (text: string) => {
@@ -278,25 +275,39 @@ export function ScratchpadCapture() {
   return (
     <div className="space-y-3">
       {/* Prompt box — modern floating AI input style */}
-      <div className="relative rounded-2xl border border-border/60 bg-card shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-primary/20">
+      <div className={cn(
+        "relative rounded-2xl border border-border/60 bg-card overflow-hidden transition-all duration-300",
+        isExpanded
+          ? "shadow-lg hover:shadow-xl hover:border-primary/20"
+          : "shadow-sm hover:shadow-md hover:border-primary/15"
+      )}>
         {/* Subtle top accent line */}
         <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-primary/60 via-accent/40 to-secondary/60" />
 
-        <div className="p-3 pt-3.5">
+        <div className={cn(isExpanded ? "p-5 pt-5" : "px-4 py-2.5 pt-3")}>
           {/* Header row */}
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between">
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="flex items-center gap-2 text-sm font-semibold text-foreground hover:text-primary transition-colors"
+              className={cn(
+                "flex items-center gap-2 font-semibold text-foreground hover:text-primary transition-colors",
+                isExpanded ? "text-sm mb-3" : "text-xs"
+              )}
             >
-              <div className="h-6 w-6 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Sparkles className="h-3.5 w-3.5 text-primary" />
+              <div className={cn(
+                "rounded-lg bg-primary/10 flex items-center justify-center",
+                isExpanded ? "h-6 w-6" : "h-5 w-5"
+              )}>
+                <Sparkles className={cn("text-primary", isExpanded ? "h-3.5 w-3.5" : "h-3 w-3")} />
               </div>
               <span>Quick Brief</span>
-              {isExpanded ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+              {rawText.length > 0 && !isExpanded && (
+                <span className="text-[10px] font-normal text-muted-foreground ml-1">— draft saved</span>
+              )}
+              {isExpanded ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3 w-3 text-muted-foreground" />}
             </button>
 
-            {rawText.length > 0 && (
+            {rawText.length > 0 && isExpanded && (
               <button
                 onClick={handleClear}
                 className="text-xs text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1"
@@ -305,16 +316,6 @@ export function ScratchpadCapture() {
               </button>
             )}
           </div>
-
-          {/* Collapsed: clickable placeholder */}
-          {!isExpanded && (
-            <div
-              className="cursor-text rounded-xl bg-muted/40 px-4 py-3 text-sm text-muted-foreground hover:bg-muted/60 transition-colors"
-              onClick={() => setIsExpanded(true)}
-            >
-              {rawText || "Drop your notes, talking points, or rough ideas here..."}
-            </div>
-          )}
 
           {/* Expanded: textarea with inline send */}
           {isExpanded && (
@@ -330,7 +331,7 @@ export function ScratchpadCapture() {
                     }
                   }}
                   placeholder="Drop your notes, talking points, or rough ideas here... e.g. 'Need to reach admitted students who haven't enrolled. Dean wants a 3-touch sequence by next week.'"
-                  className="min-h-[80px] max-h-[160px] resize-none border-0 bg-transparent text-sm leading-relaxed focus-visible:ring-0 focus-visible:ring-offset-0 pb-12"
+                  className="min-h-[100px] max-h-[200px] resize-none border-0 bg-transparent text-base leading-relaxed focus-visible:ring-0 focus-visible:ring-offset-0 pb-14 px-4 py-3"
                   autoFocus
                 />
                 {/* Bottom bar inside the textarea container */}
@@ -375,23 +376,23 @@ export function ScratchpadCapture() {
 
         {/* Results panel */}
         {showResults && organizedText && (
-          <div className="animate-in fade-in-0 slide-in-from-bottom-3 duration-500 pt-3 pl-3 space-y-0">
-            <div className="max-w-none text-foreground space-y-1">
+          <div className="animate-in fade-in-0 slide-in-from-bottom-3 duration-500 pt-5 pl-4 pr-2 space-y-0">
+            <div className="max-w-none text-foreground space-y-1.5">
               <ReactMarkdown
                 components={{
                   h1: ({ children }) => (
-                    <div className="mb-4 mt-1">
-                      <h1 className="text-lg font-bold text-foreground tracking-tight flex items-center gap-2">
-                        <div className="h-6 w-1 rounded-full bg-primary" />
+                    <div className="mb-5 mt-1">
+                      <h1 className="text-xl font-bold text-foreground tracking-tight flex items-center gap-2.5">
+                        <div className="h-7 w-1 rounded-full bg-primary" />
                         {children}
                       </h1>
-                      <div className="h-px bg-gradient-to-r from-primary/30 via-border/50 to-transparent mt-2" />
+                      <div className="h-px bg-gradient-to-r from-primary/30 via-border/50 to-transparent mt-3" />
                     </div>
                   ),
                   h2: ({ children }) => (
-                    <div className="mt-6 first:mt-0">
-                      <div className="h-px bg-border/40 mb-4" />
-                      <h2 className="text-[13px] font-bold uppercase tracking-widest text-primary mb-2.5 flex items-center gap-2">
+                    <div className="mt-7 first:mt-0">
+                      <div className="h-px bg-border/40 mb-5" />
+                      <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-3 flex items-center gap-2">
                         <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary" />
                         {children}
                       </h2>
@@ -403,7 +404,7 @@ export function ScratchpadCapture() {
                       if (text.includes(key) || text.includes(route.label.toLowerCase())) {
                         const ToolIcon = route.icon;
                         return (
-                          <h3 className="flex items-center gap-2 text-[12.5px] font-semibold text-foreground/90 mt-3.5 mb-1.5 pl-1 border-l-2 border-accent/40 ml-0.5">
+                          <h3 className="flex items-center gap-2.5 text-sm font-semibold text-foreground/90 mt-4 mb-2 pl-1.5 border-l-2 border-accent/40 ml-0.5">
                             <div className="h-5 w-5 rounded-md bg-accent/10 flex items-center justify-center flex-shrink-0">
                               <ToolIcon className="h-3 w-3 text-accent" />
                             </div>
@@ -413,7 +414,7 @@ export function ScratchpadCapture() {
                       }
                     }
                     return (
-                      <h3 className="flex items-center gap-2 text-[12.5px] font-semibold text-foreground/90 mt-3.5 mb-1.5 pl-1 border-l-2 border-accent/40 ml-0.5">
+                      <h3 className="flex items-center gap-2.5 text-sm font-semibold text-foreground/90 mt-4 mb-2 pl-1.5 border-l-2 border-accent/40 ml-0.5">
                         <ArrowRight className="h-3 w-3 text-accent flex-shrink-0" />
                         {children}
                       </h3>
@@ -461,7 +462,7 @@ export function ScratchpadCapture() {
                       const regex = new RegExp(`^${field}:`, "i");
                       if (regex.test(text.trim())) {
                         return (
-                          <li className="flex items-start gap-2.5 text-sm text-foreground/90 list-none py-1 pl-1">
+                          <li className="flex items-start gap-3 text-[15px] text-foreground/90 list-none py-1.5 pl-1">
                             <div className="h-5 w-5 rounded-md bg-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                               <IconComp className="h-3 w-3 text-accent" />
                             </div>
@@ -471,14 +472,14 @@ export function ScratchpadCapture() {
                       }
                     }
                     return (
-                      <li className="text-sm text-foreground/85 py-1 ml-1 flex items-start gap-2 list-none">
-                        <span className="mt-2 h-1 w-1 rounded-full bg-muted-foreground/50 flex-shrink-0" />
+                      <li className="text-[15px] text-foreground/85 py-1.5 ml-1 flex items-start gap-2.5 list-none">
+                        <span className="mt-2.5 h-1 w-1 rounded-full bg-muted-foreground/50 flex-shrink-0" />
                         <span className="leading-relaxed">{children}</span>
                       </li>
                     );
                   },
-                  ul: ({ children }) => <ul className="my-2 space-y-0.5">{children}</ul>,
-                  ol: ({ children }) => <ol className="my-2 space-y-0.5 list-decimal list-inside">{children}</ol>,
+                  ul: ({ children }) => <ul className="my-3 space-y-1">{children}</ul>,
+                  ol: ({ children }) => <ol className="my-3 space-y-1 list-decimal list-inside">{children}</ol>,
                   p: ({ children }) => {
                     const text = extractText(children);
                     // Tool recommendation card
@@ -489,13 +490,13 @@ export function ScratchpadCapture() {
                       if (route) {
                         const ToolIcon = route.icon;
                         return (
-                          <div className="my-2.5 rounded-lg border border-primary/15 bg-primary/5 p-3 flex items-center gap-3">
-                            <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary/10 flex-shrink-0">
-                              <ToolIcon className="h-4 w-4 text-primary" />
+                          <div className="my-3 rounded-lg border border-primary/15 bg-primary/5 p-4 flex items-center gap-3">
+                            <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-primary/10 flex-shrink-0">
+                              <ToolIcon className="h-4.5 w-4.5 text-primary" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Recommended Tool</span>
-                              <p className="text-sm font-bold text-foreground leading-tight">{route.label}</p>
+                              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Recommended Tool</span>
+                              <p className="text-[15px] font-bold text-foreground leading-tight">{route.label}</p>
                             </div>
                             <Link to={route.path}>
                               <Button
@@ -522,7 +523,7 @@ export function ScratchpadCapture() {
                         const after = text.slice((inlineToolMatch.index || 0) + inlineToolMatch[0].length);
                         const whyMatch = after.match(/^\s*Why:\s*(.*)/i);
                         return (
-                          <div className="text-sm leading-relaxed text-foreground/85 my-2 flex items-center flex-wrap gap-1.5">
+                          <div className="text-[15px] leading-relaxed text-foreground/85 my-3 flex items-center flex-wrap gap-1.5">
                             {before && <span>{before}</span>}
                             <Link to={route.path} className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-xs hover:bg-primary/20 hover:shadow-sm transition-all border border-primary/15">
                               <ToolIcon className="h-3 w-3" />
@@ -572,9 +573,9 @@ export function ScratchpadCapture() {
                       if (lastIndex < plainText.length) {
                         parts.push(plainText.slice(lastIndex));
                       }
-                      return <p className="text-sm leading-relaxed text-foreground/85 my-2">{parts}</p>;
+                      return <p className="text-[15px] leading-relaxed text-foreground/85 my-3">{parts}</p>;
                     }
-                    return <p className="text-sm leading-relaxed text-foreground/85 my-2">{children}</p>;
+                    return <p className="text-[15px] leading-relaxed text-foreground/85 my-3">{children}</p>;
                   },
                   hr: () => <div className="h-px bg-border/50 my-5" />,
                 }}
