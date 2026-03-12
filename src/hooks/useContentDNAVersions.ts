@@ -18,6 +18,28 @@ export interface ContentDNAVersion {
   created_at: string;
 }
 
+export interface ContentDNAActivityEntry {
+  id: string;
+  tenant_id: string;
+  profile_id: string | null;
+  user_id: string;
+  section: string;
+  action: string;
+  artifact_name: string | null;
+  artifact_count: number | null;
+  metadata: Json;
+  created_at: string;
+}
+
+/** Unified timeline item combining versions + activities */
+export interface TimelineEntry {
+  type: 'version' | 'activity';
+  id: string;
+  created_at: string;
+  version?: ContentDNAVersion;
+  activity?: ContentDNAActivityEntry;
+}
+
 interface UseContentDNAVersionsOptions {
   contentDnaId?: string | null;
   profileId?: string | null;
@@ -28,47 +50,80 @@ export function useContentDNAVersions(options: UseContentDNAVersionsOptions = {}
   const workspaceId = useActiveWorkspaceId();
   
   const [versions, setVersions] = useState<ContentDNAVersion[]>([]);
+  const [activities, setActivities] = useState<ContentDNAActivityEntry[]>([]);
+  const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRestoring, setIsRestoring] = useState(false);
 
-  const fetchVersions = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     if (!workspaceId) return;
     
     setIsLoading(true);
     try {
-      let query = supabase
+      // Fetch versions
+      let versionQuery = supabase
         .from('content_dna_versions')
         .select('*')
         .eq('tenant_id', workspaceId)
         .order('version_number', { ascending: false });
       
       if (contentDnaId) {
-        // When we have the exact DNA id, filter by it (profileId is redundant)
-        query = query.eq('content_dna_id', contentDnaId);
+        versionQuery = versionQuery.eq('content_dna_id', contentDnaId);
       } else if (profileId) {
-        // Filter by profile when no specific DNA id
-        query = query.eq('profile_id', profileId);
-      }
-      // When neither is provided, return all versions for the tenant
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('Error fetching versions:', error);
-        return;
+        versionQuery = versionQuery.eq('profile_id', profileId);
       }
 
-      setVersions((data || []) as ContentDNAVersion[]);
+      // Fetch activities
+      let activityQuery = supabase
+        .from('content_dna_activity')
+        .select('*')
+        .eq('tenant_id', workspaceId)
+        .order('created_at', { ascending: false })
+        .limit(100);
+
+      if (profileId) {
+        activityQuery = activityQuery.eq('profile_id', profileId);
+      }
+
+      const [versionsResult, activitiesResult] = await Promise.all([
+        versionQuery,
+        activityQuery,
+      ]);
+
+      const fetchedVersions = (versionsResult.data || []) as ContentDNAVersion[];
+      const fetchedActivities = (activitiesResult.data || []) as ContentDNAActivityEntry[];
+
+      setVersions(fetchedVersions);
+      setActivities(fetchedActivities);
+
+      // Build unified timeline
+      const timelineItems: TimelineEntry[] = [
+        ...fetchedVersions.map(v => ({
+          type: 'version' as const,
+          id: `v-${v.id}`,
+          created_at: v.created_at,
+          version: v,
+        })),
+        ...fetchedActivities.map(a => ({
+          type: 'activity' as const,
+          id: `a-${a.id}`,
+          created_at: a.created_at,
+          activity: a,
+        })),
+      ];
+
+      timelineItems.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      setTimeline(timelineItems);
     } catch (error) {
-      console.error('Error fetching versions:', error);
+      console.error('Error fetching version/activity data:', error);
     } finally {
       setIsLoading(false);
     }
   }, [workspaceId, contentDnaId, profileId]);
 
   useEffect(() => {
-    fetchVersions();
-  }, [fetchVersions]);
+    fetchData();
+  }, [fetchData]);
 
   const restoreVersion = useCallback(async (version: ContentDNAVersion) => {
     if (!version.content_dna_id) return false;
@@ -90,8 +145,7 @@ export function useContentDNAVersions(options: UseContentDNAVersionsOptions = {}
         return false;
       }
 
-      // Refresh versions after restore (new version will be created by trigger)
-      await fetchVersions();
+      await fetchData();
       return true;
     } catch (error) {
       console.error('Error restoring version:', error);
@@ -99,44 +153,33 @@ export function useContentDNAVersions(options: UseContentDNAVersionsOptions = {}
     } finally {
       setIsRestoring(false);
     }
-  }, [fetchVersions]);
+  }, [fetchData]);
 
   const compareVersions = useCallback((v1: ContentDNAVersion, v2: ContentDNAVersion) => {
     const changes: string[] = [];
-    
-    // Compare voice analysis
-    const v1Voice = JSON.stringify(v1.voice_analysis);
-    const v2Voice = JSON.stringify(v2.voice_analysis);
-    if (v1Voice !== v2Voice) {
+    if (JSON.stringify(v1.voice_analysis) !== JSON.stringify(v2.voice_analysis)) {
       changes.push('Voice analysis updated');
     }
-    
-    // Compare brand platform
-    const v1Brand = JSON.stringify(v1.brand_platform);
-    const v2Brand = JSON.stringify(v2.brand_platform);
-    if (v1Brand !== v2Brand) {
+    if (JSON.stringify(v1.brand_platform) !== JSON.stringify(v2.brand_platform)) {
       changes.push('Brand platform updated');
     }
-    
-    // Compare custom instructions
     if (v1.custom_instructions !== v2.custom_instructions) {
       changes.push('Custom instructions updated');
     }
-    
-    // Compare sample count
     if (v1.sample_count !== v2.sample_count) {
       const diff = v2.sample_count - v1.sample_count;
       changes.push(`Sample count ${diff > 0 ? 'increased' : 'decreased'} by ${Math.abs(diff)}`);
     }
-    
     return changes;
   }, []);
 
   return {
     versions,
+    activities,
+    timeline,
     isLoading,
     isRestoring,
-    fetchVersions,
+    fetchVersions: fetchData,
     restoreVersion,
     compareVersions,
   };
