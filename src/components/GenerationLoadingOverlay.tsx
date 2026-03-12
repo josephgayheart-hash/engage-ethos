@@ -328,27 +328,15 @@ export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown
                   }`}
                 >
                   {/* Status icon */}
-                  <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center mt-0.5 transition-all duration-500 ${
-                    isComplete
-                      ? "scale-100"
-                      : isCurrent
-                        ? "scale-110"
-                        : "bg-muted text-muted-foreground"
-                  }`}
-                    style={
-                      isComplete
-                        ? { ...brandBg(0.15), ...(hasBrandColors ? brandText : {}) }
-                        : isCurrent
-                          ? { ...brandBg(0.1), ...(hasBrandColors ? brandText : {}) }
-                          : {}
-                    }
+                  <div
                     className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center mt-0.5 transition-all duration-500 ${
-                      !hasBrandColors ? (
-                        isComplete ? "bg-primary/15 text-primary" : isCurrent ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-                      ) : (
-                        isComplete || isCurrent ? "" : "bg-muted text-muted-foreground"
-                      )
-                    } ${isComplete ? "scale-100" : isCurrent ? "scale-110" : ""}`}
+                      isComplete ? "scale-100" : isCurrent ? "scale-110" : ""
+                    } ${
+                      !hasBrandColors
+                        ? (isComplete ? "bg-primary/15 text-primary" : isCurrent ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")
+                        : (isComplete || isCurrent ? "" : "bg-muted text-muted-foreground")
+                    }`}
+                    style={(isComplete || isCurrent) && hasBrandColors ? { backgroundColor: `${brandPrimary}${isComplete ? '26' : '1a'}`, color: brandPrimary } : {}}
                   >
                     {isComplete ? (
                       <Check className="w-3.5 h-3.5" style={{ animation: "popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards" }} />
