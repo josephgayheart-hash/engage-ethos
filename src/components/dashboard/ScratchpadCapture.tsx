@@ -376,23 +376,23 @@ export function ScratchpadCapture() {
 
         {/* Results panel */}
         {showResults && organizedText && (
-          <div className="animate-in fade-in-0 slide-in-from-bottom-3 duration-500 pt-3 pl-3 space-y-0">
-            <div className="max-w-none text-foreground space-y-1">
+          <div className="animate-in fade-in-0 slide-in-from-bottom-3 duration-500 pt-5 pl-4 pr-2 space-y-0">
+            <div className="max-w-none text-foreground space-y-1.5">
               <ReactMarkdown
                 components={{
                   h1: ({ children }) => (
-                    <div className="mb-4 mt-1">
-                      <h1 className="text-lg font-bold text-foreground tracking-tight flex items-center gap-2">
-                        <div className="h-6 w-1 rounded-full bg-primary" />
+                    <div className="mb-5 mt-1">
+                      <h1 className="text-xl font-bold text-foreground tracking-tight flex items-center gap-2.5">
+                        <div className="h-7 w-1 rounded-full bg-primary" />
                         {children}
                       </h1>
-                      <div className="h-px bg-gradient-to-r from-primary/30 via-border/50 to-transparent mt-2" />
+                      <div className="h-px bg-gradient-to-r from-primary/30 via-border/50 to-transparent mt-3" />
                     </div>
                   ),
                   h2: ({ children }) => (
-                    <div className="mt-6 first:mt-0">
-                      <div className="h-px bg-border/40 mb-4" />
-                      <h2 className="text-[13px] font-bold uppercase tracking-widest text-primary mb-2.5 flex items-center gap-2">
+                    <div className="mt-7 first:mt-0">
+                      <div className="h-px bg-border/40 mb-5" />
+                      <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-3 flex items-center gap-2">
                         <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary" />
                         {children}
                       </h2>
