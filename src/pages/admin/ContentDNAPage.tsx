@@ -1920,7 +1920,7 @@ export default function ContentDNAPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="flex flex-wrap gap-2">
-                        {analysis.voice_analysis.keyCharacteristics.map((char, i) => (
+                        {(analysis.voice_analysis.keyCharacteristics || []).map((char, i) => (
                           <Badge key={i} variant="secondary" className="bg-[hsl(210,20%,94%)]">
                             <CheckCircle2 className="w-3 h-3 mr-1" />
                             {char}
