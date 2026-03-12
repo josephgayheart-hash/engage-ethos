@@ -701,14 +701,15 @@ SETTING & ENVIRONMENT RULES — READ CAREFULLY:
 
 CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
 - ABSOLUTELY NO TEXT of any kind in the image. No words, letters, numbers, symbols, abbreviations, university names, or institution names.
-- Do NOT put text on clothing — no "University", no school names, no abbreviations, no letters. Show PLAIN solid-color clothing in the brand palette instead.
+- Do NOT put text on clothing — no "University", no school names, no abbreviations, no single letters, no letter marks, no monograms. Show PLAIN solid-color clothing in the brand palette instead. A plain hoodie in the brand color is ALWAYS better than one with any mark on it.
+- ANTI-HALLUCINATION: Do NOT render ANY recognizable university marks, letter logos, or symbols from ANY institution — not from this institution and not from any other institution. The AI does not know what any university's actual logo or mark looks like and WILL hallucinate the wrong one (e.g., rendering a Minnesota "M" for Arizona State, or a Michigan "M" for Maryland). This is brand-damaging. ALL clothing, banners, and surfaces must be PLAIN with no marks whatsoever.
 - Do NOT put text on banners, signs, buildings, flags, or any surface. All signage and banners should be BLANK or show only solid brand colors / abstract patterns.
-- Do NOT render any logos, crests, seals, emblems, wordmarks, or the institution's name as text. AI cannot accurately reproduce these — any attempt will look wrong and damage the brand. The user will add these in Brand Studio.
+- Do NOT render any logos, crests, seals, emblems, wordmarks, letter marks, monograms, or the institution's name as text. AI cannot accurately reproduce these — any attempt will look wrong and damage the brand. The user will add these in Brand Studio.
 - Do NOT render any mascot, mascot costume, cartoon character, or animal figure.
-- If you feel the urge to add text anywhere — DON'T. A plain scarlet hoodie is better than one with garbled "Uhiversity" on it.
-- The institution's identity should come through via COLORS, ARCHITECTURE, and ENVIRONMENT — never through rendered text or logos.
+- If you feel the urge to add ANY letter, symbol, or mark anywhere — DON'T. A plain scarlet hoodie is ALWAYS better than one with any mark on it, even if you think the mark is correct — it isn't.
+- The institution's identity should come through via COLORS, ARCHITECTURE, and ENVIRONMENT — never through rendered text, logos, or letter marks.
 - ABSOLUTELY NO QR codes — never generate a QR code under any circumstances.
-- NEVER include "CampusVoice" or any platform/SaaS branding — only the institution's own brand identity.
+- NEVER include "CampusVoice" or any platform/SaaS branding — only the institution's own brand identity expressed through colors and environment.
 - Professional quality: sharp focus on subject, creamy bokeh backgrounds, rich color depth
 - Feel warm, authentic, and aspirational — like a spread in a top university's viewbook
 - Match the tone and energy of the communication moment${toneContext ? ` — the visual should feel ${tone}` : ''}
