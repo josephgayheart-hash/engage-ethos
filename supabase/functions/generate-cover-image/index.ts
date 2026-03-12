@@ -211,7 +211,17 @@ Requirements:
       });
     }
 
-    const aiData = await aiResponse.json();
+    // Safely parse AI response — gateway may return HTML error pages
+    const aiText = await aiResponse.text();
+    let aiData: any;
+    try {
+      aiData = JSON.parse(aiText);
+    } catch {
+      console.error("AI response was not JSON:", aiText.slice(0, 200));
+      return new Response(JSON.stringify({ error: "AI service returned an invalid response. Please try again." }), {
+        status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const imageDataUrl = aiData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
 
     if (!imageDataUrl) {

@@ -128,20 +128,20 @@ const features = [
 
 const valueProps = [
   {
-    title: 'Brand protection at scale',
-    description: 'Protect your brand across every college, every department — without being in every meeting.',
+    title: 'Brand Protection at Scale',
+    description: 'Guard your brand across every department — no extra meetings required.',
   },
   {
-    title: 'University-to-subunit governance',
-    description: 'Build your institution profile once. Subunits inherit or customize brand elements with clear hierarchy and control.',
+    title: 'Subunit Governance',
+    description: 'One institutional profile. Subunits inherit or customize as needed.',
   },
   {
-    title: 'Audience-first, brand-aligned',
-    description: 'Start with your audience. Align to brand pillars. Then craft messages that resonate.',
+    title: 'Audience-First Messaging',
+    description: 'Start with who you're reaching. Align to brand pillars automatically.',
   },
   {
-    title: 'Journey planning that solves real problems',
-    description: 'Map multi-week communication flows with intensity controls, ramp-up patterns, and visual timelines your team will actually use.',
+    title: 'Journey Planning',
+    description: 'Map multi-week flows with intensity controls and visual timelines.',
   },
 ];
 
