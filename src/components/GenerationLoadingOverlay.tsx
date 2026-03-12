@@ -438,9 +438,8 @@ export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown
                   transform: "translateY(8px)",
                   ...(hasBrandColors ? { borderColor: `${brandPrimary}33` } : {}),
                 }}
-                }}
               >
-                <TagIcon className="w-3 h-3 text-primary/60" />
+                <TagIcon className={hasBrandColors ? "w-3 h-3" : "w-3 h-3 text-primary/60"} style={hasBrandColors ? { color: `${brandPrimary}99` } : {}} />
                 {tag.label}
               </Badge>
             );
