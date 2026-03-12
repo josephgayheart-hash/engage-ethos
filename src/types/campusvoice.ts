@@ -309,8 +309,11 @@ export interface EmailDraft {
 export interface LandingPageDraft {
   headline: string;
   subheadline?: string;
+  slug?: string;
   body: string;
+  sections?: { heading: string; text: string }[];
   cta: string;
+  ctaUrl?: string;
 }
 
 export interface CallScriptDraft {

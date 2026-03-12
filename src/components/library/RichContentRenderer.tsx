@@ -466,20 +466,33 @@ const CallScriptRenderer = ({ content }: { content: CallScriptDraft & { _type: s
 // Render landing page
 const LandingPageRenderer = ({ content }: { content: LandingPageDraft & { _type: string } }) => (
   <div className="border rounded-lg overflow-hidden">
-    <div className="bg-gradient-to-r from-primary/10 to-secondary/10 p-6 text-center space-y-2">
-      <h2 className="text-2xl font-bold">{content.headline}</h2>
+    <div className="bg-gradient-to-r from-primary/10 to-secondary/10 p-8 text-center space-y-3">
+      <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{content.headline}</h1>
       {content.subheadline && (
-        <p className="text-muted-foreground">{content.subheadline}</p>
+        <h2 className="text-base md:text-lg text-muted-foreground font-medium">{content.subheadline}</h2>
+      )}
+      {content.slug && (
+        <p className="text-xs text-muted-foreground/60 font-mono">/{content.slug}</p>
       )}
     </div>
-    <div className="p-6">
-      <div className="prose prose-sm max-w-none mb-6">
-        {content.body.split('\n').map((para, i) => (
-          <p key={i} className="mb-3">{para}</p>
+    <div className="p-6 space-y-6">
+      <div className="prose prose-sm max-w-none">
+        {content.body.split('\n').filter(Boolean).map((para, i) => (
+          <p key={i} className="mb-3 leading-relaxed">{para}</p>
         ))}
       </div>
-      <div className="text-center">
-        <span className="inline-block bg-primary text-primary-foreground px-6 py-2 rounded-lg font-medium">
+      {content.sections && content.sections.length > 0 && (
+        <div className="space-y-4 border-t border-border pt-4">
+          {content.sections.map((section, i) => (
+            <div key={i}>
+              <h2 className="text-lg font-semibold mb-1">{section.heading}</h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">{section.text}</p>
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="text-center pt-2">
+        <span className="inline-block bg-primary text-primary-foreground px-8 py-3 rounded-lg font-semibold text-sm tracking-wide">
           {content.cta}
         </span>
       </div>

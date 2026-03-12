@@ -226,7 +226,7 @@ ${daysUntilDeadline ? `- Days Until Deadline: ${daysUntilDeadline} days remainin
         sms: "Short SMS message. 160 characters max. Direct and actionable. Include link placeholder if needed.",
         "social-media": "Social media post. Engaging and shareable. 100-200 characters. Use emojis sparingly. Include hashtag suggestions.",
         portal: "Portal notification message. Clear and informative. 50-100 words. Action-oriented.",
-        "landing-page": "Landing page copy. Compelling headline and body. 100-200 words. Clear value proposition and CTA.",
+        "landing-page": "Conversion-optimized landing page. Return JSON: { \"headline\": \"Benefit-driven H1 (under 10 words)\", \"subheadline\": \"Supporting H2 value proposition\", \"slug\": \"url-slug\", \"body\": \"2-3 punchy paragraphs, scannable, benefit-focused\", \"sections\": [{\"heading\": \"H2 Heading\", \"text\": \"Brief content\"}], \"cta\": \"Action verb CTA\", \"ctaUrl\": \"#action\" }. Keep all copy concise and short-form. Every word must earn its place.",
         "direct-mail": "Direct mail letter opening paragraph and key message. Formal tone. 100-150 words.",
         "phone-call": "Phone call script talking points. Bullet format. Include greeting, key message, and closing.",
         "digital-ad-search": `Google/Bing Search Ad. Return JSON object with exact fields: { "headlines": ["Headline 1 (max 30 chars)", "Headline 2 (max 30 chars)", "Headline 3 (max 30 chars)"], "descriptions": ["Description 1 (max 90 chars)", "Description 2 (max 90 chars)"], "displayUrl": "university.edu/path" }`,
