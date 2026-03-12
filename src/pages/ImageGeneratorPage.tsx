@@ -966,11 +966,18 @@ const ImageGeneratorPage = () => {
                           goal={goal}
                         />
                       ) : viewMode === "mockup" && imageUrl ? (
-                        <ChannelMockup
-                          channel={channel}
-                          imageUrl={imageUrl}
-                          profileName={profiles?.find(p => p.id === selectedProfileId)?.name}
-                        />
+                        <div className="relative group cursor-pointer" onClick={() => setIsLightboxOpen(true)}>
+                          <ChannelMockup
+                            channel={channel}
+                            imageUrl={imageUrl}
+                            profileName={profiles?.find(p => p.id === selectedProfileId)?.name}
+                          />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100 rounded-lg">
+                            <div className="bg-background/90 backdrop-blur-sm rounded-full p-3 shadow-lg border border-border/50 transition-transform duration-200 group-hover:scale-100 scale-90">
+                              <ZoomIn className="w-5 h-5 text-foreground" />
+                            </div>
+                          </div>
+                        </div>
                       ) : imageUrl ? (
                         <div className="relative group rounded-lg overflow-hidden">
                           <img
