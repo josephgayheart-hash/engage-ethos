@@ -87,12 +87,6 @@ export interface BrandOverlayControlsProps {
   goal?: string;
   sceneDescription?: string;
 
-  // Smart Layer
-  onSmartLayer?: () => void;
-  isSmartLayering?: boolean;
-  smartLayerImageUrl?: string | null;
-  onClearSmartLayer?: () => void;
-
   // Canvas background (no-image mode)
   hasImage?: boolean;
   canvasBackgroundType?: CanvasBackgroundType;
