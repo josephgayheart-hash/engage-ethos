@@ -41,12 +41,7 @@ export function WorkflowHero({ context }: WorkflowHeroProps) {
     Math.floor(Math.random() * ROTATING_MESSAGES.length)
   );
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setMessageIndex(prev => (prev + 1) % ROTATING_MESSAGES.length);
-    }, 8000);
-    return () => clearInterval(interval);
-  }, []);
+
 
   const getGreeting = () => {
     const hour = new Date().getHours();

@@ -31,12 +31,8 @@ export function OnboardingHero({ context }: OnboardingHeroProps) {
     Math.floor(Math.random() * ONBOARDING_MESSAGES.length)
   );
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setMessageIndex(prev => (prev + 1) % ONBOARDING_MESSAGES.length);
-    }, 8000);
-    return () => clearInterval(interval);
-  }, []);
+
+
 
   const getNextStep = () => {
     if (!setupProgress.hasInstitution) return { label: 'Set Up Institution', href: '/university-settings' };
