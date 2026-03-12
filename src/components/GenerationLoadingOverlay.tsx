@@ -445,8 +445,11 @@ export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown
         <div className="w-full max-w-xs">
           <div className="h-1.5 bg-muted rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-primary/80 to-primary rounded-full transition-all duration-1000 ease-out"
-              style={{ width: allDone ? "100%" : `${Math.min(8 + (phase / maxPhase) * 90, 95)}%` }}
+              className={hasBrandColors ? "h-full rounded-full transition-all duration-1000 ease-out" : "h-full bg-gradient-to-r from-primary/80 to-primary rounded-full transition-all duration-1000 ease-out"}
+              style={{
+                width: allDone ? "100%" : `${Math.min(8 + (phase / maxPhase) * 90, 95)}%`,
+                ...(hasBrandColors ? { background: `linear-gradient(to right, ${brandPrimary}cc, ${brandAccent || brandPrimary})` } : {}),
+              }}
             />
           </div>
         </div>
