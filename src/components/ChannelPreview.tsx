@@ -1090,9 +1090,9 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
                 {logoUrl && (
                   <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain mx-auto mb-3 drop-shadow-lg" />
                 )}
-                <h2 className="text-xl font-bold mb-1 text-white drop-shadow-lg">{lp.headline}</h2>
+                <h1 className="text-xl font-bold mb-1 text-white drop-shadow-lg">{lp.headline}</h1>
                 {lp.subheadline && (
-                  <p className="text-sm text-white/80">{lp.subheadline}</p>
+                  <h2 className="text-sm text-white/80 font-medium">{lp.subheadline}</h2>
                 )}
               </div>
               <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1110,13 +1110,16 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
               <p className="text-xs text-muted-foreground">Generating hero image...</p>
             </div>
           ) : (
-            <div className="p-6 text-center" style={headerStyle}>
+            <div className="p-8 text-center" style={headerStyle}>
               {logoUrl && (
                 <img src={logoUrl} alt="Logo" className="w-16 h-16 object-contain mx-auto mb-4" />
               )}
-              <h2 className="text-xl font-bold mb-2">{lp.headline}</h2>
+              <h1 className="text-xl font-bold mb-2 tracking-tight">{lp.headline}</h1>
               {lp.subheadline && (
-                <p className="text-sm text-muted-foreground">{lp.subheadline}</p>
+                <h2 className="text-sm text-muted-foreground font-medium">{lp.subheadline}</h2>
+              )}
+              {lp.slug && (
+                <p className="text-[10px] text-muted-foreground/50 font-mono mt-2">/{lp.slug}</p>
               )}
               {isVisualChannel && (
                 <Button variant="ghost" size="sm" className="text-xs mt-2" onClick={generateChannelImage}>
@@ -1126,10 +1129,20 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
             </div>
           )}
         </div>
-        <div className="p-6">
-          <p className="text-sm whitespace-pre-wrap mb-4">{lp.body}</p>
+        <div className="p-6 space-y-4">
+          <div className="text-sm whitespace-pre-wrap leading-relaxed">{lp.body}</div>
+          {lp.sections && lp.sections.length > 0 && (
+            <div className="space-y-3 border-t border-border pt-4">
+              {lp.sections.map((section, i) => (
+                <div key={i}>
+                  <h2 className="text-base font-semibold mb-1">{section.heading}</h2>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{section.text}</p>
+                </div>
+              ))}
+            </div>
+          )}
           <Button 
-            className="w-full text-white"
+            className="w-full text-white font-semibold tracking-wide"
             style={{ backgroundColor: primaryColor }}
           >
             {lp.cta}

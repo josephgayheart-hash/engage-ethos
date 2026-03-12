@@ -113,7 +113,7 @@ IMPORTANT: Respond ONLY with valid JSON:
     "sms": "Short SMS message here",
     "social-media": "Social media post content here",
     "portal": "Portal notification content here",
-    "landing-page": { "headline": "...", "subheadline": "...", "body": "...", "cta": "CTA button text" },
+    "landing-page": { "headline": "Short benefit-driven H1", "subheadline": "Supporting H2 value proposition", "slug": "url-friendly-slug", "body": "Concise benefit-focused copy", "sections": [{"heading": "Section H2 Heading", "text": "Brief section content"}], "cta": "Action-Oriented CTA", "ctaUrl": "#apply" },
     "direct-mail": "Full letter content here",
     "phone-call": { 
       "opening": "Hello, this is (your name) from (your institution)...",
