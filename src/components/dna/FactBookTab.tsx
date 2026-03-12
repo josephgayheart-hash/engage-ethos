@@ -255,7 +255,41 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
     }
   };
 
-  const handleImportSelected = async () => {
+  const handleScrapeUrl = async () => {
+    if (!scrapeUrl.trim()) return;
+    
+    setIsScraping(true);
+    try {
+      const response = await firecrawlApi.scrape(scrapeUrl, { 
+        formats: ['markdown'],
+        onlyMainContent: true 
+      });
+      
+      if (response.success) {
+        const markdown = response.data?.markdown || response.data?.content || '';
+        if (markdown) {
+          setImportText(markdown);
+          // Auto-set source document from URL
+          try {
+            const urlObj = new URL(scrapeUrl.startsWith('http') ? scrapeUrl : `https://${scrapeUrl}`);
+            setSourceDocument(urlObj.hostname + ' Facts Page');
+          } catch {
+            setSourceDocument('Web Page');
+          }
+        } else {
+          toastError('No content found', 'The URL did not return any extractable text content.');
+        }
+      } else {
+        toastError('Scrape failed', response.error || 'Could not scrape the URL');
+      }
+    } catch (error) {
+      toastError('Error scraping URL', error);
+    } finally {
+      setIsScraping(false);
+    }
+  };
+
+
     const factsToImport = parsedFacts.filter((_, i) => selectedParsedFacts.has(i));
     if (factsToImport.length === 0) return;
     
