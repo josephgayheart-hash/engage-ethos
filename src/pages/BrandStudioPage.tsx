@@ -712,6 +712,8 @@ const BrandStudioPage = () => {
               institutionName={institutionName}
             />
 
+            <CanvasRuler targetRef={canvasRef} />
+
             {/* Hover overlay actions — only at bottom, not covering canvas interaction area */}
             <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-5 pt-12 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-b-lg pointer-events-none z-20">
               <div className="flex flex-wrap gap-2 pointer-events-auto justify-center px-4">
