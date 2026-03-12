@@ -430,12 +430,14 @@ export function GenerationLoadingOverlay({ isVisible, context, onCompletionShown
               <Badge
                 key={i}
                 variant="outline"
-                className="text-[10px] gap-1 border-primary/20"
+                className={hasBrandColors ? "text-[10px] gap-1" : "text-[10px] gap-1 border-primary/20"}
                 style={{
                   animation: "slideInTag 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards",
                   animationDelay: `${300 + i * 100}ms`,
                   opacity: 0,
                   transform: "translateY(8px)",
+                  ...(hasBrandColors ? { borderColor: `${brandPrimary}33` } : {}),
+                }}
                 }}
               >
                 <TagIcon className="w-3 h-3 text-primary/60" />
