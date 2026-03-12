@@ -208,32 +208,36 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const [isPdfExporting, setIsPdfExporting] = useState(false);
+
   const handleExportToPDF = async () => {
+    setIsPdfExporting(true);
+    const loadingToastId = toast.loading(
+      channel === "case-for-care"
+        ? "Generating Case for Support PDF with AI images… This may take 15–30 seconds."
+        : "Generating PDF…",
+      { duration: Infinity }
+    );
     try {
       if (channel === "talking-points") {
         await exportTalkingPointsToPDF(editedContent as TalkingPointsDraft, institutionName, branding);
-        toast({
-          title: "PDF Downloaded",
-          description: "Executive Talking Points exported successfully.",
-        });
+        toast.dismiss(loadingToastId);
+        toast.success("Executive Talking Points exported successfully.");
         return;
       }
 
       if (channel === "case-for-care") {
         await exportCaseForSupportToPDF(editedContent as CaseForCareDraft, institutionName, branding);
-        toast({
-          title: "PDF Downloaded",
-          description: "Case for Support exported successfully.",
-        });
+        toast.dismiss(loadingToastId);
+        toast.success("Case for Support exported successfully.");
         return;
       }
     } catch (error) {
       console.error("PDF export error:", error);
-      toast({
-        variant: "destructive",
-        title: "Export Failed",
-        description: error instanceof Error ? error.message : "Could not generate PDF. Please try again.",
-      });
+      toast.dismiss(loadingToastId);
+      toast.error(error instanceof Error ? error.message : "Could not generate PDF. Please try again.");
+    } finally {
+      setIsPdfExporting(false);
     }
   };
 
