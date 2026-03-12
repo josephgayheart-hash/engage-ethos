@@ -515,6 +515,7 @@ export async function exportCaseForSupportToPDF(
   branding?: BrandingOptions
 ): Promise<void> {
   const doc = new jsPDF();
+  try {
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 25; // Increased margin for better readability
