@@ -548,14 +548,14 @@ export async function exportCaseForSupportToPDF(
       })
     : Promise.resolve(null);
 
-  // Race image generation against a 25s timeout so the PDF always downloads
+  // Fetch campus photos directly (fast, no AI generation needed)
   const imagesPromise = Promise.race([
-    generatePdfImages(cfc, institutionName, branding),
+    fetchCampusPhotosForPdf(),
     new Promise<(LoadedImageData | null)[]>((resolve) =>
       setTimeout(() => {
-        console.warn("PDF image generation timed out after 25s, proceeding without images");
+        console.warn("Campus photo loading timed out after 10s, proceeding without images");
         resolve([null, null, null]);
-      }, 25_000)
+      }, 10_000)
     ),
   ]);
 
