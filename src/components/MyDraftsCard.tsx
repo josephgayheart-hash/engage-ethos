@@ -122,11 +122,25 @@ export function MyDraftsCard() {
             My Drafts
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="animate-pulse space-y-3">
-            <div className="h-12 bg-muted rounded" />
-            <div className="h-12 bg-muted rounded" />
-          </div>
+        <CardContent className="space-y-2">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="p-2.5 rounded-lg border border-border animate-pulse">
+              <div className="flex items-start gap-2.5">
+                <div className="w-8 h-8 rounded-md bg-muted shrink-0" />
+                <div className="w-9 h-9 rounded-md bg-muted shrink-0" />
+                <div className="flex-1 min-w-0 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-4 bg-muted rounded w-2/3" />
+                    <div className="h-4 bg-muted rounded w-12" />
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="h-3 bg-muted rounded w-16" />
+                    <div className="h-3 bg-muted rounded w-20" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
         </CardContent>
       </Card>
     );
