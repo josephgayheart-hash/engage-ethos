@@ -655,10 +655,6 @@ const BrandStudioPage = () => {
                 tone={tone}
                 goal={goal}
                 sceneDescription={sceneDescription}
-                onSmartLayer={imageUrl ? handleSmartLayer : undefined}
-                isSmartLayering={isSmartLayering}
-                smartLayerImageUrl={smartLayerImageUrl}
-                onClearSmartLayer={() => setSmartLayerImageUrl(null)}
                 hasImage={!!imageUrl}
                 canvasBackgroundType={canvasBackgroundType}
                 onCanvasBackgroundTypeChange={setCanvasBackgroundType}
