@@ -843,9 +843,12 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                             {isScraping ? 'Scraping Web Page...' : isExtractingFile ? 'Extracting Document Text...' : 'AI Processing Facts...'}
                           </h4>
                           <p className="text-sm text-muted-foreground">
-                            {isExtractingFile 
+                            {isScraping 
+                              ? 'Fetching and extracting content from the web page'
+                              : isExtractingFile 
                               ? 'Reading and parsing your document content' 
                               : 'Identifying and categorizing facts from your content'}
+                          </p>
                           </p>
                         </div>
                       </div>
