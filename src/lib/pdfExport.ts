@@ -1166,8 +1166,8 @@ export async function exportCaseForSupportToPDF(
     doc.setFontSize(8);
     doc.setTextColor(255, 255, 255);
     
-    // Left side: Institution name
-    doc.text(institutionName || '', margin, pageHeight - 8);
+    // Left side: Page numbers
+    doc.text(`Page ${i} of ${pageCount}`, margin, pageHeight - 8);
     
     // Center: Page numbers
     doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, pageHeight - 8, { align: "center" });
