@@ -95,13 +95,13 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       {/* Logo Header */}
-      <SidebarHeader className="border-b border-sidebar-border px-3 py-3">
+      <SidebarHeader className="border-b border-sidebar-border px-2 py-2">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild tooltip="CampusVoice.ai">
-              <NavLink to="/dashboard" className="flex items-center gap-0">
-                <span className="font-bold text-sm tracking-tight text-foreground">CampusVoice.ai</span>
-                <span className="text-[7px] text-muted-foreground -mt-2 ml-0.5">®</span>
+            <SidebarMenuButton size="sm" asChild tooltip="CampusVoice.ai">
+              <NavLink to="/dashboard" className="flex items-center justify-center gap-0 w-full">
+                <span className="font-semibold text-xs tracking-tight text-foreground">CampusVoice.ai</span>
+                <span className="text-[6px] text-muted-foreground -mt-1.5 ml-px">®</span>
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
