@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveWorkspaceId } from '@/contexts/WorkspaceContext';
 import { toastError, toastSuccess } from '@/lib/errors';
+import { logDNAActivity } from '@/hooks/useContentDNAActivity';
 
 export interface Fact {
   id: string;
@@ -160,6 +161,11 @@ export function useFactBook(options: UseFactBookOptions = {}) {
       const newFact = data as unknown as Fact;
       setFacts(prev => [newFact, ...prev]);
       
+      logDNAActivity(workspaceId, user.id, {
+        section: 'facts', action: 'added', profileId: profileId || null,
+        artifactName: input.label, metadata: { category: input.category },
+      });
+      
       toastSuccess('Fact added', `"${input.label}" has been added to your Fact Book.`);
       
       return newFact;
@@ -206,6 +212,11 @@ export function useFactBook(options: UseFactBookOptions = {}) {
       
       const newFacts = (data || []) as unknown as Fact[];
       setFacts(prev => [...newFacts, ...prev]);
+      
+      logDNAActivity(workspaceId, user.id, {
+        section: 'facts', action: 'imported', profileId: profileId || null,
+        artifactCount: newFacts.length,
+      });
       
       toastSuccess('Facts imported', `${newFacts.length} facts have been added to your Fact Book.`);
       
@@ -255,7 +266,15 @@ export function useFactBook(options: UseFactBookOptions = {}) {
       
       if (error) throw error;
       
+      const deletedFact = facts.find(f => f.id === id);
       setFacts(prev => prev.filter(f => f.id !== id));
+      
+      if (workspaceId && user?.id) {
+        logDNAActivity(workspaceId, user.id, {
+          section: 'facts', action: 'removed', profileId: profileId || null,
+          artifactName: deletedFact?.label,
+        });
+      }
       
       toastSuccess('Fact deleted', 'The fact has been removed from your Fact Book.');
       

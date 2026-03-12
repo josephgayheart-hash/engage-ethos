@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveWorkspaceId } from '@/contexts/WorkspaceContext';
 import { toast } from 'sonner';
+import { logDNAActivity } from '@/hooks/useContentDNAActivity';
 
 export interface DesignReference {
   id: string;
@@ -112,6 +113,12 @@ export function useDesignReferences({ profileId }: { profileId: string | null })
         if (insertError) throw insertError;
       }
 
+      logDNAActivity(workspaceId, user.id, {
+        section: 'design_refs', action: 'added', profileId,
+        artifactCount: files.length,
+        artifactName: name || files.map(f => f.name).join(', '),
+      });
+      
       toast.success(`${files.length} design reference${files.length > 1 ? 's' : ''} uploaded`);
       await fetchReferences();
     } catch (err: any) {
@@ -140,6 +147,14 @@ export function useDesignReferences({ profileId }: { profileId: string | null })
       if (error) throw error;
 
       setReferences(prev => prev.filter(r => r.id !== id));
+      
+      if (workspaceId && user?.id) {
+        logDNAActivity(workspaceId, user.id, {
+          section: 'design_refs', action: 'removed', profileId,
+          artifactName: ref?.name,
+        });
+      }
+      
       toast.success('Design reference removed');
     } catch (err) {
       console.error('Delete failed:', err);

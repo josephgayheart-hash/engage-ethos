@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveWorkspaceId } from '@/contexts/WorkspaceContext';
 import { useToast } from '@/hooks/use-toast';
+import { logDNAActivity } from '@/hooks/useContentDNAActivity';
 import type { BrandPlatform, BrandPillar, BrandPathway } from '@/types/campusvoice';
 
 export interface ContentDNASample {
@@ -269,6 +270,13 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
       if (error) throw error;
 
       setSamples(prev => [data as ContentDNASample, ...prev]);
+      
+      logDNAActivity(workspaceId, profile.id, {
+        section: 'samples', action: 'added', profileId: profileId || null,
+        artifactName: options.title || fileName,
+        metadata: { sampleType: options.sampleType },
+      });
+      
       toast({
         title: 'Sample Added',
         description: 'Content sample has been saved.',
@@ -293,7 +301,16 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
 
       if (error) throw error;
 
+      const deletedSample = samples.find(s => s.id === sampleId);
       setSamples(prev => prev.filter(s => s.id !== sampleId));
+      
+      if (workspaceId && profile?.id) {
+        logDNAActivity(workspaceId, profile.id, {
+          section: 'samples', action: 'removed', profileId: profileId || null,
+          artifactName: deletedSample?.title || deletedSample?.file_name,
+        });
+      }
+      
       toast({
         title: 'Sample Deleted',
         description: 'Content sample has been removed.',
@@ -393,6 +410,14 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
         } as ContentDNAAnalysis);
       }
 
+      if (workspaceId && profile?.id) {
+        logDNAActivity(workspaceId, profile.id, {
+          section: 'analysis', action: 'analyzed', profileId: profileId || null,
+          artifactCount: sampleTexts.length,
+          metadata: { pillarsExtracted: brandPlatform?.brandPillars?.length || 0 },
+        });
+      }
+
       const brandPlatformMsg = brandPlatform?.brandPillars?.length 
         ? ` Extracted ${brandPlatform.brandPillars.length} brand pillars.`
         : '';
@@ -457,6 +482,12 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
           voice_analysis: data.voice_analysis as unknown as VoiceAnalysis,
           brand_platform: data.brand_platform as unknown as BrandPlatform | null,
         } as ContentDNAAnalysis);
+      }
+
+      if (workspaceId && profile?.id) {
+        logDNAActivity(workspaceId, profile.id, {
+          section: 'custom_instructions', action: 'updated', profileId: profileId || null,
+        });
       }
 
       toast({

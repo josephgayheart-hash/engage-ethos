@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveWorkspaceId } from '@/contexts/WorkspaceContext';
 import { useToast } from '@/hooks/use-toast';
+import { logDNAActivity } from '@/hooks/useContentDNAActivity';
 
 export interface Story {
   id: string;
@@ -133,6 +134,11 @@ export function useStoryBank(options: UseStoryBankOptions = {}) {
       const newStory = data as unknown as Story;
       setStories(prev => [newStory, ...prev]);
       
+      logDNAActivity(workspaceId, user.id, {
+        section: 'stories', action: 'added', profileId: profileId || null,
+        artifactName: input.title, metadata: { story_type: input.story_type },
+      });
+      
       toast({
         title: 'Story added',
         description: `"${input.title}" has been added to your Story Bank.`,
@@ -169,6 +175,14 @@ export function useStoryBank(options: UseStoryBankOptions = {}) {
         s.id === id ? { ...s, ...updates, updated_at: new Date().toISOString() } : s
       ));
       
+      if (workspaceId && user?.id) {
+        const story = stories.find(s => s.id === id);
+        logDNAActivity(workspaceId, user.id, {
+          section: 'stories', action: 'updated', profileId: profileId || null,
+          artifactName: story?.title || updates.title,
+        });
+      }
+      
       toast({
         title: 'Story updated',
         description: 'Your changes have been saved.',
@@ -197,7 +211,15 @@ export function useStoryBank(options: UseStoryBankOptions = {}) {
       
       if (error) throw error;
       
+      const deletedStory = stories.find(s => s.id === id);
       setStories(prev => prev.filter(s => s.id !== id));
+      
+      if (workspaceId && user?.id) {
+        logDNAActivity(workspaceId, user.id, {
+          section: 'stories', action: 'removed', profileId: profileId || null,
+          artifactName: deletedStory?.title,
+        });
+      }
       
       toast({
         title: 'Story deleted',

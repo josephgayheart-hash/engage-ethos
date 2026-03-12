@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveWorkspaceId } from '@/contexts/WorkspaceContext';
 import { toast } from 'sonner';
+import { logDNAActivity } from '@/hooks/useContentDNAActivity';
 
 export interface PhotoAIAnalysis {
   scene_type?: string;
@@ -159,6 +160,12 @@ export function useCampusPhotography({ profileId }: { profileId: string | null }
         setPhotos(prev => [...uploaded, ...prev]);
         toast.success(`${uploaded.length} photo${uploaded.length > 1 ? 's' : ''} uploaded successfully.`);
 
+        logDNAActivity(workspaceId, user.id, {
+          section: 'photos', action: 'added', profileId,
+          artifactCount: uploaded.length,
+          artifactName: uploaded.map(p => p.file_name).join(', '),
+        });
+
         // Auto-analyze the new photos
         analyzePhotos(uploaded.map(p => p.id));
       }
@@ -236,6 +243,14 @@ export function useCampusPhotography({ profileId }: { profileId: string | null }
       if (error) throw error;
 
       setPhotos(prev => prev.filter(p => p.id !== photoId));
+      
+      if (workspaceId && user?.id) {
+        logDNAActivity(workspaceId, user.id, {
+          section: 'photos', action: 'removed', profileId,
+          artifactName: photo?.file_name,
+        });
+      }
+      
       toast.success('Photo removed.');
     } catch (e: any) {
       console.error('Delete error:', e);
