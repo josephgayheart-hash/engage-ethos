@@ -763,18 +763,27 @@ Provide your evaluation as JSON.`;
 
     console.log("AI response received, parsing JSON...");
 
-    let jsonContent = content.trim();
-    
-    // Strip markdown code fences if present (AI sometimes wraps response)
-    const jsonMatch = jsonContent.match(/```(?:json)?\s*\n?([\s\S]*?)\n?\s*```/);
-    if (jsonMatch) {
-      jsonContent = jsonMatch[1].trim();
-    }
-    
-    // Also strip if it just starts/ends with backtick fences on their own lines
-    if (jsonContent.startsWith('```')) {
-      jsonContent = jsonContent.replace(/^```(?:json)?\s*\n/, '').replace(/\n\s*```\s*$/, '').trim();
-    }
+    const extractJson = (raw: string) => {
+      let cleaned = raw.trim();
+      // Strip markdown code fences if present
+      const fenceMatch = cleaned.match(/```(?:json)?\s*\n?([\s\S]*?)\n?\s*```/);
+      if (fenceMatch) {
+        cleaned = fenceMatch[1].trim();
+      } else if (cleaned.startsWith('```')) {
+        cleaned = cleaned.replace(/^```(?:json)?\s*\n/, '').replace(/\n\s*```\s*$/, '').trim();
+      }
+      // Try to find the outermost JSON object if there's leading/trailing text
+      const firstBrace = cleaned.indexOf('{');
+      const lastBrace = cleaned.lastIndexOf('}');
+      if (firstBrace !== -1 && lastBrace > firstBrace) {
+        cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+      }
+      // Fix common JSON issues: trailing commas before closing braces/brackets
+      cleaned = cleaned.replace(/,\s*([}\]])/g, '$1');
+      return cleaned;
+    };
+
+    let jsonContent = extractJson(content);
 
     try {
       const result = JSON.parse(jsonContent);
@@ -976,10 +985,49 @@ Scoring guide:
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     } catch (parseError) {
-      console.error("Failed to parse AI response as JSON:", parseError);
-      console.error("Raw content:", content);
+      console.error("Failed to parse AI response as JSON (attempt 1):", parseError);
+      console.error("Raw content (first 500 chars):", content?.substring(0, 500));
+      
+      // Retry once with a fresh request
+      console.log("Retrying AI request after parse failure...");
+      try {
+        const retryResponse = await resilientFetch(
+          "https://ai.gateway.lovable.dev/v1/chat/completions",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${LOVABLE_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: "google/gemini-2.5-flash",
+              messages: [
+                { role: "system", content: SYSTEM_PROMPT + "\n\n" + modePrompt },
+                { role: "user", content: userPrompt + "\n\nCRITICAL: You MUST respond with ONLY valid JSON. No markdown, no commentary, no explanation. Just the JSON object." },
+              ],
+            }),
+          },
+          { label: "evaluate-message-retry", maxRetries: 1 }
+        );
+
+        if (retryResponse.ok) {
+          const retryData = await retryResponse.json();
+          const retryContent = retryData.choices?.[0]?.message?.content;
+          if (retryContent) {
+            const retryJsonContent = extractJson(retryContent);
+            const retryResult = JSON.parse(retryJsonContent);
+            console.log("Retry parse succeeded");
+            return new Response(JSON.stringify(retryResult), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+        }
+      } catch (retryError) {
+        console.error("Retry also failed:", retryError);
+      }
+
       return new Response(
-        JSON.stringify({ error: "Failed to parse results" }),
+        JSON.stringify({ error: "Failed to parse results. Please try again." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
