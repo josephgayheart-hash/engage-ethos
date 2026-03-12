@@ -522,7 +522,8 @@ async function fetchCampusPhotosForPdf(profileId?: string): Promise<(LoadedImage
 export async function exportCaseForSupportToPDF(
   cfc: CaseForCareDraft, 
   institutionName?: string,
-  branding?: BrandingOptions
+  branding?: BrandingOptions,
+  profileId?: string
 ): Promise<void> {
   const doc = new jsPDF();
   try {
