@@ -469,7 +469,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
             <div className="flex justify-center gap-2">
               <Button variant="outline" onClick={() => setShowImportDialog(true)}>
                 <Upload className="w-4 h-4 mr-2" />
-                Import PDF
+                Import Facts
               </Button>
               <Button onClick={() => setShowAddDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
