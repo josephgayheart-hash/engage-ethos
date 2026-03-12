@@ -147,6 +147,14 @@ export function useDesignReferences({ profileId }: { profileId: string | null })
       if (error) throw error;
 
       setReferences(prev => prev.filter(r => r.id !== id));
+      
+      if (workspaceId && user?.id) {
+        logDNAActivity(workspaceId, user.id, {
+          section: 'design_refs', action: 'removed', profileId,
+          artifactName: ref?.name,
+        });
+      }
+      
       toast.success('Design reference removed');
     } catch (err) {
       console.error('Delete failed:', err);
