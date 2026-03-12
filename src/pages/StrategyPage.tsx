@@ -133,6 +133,7 @@ const StrategyPage = () => {
   const [mapperResult, setMapperResult] = useState<MapperResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
+  const overlayRef = useRef<HTMLDivElement>(null);
   const [buildDiagram, setBuildDiagram] = useState(true);
   const [cadence, setCadence] = useState<CadenceFrequency>('weekly');
   const [escalation, setEscalation] = useState<EscalationPattern>('none');
