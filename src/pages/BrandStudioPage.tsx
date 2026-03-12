@@ -216,7 +216,7 @@ const BrandStudioPage = () => {
 
   useEffect(() => {
     draftDataRef.current = imageUrl ? {
-      imageUrl: smartLayerImageUrl || imageUrl,
+      imageUrl,
       brandColors,
       channel,
       audience,
