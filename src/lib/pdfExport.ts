@@ -547,9 +547,14 @@ export async function exportCaseForSupportToPDF(
     headerY += taglineLines.length * 5 + 2;
   }
 
-  // Institution name BELOW tagline in left-aligned area (sub-unit/college name)
-  if (institutionName) {
-    doc.setTextColor(200, 200, 200);  // Lighter text for sub-unit
+  // Institution name BELOW tagline — skip if it duplicates the document title or campaign name
+  const titleLower = (cfc.documentTitle || "").toLowerCase();
+  const campaignLower = (cfc.campaignName || "").toLowerCase();
+  const instLower = (institutionName || "").toLowerCase();
+  const isDuplicateName = instLower && (titleLower.includes(instLower) || campaignLower.includes(instLower) || instLower.includes(campaignLower));
+  
+  if (institutionName && !isDuplicateName) {
+    doc.setTextColor(200, 200, 200);
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
     const instLines = doc.splitTextToSize(institutionName, titleAvailableWidth);
