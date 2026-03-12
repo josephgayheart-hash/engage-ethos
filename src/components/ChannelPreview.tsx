@@ -2082,9 +2082,14 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
                     variant="ghost"
                     size="sm"
                     onClick={handleExportToPDF}
+                    disabled={isPdfExporting}
                     title="Export to PDF"
                   >
-                    <FileDown className="w-4 h-4 text-red-500" />
+                    {isPdfExporting ? (
+                      <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                    ) : (
+                      <FileDown className="w-4 h-4 text-red-500" />
+                    )}
                   </Button>
                 )}
                 <Button
