@@ -95,18 +95,16 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       {/* Logo Header */}
-      <SidebarHeader className="border-b border-sidebar-border px-2 py-2">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="sm" asChild tooltip="CampusVoice.ai">
-              <NavLink to="/dashboard" className="flex items-center justify-center gap-0 w-full">
-                <span className="font-semibold text-xs tracking-tight text-foreground">CampusVoice.ai</span>
-                <span className="text-[6px] text-muted-foreground -mt-1.5 ml-px">®</span>
-              </NavLink>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
+      {!collapsed && (
+        <SidebarHeader className="border-b border-sidebar-border px-2 py-2">
+          <div className="flex items-center justify-center gap-0">
+            <NavLink to="/dashboard" className="flex items-center gap-0">
+              <span className="font-semibold text-xs tracking-tight text-foreground">CampusVoice.ai</span>
+              <span className="text-[6px] text-muted-foreground -mt-1.5 ml-px">®</span>
+            </NavLink>
+          </div>
+        </SidebarHeader>
+      )}
 
       <SidebarContent className="px-1">
         {/* Home */}
