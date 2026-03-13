@@ -26,6 +26,7 @@ import campusvoiceLogo from '@/assets/campusvoice-logo-new.png';
 import HowItWorksSection from '@/components/landing/HowItWorksSection';
 
 import PricingSignalSection from '@/components/landing/PricingSignalSection';
+import AICredibilitySection from '@/components/landing/AICredibilitySection';
 import ProductTourTabs from '@/components/landing/ProductTourTabs';
 import { LandingNav } from '@/components/landing/LandingNav';
 import { LandingFooter } from '@/components/landing/LandingFooter';
