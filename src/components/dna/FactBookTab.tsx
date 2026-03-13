@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { usePIIScanner } from '@/hooks/usePIIScanner';
 import { useFactBook, Fact, FactCategory, FACT_CATEGORIES, CreateFactInput } from '@/hooks/useFactBook';
 import { useAuth } from '@/contexts/AuthContext';
 import { FactCard } from './FactCard';
