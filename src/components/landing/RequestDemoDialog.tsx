@@ -168,10 +168,23 @@ export function RequestDemoDialog({ trigger }: RequestDemoDialogProps) {
                   rows={3}
                 />
               </div>
+              <div className="flex items-start space-x-2">
+                <Checkbox
+                  id="demo-privacy"
+                  checked={agreedToPrivacy}
+                  onCheckedChange={(checked) => setAgreedToPrivacy(checked === true)}
+                />
+                <label htmlFor="demo-privacy" className="text-xs text-muted-foreground leading-tight cursor-pointer">
+                  I agree to the{' '}
+                  <Link to="/privacy" target="_blank" className="text-accent underline underline-offset-2 hover:text-accent/80">
+                    Privacy Policy
+                  </Link>
+                </label>
+              </div>
               <Button
                 type="submit"
                 className="w-full bg-gradient-to-r from-[hsl(270_70%_55%)] to-[hsl(270_70%_45%)] hover:from-[hsl(270_70%_50%)] hover:to-[hsl(270_70%_40%)]"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !agreedToPrivacy}
               >
                 {isSubmitting ? (
                   <>

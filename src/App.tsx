@@ -156,6 +156,7 @@ const AppRoutes = () => (
     <Route path="/features/brand-audit" element={<BrandAuditFeaturePage />} />
     <Route path="/features/webcrawl" element={<WebCrawlFeaturePage />} />
     <Route path="/nda/sign/:slug" element={<NDASignPage />} />
+    <Route path="/privacy" element={<PrivacyPolicyPage />} />
 
     {/* Authenticated routes — wrapped in AppLayout sidebar shell */}
     <Route element={<RequireAuth><AppLayout /></RequireAuth>}>
