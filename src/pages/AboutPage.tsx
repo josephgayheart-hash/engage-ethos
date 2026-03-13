@@ -125,37 +125,36 @@ export default function AboutPage() {
         <section className="mb-16">
           <h2 className="text-xl font-semibold text-foreground mb-6">The Story Behind CampusVoice</h2>
 
-          <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-start mb-8">
-            {/* Photo placeholder */}
+          <div className="flex flex-row gap-5 sm:gap-8 items-center mb-8">
+            {/* Photo */}
             <div className="shrink-0">
-              <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-full border-2 border-primary/10 overflow-hidden shadow-md">
+              <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-full border-2 border-primary/10 overflow-hidden shadow-md">
                 <img src={tylerHeadshot} alt="Dr. Tyler Gayheart" className="w-full h-full object-cover" />
               </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Badge variant="secondary" className="text-xs font-medium">Founder & Creator</Badge>
+              <h3 className="text-2xl font-serif font-bold text-foreground">Dr. Tyler Gayheart</h3>
+              <p className="text-muted-foreground text-sm">
+                Ph.D. in Communication &bull; University of Kentucky
+              </p>
               <a
                 href="https://www.linkedin.com/in/tylergayheart"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-2.5 inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+                className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline pt-1"
               >
                 <Linkedin className="w-4 h-4" />
-                LinkedIn
+                LinkedIn Profile
                 <ExternalLink className="w-3 h-3" />
               </a>
             </div>
-
-            <div className="space-y-3">
-              <div>
-                <Badge variant="secondary" className="mb-2 text-xs font-medium">Founder & Creator</Badge>
-                <h3 className="text-2xl font-serif font-bold text-foreground">Dr. Tyler Gayheart</h3>
-                <p className="text-muted-foreground text-sm mt-0.5">
-                  Ph.D. in Communication &bull; University of Kentucky
-                </p>
-              </div>
-              <p className="text-foreground/85 text-[15px] leading-relaxed max-w-xl">
-                Tyler spent over 15 years working across higher education administration, enrollment marketing, and digital transformation — watching brilliant communicators struggle with tools that were never designed for their world. His doctoral research at the University of Kentucky's College of Communication &amp; Information gave him the framework to do something about it.
-              </p>
-            </div>
           </div>
+
+          <p className="text-foreground/85 text-[15px] leading-relaxed max-w-xl mb-8">
+            Tyler spent over 15 years working across higher education administration, enrollment marketing, and digital transformation — watching brilliant communicators struggle with tools that were never designed for their world. His doctoral research at the University of Kentucky's College of Communication &amp; Information gave him the framework to do something about it.
+          </p>
 
           {/* Dissertation */}
           <div className="rounded-lg border bg-card p-6 shadow-sm space-y-4 mb-6">
