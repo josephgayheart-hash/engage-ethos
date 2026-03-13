@@ -43,6 +43,12 @@ type PageState = "loading" | "form" | "success" | "expired" | "signed" | "not-fo
 function NDAPageWrapper({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Confidentiality Agreement — CampusVoice.AI"
+        description="Review and sign a confidentiality agreement for your CampusVoice.AI demo session."
+        ogImage="/nda-og-image.png"
+        noIndex={true}
+      />
       <div className="max-w-2xl mx-auto px-4 py-8 md:py-16">
         <div className="flex justify-center mb-8">
           <img src={campusvoiceLogo} alt="CampusVoice" className="h-10 object-contain" />
