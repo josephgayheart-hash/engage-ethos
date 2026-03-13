@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { usePIIScanner } from '@/hooks/usePIIScanner';
 import { useCampusPhotography, PhotoAIAnalysis } from '@/hooks/useCampusPhotography';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
