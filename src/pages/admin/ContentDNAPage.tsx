@@ -74,6 +74,7 @@ import {
 } from 'lucide-react';
 import { extractTextFromFile, getAcceptString } from '@/lib/documentParser';
 import { DNATuningControls, DNAAdjustments } from '@/components/DNATuningControls';
+import { usePIIScanner } from '@/hooks/usePIIScanner';
 
 const SAMPLE_TYPES = [
   // Core Communications
