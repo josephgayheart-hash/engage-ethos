@@ -26,6 +26,7 @@ import campusvoiceLogo from '@/assets/campusvoice-logo-new.png';
 import HowItWorksSection from '@/components/landing/HowItWorksSection';
 
 import PricingSignalSection from '@/components/landing/PricingSignalSection';
+import AICredibilitySection from '@/components/landing/AICredibilitySection';
 import ProductTourTabs from '@/components/landing/ProductTourTabs';
 import { LandingNav } from '@/components/landing/LandingNav';
 import { LandingFooter } from '@/components/landing/LandingFooter';
@@ -464,6 +465,9 @@ export default function LandingPage() {
 
       {/* Pricing Signal */}
       <PricingSignalSection />
+
+      {/* AI Credibility */}
+      <AICredibilitySection />
 
       {/* Secondary CTA Section - Vibrant Purple */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(270_60%_50%)] relative overflow-hidden">
