@@ -27,7 +27,7 @@ const pillars = [
 const stats = [
   { value: '8', label: 'AI Models' },
   { value: '35+', label: 'Cloud Functions' },
-  { value: 'Real-time', label: 'Brand Scoring' },
+  { value: 'Real-time', label: 'Brand Alignment' },
 ];
 
 export default function AICredibilitySection() {
