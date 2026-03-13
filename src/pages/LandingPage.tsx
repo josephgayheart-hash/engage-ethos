@@ -466,6 +466,9 @@ export default function LandingPage() {
       {/* Pricing Signal */}
       <PricingSignalSection />
 
+      {/* AI Credibility */}
+      <AICredibilitySection />
+
       {/* Secondary CTA Section - Vibrant Purple */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(270_60%_50%)] relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
