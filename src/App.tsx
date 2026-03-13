@@ -221,6 +221,7 @@ const AppRoutes = () => (
         <Route path="/admin/prospect-outreach" element={<ProspectOutreachPage />} />
         <Route path="/admin/crm" element={<CRMPage />} />
         <Route path="/admin/nda-links" element={<NDALinksPage />} />
+        <Route path="/admin/ai-technology" element={<AITechnologyPage />} />
       </Route>
     </Route>
 
