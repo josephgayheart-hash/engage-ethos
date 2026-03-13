@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { CheckCircle, Loader2, AlertTriangle, XCircle } from "lucide-react";
 import campusvoiceLogo from "@/assets/campusvoice-logo-new.png";
+import SEOHead from "@/components/SEOHead";
 
 const AGREEMENT_TEXT = `This Agreement is made as of [current date] between Tyler Gayheart ("Disclosing Party") and the individual completing and signing this form ("Recipient"). The purpose of this Agreement is to allow the Recipient to review and evaluate demonstrations, concepts, and materials related to CampusVoice.ai. In connection with this evaluation, the Disclosing Party may share non-public information about the platform, and the Recipient agrees to keep that information confidential and use it only for the purpose of evaluating CampusVoice.ai.
 
@@ -42,6 +43,12 @@ type PageState = "loading" | "form" | "success" | "expired" | "signed" | "not-fo
 function NDAPageWrapper({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Confidentiality Agreement — CampusVoice.AI"
+        description="Review and sign a confidentiality agreement for your CampusVoice.AI demo session."
+        ogImage="/nda-og-image.png"
+        noIndex={true}
+      />
       <div className="max-w-2xl mx-auto px-4 py-8 md:py-16">
         <div className="flex justify-center mb-8">
           <img src={campusvoiceLogo} alt="CampusVoice" className="h-10 object-contain" />
