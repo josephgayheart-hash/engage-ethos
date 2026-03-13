@@ -14,6 +14,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Send, CheckCircle2, Calendar } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Link } from 'react-router-dom';
 
 interface RequestDemoDialogProps {
   trigger?: React.ReactNode;
@@ -24,6 +26,7 @@ export function RequestDemoDialog({ trigger }: RequestDemoDialogProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -34,7 +37,7 @@ export function RequestDemoDialog({ trigger }: RequestDemoDialogProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.email || !formData.institution) {
+    if (!formData.name || !formData.email || !formData.institution || !agreedToPrivacy) {
       toast({
         title: 'Missing Information',
         description: 'Please fill in all required fields.',
@@ -80,6 +83,7 @@ export function RequestDemoDialog({ trigger }: RequestDemoDialogProps) {
       // Reset form when closing
       setTimeout(() => {
         setIsSubmitted(false);
+        setAgreedToPrivacy(false);
         setFormData({ name: '', email: '', institution: '', message: '' });
       }, 200);
     }
@@ -164,10 +168,23 @@ export function RequestDemoDialog({ trigger }: RequestDemoDialogProps) {
                   rows={3}
                 />
               </div>
+              <div className="flex items-start space-x-2">
+                <Checkbox
+                  id="demo-privacy"
+                  checked={agreedToPrivacy}
+                  onCheckedChange={(checked) => setAgreedToPrivacy(checked === true)}
+                />
+                <label htmlFor="demo-privacy" className="text-xs text-muted-foreground leading-tight cursor-pointer">
+                  I agree to the{' '}
+                  <Link to="/privacy" target="_blank" className="text-accent underline underline-offset-2 hover:text-accent/80">
+                    Privacy Policy
+                  </Link>
+                </label>
+              </div>
               <Button
                 type="submit"
                 className="w-full bg-gradient-to-r from-[hsl(270_70%_55%)] to-[hsl(270_70%_45%)] hover:from-[hsl(270_70%_50%)] hover:to-[hsl(270_70%_40%)]"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !agreedToPrivacy}
               >
                 {isSubmitting ? (
                   <>

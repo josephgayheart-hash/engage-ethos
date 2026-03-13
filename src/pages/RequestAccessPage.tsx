@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { CheckCircle2, Loader2, ArrowLeft, ArrowRight, Zap, BarChart3, Palette, MessageSquareText } from 'lucide-react';
 import campusvoiceLogo from '@/assets/campusvoice-logo.png';
 import { SEOHead } from '@/components/SEOHead';
@@ -56,6 +57,7 @@ export default function RequestAccessPage() {
     title: '',
     referralSource: isColleagueReferral ? 'colleague' : '',
   });
+  const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -418,10 +420,24 @@ export default function RequestAccessPage() {
                   </Select>
                 </div>
 
+                <div className="flex items-start space-x-2">
+                  <Checkbox
+                    id="privacy-consent"
+                    checked={agreedToPrivacy}
+                    onCheckedChange={(checked) => setAgreedToPrivacy(checked === true)}
+                  />
+                  <label htmlFor="privacy-consent" className="text-xs text-muted-foreground leading-tight cursor-pointer">
+                    I agree to the{' '}
+                    <Link to="/privacy" target="_blank" className="text-accent underline underline-offset-2 hover:text-accent/80">
+                      Privacy Policy
+                    </Link>
+                  </label>
+                </div>
+
                 <Button
                   type="submit"
                   className="w-full h-10 text-sm font-semibold rounded-xl gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !agreedToPrivacy}
                 >
                   {isSubmitting ? (
                     <>
