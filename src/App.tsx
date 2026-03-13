@@ -81,6 +81,7 @@ import CRMPage from "./pages/CRMPage";
 import NDALinksPage from "./pages/admin/NDALinksPage";
 import AITechnologyPage from "./pages/admin/AITechnologyPage";
 import NDASignPage from "./pages/NDASignPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import GivingDayPlannerPage from "./pages/GivingDayPlannerPage";
 import StewardshipReportPage from "./pages/StewardshipReportPage";
 
