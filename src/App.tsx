@@ -79,6 +79,7 @@ import BrandStudioPage from "./pages/BrandStudioPage";
 import ProspectOutreachPage from "./pages/ProspectOutreachPage";
 import CRMPage from "./pages/CRMPage";
 import NDALinksPage from "./pages/admin/NDALinksPage";
+import AITechnologyPage from "./pages/admin/AITechnologyPage";
 import NDASignPage from "./pages/NDASignPage";
 import GivingDayPlannerPage from "./pages/GivingDayPlannerPage";
 import StewardshipReportPage from "./pages/StewardshipReportPage";
@@ -221,6 +222,7 @@ const AppRoutes = () => (
         <Route path="/admin/prospect-outreach" element={<ProspectOutreachPage />} />
         <Route path="/admin/crm" element={<CRMPage />} />
         <Route path="/admin/nda-links" element={<NDALinksPage />} />
+        <Route path="/admin/ai-technology" element={<AITechnologyPage />} />
       </Route>
     </Route>
 

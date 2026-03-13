@@ -1,61 +1,58 @@
 
 
-# AI Technology Reference Page — Internal Super Admin Page
+## Demo Readiness Improvements — ✅ COMPLETED (Phase 1)
 
-## What We're Building
-A read-only internal reference page at `/admin/ai-technology` accessible from the Super Admin sidebar menu. This page documents every AI model, edge function, external service, and architectural pattern used across the CampusVoice.ai platform — a quick-reference cheat sheet for technical conversations.
+### What was implemented
 
-## Page Structure
+1. **Social Proof Strip** — Added `SocialProofStrip.tsx` to landing page below hero with platform stats (2,400+ messages, 12 institutions, 85+ users, 94% brand score)
+2. **Features Dropdown** — Added `FeaturesDropdown.tsx` to `LandingNav` with links to all 10 feature pages
+3. **Impact Metrics Card** — Added `ImpactMetricsCard.tsx` to dashboard showing messages created, estimated time saved, builds generated, evaluations run
+4. **Branded Loading States** — Replaced generic "Loading..." text with `BrandedLoader.tsx` (CampusVoice logo + bouncing dots) in all auth guards
+5. **Team Activity Feed** — Added `TeamActivityFeed.tsx` to dashboard (admin-only) showing recent team actions
 
-### Section 1: AI Models Inventory
-A table/grid of all 8 distinct AI models used, grouped by capability:
+### Files created
+- `src/components/landing/SocialProofStrip.tsx`
+- `src/components/landing/FeaturesDropdown.tsx`
+- `src/components/dashboard/ImpactMetricsCard.tsx`
+- `src/components/dashboard/TeamActivityFeed.tsx`
+- `src/components/BrandedLoader.tsx`
 
-**Reasoning / Text Models:**
-| Model | Use Cases |
-|-------|-----------|
-| `google/gemini-2.5-flash` | Core engine — Content DNA analysis, message generation, evaluation, web content analysis, fact-book/story parsing, campus photo analysis, semantic extraction, institution lookup, text extraction from images, web section parsing |
-| `google/gemini-2.5-flash-lite` | Lightweight tasks — scratchpad organization, overlay text generation |
-| `google/gemini-2.5-pro` | Premium playground chat |
-| `google/gemini-3-flash-preview` | Outreach messages, article contact extraction, image prompt building, scratchpad (secondary) |
-| `openai/gpt-5-mini` | Playground chat (user-selectable) |
+### Files modified
+- `src/pages/LandingPage.tsx` — imported SocialProofStrip
+- `src/components/landing/LandingNav.tsx` — added FeaturesDropdown
+- `src/pages/Index.tsx` — added ImpactMetricsCard + TeamActivityFeed
+- `src/App.tsx` — replaced loading states with BrandedLoader
 
-**Image Generation Models:**
-| Model | Use Cases |
-|-------|-----------|
-| `google/gemini-2.5-flash-image` | Default image generation — cover images, collection covers, smart layer images |
-| `google/gemini-3-pro-image-preview` | Premium image generation engine |
-| `google/gemini-3.1-flash-image-preview` | PDF page image generation |
+---
 
-### Section 2: Edge Functions Inventory (22 functions)
-Organized by capability layer with model and purpose for each:
+## Remaining Demo Readiness Items (Phase 2)
 
-- **Content DNA Engine**: analyze-voice, extract-semantics
-- **Generation Suite**: generate-message, playground-chat, generate-outreach-message, generate-overlay-text
-- **Evaluation & Analysis**: evaluate-message, analyze-web-content, analyze-campus-photo
-- **Image Generation**: generate-channel-image, generate-cover-image, generate-collection-cover, smart-layer-image, generate-pdf-images
-- **Content Parsing**: parse-fact-book, parse-story, parse-web-sections, extract-text-from-image, extract-article-contacts, parse-contact-text
-- **Data Enrichment**: lookup-institution, find-contact-email, find-linkedin-profile, search-university-logo
-- **Utility**: organize-scratchpad
+| Priority | Item | Status |
+|----------|------|--------|
+| 1 | Demo mode with pre-seeded Content DNA | Todo |
+| 7 | "Try a sample" in Journey Designer | Todo |
+| 8 | Video/demo embed in hero | Todo (needs video asset) |
+| 9 | Guided tour for first login | Todo |
+| 10 | Analytics seed data for demo accounts | Todo |
 
-### Section 3: External Services
-- **Firecrawl** — Web scraping, search, and site mapping (firecrawl-scrape, firecrawl-search, firecrawl-map, find-contact-email, find-linkedin-profile, search-university-logo)
-- **Resend** — Transactional email delivery (10+ email edge functions)
+---
 
-### Section 4: Infrastructure Patterns
-- Lovable AI Gateway (`ai.gateway.lovable.dev`)
-- Resilient fetch with retries (`_shared/resilience.ts`)
-- IP-based rate limiting (`_shared/rateLimit.ts`)
-- Streaming responses for playground chat
-- Hierarchical Content DNA resolution (Profile → Parent → Tenant)
+## Previous Completed Work
 
-### Section 5: Content DNA Pipeline
-A text-based flow diagram showing: Upload Samples → Voice Analysis → Semantic Extraction → Brand Platform → Generation Enforcement → Evaluation Scoring
+### Graphic Design Mode Toggle with Extended Prompts — ✅ COMPLETED
 
-## Code Changes
+1. **Extracted Graphic Design as a segmented toggle** — "Photo" | "Graphic Design" toggle group at the top of Image Settings
+2. **Removed `graphic-design` from the Style dropdown** — Photo mode shows photo styles only; Graphic Design mode hides the style dropdown entirely
+3. **Added 4 Graphic Design sub-controls** (visible only in Graphic Design mode):
+   - **Design Style** — radio group: Bold & Geometric, Gradient Flow, Typographic Poster, Collage / Mixed Media, Retro / Vintage, Abstract Minimal
+   - **Color Mood** — selectable badge chips: Brand Colors Only, Warm, Cool, Monochrome, High Contrast, Pastel
+   - **Typography Style** — radio group: Sans-Serif Modern, Serif Classic, Display / Decorative, Handwritten
+   - **Layout Density** — radio group: Spacious, Balanced, Dense
+4. **Updated edge function prompt** — accepts `designStyle`, `colorMood`, `typographyStyle`, `layoutDensity`
 
-1. **Create** `src/pages/admin/AITechnologyPage.tsx` — The full reference page component with all sections above, using existing Card/Table/Badge UI components.
+### NDA Links — Super Admin Feature — ✅ COMPLETED
 
-2. **Update** `src/App.tsx` — Add route `/admin/ai-technology` under the `RequireSuperAdmin` block, import the new page.
-
-3. **Update** `src/components/app-shell/AppSidebar.tsx` — Add `{ title: "AI Technology", url: "/admin/ai-technology", icon: Cpu }` to `superAdminItems`.
-
+1. **Database**: Created `nda_links` and `nda_responses` tables with full RLS
+2. **Storage**: Created `nda-signatures` bucket for drawn signature images
+3. **Public signing page** (`/nda/sign/:slug`): CampusVoice-branded page with wave emoji heading, agreement text, form fields, 3 required checkboxes, typed + optional drawn signature
+4. **Admin page** (`/admin/nda-links`): Two-tab layout — Links table + Responses table with detail drawer
