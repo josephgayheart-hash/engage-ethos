@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { SEOHead } from '@/components/SEOHead';
 import { Badge } from '@/components/ui/badge';
 import campusvoiceLogo from '@/assets/campusvoice-logo-new.png';
+import tylerHeadshot from '@/assets/tyler-headshot.jpeg';
 
 const values = [
   {
