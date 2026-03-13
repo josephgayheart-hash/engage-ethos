@@ -137,7 +137,7 @@ export default function AboutPage() {
               <Badge variant="secondary" className="text-xs font-medium">Founder & Creator</Badge>
               <h3 className="text-2xl font-serif font-bold text-foreground">Dr. Tyler Gayheart</h3>
               <p className="text-muted-foreground text-sm">
-                Ph.D. in Communication &bull; University of Kentucky
+                Ph.D. in Communication
               </p>
               <a
                 href="https://www.linkedin.com/in/tylergayheart"
