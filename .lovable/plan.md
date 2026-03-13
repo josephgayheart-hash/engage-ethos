@@ -1,58 +1,73 @@
 
 
-## Demo Readiness Improvements — ✅ COMPLETED (Phase 1)
+# Expand AI Technology Page to Full Technology Stack Reference
 
-### What was implemented
+## What We're Building
+Expand the existing `AITechnologyPage.tsx` to include **all** tools, libraries, and services used across the platform — not just AI models. This turns it into a comprehensive "Technology Stack Reference" page.
 
-1. **Social Proof Strip** — Added `SocialProofStrip.tsx` to landing page below hero with platform stats (2,400+ messages, 12 institutions, 85+ users, 94% brand score)
-2. **Features Dropdown** — Added `FeaturesDropdown.tsx` to `LandingNav` with links to all 10 feature pages
-3. **Impact Metrics Card** — Added `ImpactMetricsCard.tsx` to dashboard showing messages created, estimated time saved, builds generated, evaluations run
-4. **Branded Loading States** — Replaced generic "Loading..." text with `BrandedLoader.tsx` (CampusVoice logo + bouncing dots) in all auth guards
-5. **Team Activity Feed** — Added `TeamActivityFeed.tsx` to dashboard (admin-only) showing recent team actions
+## New Sections to Add
 
-### Files created
-- `src/components/landing/SocialProofStrip.tsx`
-- `src/components/landing/FeaturesDropdown.tsx`
-- `src/components/dashboard/ImpactMetricsCard.tsx`
-- `src/components/dashboard/TeamActivityFeed.tsx`
-- `src/components/BrandedLoader.tsx`
+### Section: Frontend Libraries & Tools
+A table of all key npm dependencies with their role in the platform:
 
-### Files modified
-- `src/pages/LandingPage.tsx` — imported SocialProofStrip
-- `src/components/landing/LandingNav.tsx` — added FeaturesDropdown
-- `src/pages/Index.tsx` — added ImpactMetricsCard + TeamActivityFeed
-- `src/App.tsx` — replaced loading states with BrandedLoader
+| Library | Purpose |
+|---------|---------|
+| React 18 + TypeScript | Core UI framework |
+| Vite + SWC | Build tooling with fast HMR |
+| Tailwind CSS | Utility-first styling |
+| shadcn/ui (Radix UI) | 20+ accessible UI primitives (Dialog, Select, Tabs, etc.) |
+| TanStack React Query | Server state management and caching |
+| React Router v6 | Client-side routing with nested layouts |
+| Tiptap | Rich text editor (story bank, message editing) |
+| React Flow | Visual journey/flow diagram builder |
+| Recharts | Data visualization (analytics charts, dashboards) |
+| Embla Carousel | Image carousels and slideshows |
+| React Resizable Panels | Split-pane layouts |
+| cmdk | Command palette interface |
+| Zod + React Hook Form | Schema validation and form management |
+| date-fns | Date formatting and manipulation |
+| Lucide React | Icon library (462+ icons) |
+| next-themes | Dark/light mode theming |
+| Sonner | Toast notification system |
 
----
+### Section: Document & Media Processing
+| Library | Purpose |
+|---------|---------|
+| PDF.js (pdfjs-dist) | Client-side PDF text extraction |
+| Mammoth | Word document (.docx) text extraction |
+| jsPDF | PDF generation and export |
+| html-to-image | DOM-to-image screenshot capture |
+| html2canvas | HTML element to canvas rendering |
+| react-markdown | Markdown content rendering |
 
-## Remaining Demo Readiness Items (Phase 2)
+### Section: CRM Integrations
+| Integration | Purpose |
+|-------------|---------|
+| Salesforce Marketing Cloud (SFMC) | Push content to SFMC Content Builder via API |
+| Technolutions Slate | Push content to Slate Deliver via API |
+| Ellucian CRM Recruit | XML export format for communications |
+| Generic CSV/JSON | Universal export for any CRM |
 
-| Priority | Item | Status |
-|----------|------|--------|
-| 1 | Demo mode with pre-seeded Content DNA | Todo |
-| 7 | "Try a sample" in Journey Designer | Todo |
-| 8 | Video/demo embed in hero | Todo (needs video asset) |
-| 9 | Guided tour for first login | Todo |
-| 10 | Analytics seed data for demo accounts | Todo |
+### Section: Email & Communication Functions
+Add a new edge function group for the 11+ email functions using Resend, plus `track-email-click` for click tracking and `resend-webhook` for delivery status webhooks.
 
----
+### Section: Backend Infrastructure
+| Component | Purpose |
+|-----------|---------|
+| Supabase (Postgres) | Database with RLS, multi-tenant isolation |
+| Supabase Auth | Authentication with email/password |
+| Supabase Edge Functions | 30+ Deno serverless functions |
+| Supabase Storage | File uploads (campus photos, documents) |
+| Supabase Realtime | Live updates for collaborative features |
 
-## Previous Completed Work
+## Code Changes
 
-### Graphic Design Mode Toggle with Extended Prompts — ✅ COMPLETED
+### 1. Update `src/pages/admin/AITechnologyPage.tsx`
+- Rename page title to "Technology Stack Reference"
+- Add new data arrays: `frontendLibraries`, `documentProcessing`, `crmIntegrations`, `emailFunctions`, `backendInfra`
+- Add new Card sections for each, using existing Table/Badge patterns
+- Add the email/CRM edge functions to the edge function inventory
+- Import additional icons (`Package`, `FileText`, `Database`, `MailIcon`)
 
-1. **Extracted Graphic Design as a segmented toggle** — "Photo" | "Graphic Design" toggle group at the top of Image Settings
-2. **Removed `graphic-design` from the Style dropdown** — Photo mode shows photo styles only; Graphic Design mode hides the style dropdown entirely
-3. **Added 4 Graphic Design sub-controls** (visible only in Graphic Design mode):
-   - **Design Style** — radio group: Bold & Geometric, Gradient Flow, Typographic Poster, Collage / Mixed Media, Retro / Vintage, Abstract Minimal
-   - **Color Mood** — selectable badge chips: Brand Colors Only, Warm, Cool, Monochrome, High Contrast, Pastel
-   - **Typography Style** — radio group: Sans-Serif Modern, Serif Classic, Display / Decorative, Handwritten
-   - **Layout Density** — radio group: Spacious, Balanced, Dense
-4. **Updated edge function prompt** — accepts `designStyle`, `colorMood`, `typographyStyle`, `layoutDensity`
+No routing or sidebar changes needed — the page already exists at `/admin/ai-technology`.
 
-### NDA Links — Super Admin Feature — ✅ COMPLETED
-
-1. **Database**: Created `nda_links` and `nda_responses` tables with full RLS
-2. **Storage**: Created `nda-signatures` bucket for drawn signature images
-3. **Public signing page** (`/nda/sign/:slug`): CampusVoice-branded page with wave emoji heading, agreement text, form fields, 3 required checkboxes, typed + optional drawn signature
-4. **Admin page** (`/admin/nda-links`): Two-tab layout — Links table + Responses table with detail drawer
