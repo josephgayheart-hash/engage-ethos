@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Briefcase,
@@ -49,6 +50,7 @@ export default function AgencyRequestAccessPage() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -397,10 +399,24 @@ export default function AgencyRequestAccessPage() {
                         </div>
                       </div>
 
+                      <div className="flex items-start space-x-2">
+                        <Checkbox
+                          id="agency-privacy-consent"
+                          checked={agreedToPrivacy}
+                          onCheckedChange={(checked) => setAgreedToPrivacy(checked === true)}
+                        />
+                        <label htmlFor="agency-privacy-consent" className="text-xs text-muted-foreground leading-tight cursor-pointer">
+                          I agree to the{' '}
+                          <Link to="/privacy" target="_blank" className="text-accent underline underline-offset-2 hover:text-accent/80">
+                            Privacy Policy
+                          </Link>
+                        </label>
+                      </div>
+
                       <Button
                         type="submit"
                         className="w-full gap-2"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || !agreedToPrivacy}
                       >
                         {isSubmitting ? (
                           "Submitting..."
