@@ -454,6 +454,8 @@ export default function ContentDNAPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (await checkFile(file)) return;
+
     setLibraryIsExtractingFile(true);
     setLibraryStagedFile(file);
     setLibraryStagedFileText(null);
