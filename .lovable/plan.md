@@ -1,27 +1,58 @@
 
 
-# Terms of Service Page
+## Demo Readiness Improvements — ✅ COMPLETED (Phase 1)
 
-## What We're Building
-A `/terms` page matching the style of the existing Privacy Policy page, with content tailored to CampusVoice.AI as a higher-ed SaaS platform that uses AI (Google Gemini & OpenAI).
+### What was implemented
 
-## Sections
-1. **Acceptance of Terms** — using the platform = agreement
-2. **Description of Service** — AI-powered messaging platform for higher education, beta status
-3. **Account Responsibilities** — user maintains credentials, accurate info
-4. **Acceptable Use** — no uploading PII/FERPA-protected records, no misuse of AI outputs
-5. **AI-Generated Content** — outputs are suggestions, must be reviewed, no guarantee of accuracy or compliance
-6. **Intellectual Property** — institution owns its content; CampusVoice owns platform IP; license to process content for service delivery
-7. **Data Handling** — references Privacy Policy, no sale of data
-8. **Third-Party Services** — disclosure of Google Gemini & OpenAI usage
-9. **Service Availability** — beta, no uptime guarantee, may change features
-10. **Limitation of Liability** — standard SaaS disclaimers
-11. **Termination** — either party can terminate; data export/deletion on request
-12. **Governing Law** — placeholder jurisdiction
-13. **Contact** — sales@campusvoice.ai
+1. **Social Proof Strip** — Added `SocialProofStrip.tsx` to landing page below hero with platform stats (2,400+ messages, 12 institutions, 85+ users, 94% brand score)
+2. **Features Dropdown** — Added `FeaturesDropdown.tsx` to `LandingNav` with links to all 10 feature pages
+3. **Impact Metrics Card** — Added `ImpactMetricsCard.tsx` to dashboard showing messages created, estimated time saved, builds generated, evaluations run
+4. **Branded Loading States** — Replaced generic "Loading..." text with `BrandedLoader.tsx` (CampusVoice logo + bouncing dots) in all auth guards
+5. **Team Activity Feed** — Added `TeamActivityFeed.tsx` to dashboard (admin-only) showing recent team actions
 
-## Code Changes
-1. **Create `src/pages/TermsOfServicePage.tsx`** — styled like the existing `PrivacyPolicyPage.tsx` with header, logo, back link, and prose content
-2. **Update `src/App.tsx`** — add `/terms` as a public route
-3. **Update `src/components/landing/LandingFooter.tsx`** — change `to: '#'` → `to: '/terms'`
+### Files created
+- `src/components/landing/SocialProofStrip.tsx`
+- `src/components/landing/FeaturesDropdown.tsx`
+- `src/components/dashboard/ImpactMetricsCard.tsx`
+- `src/components/dashboard/TeamActivityFeed.tsx`
+- `src/components/BrandedLoader.tsx`
 
+### Files modified
+- `src/pages/LandingPage.tsx` — imported SocialProofStrip
+- `src/components/landing/LandingNav.tsx` — added FeaturesDropdown
+- `src/pages/Index.tsx` — added ImpactMetricsCard + TeamActivityFeed
+- `src/App.tsx` — replaced loading states with BrandedLoader
+
+---
+
+## Remaining Demo Readiness Items (Phase 2)
+
+| Priority | Item | Status |
+|----------|------|--------|
+| 1 | Demo mode with pre-seeded Content DNA | Todo |
+| 7 | "Try a sample" in Journey Designer | Todo |
+| 8 | Video/demo embed in hero | Todo (needs video asset) |
+| 9 | Guided tour for first login | Todo |
+| 10 | Analytics seed data for demo accounts | Todo |
+
+---
+
+## Previous Completed Work
+
+### Graphic Design Mode Toggle with Extended Prompts — ✅ COMPLETED
+
+1. **Extracted Graphic Design as a segmented toggle** — "Photo" | "Graphic Design" toggle group at the top of Image Settings
+2. **Removed `graphic-design` from the Style dropdown** — Photo mode shows photo styles only; Graphic Design mode hides the style dropdown entirely
+3. **Added 4 Graphic Design sub-controls** (visible only in Graphic Design mode):
+   - **Design Style** — radio group: Bold & Geometric, Gradient Flow, Typographic Poster, Collage / Mixed Media, Retro / Vintage, Abstract Minimal
+   - **Color Mood** — selectable badge chips: Brand Colors Only, Warm, Cool, Monochrome, High Contrast, Pastel
+   - **Typography Style** — radio group: Sans-Serif Modern, Serif Classic, Display / Decorative, Handwritten
+   - **Layout Density** — radio group: Spacious, Balanced, Dense
+4. **Updated edge function prompt** — accepts `designStyle`, `colorMood`, `typographyStyle`, `layoutDensity`
+
+### NDA Links — Super Admin Feature — ✅ COMPLETED
+
+1. **Database**: Created `nda_links` and `nda_responses` tables with full RLS
+2. **Storage**: Created `nda-signatures` bucket for drawn signature images
+3. **Public signing page** (`/nda/sign/:slug`): CampusVoice-branded page with wave emoji heading, agreement text, form fields, 3 required checkboxes, typed + optional drawn signature
+4. **Admin page** (`/admin/nda-links`): Two-tab layout — Links table + Responses table with detail drawer

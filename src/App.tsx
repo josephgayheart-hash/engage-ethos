@@ -82,6 +82,7 @@ import NDALinksPage from "./pages/admin/NDALinksPage";
 import AITechnologyPage from "./pages/admin/AITechnologyPage";
 import NDASignPage from "./pages/NDASignPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import TermsOfServicePage from "./pages/TermsOfServicePage";
 import GivingDayPlannerPage from "./pages/GivingDayPlannerPage";
 import StewardshipReportPage from "./pages/StewardshipReportPage";
 
@@ -157,6 +158,7 @@ const AppRoutes = () => (
     <Route path="/features/webcrawl" element={<WebCrawlFeaturePage />} />
     <Route path="/nda/sign/:slug" element={<NDASignPage />} />
     <Route path="/privacy" element={<PrivacyPolicyPage />} />
+    <Route path="/terms" element={<TermsOfServicePage />} />
 
     {/* Authenticated routes — wrapped in AppLayout sidebar shell */}
     <Route element={<RequireAuth><AppLayout /></RequireAuth>}>
