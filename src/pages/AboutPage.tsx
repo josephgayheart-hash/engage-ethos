@@ -128,10 +128,8 @@ export default function AboutPage() {
           <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-start mb-8">
             {/* Photo placeholder */}
             <div className="shrink-0">
-              <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-2xl bg-muted border-2 border-primary/10 overflow-hidden shadow-md">
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10">
-                  <GraduationCap className="w-12 h-12 text-primary/40" />
-                </div>
+              <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-full border-2 border-primary/10 overflow-hidden shadow-md">
+                <img src={tylerHeadshot} alt="Dr. Tyler Gayheart" className="w-full h-full object-cover" />
               </div>
               <a
                 href="https://www.linkedin.com/in/tylergayheart"
