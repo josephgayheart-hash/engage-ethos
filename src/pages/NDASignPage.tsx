@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { CheckCircle, Loader2, AlertTriangle, XCircle } from "lucide-react";
 import campusvoiceLogo from "@/assets/campusvoice-logo-new.png";
+import SEOHead from "@/components/SEOHead";
 
 const AGREEMENT_TEXT = `This Agreement is made as of [current date] between Tyler Gayheart ("Disclosing Party") and the individual completing and signing this form ("Recipient"). The purpose of this Agreement is to allow the Recipient to review and evaluate demonstrations, concepts, and materials related to CampusVoice.ai. In connection with this evaluation, the Disclosing Party may share non-public information about the platform, and the Recipient agrees to keep that information confidential and use it only for the purpose of evaluating CampusVoice.ai.
 
