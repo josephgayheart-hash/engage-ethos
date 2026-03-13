@@ -310,7 +310,10 @@ export default function LandingPage() {
       {/* Social Proof Strip */}
       <SocialProofStrip />
 
-      {/* How It Works Section - Position #2 */}
+      {/* AI Credibility — Position #2 */}
+      <AICredibilitySection />
+
+      {/* How It Works Section */}
       <HowItWorksSection />
 
       {/* Product Showcases Section — Top 2 inline + 3 tabbed */}
