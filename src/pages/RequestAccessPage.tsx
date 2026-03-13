@@ -57,6 +57,7 @@ export default function RequestAccessPage() {
     title: '',
     referralSource: isColleagueReferral ? 'colleague' : '',
   });
+  const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
