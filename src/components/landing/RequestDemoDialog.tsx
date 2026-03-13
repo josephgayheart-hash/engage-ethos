@@ -26,6 +26,7 @@ export function RequestDemoDialog({ trigger }: RequestDemoDialogProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
