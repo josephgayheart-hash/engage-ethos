@@ -14,6 +14,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Send, CheckCircle2, Calendar } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Link } from 'react-router-dom';
 
 interface RequestDemoDialogProps {
   trigger?: React.ReactNode;
