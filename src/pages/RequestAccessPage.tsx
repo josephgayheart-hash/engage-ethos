@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { CheckCircle2, Loader2, ArrowLeft, ArrowRight, Zap, BarChart3, Palette, MessageSquareText } from 'lucide-react';
 import campusvoiceLogo from '@/assets/campusvoice-logo.png';
 import { SEOHead } from '@/components/SEOHead';
