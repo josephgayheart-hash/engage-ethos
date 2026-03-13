@@ -83,6 +83,7 @@ export function RequestDemoDialog({ trigger }: RequestDemoDialogProps) {
       // Reset form when closing
       setTimeout(() => {
         setIsSubmitted(false);
+        setAgreedToPrivacy(false);
         setFormData({ name: '', email: '', institution: '', message: '' });
       }, 200);
     }
