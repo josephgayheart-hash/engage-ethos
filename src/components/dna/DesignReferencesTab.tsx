@@ -50,6 +50,7 @@ export function DesignReferencesTab({ profileId }: DesignReferencesTabProps) {
       ['image/jpeg', 'image/png', 'image/webp'].includes(f.type)
     );
     if (files.length > 0) {
+      if (await checkFiles(files)) return;
       await uploadReference(files);
     }
   };

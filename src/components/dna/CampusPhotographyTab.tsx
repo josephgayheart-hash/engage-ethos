@@ -111,9 +111,15 @@ export function CampusPhotographyTab({ profileId }: CampusPhotographyTabProps) {
   const analyzedCount = photos.filter(p => p.ai_analysis).length;
   const unanalyzedIds = photos.filter(p => !p.ai_analysis).map(p => p.id);
 
+  const { checkFiles } = usePIIScanner();
+
   const handleFileSelect = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     const fileArray = Array.from(files);
+    if (await checkFiles(fileArray)) {
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
     await uploadPhotos(fileArray, 'uncategorized', description || undefined);
     setDescription('');
     if (fileInputRef.current) fileInputRef.current.value = '';

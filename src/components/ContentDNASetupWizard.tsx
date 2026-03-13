@@ -164,6 +164,7 @@ export function ContentDNASetupWizard({ initialProfileId, onComplete, onCancel }
 
   const handleAddText = () => {
     if (!textInput.trim()) return;
+    if (checkText(textInput)) return;
     const newSample: StagedSample = {
       id: crypto.randomUUID(),
       title: sampleTitle || `${SAMPLE_TYPES.find(t => t.value === sampleType)?.label || 'Content'} Sample`,

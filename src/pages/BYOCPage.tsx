@@ -62,9 +62,13 @@ const BYOCPage = () => {
 
   const canProcess = messageContent.trim().length > 20;
 
+  const { checkFile } = usePIIScanner();
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    if (await checkFile(file)) return;
 
     setFileName(file.name);
 
