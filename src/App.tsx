@@ -83,6 +83,7 @@ import AITechnologyPage from "./pages/admin/AITechnologyPage";
 import NDASignPage from "./pages/NDASignPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import TermsOfServicePage from "./pages/TermsOfServicePage";
+import AboutPage from "./pages/AboutPage";
 import GivingDayPlannerPage from "./pages/GivingDayPlannerPage";
 import StewardshipReportPage from "./pages/StewardshipReportPage";
 
