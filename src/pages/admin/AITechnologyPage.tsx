@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Cpu, Zap, Brain, ImageIcon, Globe, Mail, Shield, ArrowRight, Server, RefreshCw } from "lucide-react";
+import { Cpu, Zap, Brain, ImageIcon, Globe, Mail, Shield, ArrowRight, Server, RefreshCw, Package, FileText, Database, MailIcon, Plug, Layout } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 /* ── Data ── */
@@ -18,6 +18,43 @@ const imageModels = [
   { model: "google/gemini-2.5-flash-image", tier: "Default", uses: "Cover images, collection covers, smart layer images" },
   { model: "google/gemini-3-pro-image-preview", tier: "Premium", uses: "Premium image generation engine" },
   { model: "google/gemini-3.1-flash-image-preview", tier: "Fast", uses: "PDF page image generation" },
+];
+
+const frontendLibraries = [
+  { name: "React 18 + TypeScript", pkg: "react, react-dom", purpose: "Core UI framework" },
+  { name: "Vite + SWC", pkg: "vite", purpose: "Build tooling with fast HMR" },
+  { name: "Tailwind CSS", pkg: "tailwindcss", purpose: "Utility-first styling with design tokens" },
+  { name: "shadcn/ui (Radix UI)", pkg: "@radix-ui/*", purpose: "20+ accessible UI primitives (Dialog, Select, Tabs, Toast, etc.)" },
+  { name: "TanStack React Query", pkg: "@tanstack/react-query", purpose: "Server state management, caching, and background refetching" },
+  { name: "React Router v6", pkg: "react-router-dom", purpose: "Client-side routing with nested layouts and guards" },
+  { name: "Tiptap", pkg: "@tiptap/react", purpose: "Rich text editor (story bank, message editing)" },
+  { name: "React Flow", pkg: "reactflow", purpose: "Visual journey/flow diagram builder" },
+  { name: "Recharts", pkg: "recharts", purpose: "Data visualization (analytics charts, dashboards)" },
+  { name: "Embla Carousel", pkg: "embla-carousel-react", purpose: "Image carousels and slideshows" },
+  { name: "React Resizable Panels", pkg: "react-resizable-panels", purpose: "Split-pane layouts" },
+  { name: "cmdk", pkg: "cmdk", purpose: "Command palette interface" },
+  { name: "Zod + React Hook Form", pkg: "zod, react-hook-form", purpose: "Schema validation and form management" },
+  { name: "date-fns", pkg: "date-fns", purpose: "Date formatting and manipulation" },
+  { name: "Lucide React", pkg: "lucide-react", purpose: "Icon library (462+ icons)" },
+  { name: "next-themes", pkg: "next-themes", purpose: "Dark/light mode theming" },
+  { name: "Sonner", pkg: "sonner", purpose: "Toast notification system" },
+  { name: "Framer Motion (via CVA)", pkg: "class-variance-authority", purpose: "Component variant management" },
+];
+
+const documentProcessing = [
+  { name: "PDF.js", pkg: "pdfjs-dist", purpose: "Client-side PDF text extraction (large PDFs without backend round-trip)" },
+  { name: "Mammoth", pkg: "mammoth", purpose: "Word document (.docx) text extraction" },
+  { name: "jsPDF", pkg: "jspdf", purpose: "PDF generation and export (reports, campaigns)" },
+  { name: "html-to-image", pkg: "html-to-image", purpose: "DOM-to-image screenshot capture" },
+  { name: "html2canvas", pkg: "html2canvas", purpose: "HTML element to canvas rendering" },
+  { name: "react-markdown", pkg: "react-markdown", purpose: "Markdown content rendering (playground, AI responses)" },
+];
+
+const crmIntegrations = [
+  { name: "Salesforce Marketing Cloud (SFMC)", type: "API", purpose: "Push content to SFMC Content Builder via REST API", functions: "push-to-sfmc" },
+  { name: "Technolutions Slate", type: "API", purpose: "Push content to Slate Deliver via REST API", functions: "push-to-slate" },
+  { name: "Ellucian CRM Recruit", type: "Export", purpose: "XML export format for Recruit communications", functions: "Client-side export" },
+  { name: "Generic CSV / JSON", type: "Export", purpose: "Universal export for any CRM system", functions: "Client-side export" },
 ];
 
 const edgeFunctionGroups = [
@@ -82,6 +119,51 @@ const edgeFunctionGroups = [
     ],
   },
   {
+    label: "CRM Push",
+    icon: Plug,
+    functions: [
+      { name: "push-to-sfmc", model: "Salesforce API", purpose: "Push approved content to SFMC Content Builder" },
+      { name: "push-to-slate", model: "Slate API", purpose: "Push approved content to Slate Deliver" },
+    ],
+  },
+  {
+    label: "Email & Communications",
+    icon: MailIcon,
+    functions: [
+      { name: "send-invite-email", model: "Resend", purpose: "Team member invitation emails" },
+      { name: "send-referral-email", model: "Resend", purpose: "Colleague referral emails" },
+      { name: "send-demo-request", model: "Resend", purpose: "Demo request notification to sales" },
+      { name: "send-beta-feedback-email", model: "Resend", purpose: "Beta feedback submission notification" },
+      { name: "send-approval-email", model: "Resend", purpose: "Content approval request emails" },
+      { name: "send-engagement-emails", model: "Resend", purpose: "Batch engagement nudge emails" },
+      { name: "send-reengagement-email", model: "Resend", purpose: "Re-engagement campaign emails" },
+      { name: "send-prospect-email", model: "Resend", purpose: "Sales prospect outreach emails" },
+      { name: "send-request-confirmation", model: "Resend", purpose: "Access request confirmation emails" },
+      { name: "send-test-email", model: "Resend", purpose: "Template test/preview emails" },
+      { name: "resend-invite", model: "Resend", purpose: "Re-send expired invitation emails" },
+      { name: "resend-webhook", model: "Webhook", purpose: "Process Resend delivery status webhooks (delivered, bounced, opened)" },
+      { name: "track-email-click", model: "Redirect", purpose: "Track email link clicks via redirect proxy" },
+    ],
+  },
+  {
+    label: "Web Crawling",
+    icon: Globe,
+    functions: [
+      { name: "firecrawl-scrape", model: "Firecrawl", purpose: "Scrape individual web page content" },
+      { name: "firecrawl-search", model: "Firecrawl", purpose: "Search the web for relevant content" },
+      { name: "firecrawl-map", model: "Firecrawl", purpose: "Map all pages on a website domain" },
+    ],
+  },
+  {
+    label: "Admin & Auth",
+    icon: Shield,
+    functions: [
+      { name: "admin-users", model: "Supabase Admin", purpose: "User management (list, invite, update roles)" },
+      { name: "bootstrap-admin", model: "Supabase Admin", purpose: "Initial super admin account setup" },
+      { name: "impersonate-user", model: "Supabase Admin", purpose: "Super admin user impersonation for support" },
+    ],
+  },
+  {
     label: "Utility",
     icon: RefreshCw,
     functions: [
@@ -92,14 +174,28 @@ const edgeFunctionGroups = [
 
 const externalServices = [
   { name: "Firecrawl", purpose: "Web scraping, search, and site mapping", functions: "firecrawl-scrape, firecrawl-search, firecrawl-map, find-contact-email, find-linkedin-profile, search-university-logo" },
-  { name: "Resend", purpose: "Transactional email delivery", functions: "send-invite-email, send-referral-email, send-demo-request, send-beta-feedback-email, send-approval-email, send-engagement-emails, send-reengagement-email, send-prospect-email, send-request-confirmation, send-test-email, resend-invite" },
+  { name: "Resend", purpose: "Transactional email delivery & webhook tracking", functions: "11 send-* functions, resend-webhook, track-email-click" },
+  { name: "Salesforce MC", purpose: "Marketing content distribution", functions: "push-to-sfmc" },
+  { name: "Slate (Technolutions)", purpose: "Enrollment communication delivery", functions: "push-to-slate" },
+];
+
+const backendInfra = [
+  { component: "Postgres (via Supabase)", purpose: "Primary database with Row-Level Security for multi-tenant data isolation" },
+  { component: "Supabase Auth", purpose: "Authentication with email/password, invite-based onboarding, and session management" },
+  { component: "Edge Functions (Deno)", purpose: "35+ serverless functions for AI, email, CRM, and data processing" },
+  { component: "Supabase Storage", purpose: "File uploads — campus photos, content DNA samples, design references, overlay patterns" },
+  { component: "Supabase Realtime", purpose: "Live updates for collaborative features and activity feeds" },
+  { component: "Lovable AI Gateway", purpose: "Unified AI model routing, auth, and usage tracking (ai.gateway.lovable.dev)" },
 ];
 
 const infrastructurePatterns = [
+  { pattern: "Multi-Tenant RLS", detail: "Every table uses tenant_id-based Row-Level Security for complete data isolation between institutions" },
+  { pattern: "Hierarchical Profiles", detail: "Institutional profiles support parent→child hierarchy (University → College → Department) with cascading Content DNA" },
   { pattern: "Lovable AI Gateway", detail: "All LLM calls route through ai.gateway.lovable.dev — unified auth, model routing, and usage tracking" },
   { pattern: "Resilient Fetch", detail: "_shared/resilience.ts — automatic retries with exponential backoff for transient failures" },
   { pattern: "Rate Limiting", detail: "_shared/rateLimit.ts — IP-based rate limiting on public-facing edge functions" },
   { pattern: "Streaming Responses", detail: "playground-chat uses Server-Sent Events for real-time token streaming" },
+  { pattern: "Email Event Tracking", detail: "Resend webhooks → resend-webhook function → email_nudges table tracks delivery, opens, bounces, and clicks" },
   { pattern: "Hierarchical DNA Resolution", detail: "Profile → Parent Profile → Tenant — content DNA cascades through institutional hierarchy" },
 ];
 
@@ -135,18 +231,83 @@ export default function AITechnologyPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
           <Cpu className="h-6 w-6 text-primary" />
-          AI Technology Reference
+          Technology Stack Reference
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Internal reference for all AI models, edge functions, and infrastructure powering CampusVoice.ai
+          Complete internal reference for all tools, libraries, AI models, edge functions, and infrastructure powering CampusVoice.ai
         </p>
       </div>
 
-      {/* Section 1: Models */}
+      {/* Section: Frontend Libraries */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Reasoning & Text Models</CardTitle>
-          <CardDescription>5 models used across 22 edge functions</CardDescription>
+          <CardTitle className="text-base flex items-center gap-1.5">
+            <Package className="h-4 w-4 text-primary" />
+            Frontend Libraries & Tools
+          </CardTitle>
+          <CardDescription>{frontendLibraries.length} key dependencies</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[200px]">Library</TableHead>
+                <TableHead className="w-[180px]">Package</TableHead>
+                <TableHead>Purpose</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {frontendLibraries.map((lib) => (
+                <TableRow key={lib.name}>
+                  <TableCell className="font-medium text-xs">{lib.name}</TableCell>
+                  <TableCell className="font-mono text-xs text-muted-foreground">{lib.pkg}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{lib.purpose}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Section: Document & Media Processing */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-1.5">
+            <FileText className="h-4 w-4 text-primary" />
+            Document & Media Processing
+          </CardTitle>
+          <CardDescription>{documentProcessing.length} libraries for file handling</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[160px]">Library</TableHead>
+                <TableHead className="w-[140px]">Package</TableHead>
+                <TableHead>Purpose</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {documentProcessing.map((lib) => (
+                <TableRow key={lib.name}>
+                  <TableCell className="font-medium text-xs">{lib.name}</TableCell>
+                  <TableCell className="font-mono text-xs text-muted-foreground">{lib.pkg}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{lib.purpose}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Section: AI Text Models */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-1.5">
+            <Brain className="h-4 w-4 text-primary" />
+            AI Reasoning & Text Models
+          </CardTitle>
+          <CardDescription>5 models used across AI-powered edge functions</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -170,9 +331,13 @@ export default function AITechnologyPage() {
         </CardContent>
       </Card>
 
+      {/* Section: AI Image Models */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Image Generation Models</CardTitle>
+          <CardTitle className="text-base flex items-center gap-1.5">
+            <ImageIcon className="h-4 w-4 text-primary" />
+            AI Image Generation Models
+          </CardTitle>
           <CardDescription>3 models for visual content creation</CardDescription>
         </CardHeader>
         <CardContent>
@@ -197,11 +362,47 @@ export default function AITechnologyPage() {
         </CardContent>
       </Card>
 
-      {/* Section 2: Edge Functions */}
+      {/* Section: CRM Integrations */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Edge Functions Inventory</CardTitle>
-          <CardDescription>22 serverless functions organized by capability layer</CardDescription>
+          <CardTitle className="text-base flex items-center gap-1.5">
+            <Plug className="h-4 w-4 text-primary" />
+            CRM Integrations
+          </CardTitle>
+          <CardDescription>4 CRM platforms supported for content distribution</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[220px]">Integration</TableHead>
+                <TableHead className="w-[80px]">Type</TableHead>
+                <TableHead className="w-[200px]">Purpose</TableHead>
+                <TableHead>Functions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {crmIntegrations.map((crm) => (
+                <TableRow key={crm.name}>
+                  <TableCell className="font-medium text-xs">{crm.name}</TableCell>
+                  <TableCell><Badge variant="outline">{crm.type}</Badge></TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{crm.purpose}</TableCell>
+                  <TableCell className="font-mono text-xs text-muted-foreground">{crm.functions}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Section: Edge Functions */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-1.5">
+            <Server className="h-4 w-4 text-primary" />
+            Edge Functions Inventory
+          </CardTitle>
+          <CardDescription>35+ serverless functions organized by capability layer</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {edgeFunctionGroups.map((group) => (
@@ -234,17 +435,20 @@ export default function AITechnologyPage() {
         </CardContent>
       </Card>
 
-      {/* Section 3: External Services */}
+      {/* Section: External Services */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">External Services</CardTitle>
+          <CardTitle className="text-base flex items-center gap-1.5">
+            <Globe className="h-4 w-4 text-primary" />
+            External Services
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[120px]">Service</TableHead>
-                <TableHead className="w-[200px]">Purpose</TableHead>
+                <TableHead className="w-[140px]">Service</TableHead>
+                <TableHead className="w-[220px]">Purpose</TableHead>
                 <TableHead>Edge Functions</TableHead>
               </TableRow>
             </TableHeader>
@@ -261,10 +465,41 @@ export default function AITechnologyPage() {
         </CardContent>
       </Card>
 
-      {/* Section 4: Infrastructure */}
+      {/* Section: Backend Infrastructure */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Infrastructure Patterns</CardTitle>
+          <CardTitle className="text-base flex items-center gap-1.5">
+            <Database className="h-4 w-4 text-primary" />
+            Backend Infrastructure
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[200px]">Component</TableHead>
+                <TableHead>Purpose</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {backendInfra.map((b) => (
+                <TableRow key={b.component}>
+                  <TableCell className="font-semibold text-xs">{b.component}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{b.purpose}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Section: Infrastructure Patterns */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-1.5">
+            <Layout className="h-4 w-4 text-primary" />
+            Architecture Patterns
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {infrastructurePatterns.map((p) => (
@@ -276,7 +511,7 @@ export default function AITechnologyPage() {
         </CardContent>
       </Card>
 
-      {/* Section 5: Content DNA Pipeline */}
+      {/* Section: Content DNA Pipeline */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Content DNA Pipeline</CardTitle>
