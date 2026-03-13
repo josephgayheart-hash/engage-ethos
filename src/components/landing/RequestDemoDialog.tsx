@@ -37,7 +37,7 @@ export function RequestDemoDialog({ trigger }: RequestDemoDialogProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.email || !formData.institution) {
+    if (!formData.name || !formData.email || !formData.institution || !agreedToPrivacy) {
       toast({
         title: 'Missing Information',
         description: 'Please fill in all required fields.',
