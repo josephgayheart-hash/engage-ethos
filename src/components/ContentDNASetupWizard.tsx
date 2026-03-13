@@ -125,9 +125,16 @@ export function ContentDNASetupWizard({ initialProfileId, onComplete, onCancel }
 
   const progress = ((currentStep + 1) / STEPS.length) * 100;
 
+  const { checkFile, checkText } = usePIIScanner();
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (await checkFile(file)) {
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
 
     setIsExtractingFile(true);
     try {
