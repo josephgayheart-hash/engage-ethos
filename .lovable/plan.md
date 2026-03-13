@@ -1,61 +1,58 @@
 
 
-# Redesign AI Technology Page — Client-Ready Showcase
+## Demo Readiness Improvements — ✅ COMPLETED (Phase 1)
 
-## Goal
-Transform the current data-heavy reference page into a visually polished, client-presentable technology showcase. Use branded hero header, model provider logos (inline SVGs), visual cards instead of raw tables, the Content DNA pipeline as a proper visual diagram, and the existing design system (WaveBackground, gradient zones, hover-lift cards).
+### What was implemented
 
-## Design Approach
+1. **Social Proof Strip** — Added `SocialProofStrip.tsx` to landing page below hero with platform stats (2,400+ messages, 12 institutions, 85+ users, 94% brand score)
+2. **Features Dropdown** — Added `FeaturesDropdown.tsx` to `LandingNav` with links to all 10 feature pages
+3. **Impact Metrics Card** — Added `ImpactMetricsCard.tsx` to dashboard showing messages created, estimated time saved, builds generated, evaluations run
+4. **Branded Loading States** — Replaced generic "Loading..." text with `BrandedLoader.tsx` (CampusVoice logo + bouncing dots) in all auth guards
+5. **Team Activity Feed** — Added `TeamActivityFeed.tsx` to dashboard (admin-only) showing recent team actions
 
-### 1. Hero Header with WaveBackground
-- Add a `WaveBackground` variant at the top with a bold headline: "Technology Platform" and subtitle about the 8 models, 35+ functions, and full stack
-- Stat pills showing key numbers: "8 AI Models", "35+ Edge Functions", "22 Libraries"
+### Files created
+- `src/components/landing/SocialProofStrip.tsx`
+- `src/components/landing/FeaturesDropdown.tsx`
+- `src/components/dashboard/ImpactMetricsCard.tsx`
+- `src/components/dashboard/TeamActivityFeed.tsx`
+- `src/components/BrandedLoader.tsx`
 
-### 2. AI Models Section — Visual Cards with Provider Logos
-Replace the plain tables with branded cards:
-- **Google Gemini** card cluster — inline SVG of the Gemini sparkle icon in Google blue, listing all 7 Gemini models as chips with tier badges
-- **OpenAI** card — inline SVG of the OpenAI logo mark, showing GPT-5 Mini
-- Each model gets a colored tier badge (Core/Premium/Lite/Preview) and a compact use-case list
-- Cards use `card-interactive hover-lift` classes for polish
+### Files modified
+- `src/pages/LandingPage.tsx` — imported SocialProofStrip
+- `src/components/landing/LandingNav.tsx` — added FeaturesDropdown
+- `src/pages/Index.tsx` — added ImpactMetricsCard + TeamActivityFeed
+- `src/App.tsx` — replaced loading states with BrandedLoader
 
-### 3. Edge Functions — Grouped Visual Grid
-Replace the nested tables with a grid of compact cards per capability layer:
-- Each group gets an icon, count badge, and expandable function list
-- Use `Collapsible` from Radix to keep it clean — show group summary, expand for details
-- Color-code by layer (DNA = teal, Generation = amber, Evaluation = navy, etc.)
+---
 
-### 4. Content DNA Pipeline — Visual Flow Diagram
-Replace the inline flex of boxes with a proper stepped pipeline:
-- Horizontal connected nodes with gradient backgrounds
-- Animated connecting lines using the existing `animate-beam-flow` CSS
-- Each step as a rounded card with icon, title, and description
+## Remaining Demo Readiness Items (Phase 2)
 
-### 5. Frontend & Backend Stacks — Icon Grid Cards
-Replace library tables with a visual grid:
-- Each library gets a small card with the library name, icon, and one-line purpose
-- Group into "UI Framework", "Data & State", "Content Processing", "Build Tools"
-- Backend infra shown as a horizontal architecture strip
+| Priority | Item | Status |
+|----------|------|--------|
+| 1 | Demo mode with pre-seeded Content DNA | Todo |
+| 7 | "Try a sample" in Journey Designer | Todo |
+| 8 | Video/demo embed in hero | Todo (needs video asset) |
+| 9 | Guided tour for first login | Todo |
+| 10 | Analytics seed data for demo accounts | Todo |
 
-### 6. CRM & Services — Integration Cards
-- Each integration gets a card with the service logo area, connection type badge, and description
-- Salesforce, Slate, Firecrawl, Resend as distinct branded cards
+---
 
-### 7. Architecture Patterns — Clean Feature List
-- Horizontal cards with pattern name and detail, using subtle left-border accents
+## Previous Completed Work
 
-## Code Changes
+### Graphic Design Mode Toggle with Extended Prompts — ✅ COMPLETED
 
-### Update `src/pages/admin/AITechnologyPage.tsx`
-Complete rewrite of the render, keeping all existing data arrays. Changes:
-- Import `WaveBackground`, `Collapsible`/`CollapsibleTrigger`/`CollapsibleContent`
-- Add inline SVG components for Google Gemini sparkle and OpenAI logomark
-- Hero section with WaveBackground and stat counters
-- Model cards with provider branding instead of tables
-- Collapsible edge function groups as a visual grid
-- Pipeline as connected visual nodes
-- Library grid cards instead of tables
-- Integration cards for CRM/services
-- Use existing CSS classes: `card-interactive`, `hover-lift`, `bg-zone-hero`, `bg-zone-mint`
+1. **Extracted Graphic Design as a segmented toggle** — "Photo" | "Graphic Design" toggle group at the top of Image Settings
+2. **Removed `graphic-design` from the Style dropdown** — Photo mode shows photo styles only; Graphic Design mode hides the style dropdown entirely
+3. **Added 4 Graphic Design sub-controls** (visible only in Graphic Design mode):
+   - **Design Style** — radio group: Bold & Geometric, Gradient Flow, Typographic Poster, Collage / Mixed Media, Retro / Vintage, Abstract Minimal
+   - **Color Mood** — selectable badge chips: Brand Colors Only, Warm, Cool, Monochrome, High Contrast, Pastel
+   - **Typography Style** — radio group: Sans-Serif Modern, Serif Classic, Display / Decorative, Handwritten
+   - **Layout Density** — radio group: Spacious, Balanced, Dense
+4. **Updated edge function prompt** — accepts `designStyle`, `colorMood`, `typographyStyle`, `layoutDensity`
 
-No routing or sidebar changes needed.
+### NDA Links — Super Admin Feature — ✅ COMPLETED
 
+1. **Database**: Created `nda_links` and `nda_responses` tables with full RLS
+2. **Storage**: Created `nda-signatures` bucket for drawn signature images
+3. **Public signing page** (`/nda/sign/:slug`): CampusVoice-branded page with wave emoji heading, agreement text, form fields, 3 required checkboxes, typed + optional drawn signature
+4. **Admin page** (`/admin/nda-links`): Two-tab layout — Links table + Responses table with detail drawer
