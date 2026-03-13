@@ -1,25 +1,58 @@
 
 
-# Restructure About Page — Vision-First with Founder Story
+## Demo Readiness Improvements — ✅ COMPLETED (Phase 1)
 
-## Current State
-The page is structured as a "meet the founder" bio page. The user wants it restructured to lead with CampusVoice's **mission, vision, and an emotional opening** about *why* it was built, then transition into the founder's background as the story behind the platform.
+### What was implemented
 
-## New Page Structure
+1. **Social Proof Strip** — Added `SocialProofStrip.tsx` to landing page below hero with platform stats (2,400+ messages, 12 institutions, 85+ users, 94% brand score)
+2. **Features Dropdown** — Added `FeaturesDropdown.tsx` to `LandingNav` with links to all 10 feature pages
+3. **Impact Metrics Card** — Added `ImpactMetricsCard.tsx` to dashboard showing messages created, estimated time saved, builds generated, evaluations run
+4. **Branded Loading States** — Replaced generic "Loading..." text with `BrandedLoader.tsx` (CampusVoice logo + bouncing dots) in all auth guards
+5. **Team Activity Feed** — Added `TeamActivityFeed.tsx` to dashboard (admin-only) showing recent team actions
 
-1. **Emotional Opening / "Why CampusVoice Exists"** — A heartstrings paragraph about how higher ed communicators are stretched thin, how messages shape student futures, and how words matter. Why Tyler built this.
+### Files created
+- `src/components/landing/SocialProofStrip.tsx`
+- `src/components/landing/FeaturesDropdown.tsx`
+- `src/components/dashboard/ImpactMetricsCard.tsx`
+- `src/components/dashboard/TeamActivityFeed.tsx`
+- `src/components/BrandedLoader.tsx`
 
-2. **Mission & Vision** — Clear, concise mission and vision statements for CampusVoice.AI as a platform.
+### Files modified
+- `src/pages/LandingPage.tsx` — imported SocialProofStrip
+- `src/components/landing/LandingNav.tsx` — added FeaturesDropdown
+- `src/pages/Index.tsx` — added ImpactMetricsCard + TeamActivityFeed
+- `src/App.tsx` — replaced loading states with BrandedLoader
 
-3. **Values** — 3-4 core values (e.g., Research-Grounded, Human-First AI, Built for Higher Ed, Ethical Persuasion).
+---
 
-4. **The Story Behind It — Dr. Tyler Gayheart** — Condensed founder section: photo placeholder, LinkedIn link, PhD credentials, dissertation summary with DOI link, and how his background in communication science / psychometrics / persuasion / higher ed marketing led to building CampusVoice.
+## Remaining Demo Readiness Items (Phase 2)
 
-5. **CTA** — Keep the existing "Interested?" section.
+| Priority | Item | Status |
+|----------|------|--------|
+| 1 | Demo mode with pre-seeded Content DNA | Todo |
+| 7 | "Try a sample" in Journey Designer | Todo |
+| 8 | Video/demo embed in hero | Todo (needs video asset) |
+| 9 | Guided tour for first login | Todo |
+| 10 | Analytics seed data for demo accounts | Todo |
 
-## What Changes
-- **Rewrite `src/pages/AboutPage.tsx`** — Restructure from bio-first to vision-first. Same styling conventions (header, max-w-4xl, prose). Remove the current hero layout that leads with the photo. Add mission/vision/values sections above the founder section. Keep dissertation, DOI, LinkedIn, expertise grid, and CTA.
+---
 
-## Files
-- `src/pages/AboutPage.tsx` — rewrite
+## Previous Completed Work
 
+### Graphic Design Mode Toggle with Extended Prompts — ✅ COMPLETED
+
+1. **Extracted Graphic Design as a segmented toggle** — "Photo" | "Graphic Design" toggle group at the top of Image Settings
+2. **Removed `graphic-design` from the Style dropdown** — Photo mode shows photo styles only; Graphic Design mode hides the style dropdown entirely
+3. **Added 4 Graphic Design sub-controls** (visible only in Graphic Design mode):
+   - **Design Style** — radio group: Bold & Geometric, Gradient Flow, Typographic Poster, Collage / Mixed Media, Retro / Vintage, Abstract Minimal
+   - **Color Mood** — selectable badge chips: Brand Colors Only, Warm, Cool, Monochrome, High Contrast, Pastel
+   - **Typography Style** — radio group: Sans-Serif Modern, Serif Classic, Display / Decorative, Handwritten
+   - **Layout Density** — radio group: Spacious, Balanced, Dense
+4. **Updated edge function prompt** — accepts `designStyle`, `colorMood`, `typographyStyle`, `layoutDensity`
+
+### NDA Links — Super Admin Feature — ✅ COMPLETED
+
+1. **Database**: Created `nda_links` and `nda_responses` tables with full RLS
+2. **Storage**: Created `nda-signatures` bucket for drawn signature images
+3. **Public signing page** (`/nda/sign/:slug`): CampusVoice-branded page with wave emoji heading, agreement text, form fields, 3 required checkboxes, typed + optional drawn signature
+4. **Admin page** (`/admin/nda-links`): Two-tab layout — Links table + Responses table with detail drawer
