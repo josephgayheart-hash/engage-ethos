@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { usePIIScanner } from '@/hooks/usePIIScanner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useContentDNA } from '@/hooks/useContentDNA';
 import { useInstitutionalProfiles } from '@/hooks/useInstitutionalProfiles';
@@ -124,9 +125,16 @@ export function ContentDNASetupWizard({ initialProfileId, onComplete, onCancel }
 
   const progress = ((currentStep + 1) / STEPS.length) * 100;
 
+  const { checkFile, checkText } = usePIIScanner();
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (await checkFile(file)) {
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
 
     setIsExtractingFile(true);
     try {
@@ -156,6 +164,7 @@ export function ContentDNASetupWizard({ initialProfileId, onComplete, onCancel }
 
   const handleAddText = () => {
     if (!textInput.trim()) return;
+    if (checkText(textInput)) return;
     const newSample: StagedSample = {
       id: crypto.randomUUID(),
       title: sampleTitle || `${SAMPLE_TYPES.find(t => t.value === sampleType)?.label || 'Content'} Sample`,

@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { usePIIScanner } from '@/hooks/usePIIScanner';
 import { useDesignReferences } from '@/hooks/useDesignReferences';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,9 +30,15 @@ export function DesignReferencesTab({ profileId }: DesignReferencesTabProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
 
+  const { checkFiles } = usePIIScanner();
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
+    if (await checkFiles(files)) {
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
     await uploadReference(files);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -43,6 +50,7 @@ export function DesignReferencesTab({ profileId }: DesignReferencesTabProps) {
       ['image/jpeg', 'image/png', 'image/webp'].includes(f.type)
     );
     if (files.length > 0) {
+      if (await checkFiles(files)) return;
       await uploadReference(files);
     }
   };

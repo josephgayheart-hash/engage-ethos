@@ -74,6 +74,7 @@ import {
 } from 'lucide-react';
 import { extractTextFromFile, getAcceptString } from '@/lib/documentParser';
 import { DNATuningControls, DNAAdjustments } from '@/components/DNATuningControls';
+import { usePIIScanner } from '@/hooks/usePIIScanner';
 
 const SAMPLE_TYPES = [
   // Core Communications
@@ -192,6 +193,7 @@ function detectContentType(text: string): string | null {
 export default function ContentDNAPage() {
   const { tenant, profile, isAdmin } = useAuth();
   const { activeWorkspace, canSwitch } = useWorkspace();
+  const { checkFile } = usePIIScanner();
   const effectiveTenant = canSwitch && activeWorkspace ? activeWorkspace : tenant;
   const location = useLocation();
   
@@ -454,6 +456,8 @@ export default function ContentDNAPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (await checkFile(file)) return;
+
     setLibraryIsExtractingFile(true);
     setLibraryStagedFile(file);
     setLibraryStagedFileText(null);
@@ -544,6 +548,8 @@ export default function ContentDNAPage() {
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (await checkFile(file)) return;
 
     setIsExtractingFile(true);
     setStagedFile(file);

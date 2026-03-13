@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { usePIIScanner } from '@/hooks/usePIIScanner';
 import { useCampusPhotography, PhotoAIAnalysis } from '@/hooks/useCampusPhotography';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -110,9 +111,15 @@ export function CampusPhotographyTab({ profileId }: CampusPhotographyTabProps) {
   const analyzedCount = photos.filter(p => p.ai_analysis).length;
   const unanalyzedIds = photos.filter(p => !p.ai_analysis).map(p => p.id);
 
+  const { checkFiles } = usePIIScanner();
+
   const handleFileSelect = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     const fileArray = Array.from(files);
+    if (await checkFiles(fileArray)) {
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
     await uploadPhotos(fileArray, 'uncategorized', description || undefined);
     setDescription('');
     if (fileInputRef.current) fileInputRef.current.value = '';

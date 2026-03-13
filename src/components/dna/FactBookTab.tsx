@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { usePIIScanner } from '@/hooks/usePIIScanner';
 import { useFactBook, Fact, FactCategory, FACT_CATEGORIES, CreateFactInput } from '@/hooks/useFactBook';
 import { useAuth } from '@/contexts/AuthContext';
 import { FactCard } from './FactCard';
@@ -236,9 +237,16 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
     }
   };
 
+  const { checkFile } = usePIIScanner();
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (await checkFile(file)) {
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
 
     setIsExtractingFile(true);
     try {

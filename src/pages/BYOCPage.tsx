@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { AIBadge } from "@/components/ui/ai-indicator";
 import { useToast } from "@/hooks/use-toast";
+import { usePIIScanner } from "@/hooks/usePIIScanner";
 import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useInstitutionalConfig } from "@/hooks/useInstitutionalConfig";
@@ -61,9 +62,13 @@ const BYOCPage = () => {
 
   const canProcess = messageContent.trim().length > 20;
 
+  const { checkFile } = usePIIScanner();
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    if (await checkFile(file)) return;
 
     setFileName(file.name);
 
