@@ -310,7 +310,10 @@ export default function LandingPage() {
       {/* Social Proof Strip */}
       <SocialProofStrip />
 
-      {/* How It Works Section - Position #2 */}
+      {/* AI Credibility — Position #2 */}
+      <AICredibilitySection />
+
+      {/* How It Works Section */}
       <HowItWorksSection />
 
       {/* Product Showcases Section — Top 2 inline + 3 tabbed */}
@@ -466,8 +469,6 @@ export default function LandingPage() {
       {/* Pricing Signal */}
       <PricingSignalSection />
 
-      {/* AI Credibility */}
-      <AICredibilitySection />
 
       {/* Secondary CTA Section - Vibrant Purple */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(270_60%_50%)] relative overflow-hidden">
