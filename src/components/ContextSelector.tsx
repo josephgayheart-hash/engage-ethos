@@ -589,95 +589,98 @@ export function ContextSelector({ context, onChange, mode = 'evaluator', selecte
               </div>
 
               {showExtendedOptions && (
-              <div className="space-y-2">
-                <Label htmlFor="department" className="text-sm font-medium">
-                  Department
-                </Label>
-                <Select
-                  value={context.department ?? ""}
-                  onValueChange={(value) =>
-                    onChange({ ...context, department: value === "none" || value === "" ? undefined : value as Department })
-                  }
-                >
-                  <SelectTrigger id="department" className="w-full bg-background">
-                    <SelectValue placeholder="Select department..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">— None —</SelectItem>
-                    {departmentOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="department" className="text-sm font-medium">
+                      Department
+                    </Label>
+                    <Select
+                      value={context.department ?? ""}
+                      onValueChange={(value) =>
+                        onChange({ ...context, department: value === "none" || value === "" ? undefined : value as Department })
+                      }
+                    >
+                      <SelectTrigger id="department" className="w-full bg-background">
+                        <SelectValue placeholder="Select department..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">— None —</SelectItem>
+                        {departmentOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="domain" className="text-sm font-medium">
-                  Message Domain
-                </Label>
-                <Select
-                  value={context.domain ?? ""}
-                  onValueChange={(value) =>
-                    onChange({ ...context, domain: value === "none" || value === "" ? undefined : value as MessageDomain })
-                  }
-                >
-                  <SelectTrigger id="domain" className="w-full bg-background">
-                    <SelectValue placeholder="Select domain..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">— None —</SelectItem>
-                    {domainOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="domain" className="text-sm font-medium">
+                      Message Domain
+                    </Label>
+                    <Select
+                      value={context.domain ?? ""}
+                      onValueChange={(value) =>
+                        onChange({ ...context, domain: value === "none" || value === "" ? undefined : value as MessageDomain })
+                      }
+                    >
+                      <SelectTrigger id="domain" className="w-full bg-background">
+                        <SelectValue placeholder="Select domain..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">— None —</SelectItem>
+                        {domainOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="goal" className="text-sm font-medium">
-                  Primary Goal
-                </Label>
-                <MultiSelectDropdown
-                  options={goalOptions}
-                  value={context.goals || (context.goal ? [context.goal] : [])}
-                  onChange={(values) =>
-                    onChange({ 
-                      ...context, 
-                      goals: values.length > 0 ? values as PrimaryGoal[] : undefined,
-                      goal: values.length > 0 ? values[0] as PrimaryGoal : undefined
-                    })
-                  }
-                  placeholder="Select goals..."
-                />
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="goal" className="text-sm font-medium">
+                      Primary Goal
+                    </Label>
+                    <MultiSelectDropdown
+                      options={goalOptions}
+                      value={context.goals || (context.goal ? [context.goal] : [])}
+                      onChange={(values) =>
+                        onChange({ 
+                          ...context, 
+                          goals: values.length > 0 ? values as PrimaryGoal[] : undefined,
+                          goal: values.length > 0 ? values[0] as PrimaryGoal : undefined
+                        })
+                      }
+                      placeholder="Select goals..."
+                    />
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="tone" className="text-sm font-medium">
-                  Tone Preference
-                </Label>
-                <Select
-                  value={context.tone ?? ""}
-                  onValueChange={(value) =>
-                    onChange({ ...context, tone: value === "none" || value === "" ? undefined : value as TonePreference })
-                  }
-                >
-                  <SelectTrigger id="tone" className="w-full bg-background">
-                    <SelectValue placeholder="Select tone..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">— None —</SelectItem>
-                    {toneOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="tone" className="text-sm font-medium">
+                      Tone Preference
+                    </Label>
+                    <Select
+                      value={context.tone ?? ""}
+                      onValueChange={(value) =>
+                        onChange({ ...context, tone: value === "none" || value === "" ? undefined : value as TonePreference })
+                      }
+                    >
+                      <SelectTrigger id="tone" className="w-full bg-background">
+                        <SelectValue placeholder="Select tone..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">— None —</SelectItem>
+                        {toneOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
             </div>
           </CollapsibleContent>
         </Collapsible>
