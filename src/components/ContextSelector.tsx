@@ -588,6 +588,7 @@ export function ContextSelector({ context, onChange, mode = 'evaluator', selecte
                 </Select>
               </div>
 
+              {showExtendedOptions && (
               <div className="space-y-2">
                 <Label htmlFor="department" className="text-sm font-medium">
                   Department
