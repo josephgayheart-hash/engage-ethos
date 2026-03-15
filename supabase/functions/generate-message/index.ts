@@ -679,7 +679,7 @@ Generate a structured call script with these sections. Return valid JSON only:
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: selectedModel,
           messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt },
