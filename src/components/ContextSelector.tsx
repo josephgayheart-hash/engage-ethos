@@ -523,8 +523,8 @@ export function ContextSelector({ context, onChange, mode = 'evaluator', selecte
         )}
       </div>
 
-      {/* Advanced Options - Collapsible (only in builder/mapper mode) */}
-      {showExtendedOptions && (
+      {/* Advanced Options - Collapsible */}
+      {(showExtendedOptions || onModelChange) && (
         <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
           <CollapsibleTrigger asChild>
             <Button 
