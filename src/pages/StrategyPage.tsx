@@ -1091,7 +1091,7 @@ const StrategyPage = () => {
                   "transition-all",
                   selectedPlaybookKit && "opacity-50 pointer-events-none"
                 )}>
-                  <ContextSelector context={context} onChange={setContext} mode="mapper" />
+                  <ContextSelector context={context} onChange={setContext} mode="mapper" selectedModel={selectedModel} onModelChange={setSelectedModel} />
                   {selectedPlaybookKit && (
                     <p className="text-xs text-muted-foreground mt-2 italic">
                       Audience settings are pre-configured by the "{selectedPlaybookKit.name}" playbook.
