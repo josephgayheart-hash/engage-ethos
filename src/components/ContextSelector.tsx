@@ -540,7 +540,11 @@ export function ContextSelector({ context, onChange, mode = 'evaluator', selecte
               ) : (
                 <>
                   <ChevronDown className="w-4 h-4" />
-                  Show Advanced Options (Department, Domain, Goal, Tone)
+                  <span>Advanced Options</span>
+                  <Badge variant="outline" className="text-[10px] h-5 px-1.5 gap-1 font-normal">
+                    <CurrentModelIcon className="w-3 h-3" />
+                    {currentModel.name}
+                  </Badge>
                 </>
               )}
             </Button>
