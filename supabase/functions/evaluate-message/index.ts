@@ -951,7 +951,7 @@ Scoring guide:
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                model: "google/gemini-2.5-flash",
+                model: selectedModel,
                 messages: [
                   { role: "system", content: "You are a brand adherence analyst for higher education communications. Evaluate how well generated content reflects the selected brand elements." },
                   { role: "user", content: brandAdherencePrompt },
