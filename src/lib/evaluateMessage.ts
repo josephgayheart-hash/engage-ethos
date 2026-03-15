@@ -88,7 +88,8 @@ export async function mapMessages(
   institutionalConfig?: InstitutionalConfig,
   journeyWeeks?: number,
   startDate?: string,
-  endDate?: string
+  endDate?: string,
+  model?: string
 ): Promise<MapperResult> {
   console.log("Generating messaging strategy...");
   
