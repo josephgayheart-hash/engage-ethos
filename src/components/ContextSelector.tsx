@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { type AIModel, models as aiModels } from "@/components/playground/ModelSelector";
 import {
   Select,
   SelectContent,
@@ -7,7 +8,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Users, Clock, Briefcase, ChevronDown, ChevronUp } from "lucide-react";
+import { Users, Clock, Briefcase, ChevronDown, ChevronUp, Cpu } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -28,6 +30,8 @@ interface ContextSelectorProps {
   context: MessageContext;
   onChange: (context: MessageContext) => void;
   mode?: OperationMode;
+  selectedModel?: AIModel;
+  onModelChange?: (model: AIModel) => void;
 }
 
 // ============= AUDIENCE OPTIONS =============
@@ -395,8 +399,11 @@ function getGoalOptions(audience?: AudienceType) {
 }
 
 // ============= MAIN COMPONENT =============
-export function ContextSelector({ context, onChange, mode = 'evaluator' }: ContextSelectorProps) {
+export function ContextSelector({ context, onChange, mode = 'evaluator', selectedModel, onModelChange }: ContextSelectorProps) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  
+  const currentModel = aiModels.find(m => m.id === (selectedModel || 'google/gemini-3-flash-preview')) || aiModels[0];
+  const CurrentModelIcon = currentModel.icon;
   
   const showExtendedOptions = mode === 'builder' || mode === 'mapper';
   const hideChannel = mode === 'mapper' || mode === 'builder';
@@ -516,8 +523,8 @@ export function ContextSelector({ context, onChange, mode = 'evaluator' }: Conte
         )}
       </div>
 
-      {/* Advanced Options - Collapsible (only in builder/mapper mode) */}
-      {showExtendedOptions && (
+      {/* Advanced Options - Collapsible */}
+      {(showExtendedOptions || onModelChange) && (
         <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
           <CollapsibleTrigger asChild>
             <Button 
@@ -533,102 +540,147 @@ export function ContextSelector({ context, onChange, mode = 'evaluator' }: Conte
               ) : (
                 <>
                   <ChevronDown className="w-4 h-4" />
-                  Show Advanced Options (Department, Domain, Goal, Tone)
+                  <span>Advanced Options</span>
+                  <Badge variant="outline" className="text-[10px] h-5 px-1.5 gap-1 font-normal">
+                    <CurrentModelIcon className="w-3 h-3" />
+                    {currentModel.name}
+                  </Badge>
                 </>
               )}
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 border border-border rounded-lg bg-muted/30">
+            <div className={`grid grid-cols-1 ${showExtendedOptions ? 'md:grid-cols-2 lg:grid-cols-5' : ''} gap-4 p-4 border border-border rounded-lg bg-muted/30`}>
+              {/* AI Model Selector */}
               <div className="space-y-2">
-                <Label htmlFor="department" className="text-sm font-medium">
-                  Department
+                <Label htmlFor="ai-model" className="flex items-center gap-2 text-sm font-medium">
+                  <Cpu className="w-4 h-4 text-primary" />
+                  AI Model
                 </Label>
                 <Select
-                  value={context.department ?? ""}
-                  onValueChange={(value) =>
-                    onChange({ ...context, department: value === "none" || value === "" ? undefined : value as Department })
-                  }
+                  value={selectedModel || 'google/gemini-3-flash-preview'}
+                  onValueChange={(value) => onModelChange?.(value as AIModel)}
                 >
-                  <SelectTrigger id="department" className="w-full bg-background">
-                    <SelectValue placeholder="Select department..." />
+                  <SelectTrigger id="ai-model" className="w-full bg-background">
+                    <SelectValue placeholder="Select model..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">— None —</SelectItem>
-                    {departmentOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
+                    {aiModels.map((model) => {
+                      const ModelIcon = model.icon;
+                      return (
+                        <SelectItem key={model.id} value={model.id} className="py-2">
+                          <div className="flex items-center gap-2">
+                            <ModelIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                            <span className="font-medium">{model.name}</span>
+                            {model.badge && (
+                              <Badge 
+                                variant={model.badge === 'Premium' ? 'default' : 'secondary'} 
+                                className="text-[10px] px-1 py-0"
+                              >
+                                {model.badge}
+                              </Badge>
+                            )}
+                          </div>
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="domain" className="text-sm font-medium">
-                  Message Domain
-                </Label>
-                <Select
-                  value={context.domain ?? ""}
-                  onValueChange={(value) =>
-                    onChange({ ...context, domain: value === "none" || value === "" ? undefined : value as MessageDomain })
-                  }
-                >
-                  <SelectTrigger id="domain" className="w-full bg-background">
-                    <SelectValue placeholder="Select domain..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">— None —</SelectItem>
-                    {domainOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {showExtendedOptions && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="department" className="text-sm font-medium">
+                      Department
+                    </Label>
+                    <Select
+                      value={context.department ?? ""}
+                      onValueChange={(value) =>
+                        onChange({ ...context, department: value === "none" || value === "" ? undefined : value as Department })
+                      }
+                    >
+                      <SelectTrigger id="department" className="w-full bg-background">
+                        <SelectValue placeholder="Select department..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">— None —</SelectItem>
+                        {departmentOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="goal" className="text-sm font-medium">
-                  Primary Goal
-                </Label>
-                <MultiSelectDropdown
-                  options={goalOptions}
-                  value={context.goals || (context.goal ? [context.goal] : [])}
-                  onChange={(values) =>
-                    onChange({ 
-                      ...context, 
-                      goals: values.length > 0 ? values as PrimaryGoal[] : undefined,
-                      goal: values.length > 0 ? values[0] as PrimaryGoal : undefined
-                    })
-                  }
-                  placeholder="Select goals..."
-                />
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="domain" className="text-sm font-medium">
+                      Message Domain
+                    </Label>
+                    <Select
+                      value={context.domain ?? ""}
+                      onValueChange={(value) =>
+                        onChange({ ...context, domain: value === "none" || value === "" ? undefined : value as MessageDomain })
+                      }
+                    >
+                      <SelectTrigger id="domain" className="w-full bg-background">
+                        <SelectValue placeholder="Select domain..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">— None —</SelectItem>
+                        {domainOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="tone" className="text-sm font-medium">
-                  Tone Preference
-                </Label>
-                <Select
-                  value={context.tone ?? ""}
-                  onValueChange={(value) =>
-                    onChange({ ...context, tone: value === "none" || value === "" ? undefined : value as TonePreference })
-                  }
-                >
-                  <SelectTrigger id="tone" className="w-full bg-background">
-                    <SelectValue placeholder="Select tone..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">— None —</SelectItem>
-                    {toneOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="goal" className="text-sm font-medium">
+                      Primary Goal
+                    </Label>
+                    <MultiSelectDropdown
+                      options={goalOptions}
+                      value={context.goals || (context.goal ? [context.goal] : [])}
+                      onChange={(values) =>
+                        onChange({ 
+                          ...context, 
+                          goals: values.length > 0 ? values as PrimaryGoal[] : undefined,
+                          goal: values.length > 0 ? values[0] as PrimaryGoal : undefined
+                        })
+                      }
+                      placeholder="Select goals..."
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="tone" className="text-sm font-medium">
+                      Tone Preference
+                    </Label>
+                    <Select
+                      value={context.tone ?? ""}
+                      onValueChange={(value) =>
+                        onChange({ ...context, tone: value === "none" || value === "" ? undefined : value as TonePreference })
+                      }
+                    >
+                      <SelectTrigger id="tone" className="w-full bg-background">
+                        <SelectValue placeholder="Select tone..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">— None —</SelectItem>
+                        {toneOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
             </div>
           </CollapsibleContent>
         </Collapsible>

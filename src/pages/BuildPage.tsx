@@ -3,6 +3,7 @@ import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ContextSelector } from "@/components/ContextSelector";
+import { type AIModel } from "@/components/playground/ModelSelector";
 import { LibraryNav } from "@/components/LibraryNav";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
 import { ChannelPreview } from "@/components/ChannelPreview";
@@ -257,6 +258,7 @@ const BuildPage = () => {
     moment: (remixState?.remixContext?.moment as any) || undefined,
     channel: (remixState?.preSelectChannel as any) || (remixState?.remixContext?.channel as any) || 'email',
   });
+  const [selectedModel, setSelectedModel] = useState<AIModel>('google/gemini-3-flash-preview');
   const [selectedChannels, setSelectedChannels] = useState<Channel[]>(
     remixState?.preSelectChannel 
       ? [remixState.preSelectChannel as Channel]
@@ -480,7 +482,7 @@ const BuildPage = () => {
           }
         : undefined;
 
-      const result = await buildMessage(contextWithChannels, configForGeneration);
+      const result = await buildMessage(contextWithChannels, configForGeneration, selectedModel);
       setBuilderResult(result);
       setJustGenerated(true); // Mark as freshly generated to trigger scroll
 
@@ -1015,7 +1017,7 @@ const BuildPage = () => {
                 helpText="Select the primary audience type, their specific cohort characteristics, and the communication moment. These selections help the AI generate contextually appropriate messaging."
                 icon={<Users className="w-4 h-4" />}
               >
-                <ContextSelector context={context} onChange={setContext} mode="builder" />
+                <ContextSelector context={context} onChange={setContext} mode="builder" selectedModel={selectedModel} onModelChange={setSelectedModel} />
               </BuilderStepSection>
 
               {/* Step 5: Channel Selection */}

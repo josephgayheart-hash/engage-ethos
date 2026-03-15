@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { ContextSelector } from "@/components/ContextSelector";
+import { type AIModel } from "@/components/playground/ModelSelector";
 import { MessageInput } from "@/components/MessageInput";
 import { EvaluationResults } from "@/components/EvaluationResults";
 import { LibraryNav } from "@/components/LibraryNav";
@@ -42,6 +43,7 @@ const EvaluatePage = () => {
     moment: 'early-term',
     channel: 'email',
   });
+  const [selectedModel, setSelectedModel] = useState<AIModel>('google/gemini-3-flash-preview');
   const [evaluationResult, setEvaluationResult] = useState<EvaluationResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [autoSave, setAutoSave] = useState(true);
@@ -64,7 +66,7 @@ const EvaluatePage = () => {
     setEvaluationResult(null);
     
     try {
-      const result = await evaluateMessage(messageContent, context, institutionalConfig || undefined);
+      const result = await evaluateMessage(messageContent, context, institutionalConfig || undefined, selectedModel);
       setEvaluationResult(result);
 
       // Track tool usage
@@ -231,7 +233,7 @@ const EvaluatePage = () => {
                 description="Who is this message for and what's the situation?"
                 icon={<Users className="w-4 h-4" />}
               >
-                <ContextSelector context={context} onChange={setContext} mode="evaluator" />
+                <ContextSelector context={context} onChange={setContext} mode="evaluator" selectedModel={selectedModel} onModelChange={setSelectedModel} />
               </BuilderStepSection>
 
               {/* Step 4: Message Content */}

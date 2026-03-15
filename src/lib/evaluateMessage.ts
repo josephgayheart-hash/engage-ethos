@@ -10,7 +10,8 @@ import type {
 export async function evaluateMessage(
   content: string, 
   context: MessageContext,
-  institutionalConfig?: InstitutionalConfig
+  institutionalConfig?: InstitutionalConfig,
+  model?: string
 ): Promise<EvaluationResult> {
   console.log("Sending message for AI evaluation...");
   
@@ -19,7 +20,8 @@ export async function evaluateMessage(
       message: content, 
       context,
       mode: 'evaluator',
-      institutionalConfig
+      institutionalConfig,
+      model
     }
   });
 
@@ -39,7 +41,8 @@ export async function evaluateMessage(
 
 export async function buildMessage(
   context: MessageContext,
-  institutionalConfig?: InstitutionalConfig
+  institutionalConfig?: InstitutionalConfig,
+  model?: string
 ): Promise<BuilderResult> {
   console.log("Building message from context...");
   
@@ -61,7 +64,8 @@ export async function buildMessage(
     body: { 
       context,
       mode: 'builder',
-      institutionalConfig
+      institutionalConfig,
+      model
     }
   });
 
@@ -84,7 +88,8 @@ export async function mapMessages(
   institutionalConfig?: InstitutionalConfig,
   journeyWeeks?: number,
   startDate?: string,
-  endDate?: string
+  endDate?: string,
+  model?: string
 ): Promise<MapperResult> {
   console.log("Generating messaging strategy...");
   
@@ -109,7 +114,8 @@ export async function mapMessages(
       institutionalConfig,
       journeyWeeks: journeyWeeks || 12,
       startDate,
-      endDate
+      endDate,
+      model
     }
   });
 

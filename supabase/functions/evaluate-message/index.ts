@@ -335,7 +335,15 @@ serve(async (req) => {
     if (!rateLimit.allowed) {
       return rateLimitExceededResponse(rateLimit);
     }
-    const { message, context, mode, institutionalConfig, journeyWeeks, startDate, endDate } = await req.json();
+    const { message, context, mode, institutionalConfig, journeyWeeks, startDate, endDate, model: requestedModel } = await req.json();
+    
+    // Validate and select model
+    const ALLOWED_MODELS = [
+      'google/gemini-2.5-flash', 'google/gemini-2.5-flash-lite', 'google/gemini-2.5-pro',
+      'google/gemini-3-flash-preview', 'google/gemini-3.1-pro-preview',
+      'openai/gpt-5', 'openai/gpt-5-mini', 'openai/gpt-5-nano', 'openai/gpt-5.2'
+    ];
+    const selectedModel = requestedModel && ALLOWED_MODELS.includes(requestedModel) ? requestedModel : 'google/gemini-3-flash-preview';
     
     if (!context) {
       return new Response(
@@ -736,7 +744,7 @@ Provide your evaluation as JSON.`;
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: selectedModel,
           messages: [
             { role: "system", content: SYSTEM_PROMPT + "\n\n" + modePrompt },
             { role: "user", content: userPrompt },
@@ -943,7 +951,7 @@ Scoring guide:
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                model: "google/gemini-2.5-flash",
+                model: selectedModel,
                 messages: [
                   { role: "system", content: "You are a brand adherence analyst for higher education communications. Evaluate how well generated content reflects the selected brand elements." },
                   { role: "user", content: brandAdherencePrompt },
@@ -1000,7 +1008,7 @@ Scoring guide:
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              model: "google/gemini-2.5-flash",
+              model: selectedModel,
               messages: [
                 { role: "system", content: SYSTEM_PROMPT + "\n\n" + modePrompt },
                 { role: "user", content: userPrompt + "\n\nCRITICAL: You MUST respond with ONLY valid JSON. No markdown, no commentary, no explanation. Just the JSON object." },

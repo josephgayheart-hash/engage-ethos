@@ -9,6 +9,7 @@ import { PlaybookKitSelector } from "@/components/PlaybookKitSelector";
 import { PlaybookKitGuidance } from "@/components/PlaybookKitGuidance";
 import { usePlaybookKits } from "@/hooks/usePlaybookKits";
 import { ContextSelector } from "@/components/ContextSelector";
+import { type AIModel } from "@/components/playground/ModelSelector";
 import { StrategyJourneyDisplay } from "@/components/StrategyJourney";
 import { JourneyFlowDiagram } from "@/components/JourneyFlowDiagram";
 import { LibraryNav } from "@/components/LibraryNav";
@@ -126,6 +127,7 @@ const StrategyPage = () => {
     moment: undefined,
     channel: 'email',
   });
+  const [selectedModel, setSelectedModel] = useState<AIModel>('google/gemini-3-flash-preview');
   const [selectedChannels, setSelectedChannels] = useState<Channel[]>(['email', 'sms']);
   const [journeyWeeks, setJourneyWeeks] = useState(12);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
@@ -464,7 +466,8 @@ const StrategyPage = () => {
         configForGeneration, 
         journeyWeeks,
         startDate?.toISOString(),
-        endDate?.toISOString()
+        endDate?.toISOString(),
+        selectedModel
       );
       setMapperResult(result);
 
@@ -1088,7 +1091,7 @@ const StrategyPage = () => {
                   "transition-all",
                   selectedPlaybookKit && "opacity-50 pointer-events-none"
                 )}>
-                  <ContextSelector context={context} onChange={setContext} mode="mapper" />
+                  <ContextSelector context={context} onChange={setContext} mode="mapper" selectedModel={selectedModel} onModelChange={setSelectedModel} />
                   {selectedPlaybookKit && (
                     <p className="text-xs text-muted-foreground mt-2 italic">
                       Audience settings are pre-configured by the "{selectedPlaybookKit.name}" playbook.
