@@ -93,6 +93,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     impersonatedUserEmail: null,
   });
 
+  const clearAuthState = () => {
+    setUser(null);
+    setSession(null);
+    setProfile(null);
+    setTenant(null);
+    setRoles([]);
+  };
+
   const fetchUserData = async (userId: string) => {
     try {
       // Fetch profile
