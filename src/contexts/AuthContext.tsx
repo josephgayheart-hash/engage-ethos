@@ -188,20 +188,40 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Ignore INITIAL_SESSION; we hydrate from getSession() first.
         if (event === 'INITIAL_SESSION') return;
 
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
-
         if (currentSession?.user) {
-          // Defer Supabase calls with setTimeout to prevent deadlock
+          setSession(currentSession);
+          setUser(currentSession.user);
+
+          // Defer backend reads to avoid blocking auth event processing
           setTimeout(() => {
             if (!isMounted) return;
-            fetchUserData(currentSession.user.id);
+            void fetchUserData(currentSession.user.id);
           }, 0);
-        } else {
-          setProfile(null);
-          setTenant(null);
-          setRoles([]);
+          return;
         }
+
+        // Guard against transient null sessions by re-checking storage-backed session first
+        setTimeout(() => {
+          void (async () => {
+            if (!isMounted) return;
+            try {
+              const { data: { session: recoveredSession } } = await supabase.auth.getSession();
+              if (!isMounted) return;
+
+              if (recoveredSession?.user) {
+                setSession(recoveredSession);
+                setUser(recoveredSession.user);
+                void fetchUserData(recoveredSession.user.id);
+                return;
+              }
+            } catch (sessionError) {
+              console.error('Session recovery failed:', sessionError);
+            }
+
+            if (!isMounted) return;
+            clearAuthState();
+          })();
+        }, 0);
       }
     );
 
