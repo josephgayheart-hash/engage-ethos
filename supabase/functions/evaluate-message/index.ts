@@ -335,7 +335,15 @@ serve(async (req) => {
     if (!rateLimit.allowed) {
       return rateLimitExceededResponse(rateLimit);
     }
-    const { message, context, mode, institutionalConfig, journeyWeeks, startDate, endDate } = await req.json();
+    const { message, context, mode, institutionalConfig, journeyWeeks, startDate, endDate, model: requestedModel } = await req.json();
+    
+    // Validate and select model
+    const ALLOWED_MODELS = [
+      'google/gemini-2.5-flash', 'google/gemini-2.5-flash-lite', 'google/gemini-2.5-pro',
+      'google/gemini-3-flash-preview', 'google/gemini-3.1-pro-preview',
+      'openai/gpt-5', 'openai/gpt-5-mini', 'openai/gpt-5-nano', 'openai/gpt-5.2'
+    ];
+    const selectedModel = requestedModel && ALLOWED_MODELS.includes(requestedModel) ? requestedModel : 'google/gemini-3-flash-preview';
     
     if (!context) {
       return new Response(
