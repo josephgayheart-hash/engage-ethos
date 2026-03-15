@@ -6,13 +6,18 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Cpu, Zap, Sparkles, Brain } from 'lucide-react';
+import { Cpu, Zap, Sparkles, Brain, Rocket, FlaskConical, Crown } from 'lucide-react';
 
 export type AIModel = 
   | 'google/gemini-2.5-flash' 
   | 'google/gemini-2.5-flash-lite' 
   | 'google/gemini-2.5-pro'
-  | 'openai/gpt-5-mini';
+  | 'google/gemini-3-flash-preview'
+  | 'google/gemini-3.1-pro-preview'
+  | 'openai/gpt-5'
+  | 'openai/gpt-5-mini'
+  | 'openai/gpt-5-nano'
+  | 'openai/gpt-5.2';
 
 interface ModelOption {
   id: AIModel;
@@ -22,11 +27,16 @@ interface ModelOption {
   badge?: string;
 }
 
-const models: ModelOption[] = [
-  { id: 'google/gemini-2.5-flash', name: 'Flash', description: 'Fast & balanced', icon: Zap, badge: 'Default' },
-  { id: 'google/gemini-2.5-flash-lite', name: 'Lite', description: 'Fastest', icon: Cpu },
-  { id: 'google/gemini-2.5-pro', name: 'Pro', description: 'Most capable', icon: Brain, badge: 'Premium' },
-  { id: 'openai/gpt-5-mini', name: 'GPT-5 Mini', description: 'Strong reasoning', icon: Sparkles },
+export const models: ModelOption[] = [
+  { id: 'google/gemini-3-flash-preview', name: 'Gemini 3 Flash', description: 'Fast & capable (recommended)', icon: Rocket, badge: 'Default' },
+  { id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash', description: 'Balanced speed & quality', icon: Zap },
+  { id: 'google/gemini-2.5-flash-lite', name: 'Gemini 2.5 Lite', description: 'Fastest, simple tasks', icon: Cpu },
+  { id: 'google/gemini-2.5-pro', name: 'Gemini 2.5 Pro', description: 'Complex reasoning & analysis', icon: Brain, badge: 'Premium' },
+  { id: 'google/gemini-3.1-pro-preview', name: 'Gemini 3.1 Pro', description: 'Next-gen reasoning', icon: FlaskConical, badge: 'Preview' },
+  { id: 'openai/gpt-5-mini', name: 'GPT-5 Mini', description: 'Strong reasoning, lower cost', icon: Sparkles },
+  { id: 'openai/gpt-5', name: 'GPT-5', description: 'Powerful all-rounder', icon: Crown, badge: 'Premium' },
+  { id: 'openai/gpt-5-nano', name: 'GPT-5 Nano', description: 'Speed & cost optimized', icon: Cpu },
+  { id: 'openai/gpt-5.2', name: 'GPT-5.2', description: 'Enhanced reasoning', icon: Brain, badge: 'Latest' },
 ];
 
 interface ModelSelectorProps {

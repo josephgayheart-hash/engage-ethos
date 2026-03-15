@@ -114,7 +114,8 @@ export async function mapMessages(
       institutionalConfig,
       journeyWeeks: journeyWeeks || 12,
       startDate,
-      endDate
+      endDate,
+      model
     }
   });
 
