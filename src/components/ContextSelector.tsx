@@ -30,6 +30,8 @@ interface ContextSelectorProps {
   context: MessageContext;
   onChange: (context: MessageContext) => void;
   mode?: OperationMode;
+  selectedModel?: AIModel;
+  onModelChange?: (model: AIModel) => void;
 }
 
 // ============= AUDIENCE OPTIONS =============
