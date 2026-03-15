@@ -399,8 +399,11 @@ function getGoalOptions(audience?: AudienceType) {
 }
 
 // ============= MAIN COMPONENT =============
-export function ContextSelector({ context, onChange, mode = 'evaluator' }: ContextSelectorProps) {
+export function ContextSelector({ context, onChange, mode = 'evaluator', selectedModel, onModelChange }: ContextSelectorProps) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  
+  const currentModel = aiModels.find(m => m.id === (selectedModel || 'google/gemini-3-flash-preview')) || aiModels[0];
+  const CurrentModelIcon = currentModel.icon;
   
   const showExtendedOptions = mode === 'builder' || mode === 'mapper';
   const hideChannel = mode === 'mapper' || mode === 'builder';
