@@ -3,7 +3,7 @@ import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ContextSelector } from "@/components/ContextSelector";
-import { type AIModel } from "@/components/playground/ModelSelector";
+import { ModelSelector, type AIModel } from "@/components/playground/ModelSelector";
 import { LibraryNav } from "@/components/LibraryNav";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
 import { ChannelPreview } from "@/components/ChannelPreview";
