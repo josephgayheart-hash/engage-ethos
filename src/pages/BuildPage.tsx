@@ -258,6 +258,7 @@ const BuildPage = () => {
     moment: (remixState?.remixContext?.moment as any) || undefined,
     channel: (remixState?.preSelectChannel as any) || (remixState?.remixContext?.channel as any) || 'email',
   });
+  const [selectedModel, setSelectedModel] = useState<AIModel>('google/gemini-3-flash-preview');
   const [selectedChannels, setSelectedChannels] = useState<Channel[]>(
     remixState?.preSelectChannel 
       ? [remixState.preSelectChannel as Channel]
