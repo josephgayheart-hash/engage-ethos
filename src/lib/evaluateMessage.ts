@@ -10,7 +10,8 @@ import type {
 export async function evaluateMessage(
   content: string, 
   context: MessageContext,
-  institutionalConfig?: InstitutionalConfig
+  institutionalConfig?: InstitutionalConfig,
+  model?: string
 ): Promise<EvaluationResult> {
   console.log("Sending message for AI evaluation...");
   
@@ -19,7 +20,8 @@ export async function evaluateMessage(
       message: content, 
       context,
       mode: 'evaluator',
-      institutionalConfig
+      institutionalConfig,
+      model
     }
   });
 
