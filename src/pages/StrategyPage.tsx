@@ -127,6 +127,7 @@ const StrategyPage = () => {
     moment: undefined,
     channel: 'email',
   });
+  const [selectedModel, setSelectedModel] = useState<AIModel>('google/gemini-3-flash-preview');
   const [selectedChannels, setSelectedChannels] = useState<Channel[]>(['email', 'sms']);
   const [journeyWeeks, setJourneyWeeks] = useState(12);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
