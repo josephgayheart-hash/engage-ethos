@@ -233,7 +233,7 @@ const EvaluatePage = () => {
                 description="Who is this message for and what's the situation?"
                 icon={<Users className="w-4 h-4" />}
               >
-                <ContextSelector context={context} onChange={setContext} mode="evaluator" />
+                <ContextSelector context={context} onChange={setContext} mode="evaluator" selectedModel={selectedModel} onModelChange={setSelectedModel} />
               </BuilderStepSection>
 
               {/* Step 4: Message Content */}
