@@ -238,9 +238,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (currentSession?.user) {
           await fetchUserData(currentSession.user.id);
         } else {
-          setProfile(null);
-          setTenant(null);
-          setRoles([]);
+          clearAuthState();
         }
       } catch (err) {
         console.error('Session check failed:', err);
