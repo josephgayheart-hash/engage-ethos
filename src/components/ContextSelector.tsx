@@ -404,7 +404,8 @@ export function ContextSelector({ context, onChange, mode = 'evaluator', selecte
   
   const currentModel = aiModels.find(m => m.id === (selectedModel || 'google/gemini-3-flash-preview')) || aiModels[0];
   const CurrentModelIcon = currentModel.icon;
-  
+  const shouldShowModelSelector = Boolean(onModelChange);
+
   const showExtendedOptions = mode === 'builder' || mode === 'mapper';
   const hideChannel = mode === 'mapper' || mode === 'builder';
   
