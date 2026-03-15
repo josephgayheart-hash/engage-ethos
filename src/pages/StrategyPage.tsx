@@ -466,7 +466,8 @@ const StrategyPage = () => {
         configForGeneration, 
         journeyWeeks,
         startDate?.toISOString(),
-        endDate?.toISOString()
+        endDate?.toISOString(),
+        selectedModel
       );
       setMapperResult(result);
 
