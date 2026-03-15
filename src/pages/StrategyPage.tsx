@@ -9,6 +9,7 @@ import { PlaybookKitSelector } from "@/components/PlaybookKitSelector";
 import { PlaybookKitGuidance } from "@/components/PlaybookKitGuidance";
 import { usePlaybookKits } from "@/hooks/usePlaybookKits";
 import { ContextSelector } from "@/components/ContextSelector";
+import { type AIModel } from "@/components/playground/ModelSelector";
 import { StrategyJourneyDisplay } from "@/components/StrategyJourney";
 import { JourneyFlowDiagram } from "@/components/JourneyFlowDiagram";
 import { LibraryNav } from "@/components/LibraryNav";
