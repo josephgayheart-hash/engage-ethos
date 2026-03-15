@@ -482,7 +482,7 @@ const BuildPage = () => {
           }
         : undefined;
 
-      const result = await buildMessage(contextWithChannels, configForGeneration);
+      const result = await buildMessage(contextWithChannels, configForGeneration, selectedModel);
       setBuilderResult(result);
       setJustGenerated(true); // Mark as freshly generated to trigger scroll
 
