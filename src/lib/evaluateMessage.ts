@@ -41,7 +41,8 @@ export async function evaluateMessage(
 
 export async function buildMessage(
   context: MessageContext,
-  institutionalConfig?: InstitutionalConfig
+  institutionalConfig?: InstitutionalConfig,
+  model?: string
 ): Promise<BuilderResult> {
   console.log("Building message from context...");
   
