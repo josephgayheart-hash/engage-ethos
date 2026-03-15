@@ -550,7 +550,44 @@ export function ContextSelector({ context, onChange, mode = 'evaluator', selecte
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 border border-border rounded-lg bg-muted/30">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 p-4 border border-border rounded-lg bg-muted/30">
+              {/* AI Model Selector */}
+              <div className="space-y-2">
+                <Label htmlFor="ai-model" className="flex items-center gap-2 text-sm font-medium">
+                  <Cpu className="w-4 h-4 text-primary" />
+                  AI Model
+                </Label>
+                <Select
+                  value={selectedModel || 'google/gemini-3-flash-preview'}
+                  onValueChange={(value) => onModelChange?.(value as AIModel)}
+                >
+                  <SelectTrigger id="ai-model" className="w-full bg-background">
+                    <SelectValue placeholder="Select model..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {aiModels.map((model) => {
+                      const ModelIcon = model.icon;
+                      return (
+                        <SelectItem key={model.id} value={model.id} className="py-2">
+                          <div className="flex items-center gap-2">
+                            <ModelIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                            <span className="font-medium">{model.name}</span>
+                            {model.badge && (
+                              <Badge 
+                                variant={model.badge === 'Premium' ? 'default' : 'secondary'} 
+                                className="text-[10px] px-1 py-0"
+                              >
+                                {model.badge}
+                              </Badge>
+                            )}
+                          </div>
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="department" className="text-sm font-medium">
                   Department
