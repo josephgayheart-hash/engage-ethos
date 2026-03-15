@@ -134,7 +134,8 @@ function RequireApprover({ children }: { children: React.ReactNode }) {
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading, profile } = useAuth();
   if (isLoading) return <BrandedLoader />;
-  if (user && profile?.status === 'active' && !profile?.password_reset_required) return <Navigate to="/dashboard" replace />;
+  if (user && !profile) return <BrandedLoader />;
+  if (user && profile?.status === 'active' && !profile.password_reset_required) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 
