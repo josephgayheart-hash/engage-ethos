@@ -14,7 +14,15 @@ serve(async (req) => {
     if (!rateLimit.allowed) {
       return rateLimitExceededResponse(rateLimit);
     }
-    const { type, context, institutionalConfig, touchpoint, channels, startDate, endDate, contentDNA } = await req.json();
+    const { type, context, institutionalConfig, touchpoint, channels, startDate, endDate, contentDNA, model: requestedModel } = await req.json();
+    
+    // Validate and select model
+    const ALLOWED_MODELS = [
+      'google/gemini-2.5-flash', 'google/gemini-2.5-flash-lite', 'google/gemini-2.5-pro',
+      'google/gemini-3-flash-preview', 'google/gemini-3.1-pro-preview',
+      'openai/gpt-5', 'openai/gpt-5-mini', 'openai/gpt-5-nano', 'openai/gpt-5.2'
+    ];
+    const selectedModel = requestedModel && ALLOWED_MODELS.includes(requestedModel) ? requestedModel : 'google/gemini-3-flash-preview';
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
