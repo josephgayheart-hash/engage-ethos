@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { type AIModel, models as aiModels } from "@/components/playground/ModelSelector";
 import {
   Select,
   SelectContent,
