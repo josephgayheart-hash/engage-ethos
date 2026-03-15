@@ -64,7 +64,8 @@ export async function buildMessage(
     body: { 
       context,
       mode: 'builder',
-      institutionalConfig
+      institutionalConfig,
+      model
     }
   });
 
