@@ -404,7 +404,8 @@ export function ContextSelector({ context, onChange, mode = 'evaluator', selecte
   
   const currentModel = aiModels.find(m => m.id === (selectedModel || 'google/gemini-3-flash-preview')) || aiModels[0];
   const CurrentModelIcon = currentModel.icon;
-  
+  const shouldShowModelSelector = Boolean(onModelChange);
+
   const showExtendedOptions = mode === 'builder' || mode === 'mapper';
   const hideChannel = mode === 'mapper' || mode === 'builder';
   
@@ -524,7 +525,7 @@ export function ContextSelector({ context, onChange, mode = 'evaluator', selecte
       </div>
 
       {/* Advanced Options - Collapsible */}
-      {(showExtendedOptions || onModelChange) && (
+      {(showExtendedOptions || shouldShowModelSelector) && (
         <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
           <CollapsibleTrigger asChild>
             <Button 
@@ -541,52 +542,66 @@ export function ContextSelector({ context, onChange, mode = 'evaluator', selecte
                 <>
                   <ChevronDown className="w-4 h-4" />
                   <span>Advanced Options</span>
-                  <Badge variant="outline" className="text-[10px] h-5 px-1.5 gap-1 font-normal">
-                    <CurrentModelIcon className="w-3 h-3" />
-                    {currentModel.name}
-                  </Badge>
+                  {shouldShowModelSelector && (
+                    <Badge variant="outline" className="text-[10px] h-5 px-1.5 gap-1 font-normal">
+                      <CurrentModelIcon className="w-3 h-3" />
+                      {currentModel.name}
+                    </Badge>
+                  )}
                 </>
               )}
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-4">
-            <div className={`grid grid-cols-1 ${showExtendedOptions ? 'md:grid-cols-2 lg:grid-cols-5' : ''} gap-4 p-4 border border-border rounded-lg bg-muted/30`}>
+            <div
+              className={`grid grid-cols-1 ${
+                showExtendedOptions
+                  ? shouldShowModelSelector
+                    ? 'md:grid-cols-2 lg:grid-cols-5'
+                    : 'md:grid-cols-2 lg:grid-cols-4'
+                  : shouldShowModelSelector
+                    ? 'md:grid-cols-2'
+                    : ''
+              } gap-4 p-4 border border-border rounded-lg bg-muted/30`}
+            >
               {/* AI Model Selector */}
-              <div className="space-y-2">
-                <Label htmlFor="ai-model" className="flex items-center gap-2 text-sm font-medium">
-                  <Cpu className="w-4 h-4 text-primary" />
-                  AI Model
-                </Label>
-                <Select
-                  value={selectedModel || 'google/gemini-3-flash-preview'}
-                  onValueChange={(value) => onModelChange?.(value as AIModel)}
-                >
-                  <SelectTrigger id="ai-model" className="w-full bg-background">
-                    <SelectValue placeholder="Select model..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {aiModels.map((model) => {
-                      const ModelIcon = model.icon;
-                      return (
-                        <SelectItem key={model.id} value={model.id} className="py-2">
-                          <div className="flex items-center gap-2">
-                            <ModelIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                            <span className="font-medium">{model.name}</span>
-                            {model.badge && (
-                              <Badge 
-                                variant={model.badge === 'Premium' ? 'default' : 'secondary'} 
-                                className="text-[10px] px-1 py-0"
-                              >
-                                {model.badge}
-                              </Badge>
-                            )}
-                          </div>
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-              </div>
+              {shouldShowModelSelector && (
+                <div className="space-y-2">
+                  <Label htmlFor="ai-model" className="flex items-center gap-2 text-sm font-medium">
+                    <Cpu className="w-4 h-4 text-primary" />
+                    AI Model
+                  </Label>
+                  <Select
+                    value={selectedModel || 'google/gemini-3-flash-preview'}
+                    onValueChange={(value) => onModelChange?.(value as AIModel)}
+                  >
+                    <SelectTrigger id="ai-model" className="w-full bg-background">
+                      <SelectValue placeholder="Select model..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {aiModels.map((model) => {
+                        const ModelIcon = model.icon;
+                        return (
+                          <SelectItem key={model.id} value={model.id} className="py-2">
+                            <div className="flex items-center gap-2">
+                              <ModelIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                              <span className="font-medium">{model.name}</span>
+                              {model.badge && (
+                                <Badge 
+                                  variant={model.badge === 'Premium' ? 'default' : 'secondary'} 
+                                  className="text-[10px] px-1 py-0"
+                                >
+                                  {model.badge}
+                                </Badge>
+                              )}
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               {showExtendedOptions && (
                 <>

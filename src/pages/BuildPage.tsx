@@ -3,7 +3,7 @@ import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ContextSelector } from "@/components/ContextSelector";
-import { type AIModel } from "@/components/playground/ModelSelector";
+import { ModelSelector, type AIModel } from "@/components/playground/ModelSelector";
 import { LibraryNav } from "@/components/LibraryNav";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
 import { ChannelPreview } from "@/components/ChannelPreview";
@@ -1017,7 +1017,7 @@ const BuildPage = () => {
                 helpText="Select the primary audience type, their specific cohort characteristics, and the communication moment. These selections help the AI generate contextually appropriate messaging."
                 icon={<Users className="w-4 h-4" />}
               >
-                <ContextSelector context={context} onChange={setContext} mode="builder" selectedModel={selectedModel} onModelChange={setSelectedModel} />
+                <ContextSelector context={context} onChange={setContext} mode="builder" />
               </BuilderStepSection>
 
               {/* Step 5: Channel Selection */}
@@ -1126,9 +1126,24 @@ const BuildPage = () => {
                 )}
               </BuilderStepSection>
 
-              {/* Step 7: Additional Context */}
+              {/* Step 7: AI Model */}
               <BuilderStepSection
                 stepNumber={7}
+                title="Select AI Model"
+                description="Choose which model powers this generation run"
+                helpText="Pick the model before adding final campaign notes. Faster models are great for iteration; premium models work best for nuanced messaging."
+                icon={<Zap className="w-4 h-4" />}
+                optional
+              >
+                <div className="flex items-center gap-3">
+                  <ModelSelector value={selectedModel} onChange={setSelectedModel} />
+                  <Badge variant="outline" className="text-xs">Applies to this build</Badge>
+                </div>
+              </BuilderStepSection>
+
+              {/* Step 8: Additional Context */}
+              <BuilderStepSection
+                stepNumber={8}
                 title="Additional Context"
                 description="Provide campaign-specific details for more targeted messaging"
                 helpText="Add specific instructions, campaign themes, or refinement notes. Examples: 'Emphasize career outcomes' or 'Focus on FAFSA deadline' or 'Highlight peer success stories'."
