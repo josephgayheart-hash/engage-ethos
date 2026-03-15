@@ -152,31 +152,41 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   useEffect(() => {
+    let isMounted = true;
+
     // Check for stored impersonation state on mount
     const storedImpersonation = localStorage.getItem(IMPERSONATION_STORAGE_KEY);
     if (storedImpersonation) {
       try {
         const parsed = JSON.parse(storedImpersonation);
-        setImpersonation({
-          isImpersonating: true,
-          originalAccessToken: parsed.originalAccessToken,
-          originalRefreshToken: parsed.originalRefreshToken,
-          impersonatedUserEmail: parsed.impersonatedUserEmail,
-        });
+        if (isMounted) {
+          setImpersonation({
+            isImpersonating: true,
+            originalAccessToken: parsed.originalAccessToken,
+            originalRefreshToken: parsed.originalRefreshToken,
+            impersonatedUserEmail: parsed.impersonatedUserEmail,
+          });
+        }
       } catch (e) {
         localStorage.removeItem(IMPERSONATION_STORAGE_KEY);
       }
     }
 
-    // Set up auth state listener
+    // Set up auth state listener for subsequent auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
+        if (!isMounted) return;
+
+        // Ignore INITIAL_SESSION; we hydrate from getSession() first.
+        if (event === 'INITIAL_SESSION') return;
+
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
 
         if (currentSession?.user) {
           // Defer Supabase calls with setTimeout to prevent deadlock
           setTimeout(() => {
+            if (!isMounted) return;
             fetchUserData(currentSession.user.id);
           }, 0);
         } else {
@@ -187,36 +197,37 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     );
 
-    // Check for existing session with a timeout to prevent infinite loading
-    const sessionPromise = supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      
-      if (currentSession?.user) {
-        return fetchUserData(currentSession.user.id).finally(() => {
-          setIsLoading(false);
-        });
-      } else {
-        setIsLoading(false);
-      }
-    }).catch((err) => {
-      console.error('Session check failed:', err);
-      setIsLoading(false);
-    });
+    const initializeAuth = async () => {
+      try {
+        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
 
-    // Safety timeout: if auth takes more than 8 seconds, stop loading
-    const timeout = setTimeout(() => {
-      setIsLoading((current) => {
-        if (current) {
-          console.warn('Auth initialization timed out — proceeding without session');
+        if (!isMounted) return;
+        if (error) throw error;
+
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+
+        if (currentSession?.user) {
+          await fetchUserData(currentSession.user.id);
+        } else {
+          setProfile(null);
+          setTenant(null);
+          setRoles([]);
         }
-        return false;
-      });
-    }, 8000);
+      } catch (err) {
+        console.error('Session check failed:', err);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void initializeAuth();
 
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
-      clearTimeout(timeout);
     };
   }, []);
 

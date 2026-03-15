@@ -99,8 +99,10 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   const { user, isLoading, profile } = useAuth();
   if (isLoading) return <BrandedLoader />;
   if (!user) return <Navigate to="/login" replace />;
-  if (profile?.password_reset_required) return <Navigate to="/change-password" replace />;
-  if (profile?.status !== 'active' && profile?.status !== 'invited') return <Navigate to="/login" replace />;
+  // Avoid false logout redirects while profile is still hydrating.
+  if (!profile) return <BrandedLoader />;
+  if (profile.password_reset_required) return <Navigate to="/change-password" replace />;
+  if (profile.status !== 'active' && profile.status !== 'invited') return <Navigate to="/login" replace />;
   return <>{children}</>;
 }
 
@@ -132,7 +134,8 @@ function RequireApprover({ children }: { children: React.ReactNode }) {
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading, profile } = useAuth();
   if (isLoading) return <BrandedLoader />;
-  if (user && profile?.status === 'active' && !profile?.password_reset_required) return <Navigate to="/dashboard" replace />;
+  if (user && !profile) return <BrandedLoader />;
+  if (user && profile?.status === 'active' && !profile.password_reset_required) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 
