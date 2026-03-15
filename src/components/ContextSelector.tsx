@@ -550,7 +550,7 @@ export function ContextSelector({ context, onChange, mode = 'evaluator', selecte
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 p-4 border border-border rounded-lg bg-muted/30">
+            <div className={`grid grid-cols-1 ${showExtendedOptions ? 'md:grid-cols-2 lg:grid-cols-5' : ''} gap-4 p-4 border border-border rounded-lg bg-muted/30`}>
               {/* AI Model Selector */}
               <div className="space-y-2">
                 <Label htmlFor="ai-model" className="flex items-center gap-2 text-sm font-medium">
