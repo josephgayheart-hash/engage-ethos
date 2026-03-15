@@ -1008,7 +1008,7 @@ Scoring guide:
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              model: "google/gemini-2.5-flash",
+              model: selectedModel,
               messages: [
                 { role: "system", content: SYSTEM_PROMPT + "\n\n" + modePrompt },
                 { role: "user", content: userPrompt + "\n\nCRITICAL: You MUST respond with ONLY valid JSON. No markdown, no commentary, no explanation. Just the JSON object." },
