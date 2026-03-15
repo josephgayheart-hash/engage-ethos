@@ -1017,7 +1017,7 @@ const BuildPage = () => {
                 helpText="Select the primary audience type, their specific cohort characteristics, and the communication moment. These selections help the AI generate contextually appropriate messaging."
                 icon={<Users className="w-4 h-4" />}
               >
-                <ContextSelector context={context} onChange={setContext} mode="builder" />
+                <ContextSelector context={context} onChange={setContext} mode="builder" selectedModel={selectedModel} onModelChange={setSelectedModel} />
               </BuilderStepSection>
 
               {/* Step 5: Channel Selection */}
