@@ -686,7 +686,7 @@ Generate a structured call script with these sections. Return valid JSON only:
           ],
         }),
       },
-      { label: "generate-message", maxRetries: 2 }
+      { label: "generate-message", maxRetries: 2, timeoutMs: 90_000 }
     );
 
     if (!response.ok) {
