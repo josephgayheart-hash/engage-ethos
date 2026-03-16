@@ -751,7 +751,7 @@ Provide your evaluation as JSON.`;
           ],
         }),
       },
-      { label: "evaluate-message", maxRetries: 2 }
+      { label: "evaluate-message", maxRetries: 2, timeoutMs: 90_000 }
     );
 
     if (!response.ok) {
