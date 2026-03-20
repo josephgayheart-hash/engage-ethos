@@ -97,7 +97,9 @@ export async function mapMessages(
   journeyWeeks?: number,
   startDate?: string,
   endDate?: string,
-  model?: string
+  model?: string,
+  industryContext?: string,
+  contentStyle?: string
 ): Promise<MapperResult> {
   console.log("Generating messaging strategy...");
   
