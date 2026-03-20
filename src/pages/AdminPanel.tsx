@@ -127,7 +127,7 @@ interface TenantWithStats {
   id: string;
   institution_name: string;
   status: string;
-  tenant_type: 'university' | 'agency';
+  tenant_type: string;
   userCount: number;
   contentDNACount: number;
   personalMessagesCount: number;
