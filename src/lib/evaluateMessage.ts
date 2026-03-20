@@ -125,7 +125,9 @@ export async function mapMessages(
       journeyWeeks: journeyWeeks || 12,
       startDate,
       endDate,
-      model
+      model,
+      industryContext,
+      contentStyle
     }
   });
 
