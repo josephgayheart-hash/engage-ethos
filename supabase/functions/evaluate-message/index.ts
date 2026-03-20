@@ -746,7 +746,7 @@ Provide your evaluation as JSON.`;
         body: JSON.stringify({
           model: selectedModel,
           messages: [
-            { role: "system", content: SYSTEM_PROMPT + "\n\n" + modePrompt },
+            { role: "system", content: buildSystemPrompt(industryContext, contentStyle) + "\n\n" + modePrompt },
             { role: "user", content: userPrompt },
           ],
         }),
