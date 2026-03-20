@@ -71,7 +71,9 @@ export async function buildMessage(
       context,
       mode: 'builder',
       institutionalConfig,
-      model
+      model,
+      industryContext,
+      contentStyle
     }
   });
 
