@@ -125,6 +125,7 @@ const channelOptions: { value: Channel; label: string }[] = [
 const BuildPage = () => {
   const { toast } = useToast();
   const { profile, isAdmin, isApprover, tenant } = useAuth();
+  const { audiences, cohorts, labels: industryLabels } = useIndustry();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { addMessage } = useMessageLibrary();
