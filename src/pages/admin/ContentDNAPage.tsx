@@ -73,6 +73,7 @@ import {
   Camera,
 } from 'lucide-react';
 import { extractTextFromFile, getAcceptString } from '@/lib/documentParser';
+import { useIndustry } from '@/contexts/IndustryContext';
 import { DNATuningControls, DNAAdjustments } from '@/components/DNATuningControls';
 import { usePIIScanner } from '@/hooks/usePIIScanner';
 

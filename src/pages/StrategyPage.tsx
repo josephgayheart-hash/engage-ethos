@@ -444,7 +444,9 @@ const StrategyPage = () => {
         journeyWeeks,
         startDate?.toISOString(),
         endDate?.toISOString(),
-        selectedModel
+        selectedModel,
+        industryLabels.industryContext,
+        industryLabels.contentStyle
       );
       setMapperResult(result);
 
