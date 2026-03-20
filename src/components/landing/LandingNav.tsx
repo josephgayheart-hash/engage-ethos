@@ -27,6 +27,15 @@ export function LandingNav() {
               For Universities
             </Button>
           </Link>
+          <Link to="/for-enterprise" className="hidden sm:block">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white/70 hover:text-white hover:bg-white/10"
+            >
+              For Enterprise
+            </Button>
+          </Link>
           <Link to="/for-agencies" className="hidden sm:block">
             <Button
               variant="ghost"
