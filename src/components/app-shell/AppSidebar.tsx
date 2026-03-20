@@ -9,6 +9,7 @@ import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAgencyMode } from "@/hooks/useAgencyMode";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { useIndustry } from "@/contexts/IndustryContext";
 import { ReferColleagueDialog } from "@/components/ReferColleagueDialog";
 
 import {
