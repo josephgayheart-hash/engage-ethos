@@ -142,7 +142,7 @@ function BrandDegradationDiagram() {
   const levels = [
     {
       label: "HQ Brand Team",
-      message: "Precision-engineered protection for peak engine performance.",
+      message: "Empowering communities through sustainable innovation and shared prosperity.",
       score: 100,
       color: "border-[hsl(var(--status-strong))]",
       bg: "bg-[hsl(var(--status-strong)_/_0.08)]",
@@ -150,15 +150,15 @@ function BrandDegradationDiagram() {
     },
     {
       label: "Regional Marketing",
-      message: "High-quality protection that keeps engines running at their best.",
+      message: "We help communities grow with innovative, sustainable solutions.",
       score: 72,
       color: "border-[hsl(var(--status-moderate))]",
       bg: "bg-[hsl(var(--status-moderate)_/_0.08)]",
       scoreBg: "bg-[hsl(var(--status-moderate))]",
     },
     {
-      label: "Local Dealer",
-      message: "Good oil, cheap price! Come get your oil changed today!!!",
+      label: "Local Affiliate",
+      message: "Great deals on services near you! Call now for a free quote!!",
       score: 23,
       color: "border-[hsl(var(--status-attention))]",
       bg: "bg-[hsl(var(--status-attention)_/_0.08)]",
