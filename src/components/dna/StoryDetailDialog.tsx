@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Story, StoryType, CreateStoryInput } from '@/hooks/useStoryBank';
+import { useIndustry } from '@/contexts/IndustryContext';
+import { resolveIcon } from '@/lib/iconResolver';
 import {
   Dialog,
   DialogContent,
@@ -25,33 +27,10 @@ import {
   Quote, 
   Star, 
   Loader2,
-  GraduationCap,
-  Users,
-  Heart,
-  Briefcase,
   User,
-  Building2,
   X,
   Plus
 } from 'lucide-react';
-
-interface StoryDetailDialogProps {
-  story: Story | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSave?: (story: Story, updates: Partial<CreateStoryInput>) => void;
-  isSaving?: boolean;
-  mode?: 'view' | 'edit';
-}
-
-const storyTypes: { value: StoryType; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { value: 'student', label: 'Student', icon: GraduationCap },
-  { value: 'alumni', label: 'Alumni', icon: Users },
-  { value: 'donor', label: 'Donor', icon: Heart },
-  { value: 'faculty', label: 'Faculty', icon: Briefcase },
-  { value: 'staff', label: 'Staff', icon: User },
-  { value: 'community', label: 'Community', icon: Building2 },
-];
 
 export function StoryDetailDialog({
   story,
