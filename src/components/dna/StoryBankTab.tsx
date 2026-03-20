@@ -54,6 +54,16 @@ import {
 
 export function StoryBankTab({ profileId }: StoryBankTabProps) {
   const { isAdmin } = useAuth();
+  const { storyTypes: industryStoryTypes } = useIndustry();
+  
+  const storyTypes = useMemo(() => 
+    industryStoryTypes.map(t => ({
+      value: t.id,
+      label: t.label,
+      icon: resolveIcon(t.icon),
+    })),
+    [industryStoryTypes]
+  );
   const {
     stories,
     isLoading,

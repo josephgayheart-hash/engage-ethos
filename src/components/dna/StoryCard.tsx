@@ -53,7 +53,7 @@ export function StoryCard({
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="text-xs flex items-center gap-1">
               <TypeIcon className="w-3 h-3" />
-              {typeConfig.label}
+              {typeLabel}
             </Badge>
             {story.is_featured && (
               <Badge className="bg-amber-100 text-amber-700 text-xs">

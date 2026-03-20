@@ -43,6 +43,17 @@ export function StoryFactSelector({
   onFactsChange,
   className,
 }: StoryFactSelectorProps) {
+  const { storyTypes: industryStoryTypes } = useIndustry();
+  const storyTypeLabels = useMemo(() => {
+    const map: Record<string, string> = {};
+    industryStoryTypes.forEach(t => { map[t.id] = t.label; });
+    return map;
+  }, [industryStoryTypes]);
+  const storyTypeIcons = useMemo(() => {
+    const map: Record<string, React.ElementType> = {};
+    industryStoryTypes.forEach(t => { map[t.id] = resolveIcon(t.icon); });
+    return map;
+  }, [industryStoryTypes]);
   const { stories, isLoading: storiesLoading } = useStoryBank({ profileId: profileId || undefined });
   const { facts, isLoading: factsLoading } = useFactBook({ profileId: profileId || undefined });
   

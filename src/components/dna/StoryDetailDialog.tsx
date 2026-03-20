@@ -40,6 +40,15 @@ export function StoryDetailDialog({
   isSaving = false,
   mode = 'view'
 }: StoryDetailDialogProps) {
+  const { storyTypes: industryStoryTypes } = useIndustry();
+  const storyTypes = useMemo(() => 
+    industryStoryTypes.map(t => ({
+      value: t.id,
+      label: t.label,
+      icon: resolveIcon(t.icon),
+    })),
+    [industryStoryTypes]
+  );
   const [isEditing, setIsEditing] = useState(mode === 'edit');
   const [formData, setFormData] = useState<Partial<CreateStoryInput>>({});
   const [newTheme, setNewTheme] = useState('');
