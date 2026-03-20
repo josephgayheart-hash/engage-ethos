@@ -86,6 +86,7 @@ import TermsOfServicePage from "./pages/TermsOfServicePage";
 import AboutPage from "./pages/AboutPage";
 import GivingDayPlannerPage from "./pages/GivingDayPlannerPage";
 import StewardshipReportPage from "./pages/StewardshipReportPage";
+import ForEnterprisePage from "./pages/ForEnterprisePage";
 
 const queryClient = new QueryClient();
 
