@@ -128,7 +128,7 @@ export default function UserDetailPage() {
   const [tenantChangeMode, setTenantChangeMode] = useState<'existing' | 'new'>('existing');
   const [selectedTenantId, setSelectedTenantId] = useState<string>('');
   const [newTenantName, setNewTenantName] = useState('');
-  const [newTenantType, setNewTenantType] = useState<'university' | 'agency'>('agency');
+  const [newTenantType, setNewTenantType] = useState<string>('agency');
   const [activeTab, setActiveTab] = useState('overview');
 
   const fetchData = async () => {
