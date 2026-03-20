@@ -55,6 +55,8 @@ interface CallScript {
   followUpNotes: string;
 }
 
+// audienceOptions and momentOptions are hardcoded fallbacks for CallScript
+// They will be replaced with dynamic vocabulary in a future session
 const audienceOptions: { value: AudienceType; label: string }[] = [
   { value: 'prospective', label: 'Prospective Student' },
   { value: 'first-year', label: 'First-Year Student' },
