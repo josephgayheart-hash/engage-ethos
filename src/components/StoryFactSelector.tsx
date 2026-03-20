@@ -3,12 +3,7 @@ import {
   BookOpen, 
   BarChart3, 
   Star, 
-  Users, 
-  GraduationCap, 
-  Heart, 
-  Building2, 
-  Briefcase,
-  Globe,
+  Users,
   CheckCircle2,
   Filter,
   X
@@ -28,24 +23,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useStoryBank, Story, StoryType } from "@/hooks/useStoryBank";
 import { useFactBook, Fact, FactCategory } from "@/hooks/useFactBook";
-
-const storyTypeIcons: Record<StoryType, React.ElementType> = {
-  'student': GraduationCap,
-  'alumni': Users,
-  'donor': Heart,
-  'faculty': Briefcase,
-  'staff': Building2,
-  'community': Globe,
-};
-
-const storyTypeLabels: Record<StoryType, string> = {
-  'student': 'Student',
-  'alumni': 'Alumni',
-  'donor': 'Donor',
-  'faculty': 'Faculty',
-  'staff': 'Staff',
-  'community': 'Community',
-};
+import { useIndustry } from "@/contexts/IndustryContext";
+import { resolveIcon } from "@/lib/iconResolver";
 
 interface StoryFactSelectorProps {
   profileId: string | null;
