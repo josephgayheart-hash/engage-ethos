@@ -33,6 +33,7 @@ import type { MessageContext, EvaluationResult, InstitutionalConfig } from "@/ty
 const EvaluatePage = () => {
   const { toast } = useToast();
   const { profile } = useAuth();
+  const { labels: industryLabels } = useIndustry();
   const { addMessage } = useMessageLibrary();
   const { trackToolUse } = useToolTracking();
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
