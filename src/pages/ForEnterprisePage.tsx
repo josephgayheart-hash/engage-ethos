@@ -231,7 +231,7 @@ export default function ForEnterprisePage() {
               </h1>
 
               <p className="text-lg sm:text-xl text-primary-foreground/60 mb-10 max-w-2xl mx-auto leading-relaxed">
-                When 500+ affiliates, resellers, and regional teams create their own content,
+                When hundreds of affiliates, resellers, and regional teams create their own content,
                 brand drift isn't a risk — it's a certainty. Take back control with the
                 AI-powered brand command center.
               </p>
