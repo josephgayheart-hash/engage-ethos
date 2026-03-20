@@ -108,6 +108,7 @@ const CallScriptPage = () => {
   const { profile } = useAuth();
   const { addMessage } = useMessageLibrary();
   const { trackToolUse } = useToolTracking();
+  const { labels: industryLabels } = useIndustry();
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [selectedProfileName, setSelectedProfileName] = useState<string | undefined>(undefined);
   const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfig | null>(null);
