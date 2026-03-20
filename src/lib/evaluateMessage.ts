@@ -11,7 +11,9 @@ export async function evaluateMessage(
   content: string, 
   context: MessageContext,
   institutionalConfig?: InstitutionalConfig,
-  model?: string
+  model?: string,
+  industryContext?: string,
+  contentStyle?: string
 ): Promise<EvaluationResult> {
   console.log("Sending message for AI evaluation...");
   
@@ -21,7 +23,9 @@ export async function evaluateMessage(
       context,
       mode: 'evaluator',
       institutionalConfig,
-      model
+      model,
+      industryContext,
+      contentStyle
     }
   });
 
