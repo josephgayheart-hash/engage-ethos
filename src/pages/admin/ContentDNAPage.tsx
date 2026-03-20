@@ -1361,7 +1361,7 @@ export default function ContentDNAPage() {
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base flex items-center gap-2">
                       <Camera className="w-4 h-4" />
-                      Campus Photography
+                      {industryLabels.photography}
                     </CardTitle>
                     <Button variant="outline" size="sm" onClick={() => setActiveTab('campus-photos')}>
                       {campusPhotoCount > 0 ? 'Manage' : 'Add Photos'}
