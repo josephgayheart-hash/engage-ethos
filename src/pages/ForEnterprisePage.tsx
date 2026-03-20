@@ -181,7 +181,7 @@ function BrandDegradationDiagram() {
             <p className="text-primary-foreground font-medium italic">"{level.message}"</p>
           </div>
           {i < levels.length - 1 && (
-            <div className="flex items-center justify-center py-2 text-muted-foreground/50">
+            <div className="flex items-center justify-center py-2 text-primary-foreground/40">
               <AlertTriangle className="h-4 w-4 mr-2 text-[hsl(var(--status-attention)_/_0.6)]" />
               <span className="text-xs">Brand drift</span>
               <ChevronRight className="h-4 w-4 ml-1 rotate-90" />
