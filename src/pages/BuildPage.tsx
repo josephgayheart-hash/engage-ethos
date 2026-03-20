@@ -456,7 +456,7 @@ const BuildPage = () => {
           }
         : undefined;
 
-      const result = await buildMessage(contextWithChannels, configForGeneration, selectedModel);
+      const result = await buildMessage(contextWithChannels, configForGeneration, selectedModel, industryLabels.industryContext, industryLabels.contentStyle);
       setBuilderResult(result);
       setJustGenerated(true); // Mark as freshly generated to trigger scroll
 

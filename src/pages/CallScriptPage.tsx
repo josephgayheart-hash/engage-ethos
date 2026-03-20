@@ -21,6 +21,7 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useToolTracking } from "@/hooks/useToolTracking";
 import { supabase } from "@/integrations/supabase/client";
+import { useIndustry } from "@/contexts/IndustryContext";
 import { cn } from "@/lib/utils";
 import { WaveBackground } from "@/components/WaveBackground";
 import { 
