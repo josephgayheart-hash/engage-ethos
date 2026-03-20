@@ -171,14 +171,14 @@ function BrandDegradationDiagram() {
         <div key={level.label}>
           <div className={`rounded-xl border-2 ${level.color} ${level.bg} p-5 transition-all`}>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <span className="text-xs font-semibold uppercase tracking-wider text-primary-foreground/50">
                 {level.label}
               </span>
               <Badge className={`${level.scoreBg} text-white text-xs font-bold`}>
                 {level.score}% on-brand
               </Badge>
             </div>
-            <p className="text-foreground font-medium italic">"{level.message}"</p>
+            <p className="text-primary-foreground font-medium italic">"{level.message}"</p>
           </div>
           {i < levels.length - 1 && (
             <div className="flex items-center justify-center py-2 text-muted-foreground/50">
