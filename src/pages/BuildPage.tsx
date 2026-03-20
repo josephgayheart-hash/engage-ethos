@@ -120,35 +120,7 @@ const channelOptions: { value: Channel; label: string }[] = [
   { value: 'case-for-care', label: 'Case for Support' },
 ];
 
-const audienceLabels: Record<string, string> = {
-  'general': 'General',
-  'prospective': 'Prospective Student',
-  'first-year': 'First-Year Student',
-  'continuing': 'Continuing Student',
-  'at-risk': 'At-Risk Student',
-  'graduate': 'Graduate Student',
-  'online-learner': 'Online Learner',
-  'alumni': 'Alumni',
-  'parents': 'Parents/Family',
-  'donors': 'Donors',
-  'policy-makers': 'Policy Makers',
-  'community-partners': 'Community Partners',
-  'higher-ed-leaders': 'Higher Education Leaders',
-};
-
-const cohortLabels: Record<string, string> = {
-  'none': 'No specific cohort',
-  'first-gen': 'First-Generation',
-  'probation': 'Academic Probation',
-  'online': 'Online Student',
-  'commuter': 'Commuter',
-  'residential': 'Residential',
-  'transfer': 'Transfer Student',
-  'international': 'International',
-  'veteran': 'Veteran',
-  'parent': 'Student Parent',
-  'working-adult': 'Working Adult',
-};
+// Audience/cohort labels are now resolved dynamically from useIndustry()
 
 const BuildPage = () => {
   const { toast } = useToast();
