@@ -6,6 +6,7 @@ import { usePlaygroundConversations } from "@/hooks/usePlaygroundConversations";
 import { useToolTracking } from "@/hooks/useToolTracking";
 import { useCampusPhotoCount } from "@/hooks/useCampusPhotoCount";
 import { supabase } from "@/integrations/supabase/client";
+import { useIndustry } from "@/contexts/IndustryContext";
 import { ConversationList } from "@/components/playground/ConversationList";
 import { ChatInterface } from "@/components/playground/ChatInterface";
 import { ContextSelector } from "@/components/playground/ContextSelector";
