@@ -26,6 +26,7 @@ import { RequestDemoDialog } from "@/components/landing/RequestDemoDialog";
 import { SEOHead } from "@/components/SEOHead";
 import { WaveBackground } from "@/components/WaveBackground";
 import GlowOrbs from "@/components/landing/GlowOrbs";
+import EnterpriseShowcases from "@/components/enterprise/EnterpriseShowcases";
 
 /* ------------------------------------------------------------------ */
 /*  Data                                                               */
