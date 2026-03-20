@@ -171,17 +171,17 @@ function BrandDegradationDiagram() {
         <div key={level.label}>
           <div className={`rounded-xl border-2 ${level.color} ${level.bg} p-5 transition-all`}>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <span className="text-xs font-semibold uppercase tracking-wider text-primary-foreground/50">
                 {level.label}
               </span>
               <Badge className={`${level.scoreBg} text-white text-xs font-bold`}>
                 {level.score}% on-brand
               </Badge>
             </div>
-            <p className="text-foreground font-medium italic">"{level.message}"</p>
+            <p className="text-primary-foreground font-medium italic">"{level.message}"</p>
           </div>
           {i < levels.length - 1 && (
-            <div className="flex items-center justify-center py-2 text-muted-foreground/50">
+            <div className="flex items-center justify-center py-2 text-primary-foreground/40">
               <AlertTriangle className="h-4 w-4 mr-2 text-[hsl(var(--status-attention)_/_0.6)]" />
               <span className="text-xs">Brand drift</span>
               <ChevronRight className="h-4 w-4 ml-1 rotate-90" />
@@ -231,7 +231,7 @@ export default function ForEnterprisePage() {
               </h1>
 
               <p className="text-lg sm:text-xl text-primary-foreground/60 mb-10 max-w-2xl mx-auto leading-relaxed">
-                When 500+ affiliates, resellers, and regional teams create their own content,
+                When hundreds of affiliates, resellers, and regional teams create their own content,
                 brand drift isn't a risk — it's a certainty. Take back control with the
                 AI-powered brand command center.
               </p>
@@ -250,9 +250,8 @@ export default function ForEnterprisePage() {
                 />
                 <a href="#how-it-works">
                   <Button
-                    variant="outline"
                     size="lg"
-                    className="border-primary-foreground/20 text-primary-foreground/80 hover:bg-primary-foreground/10 rounded-full px-8 text-base"
+                    className="border border-[hsl(var(--cyber-lime)_/_0.4)] bg-transparent text-[hsl(var(--cyber-lime))] hover:bg-[hsl(var(--cyber-lime)_/_0.1)] rounded-full px-8 text-base"
                   >
                     See How It Works
                   </Button>
@@ -352,7 +351,7 @@ export default function ForEnterprisePage() {
               ))}
 
               {/* Extra CTA card */}
-              <Card className="bg-gradient-to-br from-[hsl(var(--cyber-lime)_/_0.08)] to-[hsl(var(--cyber-purple)_/_0.08)] border-[hsl(var(--cyber-lime)_/_0.2)] flex items-center justify-center">
+              <Card className="bg-primary-foreground/[0.04] border-primary-foreground/10 border-dashed flex items-center justify-center min-h-[180px]">
                 <CardContent className="p-6 text-center">
                   <p className="text-primary-foreground/60 text-sm mb-4">
                     Don't see your industry? We work with any distributed organization.
@@ -360,9 +359,8 @@ export default function ForEnterprisePage() {
                   <RequestDemoDialog
                     trigger={
                       <Button
-                        variant="outline"
                         size="sm"
-                        className="border-[hsl(var(--cyber-lime)_/_0.4)] text-[hsl(var(--cyber-lime))] hover:bg-[hsl(var(--cyber-lime)_/_0.1)]"
+                        className="bg-gradient-to-r from-[hsl(var(--cyber-lime))] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] font-bold"
                       >
                         Talk to Us
                         <ArrowRight className="ml-2 h-3.5 w-3.5" />
@@ -442,9 +440,8 @@ export default function ForEnterprisePage() {
               />
               <Link to="/request-access">
                 <Button
-                  variant="outline"
                   size="lg"
-                  className="border-primary-foreground/20 text-primary-foreground/80 hover:bg-primary-foreground/10 rounded-full px-8 text-base"
+                  className="border border-[hsl(var(--cyber-lime)_/_0.4)] bg-transparent text-[hsl(var(--cyber-lime))] hover:bg-[hsl(var(--cyber-lime)_/_0.1)] rounded-full px-8 text-base"
                 >
                   Get Early Access
                 </Button>
