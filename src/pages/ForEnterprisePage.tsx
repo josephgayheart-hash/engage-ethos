@@ -26,6 +26,7 @@ import { RequestDemoDialog } from "@/components/landing/RequestDemoDialog";
 import { SEOHead } from "@/components/SEOHead";
 import { WaveBackground } from "@/components/WaveBackground";
 import GlowOrbs from "@/components/landing/GlowOrbs";
+import EnterpriseShowcases from "@/components/enterprise/EnterpriseShowcases";
 
 /* ------------------------------------------------------------------ */
 /*  Data                                                               */
@@ -372,6 +373,9 @@ export default function ForEnterprisePage() {
             </div>
           </div>
         </section>
+
+        {/* ---- PRODUCT SHOWCASES ---- */}
+        <EnterpriseShowcases />
 
         {/* ---- ENTERPRISE FEATURES GRID ---- */}
         <section className="py-20 px-4 sm:px-6 lg:px-8">
