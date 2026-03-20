@@ -10,7 +10,7 @@ export interface Story {
   tenant_id: string;
   profile_id: string | null;
   title: string;
-  story_type: 'student' | 'alumni' | 'donor' | 'faculty' | 'staff' | 'community';
+  story_type: string;
   narrative: string;
   pull_quote: string | null;
   subject_name: string | null;
