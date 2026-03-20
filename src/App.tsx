@@ -150,6 +150,7 @@ const AppRoutes = () => (
     <Route path="/change-password" element={<ChangePasswordPage />} />
     <Route path="/setup" element={<InitialSetupPage />} />
     <Route path="/for-agencies" element={<ForAgenciesPage />} />
+    <Route path="/for-enterprise" element={<ForEnterprisePage />} />
     <Route path="/agency/request-access" element={<AgencyRequestAccessPage />} />
     <Route path="/features/content-dna" element={<ContentDNAFeaturePage />} />
     <Route path="/features/message-builder" element={<MessageBuilderFeaturePage />} />
