@@ -14,7 +14,9 @@ serve(async (req) => {
     if (!rateLimit.allowed) {
       return rateLimitExceededResponse(rateLimit);
     }
-    const { type, context, institutionalConfig, touchpoint, channels, startDate, endDate, contentDNA, model: requestedModel } = await req.json();
+    const { type, context, institutionalConfig, touchpoint, channels, startDate, endDate, contentDNA, model: requestedModel, industryContext: reqIndustryContext, contentStyle: reqContentStyle } = await req.json();
+    const industryContext = reqIndustryContext || 'higher education';
+    const contentStyle = reqContentStyle || 'institutional communications';
     
     // Validate and select model
     const ALLOWED_MODELS = [
