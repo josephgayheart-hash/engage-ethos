@@ -374,6 +374,9 @@ export default function ForEnterprisePage() {
           </div>
         </section>
 
+        {/* ---- PRODUCT SHOWCASES ---- */}
+        <EnterpriseShowcases />
+
         {/* ---- ENTERPRISE FEATURES GRID ---- */}
         <section className="py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-6xl mx-auto">
