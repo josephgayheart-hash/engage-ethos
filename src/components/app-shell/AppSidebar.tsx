@@ -9,6 +9,7 @@ import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAgencyMode } from "@/hooks/useAgencyMode";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { useIndustry } from "@/contexts/IndustryContext";
 import { ReferColleagueDialog } from "@/components/ReferColleagueDialog";
 
 import {
@@ -64,6 +65,7 @@ export function AppSidebar() {
   const { profile, tenant, isAdmin, isSuperAdmin, isApprover, logout } = useAuth();
   const { isAgency, labels } = useAgencyMode();
   const { activeWorkspace, canSwitch } = useWorkspace();
+  const { labels: industryLabels } = useIndustry();
   const { state } = useSidebar();
   const navigate = useNavigate();
   const [referDialogOpen, setReferDialogOpen] = useState(false);
@@ -82,7 +84,7 @@ export function AppSidebar() {
 
   const governItems = [
     { title: "Content DNA Studio", url: "/admin/content-dna", icon: Dna },
-    { title: isAgency ? "Partner Institutions" : "Institution Settings", url: isAgency ? "/agency/clients" : "/university-settings", icon: Building2 },
+    { title: isAgency ? "Partner Institutions" : industryLabels.organizationSettings, url: isAgency ? "/agency/clients" : "/university-settings", icon: Building2 },
     ...(isAdmin ? [{ title: "Admin Console", url: "/admin/console", icon: Settings }] : []),
     ...(isAgency && isViewingOwnWorkspace ? [{ title: "Analytics", url: "/agency/analytics", icon: BarChart3 }] : []),
   ];

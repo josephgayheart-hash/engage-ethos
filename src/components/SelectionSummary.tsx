@@ -10,6 +10,7 @@ import {
   BookOpen,
   BarChart3
 } from "lucide-react";
+import { useIndustry } from "@/contexts/IndustryContext";
 
 interface SelectionSummaryProps {
   selectedProfileName?: string;
@@ -23,33 +24,6 @@ interface SelectionSummaryProps {
   factCount?: number;
   className?: string;
 }
-
-const audienceLabels: Record<string, string> = {
-  'prospective': 'Prospective Student',
-  'first-year': 'First-Year Student',
-  'continuing': 'Continuing Student',
-  'at-risk': 'At-Risk Student',
-  'graduate': 'Graduate Student',
-  'online-learner': 'Online Learner',
-  'alumni': 'Alumni',
-  'parents': 'Parents/Family',
-  'donors': 'Donors',
-  'policy-makers': 'Policy Makers',
-  'community-partners': 'Community Partners',
-  'higher-ed-leaders': 'Higher Education Leaders',
-};
-
-const momentLabels: Record<string, string> = {
-  'pre-enrollment': 'Pre-Enrollment',
-  'orientation': 'Orientation',
-  'early-term': 'Early Term',
-  'mid-term': 'Mid-Term',
-  'late-term': 'Late Term',
-  'end-of-term': 'End of Term',
-  'between-terms': 'Between Terms',
-  'graduation': 'Graduation',
-  'post-graduation': 'Post-Graduation',
-};
 
 const channelLabels: Record<string, string> = {
   'email': 'Email',
@@ -66,7 +40,8 @@ const channelLabels: Record<string, string> = {
 };
 
 /**
- * SelectionSummary - Shows a compact summary of user selections before generating
+ * SelectionSummary - Shows a compact summary of user selections before generating.
+ * Uses industry vocabulary for audience/moment labels.
  */
 export function SelectionSummary({
   selectedProfileName,
@@ -80,6 +55,8 @@ export function SelectionSummary({
   factCount = 0,
   className = '',
 }: SelectionSummaryProps) {
+  const { audiences, moments } = useIndustry();
+
   const hasProfile = !!selectedProfileName;
   const hasAudience = !!audience;
   const hasChannels = channels.length > 0;
@@ -87,6 +64,10 @@ export function SelectionSummary({
   const hasStoriesOrFacts = storyCount > 0 || factCount > 0;
   
   const isReady = hasProfile && hasAudience && hasChannels;
+
+  // Dynamic label lookup from industry vocabulary
+  const audienceLabel = audience ? (audiences.find(a => a.id === audience)?.label || audience) : '';
+  const momentLabel = moment ? (moments.find(m => m.id === moment)?.label || moment) : '';
 
   return (
     <div className={`p-4 rounded-xl border bg-muted/30 ${className}`}>
@@ -119,7 +100,7 @@ export function SelectionSummary({
         {hasAudience ? (
           <Badge variant="secondary" className="gap-1.5 bg-accent/10 text-accent border-accent/20">
             <Users className="w-3 h-3" />
-            {audienceLabels[audience] || audience}
+            {audienceLabel}
             {cohort && cohort !== 'none' && ` (${cohort})`}
           </Badge>
         ) : (
@@ -133,7 +114,7 @@ export function SelectionSummary({
         {hasMoment && (
           <Badge variant="secondary" className="gap-1.5 bg-secondary/10 text-secondary-foreground border-secondary/20">
             <Clock className="w-3 h-3" />
-            {momentLabels[moment] || moment}
+            {momentLabel}
           </Badge>
         )}
 

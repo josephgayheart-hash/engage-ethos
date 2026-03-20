@@ -14,7 +14,9 @@ serve(async (req) => {
     if (!rateLimit.allowed) {
       return rateLimitExceededResponse(rateLimit);
     }
-    const { type, context, institutionalConfig, touchpoint, channels, startDate, endDate, contentDNA, model: requestedModel } = await req.json();
+    const { type, context, institutionalConfig, touchpoint, channels, startDate, endDate, contentDNA, model: requestedModel, industryContext: reqIndustryContext, contentStyle: reqContentStyle } = await req.json();
+    const industryContext = reqIndustryContext || 'higher education';
+    const contentStyle = reqContentStyle || 'institutional communications';
     
     // Validate and select model
     const ALLOWED_MODELS = [
@@ -165,7 +167,7 @@ FACT USAGE GUIDELINES BY CHANNEL:
 `;
     }
 
-    let systemPrompt = `You are CampusVoice.AI, an AI assistant specialized in creating effective, ethical communications for higher education institutions - both student-facing and employee-facing.
+    let systemPrompt = `You are CampusVoice.AI, an AI assistant specialized in creating effective, ethical communications for ${industryContext} - both audience-facing and employee-facing.
 
 Your messages should:
 - Be evidence-based and grounded in persuasion research

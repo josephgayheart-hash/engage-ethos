@@ -2,9 +2,9 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { checkRateLimit, getClientIP, rateLimitExceededResponse, logSecurityEvent } from "../_shared/rateLimit.ts";
 import { resilientFetch, corsHeaders, handleGatewayErrorResponse } from "../_shared/resilience.ts";
 
-const SYSTEM_PROMPT = `You are CampusVoice.AI, an AI-powered strategic messaging intelligence platform designed specifically for higher education.
+const buildSystemPrompt = (industryContext = 'higher education', contentStyle = 'institutional communications') => `You are CampusVoice.AI, an AI-powered strategic messaging intelligence platform designed specifically for ${industryContext}.
 
-Your purpose is to help higher education administrators, marketers, enrollment leaders, and student success professionals DESIGN, EVALUATE, and PLAN student-facing communication that supports persistence, retention, and engagement.
+Your purpose is to help ${industryContext} administrators, marketers, and communications professionals DESIGN, EVALUATE, and PLAN audience-facing communication that supports engagement, retention, and organizational goals.
 
 You are grounded in peer-reviewed communication and persuasion research tested in higher education contexts, including:
 - Persuasion principles (Cialdini), with particular emphasis on authority
@@ -37,7 +37,7 @@ You DO:
 - Evaluate messages at the audience, cohort, and campaign level
 - Respect ethical, student-centered communication norms
 
-Maintain a professional, calm, and evidence-based tone. Write for higher education administrators. Avoid buzzwords and marketing hype. Reference research sparingly and clearly. Frame AI as decision support, not automation.`;
+Maintain a professional, calm, and evidence-based tone. Write for ${industryContext} professionals. Avoid buzzwords and marketing hype. Reference research sparingly and clearly. Frame AI as decision support, not automation.`;
 
 const EVALUATOR_PROMPT = `When evaluating a message, assess it across FIVE PILLARS:
 
@@ -335,7 +335,7 @@ serve(async (req) => {
     if (!rateLimit.allowed) {
       return rateLimitExceededResponse(rateLimit);
     }
-    const { message, context, mode, institutionalConfig, journeyWeeks, startDate, endDate, model: requestedModel } = await req.json();
+    const { message, context, mode, institutionalConfig, journeyWeeks, startDate, endDate, model: requestedModel, industryContext, contentStyle } = await req.json();
     
     // Validate and select model
     const ALLOWED_MODELS = [
@@ -746,7 +746,7 @@ Provide your evaluation as JSON.`;
         body: JSON.stringify({
           model: selectedModel,
           messages: [
-            { role: "system", content: SYSTEM_PROMPT + "\n\n" + modePrompt },
+            { role: "system", content: buildSystemPrompt(industryContext, contentStyle) + "\n\n" + modePrompt },
             { role: "user", content: userPrompt },
           ],
         }),
@@ -1010,7 +1010,7 @@ Scoring guide:
             body: JSON.stringify({
               model: selectedModel,
               messages: [
-                { role: "system", content: SYSTEM_PROMPT + "\n\n" + modePrompt },
+                { role: "system", content: buildSystemPrompt(industryContext, contentStyle) + "\n\n" + modePrompt },
                 { role: "user", content: userPrompt + "\n\nCRITICAL: You MUST respond with ONLY valid JSON. No markdown, no commentary, no explanation. Just the JSON object." },
               ],
             }),

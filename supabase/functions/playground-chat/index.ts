@@ -7,7 +7,9 @@ serve(async (req) => {
   }
 
   try {
-    const { message, history, institutionalConfig, contentDNA, profileConfig, model } = await req.json();
+    const { message, history, institutionalConfig, contentDNA, profileConfig, model, industryContext: reqIndustryContext, contentStyle: reqContentStyle } = await req.json();
+    const industryContext = reqIndustryContext || 'higher education';
+    const contentStyle = reqContentStyle || 'institutional communications';
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -98,7 +100,7 @@ ${institutionalConfig.wordsToAvoid?.length ? `**Words to avoid:** ${institutiona
       ? `\n\n**Your current context:** ${contextSummary.join(" | ")}`
       : "";
 
-    const systemPrompt = `You are an expert AI messaging assistant for CampusVoice.AI, a strategic communications platform for higher education. You help create, review, and strategize student communications grounded in peer-reviewed behavioral science research.
+    const systemPrompt = `You are an expert AI messaging assistant for CampusVoice.AI, a strategic communications platform for ${industryContext}. You help create, review, and strategize communications grounded in peer-reviewed behavioral science research.
 ${profileContext}
 ${voiceContext}
 ${customInstructions}
