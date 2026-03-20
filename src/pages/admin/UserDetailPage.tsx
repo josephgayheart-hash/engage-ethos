@@ -59,7 +59,7 @@ interface UserProfile {
 interface TenantInfo {
   id: string;
   institution_name: string;
-  tenant_type: 'university' | 'agency';
+  tenant_type: string;
 }
 
 interface PersonalMessage {
