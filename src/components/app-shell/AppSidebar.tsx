@@ -65,6 +65,7 @@ export function AppSidebar() {
   const { profile, tenant, isAdmin, isSuperAdmin, isApprover, logout } = useAuth();
   const { isAgency, labels } = useAgencyMode();
   const { activeWorkspace, canSwitch } = useWorkspace();
+  const { labels: industryLabels } = useIndustry();
   const { state } = useSidebar();
   const navigate = useNavigate();
   const [referDialogOpen, setReferDialogOpen] = useState(false);
