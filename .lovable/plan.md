@@ -1,58 +1,72 @@
 
 
-## Demo Readiness Improvements — ✅ COMPLETED (Phase 1)
+## Plan: Enterprise Brand Control Landing Page (`/for-enterprise`)
 
-### What was implemented
+### Concept
 
-1. **Social Proof Strip** — Added `SocialProofStrip.tsx` to landing page below hero with platform stats (2,400+ messages, 12 institutions, 85+ users, 94% brand score)
-2. **Features Dropdown** — Added `FeaturesDropdown.tsx` to `LandingNav` with links to all 10 feature pages
-3. **Impact Metrics Card** — Added `ImpactMetricsCard.tsx` to dashboard showing messages created, estimated time saved, builds generated, evaluations run
-4. **Branded Loading States** — Replaced generic "Loading..." text with `BrandedLoader.tsx` (CampusVoice logo + bouncing dots) in all auth guards
-5. **Team Activity Feed** — Added `TeamActivityFeed.tsx` to dashboard (admin-only) showing recent team actions
+A dedicated marketing page targeting **distributed brands** — franchises, global companies with regional affiliates, nonprofits with chapters, and any organization where HQ needs to control messaging across decentralized teams. The Valvoline use case is the perfect anchor: a global brand with resellers/affiliates in dozens of countries who go off-brand with local campaigns, imagery, and tone.
 
-### Files created
-- `src/components/landing/SocialProofStrip.tsx`
-- `src/components/landing/FeaturesDropdown.tsx`
-- `src/components/dashboard/ImpactMetricsCard.tsx`
-- `src/components/dashboard/TeamActivityFeed.tsx`
-- `src/components/BrandedLoader.tsx`
+### Positioning
 
-### Files modified
-- `src/pages/LandingPage.tsx` — imported SocialProofStrip
-- `src/components/landing/LandingNav.tsx` — added FeaturesDropdown
-- `src/pages/Index.tsx` — added ImpactMetricsCard + TeamActivityFeed
-- `src/App.tsx` — replaced loading states with BrandedLoader
+**Headline direction:** "One Brand. Every Market. Always On-Voice."
 
----
+**Core pain point:** When you have 500+ affiliates, resellers, chapters, or regional offices creating their own content, brand drift isn't a risk — it's a certainty. CampusVoice becomes the **brand command center** that ensures every piece of content, in every market, sounds like it came from HQ.
 
-## Remaining Demo Readiness Items (Phase 2)
+### Target Industries (shown as use-case cards)
 
-| Priority | Item | Status |
-|----------|------|--------|
-| 1 | Demo mode with pre-seeded Content DNA | Todo |
-| 7 | "Try a sample" in Journey Designer | Todo |
-| 8 | Video/demo embed in hero | Todo (needs video asset) |
-| 9 | Guided tour for first login | Todo |
-| 10 | Analytics seed data for demo accounts | Todo |
+| Industry | Pain Point | Example |
+|----------|-----------|---------|
+| **Franchise / Reseller Networks** | Local dealers creating off-brand ads, translating taglines incorrectly | Valvoline, automotive, retail franchises |
+| **Global Enterprises** | Regional offices in 40+ countries adapting campaigns without brand guardrails | CPG, tech, manufacturing |
+| **Nonprofits & NGOs** | Chapters and affiliates diluting the mission message | United Way, Red Cross, advocacy orgs |
+| **Healthcare Systems** | Individual hospitals/clinics creating inconsistent patient comms | Hospital networks, insurance |
+| **Financial Services** | Branch offices and advisors going rogue on messaging | Banks, insurance, wealth management |
 
----
+### Page Sections
 
-## Previous Completed Work
+1. **Hero** — Dark gradient (matching existing landing aesthetic). Headline + rotating industry icons. Primary CTA: "Request a Demo." Secondary: "See How It Works."
 
-### Graphic Design Mode Toggle with Extended Prompts — ✅ COMPLETED
+2. **The Problem** — Visual showing brand message degrading as it flows from HQ → Region → Local. A "telephone game" diagram showing how "Precision-engineered protection" becomes "Good oil, cheap price!" at the local level.
 
-1. **Extracted Graphic Design as a segmented toggle** — "Photo" | "Graphic Design" toggle group at the top of Image Settings
-2. **Removed `graphic-design` from the Style dropdown** — Photo mode shows photo styles only; Graphic Design mode hides the style dropdown entirely
-3. **Added 4 Graphic Design sub-controls** (visible only in Graphic Design mode):
-   - **Design Style** — radio group: Bold & Geometric, Gradient Flow, Typographic Poster, Collage / Mixed Media, Retro / Vintage, Abstract Minimal
-   - **Color Mood** — selectable badge chips: Brand Colors Only, Warm, Cool, Monochrome, High Contrast, Pastel
-   - **Typography Style** — radio group: Sans-Serif Modern, Serif Classic, Display / Decorative, Handwritten
-   - **Layout Density** — radio group: Spacious, Balanced, Dense
-4. **Updated edge function prompt** — accepts `designStyle`, `colorMood`, `typographyStyle`, `layoutDensity`
+3. **How It Works** — 3-step flow reframed for enterprise:
+   - **Define Your Brand DNA** — Upload brand guidelines, voice samples, approved messaging. AI learns your brand.
+   - **Distribute & Govern** — Regional teams generate content within your guardrails. Every output is scored against your brand standard.
+   - **Monitor & Enforce** — Dashboard showing brand adherence scores across all regions/affiliates. Flag off-brand content before it goes live.
 
-### NDA Links — Super Admin Feature — ✅ COMPLETED
+4. **Industry Use Cases** — Tabbed or card-based section with the 5 industries above, each showing a specific scenario and how the platform solves it.
 
-1. **Database**: Created `nda_links` and `nda_responses` tables with full RLS
-2. **Storage**: Created `nda-signatures` bucket for drawn signature images
-3. **Public signing page** (`/nda/sign/:slug`): CampusVoice-branded page with wave emoji heading, agreement text, form fields, 3 required checkboxes, typed + optional drawn signature
-4. **Admin page** (`/admin/nda-links`): Two-tab layout — Links table + Responses table with detail drawer
+5. **Enterprise Features Grid** — Highlights features reframed for enterprise:
+   - Multi-tenant brand hierarchies (HQ → Region → Local)
+   - Brand adherence scoring on every asset
+   - Approval workflows before publish
+   - Content DNA that enforces voice across languages
+   - AI Image Studio with locked brand overlays
+   - Audit dashboard for brand compliance
+
+6. **Social Proof / Stats Strip** — Platform capability stats (e.g., "19 channel formats", "Brand scoring on every output", "Multi-level governance")
+
+7. **CTA Section** — "See CampusVoice in action for your industry" → Request Demo dialog
+
+### Technical Implementation
+
+**New files:**
+- `src/pages/ForEnterprisePage.tsx` — Main page component
+- Route added to `App.tsx` as `/for-enterprise` (public route)
+
+**Reused components:**
+- `LandingNav` (add "For Enterprise" link alongside "For Universities" and "For Agencies")
+- `LandingFooter`, `SEOHead`, `WaveBackground`, `GlowOrbs`
+- `RequestDemoDialog` for CTA
+- `FeatureNavigation` pattern for cross-linking
+
+**Nav updates:**
+- `LandingNav.tsx` — Add "For Enterprise" link
+- `FeaturesDropdown.tsx` — Optionally add enterprise entry
+
+### Design Notes
+
+- Reuses the same dark-gradient aesthetic as the existing landing and agency pages for brand consistency
+- Industry-specific iconography (Factory, Globe, Heart, Building2, Landmark from lucide-react)
+- The "brand degradation" diagram is the emotional hook — visually showing what happens without governance
+- No higher-ed terminology on this page; reframe everything as "affiliates," "regions," "chapters," "dealers"
+
