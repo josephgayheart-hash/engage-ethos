@@ -1092,7 +1092,7 @@ export default function UserDetailPage() {
                               </div>
                               <div className="space-y-2">
                                 <Label>Organization Type</Label>
-                                <Select value={newTenantType} onValueChange={(v) => setNewTenantType(v as 'university' | 'agency')}>
+                                <Select value={newTenantType} onValueChange={(v) => setNewTenantType(v)}>
                                   <SelectTrigger>
                                     <SelectValue />
                                   </SelectTrigger>
