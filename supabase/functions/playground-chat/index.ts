@@ -7,7 +7,9 @@ serve(async (req) => {
   }
 
   try {
-    const { message, history, institutionalConfig, contentDNA, profileConfig, model } = await req.json();
+    const { message, history, institutionalConfig, contentDNA, profileConfig, model, industryContext: reqIndustryContext, contentStyle: reqContentStyle } = await req.json();
+    const industryContext = reqIndustryContext || 'higher education';
+    const contentStyle = reqContentStyle || 'institutional communications';
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
