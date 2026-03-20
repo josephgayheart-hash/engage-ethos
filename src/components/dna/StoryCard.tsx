@@ -1,4 +1,4 @@
-import { Story, StoryType } from '@/hooks/useStoryBank';
+import { Story } from '@/hooks/useStoryBank';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,30 +8,20 @@ import {
   Trash2, 
   Pencil, 
   Quote,
-  GraduationCap,
-  Users,
-  Heart,
-  Briefcase,
   User,
-  Building2
 } from 'lucide-react';
+import { useIndustry } from '@/contexts/IndustryContext';
+import { resolveIcon } from '@/lib/iconResolver';
 
-interface StoryCardProps {
-  story: Story;
-  onEdit?: (story: Story) => void;
-  onDelete?: (id: string) => void;
-  onToggleFeatured?: (id: string, featured: boolean) => void;
-  onClick?: (story: Story) => void;
-  isAdmin?: boolean;
-}
-
-const storyTypeConfig: Record<StoryType, { label: string; icon: React.ComponentType<{ className?: string }>; color: string }> = {
-  student: { label: 'Student', icon: GraduationCap, color: 'bg-blue-500' },
-  alumni: { label: 'Alumni', icon: Users, color: 'bg-green-500' },
-  donor: { label: 'Donor', icon: Heart, color: 'bg-amber-500' },
-  faculty: { label: 'Faculty', icon: Briefcase, color: 'bg-purple-500' },
-  staff: { label: 'Staff', icon: User, color: 'bg-indigo-500' },
-  community: { label: 'Community', icon: Building2, color: 'bg-teal-500' },
+const typeColors: Record<number, string> = {
+  0: 'bg-blue-500',
+  1: 'bg-green-500',
+  2: 'bg-amber-500',
+  3: 'bg-purple-500',
+  4: 'bg-indigo-500',
+  5: 'bg-teal-500',
+  6: 'bg-rose-500',
+  7: 'bg-cyan-500',
 };
 
 export function StoryCard({ 
