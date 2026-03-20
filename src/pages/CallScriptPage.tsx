@@ -185,6 +185,8 @@ const CallScriptPage = () => {
           },
           institutionalConfig: configForGeneration,
           contentDNA: useContentDNA ? contentDNA : undefined,
+          industryContext: industryLabels.industryContext,
+          contentStyle: industryLabels.contentStyle,
         }
       });
 

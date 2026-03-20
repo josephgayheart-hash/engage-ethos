@@ -68,7 +68,7 @@ const EvaluatePage = () => {
     setEvaluationResult(null);
     
     try {
-      const result = await evaluateMessage(messageContent, context, institutionalConfig || undefined, selectedModel);
+      const result = await evaluateMessage(messageContent, context, institutionalConfig || undefined, selectedModel, industryLabels.industryContext, industryLabels.contentStyle);
       setEvaluationResult(result);
 
       // Track tool usage

@@ -144,7 +144,9 @@ const PlaygroundPage = () => {
         institutionalConfig: null,
         contentDNA,
         profileConfig,
-        model: selectedModel
+        model: selectedModel,
+        industryContext: industryLabels.industryContext,
+        contentStyle: industryLabels.contentStyle,
       }),
     });
 
