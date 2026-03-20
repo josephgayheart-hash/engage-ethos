@@ -73,6 +73,7 @@ import {
   Camera,
 } from 'lucide-react';
 import { extractTextFromFile, getAcceptString } from '@/lib/documentParser';
+import { useIndustry } from '@/contexts/IndustryContext';
 import { DNATuningControls, DNAAdjustments } from '@/components/DNATuningControls';
 import { usePIIScanner } from '@/hooks/usePIIScanner';
 
@@ -193,6 +194,7 @@ function detectContentType(text: string): string | null {
 export default function ContentDNAPage() {
   const { tenant, profile, isAdmin } = useAuth();
   const { activeWorkspace, canSwitch } = useWorkspace();
+  const { labels: industryLabels } = useIndustry();
   const { checkFile } = usePIIScanner();
   const effectiveTenant = canSwitch && activeWorkspace ? activeWorkspace : tenant;
   const location = useLocation();
@@ -1359,7 +1361,7 @@ export default function ContentDNAPage() {
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base flex items-center gap-2">
                       <Camera className="w-4 h-4" />
-                      Campus Photography
+                      {industryLabels.photography}
                     </CardTitle>
                     <Button variant="outline" size="sm" onClick={() => setActiveTab('campus-photos')}>
                       {campusPhotoCount > 0 ? 'Manage' : 'Add Photos'}

@@ -21,6 +21,7 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useToolTracking } from "@/hooks/useToolTracking";
 import { supabase } from "@/integrations/supabase/client";
+import { useIndustry } from "@/contexts/IndustryContext";
 import { cn } from "@/lib/utils";
 import { WaveBackground } from "@/components/WaveBackground";
 import { 
@@ -54,6 +55,8 @@ interface CallScript {
   followUpNotes: string;
 }
 
+// audienceOptions and momentOptions are hardcoded fallbacks for CallScript
+// They will be replaced with dynamic vocabulary in a future session
 const audienceOptions: { value: AudienceType; label: string }[] = [
   { value: 'prospective', label: 'Prospective Student' },
   { value: 'first-year', label: 'First-Year Student' },
@@ -105,6 +108,7 @@ const CallScriptPage = () => {
   const { profile } = useAuth();
   const { addMessage } = useMessageLibrary();
   const { trackToolUse } = useToolTracking();
+  const { labels: industryLabels } = useIndustry();
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [selectedProfileName, setSelectedProfileName] = useState<string | undefined>(undefined);
   const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfig | null>(null);
@@ -182,6 +186,8 @@ const CallScriptPage = () => {
           },
           institutionalConfig: configForGeneration,
           contentDNA: useContentDNA ? contentDNA : undefined,
+          industryContext: industryLabels.industryContext,
+          contentStyle: industryLabels.contentStyle,
         }
       });
 

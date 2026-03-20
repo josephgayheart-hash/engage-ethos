@@ -6,6 +6,7 @@ import { usePlaygroundConversations } from "@/hooks/usePlaygroundConversations";
 import { useToolTracking } from "@/hooks/useToolTracking";
 import { useCampusPhotoCount } from "@/hooks/useCampusPhotoCount";
 import { supabase } from "@/integrations/supabase/client";
+import { useIndustry } from "@/contexts/IndustryContext";
 import { ConversationList } from "@/components/playground/ConversationList";
 import { ChatInterface } from "@/components/playground/ChatInterface";
 import { ContextSelector } from "@/components/playground/ContextSelector";
@@ -23,6 +24,7 @@ const PlaygroundPage = () => {
   const { user, tenant } = useAuth();
   const { profiles } = useInstitutionalProfiles();
   const { trackToolUse } = useToolTracking();
+  const { labels: industryLabels } = useIndustry();
   
   const {
     conversations,
@@ -142,7 +144,9 @@ const PlaygroundPage = () => {
         institutionalConfig: null,
         contentDNA,
         profileConfig,
-        model: selectedModel
+        model: selectedModel,
+        industryContext: industryLabels.industryContext,
+        contentStyle: industryLabels.contentStyle,
       }),
     });
 

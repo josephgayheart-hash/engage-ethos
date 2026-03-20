@@ -44,6 +44,7 @@ import { cn } from "@/lib/utils";
 import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target, Users, UserCheck, Mail, FileDown, MessageSquare, Globe, Phone, FileText, Search, Megaphone, Building2, FileEdit, Smartphone, LayoutTemplate, Send, Mic, Newspaper, Heart, BookOpen, type LucideIcon } from "lucide-react";
 import { mapMessages } from "@/lib/evaluateMessage";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIndustry } from "@/contexts/IndustryContext";
 import type { MessageContext, MapperResult, Channel, InstitutionalConfig } from "@/types/campusvoice";
 import type { Story } from "@/hooks/useStoryBank";
 import type { Fact } from "@/hooks/useFactBook";
@@ -79,38 +80,14 @@ const channelOptions: { value: Channel; label: string }[] = [
   { value: 'case-for-care', label: 'Case for Support' },
 ];
 
-const audienceLabels: Record<string, string> = {
-  'prospective': 'Prospective Student',
-  'first-year': 'First-Year Student',
-  'continuing': 'Continuing Student',
-  'at-risk': 'At-Risk Student',
-  'graduate': 'Graduate Student',
-  'online-learner': 'Online Learner',
-  'alumni': 'Alumni',
-  'parents': 'Parents/Family',
-  'donors': 'Donors',
-  'policy-makers': 'Policy Makers',
-  'community-partners': 'Community Partners',
-  'higher-ed-leaders': 'Higher Education Leaders',
-};
-
-const cohortLabels: Record<string, string> = {
-  'none': 'No specific cohort',
-  'first-gen': 'First-Generation',
-  'probation': 'Academic Probation',
-  'online': 'Online Student',
-  'commuter': 'Commuter',
-  'residential': 'Residential',
-  'transfer': 'Transfer Student',
-  'international': 'International',
-  'veteran': 'Veteran',
-  'parent': 'Student Parent',
-  'working-adult': 'Working Adult',
-};
+// Audience/cohort labels are now resolved dynamically from useIndustry()
 
 const StrategyPage = () => {
   const { toast } = useToast();
   const { profile, isAdmin, isApprover, tenant } = useAuth();
+  const { audiences, cohorts, labels: industryLabels } = useIndustry();
+  const audienceLabels: Record<string, string> = Object.fromEntries(audiences.map(a => [a.id, a.label]));
+  const cohortLabels: Record<string, string> = Object.fromEntries(cohorts.map(c => [c.id, c.label]));
   const { addMessage, updateMessage } = useMessageLibrary();
   const { addTemplate } = useSharedLibrary();
   const { trackToolUse } = useToolTracking();
@@ -467,7 +444,9 @@ const StrategyPage = () => {
         journeyWeeks,
         startDate?.toISOString(),
         endDate?.toISOString(),
-        selectedModel
+        selectedModel,
+        industryLabels.industryContext,
+        industryLabels.contentStyle
       );
       setMapperResult(result);
 

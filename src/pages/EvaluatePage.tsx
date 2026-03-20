@@ -27,11 +27,13 @@ import { cn } from "@/lib/utils";
 import { ArrowLeft, ArrowRight, FileText, AlertCircle, Save, RefreshCw, CalendarIcon, Clock, Building2, Target, Users } from "lucide-react";
 import { evaluateMessage } from "@/lib/evaluateMessage";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIndustry } from "@/contexts/IndustryContext";
 import type { MessageContext, EvaluationResult, InstitutionalConfig } from "@/types/campusvoice";
 
 const EvaluatePage = () => {
   const { toast } = useToast();
   const { profile } = useAuth();
+  const { labels: industryLabels } = useIndustry();
   const { addMessage } = useMessageLibrary();
   const { trackToolUse } = useToolTracking();
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
@@ -66,7 +68,7 @@ const EvaluatePage = () => {
     setEvaluationResult(null);
     
     try {
-      const result = await evaluateMessage(messageContent, context, institutionalConfig || undefined, selectedModel);
+      const result = await evaluateMessage(messageContent, context, institutionalConfig || undefined, selectedModel, industryLabels.industryContext, industryLabels.contentStyle);
       setEvaluationResult(result);
 
       // Track tool usage

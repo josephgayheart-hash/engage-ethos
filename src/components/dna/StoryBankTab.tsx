@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useStoryBank, Story, StoryType, CreateStoryInput } from '@/hooks/useStoryBank';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIndustry } from '@/contexts/IndustryContext';
+import { resolveIcon } from '@/lib/iconResolver';
 import { StoryCard } from './StoryCard';
 import { StoryDetailDialog } from './StoryDetailDialog';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -31,12 +33,6 @@ import {
   Wand2, 
   Loader2, 
   BookOpen,
-  GraduationCap,
-  Users,
-  Heart,
-  Briefcase,
-  User,
-  Building2,
   Star,
   Search,
   Link,
@@ -60,17 +56,18 @@ interface StoryBankTabProps {
   profileId?: string | null;
 }
 
-const storyTypes: { value: StoryType; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { value: 'student', label: 'Student', icon: GraduationCap },
-  { value: 'alumni', label: 'Alumni', icon: Users },
-  { value: 'donor', label: 'Donor', icon: Heart },
-  { value: 'faculty', label: 'Faculty', icon: Briefcase },
-  { value: 'staff', label: 'Staff', icon: User },
-  { value: 'community', label: 'Community', icon: Building2 },
-];
-
 export function StoryBankTab({ profileId }: StoryBankTabProps) {
   const { isAdmin } = useAuth();
+  const { storyTypes: industryStoryTypes } = useIndustry();
+  
+  const storyTypes = useMemo(() => 
+    industryStoryTypes.map(t => ({
+      value: t.id,
+      label: t.label,
+      icon: resolveIcon(t.icon),
+    })),
+    [industryStoryTypes]
+  );
   const {
     stories,
     isLoading,
