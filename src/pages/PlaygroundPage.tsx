@@ -24,6 +24,7 @@ const PlaygroundPage = () => {
   const { user, tenant } = useAuth();
   const { profiles } = useInstitutionalProfiles();
   const { trackToolUse } = useToolTracking();
+  const { labels: industryLabels } = useIndustry();
   
   const {
     conversations,
