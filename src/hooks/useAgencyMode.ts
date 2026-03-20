@@ -51,7 +51,7 @@ interface AgencyLabels {
 interface AgencyModeResult {
   isAgency: boolean;
   isUniversity: boolean;
-  tenantType: 'university' | 'agency' | null;
+  tenantType: string | null;
   labels: AgencyLabels;
 }
 
