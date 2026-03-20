@@ -62,7 +62,7 @@ export function useAgencyMode(): AgencyModeResult {
   // Use active workspace when super admin is switching workspaces
   const effectiveTenant = canSwitch && activeWorkspace ? activeWorkspace : tenant;
   
-  const tenantType = (effectiveTenant as any)?.tenant_type as 'university' | 'agency' | null;
+  const tenantType = (effectiveTenant as any)?.tenant_type as string | null;
   const isAgency = tenantType === 'agency';
   const isUniversity = tenantType === 'university' || !tenantType;
 

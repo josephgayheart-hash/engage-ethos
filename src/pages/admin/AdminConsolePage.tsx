@@ -71,7 +71,7 @@ export default function AdminConsolePage() {
   
   // Derive workspace-aware labels from the effective tenant, not the logged-in user's tenant
   const isOwnTenant = effectiveTenant?.id === tenant?.id;
-  const effectiveTenantType = (effectiveTenant as any)?.tenant_type as 'university' | 'agency' | null;
+  const effectiveTenantType = (effectiveTenant as any)?.tenant_type as string | null;
   const isEffectiveAgency = effectiveTenantType === 'agency';
   
   // Platform Owner = super admin viewing their own (CampusVoice) workspace
