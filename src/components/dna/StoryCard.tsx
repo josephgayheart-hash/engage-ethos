@@ -32,8 +32,12 @@ export function StoryCard({
   onClick,
   isAdmin = false 
 }: StoryCardProps) {
-  const typeConfig = storyTypeConfig[story.story_type] || storyTypeConfig.community;
-  const TypeIcon = typeConfig.icon;
+  const { storyTypes } = useIndustry();
+  const storyTypeIndex = storyTypes.findIndex(t => t.id === story.story_type);
+  const storyTypeDef = storyTypes.find(t => t.id === story.story_type);
+  const TypeIcon = resolveIcon(storyTypeDef?.icon);
+  const typeLabel = storyTypeDef?.label || story.story_type;
+  const typeColor = typeColors[storyTypeIndex >= 0 ? storyTypeIndex % Object.keys(typeColors).length : 5];
 
   return (
     <Card 
