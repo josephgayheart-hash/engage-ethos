@@ -29,7 +29,8 @@ export interface Story {
   created_by_user_id: string | null;
 }
 
-export type StoryType = Story['story_type'];
+/** Story type is now a dynamic string determined by industry vocabulary */
+export type StoryType = string;
 
 export interface CreateStoryInput {
   title: string;
