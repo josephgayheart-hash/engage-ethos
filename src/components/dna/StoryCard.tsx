@@ -45,7 +45,7 @@ export function StoryCard({
       onClick={() => onClick?.(story)}
     >
       {/* Type indicator bar */}
-      <div className={`absolute top-0 left-0 w-1 h-full ${typeConfig.color}`} />
+      <div className={`absolute top-0 left-0 w-1 h-full ${typeColor}`} />
       
       <CardContent className="p-4 pl-5">
         {/* Header */}
