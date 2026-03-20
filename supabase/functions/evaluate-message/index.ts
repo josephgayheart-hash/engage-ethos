@@ -37,7 +37,7 @@ You DO:
 - Evaluate messages at the audience, cohort, and campaign level
 - Respect ethical, student-centered communication norms
 
-Maintain a professional, calm, and evidence-based tone. Write for higher education administrators. Avoid buzzwords and marketing hype. Reference research sparingly and clearly. Frame AI as decision support, not automation.`;
+Maintain a professional, calm, and evidence-based tone. Write for ${industryContext} professionals. Avoid buzzwords and marketing hype. Reference research sparingly and clearly. Frame AI as decision support, not automation.`;
 
 const EVALUATOR_PROMPT = `When evaluating a message, assess it across FIVE PILLARS:
 
