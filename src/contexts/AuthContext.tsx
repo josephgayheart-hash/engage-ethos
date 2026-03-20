@@ -28,10 +28,12 @@ export interface Tenant {
   logo_url: string | null;
   primary_color: string;
   accent_color: string;
-  tenant_type: 'university' | 'agency';
+  tenant_type: 'university' | 'agency' | 'enterprise' | 'franchise' | 'nonprofit' | 'healthcare' | 'financial';
   client_limit: number | null;
   agency_website: string | null;
   agency_contact_email: string | null;
+  industry_vertical?: string | null;
+  industry_config?: Record<string, unknown> | null;
 }
 
 interface ImpersonationState {

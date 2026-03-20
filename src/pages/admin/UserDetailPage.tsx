@@ -59,7 +59,7 @@ interface UserProfile {
 interface TenantInfo {
   id: string;
   institution_name: string;
-  tenant_type: 'university' | 'agency';
+  tenant_type: string;
 }
 
 interface PersonalMessage {
@@ -128,7 +128,7 @@ export default function UserDetailPage() {
   const [tenantChangeMode, setTenantChangeMode] = useState<'existing' | 'new'>('existing');
   const [selectedTenantId, setSelectedTenantId] = useState<string>('');
   const [newTenantName, setNewTenantName] = useState('');
-  const [newTenantType, setNewTenantType] = useState<'university' | 'agency'>('agency');
+  const [newTenantType, setNewTenantType] = useState<string>('agency');
   const [activeTab, setActiveTab] = useState('overview');
 
   const fetchData = async () => {
@@ -1092,7 +1092,7 @@ export default function UserDetailPage() {
                               </div>
                               <div className="space-y-2">
                                 <Label>Organization Type</Label>
-                                <Select value={newTenantType} onValueChange={(v) => setNewTenantType(v as 'university' | 'agency')}>
+                                <Select value={newTenantType} onValueChange={(v) => setNewTenantType(v)}>
                                   <SelectTrigger>
                                     <SelectValue />
                                   </SelectTrigger>

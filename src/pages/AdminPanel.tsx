@@ -127,7 +127,7 @@ interface TenantWithStats {
   id: string;
   institution_name: string;
   status: string;
-  tenant_type: 'university' | 'agency';
+  tenant_type: string;
   userCount: number;
   contentDNACount: number;
   personalMessagesCount: number;
@@ -232,7 +232,7 @@ const AdminPanel = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sendEmailOpen, setSendEmailOpen] = useState(false);
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
-  const [tenantTypeFilter, setTenantTypeFilter] = useState<'all' | 'university' | 'agency'>('all');
+  const [tenantTypeFilter, setTenantTypeFilter] = useState<string>('all');
 
   // Analytics hook for new Command Center
   const { data: analytics, isLoading: analyticsLoading, refetch: refetchAnalytics } = useAdminAnalytics();

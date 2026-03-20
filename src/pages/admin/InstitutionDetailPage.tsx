@@ -46,7 +46,7 @@ interface TenantInfo {
   accent_color: string | null;
   logo_url: string | null;
   created_at: string;
-  tenant_type: 'university' | 'agency' | null;
+  tenant_type: string | null;
   client_limit: number | null;
   agency_website: string | null;
   agency_contact_email: string | null;

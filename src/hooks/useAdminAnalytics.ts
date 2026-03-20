@@ -19,7 +19,7 @@ export interface ToolUsageBreakdown {
 export interface TenantHealthScore {
   tenant_id: string;
   institution_name: string;
-  tenant_type: 'university' | 'agency';
+  tenant_type: string;
   status: string;
   // User metrics
   total_users: number;

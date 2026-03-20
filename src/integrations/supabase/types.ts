@@ -2517,6 +2517,8 @@ export type Database = {
           client_limit: number | null
           created_at: string
           id: string
+          industry_config: Json | null
+          industry_vertical: string | null
           institution_name: string
           logo_url: string | null
           primary_color: string | null
@@ -2531,6 +2533,8 @@ export type Database = {
           client_limit?: number | null
           created_at?: string
           id?: string
+          industry_config?: Json | null
+          industry_vertical?: string | null
           institution_name: string
           logo_url?: string | null
           primary_color?: string | null
@@ -2545,6 +2549,8 @@ export type Database = {
           client_limit?: number | null
           created_at?: string
           id?: string
+          industry_config?: Json | null
+          industry_vertical?: string | null
           institution_name?: string
           logo_url?: string | null
           primary_color?: string | null
@@ -2734,7 +2740,14 @@ export type Database = {
       integration_type: "slate" | "sfmc"
       onboarding_status: "submitted" | "approved" | "rejected"
       tenant_status: "active" | "inactive"
-      tenant_type: "university" | "agency"
+      tenant_type:
+        | "university"
+        | "agency"
+        | "enterprise"
+        | "franchise"
+        | "nonprofit"
+        | "healthcare"
+        | "financial"
       user_status: "invited" | "pending" | "active" | "locked" | "disabled"
     }
     CompositeTypes: {
@@ -2874,7 +2887,15 @@ export const Constants = {
       integration_type: ["slate", "sfmc"],
       onboarding_status: ["submitted", "approved", "rejected"],
       tenant_status: ["active", "inactive"],
-      tenant_type: ["university", "agency"],
+      tenant_type: [
+        "university",
+        "agency",
+        "enterprise",
+        "franchise",
+        "nonprofit",
+        "healthcare",
+        "financial",
+      ],
       user_status: ["invited", "pending", "active", "locked", "disabled"],
     },
   },
