@@ -32,6 +32,15 @@ import {
   Plus
 } from 'lucide-react';
 
+interface StoryDetailDialogProps {
+  story: Story | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSave?: (story: Story, updates: Partial<CreateStoryInput>) => void;
+  isSaving?: boolean;
+  mode?: 'view' | 'edit';
+}
+
 export function StoryDetailDialog({
   story,
   open,

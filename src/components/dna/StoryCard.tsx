@@ -24,6 +24,15 @@ const typeColors: Record<number, string> = {
   7: 'bg-cyan-500',
 };
 
+interface StoryCardProps {
+  story: Story;
+  onEdit?: (story: Story) => void;
+  onDelete?: (id: string) => void;
+  onToggleFeatured?: (id: string, featured: boolean) => void;
+  onClick?: (story: Story) => void;
+  isAdmin?: boolean;
+}
+
 export function StoryCard({ 
   story, 
   onEdit, 

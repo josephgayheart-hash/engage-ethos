@@ -52,6 +52,10 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
+interface StoryBankTabProps {
+  profileId?: string | null;
+}
+
 export function StoryBankTab({ profileId }: StoryBankTabProps) {
   const { isAdmin } = useAuth();
   const { storyTypes: industryStoryTypes } = useIndustry();
