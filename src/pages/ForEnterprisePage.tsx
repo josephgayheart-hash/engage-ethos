@@ -351,7 +351,7 @@ export default function ForEnterprisePage() {
               ))}
 
               {/* Extra CTA card */}
-              <Card className="bg-gradient-to-br from-[hsl(var(--cyber-lime)_/_0.08)] to-[hsl(var(--cyber-purple)_/_0.08)] border-[hsl(var(--cyber-lime)_/_0.2)] flex items-center justify-center">
+              <Card className="bg-primary-foreground/[0.04] border-primary-foreground/10 border-dashed flex items-center justify-center min-h-[180px]">
                 <CardContent className="p-6 text-center">
                   <p className="text-primary-foreground/60 text-sm mb-4">
                     Don't see your industry? We work with any distributed organization.
@@ -359,9 +359,8 @@ export default function ForEnterprisePage() {
                   <RequestDemoDialog
                     trigger={
                       <Button
-                        variant="outline"
                         size="sm"
-                        className="border-[hsl(var(--cyber-lime)_/_0.4)] text-[hsl(var(--cyber-lime))] hover:bg-[hsl(var(--cyber-lime)_/_0.1)]"
+                        className="bg-gradient-to-r from-[hsl(var(--cyber-lime))] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] font-bold"
                       >
                         Talk to Us
                         <ArrowRight className="ml-2 h-3.5 w-3.5" />
