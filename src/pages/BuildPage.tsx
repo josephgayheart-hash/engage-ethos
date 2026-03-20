@@ -126,6 +126,10 @@ const BuildPage = () => {
   const { toast } = useToast();
   const { profile, isAdmin, isApprover, tenant } = useAuth();
   const { audiences, cohorts, labels: industryLabels } = useIndustry();
+  
+  // Dynamic label resolvers (replaced hardcoded audienceLabels/cohortLabels)
+  const audienceLabels: Record<string, string> = Object.fromEntries(audiences.map(a => [a.id, a.label]));
+  const cohortLabels: Record<string, string> = Object.fromEntries(cohorts.map(c => [c.id, c.label]));
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { addMessage } = useMessageLibrary();
