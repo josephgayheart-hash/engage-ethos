@@ -1010,7 +1010,7 @@ Scoring guide:
             body: JSON.stringify({
               model: selectedModel,
               messages: [
-                { role: "system", content: SYSTEM_PROMPT + "\n\n" + modePrompt },
+                { role: "system", content: buildSystemPrompt(industryContext, contentStyle) + "\n\n" + modePrompt },
                 { role: "user", content: userPrompt + "\n\nCRITICAL: You MUST respond with ONLY valid JSON. No markdown, no commentary, no explanation. Just the JSON object." },
               ],
             }),

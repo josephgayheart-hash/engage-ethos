@@ -100,7 +100,7 @@ ${institutionalConfig.wordsToAvoid?.length ? `**Words to avoid:** ${institutiona
       ? `\n\n**Your current context:** ${contextSummary.join(" | ")}`
       : "";
 
-    const systemPrompt = `You are an expert AI messaging assistant for CampusVoice.AI, a strategic communications platform for higher education. You help create, review, and strategize student communications grounded in peer-reviewed behavioral science research.
+    const systemPrompt = `You are an expert AI messaging assistant for CampusVoice.AI, a strategic communications platform for ${industryContext}. You help create, review, and strategize communications grounded in peer-reviewed behavioral science research.
 ${profileContext}
 ${voiceContext}
 ${customInstructions}
