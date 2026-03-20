@@ -151,6 +151,7 @@ const AppRoutes = () => (
     <Route path="/setup" element={<InitialSetupPage />} />
     <Route path="/for-agencies" element={<ForAgenciesPage />} />
     <Route path="/for-enterprise" element={<ForEnterprisePage />} />
+    <Route path="/enterprise" element={<Navigate to="/for-enterprise" replace />} />
     <Route path="/agency/request-access" element={<AgencyRequestAccessPage />} />
     <Route path="/features/content-dna" element={<ContentDNAFeaturePage />} />
     <Route path="/features/message-builder" element={<MessageBuilderFeaturePage />} />
