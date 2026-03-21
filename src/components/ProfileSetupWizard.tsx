@@ -351,62 +351,12 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
 
   const progress = ((currentStep + 1) / STEPS.length) * 100;
 
-  const institutionTypeOptions: { value: InstitutionType; label: string; description: string; icon: React.ReactNode }[] = [
-    {
-      value: 'doctoral-university',
-      label: 'Doctoral University',
-      description: 'R1 & R2 research universities with high or very high research activity',
-      icon: <GraduationCap className="w-6 h-6" />,
-    },
-    {
-      value: 'masters-university',
-      label: "Master's College or University",
-      description: "Institutions awarding at least 50 master's degrees annually across programs",
-      icon: <BookOpen className="w-6 h-6" />,
-    },
-    {
-      value: 'baccalaureate-college',
-      label: 'Baccalaureate College',
-      description: "Liberal arts colleges and institutions where bachelor's degrees represent the majority of conferrals",
-      icon: <Building2 className="w-6 h-6" />,
-    },
-    {
-      value: 'associates-college',
-      label: "Associate's College",
-      description: 'Community colleges, technical colleges, and two-year institutions',
-      icon: <Users className="w-6 h-6" />,
-    },
-    {
-      value: 'special-focus',
-      label: 'Special Focus Institution',
-      description: 'Professional schools, theological seminaries, medical schools, art & design schools',
-      icon: <Briefcase className="w-6 h-6" />,
-    },
-    {
-      value: 'nonprofit-organization',
-      label: 'Nonprofit Organization',
-      description: 'Foundations, 501(c)(3) nonprofits, NGOs, and mission-driven organizations',
-      icon: <Heart className="w-6 h-6" />,
-    },
-    {
-      value: 'k12-school-district',
-      label: 'K–12 School or District',
-      description: 'Public or private K–12 schools, school districts, and charter networks',
-      icon: <School className="w-6 h-6" />,
-    },
-    {
-      value: 'government-agency',
-      label: 'Government Agency',
-      description: 'Municipal, state, federal, or tribal government bodies and public agencies',
-      icon: <Landmark className="w-6 h-6" />,
-    },
-    {
-      value: 'private-enterprise',
-      label: 'Private Enterprise',
-      description: 'Corporations, startups, consultancies, and for-profit businesses',
-      icon: <Building2 className="w-6 h-6" />,
-    },
-  ];
+  const institutionTypeOptions = vocabulary.classificationOptions.map(opt => ({
+    value: opt.value as InstitutionType,
+    label: opt.label,
+    description: opt.description,
+    icon: (() => { const Icon = resolveIcon(opt.value); return <Icon className="w-6 h-6" />; })(),
+  }));
 
   const renderStepContent = () => {
     switch (currentStep) {
