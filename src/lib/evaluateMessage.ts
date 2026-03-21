@@ -74,7 +74,8 @@ export async function buildMessage(
       institutionalConfig,
       model,
       industryContext,
-      contentStyle
+      contentStyle,
+      outputLanguage: context.outputLanguage
     }
   });
 
