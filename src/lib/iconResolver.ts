@@ -23,6 +23,9 @@ import {
   PiggyBank,
   Shield,
   Award,
+  Megaphone,
+  FileText,
+  UserPlus,
   type LucideIcon,
 } from 'lucide-react';
 
