@@ -87,7 +87,17 @@ const STEPS: WizardStep[] = [
 
 export function SubUnitSetupWizard({ parentProfile, onComplete, onCancel }: SubUnitSetupWizardProps) {
   const { tenant } = useAuth();
+  const { labels: industryLabels } = useIndustry();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const UNIT_TYPE_LABELS: Record<string, { label: string; icon: React.ReactNode; description: string }> = {
+    university: { label: industryLabels.organization, icon: <Building2 className="w-4 h-4" />, description: `Top-level ${industryLabels.organization.toLowerCase()}` },
+    college: { label: industryLabels.subUnit, icon: <GraduationCap className="w-4 h-4" />, description: `e.g., ${industryLabels.subUnit}` },
+    division: { label: 'Division', icon: <Layers className="w-4 h-4" />, description: 'Organizational division' },
+    unit: { label: 'Unit/Center', icon: <Building className="w-4 h-4" />, description: 'Support center or unit' },
+    department: { label: 'Department', icon: <Briefcase className="w-4 h-4" />, description: 'Department or office' },
+  };
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [currentStep, setCurrentStep] = useState(0);
