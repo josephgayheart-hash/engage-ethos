@@ -188,9 +188,9 @@ export default function LandingPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <StickyCtaBar />
       <SEOHead
-        title="CampusVoice.AI - Strategic Messaging Intelligence for Higher Education"
-        description="Plan, strategize, and execute brand-aligned communications at scale. Research-driven messaging intelligence built for higher education."
-        keywords={['higher education communications', 'enrollment marketing', 'brand messaging AI', 'university marketing', 'college admissions']}
+        title="CampusVoice.AI - Strategic Messaging Intelligence for Brand Teams"
+        description="Plan, strategize, and execute brand-aligned communications at scale. Research-driven messaging intelligence for education, enterprise, nonprofit, and healthcare."
+        keywords={['brand communications', 'strategic messaging', 'brand messaging AI', 'content governance', 'audience engagement']}
         jsonLd={landingPageSchemas}
       />
 

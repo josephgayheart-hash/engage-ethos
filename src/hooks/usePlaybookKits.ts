@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { PlaybookKit, JourneyTemplate, MessageTemplate } from "@/types/playbook";
+import { useIndustry } from "@/contexts/IndustryContext";
 
 export function usePlaybookKits(institutionType?: string) {
   const [kits, setKits] = useState<PlaybookKit[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const { tenantType } = useIndustry();
 
   useEffect(() => {
     const fetchKits = async () => {
@@ -32,6 +34,15 @@ export function usePlaybookKits(institutionType?: string) {
           );
         }
 
+        // Also filter by tenant type — match kits whose institution_types 
+        // include the current tenant type (e.g., 'enterprise', 'nonprofit')
+        if (tenantType && tenantType !== 'university') {
+          filteredData = filteredData.filter(kit =>
+            kit.institution_types?.includes(tenantType) ||
+            kit.institution_types?.includes('all')
+          );
+        }
+
         // Transform data to proper types
         const transformedKits: PlaybookKit[] = filteredData.map(kit => ({
           ...kit,
@@ -53,7 +64,7 @@ export function usePlaybookKits(institutionType?: string) {
     };
 
     fetchKits();
-  }, [institutionType]);
+  }, [institutionType, tenantType]);
 
   const getKitByKey = (kitKey: string) => {
     return kits.find(kit => kit.kit_key === kitKey);
