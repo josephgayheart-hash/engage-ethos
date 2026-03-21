@@ -493,7 +493,7 @@ export default function UniversitySettingsPage() {
         <div className="container mx-auto px-4 py-16 text-center">
           <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
-          <p className="text-muted-foreground">You need admin privileges to access University Settings.</p>
+          <p className="text-muted-foreground">You need admin privileges to access {industryLabels.organizationSettings}.</p>
         </div>
       </div>
     );
