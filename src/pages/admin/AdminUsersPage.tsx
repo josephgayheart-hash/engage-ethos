@@ -916,8 +916,8 @@ export default function AdminUsersPage() {
               <div className="space-y-2">
                 <Label htmlFor="institutionalProfile">Assign to {labels.subUnit} (Optional)</Label>
                 <Select 
-                  value={newUser.institutionalProfileId} 
-                  onValueChange={(value) => setNewUser(prev => ({ ...prev, institutionalProfileId: value }))}
+                  value={newUser.institutionalProfileId || 'none'} 
+                  onValueChange={(value) => setNewUser(prev => ({ ...prev, institutionalProfileId: value === 'none' ? '' : value }))}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="No specific assignment" />
