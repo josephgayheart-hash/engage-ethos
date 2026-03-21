@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Users, Clock, Briefcase, ChevronDown, ChevronUp, Cpu } from "lucide-react";
+import { Users, Clock, Briefcase, ChevronDown, ChevronUp, Cpu, Globe } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,23 @@ interface ContextSelectorProps {
   selectedModel?: AIModel;
   onModelChange?: (model: AIModel) => void;
 }
+
+const languageOptions = [
+  { value: 'en', label: 'English' },
+  { value: 'es', label: 'Spanish (Español)' },
+  { value: 'fr', label: 'French (Français)' },
+  { value: 'zh', label: 'Chinese (中文)' },
+  { value: 'ar', label: 'Arabic (العربية)' },
+  { value: 'pt', label: 'Portuguese (Português)' },
+  { value: 'de', label: 'German (Deutsch)' },
+  { value: 'ja', label: 'Japanese (日本語)' },
+  { value: 'ko', label: 'Korean (한국어)' },
+  { value: 'hi', label: 'Hindi (हिन्दी)' },
+  { value: 'vi', label: 'Vietnamese (Tiếng Việt)' },
+  { value: 'tl', label: 'Tagalog' },
+  { value: 'it', label: 'Italian (Italiano)' },
+  { value: 'ru', label: 'Russian (Русский)' },
+];
 
 // ============= CHANNEL & TONE OPTIONS (industry-neutral) =============
 const channelOptions: { value: Channel; label: string }[] = [
@@ -207,14 +224,20 @@ export function ContextSelector({ context, onChange, mode = 'evaluator', selecte
                 </>
               ) : (
                 <>
-                  <ChevronDown className="w-4 h-4" />
-                  <span>Advanced Options</span>
-                  {shouldShowModelSelector && (
-                    <Badge variant="outline" className="text-[10px] h-5 px-1.5 gap-1 font-normal">
-                      <CurrentModelIcon className="w-3 h-3" />
-                      {currentModel.name}
-                    </Badge>
-                  )}
+                   <ChevronDown className="w-4 h-4" />
+                    <span>Advanced Options</span>
+                    {shouldShowModelSelector && (
+                      <Badge variant="outline" className="text-[10px] h-5 px-1.5 gap-1 font-normal">
+                        <CurrentModelIcon className="w-3 h-3" />
+                        {currentModel.name}
+                      </Badge>
+                    )}
+                    {context.outputLanguage && context.outputLanguage !== 'en' && (
+                      <Badge variant="outline" className="text-[10px] h-5 px-1.5 gap-1 font-normal">
+                        <Globe className="w-3 h-3" />
+                        {languageOptions.find(l => l.value === context.outputLanguage)?.label?.split(' ')[0] || context.outputLanguage}
+                      </Badge>
+                    )}
                 </>
               )}
             </Button>
@@ -224,11 +247,11 @@ export function ContextSelector({ context, onChange, mode = 'evaluator', selecte
               className={`grid grid-cols-1 ${
                 showExtendedOptions
                   ? shouldShowModelSelector
-                    ? 'md:grid-cols-2 lg:grid-cols-5'
-                    : 'md:grid-cols-2 lg:grid-cols-4'
+                    ? 'md:grid-cols-2 lg:grid-cols-6'
+                    : 'md:grid-cols-2 lg:grid-cols-5'
                   : shouldShowModelSelector
-                    ? 'md:grid-cols-2'
-                    : ''
+                    ? 'md:grid-cols-2 lg:grid-cols-3'
+                    : 'md:grid-cols-2'
               } gap-4 p-4 border border-border rounded-lg bg-muted/30`}
             >
               {/* AI Model Selector */}
@@ -269,6 +292,29 @@ export function ContextSelector({ context, onChange, mode = 'evaluator', selecte
                   </Select>
                 </div>
               )}
+
+              {/* Output Language Selector */}
+              <div className="space-y-2">
+                <Label htmlFor="output-language" className="flex items-center gap-2 text-sm font-medium">
+                  <Globe className="w-4 h-4 text-primary" />
+                  Output Language
+                </Label>
+                <Select
+                  value={context.outputLanguage || 'en'}
+                  onValueChange={(value) => onChange({ ...context, outputLanguage: value === 'en' ? undefined : value })}
+                >
+                  <SelectTrigger id="output-language" className="w-full bg-background">
+                    <SelectValue placeholder="English" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {languageOptions.map((lang) => (
+                      <SelectItem key={lang.value} value={lang.value}>
+                        {lang.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
               {showExtendedOptions && (
                 <>

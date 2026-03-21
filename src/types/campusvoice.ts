@@ -251,6 +251,8 @@ export interface MessageContext {
   estimatedTouchpoints?: number;
   // Additional context for refinement
   additionalContext?: string; // User-provided context, situation details, or refinement notes
+  // Output language
+  outputLanguage?: string; // e.g. 'en', 'es', 'fr', 'zh', 'ar' — defaults to English
 }
 
 // Strategy Journey Types

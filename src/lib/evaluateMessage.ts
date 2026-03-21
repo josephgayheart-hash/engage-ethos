@@ -25,7 +25,8 @@ export async function evaluateMessage(
       institutionalConfig,
       model,
       industryContext,
-      contentStyle
+      contentStyle,
+      outputLanguage: context.outputLanguage
     }
   });
 
@@ -73,7 +74,8 @@ export async function buildMessage(
       institutionalConfig,
       model,
       industryContext,
-      contentStyle
+      contentStyle,
+      outputLanguage: context.outputLanguage
     }
   });
 
@@ -127,7 +129,8 @@ export async function mapMessages(
       endDate,
       model,
       industryContext,
-      contentStyle
+      contentStyle,
+      outputLanguage: context.outputLanguage
     }
   });
 
