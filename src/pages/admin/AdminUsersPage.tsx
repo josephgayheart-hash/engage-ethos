@@ -77,6 +77,7 @@ export default function AdminUsersPage() {
   const { tenant, isSuperAdmin, startImpersonation, user: currentUser } = useAuth();
   const { activeWorkspace, canSwitch } = useWorkspace();
   const { toast } = useToast();
+  const { labels } = useIndustry();
 
   // When super admin is switching workspaces, scope to that workspace
   const effectiveTenant = canSwitch ? activeWorkspace : tenant;
@@ -85,6 +86,9 @@ export default function AdminUsersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  
+  // Institutional profiles for association
+  const [institutionalProfiles, setInstitutionalProfiles] = useState<{ id: string; name: string; profile_type: string }[]>([]);
   
   // Create user dialog
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -98,6 +102,7 @@ export default function AdminUsersPage() {
     department: '',
     title: '',
     role: 'user' as 'user' | 'user_approver' | 'admin' | 'super_admin' | 'agency_admin' | 'agency_user',
+    institutionalProfileId: '' as string,
   });
 
   // Credentials dialog
