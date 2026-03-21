@@ -61,6 +61,7 @@ export function useStoryBank(options: UseStoryBankOptions = {}) {
   const { tenant, user } = useAuth();
   const workspaceId = useActiveWorkspaceId();
   const { toast } = useToast();
+  const { labels, storyTypes } = useIndustry();
   
   const [stories, setStories] = useState<Story[]>([]);
   const [isLoading, setIsLoading] = useState(true);
