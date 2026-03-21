@@ -129,7 +129,8 @@ export async function mapMessages(
       endDate,
       model,
       industryContext,
-      contentStyle
+      contentStyle,
+      outputLanguage: context.outputLanguage
     }
   });
 
