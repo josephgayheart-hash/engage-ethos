@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useActiveWorkspaceId } from '@/contexts/WorkspaceContext';
 import { useToast } from '@/hooks/use-toast';
 import { logDNAActivity } from '@/hooks/useContentDNAActivity';
+import { useIndustry } from '@/contexts/IndustryContext';
 
 export interface Story {
   id: string;
