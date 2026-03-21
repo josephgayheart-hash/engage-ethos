@@ -235,6 +235,7 @@ export default function AdminOnboardingPage() {
       setSelectedTenantId('');
       setCreateNewTenant(false);
       setNewTenantName('');
+      setNewTenantType('university');
       setSelectedRole('user');
     }
   };
