@@ -1104,17 +1104,42 @@ const BuildPage = () => {
                 )}
               </BuilderStepSection>
 
-              {/* Step 7: AI Model */}
+              {/* Step 7: AI Model & Language */}
               <BuilderStepSection
                 stepNumber={7}
-                title="Select AI Model"
-                description="Choose which model powers this generation run"
+                title="AI Model & Language"
+                description="Choose which model powers this generation and the output language"
                 helpText="Pick the model before adding final campaign notes. Faster models are great for iteration; premium models work best for nuanced messaging."
                 icon={<Zap className="w-4 h-4" />}
                 optional
               >
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <ModelSelector value={selectedModel} onChange={setSelectedModel} />
+                  <Select
+                    value={context.outputLanguage || 'en'}
+                    onValueChange={(value) => setContext({ ...context, outputLanguage: value === 'en' ? undefined : value })}
+                  >
+                    <SelectTrigger className="w-[180px] bg-background">
+                      <Globe className="w-4 h-4 mr-2 text-primary" />
+                      <SelectValue placeholder="English" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="es">Spanish (Español)</SelectItem>
+                      <SelectItem value="fr">French (Français)</SelectItem>
+                      <SelectItem value="zh">Chinese (中文)</SelectItem>
+                      <SelectItem value="ar">Arabic (العربية)</SelectItem>
+                      <SelectItem value="pt">Portuguese (Português)</SelectItem>
+                      <SelectItem value="de">German (Deutsch)</SelectItem>
+                      <SelectItem value="ja">Japanese (日本語)</SelectItem>
+                      <SelectItem value="ko">Korean (한국어)</SelectItem>
+                      <SelectItem value="hi">Hindi (हिन्दी)</SelectItem>
+                      <SelectItem value="vi">Vietnamese (Tiếng Việt)</SelectItem>
+                      <SelectItem value="tl">Tagalog</SelectItem>
+                      <SelectItem value="it">Italian (Italiano)</SelectItem>
+                      <SelectItem value="ru">Russian (Русский)</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <Badge variant="outline" className="text-xs">Applies to this build</Badge>
                 </div>
               </BuilderStepSection>
