@@ -337,14 +337,39 @@ export default function InstitutionDetailPage() {
                     <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground">
                       {tenant.institution_name}
                     </h1>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
                       <Badge variant={tenant.status === 'active' ? 'default' : 'secondary'}>
                         {tenant.status}
                       </Badge>
-                      {tenant.tenant_type && (
-                        <Badge variant="outline" className={tenant.tenant_type === 'agency' ? 'bg-purple-50 text-purple-700 border-purple-200' : ''}>
-                          {tenant.tenant_type.charAt(0).toUpperCase() + tenant.tenant_type.slice(1)}
-                        </Badge>
+                      {isEditingType ? (
+                        <div className="flex items-center gap-1.5">
+                          <Select value={editingTenantType} onValueChange={setEditingTenantType}>
+                            <SelectTrigger className="h-7 w-[140px] text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {TENANT_TYPE_OPTIONS.map(opt => (
+                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleSaveTenantType}>
+                            <Check className="w-3.5 h-3.5 text-green-600" />
+                          </Button>
+                          <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingType(false)}>
+                            <X className="w-3.5 h-3.5 text-destructive" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => { setEditingTenantType(tenant.tenant_type || 'university'); setIsEditingType(true); }}
+                          className="group flex items-center gap-1 cursor-pointer"
+                        >
+                          <Badge variant="outline" className={tenant.tenant_type === 'agency' ? 'bg-purple-50 text-purple-700 border-purple-200' : ''}>
+                            {(tenant.tenant_type || 'university').charAt(0).toUpperCase() + (tenant.tenant_type || 'university').slice(1)}
+                          </Badge>
+                          <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
                       )}
                       <span className="text-sm text-muted-foreground">
                         Created {formatDate(tenant.created_at)}
