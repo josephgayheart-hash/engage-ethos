@@ -746,7 +746,7 @@ Provide your evaluation as JSON.`;
         body: JSON.stringify({
           model: selectedModel,
           messages: [
-            { role: "system", content: buildSystemPrompt(industryContext, contentStyle) + "\n\n" + modePrompt },
+            { role: "system", content: buildSystemPrompt(industryContext, contentStyle) + "\n\n" + modePrompt + (outputLanguage && outputLanguage !== 'en' ? `\n\nCRITICAL LANGUAGE INSTRUCTION: You MUST write ALL generated content, messages, subject lines, CTAs, recommendations, and explanations in ${outputLanguage === 'es' ? 'Spanish' : outputLanguage === 'fr' ? 'French' : outputLanguage === 'zh' ? 'Chinese (Simplified)' : outputLanguage === 'ar' ? 'Arabic' : outputLanguage === 'pt' ? 'Portuguese' : outputLanguage === 'de' ? 'German' : outputLanguage === 'ja' ? 'Japanese' : outputLanguage === 'ko' ? 'Korean' : outputLanguage === 'hi' ? 'Hindi' : outputLanguage === 'vi' ? 'Vietnamese' : outputLanguage === 'tl' ? 'Tagalog' : outputLanguage === 'it' ? 'Italian' : outputLanguage === 'ru' ? 'Russian' : outputLanguage}. Keep JSON keys in English but all text values must be in the target language.` : '') },
             { role: "user", content: userPrompt },
           ],
         }),
