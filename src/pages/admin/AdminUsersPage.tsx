@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth, UserProfile, UserStatus } from '@/contexts/AuthContext';
+import { useIndustry } from '@/contexts/IndustryContext';
 import { useWorkspace } from '@/contexts/WorkspaceContext';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -76,6 +77,7 @@ export default function AdminUsersPage() {
   const { tenant, isSuperAdmin, startImpersonation, user: currentUser } = useAuth();
   const { activeWorkspace, canSwitch } = useWorkspace();
   const { toast } = useToast();
+  const { labels } = useIndustry();
 
   // When super admin is switching workspaces, scope to that workspace
   const effectiveTenant = canSwitch ? activeWorkspace : tenant;
@@ -84,6 +86,9 @@ export default function AdminUsersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  
+  // Institutional profiles for association
+  const [institutionalProfiles, setInstitutionalProfiles] = useState<{ id: string; name: string; profile_type: string }[]>([]);
   
   // Create user dialog
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -97,6 +102,7 @@ export default function AdminUsersPage() {
     department: '',
     title: '',
     role: 'user' as 'user' | 'user_approver' | 'admin' | 'super_admin' | 'agency_admin' | 'agency_user',
+    institutionalProfileId: '' as string,
   });
 
   // Credentials dialog
@@ -181,9 +187,20 @@ export default function AdminUsersPage() {
     }
   };
 
+  const fetchInstitutionalProfiles = async () => {
+    if (!effectiveTenantId) return;
+    const { data } = await supabase
+      .from('institutional_profiles')
+      .select('id, name, profile_type')
+      .eq('tenant_id', effectiveTenantId)
+      .order('name');
+    setInstitutionalProfiles(data || []);
+  };
+
   useEffect(() => {
     fetchUsers();
-  }, []);
+    fetchInstitutionalProfiles();
+  }, [effectiveTenantId]);
 
   const generatePassword = () => {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
@@ -285,6 +302,7 @@ export default function AdminUsersPage() {
         department: '',
         title: '',
         role: 'user',
+        institutionalProfileId: '',
       });
       setSendInviteEmail(true);
 
@@ -868,9 +886,9 @@ export default function AdminUsersPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="user">University User</SelectItem>
-                  <SelectItem value="user_approver">University User + Approver</SelectItem>
-                  <SelectItem value="admin">University Admin</SelectItem>
+                  <SelectItem value="user">{labels.organizationUser}</SelectItem>
+                  <SelectItem value="user_approver">{labels.organizationUser} + Approver</SelectItem>
+                  <SelectItem value="admin">{labels.organizationAdmin}</SelectItem>
                   {isSuperAdmin && (
                     <>
                       <SelectItem value="agency_admin">Agency Admin</SelectItem>
@@ -888,10 +906,36 @@ export default function AdminUsersPage() {
                   : newUser.role === 'agency_user'
                   ? 'Agency team member who can manage client content and messaging.'
                   : newUser.role === 'admin'
-                  ? 'Full admin access to their institution including user management and Content DNA.'
-                  : 'University Users can create and evaluate messages. Approvers can also review library submissions.'}
+                  ? `Full admin access to their ${labels.organization.toLowerCase()} including user management and Content DNA.`
+                  : `${labels.organizationUser}s can create and evaluate messages. Approvers can also review library submissions.`}
               </p>
             </div>
+
+            {/* Institutional Profile Association */}
+            {institutionalProfiles.length > 0 && (
+              <div className="space-y-2">
+                <Label htmlFor="institutionalProfile">Assign to {labels.subUnit} (Optional)</Label>
+                <Select 
+                  value={newUser.institutionalProfileId} 
+                  onValueChange={(value) => setNewUser(prev => ({ ...prev, institutionalProfileId: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="No specific assignment" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No specific assignment</SelectItem>
+                    {institutionalProfiles.map(profile => (
+                      <SelectItem key={profile.id} value={profile.id}>
+                        {profile.name} <span className="text-muted-foreground">({profile.profile_type})</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Optionally assign this user to a specific {labels.subUnit.toLowerCase()} for scoped content generation.
+                </p>
+              </div>
+            )}
             
             {/* Send Email Invite Checkbox */}
             <div className="flex items-center space-x-3 pt-2 border-t border-[hsl(220,13%,88%)]">
