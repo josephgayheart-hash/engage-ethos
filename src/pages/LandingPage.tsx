@@ -115,7 +115,7 @@ const features = [
   },
   {
     icon: BookOpen,
-    title: 'University Library',
+    title: 'Content Library',
     description: 'Governed content with approval workflows and shared collections.',
     link: '/features/library',
   },
