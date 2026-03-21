@@ -923,7 +923,7 @@ export default function AdminUsersPage() {
                     <SelectValue placeholder="No specific assignment" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No specific assignment</SelectItem>
+                    <SelectItem value="none">No specific assignment</SelectItem>
                     {institutionalProfiles.map(profile => (
                       <SelectItem key={profile.id} value={profile.id}>
                         {profile.name} <span className="text-muted-foreground">({profile.profile_type})</span>
