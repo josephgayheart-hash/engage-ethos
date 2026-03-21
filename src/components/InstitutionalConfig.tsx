@@ -50,6 +50,7 @@ import {
 } from "lucide-react";
 import type { InstitutionalConfig as InstitutionalConfigType, VoiceAnalysis } from "@/types/campusvoice";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIndustry } from "@/contexts/IndustryContext";
 
 interface InstitutionalConfigProps {
   config: InstitutionalConfigType;
