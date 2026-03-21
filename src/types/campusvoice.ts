@@ -4,17 +4,8 @@ export type OperationMode =
   | 'mapper' 
   | 'customization';
 
-export type Department = 
-  | 'central-marketing'
-  | 'executive-comms'
-  | 'enrollment-management'
-  | 'registrar'
-  | 'college-communications'
-  | 'student-success'
-  | 'recruitment'
-  | 'health-wellbeing'
-  | 'advancement-alumni'
-  | 'human-resources';
+/** Department is now a dynamic string resolved from industry vocabulary */
+export type Department = string;
 
 export interface DepartmentInfo {
   id: Department;
