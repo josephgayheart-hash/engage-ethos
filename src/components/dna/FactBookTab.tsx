@@ -94,6 +94,8 @@ const categoryIcons: Record<string, React.ComponentType<{ className?: string }>>
 
 export function FactBookTab({ profileId }: FactBookTabProps) {
   const { isAdmin } = useAuth();
+  const { vocabulary } = useIndustry();
+  const FACT_CATEGORIES = useMemo(() => getFactCategoriesForTenant(vocabulary.tenantType), [vocabulary.tenantType]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const {
