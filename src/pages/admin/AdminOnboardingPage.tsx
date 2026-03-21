@@ -192,6 +192,7 @@ export default function AdminOnboardingPage() {
           tenantId: createNewTenant ? null : selectedTenantId,
           createNewTenant: createNewTenant,
           newTenantName: createNewTenant ? newTenantName.trim() : null,
+          newTenantType: createNewTenant ? newTenantType : undefined,
           role: selectedRole,
         },
       });
