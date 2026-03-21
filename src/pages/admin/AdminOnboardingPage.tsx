@@ -668,8 +668,8 @@ export default function AdminOnboardingPage() {
                 onChange={(e) => setSelectedRole(e.target.value)}
                 className="w-full px-3 py-2 border border-[hsl(220,13%,88%)] rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(222,47%,31%)]"
               >
-                <option value="user">University User</option>
-                <option value="user_approver">University User + Approver</option>
+                <option value="user">Standard User</option>
+                <option value="user_approver">Standard User + Approver</option>
                 <option value="super_admin">CampusVoice.ai Super Admin</option>
               </select>
               <p className="text-xs text-[hsl(220,14%,46%)]">

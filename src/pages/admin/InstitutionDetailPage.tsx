@@ -312,7 +312,7 @@ export default function InstitutionDetailPage() {
                       </Badge>
                       {tenant.tenant_type && (
                         <Badge variant="outline" className={tenant.tenant_type === 'agency' ? 'bg-purple-50 text-purple-700 border-purple-200' : ''}>
-                          {tenant.tenant_type === 'agency' ? 'Agency' : 'University'}
+                          {tenant.tenant_type.charAt(0).toUpperCase() + tenant.tenant_type.slice(1)}
                         </Badge>
                       )}
                       <span className="text-sm text-muted-foreground">

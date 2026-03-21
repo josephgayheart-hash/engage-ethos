@@ -676,7 +676,7 @@ serve(async (req) => {
         if (shouldCreateTenant && newTenantName) {
           const { data: newTenant, error: tenantError } = await adminClient
             .from("tenants")
-            .insert({ institution_name: newTenantName })
+            .insert({ institution_name: newTenantName, tenant_type: newTenantType || 'university' })
             .select()
             .single();
 
