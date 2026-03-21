@@ -886,9 +886,9 @@ export default function AdminUsersPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="user">University User</SelectItem>
-                  <SelectItem value="user_approver">University User + Approver</SelectItem>
-                  <SelectItem value="admin">University Admin</SelectItem>
+                  <SelectItem value="user">{labels.organizationUser}</SelectItem>
+                  <SelectItem value="user_approver">{labels.organizationUser} + Approver</SelectItem>
+                  <SelectItem value="admin">{labels.organizationAdmin}</SelectItem>
                   {isSuperAdmin && (
                     <>
                       <SelectItem value="agency_admin">Agency Admin</SelectItem>
@@ -906,10 +906,36 @@ export default function AdminUsersPage() {
                   : newUser.role === 'agency_user'
                   ? 'Agency team member who can manage client content and messaging.'
                   : newUser.role === 'admin'
-                  ? 'Full admin access to their institution including user management and Content DNA.'
-                  : 'University Users can create and evaluate messages. Approvers can also review library submissions.'}
+                  ? `Full admin access to their ${labels.organization.toLowerCase()} including user management and Content DNA.`
+                  : `${labels.organizationUser}s can create and evaluate messages. Approvers can also review library submissions.`}
               </p>
             </div>
+
+            {/* Institutional Profile Association */}
+            {institutionalProfiles.length > 0 && (
+              <div className="space-y-2">
+                <Label htmlFor="institutionalProfile">Assign to {labels.subUnit} (Optional)</Label>
+                <Select 
+                  value={newUser.institutionalProfileId} 
+                  onValueChange={(value) => setNewUser(prev => ({ ...prev, institutionalProfileId: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="No specific assignment" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No specific assignment</SelectItem>
+                    {institutionalProfiles.map(profile => (
+                      <SelectItem key={profile.id} value={profile.id}>
+                        {profile.name} <span className="text-muted-foreground">({profile.profile_type})</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Optionally assign this user to a specific {labels.subUnit.toLowerCase()} for scoped content generation.
+                </p>
+              </div>
+            )}
             
             {/* Send Email Invite Checkbox */}
             <div className="flex items-center space-x-3 pt-2 border-t border-[hsl(220,13%,88%)]">
