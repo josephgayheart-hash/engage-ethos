@@ -551,7 +551,7 @@ export default function UniversitySettingsPage() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h1 className="font-serif text-2xl md:text-3xl font-bold">
-                      {tenant?.institution_name || (isAgency ? 'Agency Settings' : 'University Settings')}
+                      {tenant?.institution_name || (isAgency ? 'Agency Settings' : industryLabels.organizationSettings)}
                     </h1>
                     {isAgency && (
                       <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400">
