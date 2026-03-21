@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { usePIIScanner } from '@/hooks/usePIIScanner';
-import { useFactBook, Fact, FactCategory, FACT_CATEGORIES, CreateFactInput } from '@/hooks/useFactBook';
+import { useFactBook, Fact, FactCategory, getFactCategoriesForTenant, CreateFactInput } from '@/hooks/useFactBook';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIndustry } from '@/contexts/IndustryContext';
 import { FactCard } from './FactCard';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -93,6 +94,8 @@ const categoryIcons: Record<string, React.ComponentType<{ className?: string }>>
 
 export function FactBookTab({ profileId }: FactBookTabProps) {
   const { isAdmin } = useAuth();
+  const { vocabulary } = useIndustry();
+  const FACT_CATEGORIES = useMemo(() => getFactCategoriesForTenant(vocabulary.tenantType), [vocabulary.tenantType]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const {

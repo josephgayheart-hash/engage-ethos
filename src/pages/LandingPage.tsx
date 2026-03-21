@@ -44,7 +44,7 @@ const landingPageSchemas = [
     '@type': 'WebSite',
     name: 'CampusVoice.AI',
     url: 'https://engage-ethos.lovable.app',
-    description: 'Strategic Messaging Intelligence for Higher Education',
+    description: 'Strategic Messaging Intelligence for Brand Teams',
     potentialAction: {
       '@type': 'SearchAction',
       target: 'https://engage-ethos.lovable.app/search?q={search_term_string}',
@@ -53,13 +53,13 @@ const landingPageSchemas = [
   },
   getSoftwareApplicationSchema(
     'CampusVoice.AI',
-    'AI-powered strategic messaging intelligence platform for higher education. Plan, strategize, and execute brand-aligned communications at scale.',
+    'AI-powered strategic messaging intelligence platform. Plan, strategize, and execute brand-aligned communications at scale for education, enterprise, nonprofit, and healthcare.',
     [
       'AI Message Builder',
       'Content DNA Studio',
       'Journey Flow Planner',
       'Message Evaluator',
-      'University Library'
+      'Content Library'
     ]
   )
 ];
@@ -115,7 +115,7 @@ const features = [
   },
   {
     icon: BookOpen,
-    title: 'University Library',
+    title: 'Content Library',
     description: 'Governed content with approval workflows and shared collections.',
     link: '/features/library',
   },
@@ -160,8 +160,8 @@ const HERO_NOUNS = [
   { text: "Storytellers", color: "hsl(200 100% 50%)" },
   { text: "Strategic Impact.", color: "hsl(270 70% 60%)" },
   { text: "Communicators", color: "hsl(82 85% 55%)" },
-  { text: "Enrollment Growth.", color: "hsl(200 100% 50%)" },
-  { text: "Educators", color: "hsl(270 70% 60%)" },
+  { text: "Audience Growth.", color: "hsl(200 100% 50%)" },
+  { text: "Brand Teams", color: "hsl(270 70% 60%)" },
   { text: "Every Touchpoint.", color: "hsl(82 85% 55%)" },
   { text: "Leaders", color: "hsl(200 100% 50%)" },
   { text: "Audience Connection.", color: "hsl(270 70% 60%)" },
@@ -188,9 +188,9 @@ export default function LandingPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <StickyCtaBar />
       <SEOHead
-        title="CampusVoice.AI - Strategic Messaging Intelligence for Higher Education"
-        description="Plan, strategize, and execute brand-aligned communications at scale. Research-driven messaging intelligence built for higher education."
-        keywords={['higher education communications', 'enrollment marketing', 'brand messaging AI', 'university marketing', 'college admissions']}
+        title="CampusVoice.AI - Strategic Messaging Intelligence for Brand Teams"
+        description="Plan, strategize, and execute brand-aligned communications at scale. Research-driven messaging intelligence for education, enterprise, nonprofit, and healthcare."
+        keywords={['brand communications', 'strategic messaging', 'brand messaging AI', 'content governance', 'audience engagement']}
         jsonLd={landingPageSchemas}
       />
 
