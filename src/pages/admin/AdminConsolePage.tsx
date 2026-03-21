@@ -1147,6 +1147,164 @@ export default function AdminConsolePage() {
           </div>
         </div>
       </div>
+      {/* Create Organization Dialog */}
+      <Dialog open={showCreateOrgDialog} onOpenChange={setShowCreateOrgDialog}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-serif">Create New Organization</DialogTitle>
+            <DialogDescription>
+              Set up a new organization with its industry type and optionally create the first admin user.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="orgName">Organization Name *</Label>
+              <Input
+                id="orgName"
+                value={newOrg.name}
+                onChange={(e) => setNewOrg(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="e.g. Valvoline, Stanford University"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="tenantType">Organization Type *</Label>
+              <Select
+                value={newOrg.tenantType}
+                onValueChange={(value) => setNewOrg(prev => ({ ...prev, tenantType: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="university">University / Higher Ed</SelectItem>
+                  <SelectItem value="agency">Agency Partner</SelectItem>
+                  <SelectItem value="enterprise">Enterprise</SelectItem>
+                  <SelectItem value="franchise">Franchise</SelectItem>
+                  <SelectItem value="nonprofit">Nonprofit</SelectItem>
+                  <SelectItem value="healthcare">Healthcare</SelectItem>
+                  <SelectItem value="financial">Financial</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Optional: Create First Admin */}
+            <div className="flex items-center space-x-3 pt-2 border-t border-[hsl(220,13%,88%)]">
+              <Checkbox
+                id="createAdmin"
+                checked={newOrg.createAdmin}
+                onCheckedChange={(checked) => setNewOrg(prev => ({ ...prev, createAdmin: checked as boolean }))}
+              />
+              <Label htmlFor="createAdmin" className="font-normal cursor-pointer">
+                Create first admin user for this organization
+              </Label>
+            </div>
+
+            {newOrg.createAdmin && (
+              <div className="space-y-4 pl-4 border-l-2 border-[hsl(173,58%,39%)]/30">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="adminFirstName">First Name *</Label>
+                    <Input
+                      id="adminFirstName"
+                      value={newOrg.adminFirstName}
+                      onChange={(e) => setNewOrg(prev => ({ ...prev, adminFirstName: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="adminLastName">Last Name *</Label>
+                    <Input
+                      id="adminLastName"
+                      value={newOrg.adminLastName}
+                      onChange={(e) => setNewOrg(prev => ({ ...prev, adminLastName: e.target.value }))}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="adminEmail">Email *</Label>
+                  <Input
+                    id="adminEmail"
+                    type="email"
+                    value={newOrg.adminEmail}
+                    onChange={(e) => setNewOrg(prev => ({ ...prev, adminEmail: e.target.value }))}
+                  />
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Checkbox
+                    id="sendAdminInvite"
+                    checked={newOrg.sendInvite}
+                    onCheckedChange={(checked) => setNewOrg(prev => ({ ...prev, sendInvite: checked as boolean }))}
+                  />
+                  <div className="flex items-center gap-2">
+                    <Mail className="w-4 h-4 text-[hsl(220,14%,46%)]" />
+                    <Label htmlFor="sendAdminInvite" className="font-normal cursor-pointer">
+                      Send email invitation with login credentials
+                    </Label>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateOrgDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateOrganization}
+              disabled={isCreatingOrg}
+              className="bg-[hsl(173,58%,39%)] hover:bg-[hsl(173,58%,34%)]"
+            >
+              {isCreatingOrg ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Organization
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Organization Admin Credentials Dialog */}
+      <Dialog open={showOrgCredentialsDialog} onOpenChange={setShowOrgCredentialsDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-serif">Admin Credentials</DialogTitle>
+            <DialogDescription>
+              Share these credentials with the organization admin. They will be required to change their password on first login.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Email</Label>
+              <div className="flex gap-2">
+                <Input value={orgCredentials?.email || ''} readOnly className="bg-[hsl(210,20%,94%)]" />
+                <Button variant="outline" size="icon" onClick={() => copyToClipboard(orgCredentials?.email || '')}>
+                  <Copy className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Temporary Password</Label>
+              <div className="flex gap-2">
+                <Input value={orgCredentials?.password || ''} readOnly className="bg-[hsl(210,20%,94%)] font-mono" />
+                <Button variant="outline" size="icon" onClick={() => copyToClipboard(orgCredentials?.password || '')}>
+                  <Copy className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => { setShowOrgCredentialsDialog(false); setOrgCredentials(null); }}>
+              Done
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
