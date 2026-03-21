@@ -11,6 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAgencyMode } from '@/hooks/useAgencyMode';
+import { useIndustry } from '@/contexts/IndustryContext';
+import { resolveIcon } from '@/lib/iconResolver';
 import type { InstitutionalConfig, InstitutionType } from '@/types/campusvoice';
 import {
   Building2,
