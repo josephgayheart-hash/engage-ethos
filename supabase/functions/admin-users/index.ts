@@ -668,7 +668,7 @@ serve(async (req) => {
       }
 
       case "approve_onboarding": {
-        const { requestId, password, tenantId: targetTenantId, createNewTenant: shouldCreateTenant, newTenantName, role: assignedRole } = body;
+        const { requestId, password, tenantId: targetTenantId, createNewTenant: shouldCreateTenant, newTenantName, newTenantType, role: assignedRole } = body;
 
         let effectiveApprovalTenantId = isSuperAdmin ? targetTenantId : adminTenantId;
         
