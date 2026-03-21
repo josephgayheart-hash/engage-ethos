@@ -137,6 +137,16 @@ const allConfigFields = [
   'brandVoiceSamples', 'voiceAnalysis'
 ];
 
+const TENANT_TYPE_OPTIONS = [
+  { value: 'university', label: 'University' },
+  { value: 'agency', label: 'Agency' },
+  { value: 'enterprise', label: 'Enterprise' },
+  { value: 'franchise', label: 'Franchise' },
+  { value: 'nonprofit', label: 'Nonprofit' },
+  { value: 'healthcare', label: 'Healthcare' },
+  { value: 'financial', label: 'Financial' },
+];
+
 export default function InstitutionDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -150,6 +160,23 @@ export default function InstitutionDetailPage() {
   const [institutionalProfiles, setInstitutionalProfiles] = useState<InstitutionalProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [isEditingType, setIsEditingType] = useState(false);
+  const [editingTenantType, setEditingTenantType] = useState<string>('university');
+
+  const handleSaveTenantType = async () => {
+    if (!tenant) return;
+    const { error } = await supabase
+      .from('tenants')
+      .update({ tenant_type: editingTenantType })
+      .eq('id', tenant.id);
+    if (error) {
+      toast({ title: 'Failed to update organization type', variant: 'destructive' });
+    } else {
+      setTenant({ ...tenant, tenant_type: editingTenantType });
+      toast({ title: 'Organization type updated' });
+    }
+    setIsEditingType(false);
+  };
 
   const fetchData = async () => {
     if (!id) return;
