@@ -51,6 +51,9 @@ const iconMap: Record<string, LucideIcon> = {
   'piggy-bank': PiggyBank,
   'shield': Shield,
   'award': Award,
+  'megaphone': Megaphone,
+  'file-text': FileText,
+  'user-plus': UserPlus,
 };
 
 /**
