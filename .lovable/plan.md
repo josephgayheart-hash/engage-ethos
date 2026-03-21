@@ -1,7 +1,7 @@
 
-# Industry Verticalization — Session Progress
+# Industry Verticalization — Complete
 
-## Completed Sessions
+## All Sessions Complete
 
 ### Session 1-2: Core Infrastructure
 - Expanded `tenant_type` enum, created 6 industry vocabulary configs
@@ -26,12 +26,19 @@
 
 ### Session 5: Playbook Kits, parse-story, QuickAddTerms
 - Seeded 12 industry-specific playbook kits (Enterprise: 3, Nonprofit: 3, Healthcare: 2, Financial: 2, Franchise: 2)
-- Made `parse-story` edge function industry-aware (accepts `industryContext`, `contentStyle`, `storyTypes`)
-- Updated `useStoryBank.ts` to pass industry params to both `parseStoryFromText` and `scrapeAndParseStory`
-- QuickAddTerms: No change needed — Terms tab already hidden for non-higher-ed via `relevantConfigFields`
+- Made `parse-story` edge function industry-aware
+- Updated `useStoryBank.ts` to pass industry params to parse-story calls
 
-## Remaining Items (Future Sessions)
-- Landing page / marketing page industry adaptation
-- CRM page is super-admin internal tooling (not user-facing industry adaptation) — low priority
-- Playbook Kit filtering by tenant_type in `usePlaybookKits` hook (currently filters by institution_type from profile)
-- Industry-specific seed data for fact book categories
+### Session 5b: Playbook Kit Filtering, Landing Page, Fact Book Categories
+- `usePlaybookKits` now filters by `tenantType` from `useIndustry()`
+- Landing page: broadened hero rotation ("Audience Growth" not "Enrollment Growth", "Brand Teams" not "Educators"), updated SEO meta/schema, renamed "University Library" → "Content Library"
+- Fact Book: created 7 industry-specific category sets (higher-ed, enterprise, nonprofit, healthcare, financial, franchise) with `getFactCategoriesForTenant()` utility
+- FactBookTab dynamically resolves categories based on active tenant type
+
+## How to Add a New Industry
+1. Add type to `TenantType` union in `src/types/industry.ts`
+2. Create vocabulary file in `src/config/industry-vocabularies/`
+3. Register in `src/config/industry-vocabularies/index.ts`
+4. Add fact categories in `src/hooks/useFactBook.ts` `CATEGORY_REGISTRY`
+5. Run DB migration: `ALTER TYPE public.tenant_type ADD VALUE 'new-type';`
+6. Optionally seed playbook kits for the new industry
