@@ -281,7 +281,13 @@ export function useStoryBank(options: UseStoryBankOptions = {}) {
     setIsParsing(true);
     try {
       const { data, error } = await supabase.functions.invoke('parse-story', {
-        body: { text, sourceUrl },
+        body: { 
+          text, 
+          sourceUrl,
+          industryContext: labels.industryContext,
+          contentStyle: labels.contentStyle,
+          storyTypes: storyTypes.map(st => st.id),
+        },
       });
       
       if (error) throw error;
