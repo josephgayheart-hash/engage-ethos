@@ -4,6 +4,7 @@ import { InstitutionalConfig } from "@/components/InstitutionalConfig";
 import { ProfileSetupWizard } from "@/components/ProfileSetupWizard";
 import { SubUnitSetupWizard } from "@/components/SubUnitSetupWizard";
 import { useInstitutionalProfiles, type InstitutionalProfile, type ProfileType } from "@/hooks/useInstitutionalProfiles";
+import { useIndustry } from "@/contexts/IndustryContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAgencyMode } from "@/hooks/useAgencyMode";
 import { supabase } from "@/integrations/supabase/client";
@@ -73,7 +74,8 @@ const PROFILE_TYPE_ICONS: Record<ProfileType, React.ReactNode> = {
   department: <Briefcase className="w-4 h-4" />,
 };
 
-const PROFILE_TYPE_LABELS: Record<ProfileType, string> = {
+// Dynamic profile type labels from industry vocabulary — fallback for unknown types
+const DEFAULT_PROFILE_TYPE_LABELS: Record<string, string> = {
   university: 'University',
   college: 'College',
   division: 'Division',
@@ -89,6 +91,14 @@ export default function UniversitySettingsPage() {
   const [searchParams] = useSearchParams();
   const { tenant, refreshProfile, isAdmin, isSuperAdmin } = useAuth();
   const { isAgency, labels } = useAgencyMode();
+  const { labels: industryLabels } = useIndustry();
+  const PROFILE_TYPE_LABELS: Record<string, string> = {
+    university: industryLabels.organization,
+    college: industryLabels.subUnit,
+    division: 'Division',
+    unit: 'Unit',
+    department: 'Department',
+  };
   const { profiles, createProfile, updateProfile, deleteProfile, duplicateProfile, getChildProfiles, getRootProfiles, getParentProfile, refreshProfiles } = useInstitutionalProfiles();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -479,7 +489,7 @@ export default function UniversitySettingsPage() {
         <div className="container mx-auto px-4 py-16 text-center">
           <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
-          <p className="text-muted-foreground">You need admin privileges to access University Settings.</p>
+          <p className="text-muted-foreground">You need admin privileges to access {industryLabels.organizationSettings}.</p>
         </div>
       </div>
     );
@@ -537,7 +547,7 @@ export default function UniversitySettingsPage() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h1 className="font-serif text-2xl md:text-3xl font-bold">
-                      {tenant?.institution_name || (isAgency ? 'Agency Settings' : 'University Settings')}
+                      {tenant?.institution_name || (isAgency ? 'Agency Settings' : industryLabels.organizationSettings)}
                     </h1>
                     {isAgency && (
                       <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400">

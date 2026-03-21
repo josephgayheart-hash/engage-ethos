@@ -11,6 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAgencyMode } from '@/hooks/useAgencyMode';
+import { useIndustry } from '@/contexts/IndustryContext';
+import { resolveIcon } from '@/lib/iconResolver';
 import type { InstitutionalConfig, InstitutionType } from '@/types/campusvoice';
 import {
   Building2,
@@ -59,8 +61,8 @@ const STEPS: WizardStep[] = [
     id: 'quickstart',
     title: 'Quick Start',
     agencyTitle: 'Quick Start',
-    description: 'Enter a .edu domain to auto-fill your profile',
-    agencyDescription: 'Enter the client\'s .edu domain to auto-fill',
+    description: 'Enter a website domain to auto-fill your profile',
+    agencyDescription: "Enter the client's website domain to auto-fill",
     icon: <Search className="w-5 h-5" />,
   },
   {
@@ -120,6 +122,7 @@ const STEPS: WizardStep[] = [
 export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: ProfileSetupWizardProps) {
   const { tenant } = useAuth();
   const { isAgency, labels } = useAgencyMode();
+  const { vocabulary, isHigherEd, labels: industryLabels } = useIndustry();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -348,62 +351,12 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
 
   const progress = ((currentStep + 1) / STEPS.length) * 100;
 
-  const institutionTypeOptions: { value: InstitutionType; label: string; description: string; icon: React.ReactNode }[] = [
-    {
-      value: 'doctoral-university',
-      label: 'Doctoral University',
-      description: 'R1 & R2 research universities with high or very high research activity',
-      icon: <GraduationCap className="w-6 h-6" />,
-    },
-    {
-      value: 'masters-university',
-      label: "Master's College or University",
-      description: "Institutions awarding at least 50 master's degrees annually across programs",
-      icon: <BookOpen className="w-6 h-6" />,
-    },
-    {
-      value: 'baccalaureate-college',
-      label: 'Baccalaureate College',
-      description: "Liberal arts colleges and institutions where bachelor's degrees represent the majority of conferrals",
-      icon: <Building2 className="w-6 h-6" />,
-    },
-    {
-      value: 'associates-college',
-      label: "Associate's College",
-      description: 'Community colleges, technical colleges, and two-year institutions',
-      icon: <Users className="w-6 h-6" />,
-    },
-    {
-      value: 'special-focus',
-      label: 'Special Focus Institution',
-      description: 'Professional schools, theological seminaries, medical schools, art & design schools',
-      icon: <Briefcase className="w-6 h-6" />,
-    },
-    {
-      value: 'nonprofit-organization',
-      label: 'Nonprofit Organization',
-      description: 'Foundations, 501(c)(3) nonprofits, NGOs, and mission-driven organizations',
-      icon: <Heart className="w-6 h-6" />,
-    },
-    {
-      value: 'k12-school-district',
-      label: 'K–12 School or District',
-      description: 'Public or private K–12 schools, school districts, and charter networks',
-      icon: <School className="w-6 h-6" />,
-    },
-    {
-      value: 'government-agency',
-      label: 'Government Agency',
-      description: 'Municipal, state, federal, or tribal government bodies and public agencies',
-      icon: <Landmark className="w-6 h-6" />,
-    },
-    {
-      value: 'private-enterprise',
-      label: 'Private Enterprise',
-      description: 'Corporations, startups, consultancies, and for-profit businesses',
-      icon: <Building2 className="w-6 h-6" />,
-    },
-  ];
+  const institutionTypeOptions = vocabulary.classificationOptions.map(opt => ({
+    value: opt.value as InstitutionType,
+    label: opt.label,
+    description: opt.description,
+    icon: (() => { const Icon = resolveIcon(opt.value); return <Icon className="w-6 h-6" />; })(),
+  }));
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -451,7 +404,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Works best with .edu domains, but any university website works.
+                  {isHigherEd ? 'Works best with .edu domains, but any website works.' : 'Enter your organization\'s website domain.'}
                 </p>
               </div>
 

@@ -89,6 +89,7 @@ export interface IndustryDepartment {
   id: string;
   label: string;
   description: string;
+  icon?: string;               // lucide icon name
 }
 
 export interface IndustryStoryType {

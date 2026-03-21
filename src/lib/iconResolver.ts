@@ -23,6 +23,9 @@ import {
   PiggyBank,
   Shield,
   Award,
+  Megaphone,
+  FileText,
+  UserPlus,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -48,6 +51,9 @@ const iconMap: Record<string, LucideIcon> = {
   'piggy-bank': PiggyBank,
   'shield': Shield,
   'award': Award,
+  'megaphone': Megaphone,
+  'file-text': FileText,
+  'user-plus': UserPlus,
 };
 
 /**

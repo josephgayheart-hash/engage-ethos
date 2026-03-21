@@ -4,17 +4,8 @@ export type OperationMode =
   | 'mapper' 
   | 'customization';
 
-export type Department = 
-  | 'central-marketing'
-  | 'executive-comms'
-  | 'enrollment-management'
-  | 'registrar'
-  | 'college-communications'
-  | 'student-success'
-  | 'recruitment'
-  | 'health-wellbeing'
-  | 'advancement-alumni'
-  | 'human-resources';
+/** Department is now a dynamic string resolved from industry vocabulary */
+export type Department = string;
 
 export interface DepartmentInfo {
   id: Department;
@@ -515,24 +506,8 @@ export interface MapperResult {
 
 export type ProfileType = 'university' | 'college' | 'division' | 'unit' | 'department';
 
-// Institution classification based on Carnegie Classifications + extended org types
-export type InstitutionType = 
-  | 'doctoral-university'
-  | 'masters-university'
-  | 'baccalaureate-college'
-  | 'associates-college'
-  | 'special-focus'
-  // Non-higher-ed organization types
-  | 'nonprofit-organization'
-  | 'k12-school-district'
-  | 'government-agency'
-  | 'private-enterprise'
-  // Legacy values kept for backward compatibility
-  | 'four-year-university'
-  | 'community-college'
-  | 'technical-college'
-  | 'graduate-school'
-  | 'professional-school';
+/** Institution type is now a dynamic string resolved from industry vocabulary classificationOptions */
+export type InstitutionType = string;
 
 export interface InstitutionalConfig {
   // Institution Classification

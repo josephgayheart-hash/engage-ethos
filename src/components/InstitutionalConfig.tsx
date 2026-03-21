@@ -50,6 +50,7 @@ import {
 } from "lucide-react";
 import type { InstitutionalConfig as InstitutionalConfigType, VoiceAnalysis } from "@/types/campusvoice";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIndustry } from "@/contexts/IndustryContext";
 
 interface InstitutionalConfigProps {
   config: InstitutionalConfigType;
@@ -60,6 +61,8 @@ interface InstitutionalConfigProps {
 export function InstitutionalConfig({ config, onChange, profileId }: InstitutionalConfigProps) {
   const { toast } = useToast();
   const { tenant } = useAuth();
+  const { vocabulary } = useIndustry();
+  const relevantFields = new Set(vocabulary.relevantConfigFields);
   const { analysis, samples, isLoading: isContentDNALoading } = useContentDNA({ profileId });
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
@@ -335,13 +338,23 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
   return (
     <div className="space-y-6">
       <Tabs defaultValue="identity" className="w-full">
-        <TabsList className="grid grid-cols-4 md:grid-cols-8 w-full mb-6">
+        <TabsList className={`grid w-full mb-6 ${
+          !relevantFields.has('academicTerms') && !relevantFields.has('campusTerms') 
+            ? 'grid-cols-3 md:grid-cols-6' 
+            : !relevantFields.has('academicTerms') || !relevantFields.has('campusTerms')
+              ? 'grid-cols-4 md:grid-cols-7'
+              : 'grid-cols-4 md:grid-cols-8'
+        }`}>
           <TabsTrigger value="identity" className="text-xs">Identity</TabsTrigger>
           <TabsTrigger value="systems" className="text-xs">Systems</TabsTrigger>
-          <TabsTrigger value="locations" className="text-xs">Locations</TabsTrigger>
+          {relevantFields.has('campusTerms') && (
+            <TabsTrigger value="locations" className="text-xs">Locations</TabsTrigger>
+          )}
           <TabsTrigger value="people" className="text-xs">People</TabsTrigger>
           <TabsTrigger value="ctas" className="text-xs">CTAs</TabsTrigger>
-          <TabsTrigger value="terms" className="text-xs">Terms</TabsTrigger>
+          {relevantFields.has('academicTerms') && (
+            <TabsTrigger value="terms" className="text-xs">Terms</TabsTrigger>
+          )}
           <TabsTrigger value="style" className="text-xs">Style</TabsTrigger>
           <TabsTrigger value="voice" className="text-xs flex items-center gap-1">
             <Sparkles className="w-3 h-3" />

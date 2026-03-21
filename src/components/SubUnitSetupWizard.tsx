@@ -15,6 +15,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIndustry } from '@/contexts/IndustryContext';
 import type { InstitutionalConfig, ProfileType } from '@/types/campusvoice';
 import type { InstitutionalProfile } from '@/hooks/useInstitutionalProfiles';
 import {
@@ -49,13 +50,7 @@ interface WizardStep {
   icon: React.ReactNode;
 }
 
-const UNIT_TYPE_LABELS: Record<ProfileType, { label: string; icon: React.ReactNode; description: string }> = {
-  university: { label: 'University', icon: <Building2 className="w-4 h-4" />, description: 'Top-level institution' },
-  college: { label: 'College', icon: <GraduationCap className="w-4 h-4" />, description: 'e.g., College of Arts & Sciences, School of Business' },
-  division: { label: 'Division', icon: <Layers className="w-4 h-4" />, description: 'e.g., Division of Student Life, Academic Affairs' },
-  unit: { label: 'Unit/Center', icon: <Building className="w-4 h-4" />, description: 'e.g., Griffin Career Center, Academic Success Center' },
-  department: { label: 'Department', icon: <Briefcase className="w-4 h-4" />, description: 'e.g., Department of Biology, Communications Office' },
-};
+// Will be built dynamically from industry vocabulary in the component
 
 const STEPS: WizardStep[] = [
   {
@@ -92,8 +87,17 @@ const STEPS: WizardStep[] = [
 
 export function SubUnitSetupWizard({ parentProfile, onComplete, onCancel }: SubUnitSetupWizardProps) {
   const { tenant } = useAuth();
+  const { labels: industryLabels } = useIndustry();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const UNIT_TYPE_LABELS: Record<string, { label: string; icon: React.ReactNode; description: string }> = {
+    university: { label: industryLabels.organization, icon: <Building2 className="w-4 h-4" />, description: `Top-level ${industryLabels.organization.toLowerCase()}` },
+    college: { label: industryLabels.subUnit, icon: <GraduationCap className="w-4 h-4" />, description: `e.g., ${industryLabels.subUnit}` },
+    division: { label: 'Division', icon: <Layers className="w-4 h-4" />, description: 'Organizational division' },
+    unit: { label: 'Unit/Center', icon: <Building className="w-4 h-4" />, description: 'Support center or unit' },
+    department: { label: 'Department', icon: <Briefcase className="w-4 h-4" />, description: 'Department or office' },
+  };
   
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
