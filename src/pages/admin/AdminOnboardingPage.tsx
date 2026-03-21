@@ -83,6 +83,7 @@ export default function AdminOnboardingPage() {
   const [selectedTenantId, setSelectedTenantId] = useState<string>('');
   const [createNewTenant, setCreateNewTenant] = useState(false);
   const [newTenantName, setNewTenantName] = useState('');
+  const [newTenantType, setNewTenantType] = useState<string>('university');
   const [selectedRole, setSelectedRole] = useState<string>('user');
   const [showApproveDialog, setShowApproveDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
