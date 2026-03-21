@@ -61,8 +61,8 @@ const STEPS: WizardStep[] = [
     id: 'quickstart',
     title: 'Quick Start',
     agencyTitle: 'Quick Start',
-    description: 'Enter a .edu domain to auto-fill your profile',
-    agencyDescription: 'Enter the client\'s .edu domain to auto-fill',
+    description: 'Enter a website domain to auto-fill your profile',
+    agencyDescription: "Enter the client's website domain to auto-fill",
     icon: <Search className="w-5 h-5" />,
   },
   {
