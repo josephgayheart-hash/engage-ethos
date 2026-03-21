@@ -61,6 +61,8 @@ interface InstitutionalConfigProps {
 export function InstitutionalConfig({ config, onChange, profileId }: InstitutionalConfigProps) {
   const { toast } = useToast();
   const { tenant } = useAuth();
+  const { vocabulary } = useIndustry();
+  const relevantFields = new Set(vocabulary.relevantConfigFields);
   const { analysis, samples, isLoading: isContentDNALoading } = useContentDNA({ profileId });
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
