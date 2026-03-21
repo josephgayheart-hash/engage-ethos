@@ -73,7 +73,8 @@ const PROFILE_TYPE_ICONS: Record<ProfileType, React.ReactNode> = {
   department: <Briefcase className="w-4 h-4" />,
 };
 
-const PROFILE_TYPE_LABELS: Record<ProfileType, string> = {
+// Dynamic profile type labels from industry vocabulary — fallback for unknown types
+const DEFAULT_PROFILE_TYPE_LABELS: Record<string, string> = {
   university: 'University',
   college: 'College',
   division: 'Division',
