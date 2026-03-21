@@ -291,6 +291,7 @@ export default function AdminUsersPage() {
         department: '',
         title: '',
         role: 'user',
+        institutionalProfileId: '',
       });
       setSendInviteEmail(true);
 
