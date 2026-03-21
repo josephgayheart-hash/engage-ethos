@@ -50,13 +50,7 @@ interface WizardStep {
   icon: React.ReactNode;
 }
 
-const UNIT_TYPE_LABELS: Record<ProfileType, { label: string; icon: React.ReactNode; description: string }> = {
-  university: { label: 'University', icon: <Building2 className="w-4 h-4" />, description: 'Top-level institution' },
-  college: { label: 'College', icon: <GraduationCap className="w-4 h-4" />, description: 'e.g., College of Arts & Sciences, School of Business' },
-  division: { label: 'Division', icon: <Layers className="w-4 h-4" />, description: 'e.g., Division of Student Life, Academic Affairs' },
-  unit: { label: 'Unit/Center', icon: <Building className="w-4 h-4" />, description: 'e.g., Griffin Career Center, Academic Success Center' },
-  department: { label: 'Department', icon: <Briefcase className="w-4 h-4" />, description: 'e.g., Department of Biology, Communications Office' },
-};
+// Will be built dynamically from industry vocabulary in the component
 
 const STEPS: WizardStep[] = [
   {

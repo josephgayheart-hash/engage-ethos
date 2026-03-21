@@ -404,7 +404,7 @@ export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: P
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Works best with .edu domains, but any university website works.
+                  {isHigherEd ? 'Works best with .edu domains, but any website works.' : 'Enter your organization\'s website domain.'}
                 </p>
               </div>
 
