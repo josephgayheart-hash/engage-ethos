@@ -247,11 +247,11 @@ export function ContextSelector({ context, onChange, mode = 'evaluator', selecte
               className={`grid grid-cols-1 ${
                 showExtendedOptions
                   ? shouldShowModelSelector
-                    ? 'md:grid-cols-2 lg:grid-cols-5'
-                    : 'md:grid-cols-2 lg:grid-cols-4'
+                    ? 'md:grid-cols-2 lg:grid-cols-6'
+                    : 'md:grid-cols-2 lg:grid-cols-5'
                   : shouldShowModelSelector
-                    ? 'md:grid-cols-2'
-                    : ''
+                    ? 'md:grid-cols-2 lg:grid-cols-3'
+                    : 'md:grid-cols-2'
               } gap-4 p-4 border border-border rounded-lg bg-muted/30`}
             >
               {/* AI Model Selector */}
