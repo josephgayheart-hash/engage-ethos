@@ -7,7 +7,8 @@ export function usePlaybookKits(institutionType?: string) {
   const [kits, setKits] = useState<PlaybookKit[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const { tenantType } = useIndustry();
+  const { vocabulary } = useIndustry();
+  const tenantType = vocabulary.tenantType;
 
   useEffect(() => {
     const fetchKits = async () => {
