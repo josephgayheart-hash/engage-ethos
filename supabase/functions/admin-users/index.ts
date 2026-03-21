@@ -668,7 +668,7 @@ serve(async (req) => {
       }
 
       case "approve_onboarding": {
-        const { requestId, password, tenantId: targetTenantId, createNewTenant: shouldCreateTenant, newTenantName, role: assignedRole } = body;
+        const { requestId, password, tenantId: targetTenantId, createNewTenant: shouldCreateTenant, newTenantName, newTenantType, role: assignedRole } = body;
 
         let effectiveApprovalTenantId = isSuperAdmin ? targetTenantId : adminTenantId;
         
@@ -676,7 +676,7 @@ serve(async (req) => {
         if (shouldCreateTenant && newTenantName) {
           const { data: newTenant, error: tenantError } = await adminClient
             .from("tenants")
-            .insert({ institution_name: newTenantName })
+            .insert({ institution_name: newTenantName, tenant_type: newTenantType || 'university' })
             .select()
             .single();
 

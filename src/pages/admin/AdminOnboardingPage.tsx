@@ -83,6 +83,7 @@ export default function AdminOnboardingPage() {
   const [selectedTenantId, setSelectedTenantId] = useState<string>('');
   const [createNewTenant, setCreateNewTenant] = useState(false);
   const [newTenantName, setNewTenantName] = useState('');
+  const [newTenantType, setNewTenantType] = useState<string>('university');
   const [selectedRole, setSelectedRole] = useState<string>('user');
   const [showApproveDialog, setShowApproveDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
@@ -191,6 +192,7 @@ export default function AdminOnboardingPage() {
           tenantId: createNewTenant ? null : selectedTenantId,
           createNewTenant: createNewTenant,
           newTenantName: createNewTenant ? newTenantName.trim() : null,
+          newTenantType: createNewTenant ? newTenantType : undefined,
           role: selectedRole,
         },
       });
@@ -233,6 +235,7 @@ export default function AdminOnboardingPage() {
       setSelectedTenantId('');
       setCreateNewTenant(false);
       setNewTenantName('');
+      setNewTenantType('university');
       setSelectedRole('user');
     }
   };
@@ -632,13 +635,29 @@ export default function AdminOnboardingPage() {
                   <span className="text-sm">Create new institution</span>
                 </label>
                 {createNewTenant && (
-                  <input
-                    type="text"
-                    value={newTenantName}
-                    onChange={(e) => setNewTenantName(e.target.value)}
-                    placeholder="Enter institution name..."
-                    className="w-full px-3 py-2 border border-[hsl(220,13%,88%)] rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(222,47%,31%)]"
-                  />
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      value={newTenantName}
+                      onChange={(e) => setNewTenantName(e.target.value)}
+                      placeholder="Enter institution name..."
+                      className="w-full px-3 py-2 border border-[hsl(220,13%,88%)] rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(222,47%,31%)]"
+                    />
+                    <label className="text-sm font-medium">Organization Type</label>
+                    <select
+                      value={newTenantType}
+                      onChange={(e) => setNewTenantType(e.target.value)}
+                      className="w-full px-3 py-2 border border-[hsl(220,13%,88%)] rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(222,47%,31%)]"
+                    >
+                      <option value="university">University</option>
+                      <option value="agency">Agency</option>
+                      <option value="enterprise">Enterprise</option>
+                      <option value="franchise">Franchise</option>
+                      <option value="nonprofit">Nonprofit</option>
+                      <option value="healthcare">Healthcare</option>
+                      <option value="financial">Financial</option>
+                    </select>
+                  </div>
                 )}
               </div>
             </div>
@@ -650,8 +669,8 @@ export default function AdminOnboardingPage() {
                 onChange={(e) => setSelectedRole(e.target.value)}
                 className="w-full px-3 py-2 border border-[hsl(220,13%,88%)] rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(222,47%,31%)]"
               >
-                <option value="user">University User</option>
-                <option value="user_approver">University User + Approver</option>
+                <option value="user">Standard User</option>
+                <option value="user_approver">Standard User + Approver</option>
                 <option value="super_admin">CampusVoice.ai Super Admin</option>
               </select>
               <p className="text-xs text-[hsl(220,14%,46%)]">

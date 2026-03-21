@@ -1097,18 +1097,13 @@ export default function UserDetailPage() {
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="agency">
-                                      <span className="flex items-center gap-2">
-                                        <Briefcase className="w-3 h-3 text-purple-500" />
-                                        Agency
-                                      </span>
-                                    </SelectItem>
-                                    <SelectItem value="university">
-                                      <span className="flex items-center gap-2">
-                                        <GraduationCap className="w-3 h-3" />
-                                        University
-                                      </span>
-                                    </SelectItem>
+                                    <SelectItem value="university">University</SelectItem>
+                                    <SelectItem value="agency">Agency</SelectItem>
+                                    <SelectItem value="enterprise">Enterprise</SelectItem>
+                                    <SelectItem value="franchise">Franchise</SelectItem>
+                                    <SelectItem value="nonprofit">Nonprofit</SelectItem>
+                                    <SelectItem value="healthcare">Healthcare</SelectItem>
+                                    <SelectItem value="financial">Financial</SelectItem>
                                   </SelectContent>
                                 </Select>
                               </div>
