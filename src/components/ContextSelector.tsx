@@ -35,6 +35,23 @@ interface ContextSelectorProps {
   onModelChange?: (model: AIModel) => void;
 }
 
+const languageOptions = [
+  { value: 'en', label: 'English' },
+  { value: 'es', label: 'Spanish (Español)' },
+  { value: 'fr', label: 'French (Français)' },
+  { value: 'zh', label: 'Chinese (中文)' },
+  { value: 'ar', label: 'Arabic (العربية)' },
+  { value: 'pt', label: 'Portuguese (Português)' },
+  { value: 'de', label: 'German (Deutsch)' },
+  { value: 'ja', label: 'Japanese (日本語)' },
+  { value: 'ko', label: 'Korean (한국어)' },
+  { value: 'hi', label: 'Hindi (हिन्दी)' },
+  { value: 'vi', label: 'Vietnamese (Tiếng Việt)' },
+  { value: 'tl', label: 'Tagalog' },
+  { value: 'it', label: 'Italian (Italiano)' },
+  { value: 'ru', label: 'Russian (Русский)' },
+];
+
 // ============= CHANNEL & TONE OPTIONS (industry-neutral) =============
 const channelOptions: { value: Channel; label: string }[] = [
   { value: 'email', label: 'Email' },
