@@ -5,6 +5,7 @@ import { ProfileSetupWizard } from "@/components/ProfileSetupWizard";
 import { SubUnitSetupWizard } from "@/components/SubUnitSetupWizard";
 import { useInstitutionalProfiles, type InstitutionalProfile, type ProfileType } from "@/hooks/useInstitutionalProfiles";
 import { useIndustry } from "@/contexts/IndustryContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useAgencyMode } from "@/hooks/useAgencyMode";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
