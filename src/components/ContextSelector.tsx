@@ -224,14 +224,20 @@ export function ContextSelector({ context, onChange, mode = 'evaluator', selecte
                 </>
               ) : (
                 <>
-                  <ChevronDown className="w-4 h-4" />
-                  <span>Advanced Options</span>
-                  {shouldShowModelSelector && (
-                    <Badge variant="outline" className="text-[10px] h-5 px-1.5 gap-1 font-normal">
-                      <CurrentModelIcon className="w-3 h-3" />
-                      {currentModel.name}
-                    </Badge>
-                  )}
+                   <ChevronDown className="w-4 h-4" />
+                    <span>Advanced Options</span>
+                    {shouldShowModelSelector && (
+                      <Badge variant="outline" className="text-[10px] h-5 px-1.5 gap-1 font-normal">
+                        <CurrentModelIcon className="w-3 h-3" />
+                        {currentModel.name}
+                      </Badge>
+                    )}
+                    {context.outputLanguage && context.outputLanguage !== 'en' && (
+                      <Badge variant="outline" className="text-[10px] h-5 px-1.5 gap-1 font-normal">
+                        <Globe className="w-3 h-3" />
+                        {languageOptions.find(l => l.value === context.outputLanguage)?.label?.split(' ')[0] || context.outputLanguage}
+                      </Badge>
+                    )}
                 </>
               )}
             </Button>
