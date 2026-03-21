@@ -680,6 +680,16 @@ export default function AdminConsolePage() {
               <p className="text-[hsl(220,14%,46%)]">{adminDescription}</p>
             </div>
             <div className="flex items-center gap-2">
+              {isSuperAdmin && isPlatformOwner && (
+                <Button
+                  onClick={() => setShowCreateOrgDialog(true)}
+                  className="bg-[hsl(173,58%,39%)] hover:bg-[hsl(173,58%,34%)]"
+                  size="sm"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Organization
+                </Button>
+              )}
               <Badge variant="outline" className="flex items-center gap-1">
                 <Building2 className="w-3 h-3" />
                 {effectiveTenant?.institution_name || 'Loading...'}
