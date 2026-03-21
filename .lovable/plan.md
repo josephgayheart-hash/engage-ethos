@@ -1,80 +1,37 @@
 
+# Industry Verticalization — Session Progress
 
-# Session 3 Completion + Session 4: Settings Labels, Profile Wizard, Onboarding, Config Relevance
+## Completed Sessions
 
-## Session 3 Remaining (1 item)
-**UniversitySettingsPage.tsx** still has hardcoded "University Settings" in two places (lines 482, 540). Replace with dynamic label from `useIndustry()`.
+### Session 1-2: Core Infrastructure
+- Expanded `tenant_type` enum, created 6 industry vocabulary configs
+- Built `IndustryProvider` / `useIndustry()` context
+- Refactored `ContextSelector` and `SelectionSummary` to use dynamic vocabulary
+- Parameterized edge function prompts (`evaluate-message`, `generate-message`, `playground-chat`)
+- Updated `AppSidebar` labels
 
-## Session 4 Scope
+### Session 3: Story Bank, Build/Strategy/Evaluate Wiring, Admin Labels
+- Made Story Bank fully industry-aware (dynamic types, icons, filters)
+- Wired `industryContext`/`contentStyle` into BuildPage, StrategyPage, EvaluatePage, CallScriptPage, PlaygroundPage
+- Created shared `iconResolver.ts` utility
+- Updated admin page labels (ContentDNAPage photography label)
 
-### 1. ProfileSetupWizard industry adaptation
-`ProfileSetupWizard.tsx` has a hardcoded `institutionTypeOptions` array (lines 351-406) with Carnegie Classifications + a few non-higher-ed types. Replace with dynamic `classificationOptions` from `useIndustry().vocabulary.classificationOptions`. Each industry vocabulary already defines these (e.g., enterprise has "Global Enterprise", "Mid-Market"; healthcare has "Hospital System", "Physician Group").
+### Session 4: Settings, Onboarding, Config Relevance
+- Dynamic `PROFILE_TYPE_LABELS` and page titles in UniversitySettingsPage
+- ProfileSetupWizard uses dynamic `classificationOptions` from vocabulary
+- OnboardingPage uses `useIndustry().departments` instead of hardcoded list
+- SubUnitSetupWizard uses dynamic unit type labels
+- InstitutionalConfig hides irrelevant tabs via `relevantConfigFields`
+- Widened `InstitutionType` and `Department` types to `string`
 
-Also update hardcoded strings throughout the wizard:
-- "Enter a .edu domain" → generic "Enter your website domain"
-- "Institution Type" / "Institution Identity" → use `labels.organization` dynamically
-- Quick Start helper text references ".edu" — make conditional on `isHigherEd`
+### Session 5: Playbook Kits, parse-story, QuickAddTerms
+- Seeded 12 industry-specific playbook kits (Enterprise: 3, Nonprofit: 3, Healthcare: 2, Financial: 2, Franchise: 2)
+- Made `parse-story` edge function industry-aware (accepts `industryContext`, `contentStyle`, `storyTypes`)
+- Updated `useStoryBank.ts` to pass industry params to both `parseStoryFromText` and `scrapeAndParseStory`
+- QuickAddTerms: No change needed — Terms tab already hidden for non-higher-ed via `relevantConfigFields`
 
-### 2. OnboardingPage industry adaptation
-`OnboardingPage.tsx` has a fully hardcoded higher-ed department list (lines 23-104) with types like "Enrollment Management", "Registrar", "Student Success". Replace with `useIndustry().departments` which each industry vocabulary already defines.
-
-Also update:
-- Department icon mapping → use `resolveIcon()` utility
-- "Welcome to CampusVoice" header → keep brand name but adjust subtitle
-- Audience/moment badges in the selected department card → use dynamic vocabulary IDs
-
-### 3. SubUnitSetupWizard industry adaptation
-`SubUnitSetupWizard.tsx` has hardcoded `SUB_UNIT_TYPES` (line 52-58) with "College", "Division", "Unit", "Department". Replace labels with industry-appropriate terms using `useIndustry().labels.subUnit` and vocabulary data.
-
-### 4. InstitutionalConfig field relevance filtering
-`InstitutionalConfig.tsx` renders all config tabs (Identity, Systems, Locations, People, CTAs, Terms, Style, Content DNA) regardless of industry. Each vocabulary defines `relevantConfigFields[]`. Use this to:
-- Hide irrelevant tabs entirely (e.g., "Terms" tab with academic calendar fields for enterprise)
-- Or show a reduced set of fields within tabs
-
-### 5. PROFILE_TYPE_LABELS in UniversitySettingsPage
-Lines 76-82 hardcode "University", "College", "Division", "Unit", "Department". Make dynamic based on industry vocabulary labels.
-
-## Technical Details
-
-**ProfileSetupWizard classification swap:**
-```typescript
-const { vocabulary } = useIndustry();
-const institutionTypeOptions = vocabulary.classificationOptions.map(opt => ({
-  value: opt.value as InstitutionType,
-  label: opt.label,
-  description: opt.description,
-  icon: resolveIcon(/* derive from value */),
-}));
-```
-
-**OnboardingPage department swap:**
-```typescript
-const { departments } = useIndustry();
-// departments already has { id, label, description }
-```
-
-**InstitutionalConfig relevance pattern:**
-```typescript
-const { vocabulary } = useIndustry();
-const relevant = new Set(vocabulary.relevantConfigFields);
-// Conditionally render fields: {relevant.has('mascot') && renderTextField(...)}
-```
-
-## Files Changed (~7 files)
-
-| File | Change |
-|------|--------|
-| `src/pages/UniversitySettingsPage.tsx` | Session 3 fix: dynamic labels + dynamic PROFILE_TYPE_LABELS |
-| `src/components/ProfileSetupWizard.tsx` | Dynamic classification options, industry-aware wizard text |
-| `src/pages/OnboardingPage.tsx` | Dynamic departments from `useIndustry()` |
-| `src/components/SubUnitSetupWizard.tsx` | Dynamic sub-unit type labels |
-| `src/components/InstitutionalConfig.tsx` | Field relevance filtering via `relevantConfigFields` |
-| `src/types/campusvoice.ts` | Widen `InstitutionType` to `string` for dynamic classification values |
-| `src/types/industry.ts` | Add `icon` field to department type if missing |
-
-## What This Does NOT Cover (Session 5+)
-- Playbook Kit industry-specific seeding and DB content
-- `parse-story` edge function industry-aware prompts
+## Remaining Items (Future Sessions)
 - Landing page / marketing page industry adaptation
-- CRM page terminology updates
-
+- CRM page is super-admin internal tooling (not user-facing industry adaptation) — low priority
+- Playbook Kit filtering by tenant_type in `usePlaybookKits` hook (currently filters by institution_type from profile)
+- Industry-specific seed data for fact book categories

@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useActiveWorkspaceId } from '@/contexts/WorkspaceContext';
 import { useToast } from '@/hooks/use-toast';
 import { logDNAActivity } from '@/hooks/useContentDNAActivity';
+import { useIndustry } from '@/contexts/IndustryContext';
 
 export interface Story {
   id: string;
@@ -60,6 +61,7 @@ export function useStoryBank(options: UseStoryBankOptions = {}) {
   const { tenant, user } = useAuth();
   const workspaceId = useActiveWorkspaceId();
   const { toast } = useToast();
+  const { labels, storyTypes } = useIndustry();
   
   const [stories, setStories] = useState<Story[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -279,7 +281,13 @@ export function useStoryBank(options: UseStoryBankOptions = {}) {
     setIsParsing(true);
     try {
       const { data, error } = await supabase.functions.invoke('parse-story', {
-        body: { text, sourceUrl },
+        body: { 
+          text, 
+          sourceUrl,
+          industryContext: labels.industryContext,
+          contentStyle: labels.contentStyle,
+          storyTypes: storyTypes.map(st => st.id),
+        },
       });
       
       if (error) throw error;
@@ -332,7 +340,10 @@ export function useStoryBank(options: UseStoryBankOptions = {}) {
         body: { 
           text: markdown, 
           sourceUrl: url,
-          sourceTitle: scrapeData.data?.metadata?.title || scrapeData.metadata?.title
+          sourceTitle: scrapeData.data?.metadata?.title || scrapeData.metadata?.title,
+          industryContext: labels.industryContext,
+          contentStyle: labels.contentStyle,
+          storyTypes: storyTypes.map(st => st.id),
         },
       });
       

@@ -8,7 +8,7 @@ serve(async (req) => {
   }
 
   try {
-    const { text, sourceUrl, sourceTitle } = await req.json();
+    const { text, sourceUrl, sourceTitle, industryContext, contentStyle, storyTypes } = await req.json();
 
     if (!text || typeof text !== 'string') {
       return new Response(
@@ -22,21 +22,30 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    const systemPrompt = `You are an expert at extracting structured story data from unstructured text about people in higher education contexts.
+    // Build industry-aware story type list
+    const defaultTypes = ['student', 'alumni', 'donor', 'faculty', 'staff', 'community'];
+    const validTypes: string[] = Array.isArray(storyTypes) && storyTypes.length > 0
+      ? storyTypes.map((t: any) => typeof t === 'string' ? t : t.id).filter(Boolean)
+      : defaultTypes;
 
-Given a story or profile about a person (student, alumni, donor, faculty, staff, or community member), extract the following information:
+    const industryLabel = industryContext || 'higher education';
+    const styleLabel = contentStyle || 'institutional communications';
+
+    const systemPrompt = `You are an expert at extracting structured story data from unstructured text in the context of ${industryLabel} ${styleLabel}.
+
+Given a story or profile about a person, extract the following information:
 
 1. **title**: A compelling title for the story (create one if not obvious)
-2. **story_type**: One of: student, alumni, donor, faculty, staff, community
+2. **story_type**: One of: ${validTypes.join(', ')}
 3. **narrative**: The main story content, cleaned up and formatted for readability
 4. **pull_quote**: A memorable, impactful quote from the story (if available, otherwise create one from the most compelling part)
 5. **subject_name**: The person's name
-6. **subject_role**: Their role/position (e.g., "Class of 2024", "CEO of TechCorp", "Professor of Biology")
-7. **themes**: Array of 2-5 relevant themes (e.g., first-generation, scholarship, research, career-success, community-service, leadership, innovation, mentorship)
+6. **subject_role**: Their role/position
+7. **themes**: Array of 2-5 relevant themes (e.g., leadership, innovation, impact, growth, community, mentorship, transformation)
 
 Return ONLY valid JSON with these exact fields. Do not include any other text or explanation.`;
 
-    console.log('Parsing story, text length:', text.length, 'sourceUrl:', sourceUrl || 'none');
+    console.log('Parsing story, text length:', text.length, 'sourceUrl:', sourceUrl || 'none', 'industry:', industryLabel);
 
     const response = await resilientFetch(
       'https://ai.gateway.lovable.dev/v1/chat/completions',
@@ -72,7 +81,6 @@ Return ONLY valid JSON with these exact fields. Do not include any other text or
     // Parse the JSON response
     let parsed;
     try {
-      // Try to extract JSON from the response (in case there's extra text)
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         parsed = JSON.parse(jsonMatch[0]);
@@ -89,10 +97,9 @@ Return ONLY valid JSON with these exact fields. Do not include any other text or
       throw new Error('Missing required fields in parsed story');
     }
 
-    // Normalize story_type
-    const validTypes = ['student', 'alumni', 'donor', 'faculty', 'staff', 'community'];
+    // Normalize story_type — fall back to last valid type if unrecognized
     if (!validTypes.includes(parsed.story_type)) {
-      parsed.story_type = 'community';
+      parsed.story_type = validTypes[validTypes.length - 1] || 'community';
     }
 
     // Ensure themes is an array
