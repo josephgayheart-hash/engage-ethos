@@ -80,6 +80,7 @@ const MAX_LOGO_SIZE = 2 * 1024 * 1024; // 2MB
 const MAX_LOGO_DIMENSION = 400; // Max width/height in pixels
 
 export default function AdminConsolePage() {
+  const navigate = useNavigate();
   const { tenant, profile, isSuperAdmin, refreshProfile } = useAuth();
   const { activeWorkspace, canSwitch, refreshWorkspaces } = useWorkspace();
   
