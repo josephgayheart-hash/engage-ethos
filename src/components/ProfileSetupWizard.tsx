@@ -122,6 +122,7 @@ const STEPS: WizardStep[] = [
 export function ProfileSetupWizard({ onComplete, onCancel, initialName = '' }: ProfileSetupWizardProps) {
   const { tenant } = useAuth();
   const { isAgency, labels } = useAgencyMode();
+  const { vocabulary, isHigherEd, labels: industryLabels } = useIndustry();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
