@@ -25,7 +25,8 @@ export async function evaluateMessage(
       institutionalConfig,
       model,
       industryContext,
-      contentStyle
+      contentStyle,
+      outputLanguage: context.outputLanguage
     }
   });
 
