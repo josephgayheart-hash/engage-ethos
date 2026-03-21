@@ -634,13 +634,29 @@ export default function AdminOnboardingPage() {
                   <span className="text-sm">Create new institution</span>
                 </label>
                 {createNewTenant && (
-                  <input
-                    type="text"
-                    value={newTenantName}
-                    onChange={(e) => setNewTenantName(e.target.value)}
-                    placeholder="Enter institution name..."
-                    className="w-full px-3 py-2 border border-[hsl(220,13%,88%)] rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(222,47%,31%)]"
-                  />
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      value={newTenantName}
+                      onChange={(e) => setNewTenantName(e.target.value)}
+                      placeholder="Enter institution name..."
+                      className="w-full px-3 py-2 border border-[hsl(220,13%,88%)] rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(222,47%,31%)]"
+                    />
+                    <label className="text-sm font-medium">Organization Type</label>
+                    <select
+                      value={newTenantType}
+                      onChange={(e) => setNewTenantType(e.target.value)}
+                      className="w-full px-3 py-2 border border-[hsl(220,13%,88%)] rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(222,47%,31%)]"
+                    >
+                      <option value="university">University</option>
+                      <option value="agency">Agency</option>
+                      <option value="enterprise">Enterprise</option>
+                      <option value="franchise">Franchise</option>
+                      <option value="nonprofit">Nonprofit</option>
+                      <option value="healthcare">Healthcare</option>
+                      <option value="financial">Financial</option>
+                    </select>
+                  </div>
                 )}
               </div>
             </div>
