@@ -1144,6 +1144,175 @@ serve(async (req) => {
         );
       }
 
+      case "create_tenant": {
+        if (!isSuperAdmin) {
+          return new Response(
+            JSON.stringify({ error: "Only Super Admins can create organizations" }),
+            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        const {
+          institutionName,
+          tenantType = "university",
+          industryVertical = null,
+          // Optional first admin user
+          adminEmail,
+          adminFirstName,
+          adminLastName,
+          adminPassword,
+          adminRole = "admin",
+          sendAdminInvite = false,
+        } = body;
+
+        if (!institutionName) {
+          return new Response(
+            JSON.stringify({ error: "Organization name is required" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Create the tenant
+        const { data: newTenant, error: tenantError } = await adminClient
+          .from("tenants")
+          .insert({
+            institution_name: institutionName,
+            tenant_type: tenantType,
+            industry_vertical: industryVertical,
+            status: "active",
+          })
+          .select()
+          .single();
+
+        if (tenantError) {
+          console.error("Tenant creation error:", tenantError);
+          return new Response(
+            JSON.stringify({ error: tenantError.message }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        console.log(`Created tenant ${newTenant.id} (${institutionName}) with type ${tenantType}`);
+
+        // Audit log
+        await adminClient.from("audit_log").insert({
+          tenant_id: newTenant.id,
+          actor_user_id: requestingUser.id,
+          action: "create_tenant",
+          target_type: "tenant",
+          target_id: newTenant.id,
+          metadata: { institutionName, tenantType, industryVertical },
+        });
+
+        // Optionally create the first admin user for this tenant
+        let adminUser = null;
+        let adminEmailSent = false;
+
+        if (adminEmail && adminFirstName && adminLastName && adminPassword) {
+          // Create auth user
+          const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
+            email: adminEmail,
+            password: adminPassword,
+            email_confirm: true,
+          });
+
+          if (authError) {
+            console.error("Admin user auth creation error:", authError);
+            // Don't fail the whole operation, tenant was still created
+            return new Response(
+              JSON.stringify({
+                success: true,
+                tenantId: newTenant.id,
+                adminError: authError.message,
+              }),
+              { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+
+          // Create profile
+          await adminClient.from("profiles").insert({
+            id: authData.user.id,
+            tenant_id: newTenant.id,
+            email: adminEmail,
+            first_name: adminFirstName,
+            last_name: adminLastName,
+            status: "invited",
+            password_reset_required: true,
+          });
+
+          // Create roles
+          const rolesToCreate = adminRole === "admin" ? ["user", "admin"] : [adminRole];
+          for (const r of rolesToCreate) {
+            await adminClient.from("user_roles").insert({
+              user_id: authData.user.id,
+              tenant_id: newTenant.id,
+              role: r,
+            });
+          }
+
+          // Send invite email if requested
+          if (sendAdminInvite) {
+            try {
+              const { data: inviterProfile } = await adminClient
+                .from("profiles")
+                .select("first_name, last_name")
+                .eq("id", requestingUser.id)
+                .single();
+
+              const inviterName = inviterProfile
+                ? `${inviterProfile.first_name} ${inviterProfile.last_name}`
+                : undefined;
+
+              const emailResponse = await fetch(`${supabaseUrl}/functions/v1/send-invite-email`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${supabaseServiceKey}`,
+                },
+                body: JSON.stringify({
+                  email: adminEmail,
+                  firstName: adminFirstName,
+                  lastName: adminLastName,
+                  temporaryPassword: adminPassword,
+                  institutionName,
+                  role: adminRole,
+                  inviterName,
+                }),
+              });
+
+              adminEmailSent = emailResponse.ok;
+            } catch (emailErr) {
+              console.error("Failed to send admin invite email:", emailErr);
+            }
+          }
+
+          adminUser = {
+            userId: authData.user.id,
+            email: adminEmail,
+            emailSent: adminEmailSent,
+          };
+
+          // Audit log for admin user creation
+          await adminClient.from("audit_log").insert({
+            tenant_id: newTenant.id,
+            actor_user_id: requestingUser.id,
+            action: "create_user",
+            target_type: "user",
+            target_id: authData.user.id,
+            metadata: { email: adminEmail, roles: rolesToCreate },
+          });
+        }
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            tenantId: newTenant.id,
+            adminUser,
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
       default:
         return new Response(
           JSON.stringify({ error: "Unknown action" }),
