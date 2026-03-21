@@ -29,22 +29,10 @@ export interface Fact {
   created_by_user_id: string | null;
 }
 
-export type FactCategory = 
-  | 'enrollment'
-  | 'research'
-  | 'rankings'
-  | 'affordability'
-  | 'outcomes'
-  | 'diversity'
-  | 'athletics'
-  | 'history'
-  | 'facilities'
-  | 'financials'
-  | 'faculty'
-  | 'academics'
-  | 'other';
+export type FactCategory = string;
 
-export const FACT_CATEGORIES: { value: FactCategory; label: string; icon: string }[] = [
+/** Higher-ed default categories */
+export const HIGHER_ED_FACT_CATEGORIES: { value: string; label: string; icon: string }[] = [
   { value: 'enrollment', label: 'Enrollment', icon: 'Users' },
   { value: 'research', label: 'Research', icon: 'FlaskConical' },
   { value: 'rankings', label: 'Rankings', icon: 'Award' },
@@ -58,6 +46,99 @@ export const FACT_CATEGORIES: { value: FactCategory; label: string; icon: string
   { value: 'faculty', label: 'Faculty', icon: 'GraduationCap' },
   { value: 'academics', label: 'Academics', icon: 'BookOpen' },
   { value: 'other', label: 'Other', icon: 'MoreHorizontal' },
+];
+
+/** Enterprise categories */
+export const ENTERPRISE_FACT_CATEGORIES: { value: string; label: string; icon: string }[] = [
+  { value: 'revenue', label: 'Revenue', icon: 'DollarSign' },
+  { value: 'customers', label: 'Customers', icon: 'Users' },
+  { value: 'market-share', label: 'Market Share', icon: 'TrendingUp' },
+  { value: 'employees', label: 'Employees', icon: 'Building2' },
+  { value: 'products', label: 'Products', icon: 'Award' },
+  { value: 'innovation', label: 'Innovation', icon: 'FlaskConical' },
+  { value: 'sustainability', label: 'Sustainability', icon: 'Heart' },
+  { value: 'history', label: 'History', icon: 'Clock' },
+  { value: 'locations', label: 'Locations', icon: 'Building2' },
+  { value: 'financials', label: 'Financials', icon: 'Wallet' },
+  { value: 'other', label: 'Other', icon: 'MoreHorizontal' },
+];
+
+/** Nonprofit categories */
+export const NONPROFIT_FACT_CATEGORIES: { value: string; label: string; icon: string }[] = [
+  { value: 'impact', label: 'Impact', icon: 'TrendingUp' },
+  { value: 'beneficiaries', label: 'Beneficiaries', icon: 'Users' },
+  { value: 'fundraising', label: 'Fundraising', icon: 'DollarSign' },
+  { value: 'volunteers', label: 'Volunteers', icon: 'Heart' },
+  { value: 'programs', label: 'Programs', icon: 'BookOpen' },
+  { value: 'partnerships', label: 'Partnerships', icon: 'Building2' },
+  { value: 'history', label: 'History', icon: 'Clock' },
+  { value: 'financials', label: 'Financials', icon: 'Wallet' },
+  { value: 'recognition', label: 'Recognition', icon: 'Award' },
+  { value: 'other', label: 'Other', icon: 'MoreHorizontal' },
+];
+
+/** Healthcare categories */
+export const HEALTHCARE_FACT_CATEGORIES: { value: string; label: string; icon: string }[] = [
+  { value: 'patients', label: 'Patients Served', icon: 'Users' },
+  { value: 'outcomes', label: 'Clinical Outcomes', icon: 'TrendingUp' },
+  { value: 'specialties', label: 'Specialties', icon: 'Award' },
+  { value: 'providers', label: 'Providers', icon: 'GraduationCap' },
+  { value: 'facilities', label: 'Facilities', icon: 'Building2' },
+  { value: 'research', label: 'Research', icon: 'FlaskConical' },
+  { value: 'accreditation', label: 'Accreditation', icon: 'Trophy' },
+  { value: 'history', label: 'History', icon: 'Clock' },
+  { value: 'financials', label: 'Financials', icon: 'Wallet' },
+  { value: 'other', label: 'Other', icon: 'MoreHorizontal' },
+];
+
+/** Financial categories */
+export const FINANCIAL_FACT_CATEGORIES: { value: string; label: string; icon: string }[] = [
+  { value: 'aum', label: 'Assets Under Management', icon: 'DollarSign' },
+  { value: 'clients', label: 'Clients', icon: 'Users' },
+  { value: 'performance', label: 'Performance', icon: 'TrendingUp' },
+  { value: 'advisors', label: 'Advisors', icon: 'GraduationCap' },
+  { value: 'products', label: 'Products & Services', icon: 'Award' },
+  { value: 'locations', label: 'Locations', icon: 'Building2' },
+  { value: 'compliance', label: 'Compliance', icon: 'Trophy' },
+  { value: 'history', label: 'History', icon: 'Clock' },
+  { value: 'financials', label: 'Financials', icon: 'Wallet' },
+  { value: 'other', label: 'Other', icon: 'MoreHorizontal' },
+];
+
+/** Franchise categories */
+export const FRANCHISE_FACT_CATEGORIES: { value: string; label: string; icon: string }[] = [
+  { value: 'locations', label: 'Locations', icon: 'Building2' },
+  { value: 'revenue', label: 'Revenue', icon: 'DollarSign' },
+  { value: 'customers', label: 'Customers', icon: 'Users' },
+  { value: 'franchisees', label: 'Franchisees', icon: 'Award' },
+  { value: 'growth', label: 'Growth', icon: 'TrendingUp' },
+  { value: 'satisfaction', label: 'Satisfaction', icon: 'Heart' },
+  { value: 'menu-products', label: 'Menu / Products', icon: 'BookOpen' },
+  { value: 'history', label: 'History', icon: 'Clock' },
+  { value: 'financials', label: 'Financials', icon: 'Wallet' },
+  { value: 'other', label: 'Other', icon: 'MoreHorizontal' },
+];
+
+import type { TenantType } from '@/types/industry';
+
+const CATEGORY_REGISTRY: Record<string, { value: string; label: string; icon: string }[]> = {
+  university: HIGHER_ED_FACT_CATEGORIES,
+  agency: HIGHER_ED_FACT_CATEGORIES,
+  enterprise: ENTERPRISE_FACT_CATEGORIES,
+  franchise: FRANCHISE_FACT_CATEGORIES,
+  nonprofit: NONPROFIT_FACT_CATEGORIES,
+  healthcare: HEALTHCARE_FACT_CATEGORIES,
+  financial: FINANCIAL_FACT_CATEGORIES,
+};
+
+/** Get fact categories for a tenant type. Falls back to higher-ed. */
+export function getFactCategoriesForTenant(tenantType?: TenantType | string | null): { value: string; label: string; icon: string }[] {
+  if (!tenantType) return HIGHER_ED_FACT_CATEGORIES;
+  return CATEGORY_REGISTRY[tenantType] ?? HIGHER_ED_FACT_CATEGORIES;
+}
+
+/** @deprecated Use getFactCategoriesForTenant() instead */
+export const FACT_CATEGORIES = HIGHER_ED_FACT_CATEGORIES;
 ];
 
 export interface CreateFactInput {

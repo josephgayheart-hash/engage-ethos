@@ -44,7 +44,7 @@ const landingPageSchemas = [
     '@type': 'WebSite',
     name: 'CampusVoice.AI',
     url: 'https://engage-ethos.lovable.app',
-    description: 'Strategic Messaging Intelligence for Higher Education',
+    description: 'Strategic Messaging Intelligence for Brand Teams',
     potentialAction: {
       '@type': 'SearchAction',
       target: 'https://engage-ethos.lovable.app/search?q={search_term_string}',
@@ -53,13 +53,13 @@ const landingPageSchemas = [
   },
   getSoftwareApplicationSchema(
     'CampusVoice.AI',
-    'AI-powered strategic messaging intelligence platform for higher education. Plan, strategize, and execute brand-aligned communications at scale.',
+    'AI-powered strategic messaging intelligence platform. Plan, strategize, and execute brand-aligned communications at scale for education, enterprise, nonprofit, and healthcare.',
     [
       'AI Message Builder',
       'Content DNA Studio',
       'Journey Flow Planner',
       'Message Evaluator',
-      'University Library'
+      'Content Library'
     ]
   )
 ];
