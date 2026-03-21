@@ -293,7 +293,29 @@ export function ContextSelector({ context, onChange, mode = 'evaluator', selecte
                 </div>
               )}
 
-              {showExtendedOptions && (
+              {/* Output Language Selector */}
+              <div className="space-y-2">
+                <Label htmlFor="output-language" className="flex items-center gap-2 text-sm font-medium">
+                  <Globe className="w-4 h-4 text-primary" />
+                  Output Language
+                </Label>
+                <Select
+                  value={context.outputLanguage || 'en'}
+                  onValueChange={(value) => onChange({ ...context, outputLanguage: value === 'en' ? undefined : value })}
+                >
+                  <SelectTrigger id="output-language" className="w-full bg-background">
+                    <SelectValue placeholder="English" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {languageOptions.map((lang) => (
+                      <SelectItem key={lang.value} value={lang.value}>
+                        {lang.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
                 <>
                   <div className="space-y-2">
                     <Label htmlFor="department" className="text-sm font-medium">
