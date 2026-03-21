@@ -335,7 +335,7 @@ serve(async (req) => {
     if (!rateLimit.allowed) {
       return rateLimitExceededResponse(rateLimit);
     }
-    const { message, context, mode, institutionalConfig, journeyWeeks, startDate, endDate, model: requestedModel, industryContext, contentStyle } = await req.json();
+    const { message, context, mode, institutionalConfig, journeyWeeks, startDate, endDate, model: requestedModel, industryContext, contentStyle, outputLanguage } = await req.json();
     
     // Validate and select model
     const ALLOWED_MODELS = [
