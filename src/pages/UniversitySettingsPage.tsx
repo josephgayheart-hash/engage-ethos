@@ -98,10 +98,6 @@ export default function UniversitySettingsPage() {
     division: 'Division',
     unit: 'Unit',
     department: 'Department',
-    ...Object.fromEntries([
-      ['university', industryLabels.organization],
-      ['college', industryLabels.subUnit],
-    ]),
   };
   const { profiles, createProfile, updateProfile, deleteProfile, duplicateProfile, getChildProfiles, getRootProfiles, getParentProfile, refreshProfiles } = useInstitutionalProfiles();
   const { toast } = useToast();
