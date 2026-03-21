@@ -340,7 +340,10 @@ export function useStoryBank(options: UseStoryBankOptions = {}) {
         body: { 
           text: markdown, 
           sourceUrl: url,
-          sourceTitle: scrapeData.data?.metadata?.title || scrapeData.metadata?.title
+          sourceTitle: scrapeData.data?.metadata?.title || scrapeData.metadata?.title,
+          industryContext: labels.industryContext,
+          contentStyle: labels.contentStyle,
+          storyTypes: storyTypes.map(st => st.id),
         },
       });
       
