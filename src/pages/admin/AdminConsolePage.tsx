@@ -139,6 +139,97 @@ export default function AdminConsolePage() {
   const [accentColorInput, setAccentColorInput] = useState('#2C7A7B');
   const [isSavingColors, setIsSavingColors] = useState(false);
 
+  // Create Organization dialog state
+  const [showCreateOrgDialog, setShowCreateOrgDialog] = useState(false);
+  const [isCreatingOrg, setIsCreatingOrg] = useState(false);
+  const [newOrg, setNewOrg] = useState({
+    name: '',
+    tenantType: 'university' as string,
+    createAdmin: false,
+    adminFirstName: '',
+    adminLastName: '',
+    adminEmail: '',
+    sendInvite: true,
+  });
+  const [orgCredentials, setOrgCredentials] = useState<{ email: string; password: string } | null>(null);
+  const [showOrgCredentialsDialog, setShowOrgCredentialsDialog] = useState(false);
+
+  const generatePassword = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    let password = '';
+    for (let i = 0; i < 12; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return password;
+  };
+
+  const handleCreateOrganization = async () => {
+    if (!newOrg.name.trim()) {
+      toast({ title: 'Validation Error', description: 'Organization name is required', variant: 'destructive' });
+      return;
+    }
+    if (newOrg.createAdmin && (!newOrg.adminFirstName || !newOrg.adminLastName || !newOrg.adminEmail)) {
+      toast({ title: 'Validation Error', description: 'Admin first name, last name, and email are required', variant: 'destructive' });
+      return;
+    }
+
+    setIsCreatingOrg(true);
+    const tempPassword = newOrg.createAdmin ? generatePassword() : '';
+
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-users', {
+        body: {
+          action: 'create_tenant',
+          institutionName: newOrg.name.trim(),
+          tenantType: newOrg.tenantType,
+          ...(newOrg.createAdmin ? {
+            adminEmail: newOrg.adminEmail,
+            adminFirstName: newOrg.adminFirstName,
+            adminLastName: newOrg.adminLastName,
+            adminPassword: tempPassword,
+            adminRole: 'admin',
+            sendAdminInvite: newOrg.sendInvite,
+          } : {}),
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setShowCreateOrgDialog(false);
+
+      if (newOrg.createAdmin && data?.adminUser) {
+        setOrgCredentials({ email: newOrg.adminEmail, password: tempPassword });
+        setShowOrgCredentialsDialog(true);
+      }
+
+      toast({
+        title: 'Organization Created',
+        description: `${newOrg.name} has been created as a ${newOrg.tenantType} organization.${data?.adminUser?.emailSent ? ' Invitation email sent.' : ''}`,
+      });
+
+      // Reset form
+      setNewOrg({ name: '', tenantType: 'university', createAdmin: false, adminFirstName: '', adminLastName: '', adminEmail: '', sendInvite: true });
+      
+      // Navigate to the new institution detail page
+      if (data?.tenantId) {
+        navigate(`/admin/institution/${data.tenantId}`);
+      }
+
+      // Refresh workspace list so the new org appears
+      await refreshWorkspaces();
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message || 'Failed to create organization', variant: 'destructive' });
+    } finally {
+      setIsCreatingOrg(false);
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({ title: 'Copied to clipboard' });
+  };
+
   useEffect(() => {
     if (effectiveTenant?.institution_name) {
       setInstitutionName(effectiveTenant.institution_name);
