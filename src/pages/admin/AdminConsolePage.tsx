@@ -50,7 +50,10 @@ import {
   FolderTree,
   FileText,
   MessageSquare,
-  FileSignature
+  FileSignature,
+  Plus,
+  Copy,
+  Mail
 } from 'lucide-react';
 
 interface UserStats {
