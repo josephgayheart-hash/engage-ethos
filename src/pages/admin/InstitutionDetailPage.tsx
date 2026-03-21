@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -36,6 +37,9 @@ import {
   MessageSquare,
   Phone,
   Globe,
+  Pencil,
+  Check,
+  X,
 } from 'lucide-react';
 
 interface TenantInfo {
@@ -133,6 +137,16 @@ const allConfigFields = [
   'brandVoiceSamples', 'voiceAnalysis'
 ];
 
+const TENANT_TYPE_OPTIONS = [
+  { value: 'university', label: 'University' },
+  { value: 'agency', label: 'Agency' },
+  { value: 'enterprise', label: 'Enterprise' },
+  { value: 'franchise', label: 'Franchise' },
+  { value: 'nonprofit', label: 'Nonprofit' },
+  { value: 'healthcare', label: 'Healthcare' },
+  { value: 'financial', label: 'Financial' },
+];
+
 export default function InstitutionDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -146,6 +160,23 @@ export default function InstitutionDetailPage() {
   const [institutionalProfiles, setInstitutionalProfiles] = useState<InstitutionalProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [isEditingType, setIsEditingType] = useState(false);
+  const [editingTenantType, setEditingTenantType] = useState<string>('university');
+
+  const handleSaveTenantType = async () => {
+    if (!tenant) return;
+    const { error } = await supabase
+      .from('tenants')
+      .update({ tenant_type: editingTenantType as any })
+      .eq('id', tenant.id);
+    if (error) {
+      toast({ title: 'Failed to update organization type', variant: 'destructive' });
+    } else {
+      setTenant({ ...tenant, tenant_type: editingTenantType });
+      toast({ title: 'Organization type updated' });
+    }
+    setIsEditingType(false);
+  };
 
   const fetchData = async () => {
     if (!id) return;
@@ -306,14 +337,39 @@ export default function InstitutionDetailPage() {
                     <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground">
                       {tenant.institution_name}
                     </h1>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
                       <Badge variant={tenant.status === 'active' ? 'default' : 'secondary'}>
                         {tenant.status}
                       </Badge>
-                      {tenant.tenant_type && (
-                        <Badge variant="outline" className={tenant.tenant_type === 'agency' ? 'bg-purple-50 text-purple-700 border-purple-200' : ''}>
-                          {tenant.tenant_type.charAt(0).toUpperCase() + tenant.tenant_type.slice(1)}
-                        </Badge>
+                      {isEditingType ? (
+                        <div className="flex items-center gap-1.5">
+                          <Select value={editingTenantType} onValueChange={setEditingTenantType}>
+                            <SelectTrigger className="h-7 w-[140px] text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {TENANT_TYPE_OPTIONS.map(opt => (
+                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleSaveTenantType}>
+                            <Check className="w-3.5 h-3.5 text-green-600" />
+                          </Button>
+                          <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingType(false)}>
+                            <X className="w-3.5 h-3.5 text-destructive" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => { setEditingTenantType(tenant.tenant_type || 'university'); setIsEditingType(true); }}
+                          className="group flex items-center gap-1 cursor-pointer"
+                        >
+                          <Badge variant="outline" className={tenant.tenant_type === 'agency' ? 'bg-purple-50 text-purple-700 border-purple-200' : ''}>
+                            {(tenant.tenant_type || 'university').charAt(0).toUpperCase() + (tenant.tenant_type || 'university').slice(1)}
+                          </Badge>
+                          <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
                       )}
                       <span className="text-sm text-muted-foreground">
                         Created {formatDate(tenant.created_at)}
