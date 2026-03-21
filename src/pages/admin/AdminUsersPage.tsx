@@ -187,9 +187,20 @@ export default function AdminUsersPage() {
     }
   };
 
+  const fetchInstitutionalProfiles = async () => {
+    if (!effectiveTenantId) return;
+    const { data } = await supabase
+      .from('institutional_profiles')
+      .select('id, name, profile_type')
+      .eq('tenant_id', effectiveTenantId)
+      .order('name');
+    setInstitutionalProfiles(data || []);
+  };
+
   useEffect(() => {
     fetchUsers();
-  }, []);
+    fetchInstitutionalProfiles();
+  }, [effectiveTenantId]);
 
   const generatePassword = () => {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
