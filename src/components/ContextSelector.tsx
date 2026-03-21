@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Users, Clock, Briefcase, ChevronDown, ChevronUp, Cpu } from "lucide-react";
+import { Users, Clock, Briefcase, ChevronDown, ChevronUp, Cpu, Globe } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown";
 import { Button } from "@/components/ui/button";
