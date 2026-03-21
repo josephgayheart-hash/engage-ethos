@@ -916,14 +916,14 @@ export default function AdminUsersPage() {
               <div className="space-y-2">
                 <Label htmlFor="institutionalProfile">Assign to {labels.subUnit} (Optional)</Label>
                 <Select 
-                  value={newUser.institutionalProfileId} 
-                  onValueChange={(value) => setNewUser(prev => ({ ...prev, institutionalProfileId: value }))}
+                  value={newUser.institutionalProfileId || 'none'} 
+                  onValueChange={(value) => setNewUser(prev => ({ ...prev, institutionalProfileId: value === 'none' ? '' : value }))}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="No specific assignment" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No specific assignment</SelectItem>
+                    <SelectItem value="none">No specific assignment</SelectItem>
                     {institutionalProfiles.map(profile => (
                       <SelectItem key={profile.id} value={profile.id}>
                         {profile.name} <span className="text-muted-foreground">({profile.profile_type})</span>
