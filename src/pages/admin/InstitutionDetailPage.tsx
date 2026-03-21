@@ -167,7 +167,7 @@ export default function InstitutionDetailPage() {
     if (!tenant) return;
     const { error } = await supabase
       .from('tenants')
-      .update({ tenant_type: editingTenantType })
+      .update({ tenant_type: editingTenantType as any })
       .eq('id', tenant.id);
     if (error) {
       toast({ title: 'Failed to update organization type', variant: 'destructive' });
