@@ -1,100 +1,80 @@
 
 
-# Session 3: Story Bank Industry Adaptation, Build/Strategy/Evaluate Industry Wiring, and Remaining UI Labels
+# Session 3 Completion + Session 4: Settings Labels, Profile Wizard, Onboarding, Config Relevance
 
-## What Was Done in Sessions 1-2
-- Expanded `tenant_type` enum, created 6 industry vocabulary configs
-- Built `IndustryProvider` / `useIndustry()` context
-- Refactored `ContextSelector` and `SelectionSummary` to use dynamic vocabulary
-- Parameterized edge function prompts (`evaluate-message`, `generate-message`, `playground-chat`)
-- Updated `AppSidebar` label
+## Session 3 Remaining (1 item)
+**UniversitySettingsPage.tsx** still has hardcoded "University Settings" in two places (lines 482, 540). Replace with dynamic label from `useIndustry()`.
 
-**Remaining gaps**: Story Bank is locked to higher-ed types. BuildPage/StrategyPage/EvaluatePage/CallScriptPage/PlaygroundPage don't pass `industryContext`/`contentStyle` to edge functions. Several admin pages still have hardcoded labels.
+## Session 4 Scope
 
-## Session 3 Scope
+### 1. ProfileSetupWizard industry adaptation
+`ProfileSetupWizard.tsx` has a hardcoded `institutionTypeOptions` array (lines 351-406) with Carnegie Classifications + a few non-higher-ed types. Replace with dynamic `classificationOptions` from `useIndustry().vocabulary.classificationOptions`. Each industry vocabulary already defines these (e.g., enterprise has "Global Enterprise", "Mid-Market"; healthcare has "Hospital System", "Physician Group").
 
-### 1. Make Story Bank industry-aware
-The `story_type` column is plain `text` (not an enum), so no DB migration needed. The industry vocabularies already define `storyTypes[]` per industry. Wire these into:
+Also update hardcoded strings throughout the wizard:
+- "Enter a .edu domain" → generic "Enter your website domain"
+- "Institution Type" / "Institution Identity" → use `labels.organization` dynamically
+- Quick Start helper text references ".edu" — make conditional on `isHigherEd`
 
-- **`StoryBankTab.tsx`** (line 63-70): Replace hardcoded `storyTypes` array with `useIndustry().storyTypes` mapped to `{ value, label, icon }`. Map icon strings from vocabulary to Lucide components via a lookup table.
-- **`StoryCard.tsx`** (line 28-34): Replace hardcoded `storyTypeConfig` Record with a dynamic lookup from `useIndustry().storyTypes`. Fall back gracefully for unknown types.
-- **`StoryDetailDialog.tsx`**: Update the story type `<Select>` to render options from `useIndustry().storyTypes`.
-- **`StoryFactSelector.tsx`** (line 32-48): Replace hardcoded `storyTypeIcons` and `storyTypeLabels` with dynamic vocabulary lookups.
-- **`useStoryBank.ts`** (line 13): Widen the `StoryType` union to `string` so it accepts any industry's story types. Keep the named type alias for documentation.
+### 2. OnboardingPage industry adaptation
+`OnboardingPage.tsx` has a fully hardcoded higher-ed department list (lines 23-104) with types like "Enrollment Management", "Registrar", "Student Success". Replace with `useIndustry().departments` which each industry vocabulary already defines.
 
-### 2. Wire industry context into BuildPage generation calls
-`BuildPage.tsx` line 485 calls `buildMessage(context, config, model)` without `industryContext`/`contentStyle`. The function signature already accepts these (added in Session 2). Changes:
-- Import `useIndustry` in `BuildPage.tsx`
-- Pass `labels.industryContext` and `labels.contentStyle` to the `buildMessage()` call
-- Replace hardcoded `audienceLabels` and `cohortLabels` Records (lines 122-150) with dynamic lookups from `useIndustry().audiences` and `useIndustry().cohorts`
+Also update:
+- Department icon mapping → use `resolveIcon()` utility
+- "Welcome to CampusVoice" header → keep brand name but adjust subtitle
+- Audience/moment badges in the selected department card → use dynamic vocabulary IDs
 
-### 3. Wire industry context into StrategyPage generation calls
-`StrategyPage.tsx` line 464 calls `mapMessages(context, config, weeks, start, end, model)` without industry params. Same pattern:
-- Import `useIndustry`, pass `labels.industryContext` and `labels.contentStyle` to `mapMessages()`
+### 3. SubUnitSetupWizard industry adaptation
+`SubUnitSetupWizard.tsx` has hardcoded `SUB_UNIT_TYPES` (line 52-58) with "College", "Division", "Unit", "Department". Replace labels with industry-appropriate terms using `useIndustry().labels.subUnit` and vocabulary data.
 
-### 4. Wire industry context into EvaluatePage
-`EvaluatePage.tsx` line 69 calls `evaluateMessage(content, context, config, model)` without industry params. Add the two extra args.
+### 4. InstitutionalConfig field relevance filtering
+`InstitutionalConfig.tsx` renders all config tabs (Identity, Systems, Locations, People, CTAs, Terms, Style, Content DNA) regardless of industry. Each vocabulary defines `relevantConfigFields[]`. Use this to:
+- Hide irrelevant tabs entirely (e.g., "Terms" tab with academic calendar fields for enterprise)
+- Or show a reduced set of fields within tabs
 
-### 5. Wire industry context into CallScriptPage
-`CallScriptPage.tsx` line 169 invokes `generate-message` directly. Add `industryContext` and `contentStyle` to the request body.
-
-### 6. Wire industry context into PlaygroundPage
-`PlaygroundPage.tsx` line 139 calls `playground-chat` via fetch. Add `industryContext` and `contentStyle` to the JSON body.
-
-### 7. Update remaining admin page labels
-- **`UniversitySettingsPage.tsx`**: Replace "University Settings" (line 482, 540) with `useIndustry().labels.organizationSettings`
-- **`ContentDNAPage.tsx`**: Replace "Campus Photography" (line 1362) with `useIndustry().labels.photography`
-
-### 8. Create shared icon resolver utility
-Multiple components need to map `storyType.icon` strings (e.g., `'graduation-cap'`, `'heart'`) to Lucide components. Create a small utility `src/lib/iconResolver.ts` with a lookup map to avoid duplicating icon imports everywhere.
+### 5. PROFILE_TYPE_LABELS in UniversitySettingsPage
+Lines 76-82 hardcode "University", "College", "Division", "Unit", "Department". Make dynamic based on industry vocabulary labels.
 
 ## Technical Details
 
-**Story type widening pattern:**
+**ProfileSetupWizard classification swap:**
 ```typescript
-// useStoryBank.ts — widen to accept any industry's types
-export type StoryType = string;
+const { vocabulary } = useIndustry();
+const institutionTypeOptions = vocabulary.classificationOptions.map(opt => ({
+  value: opt.value as InstitutionType,
+  label: opt.label,
+  description: opt.description,
+  icon: resolveIcon(/* derive from value */),
+}));
 ```
 
-**Icon resolver utility:**
+**OnboardingPage department swap:**
 ```typescript
-// src/lib/iconResolver.ts
-import { GraduationCap, Users, Heart, Briefcase, User, Building2, ... } from 'lucide-react';
-const iconMap: Record<string, LucideIcon> = {
-  'graduation-cap': GraduationCap, 'users': Users, 'heart': Heart, ...
-};
-export function resolveIcon(name?: string): LucideIcon { return iconMap[name || ''] || User; }
+const { departments } = useIndustry();
+// departments already has { id, label, description }
 ```
 
-**BuildPage audience label replacement:**
+**InstitutionalConfig relevance pattern:**
 ```typescript
-const { audiences, cohorts, labels } = useIndustry();
-const getAudienceLabel = (id: string) => audiences.find(a => a.id === id)?.label || id;
-const getCohortLabel = (id: string) => cohorts.find(c => c.id === id)?.label || id;
+const { vocabulary } = useIndustry();
+const relevant = new Set(vocabulary.relevantConfigFields);
+// Conditionally render fields: {relevant.has('mascot') && renderTextField(...)}
 ```
 
-## Files Changed (~14 files)
+## Files Changed (~7 files)
 
 | File | Change |
 |------|--------|
-| `src/lib/iconResolver.ts` | New — shared icon string→component resolver |
-| `src/hooks/useStoryBank.ts` | Widen `StoryType` to `string` |
-| `src/components/dna/StoryBankTab.tsx` | Dynamic story types from `useIndustry()` |
-| `src/components/dna/StoryCard.tsx` | Dynamic type config from `useIndustry()` |
-| `src/components/dna/StoryDetailDialog.tsx` | Dynamic type select options |
-| `src/components/StoryFactSelector.tsx` | Dynamic type icons/labels |
-| `src/pages/BuildPage.tsx` | Pass industry context + replace hardcoded labels |
-| `src/pages/StrategyPage.tsx` | Pass industry context to `mapMessages` |
-| `src/pages/EvaluatePage.tsx` | Pass industry context to `evaluateMessage` |
-| `src/pages/CallScriptPage.tsx` | Pass industry context to `generate-message` |
-| `src/pages/PlaygroundPage.tsx` | Pass industry context to `playground-chat` |
-| `src/pages/UniversitySettingsPage.tsx` | Dynamic page title |
-| `src/pages/admin/ContentDNAPage.tsx` | Dynamic "Campus Photography" label |
+| `src/pages/UniversitySettingsPage.tsx` | Session 3 fix: dynamic labels + dynamic PROFILE_TYPE_LABELS |
+| `src/components/ProfileSetupWizard.tsx` | Dynamic classification options, industry-aware wizard text |
+| `src/pages/OnboardingPage.tsx` | Dynamic departments from `useIndustry()` |
+| `src/components/SubUnitSetupWizard.tsx` | Dynamic sub-unit type labels |
+| `src/components/InstitutionalConfig.tsx` | Field relevance filtering via `relevantConfigFields` |
+| `src/types/campusvoice.ts` | Widen `InstitutionType` to `string` for dynamic classification values |
+| `src/types/industry.ts` | Add `icon` field to department type if missing |
 
-## What This Does NOT Cover (Session 4+)
-- Playbook Kit industry-specific libraries and DB seeding
-- InstitutionalConfig field relevance filtering per industry
-- Onboarding flow adaptation per industry
-- Profile Setup Wizard classification options per industry
-- `parse-story` edge function industry-aware prompt
+## What This Does NOT Cover (Session 5+)
+- Playbook Kit industry-specific seeding and DB content
+- `parse-story` edge function industry-aware prompts
+- Landing page / marketing page industry adaptation
+- CRM page terminology updates
 
