@@ -139,7 +139,6 @@ export function getFactCategoriesForTenant(tenantType?: TenantType | string | nu
 
 /** @deprecated Use getFactCategoriesForTenant() instead */
 export const FACT_CATEGORIES = HIGHER_ED_FACT_CATEGORIES;
-];
 
 export interface CreateFactInput {
   category: string;
