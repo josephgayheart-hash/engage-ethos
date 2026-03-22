@@ -1013,7 +1013,7 @@ const ImageGeneratorPage = () => {
                         <div className="relative group rounded-lg overflow-hidden">
                           <img
                             src={imageUrl}
-                            alt="Generated campus image"
+                            alt="Generated brand image"
                             className="w-full rounded-lg"
                           />
                           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
