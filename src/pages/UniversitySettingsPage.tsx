@@ -1237,7 +1237,8 @@ export default function UniversitySettingsPage() {
                                 <ExternalLink className="w-3 h-3" />
                               </Button>
 
-                              {editingProfile.profileType === 'university' && (
+                              {/* Allow sub-units on any non-leaf type */}
+                              {(['university', 'headquarters', 'region', 'college', 'division'].includes(editingProfile.profileType)) && (
                                 <Button
                                   variant="outline"
                                   size="sm"
