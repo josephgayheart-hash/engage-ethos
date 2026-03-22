@@ -1106,10 +1106,17 @@ export default function UniversitySettingsPage() {
                             <div key={profile.id}>
                               {/* Parent Profile Card - Clean minimal design */}
                               <div 
-                                className={`group relative rounded-lg border p-3 cursor-pointer transition-all ${
-                                  isSelected 
-                                    ? 'border-primary bg-primary/5 shadow-sm' 
-                                    : 'border-border hover:border-primary/40 hover:bg-muted/30'
+                                draggable
+                                onDragStart={() => handleDragStart(profile.id)}
+                                onDragOver={(e) => handleDragOver(e, profile.id)}
+                                onDragLeave={handleDragLeave}
+                                onDrop={(e) => handleDrop(e, profile.id)}
+                                className={`group relative rounded-lg border p-3 cursor-grab active:cursor-grabbing transition-all ${
+                                  dragOverProfileId === profile.id
+                                    ? 'border-primary border-dashed bg-primary/10 shadow-md'
+                                    : isSelected 
+                                      ? 'border-primary bg-primary/5 shadow-sm' 
+                                      : 'border-border hover:border-primary/40 hover:bg-muted/30'
                                 }`}
                                 onClick={() => setEditingProfile(profile)}
                               >
