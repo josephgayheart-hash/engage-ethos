@@ -1195,8 +1195,37 @@ export default function UniversitySettingsPage() {
                               </div>
                             </div>
 
-                            {/* Right: Actions */}
+                            {/* Right: Save + Actions */}
                             <div className="flex items-center gap-2">
+                              {isDirty && (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    className="h-8 gap-1.5"
+                                    disabled={isSavingProfile || !draftName.trim()}
+                                    onClick={handleSaveProfile}
+                                  >
+                                    {isSavingProfile ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                                    Save Changes
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8"
+                                    onClick={() => {
+                                      if (editingProfile) {
+                                        setDraftName(editingProfile.config.unitName || editingProfile.name);
+                                        setDraftType(editingProfile.profileType);
+                                        setDraftConfig(editingProfile.config);
+                                        setHeaderDirty(false);
+                                        setConfigDirty(false);
+                                      }
+                                    }}
+                                  >
+                                    Discard
+                                  </Button>
+                                </>
+                              )}
                               <Button
                                 variant="outline"
                                 size="sm"
