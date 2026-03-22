@@ -304,7 +304,7 @@ export default function UniversitySettingsPage() {
 
       setLogoUrl(publicUrl);
       await refreshProfile();
-      toast({ title: 'Logo Uploaded', description: 'Your institution logo has been updated.' });
+      toast({ title: 'Logo Uploaded', description: `Your ${industryLabels.organization.toLowerCase()} logo has been updated.` });
     } catch (error: any) {
       toast({ title: 'Upload Failed', description: error.message, variant: 'destructive' });
     } finally {
