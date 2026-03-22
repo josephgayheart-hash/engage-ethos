@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { Link, useLocation, useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWorkspace } from '@/contexts/WorkspaceContext';
@@ -2632,7 +2632,7 @@ export default function ContentDNAPage() {
                                           if (!acc[type.category]) acc[type.category] = [];
                                           acc[type.category].push(type);
                                           return acc;
-                                        }, {} as Record<string, typeof SAMPLE_TYPES>)
+                                        }, {} as Record<string, typeof ALL_SAMPLE_TYPES>)
                                       ).map(([category, types]) => (
                                         <SelectGroup key={category}>
                                           <SelectLabel>{category}</SelectLabel>
@@ -2719,7 +2719,7 @@ export default function ContentDNAPage() {
                                           if (!acc[type.category]) acc[type.category] = [];
                                           acc[type.category].push(type);
                                           return acc;
-                                        }, {} as Record<string, typeof SAMPLE_TYPES>)
+                                        }, {} as Record<string, typeof ALL_SAMPLE_TYPES>)
                                       ).map(([category, types]) => (
                                         <SelectGroup key={category}>
                                           <SelectLabel>{category}</SelectLabel>
@@ -2914,7 +2914,7 @@ export default function ContentDNAPage() {
                                             if (!acc[type.category]) acc[type.category] = [];
                                             acc[type.category].push(type);
                                             return acc;
-                                          }, {} as Record<string, typeof SAMPLE_TYPES>)
+                                          }, {} as Record<string, typeof ALL_SAMPLE_TYPES>)
                                         ).map(([category, types]) => (
                                           <SelectGroup key={category}>
                                             <SelectLabel>{category}</SelectLabel>
