@@ -944,9 +944,7 @@ const ImageGeneratorPage = () => {
                           </button>
                         </>
                       )}
-                      {true && (
-                        <>
-                          <button
+                      <button
                             onClick={() => setViewMode("overlay")}
                             className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                               viewMode === "overlay"
@@ -962,7 +960,7 @@ const ImageGeneratorPage = () => {
                               to="/brand-studio"
                               state={{
                               imageUrl: blankCanvasMode ? null : imageUrl,
-                              brandColors,
+                              brandColors: brandColors.length > 0 ? brandColors : APP_DEFAULT_COLORS,
                               logoUrl: profileLogoUrl,
                               logoUrls: profileLogoUrls,
                               institutionName: profileInstitutionName,
@@ -980,8 +978,6 @@ const ImageGeneratorPage = () => {
                               Open Brand Studio
                             </Link>
                           )}
-                        </>
-                      )}
                     </div>
 
                     {/* Preview content */}
