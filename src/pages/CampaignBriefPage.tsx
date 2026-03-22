@@ -67,6 +67,7 @@ const CampaignBriefPage = () => {
   const [keyMessages, setKeyMessages] = useState('');
   const [constraints, setConstraints] = useState('');
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [outputLanguage, setOutputLanguage] = useState('en');
 
   const [generatedBrief, setGeneratedBrief] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
