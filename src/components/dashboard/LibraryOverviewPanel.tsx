@@ -111,7 +111,7 @@ export function LibraryOverviewPanel() {
           </CardContent>
         </Card>
 
-        {/* University Library Card — branded */}
+        {/* Shared Library Card — branded */}
         <Card
           className="group cursor-pointer hover:shadow-md transition-all overflow-hidden border-border/60"
           onClick={() => navigate('/shared-library')}

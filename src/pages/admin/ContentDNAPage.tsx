@@ -1029,7 +1029,7 @@ export default function ContentDNAPage() {
                       <span className="hidden sm:inline">Edit Settings</span>
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Edit University Settings</TooltipContent>
+                  <TooltipContent>Edit {industryLabels.organizationSettings}</TooltipContent>
                 </Tooltip>
               )}
             </div>

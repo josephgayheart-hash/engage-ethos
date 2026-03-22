@@ -8,6 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAgencyMode } from "@/hooks/useAgencyMode";
+import { useIndustry } from "@/contexts/IndustryContext";
 import { Building2, ArrowRight, Users, Settings, Palette } from "lucide-react";
 
 interface InstitutionStatus {
@@ -19,6 +20,7 @@ interface InstitutionStatus {
 export function InstitutionManagementCard() {
   const { tenant, isAdmin } = useAuth();
   const { isAgency, labels } = useAgencyMode();
+  const { labels: industryLabels } = useIndustry();
   const [status, setStatus] = useState<InstitutionStatus | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -50,7 +52,7 @@ export function InstitutionManagementCard() {
   }, [tenant?.id]);
 
   const settingsHref = isAgency ? "/agency/clients" : "/university-settings";
-  const entityLabel = isAgency ? labels.profileTerm : "Institution";
+  const entityLabel = isAgency ? labels.profileTerm : industryLabels.organization;
 
   const primaryColor = tenant?.primary_color || "hsl(var(--primary))";
   const accentColor = tenant?.accent_color || "hsl(var(--accent))";
