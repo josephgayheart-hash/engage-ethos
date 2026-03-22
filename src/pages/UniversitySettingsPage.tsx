@@ -1323,6 +1323,7 @@ export default function UniversitySettingsPage() {
                                     if (editingProfile) {
                                       setDraftName(editingProfile.config.unitName || editingProfile.name);
                                       setDraftType(editingProfile.profileType);
+                                      setDraftParentId(editingProfile.parentProfileId || null);
                                       setDraftConfig(editingProfile.config);
                                       setHeaderDirty(false);
                                       setConfigDirty(false);
