@@ -863,21 +863,35 @@ export default function UniversitySettingsPage() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Layers className="w-5 h-5" />
-                      Create Sub-Unit
+                      {isHigherEd ? 'Create Sub-Unit' : `Add ${industryLabels.subUnit}`}
                     </CardTitle>
                     <CardDescription>
-                      Create a college, division, unit, or department under {subUnitParent.name}
+                      {isHigherEd
+                        ? `Create a college, division, unit, or department under ${subUnitParent.name}`
+                        : `Create a region, division, or location under ${subUnitParent.name}`}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <SubUnitSetupWizard
-                      parentProfile={subUnitParent}
-                      onComplete={handleCreateSubUnit}
-                      onCancel={() => {
-                        setShowSubUnitWizard(false);
-                        setSubUnitParent(null);
-                      }}
-                    />
+                    {isHigherEd ? (
+                      <SubUnitSetupWizard
+                        parentProfile={subUnitParent}
+                        onComplete={handleCreateSubUnit}
+                        onCancel={() => {
+                          setShowSubUnitWizard(false);
+                          setSubUnitParent(null);
+                        }}
+                      />
+                    ) : (
+                      <EnterpriseProfileWizard
+                        onComplete={(name, config, profileType) => handleCreateSubUnit(name, config, profileType as any)}
+                        onCancel={() => {
+                          setShowSubUnitWizard(false);
+                          setSubUnitParent(null);
+                        }}
+                        parentProfileId={subUnitParent.id}
+                        parentProfileName={subUnitParent.name}
+                      />
+                    )}
                   </CardContent>
                 </Card>
               ) : (
