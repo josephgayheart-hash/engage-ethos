@@ -1,4 +1,5 @@
 import { useRef, useCallback, useState, useEffect } from "react";
+import { useIndustry } from "@/contexts/IndustryContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import html2canvas from "html2canvas";
 import { DownloadFormatPicker } from "@/components/image-generator/DownloadFormatPicker";
