@@ -16,6 +16,9 @@ import {
   LayoutGrid,
   List,
   ImageIcon,
+  Swords,
+  Globe2,
+  ClipboardList,
 } from "lucide-react";
 
 interface ToolItem {
