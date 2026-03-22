@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import {
   Loader2, Building2, Dna, Users, Target, BookMarked, Mail, Sparkles, Map,
   Check, Shield, Palette, MessageSquare, FileText, Brain, Zap, BarChart3,
-  Quote, Type, Gauge, Hash, Layers, GraduationCap, Camera, ExternalLink
+  Quote, Type, Gauge, Hash, Layers, GraduationCap, Camera, ExternalLink, Globe
 } from "lucide-react";
 
 interface DNAStats {
