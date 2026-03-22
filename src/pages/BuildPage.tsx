@@ -105,7 +105,7 @@ const channelIcons: Record<Channel, LucideIcon> = {
   'case-for-care': Heart,
 };
 
-const channelOptions: { value: Channel; label: string }[] = [
+const ALL_CHANNEL_OPTIONS: { value: Channel; label: string }[] = [
   { value: 'email', label: 'Email' },
   { value: 'sms', label: 'SMS/Text' },
   { value: 'social-media', label: 'Social Media' },
@@ -125,8 +125,12 @@ const channelOptions: { value: Channel; label: string }[] = [
 const BuildPage = () => {
   const { toast } = useToast();
   const { profile, isAdmin, isApprover, tenant } = useAuth();
-  const { audiences, cohorts, labels: industryLabels } = useIndustry();
+  const { audiences, cohorts, labels: industryLabels, isHigherEd } = useIndustry();
   
+  // Higher-ed-only channels gated
+  const HIGHER_ED_ONLY_CHANNELS = new Set<Channel>(['case-for-care']);
+  const channelOptions = ALL_CHANNEL_OPTIONS.filter(c => isHigherEd || !HIGHER_ED_ONLY_CHANNELS.has(c.value));
+
   // Dynamic label resolvers (replaced hardcoded audienceLabels/cohortLabels)
   const audienceLabels: Record<string, string> = Object.fromEntries(audiences.map(a => [a.id, a.label]));
   const cohortLabels: Record<string, string> = Object.fromEntries(cohorts.map(c => [c.id, c.label]));
