@@ -66,6 +66,8 @@ import {
   Settings,
   AlertCircle,
   Users,
+  MapPin,
+  Globe,
 } from "lucide-react";
 import type { InstitutionalConfig as InstitutionalConfigType, ProfileType as ConfigProfileType } from "@/types/campusvoice";
 
