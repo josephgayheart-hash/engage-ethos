@@ -604,7 +604,7 @@ export default function UniversitySettingsPage() {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2">
                     {isAgency ? <Users className="w-5 h-5 text-amber-600" /> : <Building2 className="w-5 h-5" />}
-                    {isAgency ? `${tenant?.institution_name || 'Agency'} Branding` : `${industryLabels.organization} Branding`}
+                    {isAgency ? `${effectiveTenant?.institution_name || 'Agency'} Branding` : `${industryLabels.organization} Branding`}
                   </CardTitle>
                   <CardDescription>
                     {isAgency 
@@ -647,14 +647,14 @@ export default function UniversitySettingsPage() {
                               {isSavingInstitution ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Save className="w-3 h-3 mr-1" />}
                               Save
                             </Button>
-                            <Button variant="outline" size="sm" onClick={() => { setIsEditingInstitution(false); setInstitutionName(tenant?.institution_name || ''); }}>
+                            <Button variant="outline" size="sm" onClick={() => { setIsEditingInstitution(false); setInstitutionName(effectiveTenant?.institution_name || ''); }}>
                               Cancel
                             </Button>
                           </div>
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-lg">{tenant?.institution_name || 'Not set'}</span>
+                          <span className="font-semibold text-lg">{effectiveTenant?.institution_name || 'Not set'}</span>
                           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setIsEditingInstitution(true)}>
                             <Pencil className="w-3.5 h-3.5" />
                           </Button>
