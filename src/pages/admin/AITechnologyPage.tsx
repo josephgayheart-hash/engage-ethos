@@ -212,6 +212,154 @@ const pipelineSteps = [
   { step: "Evaluation", desc: "Adherence scoring & feedback", icon: Eye },
 ];
 
+/* ── Content DNA Deep Dive Data ── */
+
+const dnaComponents = [
+  {
+    name: "Voice Analysis",
+    icon: Brain,
+    storage: "content_dna_analysis.voice_analysis",
+    description: "AI-extracted voice profile: overall tone, formality level, emotional tone, sentence style, key characteristics, vocabulary patterns, common phrases, and messaging tactics.",
+    extractedBy: "analyze-voice (Gemini 2.5 Flash)",
+  },
+  {
+    name: "Brand Platform",
+    icon: Layers,
+    storage: "content_dna_analysis.brand_platform",
+    description: "Structured brand elements: Promise, Pillars (with keywords), Pathways, Proof Points, and Commitments — all selectable as generation filters.",
+    extractedBy: "analyze-voice (Gemini 2.5 Flash)",
+  },
+  {
+    name: "Custom Instructions",
+    icon: FileText,
+    storage: "content_dna_analysis.custom_instructions",
+    description: "Free-form brand guidelines and override rules authored by CMOs. Injected verbatim into every generation and evaluation prompt.",
+    extractedBy: "Manual entry",
+  },
+  {
+    name: "DNA Adjustments",
+    icon: RefreshCw,
+    storage: "content_dna_adjustments",
+    description: "Non-destructive refinements: voice dimension sliders (formality, warmth, authority), section feedback, and always/never/prefer override rules.",
+    extractedBy: "Manual tuning UI",
+  },
+  {
+    name: "Content Samples",
+    icon: Upload,
+    storage: "content_dna_samples",
+    description: "Uploaded PDFs, URLs, and pasted text. Each sample undergoes semantic extraction to derive key themes and summaries used for voice analysis.",
+    extractedBy: "extract-semantics (Gemini 2.5 Flash)",
+  },
+  {
+    name: "Story Bank",
+    icon: BookOpen,
+    storage: "story_bank",
+    description: "Narrative entries with subject names, pull quotes, themes, and story types. Selectable during generation for authentic, human storytelling.",
+    extractedBy: "parse-story (Gemini 2.5 Flash)",
+  },
+  {
+    name: "Fact Book",
+    icon: BarChart3,
+    storage: "fact_book",
+    description: "Verified data points with categories, year, trend direction, source documents. Selected facts appear as bold statistics in generated content.",
+    extractedBy: "parse-fact-book (Gemini 2.5 Flash)",
+  },
+  {
+    name: "Brand Photography",
+    icon: Camera,
+    storage: "campus_photo_samples",
+    description: "Categorized photo library with AI analysis. Used as visual context by the Image Studio to match architectural style, seasonal feel, and campus identity.",
+    extractedBy: "analyze-campus-photo (Gemini 2.5 Flash)",
+  },
+  {
+    name: "Design References",
+    icon: Palette,
+    storage: "design_references",
+    description: "Visual style inspiration images that act as a mandatory style guide. Both Photo and Graphic Design modes reference these for icon language, color ratios, and layout patterns.",
+    extractedBy: "Manual upload",
+  },
+];
+
+type ConsumptionLevel = "full" | "partial" | "none";
+
+const toolConsumptionMatrix: {
+  tool: string;
+  icon: React.ComponentType<{ className?: string }>;
+  edgeFunction: string;
+  voice: ConsumptionLevel;
+  brand: ConsumptionLevel;
+  instructions: ConsumptionLevel;
+  adjustments: ConsumptionLevel;
+  stories: ConsumptionLevel;
+  facts: ConsumptionLevel;
+  photos: ConsumptionLevel;
+  designRefs: ConsumptionLevel;
+  method: string;
+}[] = [
+  {
+    tool: "Message Builder",
+    icon: PenTool,
+    edgeFunction: "generate-message",
+    voice: "full", brand: "full", instructions: "full", adjustments: "full",
+    stories: "full", facts: "full", photos: "none", designRefs: "none",
+    method: "Client-side via useContentDNAForGeneration hook → passed in request body",
+  },
+  {
+    tool: "Journey Designer",
+    icon: Map,
+    edgeFunction: "evaluate-message (mapper mode)",
+    voice: "full", brand: "full", instructions: "full", adjustments: "partial",
+    stories: "partial", facts: "partial", photos: "none", designRefs: "none",
+    method: "Client-side via institutionalConfig with voiceAnalysis & brandPlatform merged",
+  },
+  {
+    tool: "AI Copywriter",
+    icon: MessageCircle,
+    edgeFunction: "playground-chat",
+    voice: "full", brand: "none", instructions: "full", adjustments: "none",
+    stories: "none", facts: "none", photos: "none", designRefs: "none",
+    method: "Client-side fetch from content_dna_analysis → streamed in system prompt",
+  },
+  {
+    tool: "Evaluate / Score",
+    icon: Shield,
+    edgeFunction: "evaluate-message",
+    voice: "full", brand: "full", instructions: "full", adjustments: "partial",
+    stories: "none", facts: "none", photos: "none", designRefs: "none",
+    method: "Client-side via institutionalConfig with voiceAnalysis & brandPlatform",
+  },
+  {
+    tool: "Image Studio",
+    icon: ImageIcon,
+    edgeFunction: "generate-channel-image",
+    voice: "full", brand: "full", instructions: "full", adjustments: "none",
+    stories: "none", facts: "none", photos: "full", designRefs: "full",
+    method: "Server-side — edge function fetches DNA, photos, & design refs via parallel Promise.all()",
+  },
+  {
+    tool: "Brand Studio",
+    icon: Palette,
+    edgeFunction: "Client-side only",
+    voice: "none", brand: "none", instructions: "none", adjustments: "none",
+    stories: "none", facts: "none", photos: "none", designRefs: "none",
+    method: "Receives brand colors, logos, and overlays from profile config — no AI DNA injection",
+  },
+  {
+    tool: "Smart Layer",
+    icon: Sparkles,
+    edgeFunction: "smart-layer-image",
+    voice: "none", brand: "none", instructions: "none", adjustments: "none",
+    stories: "none", facts: "none", photos: "none", designRefs: "none",
+    method: "Receives brand colors for overlay compositing — pattern-removal AI, no DNA prompt",
+  },
+];
+
+const dnaResolutionSteps = [
+  { label: "Selected Profile", desc: "First looks for DNA attached to the selected institutional profile" },
+  { label: "Parent Profile", desc: "If none found, checks the parent profile (e.g., University for a College)" },
+  { label: "Tenant Level", desc: "Falls back to tenant-wide DNA only when no profile is selected (prevents cross-contamination)" },
+];
+
 const infrastructurePatterns = [
   { pattern: "Multi-Tenant RLS", detail: "Every table uses tenant_id-based Row-Level Security for complete data isolation" },
   { pattern: "Hierarchical Profiles", detail: "University → College → Department with cascading Content DNA" },
