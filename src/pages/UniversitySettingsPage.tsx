@@ -364,8 +364,9 @@ export default function UniversitySettingsPage() {
   };
 
   // Profile handlers
-  const handleCreateProfile = async (name: string, config: InstitutionalConfigType) => {
-    const profile = await createProfile(name, config, null, 'university');
+  const handleCreateProfile = async (name: string, config: InstitutionalConfigType, profileType?: string) => {
+    const type = (profileType || (isHigherEd ? 'university' : 'headquarters')) as ProfileType;
+    const profile = await createProfile(name, config, null, type);
     setShowWizard(false);
     if (profile) {
       setEditingProfile(profile);
