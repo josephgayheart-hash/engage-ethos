@@ -257,15 +257,34 @@ Tone should be organized, warm, and brand-aligned.`;
                   </div>
                 )}
               </div>
-              {profiles.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label>{industryLabels?.organizationProfile || 'Profile'}</Label>
-                  <InstitutionalProfileSelector
-                    selectedProfileId={selectedProfileId}
-                    onProfileChange={(id) => setSelectedProfileId(id)}
-                  />
+                  <Label className="flex items-center gap-1.5">
+                    <Languages className="w-3.5 h-3.5" />
+                    Output Language
+                  </Label>
+                  <Select value={outputLanguage} onValueChange={setOutputLanguage}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {outputLanguages.map(l => <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                  {outputLanguage !== 'en' && (
+                    <p className="text-xs text-muted-foreground">
+                      Playbook will be generated in {outputLanguages.find(l => l.value === outputLanguage)?.label}. Use the toggle to review in English.
+                    </p>
+                  )}
                 </div>
-              )}
+                {profiles.length > 0 && (
+                  <div className="space-y-1.5">
+                    <Label>{industryLabels?.organizationProfile || 'Profile'}</Label>
+                    <InstitutionalProfileSelector
+                      selectedProfileId={selectedProfileId}
+                      onProfileChange={(id) => setSelectedProfileId(id)}
+                    />
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
 
