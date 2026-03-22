@@ -52,6 +52,7 @@ interface GenerationContext {
   dnaStats?: DNAStats;
   profileStats?: ProfileStats;
   campusPhotoCount?: number;
+  outputLanguage?: string;
 }
 
 interface GenerationLoadingOverlayProps {
