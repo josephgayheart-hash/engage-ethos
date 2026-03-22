@@ -1403,7 +1403,7 @@ export default function UniversitySettingsPage() {
                                 className="font-serif text-lg font-bold h-auto py-1 px-2 border-transparent hover:border-border focus:border-border w-full sm:max-w-xs"
                               />
                             </div>
-                            <div className="flex items-center gap-3 mt-2">
+                            <div className="flex flex-wrap items-center gap-3 mt-2">
                               <Select
                                 value={draftType}
                                 onValueChange={(val) => {
@@ -1425,12 +1425,53 @@ export default function UniversitySettingsPage() {
                                   ))}
                                 </SelectContent>
                               </Select>
-                              <span className="text-xs text-muted-foreground">
-                                {draftType === 'university' || draftType === 'headquarters'
-                                  ? 'Configure Content DNA, terminology, and branding'
-                                  : `Part of ${getParentProfile(editingProfile.id)?.name || 'parent organization'}`
-                                }
-                              </span>
+
+                              {/* Parent Profile selector */}
+                              <div className="flex items-center gap-1.5">
+                                <FolderTree className="w-3.5 h-3.5 text-muted-foreground" />
+                                <Select
+                                  value={draftParentId || '__none__'}
+                                  onValueChange={(val) => {
+                                    setDraftParentId(val === '__none__' ? null : val);
+                                    setHeaderDirty(true);
+                                  }}
+                                >
+                                  <SelectTrigger className="h-7 w-auto text-xs gap-1.5 border-transparent hover:border-border">
+                                    <SelectValue placeholder="No parent (root)" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="__none__">
+                                      <span className="text-muted-foreground">No parent (root level)</span>
+                                    </SelectItem>
+                                    {profiles
+                                      .filter(p => {
+                                        // Can't parent to itself
+                                        if (p.id === editingProfile.id) return false;
+                                        // Can't parent to own descendants (prevent cycles)
+                                        let current: string | null | undefined = p.parentProfileId;
+                                        while (current) {
+                                          if (current === editingProfile.id) return false;
+                                          const parent = profiles.find(pp => pp.id === current);
+                                          current = parent?.parentProfileId;
+                                        }
+                                        return true;
+                                      })
+                                      .map(p => (
+                                        <SelectItem key={p.id} value={p.id}>
+                                          <div className="flex items-center gap-2">
+                                            <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[p.profileType]}</span>
+                                            {p.config.unitName || p.name}
+                                            <Badge variant="outline" className="text-[9px] h-4 px-1 ml-1">
+                                              {PROFILE_TYPE_LABELS[p.profileType]}
+                                            </Badge>
+                                          </div>
+                                        </SelectItem>
+                                      ))
+                                    }
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
                             </div>
 
                             {/* Location & Language info */}
