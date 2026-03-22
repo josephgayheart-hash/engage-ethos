@@ -85,7 +85,7 @@ const channelOptions: { value: Channel; label: string }[] = [
 const StrategyPage = () => {
   const { toast } = useToast();
   const { profile, isAdmin, isApprover, tenant } = useAuth();
-  const { audiences, cohorts, labels: industryLabels } = useIndustry();
+  const { audiences, cohorts, labels: industryLabels, isHigherEd } = useIndustry();
   const audienceLabels: Record<string, string> = Object.fromEntries(audiences.map(a => [a.id, a.label]));
   const cohortLabels: Record<string, string> = Object.fromEntries(cohorts.map(c => [c.id, c.label]));
   const { addMessage, updateMessage } = useMessageLibrary();
