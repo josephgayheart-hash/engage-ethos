@@ -75,7 +75,8 @@ const ENTERPRISE_AUDIENCE_OPTIONS = [
 
 const engineOptions = [
   { value: "fast", label: "Fast", description: "Quick generation, good quality" },
-  { value: "premium", label: "Premium", description: "Slower, highest quality & realism" },
+  { value: "premium", label: "Premium", description: "Higher fidelity & detail" },
+  { value: "pro", label: "Pro", description: "Best quality, slower & more expensive" },
 ];
 
 const HIGHER_ED_STYLE_OPTIONS = [
