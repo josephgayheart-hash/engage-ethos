@@ -27,12 +27,14 @@ export function BuilderResults({
   result, 
   context, 
   institutionalConfig,
+  selectedModel,
   onSaveToLibrary, 
   onSubmitToShared,
   onRegeneratedDraft 
 }: BuilderResultsProps) {
   const { toast } = useToast();
   const { contentDNA } = useContentDNAForGeneration();
+  const { labels: industryLabels } = useIndustry();
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [savedIndex, setSavedIndex] = useState<number | null>(null);
   const [activeDraft, setActiveDraft] = useState(0);
