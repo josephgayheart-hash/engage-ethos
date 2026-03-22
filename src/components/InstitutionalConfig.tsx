@@ -409,9 +409,9 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
                   <ImageIcon className="w-4 h-4" />
                   Profile Logo
                 </h4>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Upload a custom logo for this profile. If not set, the institution logo will be used.
-                </p>
+                 <p className="text-xs text-muted-foreground mt-1">
+                   Upload a custom logo for this profile. If not set, the {isHigherEd ? 'institution' : 'organization'} logo will be used.
+                 </p>
                 {!config.logoUrl && (
                   <label className="inline-block mt-2">
                     <Button
@@ -525,7 +525,7 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
               Brand Colors
             </h4>
             <p className="text-xs text-muted-foreground mb-4">
-              Define your institution's official brand colors. These will be used in all message outputs, PDFs, and exports.
+              Define your {isHigherEd ? "institution's" : "organization's"} official brand colors. These will be used in all message outputs, PDFs, and exports.
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -621,12 +621,12 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {renderTextField('Institution Name', 'institutionName', 'e.g., Lakewood University')}
-            {renderTextField('Abbreviation', 'institutionAbbreviation', 'e.g., LU, LWU')}
-            {renderTextField('Mascot / Nickname', 'mascot', 'e.g., Griffins')}
+            {renderTextField('Institution Name', 'institutionName', isHigherEd ? 'e.g., Lakewood University' : 'e.g., Valvoline Inc.')}
+            {renderTextField('Abbreviation', 'institutionAbbreviation', isHigherEd ? 'e.g., LU, LWU' : 'e.g., VLV')}
+            {renderTextField(isHigherEd ? 'Mascot / Nickname' : 'Brand Nickname', 'mascot', isHigherEd ? 'e.g., Griffins' : 'e.g., The V')}
           </div>
           
-          {renderArrayField('Slogans & Spirit Phrases', 'slogans', 'slogan', 'e.g., Go Griffins!', 'Phrases used in communications to build school spirit')}
+          {renderArrayField(isHigherEd ? 'Slogans & Spirit Phrases' : 'Taglines & Brand Phrases', 'slogans', 'slogan', isHigherEd ? 'e.g., Go Griffins!' : 'e.g., It runs in the family', isHigherEd ? 'Phrases used in communications to build school spirit' : 'Key brand phrases used across communications')}
           
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="contact">
@@ -638,17 +638,17 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
               </AccordionTrigger>
               <AccordionContent className="space-y-4 pt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {renderTextField('Email Domain', 'emailDomain', 'e.g., @university.edu')}
-                  {renderTextField('Primary Contact Email', 'primaryContactEmail', 'e.g., success@university.edu')}
+                  {renderTextField('Email Domain', 'emailDomain', isHigherEd ? 'e.g., @university.edu' : 'e.g., @valvoline.com')}
+                  {renderTextField('Primary Contact Email', 'primaryContactEmail', isHigherEd ? 'e.g., success@university.edu' : 'e.g., info@company.com')}
                   {renderTextField('Primary Contact Phone', 'primaryContactPhone', 'e.g., (555) 123-4567')}
-                  {renderTextField('Advising Email', 'advisingEmail', 'e.g., advising@university.edu')}
-                  {renderTextField('General Help Email', 'generalHelpEmail', 'e.g., help@university.edu')}
+                  {renderTextField(isHigherEd ? 'Advising Email' : 'Support Email', 'advisingEmail', isHigherEd ? 'e.g., advising@university.edu' : 'e.g., support@company.com')}
+                  {renderTextField('General Help Email', 'generalHelpEmail', isHigherEd ? 'e.g., help@university.edu' : 'e.g., help@company.com')}
                   {renderTextField('Emergency Phone', 'emergencyPhone', 'e.g., (555) 911-0000')}
                   {renderTextField('Text Alert Number', 'textAlertNumber', 'e.g., 55555')}
                   {renderTextField('Appointment Booking Link', 'appointmentLink', 'e.g., calendly.com/advising')}
                 </div>
-                {renderArrayField('Website Links', 'websiteLinks', 'websiteLink', 'e.g., advising.lakewood.edu')}
-                {renderArrayField('Social Media Handles', 'socialMediaHandles', 'socialHandle', 'e.g., @LakewoodSuccess')}
+                {renderArrayField('Website Links', 'websiteLinks', 'websiteLink', isHigherEd ? 'e.g., advising.lakewood.edu' : 'e.g., www.company.com/support')}
+                {renderArrayField('Social Media Handles', 'socialMediaHandles', 'socialHandle', isHigherEd ? 'e.g., @LakewoodSuccess' : 'e.g., @Valvoline')}
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -661,17 +661,17 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
               <Monitor className="w-4 h-4" />
               Digital Platforms & Systems
             </h4>
-            <p className="text-xs text-muted-foreground">Names of systems students interact with - AI will reference these in messages.</p>
+            <p className="text-xs text-muted-foreground">{isHigherEd ? 'Names of systems students interact with — AI will reference these in messages.' : 'Names of platforms and tools your team uses — AI will reference these in messages.'}</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {renderTextField('Student Portal Name', 'portalName', 'e.g., MyUniversity Portal, Student Hub')}
-            {renderTextField('LMS Name', 'lmsName', 'e.g., Canvas, Blackboard, Moodle')}
-            {renderTextField('Advising System', 'advisingSystemName', 'e.g., Navigate, Starfish, EAB')}
+            {renderTextField(isHigherEd ? 'Student Portal Name' : 'Customer Portal Name', 'portalName', isHigherEd ? 'e.g., MyUniversity Portal, Student Hub' : 'e.g., Partner Portal, Dealer Hub')}
+            {renderTextField(isHigherEd ? 'LMS Name' : 'Knowledge Base / LMS', 'lmsName', isHigherEd ? 'e.g., Canvas, Blackboard, Moodle' : 'e.g., Confluence, Notion, Trainual')}
+            {renderTextField(isHigherEd ? 'Advising System' : 'CRM / Support System', 'advisingSystemName', isHigherEd ? 'e.g., Navigate, Starfish, EAB' : 'e.g., Salesforce, HubSpot, Zendesk')}
             {renderTextField('Scheduling System', 'schedulingSystemName', 'e.g., Calendly, Bookings, AppointmentPlus')}
-            {renderTextField('Degree Audit System', 'degreeAuditSystem', 'e.g., DegreeWorks, Stellic')}
-            {renderTextField('Financial Aid Portal', 'financialAidPortal', 'e.g., Financial Aid Self-Service')}
-            {renderTextField('Registration System', 'registrationSystem', 'e.g., Student Registration Portal')}
+            {isHigherEd && renderTextField('Degree Audit System', 'degreeAuditSystem', 'e.g., DegreeWorks, Stellic')}
+            {isHigherEd && renderTextField('Financial Aid Portal', 'financialAidPortal', 'e.g., Financial Aid Self-Service')}
+            {isHigherEd && renderTextField('Registration System', 'registrationSystem', 'e.g., Student Registration Portal')}
             {renderTextField('Virtual Meeting Platform', 'virtualMeetingPlatform', 'e.g., Zoom, Teams, Google Meet')}
           </div>
         </TabsContent>
@@ -681,15 +681,15 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
           <div className="p-4 bg-muted/50 rounded-lg mb-4">
             <h4 className="font-medium text-sm flex items-center gap-2 mb-2">
               <MapPin className="w-4 h-4" />
-              Campus Locations & Offices
+              {isHigherEd ? 'Campus Locations & Offices' : 'Locations & Offices'}
             </h4>
-            <p className="text-xs text-muted-foreground">Physical locations and office names to include in messages.</p>
+            <p className="text-xs text-muted-foreground">{isHigherEd ? 'Physical locations and office names to include in messages.' : 'Facility names and locations to reference in communications.'}</p>
           </div>
 
-          {renderArrayField('Building Names', 'buildingNames', 'buildingName', 'e.g., Student Success Center', 'Official names for buildings')}
-          {renderArrayField('Program Names', 'programNames', 'programName', 'e.g., First-Year Experience Program')}
-          {renderArrayField('Support Centers', 'supportCenters', 'supportCenter', 'e.g., Writing Center, Math Lab')}
-          {renderArrayField('Campus Terms', 'campusTerms', 'campusTerm', 'e.g., quad, commons, student union', 'Local campus geography terms')}
+          {renderArrayField(isHigherEd ? 'Building Names' : 'Facility Names', 'buildingNames', 'buildingName', isHigherEd ? 'e.g., Student Success Center' : 'e.g., Regional HQ, Innovation Lab', isHigherEd ? 'Official names for buildings' : 'Official names for facilities')}
+          {renderArrayField('Program Names', 'programNames', 'programName', isHigherEd ? 'e.g., First-Year Experience Program' : 'e.g., Leadership Development Program')}
+          {renderArrayField(isHigherEd ? 'Support Centers' : 'Support Resources', 'supportCenters', 'supportCenter', isHigherEd ? 'e.g., Writing Center, Math Lab' : 'e.g., Help Desk, Customer Support')}
+          {isHigherEd && renderArrayField('Campus Terms', 'campusTerms', 'campusTerm', 'e.g., quad, commons, student union', 'Local campus geography terms')}
           
           <Accordion type="multiple" className="w-full">
             <AccordionItem value="centers">
@@ -762,12 +762,12 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
               <Users className="w-4 h-4" />
               Naming Conventions
             </h4>
-            <p className="text-xs text-muted-foreground">How should messages address students and staff?</p>
+            <p className="text-xs text-muted-foreground">{isHigherEd ? 'How should messages address students and staff?' : 'How should messages address customers and team members?'}</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Student Addressing</Label>
+              <Label className="text-sm font-medium">{isHigherEd ? 'Student Addressing' : 'Customer Addressing'}</Label>
               <Select
                 value={config.studentAddressing || 'first-name'}
                 onValueChange={(value: 'first-name' | 'full-name' | 'formal') => 
@@ -780,7 +780,7 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
                 <SelectContent>
                   <SelectItem value="first-name">First Name (Hi Sarah)</SelectItem>
                   <SelectItem value="full-name">Full Name (Dear Sarah Johnson)</SelectItem>
-                  <SelectItem value="formal">Formal (Dear Student)</SelectItem>
+                  <SelectItem value="formal">Formal ({isHigherEd ? 'Dear Student' : 'Dear Valued Customer'})</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -820,17 +820,17 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
                 </SelectContent>
               </Select>
             </div>
-            {renderTextField('Student ID Term', 'studentIdTerm', 'e.g., Student ID, Banner ID')}
+            {renderTextField(isHigherEd ? 'Student ID Term' : 'Customer ID Term', 'studentIdTerm', isHigherEd ? 'e.g., Student ID, Banner ID' : 'e.g., Account Number, Member ID')}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {renderTextField('Default Advisor Name (placeholder)', 'defaultAdvisorName', 'e.g., Your Academic Advisor')}
+            {renderTextField(isHigherEd ? 'Default Advisor Name (placeholder)' : 'Default Rep Name (placeholder)', 'defaultAdvisorName', isHigherEd ? 'e.g., Your Academic Advisor' : 'e.g., Your Account Manager')}
           </div>
 
-          {renderArrayField('Leader Names & Titles', 'leaderNames', 'leaderName', 'e.g., President Dr. Jane Smith', 'Key leaders students should know')}
-          {renderArrayField('Advisor Titles', 'advisorTitles', 'advisorTitle', 'e.g., Academic Advisor, Success Coach', 'How advisors are titled')}
-          {renderArrayField('Staff Role Titles', 'staffTitles', 'staffTitle', 'e.g., Peer Mentor, Resident Advisor', 'Common staff roles')}
-          {renderArrayField('Signature Templates', 'signatureTemplates', 'signatureTemplate', 'e.g., Your Student Success Team', 'Standard message sign-offs')}
+          {renderArrayField('Leader Names & Titles', 'leaderNames', 'leaderName', isHigherEd ? 'e.g., President Dr. Jane Smith' : 'e.g., CEO John Smith', isHigherEd ? 'Key leaders students should know' : 'Key leaders to reference in communications')}
+          {renderArrayField(isHigherEd ? 'Advisor Titles' : 'Rep / Account Titles', 'advisorTitles', 'advisorTitle', isHigherEd ? 'e.g., Academic Advisor, Success Coach' : 'e.g., Account Manager, Customer Success', isHigherEd ? 'How advisors are titled' : 'How customer-facing roles are titled')}
+          {renderArrayField(isHigherEd ? 'Staff Role Titles' : 'Team Role Titles', 'staffTitles', 'staffTitle', isHigherEd ? 'e.g., Peer Mentor, Resident Advisor' : 'e.g., Regional Manager, Brand Ambassador', 'Common staff roles')}
+          {renderArrayField('Signature Templates', 'signatureTemplates', 'signatureTemplate', isHigherEd ? 'e.g., Your Student Success Team' : 'e.g., The Valvoline Team', 'Standard message sign-offs')}
         </TabsContent>
 
         {/* CTAs Tab */}
@@ -849,8 +849,8 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
                 'Primary CTAs', 
                 'primaryCTAs', 
                 'primaryCTA', 
-                'e.g., Schedule your advising appointment today',
-                'Main action you want students to take'
+                isHigherEd ? 'e.g., Schedule your advising appointment today' : 'e.g., Request a quote today',
+                isHigherEd ? 'Main action you want students to take' : 'Main action you want recipients to take'
               )}
             </div>
             
@@ -1033,8 +1033,8 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
                   </div>
                   <div>
                     <h4 className="font-semibold text-green-800 dark:text-green-400">Content DNA Active</h4>
-                    <p className="text-xs text-green-700 dark:text-green-500">
-                      Your institution's voice profile is being applied to all AI-generated messages
+                     <p className="text-xs text-green-700 dark:text-green-500">
+                       Your {isHigherEd ? "institution's" : "organization's"} voice profile is being applied to all AI-generated messages
                     </p>
                   </div>
                 </div>
@@ -1150,8 +1150,8 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
                       <Dna className="w-10 h-10 text-primary" />
                     </div>
                     <h3 className="font-serif text-xl font-semibold mb-2">Set Up Content DNA</h3>
-                    <p className="text-muted-foreground text-sm mb-6">
-                      Content DNA captures your institution's unique voice and communication style. 
+                     <p className="text-muted-foreground text-sm mb-6">
+                       Content DNA captures your {isHigherEd ? "institution's" : "organization's"} unique voice and communication style. 
                       Upload sample communications and let AI analyze your patterns, tone, and vocabulary.
                     </p>
                     
@@ -1187,9 +1187,9 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
                 <AlertCircle className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
                 <div className="text-sm text-muted-foreground">
                   <p className="font-medium text-foreground mb-1">What happens without Content DNA?</p>
-                  <p>
-                    AI-generated messages will use general best practices. Setting up Content DNA ensures 
-                    outputs are tailored to your institution's specific voice and style guidelines.
+                   <p>
+                     AI-generated messages will use general best practices. Setting up Content DNA ensures 
+                     outputs are tailored to your {isHigherEd ? "institution's" : "organization's"} specific voice and style guidelines.
                   </p>
                 </div>
               </div>
@@ -1201,7 +1201,7 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
       {hasConfig && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg mt-6">
           <Check className="w-4 h-4 text-green-600" />
-          <span>Institutional settings will personalize all AI-generated message outputs.</span>
+          <span>{isHigherEd ? 'Institutional' : 'Organization'} settings will personalize all AI-generated message outputs.</span>
         </div>
       )}
     </div>
