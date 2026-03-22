@@ -282,7 +282,7 @@ const ImageGeneratorPage = () => {
         const orientation = img.width > img.height ? 'l' : 'p';
         const pdf = new jsPDF(orientation as any, 'px', [img.width, img.height]);
         pdf.addImage(img, 'PNG', 0, 0, img.width, img.height);
-        pdf.save(`campus-image-${channel}-${Date.now()}.pdf`);
+        pdf.save(`brand-image-${channel}-${Date.now()}.pdf`);
         URL.revokeObjectURL(img.src);
       } else {
         // Convert to desired format via canvas
