@@ -1141,35 +1141,23 @@ export default function UniversitySettingsPage() {
                         <Card>
                           <CardHeader className="pb-4">
                             <div className="flex items-center gap-3">
-                              <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[editingProfile.profileType]}</span>
+                              <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[draftType]}</span>
                               <Input
-                                value={editingProfile.config.unitName || editingProfile.name}
+                                value={draftName}
                                 onChange={(e) => {
-                                  if (editingProfile.profileType === 'university') {
-                                    handleRenameProfile(e.target.value);
-                                  } else {
-                                    handleUpdateConfig({ ...editingProfile.config, unitName: e.target.value });
-                                  }
+                                  setDraftName(e.target.value);
+                                  setHeaderDirty(true);
                                 }}
+                                placeholder="Profile name"
                                 className="font-serif text-lg font-bold h-auto py-1 px-2 border-transparent hover:border-border focus:border-border w-full sm:max-w-xs"
                               />
                             </div>
                             <div className="flex items-center gap-3 mt-2">
                               <Select
-                                value={editingProfile.profileType}
-                                onValueChange={async (val) => {
-                                  const newType = val as ProfileType;
-                                  try {
-                                    await supabase
-                                      .from('institutional_profiles')
-                                      .update({ profile_type: newType } as any)
-                                      .eq('id', editingProfile.id);
-                                    setEditingProfile({ ...editingProfile, profileType: newType });
-                                    refreshProfiles();
-                                    toast({ title: "Profile type updated", description: `Changed to ${PROFILE_TYPE_LABELS[newType]}.` });
-                                  } catch (e) {
-                                    console.error(e);
-                                  }
+                                value={draftType}
+                                onValueChange={(val) => {
+                                  setDraftType(val as ProfileType);
+                                  setHeaderDirty(true);
                                 }}
                               >
                                 <SelectTrigger className="h-7 w-auto text-xs gap-1.5 border-transparent hover:border-border">
@@ -1187,12 +1175,67 @@ export default function UniversitySettingsPage() {
                                 </SelectContent>
                               </Select>
                               <span className="text-xs text-muted-foreground">
-                                {editingProfile.profileType === 'university' || editingProfile.profileType === 'headquarters'
+                                {draftType === 'university' || draftType === 'headquarters'
                                   ? 'Configure Content DNA, terminology, and branding'
                                   : `Part of ${getParentProfile(editingProfile.id)?.name || 'parent organization'}`
                                 }
                               </span>
                             </div>
+                            {headerDirty && (
+                              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50">
+                                <Button
+                                  size="sm"
+                                  disabled={isSavingHeader || !draftName.trim()}
+                                  onClick={async () => {
+                                    if (!editingProfile || !draftName.trim()) return;
+                                    setIsSavingHeader(true);
+                                    try {
+                                      // Update name
+                                      if (editingProfile.profileType === 'university' || editingProfile.profileType === 'headquarters') {
+                                        await updateProfile(editingProfile.id, { name: draftName.trim() });
+                                      } else {
+                                        await updateProfile(editingProfile.id, { config: { ...editingProfile.config, unitName: draftName.trim() } });
+                                      }
+                                      // Update type if changed
+                                      if (draftType !== editingProfile.profileType) {
+                                        await supabase
+                                          .from('institutional_profiles')
+                                          .update({ profile_type: draftType } as any)
+                                          .eq('id', editingProfile.id);
+                                      }
+                                      // Refresh everything
+                                      await refreshProfiles();
+                                      setEditingProfile({
+                                        ...editingProfile,
+                                        name: editingProfile.profileType === 'university' || editingProfile.profileType === 'headquarters' ? draftName.trim() : editingProfile.name,
+                                        config: { ...editingProfile.config, unitName: draftName.trim() },
+                                        profileType: draftType,
+                                      });
+                                      setHeaderDirty(false);
+                                      toast({ title: "Profile updated", description: `"${draftName.trim()}" saved successfully.` });
+                                    } catch (e) {
+                                      console.error(e);
+                                      toast({ title: "Error", description: "Failed to save profile changes.", variant: "destructive" });
+                                    } finally {
+                                      setIsSavingHeader(false);
+                                    }
+                                  }}
+                                >
+                                  {isSavingHeader ? "Saving…" : "Save Changes"}
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setDraftName(editingProfile.config.unitName || editingProfile.name);
+                                    setDraftType(editingProfile.profileType);
+                                    setHeaderDirty(false);
+                                  }}
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
+                            )}
                             <p className="text-xs text-muted-foreground mt-2">
                               Last updated {format(new Date(editingProfile.updatedAt), 'MMM d, yyyy \'at\' h:mm a')}
                             </p>
