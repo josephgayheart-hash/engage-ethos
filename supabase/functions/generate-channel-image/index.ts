@@ -492,7 +492,7 @@ serve(async (req) => {
         }
 
         if (parts.length > 0) {
-          brandGuidelinesContext = `\nINSTITUTIONAL BRAND GUIDELINES (from Content DNA):\n${parts.join('\n')}\n\nThe visual design MUST embody these brand values — the shapes, color use, composition, and energy should visually reflect the institution's brand personality, pillars, and promise. If custom graphic guidelines are provided above, follow them precisely for typography treatment, color usage ratios, and visual style. This is not generic design — it should FEEL like this specific institution's brand.`;
+          brandGuidelinesContext = `\n${orgLabel().toUpperCase()} BRAND GUIDELINES (from Content DNA):\n${parts.join('\n')}\n\nThe visual design MUST embody these brand values — the shapes, color use, composition, and energy should visually reflect the ${orgLabel()}'s brand personality, pillars, and promise. If custom graphic guidelines are provided above, follow them precisely for typography treatment, color usage ratios, and visual style. This is not generic design — it should FEEL like this specific ${orgLabel()}'s brand.`;
           brandGuidelinesSummary = parts.slice(0, 6).join('. ');
           console.log("Brand guidelines injected for graphic design:", parts.length, "elements");
         }
