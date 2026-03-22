@@ -472,6 +472,7 @@ export default function UniversitySettingsPage() {
         name: (editingProfile.profileType === 'university' || editingProfile.profileType === 'headquarters') && headerDirty ? draftName.trim() : editingProfile.name,
         config: newConfig,
         profileType: draftType,
+        parentProfileId: draftParentId,
         updatedAt: new Date().toISOString(),
       };
       setEditingProfile(updatedProfile);
