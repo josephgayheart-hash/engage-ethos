@@ -66,6 +66,8 @@ import {
   Settings,
   AlertCircle,
   Users,
+  MapPin,
+  Globe,
 } from "lucide-react";
 import type { InstitutionalConfig as InstitutionalConfigType, ProfileType as ConfigProfileType } from "@/types/campusvoice";
 
@@ -791,6 +793,28 @@ export default function UniversitySettingsPage() {
                             </Badge>
                           </div>
 
+                          {/* Location & Language metadata */}
+                          {(cfg.city || cfg.enterpriseRegion || cfg.primaryLanguage) && (
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                              {(cfg.city || cfg.stateProvince || cfg.country) && (
+                                <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                  <MapPin className="w-3 h-3" />
+                                  {[cfg.city, cfg.stateProvince, cfg.country].filter(Boolean).join(', ')}
+                                </span>
+                              )}
+                              {cfg.enterpriseRegion && (
+                                <Badge variant="secondary" className="text-[9px] h-4 px-1.5">{cfg.enterpriseRegion}</Badge>
+                              )}
+                              {cfg.primaryLanguage && (
+                                <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                  <Globe className="w-3 h-3" />
+                                  {cfg.primaryLanguage.toUpperCase()}
+                                  {cfg.secondaryLanguages?.length ? ` +${cfg.secondaryLanguages.length}` : ''}
+                                </span>
+                              )}
+                            </div>
+                          )}
+
                           {/* Color swatches */}
                           <div className="flex items-center gap-2">
                             {cfg.primaryColor && (
@@ -998,6 +1022,22 @@ export default function UniversitySettingsPage() {
                                       {profile.config.institutionAbbreviation && `${profile.config.institutionAbbreviation} • `}
                                       {profile.config.mascot || PROFILE_TYPE_LABELS[profile.profileType]}
                                     </p>
+                                    {(profile.config.city || profile.config.enterpriseRegion || profile.config.primaryLanguage) && (
+                                      <p className="text-[10px] text-muted-foreground truncate mt-0.5 flex items-center gap-1.5">
+                                        {(profile.config.city || profile.config.country) && (
+                                          <span className="flex items-center gap-0.5">
+                                            <MapPin className="w-2.5 h-2.5" />
+                                            {[profile.config.city, profile.config.country].filter(Boolean).join(', ')}
+                                          </span>
+                                        )}
+                                        {profile.config.primaryLanguage && (
+                                          <span className="flex items-center gap-0.5">
+                                            <Globe className="w-2.5 h-2.5" />
+                                            {profile.config.primaryLanguage.toUpperCase()}
+                                          </span>
+                                        )}
+                                      </p>
+                                    )}
                                   </div>
 
                                   {/* Sub-units indicator */}
@@ -1034,7 +1074,25 @@ export default function UniversitySettingsPage() {
                                       >
                                         <div className="flex items-center gap-2">
                                           <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[child.profileType]}</span>
-                                          <span className="flex-1 text-sm font-medium truncate">{child.config.unitName || child.name}</span>
+                                          <div className="flex-1 min-w-0">
+                                            <span className="text-sm font-medium truncate block">{child.config.unitName || child.name}</span>
+                                            {(child.config.city || child.config.primaryLanguage) && (
+                                              <span className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+                                                {child.config.city && (
+                                                  <span className="flex items-center gap-0.5">
+                                                    <MapPin className="w-2.5 h-2.5" />
+                                                    {[child.config.city, child.config.country].filter(Boolean).join(', ')}
+                                                  </span>
+                                                )}
+                                                {child.config.primaryLanguage && (
+                                                  <span className="flex items-center gap-0.5">
+                                                    <Globe className="w-2.5 h-2.5" />
+                                                    {child.config.primaryLanguage.toUpperCase()}
+                                                  </span>
+                                                )}
+                                              </span>
+                                            )}
+                                          </div>
                                           {isChildSelected && (
                                             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
                                               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
@@ -1181,6 +1239,28 @@ export default function UniversitySettingsPage() {
                                 }
                               </span>
                             </div>
+
+                            {/* Location & Language info */}
+                            {(editingProfile.config.city || editingProfile.config.enterpriseRegion || editingProfile.config.primaryLanguage) && (
+                              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5">
+                                {(editingProfile.config.city || editingProfile.config.stateProvince || editingProfile.config.country) && (
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                                    <MapPin className="w-3.5 h-3.5" />
+                                    {[editingProfile.config.city, editingProfile.config.stateProvince, editingProfile.config.country].filter(Boolean).join(', ')}
+                                  </span>
+                                )}
+                                {editingProfile.config.enterpriseRegion && (
+                                  <Badge variant="secondary" className="text-[10px] h-5">{editingProfile.config.enterpriseRegion}</Badge>
+                                )}
+                                {editingProfile.config.primaryLanguage && (
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                                    <Globe className="w-3.5 h-3.5" />
+                                    {editingProfile.config.primaryLanguage.toUpperCase()}
+                                    {editingProfile.config.secondaryLanguages?.length ? ` + ${editingProfile.config.secondaryLanguages.join(', ')}` : ''}
+                                  </span>
+                                )}
+                              </div>
+                            )}
                             {headerDirty && (
                               <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50">
                                 <Button
