@@ -1393,7 +1393,7 @@ export default function UniversitySettingsPage() {
                           })()}
                           
                           <InstitutionalConfig 
-                            config={editingProfile.config} 
+                            config={draftConfig || editingProfile.config} 
                             onChange={handleUpdateConfig}
                             profileId={editingProfile.id}
                           />
