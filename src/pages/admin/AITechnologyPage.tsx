@@ -5,7 +5,8 @@ import {
   Cpu, Zap, Brain, ImageIcon, Globe, Mail, Shield, ArrowRight,
   Server, RefreshCw, Package, FileText, Database, MailIcon, Plug,
   Layout, ChevronDown, Sparkles, Eye, Layers, Upload, Search,
-  Lock, BarChart3, Type, Palette, Code2, Workflow
+  Lock, BarChart3, Type, Palette, Code2, Workflow, Dna, BookOpen,
+  Camera, PenTool, MessageCircle, Map, CheckCircle2, XCircle, Minus
 } from "lucide-react";
 import { WaveBackground } from "@/components/WaveBackground";
 import {
@@ -211,6 +212,154 @@ const pipelineSteps = [
   { step: "Evaluation", desc: "Adherence scoring & feedback", icon: Eye },
 ];
 
+/* ── Content DNA Deep Dive Data ── */
+
+const dnaComponents = [
+  {
+    name: "Voice Analysis",
+    icon: Brain,
+    storage: "content_dna_analysis.voice_analysis",
+    description: "AI-extracted voice profile: overall tone, formality level, emotional tone, sentence style, key characteristics, vocabulary patterns, common phrases, and messaging tactics.",
+    extractedBy: "analyze-voice (Gemini 2.5 Flash)",
+  },
+  {
+    name: "Brand Platform",
+    icon: Layers,
+    storage: "content_dna_analysis.brand_platform",
+    description: "Structured brand elements: Promise, Pillars (with keywords), Pathways, Proof Points, and Commitments — all selectable as generation filters.",
+    extractedBy: "analyze-voice (Gemini 2.5 Flash)",
+  },
+  {
+    name: "Custom Instructions",
+    icon: FileText,
+    storage: "content_dna_analysis.custom_instructions",
+    description: "Free-form brand guidelines and override rules authored by CMOs. Injected verbatim into every generation and evaluation prompt.",
+    extractedBy: "Manual entry",
+  },
+  {
+    name: "DNA Adjustments",
+    icon: RefreshCw,
+    storage: "content_dna_adjustments",
+    description: "Non-destructive refinements: voice dimension sliders (formality, warmth, authority), section feedback, and always/never/prefer override rules.",
+    extractedBy: "Manual tuning UI",
+  },
+  {
+    name: "Content Samples",
+    icon: Upload,
+    storage: "content_dna_samples",
+    description: "Uploaded PDFs, URLs, and pasted text. Each sample undergoes semantic extraction to derive key themes and summaries used for voice analysis.",
+    extractedBy: "extract-semantics (Gemini 2.5 Flash)",
+  },
+  {
+    name: "Story Bank",
+    icon: BookOpen,
+    storage: "story_bank",
+    description: "Narrative entries with subject names, pull quotes, themes, and story types. Selectable during generation for authentic, human storytelling.",
+    extractedBy: "parse-story (Gemini 2.5 Flash)",
+  },
+  {
+    name: "Fact Book",
+    icon: BarChart3,
+    storage: "fact_book",
+    description: "Verified data points with categories, year, trend direction, source documents. Selected facts appear as bold statistics in generated content.",
+    extractedBy: "parse-fact-book (Gemini 2.5 Flash)",
+  },
+  {
+    name: "Brand Photography",
+    icon: Camera,
+    storage: "campus_photo_samples",
+    description: "Categorized photo library with AI analysis. Used as visual context by the Image Studio to match architectural style, seasonal feel, and campus identity.",
+    extractedBy: "analyze-campus-photo (Gemini 2.5 Flash)",
+  },
+  {
+    name: "Design References",
+    icon: Palette,
+    storage: "design_references",
+    description: "Visual style inspiration images that act as a mandatory style guide. Both Photo and Graphic Design modes reference these for icon language, color ratios, and layout patterns.",
+    extractedBy: "Manual upload",
+  },
+];
+
+type ConsumptionLevel = "full" | "partial" | "none";
+
+const toolConsumptionMatrix: {
+  tool: string;
+  icon: React.ComponentType<{ className?: string }>;
+  edgeFunction: string;
+  voice: ConsumptionLevel;
+  brand: ConsumptionLevel;
+  instructions: ConsumptionLevel;
+  adjustments: ConsumptionLevel;
+  stories: ConsumptionLevel;
+  facts: ConsumptionLevel;
+  photos: ConsumptionLevel;
+  designRefs: ConsumptionLevel;
+  method: string;
+}[] = [
+  {
+    tool: "Message Builder",
+    icon: PenTool,
+    edgeFunction: "generate-message",
+    voice: "full", brand: "full", instructions: "full", adjustments: "full",
+    stories: "full", facts: "full", photos: "none", designRefs: "none",
+    method: "Client-side via useContentDNAForGeneration hook → passed in request body",
+  },
+  {
+    tool: "Journey Designer",
+    icon: Map,
+    edgeFunction: "evaluate-message (mapper mode)",
+    voice: "full", brand: "full", instructions: "full", adjustments: "partial",
+    stories: "partial", facts: "partial", photos: "none", designRefs: "none",
+    method: "Client-side via institutionalConfig with voiceAnalysis & brandPlatform merged",
+  },
+  {
+    tool: "AI Copywriter",
+    icon: MessageCircle,
+    edgeFunction: "playground-chat",
+    voice: "full", brand: "none", instructions: "full", adjustments: "none",
+    stories: "none", facts: "none", photos: "none", designRefs: "none",
+    method: "Client-side fetch from content_dna_analysis → streamed in system prompt",
+  },
+  {
+    tool: "Evaluate / Score",
+    icon: Shield,
+    edgeFunction: "evaluate-message",
+    voice: "full", brand: "full", instructions: "full", adjustments: "partial",
+    stories: "none", facts: "none", photos: "none", designRefs: "none",
+    method: "Client-side via institutionalConfig with voiceAnalysis & brandPlatform",
+  },
+  {
+    tool: "Image Studio",
+    icon: ImageIcon,
+    edgeFunction: "generate-channel-image",
+    voice: "full", brand: "full", instructions: "full", adjustments: "none",
+    stories: "none", facts: "none", photos: "full", designRefs: "full",
+    method: "Server-side — edge function fetches DNA, photos, & design refs via parallel Promise.all()",
+  },
+  {
+    tool: "Brand Studio",
+    icon: Palette,
+    edgeFunction: "Client-side only",
+    voice: "none", brand: "none", instructions: "none", adjustments: "none",
+    stories: "none", facts: "none", photos: "none", designRefs: "none",
+    method: "Receives brand colors, logos, and overlays from profile config — no AI DNA injection",
+  },
+  {
+    tool: "Smart Layer",
+    icon: Sparkles,
+    edgeFunction: "smart-layer-image",
+    voice: "none", brand: "none", instructions: "none", adjustments: "none",
+    stories: "none", facts: "none", photos: "none", designRefs: "none",
+    method: "Receives brand colors for overlay compositing — pattern-removal AI, no DNA prompt",
+  },
+];
+
+const dnaResolutionSteps = [
+  { label: "Selected Profile", desc: "First looks for DNA attached to the selected institutional profile" },
+  { label: "Parent Profile", desc: "If none found, checks the parent profile (e.g., University for a College)" },
+  { label: "Tenant Level", desc: "Falls back to tenant-wide DNA only when no profile is selected (prevents cross-contamination)" },
+];
+
 const infrastructurePatterns = [
   { pattern: "Multi-Tenant RLS", detail: "Every table uses tenant_id-based Row-Level Security for complete data isolation" },
   { pattern: "Hierarchical Profiles", detail: "University → College → Department with cascading Content DNA" },
@@ -386,6 +535,157 @@ export default function AITechnologyPage() {
                   )}
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Content DNA Deep Dive ── */}
+        <section>
+          <div className="flex items-center gap-2 mb-5">
+            <div className="h-8 w-1 rounded-full bg-gradient-to-b from-accent to-primary" />
+            <h2 className="text-xl font-bold text-foreground">Content DNA Deep Dive</h2>
+            <Badge variant="secondary" className="ml-2">9 components</Badge>
+          </div>
+
+          <p className="text-sm text-muted-foreground mb-6 max-w-3xl">
+            Content DNA is the intelligence layer that makes every output tool brand-aware. It ingests raw organizational content, extracts structured voice and brand elements, and injects them into AI prompts at generation time — ensuring every message, image, and evaluation reflects the organization's authentic identity.
+          </p>
+
+          {/* DNA Components */}
+          <div className="mb-8">
+            <p className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground mb-3">Components & Storage</p>
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {dnaComponents.map((c) => (
+                <Collapsible key={c.name}>
+                  <div className="card-interactive rounded-xl overflow-hidden">
+                    <CollapsibleTrigger className="w-full p-3 flex items-center gap-3 text-left hover:bg-muted/30 transition-colors">
+                      <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                        <c.icon className="h-4 w-4 text-accent" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-foreground">{c.name}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{c.extractedBy}</p>
+                      </div>
+                      <ChevronDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="px-3 pb-3 space-y-2">
+                        <p className="text-[11px] text-muted-foreground leading-relaxed">{c.description}</p>
+                        <code className="text-[10px] text-accent/80 bg-accent/5 px-1.5 py-0.5 rounded">{c.storage}</code>
+                      </div>
+                    </CollapsibleContent>
+                  </div>
+                </Collapsible>
+              ))}
+            </div>
+          </div>
+
+          {/* DNA Resolution Hierarchy */}
+          <div className="mb-8">
+            <p className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground mb-3">Resolution Hierarchy</p>
+            <div className="card-interactive rounded-xl p-4">
+              <p className="text-[11px] text-muted-foreground mb-3">When a tool requests Content DNA, the system resolves it through a cascading hierarchy to prevent cross-contamination between profiles:</p>
+              <div className="flex items-stretch gap-2">
+                {dnaResolutionSteps.map((s, i) => (
+                  <div key={s.label} className="flex items-center gap-2 flex-1">
+                    <div className="flex-1 p-3 rounded-xl bg-gradient-to-b from-accent/10 to-accent/5 border border-accent/20 text-center">
+                      <p className="text-xs font-semibold text-foreground">{s.label}</p>
+                      <p className="text-[10px] text-muted-foreground mt-1 leading-snug">{s.desc}</p>
+                    </div>
+                    {i < dnaResolutionSteps.length - 1 && (
+                      <div className="flex items-center shrink-0">
+                        <div className="w-5 h-px bg-border relative">
+                          <ArrowRight className="h-3 w-3 text-muted-foreground absolute -right-1.5 -top-1.5" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-3 italic">
+                Client-side: <code className="text-[10px] text-accent/80">useContentDNAForGeneration</code> hook · Server-side: parallel <code className="text-[10px] text-accent/80">Promise.all()</code> in edge functions
+              </p>
+            </div>
+          </div>
+
+          {/* Tool Consumption Matrix */}
+          <div>
+            <p className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground mb-3">Tool Consumption Matrix</p>
+            <div className="card-interactive rounded-xl overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-[11px]">
+                  <thead>
+                    <tr className="border-b border-border/50 bg-muted/30">
+                      <th className="text-left px-3 py-2.5 font-semibold text-foreground">Tool</th>
+                      <th className="text-center px-1.5 py-2.5 font-semibold text-foreground">Voice</th>
+                      <th className="text-center px-1.5 py-2.5 font-semibold text-foreground">Brand</th>
+                      <th className="text-center px-1.5 py-2.5 font-semibold text-foreground">Instructions</th>
+                      <th className="text-center px-1.5 py-2.5 font-semibold text-foreground">Adjustments</th>
+                      <th className="text-center px-1.5 py-2.5 font-semibold text-foreground">Stories</th>
+                      <th className="text-center px-1.5 py-2.5 font-semibold text-foreground">Facts</th>
+                      <th className="text-center px-1.5 py-2.5 font-semibold text-foreground">Photos</th>
+                      <th className="text-center px-1.5 py-2.5 font-semibold text-foreground">Design Refs</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {toolConsumptionMatrix.map((row) => {
+                      const StatusIcon = ({ level }: { level: ConsumptionLevel }) => {
+                        if (level === "full") return <CheckCircle2 className="h-3.5 w-3.5 text-accent mx-auto" />;
+                        if (level === "partial") return <Minus className="h-3.5 w-3.5 text-pillar-susceptibility mx-auto" />;
+                        return <XCircle className="h-3.5 w-3.5 text-muted-foreground/30 mx-auto" />;
+                      };
+                      return (
+                        <Collapsible key={row.tool} asChild>
+                          <>
+                            <CollapsibleTrigger asChild>
+                              <tr className="border-b border-border/30 hover:bg-muted/20 cursor-pointer transition-colors">
+                                <td className="px-3 py-2.5">
+                                  <div className="flex items-center gap-2">
+                                    <row.icon className="h-3.5 w-3.5 text-primary shrink-0" />
+                                    <span className="font-medium text-foreground">{row.tool}</span>
+                                  </div>
+                                </td>
+                                <td className="text-center px-1.5 py-2.5"><StatusIcon level={row.voice} /></td>
+                                <td className="text-center px-1.5 py-2.5"><StatusIcon level={row.brand} /></td>
+                                <td className="text-center px-1.5 py-2.5"><StatusIcon level={row.instructions} /></td>
+                                <td className="text-center px-1.5 py-2.5"><StatusIcon level={row.adjustments} /></td>
+                                <td className="text-center px-1.5 py-2.5"><StatusIcon level={row.stories} /></td>
+                                <td className="text-center px-1.5 py-2.5"><StatusIcon level={row.facts} /></td>
+                                <td className="text-center px-1.5 py-2.5"><StatusIcon level={row.photos} /></td>
+                                <td className="text-center px-1.5 py-2.5"><StatusIcon level={row.designRefs} /></td>
+                              </tr>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent asChild>
+                              <tr className="bg-muted/10 border-b border-border/20">
+                                <td colSpan={9} className="px-3 py-2">
+                                  <div className="flex items-start gap-2">
+                                    <code className="text-[10px] text-accent/80 bg-accent/5 px-1.5 py-0.5 rounded shrink-0">{row.edgeFunction}</code>
+                                    <span className="text-[10px] text-muted-foreground">{row.method}</span>
+                                  </div>
+                                </td>
+                              </tr>
+                            </CollapsibleContent>
+                          </>
+                        </Collapsible>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <div className="px-3 py-2.5 bg-muted/20 border-t border-border/30 flex items-center gap-4">
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle2 className="h-3 w-3 text-accent" />
+                  <span className="text-[10px] text-muted-foreground">Full consumption</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Minus className="h-3 w-3 text-pillar-susceptibility" />
+                  <span className="text-[10px] text-muted-foreground">Partial / selective</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <XCircle className="h-3 w-3 text-muted-foreground/30" />
+                  <span className="text-[10px] text-muted-foreground">Not consumed</span>
+                </div>
+              </div>
             </div>
           </div>
         </section>
