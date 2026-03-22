@@ -328,6 +328,7 @@ serve(async (req) => {
     const brandColors: string[] = [];
     let tenantType = "";
     let strictInstitutionConstraint = "";
+    let schoolName = "";
     const isHigherEd = () => !tenantType || tenantType === "higher_ed";
     const orgLabel = () => isHigherEd() ? "institution" : "organization";
     const settingLabel = () => isHigherEd() ? "campus" : "brand";
