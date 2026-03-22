@@ -6,7 +6,7 @@ export const enterpriseVocabulary: IndustryVocabulary = {
     organization: 'Company',
     organizationShort: 'Co.',
     organizationPlural: 'Companies',
-    organizationSettings: 'Organization Settings',
+    organizationSettings: 'Enterprise Settings',
     organizationAdmin: 'Organization Admin',
     organizationUser: 'Team Member',
     primaryAudience: 'Customers',
