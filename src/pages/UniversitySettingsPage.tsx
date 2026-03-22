@@ -1269,10 +1269,17 @@ export default function UniversitySettingsPage() {
                                               return (
                                                 <div key={gc.id}>
                                                   <div
-                                                    className={`group rounded-md border p-2 cursor-pointer transition-all ${
-                                                      isGcSelected
-                                                        ? 'border-primary bg-primary/5'
-                                                        : 'border-border hover:border-primary/40 hover:bg-muted/30'
+                                                    draggable
+                                                    onDragStart={(e) => { e.stopPropagation(); handleDragStart(gc.id); }}
+                                                    onDragOver={(e) => { e.stopPropagation(); handleDragOver(e, gc.id); }}
+                                                    onDragLeave={handleDragLeave}
+                                                    onDrop={(e) => { e.stopPropagation(); handleDrop(e, gc.id); }}
+                                                    className={`group rounded-md border p-2 cursor-grab active:cursor-grabbing transition-all ${
+                                                      dragOverProfileId === gc.id
+                                                        ? 'border-primary border-dashed bg-primary/10'
+                                                        : isGcSelected
+                                                          ? 'border-primary bg-primary/5'
+                                                          : 'border-border hover:border-primary/40 hover:bg-muted/30'
                                                     }`}
                                                     onClick={() => setEditingProfile(gc)}
                                                   >
