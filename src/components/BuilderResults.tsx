@@ -93,7 +93,10 @@ export function BuilderResults({
           type: 'builder',
           context,
           institutionalConfig,
-          contentDNA: contentDNA || undefined
+          contentDNA: contentDNA || undefined,
+          model: selectedModel,
+          industryContext: industryLabels.industryContext,
+          contentStyle: industryLabels.contentStyle,
         }
       });
 
