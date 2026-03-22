@@ -1,5 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { useIndustry } from "@/contexts/IndustryContext";
 
 interface AgencyLabels {
   // Navigation & Header
