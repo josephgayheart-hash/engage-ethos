@@ -759,7 +759,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                       <Input
                         value={newFact.label}
                         onChange={e => setNewFact(prev => ({ ...prev, label: e.target.value }))}
-                        placeholder="e.g., Total Enrollment"
+                        placeholder={isHigherEd ? "e.g., Total Enrollment" : "e.g., Global Locations"}
                       />
                     </div>
 
