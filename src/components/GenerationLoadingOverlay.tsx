@@ -31,6 +31,7 @@ interface ProfileStats {
 
 interface GenerationContext {
   profileName?: string;
+  profileLabel?: string;
   useContentDNA?: boolean;
   hasBrandPlatform?: boolean;
   brandPillarCount?: number;
