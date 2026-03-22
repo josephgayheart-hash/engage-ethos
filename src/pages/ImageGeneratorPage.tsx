@@ -365,8 +365,10 @@ const ImageGeneratorPage = () => {
               Image Studio
             </h1>
             <p className="text-sm text-muted-foreground">
-              Generate on-brand campus imagery using your institution's profile, colors, architecture, and identity.
-              Images are always grounded in your institutional details — upload campus photos in Content DNA Studio for even greater visual accuracy.
+              {isHigherEd
+                ? "Generate on-brand campus imagery using your institution's profile, colors, architecture, and identity. Images are always grounded in your institutional details — upload campus photos in Content DNA Studio for even greater visual accuracy."
+                : "Generate on-brand imagery using your organization's profile, colors, and identity. Images are grounded in your brand details — upload brand photos in Content DNA Studio for even greater visual accuracy."
+              }
             </p>
           </div>
         </div>
