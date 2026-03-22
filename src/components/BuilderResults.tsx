@@ -17,6 +17,7 @@ interface BuilderResultsProps {
   result: BuilderResult;
   context?: MessageContext;
   institutionalConfig?: InstitutionalConfig;
+  selectedModel?: string;
   onSaveToLibrary?: (content: string, title: string) => void;
   onSubmitToShared?: (content: string) => void;
   onRegeneratedDraft?: (draft: string) => void;
