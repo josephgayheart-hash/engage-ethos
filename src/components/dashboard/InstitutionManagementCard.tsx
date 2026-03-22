@@ -20,6 +20,7 @@ interface InstitutionStatus {
 export function InstitutionManagementCard() {
   const { tenant, isAdmin } = useAuth();
   const { isAgency, labels } = useAgencyMode();
+  const { labels: industryLabels } = useIndustry();
   const [status, setStatus] = useState<InstitutionStatus | null>(null);
   const [loading, setLoading] = useState(true);
 
