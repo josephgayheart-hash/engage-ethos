@@ -236,7 +236,7 @@ export function CampusPhotographyTab({ profileId }: CampusPhotographyTabProps) {
             <Input
               value={description}
               onChange={e => setDescription(e.target.value)}
-              placeholder="e.g. Main quad at sunset"
+              placeholder={isHigherEd ? "e.g. Main quad at sunset" : "e.g. HQ lobby, product display"}
               className="h-9 text-sm"
             />
           </div>
