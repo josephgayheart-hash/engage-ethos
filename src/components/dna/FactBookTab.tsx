@@ -969,7 +969,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                           />
                         </div>
                         <div className="md:col-span-2 space-y-2">
-                          <Label>Fact Book Text</Label>
+                          <Label>{bookLabel} Text</Label>
                           <Textarea
                             value={importText}
                             onChange={e => setImportText(e.target.value)}
