@@ -177,7 +177,7 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
     } finally {
       setIsGeneratingImage(false);
     }
-  }, [channel, contentSummary, audience, tenantId, profileId, goal, tone, moment, cohort, domain, imageEngine, imageStyle]);
+  }, [channel, contentSummary, audience, tenantId, profileId, goal, tone, moment, cohort, domain, imageEngine, imageStyle, outputLanguage]);
 
   const handleRegenerateImage = () => {
     setChannelImageUrl(null);
