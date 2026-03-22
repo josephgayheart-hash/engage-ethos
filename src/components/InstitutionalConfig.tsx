@@ -661,17 +661,17 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
               <Monitor className="w-4 h-4" />
               Digital Platforms & Systems
             </h4>
-            <p className="text-xs text-muted-foreground">Names of systems students interact with - AI will reference these in messages.</p>
+            <p className="text-xs text-muted-foreground">{isHigherEd ? 'Names of systems students interact with — AI will reference these in messages.' : 'Names of platforms and tools your team uses — AI will reference these in messages.'}</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {renderTextField('Student Portal Name', 'portalName', 'e.g., MyUniversity Portal, Student Hub')}
-            {renderTextField('LMS Name', 'lmsName', 'e.g., Canvas, Blackboard, Moodle')}
-            {renderTextField('Advising System', 'advisingSystemName', 'e.g., Navigate, Starfish, EAB')}
+            {renderTextField(isHigherEd ? 'Student Portal Name' : 'Customer Portal Name', 'portalName', isHigherEd ? 'e.g., MyUniversity Portal, Student Hub' : 'e.g., Partner Portal, Dealer Hub')}
+            {renderTextField(isHigherEd ? 'LMS Name' : 'Knowledge Base / LMS', 'lmsName', isHigherEd ? 'e.g., Canvas, Blackboard, Moodle' : 'e.g., Confluence, Notion, Trainual')}
+            {renderTextField(isHigherEd ? 'Advising System' : 'CRM / Support System', 'advisingSystemName', isHigherEd ? 'e.g., Navigate, Starfish, EAB' : 'e.g., Salesforce, HubSpot, Zendesk')}
             {renderTextField('Scheduling System', 'schedulingSystemName', 'e.g., Calendly, Bookings, AppointmentPlus')}
-            {renderTextField('Degree Audit System', 'degreeAuditSystem', 'e.g., DegreeWorks, Stellic')}
-            {renderTextField('Financial Aid Portal', 'financialAidPortal', 'e.g., Financial Aid Self-Service')}
-            {renderTextField('Registration System', 'registrationSystem', 'e.g., Student Registration Portal')}
+            {isHigherEd && renderTextField('Degree Audit System', 'degreeAuditSystem', 'e.g., DegreeWorks, Stellic')}
+            {isHigherEd && renderTextField('Financial Aid Portal', 'financialAidPortal', 'e.g., Financial Aid Self-Service')}
+            {isHigherEd && renderTextField('Registration System', 'registrationSystem', 'e.g., Student Registration Portal')}
             {renderTextField('Virtual Meeting Platform', 'virtualMeetingPlatform', 'e.g., Zoom, Teams, Google Meet')}
           </div>
         </TabsContent>
