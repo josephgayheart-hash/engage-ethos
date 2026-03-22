@@ -348,7 +348,7 @@ const ImageGeneratorPage = () => {
       required_fields: { audience: audience ? [audience] : [], moment: [], channel: channel ? [channel] : ['social-media'] },
       metadata: { source: 'image-studio', sceneDescription: contentDescription, tone, goal },
     }).select('id').single();
-    if (error) { toast.error('Failed to save to University Library.'); return undefined; }
+    if (error) { toast.error('Failed to save to Shared Library.'); return undefined; }
     return data?.id;
   }, [imageUrl, channel, audience, tone, goal, contentDescription, selectedProfileId, profile, user]);
 
