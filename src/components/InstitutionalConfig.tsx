@@ -820,17 +820,17 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
                 </SelectContent>
               </Select>
             </div>
-            {renderTextField('Student ID Term', 'studentIdTerm', 'e.g., Student ID, Banner ID')}
+            {renderTextField(isHigherEd ? 'Student ID Term' : 'Customer ID Term', 'studentIdTerm', isHigherEd ? 'e.g., Student ID, Banner ID' : 'e.g., Account Number, Member ID')}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {renderTextField('Default Advisor Name (placeholder)', 'defaultAdvisorName', 'e.g., Your Academic Advisor')}
+            {renderTextField(isHigherEd ? 'Default Advisor Name (placeholder)' : 'Default Rep Name (placeholder)', 'defaultAdvisorName', isHigherEd ? 'e.g., Your Academic Advisor' : 'e.g., Your Account Manager')}
           </div>
 
-          {renderArrayField('Leader Names & Titles', 'leaderNames', 'leaderName', 'e.g., President Dr. Jane Smith', 'Key leaders students should know')}
-          {renderArrayField('Advisor Titles', 'advisorTitles', 'advisorTitle', 'e.g., Academic Advisor, Success Coach', 'How advisors are titled')}
-          {renderArrayField('Staff Role Titles', 'staffTitles', 'staffTitle', 'e.g., Peer Mentor, Resident Advisor', 'Common staff roles')}
-          {renderArrayField('Signature Templates', 'signatureTemplates', 'signatureTemplate', 'e.g., Your Student Success Team', 'Standard message sign-offs')}
+          {renderArrayField('Leader Names & Titles', 'leaderNames', 'leaderName', isHigherEd ? 'e.g., President Dr. Jane Smith' : 'e.g., CEO John Smith', isHigherEd ? 'Key leaders students should know' : 'Key leaders to reference in communications')}
+          {renderArrayField(isHigherEd ? 'Advisor Titles' : 'Rep / Account Titles', 'advisorTitles', 'advisorTitle', isHigherEd ? 'e.g., Academic Advisor, Success Coach' : 'e.g., Account Manager, Customer Success', isHigherEd ? 'How advisors are titled' : 'How customer-facing roles are titled')}
+          {renderArrayField(isHigherEd ? 'Staff Role Titles' : 'Team Role Titles', 'staffTitles', 'staffTitle', isHigherEd ? 'e.g., Peer Mentor, Resident Advisor' : 'e.g., Regional Manager, Brand Ambassador', 'Common staff roles')}
+          {renderArrayField('Signature Templates', 'signatureTemplates', 'signatureTemplate', isHigherEd ? 'e.g., Your Student Success Team' : 'e.g., The Valvoline Team', 'Standard message sign-offs')}
         </TabsContent>
 
         {/* CTAs Tab */}
