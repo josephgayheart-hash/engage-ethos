@@ -335,8 +335,38 @@ serve(async (req) => {
     if (!rateLimit.allowed) {
       return rateLimitExceededResponse(rateLimit);
     }
-    const { message, context, mode, institutionalConfig, journeyWeeks, startDate, endDate, model: requestedModel, industryContext, contentStyle, outputLanguage } = await req.json();
+    const { message, context, mode, institutionalConfig, journeyWeeks, startDate, endDate, model: requestedModel, industryContext, contentStyle, outputLanguage, targetLanguage, sourceLanguage } = await req.json();
     
+    // --- Quick translate mode: lightweight, no context needed ---
+    if (mode === 'translate' && message && targetLanguage) {
+      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+      if (!LOVABLE_API_KEY) {
+        return new Response(JSON.stringify({ error: "AI service not configured" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      const langNames: Record<string, string> = { en: "English", es: "Spanish", fr: "French", zh: "Chinese (Simplified)", ar: "Arabic", pt: "Portuguese", de: "German", ja: "Japanese", ko: "Korean", hi: "Hindi", vi: "Vietnamese", tl: "Tagalog", it: "Italian", ru: "Russian" };
+      const tgtName = langNames[targetLanguage] || targetLanguage;
+      const srcName = sourceLanguage ? (langNames[sourceLanguage] || sourceLanguage) : "the source language";
+
+      const response = await resilientFetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: `You are a professional translator. Translate the following text from ${srcName} to ${tgtName}. Preserve all formatting, line breaks, markdown, and structure. Return ONLY the translated text with no preamble or explanation.` },
+            { role: "user", content: message },
+          ],
+        }),
+      }, { label: "translate", maxRetries: 1, timeoutMs: 30_000 });
+
+      if (!response.ok) {
+        return await handleGatewayErrorResponse(response, "translate");
+      }
+      const tData = await response.json();
+      const translatedText = tData?.choices?.[0]?.message?.content || message;
+      return new Response(JSON.stringify({ translatedText }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     // Validate and select model
     const ALLOWED_MODELS = [
       'google/gemini-2.5-flash', 'google/gemini-2.5-flash-lite', 'google/gemini-2.5-pro',
