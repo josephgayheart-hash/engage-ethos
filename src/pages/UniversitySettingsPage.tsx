@@ -102,6 +102,10 @@ export default function UniversitySettingsPage() {
     division: 'Division',
     unit: 'Unit',
     department: 'Department',
+    headquarters: 'Headquarters',
+    region: 'Region',
+    location: 'Location',
+  };
   };
   const { profiles, createProfile, updateProfile, deleteProfile, duplicateProfile, getChildProfiles, getRootProfiles, getParentProfile, refreshProfiles } = useInstitutionalProfiles();
   const { toast } = useToast();
