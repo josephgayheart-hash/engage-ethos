@@ -1385,8 +1385,16 @@ export default function UniversitySettingsPage() {
                         {/* Sticky Action Bar */}
                         <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border rounded-lg p-3 shadow-sm">
                           <div className="flex flex-wrap items-center justify-between gap-3">
-                            {/* Left: Editing indicator */}
+                            {/* Left: Back button (mobile) + Editing indicator */}
                             <div className="flex items-center gap-3">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 lg:hidden"
+                                onClick={() => setEditingProfile(null)}
+                              >
+                                <ArrowLeft className="w-4 h-4" />
+                              </Button>
                               <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800">
                                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                                 <span className="text-sm font-medium text-green-700 dark:text-green-400">
