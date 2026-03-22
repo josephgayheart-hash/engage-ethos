@@ -1022,6 +1022,22 @@ export default function UniversitySettingsPage() {
                                       {profile.config.institutionAbbreviation && `${profile.config.institutionAbbreviation} • `}
                                       {profile.config.mascot || PROFILE_TYPE_LABELS[profile.profileType]}
                                     </p>
+                                    {(profile.config.city || profile.config.enterpriseRegion || profile.config.primaryLanguage) && (
+                                      <p className="text-[10px] text-muted-foreground truncate mt-0.5 flex items-center gap-1.5">
+                                        {(profile.config.city || profile.config.country) && (
+                                          <span className="flex items-center gap-0.5">
+                                            <MapPin className="w-2.5 h-2.5" />
+                                            {[profile.config.city, profile.config.country].filter(Boolean).join(', ')}
+                                          </span>
+                                        )}
+                                        {profile.config.primaryLanguage && (
+                                          <span className="flex items-center gap-0.5">
+                                            <Globe className="w-2.5 h-2.5" />
+                                            {profile.config.primaryLanguage.toUpperCase()}
+                                          </span>
+                                        )}
+                                      </p>
+                                    )}
                                   </div>
 
                                   {/* Sub-units indicator */}
