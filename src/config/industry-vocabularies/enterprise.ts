@@ -27,6 +27,7 @@ export const enterpriseVocabulary: IndustryVocabulary = {
     photography: 'Brand Photography',
     storyBank: 'Success Stories',
     factBook: 'Key Metrics',
+    organizationProfile: 'Company Profile',
     industryContext: 'enterprise brand management',
     contentStyle: 'corporate brand communications',
   },

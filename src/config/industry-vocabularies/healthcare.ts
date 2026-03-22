@@ -27,6 +27,7 @@ export const healthcareVocabulary: IndustryVocabulary = {
     photography: 'Brand Photography',
     storyBank: 'Patient Stories',
     factBook: 'Quality Metrics',
+    organizationProfile: 'System Profile',
     industryContext: 'healthcare system communications',
     contentStyle: 'patient-centered healthcare communications',
   },

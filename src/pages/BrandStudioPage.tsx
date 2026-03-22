@@ -1,4 +1,5 @@
 import { useRef, useCallback, useState, useEffect } from "react";
+import { useIndustry } from "@/contexts/IndustryContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import html2canvas from "html2canvas";
 import { DownloadFormatPicker } from "@/components/image-generator/DownloadFormatPicker";
@@ -51,6 +52,7 @@ type HeadlineAlign = "left" | "center" | "right";
 const BrandStudioPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { labels: industryLabels } = useIndustry();
   const state = (location.state as BrandStudioState | null) || ({} as Partial<BrandStudioState>);
   const restore = state.restoreOverlay;
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -494,7 +496,7 @@ const BrandStudioPage = () => {
 
           {/* Profile selector */}
           <div className="space-y-1.5">
-            <label className="text-sm font-medium">Institutional Profile</label>
+            <label className="text-sm font-medium">{industryLabels.organizationProfile}</label>
             <Select value={selectedProfileId} onValueChange={(v) => { setSelectedProfileId(v); }}>
               <SelectTrigger>
                 <SelectValue placeholder={profilesLoading ? "Loading profiles…" : "Select a profile"} />

@@ -31,6 +31,7 @@ interface ProfileStats {
 
 interface GenerationContext {
   profileName?: string;
+  profileLabel?: string;
   useContentDNA?: boolean;
   hasBrandPlatform?: boolean;
   brandPillarCount?: number;
@@ -121,10 +122,12 @@ function buildProofItems(ctx: GenerationContext, phaseKey: string): ProofItem[] 
 
 function buildPhases(ctx: GenerationContext): (PhaseItem & { key: string })[] {
   const profileDetail = ctx.profileName ? `for ${ctx.profileName}` : "";
+  const pLabel = ctx.profileLabel || "profile";
+  const pLabelLower = pLabel.toLowerCase();
 
   if (ctx.mode === "journey") {
     return [
-      { key: "profile", message: "Loading institutional profile…", completedMessage: "Institutional profile loaded", detail: profileDetail, icon: Building2, proofItems: buildProofItems(ctx, "profile") },
+      { key: "profile", message: `Loading ${pLabelLower}…`, completedMessage: `${pLabel} loaded`, detail: profileDetail, icon: Building2, proofItems: buildProofItems(ctx, "profile") },
       { key: "dna", message: "Analyzing Content DNA & voice patterns…", completedMessage: "Content DNA & voice patterns analyzed", detail: ctx.useContentDNA ? "Tone, vocabulary, sentence style" : "Skipped — DNA off", icon: Dna, proofItems: buildProofItems(ctx, "dna") },
       { key: "brand", message: "Mapping brand pillars to journey arcs…", completedMessage: "Brand pillars mapped to journey arcs", detail: ctx.brandPillarCount ? `${ctx.brandPillarCount} pillar${ctx.brandPillarCount > 1 ? "s" : ""} selected` : undefined, icon: Target, proofItems: buildProofItems(ctx, "brand") },
       { key: "flow", message: "Designing multi-channel touchpoint flow…", completedMessage: "Multi-channel touchpoint flow designed", detail: ctx.journeyWeeks ? `${ctx.journeyWeeks}-week timeline` : undefined, icon: Map, proofItems: [] },
@@ -135,7 +138,7 @@ function buildPhases(ctx: GenerationContext): (PhaseItem & { key: string })[] {
   }
 
   return [
-    { key: "profile", message: "Loading institutional profile…", completedMessage: "Institutional profile loaded", detail: profileDetail, icon: Building2, proofItems: buildProofItems(ctx, "profile") },
+    { key: "profile", message: `Loading ${pLabelLower}…`, completedMessage: `${pLabel} loaded`, detail: profileDetail, icon: Building2, proofItems: buildProofItems(ctx, "profile") },
     { key: "dna", message: "Analyzing Content DNA & voice patterns…", completedMessage: "Content DNA & voice patterns analyzed", detail: ctx.useContentDNA ? "Tone, vocabulary, sentence style" : "Skipped — DNA off", icon: Dna, proofItems: buildProofItems(ctx, "dna") },
     { key: "brand", message: "Applying brand pillars & proof points…", completedMessage: "Brand pillars & proof points applied", detail: ctx.brandPillarCount ? `${ctx.brandPillarCount} pillar${ctx.brandPillarCount > 1 ? "s" : ""} selected` : undefined, icon: Target, proofItems: buildProofItems(ctx, "brand") },
     { key: "stories", message: "Weaving in stories & data points…", completedMessage: "Stories & data points woven in", detail: ctx.hasStories || ctx.hasFacts ? `${ctx.storyCount || 0} stories, ${ctx.factCount || 0} facts` : "No stories/facts selected", icon: BookMarked, proofItems: buildProofItems(ctx, "stories") },

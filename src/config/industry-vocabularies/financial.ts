@@ -27,6 +27,7 @@ export const financialVocabulary: IndustryVocabulary = {
     photography: 'Brand Photography',
     storyBank: 'Client Stories',
     factBook: 'Performance Metrics',
+    organizationProfile: 'Institution Profile',
     industryContext: 'financial services communications',
     contentStyle: 'professional financial services brand communications',
   },

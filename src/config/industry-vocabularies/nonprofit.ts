@@ -27,6 +27,7 @@ export const nonprofitVocabulary: IndustryVocabulary = {
     photography: 'Impact Photography',
     storyBank: 'Impact Stories',
     factBook: 'Impact Metrics',
+    organizationProfile: 'Organization Profile',
     industryContext: 'nonprofit and mission-driven organization',
     contentStyle: 'mission-driven donor and community communications',
   },
