@@ -422,7 +422,6 @@ const ImageGeneratorPage = () => {
                         ? "e.g. Students collaborating on a research project in a modern science lab during golden hour"
                         : "e.g. Team collaborating in a modern workspace with brand products visible on the conference table"
                     }
-                    }
                     value={contentDescription}
                     onChange={(e) => setContentDescription(e.target.value)}
                     rows={4}
