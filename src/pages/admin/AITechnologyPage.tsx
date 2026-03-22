@@ -5,7 +5,8 @@ import {
   Cpu, Zap, Brain, ImageIcon, Globe, Mail, Shield, ArrowRight,
   Server, RefreshCw, Package, FileText, Database, MailIcon, Plug,
   Layout, ChevronDown, Sparkles, Eye, Layers, Upload, Search,
-  Lock, BarChart3, Type, Palette, Code2, Workflow
+  Lock, BarChart3, Type, Palette, Code2, Workflow, Dna, BookOpen,
+  Camera, PenTool, MessageCircle, Map, CheckCircle2, XCircle, Minus
 } from "lucide-react";
 import { WaveBackground } from "@/components/WaveBackground";
 import {
