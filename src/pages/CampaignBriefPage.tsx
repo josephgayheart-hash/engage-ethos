@@ -154,9 +154,8 @@ Use professional, actionable language suitable for a brand/marketing team.`;
                 <div className="space-y-1.5">
                   <Label>{industryLabels?.organizationProfile || 'Profile'}</Label>
                   <InstitutionalProfileSelector
-                    profiles={profiles}
                     selectedProfileId={selectedProfileId}
-                    onProfileChange={setSelectedProfileId}
+                    onProfileChange={(id) => setSelectedProfileId(id)}
                   />
                 </div>
               )}
