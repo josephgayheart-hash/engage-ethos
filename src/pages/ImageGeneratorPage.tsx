@@ -840,7 +840,7 @@ const ImageGeneratorPage = () => {
                         {creationMode !== "graphic-design" && campusPhotoCount > 0 ? (
                           <span className="flex items-center justify-center gap-1">
                             <Camera className="w-3 h-3 text-primary" />
-                            {campusPhotoCount} campus photo{campusPhotoCount > 1 ? "s" : ""} guiding visual style
+                            {campusPhotoCount} {photoLabel} guiding visual style
                           </span>
                         ) : creationMode !== "graphic-design" ? (
                           <span className="flex items-center justify-center gap-1">
