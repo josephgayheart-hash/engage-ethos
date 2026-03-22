@@ -9,12 +9,14 @@ interface TranslationToggleProps {
   originalContent: string;
   /** The language code of the original content (e.g. 'es', 'fr') */
   outputLanguage: string;
-  /** Called when the user toggles — provides the content to display */
-  onToggle: (content: string, isEnglish: boolean) => void;
-  /** Optional class for the button */
+  /** Called when the user toggles — provides the content to display and whether it's English */
+  onToggle?: (content: string, isEnglish: boolean) => void;
+  /** Optional class for the wrapper */
   className?: string;
   /** Size variant */
   size?: "sm" | "default";
+  /** If true, renders the English translation inline below the toggle */
+  inline?: boolean;
 }
 
 const languageNames: Record<string, string> = {
@@ -39,6 +41,7 @@ export function TranslationToggle({
   onToggle,
   className = "",
   size = "sm",
+  inline = true,
 }: TranslationToggleProps) {
   const { toast } = useToast();
   const [showingEnglish, setShowingEnglish] = useState(false);
@@ -49,20 +52,17 @@ export function TranslationToggle({
 
   const handleToggle = useCallback(async () => {
     if (showingEnglish) {
-      // Switch back to original
       setShowingEnglish(false);
-      onToggle(originalContent, false);
+      onToggle?.(originalContent, false);
       return;
     }
 
-    // If we already have the English version cached, use it
     if (englishVersion) {
       setShowingEnglish(true);
-      onToggle(englishVersion, true);
+      onToggle?.(englishVersion, true);
       return;
     }
 
-    // Translate to English via edge function
     setIsTranslating(true);
     try {
       const { data, error } = await supabase.functions.invoke("evaluate-message", {
@@ -78,7 +78,7 @@ export function TranslationToggle({
       const translated = data?.translatedText || data?.message || originalContent;
       setEnglishVersion(translated);
       setShowingEnglish(true);
-      onToggle(translated, true);
+      onToggle?.(translated, true);
     } catch (err) {
       console.error("Translation failed:", err);
       toast({
@@ -91,27 +91,41 @@ export function TranslationToggle({
     }
   }, [showingEnglish, englishVersion, originalContent, outputLanguage, onToggle, toast]);
 
-  // Don't render if content is already English
   if (!outputLanguage || outputLanguage === "en") return null;
 
   return (
-    <Button
-      variant="outline"
-      size={size}
-      onClick={handleToggle}
-      disabled={isTranslating}
-      className={`gap-1.5 ${className}`}
-    >
-      {isTranslating ? (
-        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-      ) : (
-        <Languages className="w-3.5 h-3.5" />
+    <div className={className}>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size={size}
+          onClick={handleToggle}
+          disabled={isTranslating}
+          className="gap-1.5"
+        >
+          {isTranslating ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <Languages className="w-3.5 h-3.5" />
+          )}
+          {isTranslating
+            ? "Translating…"
+            : showingEnglish
+              ? `Show ${langName}`
+              : "Show English"}
+        </Button>
+        {showingEnglish && (
+          <span className="text-xs text-muted-foreground italic">
+            Showing English translation for HQ review
+          </span>
+        )}
+      </div>
+      {inline && showingEnglish && englishVersion && (
+        <div className="mt-2 p-3 bg-muted/40 rounded-lg border border-border/50">
+          <p className="text-xs font-medium text-muted-foreground mb-1.5">English Translation</p>
+          <p className="text-sm whitespace-pre-wrap">{englishVersion}</p>
+        </div>
       )}
-      {isTranslating
-        ? "Translating…"
-        : showingEnglish
-          ? `Show ${langName}`
-          : "Show English"}
-    </Button>
+    </div>
   );
 }
