@@ -46,6 +46,9 @@ const PROFILE_TYPE_ICONS: Record<ProfileType, React.ReactNode> = {
   division: <Layers className="w-3.5 h-3.5" />,
   unit: <Building className="w-3.5 h-3.5" />,
   department: <Briefcase className="w-3.5 h-3.5" />,
+  headquarters: <Building2 className="w-3.5 h-3.5" />,
+  region: <Layers className="w-3.5 h-3.5" />,
+  location: <Building className="w-3.5 h-3.5" />,
 };
 
 export function ContextSelector({

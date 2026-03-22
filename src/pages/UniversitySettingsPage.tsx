@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { InstitutionalConfig } from "@/components/InstitutionalConfig";
 import { ProfileSetupWizard } from "@/components/ProfileSetupWizard";
+import { EnterpriseProfileWizard } from "@/components/EnterpriseProfileWizard";
 import { SubUnitSetupWizard } from "@/components/SubUnitSetupWizard";
 import { useInstitutionalProfiles, type InstitutionalProfile, type ProfileType } from "@/hooks/useInstitutionalProfiles";
 import { useIndustry } from "@/contexts/IndustryContext";
@@ -72,6 +73,9 @@ const PROFILE_TYPE_ICONS: Record<ProfileType, React.ReactNode> = {
   division: <Layers className="w-4 h-4" />,
   unit: <Building className="w-4 h-4" />,
   department: <Briefcase className="w-4 h-4" />,
+  headquarters: <Building2 className="w-4 h-4" />,
+  region: <Layers className="w-4 h-4" />,
+  location: <Building className="w-4 h-4" />,
 };
 
 // Dynamic profile type labels from industry vocabulary — fallback for unknown types
@@ -91,13 +95,17 @@ export default function UniversitySettingsPage() {
   const [searchParams] = useSearchParams();
   const { tenant, refreshProfile, isAdmin, isSuperAdmin } = useAuth();
   const { isAgency, labels } = useAgencyMode();
-  const { labels: industryLabels } = useIndustry();
+  const { labels: industryLabels, isHigherEd } = useIndustry();
   const PROFILE_TYPE_LABELS: Record<string, string> = {
     university: industryLabels.organization,
     college: industryLabels.subUnit,
     division: 'Division',
     unit: 'Unit',
     department: 'Department',
+    headquarters: 'Headquarters',
+    region: 'Region',
+    location: 'Location',
+  };
   };
   const { profiles, createProfile, updateProfile, deleteProfile, duplicateProfile, getChildProfiles, getRootProfiles, getParentProfile, refreshProfiles } = useInstitutionalProfiles();
   const { toast } = useToast();
@@ -360,8 +368,9 @@ export default function UniversitySettingsPage() {
   };
 
   // Profile handlers
-  const handleCreateProfile = async (name: string, config: InstitutionalConfigType) => {
-    const profile = await createProfile(name, config, null, 'university');
+  const handleCreateProfile = async (name: string, config: InstitutionalConfigType, profileType?: string) => {
+    const type = (profileType || (isHigherEd ? 'university' : 'headquarters')) as ProfileType;
+    const profile = await createProfile(name, config, null, type);
     setShowWizard(false);
     if (profile) {
       setEditingProfile(profile);
@@ -831,17 +840,26 @@ export default function UniversitySettingsPage() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Building2 className="w-5 h-5" />
-                      Create Institutional Profile
+                      {isHigherEd ? 'Create Institutional Profile' : `Create ${industryLabels.organization} Profile`}
                     </CardTitle>
                     <CardDescription>
-                      Set up a new institution profile with branding, contact info, and key systems
+                      {isHigherEd
+                        ? 'Set up a new institution profile with branding, contact info, and key systems'
+                        : `Set up a new ${industryLabels.organization.toLowerCase()} profile with region, language, and identity`}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <ProfileSetupWizard
-                      onComplete={handleCreateProfile}
-                      onCancel={() => setShowWizard(false)}
-                    />
+                    {isHigherEd ? (
+                      <ProfileSetupWizard
+                        onComplete={handleCreateProfile}
+                        onCancel={() => setShowWizard(false)}
+                      />
+                    ) : (
+                      <EnterpriseProfileWizard
+                        onComplete={handleCreateProfile}
+                        onCancel={() => setShowWizard(false)}
+                      />
+                    )}
                   </CardContent>
                 </Card>
               ) : showSubUnitWizard && subUnitParent ? (
@@ -849,21 +867,35 @@ export default function UniversitySettingsPage() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Layers className="w-5 h-5" />
-                      Create Sub-Unit
+                      {isHigherEd ? 'Create Sub-Unit' : `Add ${industryLabels.subUnit}`}
                     </CardTitle>
                     <CardDescription>
-                      Create a college, division, unit, or department under {subUnitParent.name}
+                      {isHigherEd
+                        ? `Create a college, division, unit, or department under ${subUnitParent.name}`
+                        : `Create a region, division, or location under ${subUnitParent.name}`}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <SubUnitSetupWizard
-                      parentProfile={subUnitParent}
-                      onComplete={handleCreateSubUnit}
-                      onCancel={() => {
-                        setShowSubUnitWizard(false);
-                        setSubUnitParent(null);
-                      }}
-                    />
+                    {isHigherEd ? (
+                      <SubUnitSetupWizard
+                        parentProfile={subUnitParent}
+                        onComplete={handleCreateSubUnit}
+                        onCancel={() => {
+                          setShowSubUnitWizard(false);
+                          setSubUnitParent(null);
+                        }}
+                      />
+                    ) : (
+                      <EnterpriseProfileWizard
+                        onComplete={(name, config, profileType) => handleCreateSubUnit(name, config, profileType as any)}
+                        onCancel={() => {
+                          setShowSubUnitWizard(false);
+                          setSubUnitParent(null);
+                        }}
+                        parentProfileId={subUnitParent.id}
+                        parentProfileName={subUnitParent.name}
+                      />
+                    )}
                   </CardContent>
                 </Card>
               ) : (
