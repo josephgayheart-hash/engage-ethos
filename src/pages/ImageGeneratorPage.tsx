@@ -705,7 +705,7 @@ const ImageGeneratorPage = () => {
                 <div className="space-y-2">
                   <Label>Communication Goal</Label>
                   <Textarea
-                    placeholder="e.g. Drive enrollment interest, celebrate alumni achievement..."
+                    placeholder={isHigherEd ? "e.g. Drive enrollment interest, celebrate alumni achievement..." : "e.g. Boost brand awareness, promote new product launch, drive event attendance..."}
                     value={goal}
                     onChange={(e) => setGoal(e.target.value)}
                     rows={2}
