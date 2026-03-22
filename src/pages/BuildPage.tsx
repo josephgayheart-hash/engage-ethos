@@ -125,7 +125,7 @@ const channelOptions: { value: Channel; label: string }[] = [
 const BuildPage = () => {
   const { toast } = useToast();
   const { profile, isAdmin, isApprover, tenant } = useAuth();
-  const { audiences, cohorts, labels: industryLabels } = useIndustry();
+  const { audiences, cohorts, labels: industryLabels, isHigherEd } = useIndustry();
   
   // Dynamic label resolvers (replaced hardcoded audienceLabels/cohortLabels)
   const audienceLabels: Record<string, string> = Object.fromEntries(audiences.map(a => [a.id, a.label]));
