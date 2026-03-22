@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AIBadge } from "@/components/ui/ai-indicator";
+import { TranslationToggle } from "@/components/TranslationToggle";
 import { useToast } from "@/hooks/use-toast";
 import { useIndustry } from "@/contexts/IndustryContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,7 +23,23 @@ import {
   Download,
   Copy,
   Check,
+  Languages,
 } from "lucide-react";
+
+const outputLanguages = [
+  { value: 'en', label: 'English' },
+  { value: 'es', label: 'Spanish' },
+  { value: 'fr', label: 'French' },
+  { value: 'pt', label: 'Portuguese' },
+  { value: 'de', label: 'German' },
+  { value: 'zh', label: 'Chinese' },
+  { value: 'ja', label: 'Japanese' },
+  { value: 'ko', label: 'Korean' },
+  { value: 'ar', label: 'Arabic' },
+  { value: 'hi', label: 'Hindi' },
+  { value: 'it', label: 'Italian' },
+  { value: 'ru', label: 'Russian' },
+];
 
 const campaignTypes = [
   { value: 'product-launch', label: 'Product Launch' },
@@ -50,6 +67,7 @@ const CampaignBriefPage = () => {
   const [keyMessages, setKeyMessages] = useState('');
   const [constraints, setConstraints] = useState('');
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [outputLanguage, setOutputLanguage] = useState('en');
 
   const [generatedBrief, setGeneratedBrief] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -197,6 +215,18 @@ Use professional, actionable language suitable for a brand/marketing team.`;
                 <Textarea placeholder="Core messages or talking points to include..." value={keyMessages} onChange={e => setKeyMessages(e.target.value)} rows={2} />
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="flex items-center gap-1.5"><Languages className="w-3.5 h-3.5" /> Output Language</Label>
+                  <Select value={outputLanguage} onValueChange={setOutputLanguage}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {outputLanguages.map(l => <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               <Button onClick={handleGenerate} disabled={isGenerating} className="w-full gap-2">
                 <Sparkles className="w-4 h-4" />
                 {isGenerating ? 'Generating Brief...' : 'Generate Campaign Brief'}
@@ -215,7 +245,13 @@ Use professional, actionable language suitable for a brand/marketing team.`;
                   {copied ? 'Copied' : 'Copy'}
                 </Button>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
+                {outputLanguage !== 'en' && (
+                  <TranslationToggle
+                    originalContent={generatedBrief}
+                    outputLanguage={outputLanguage}
+                  />
+                )}
                 <div className="prose prose-sm max-w-none dark:prose-invert whitespace-pre-wrap">
                   {generatedBrief}
                 </div>

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AIBadge } from "@/components/ui/ai-indicator";
+import { TranslationToggle } from "@/components/TranslationToggle";
 import { useToast } from "@/hooks/use-toast";
 import { useIndustry } from "@/contexts/IndustryContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -28,7 +29,25 @@ import {
   Target,
   HandshakeIcon,
   TrendingUp,
+  Languages,
 } from "lucide-react";
+
+const outputLanguages = [
+  { value: 'en', label: 'English' },
+  { value: 'es', label: 'Spanish' },
+  { value: 'fr', label: 'French' },
+  { value: 'pt', label: 'Portuguese' },
+  { value: 'de', label: 'German' },
+  { value: 'zh', label: 'Chinese' },
+  { value: 'ja', label: 'Japanese' },
+  { value: 'ko', label: 'Korean' },
+  { value: 'ar', label: 'Arabic' },
+  { value: 'hi', label: 'Hindi' },
+  { value: 'it', label: 'Italian' },
+  { value: 'ru', label: 'Russian' },
+  { value: 'vi', label: 'Vietnamese' },
+  { value: 'tl', label: 'Tagalog' },
+];
 
 type PlaybookTab = 'site-visit' | 'rep-engagement' | 'event-coordination';
 
@@ -49,6 +68,7 @@ const RegionalPlaybookPage = () => {
 
   const [activeTab, setActiveTab] = useState<PlaybookTab>('site-visit');
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [outputLanguage, setOutputLanguage] = useState('en');
   const [region, setRegion] = useState('');
   const [customRegion, setCustomRegion] = useState('');
 
@@ -78,9 +98,13 @@ const RegionalPlaybookPage = () => {
   const selectedProfile = profiles.find(p => p.id === selectedProfileId);
 
   const buildPrompt = (): string => {
+    const langInstruction = outputLanguage !== 'en'
+      ? `\n\nIMPORTANT: Generate ALL content in ${outputLanguages.find(l => l.value === outputLanguage)?.label || outputLanguage}. All emails, templates, talking points, and instructions must be in ${outputLanguages.find(l => l.value === outputLanguage)?.label}. Only section headers may remain in English for structure.`
+      : '';
+
     const base = `You are a regional operations strategist for ${industryLabels?.industryContext || 'enterprise brand management'}.
 Organization: ${selectedProfile?.name || 'Not specified'}
-Region: ${regionLabel}`;
+Region: ${regionLabel}${langInstruction}`;
 
     if (activeTab === 'site-visit') {
       return `${base}
@@ -233,15 +257,34 @@ Tone should be organized, warm, and brand-aligned.`;
                   </div>
                 )}
               </div>
-              {profiles.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label>{industryLabels?.organizationProfile || 'Profile'}</Label>
-                  <InstitutionalProfileSelector
-                    selectedProfileId={selectedProfileId}
-                    onProfileChange={(id) => setSelectedProfileId(id)}
-                  />
+                  <Label className="flex items-center gap-1.5">
+                    <Languages className="w-3.5 h-3.5" />
+                    Output Language
+                  </Label>
+                  <Select value={outputLanguage} onValueChange={setOutputLanguage}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {outputLanguages.map(l => <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                  {outputLanguage !== 'en' && (
+                    <p className="text-xs text-muted-foreground">
+                      Playbook will be generated in {outputLanguages.find(l => l.value === outputLanguage)?.label}. Use the toggle to review in English.
+                    </p>
+                  )}
                 </div>
-              )}
+                {profiles.length > 0 && (
+                  <div className="space-y-1.5">
+                    <Label>{industryLabels?.organizationProfile || 'Profile'}</Label>
+                    <InstitutionalProfileSelector
+                      selectedProfileId={selectedProfileId}
+                      onProfileChange={(id) => setSelectedProfileId(id)}
+                    />
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
 
@@ -400,16 +443,30 @@ Tone should be organized, warm, and brand-aligned.`;
           {/* Generated Content */}
           {generatedContent && (
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-base">
-                  {activeTab === 'site-visit' ? 'Site Visit Playbook' : activeTab === 'rep-engagement' ? 'Rep Engagement Plan' : 'Event Coordination Playbook'}
-                </CardTitle>
-                <Button variant="ghost" size="sm" onClick={handleCopy} className="gap-1.5">
+              <CardHeader className="flex flex-row items-start justify-between gap-2">
+                <div className="space-y-1">
+                  <CardTitle className="text-base">
+                    {activeTab === 'site-visit' ? 'Site Visit Playbook' : activeTab === 'rep-engagement' ? 'Rep Engagement Plan' : 'Event Coordination Playbook'}
+                  </CardTitle>
+                  {outputLanguage !== 'en' && (
+                    <Badge variant="outline" className="gap-1 text-xs">
+                      <Languages className="w-3 h-3" />
+                      {outputLanguages.find(l => l.value === outputLanguage)?.label}
+                    </Badge>
+                  )}
+                </div>
+                <Button variant="ghost" size="sm" onClick={handleCopy} className="gap-1.5 shrink-0">
                   {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                   {copied ? 'Copied' : 'Copy'}
                 </Button>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
+                {outputLanguage !== 'en' && (
+                  <TranslationToggle
+                    originalContent={generatedContent}
+                    outputLanguage={outputLanguage}
+                  />
+                )}
                 <div className="prose prose-sm max-w-none dark:prose-invert whitespace-pre-wrap">
                   {generatedContent}
                 </div>
