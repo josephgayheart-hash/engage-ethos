@@ -678,7 +678,7 @@ export default function AITechnologyPage() {
                   <span className="text-[10px] text-muted-foreground">Full consumption</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <Minus className="h-3 w-3 text-yellow-500" />
+                  <Minus className="h-3 w-3 text-pillar-susceptibility" />
                   <span className="text-[10px] text-muted-foreground">Partial / selective</span>
                 </div>
                 <div className="flex items-center gap-1.5">
