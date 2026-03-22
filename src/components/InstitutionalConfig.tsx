@@ -849,8 +849,8 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
                 'Primary CTAs', 
                 'primaryCTAs', 
                 'primaryCTA', 
-                'e.g., Schedule your advising appointment today',
-                'Main action you want students to take'
+                isHigherEd ? 'e.g., Schedule your advising appointment today' : 'e.g., Request a quote today',
+                isHigherEd ? 'Main action you want students to take' : 'Main action you want recipients to take'
               )}
             </div>
             
