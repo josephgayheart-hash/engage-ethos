@@ -68,6 +68,7 @@ const RegionalPlaybookPage = () => {
 
   const [activeTab, setActiveTab] = useState<PlaybookTab>('site-visit');
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [outputLanguage, setOutputLanguage] = useState('en');
   const [region, setRegion] = useState('');
   const [customRegion, setCustomRegion] = useState('');
 
