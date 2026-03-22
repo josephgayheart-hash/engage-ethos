@@ -780,7 +780,7 @@ CRITICAL TEXT & LOGO RULES:
 
     console.log("Generating channel image for:", channel, "content:", contentSummary.substring(0, 100));
 
-    // Use campus photos from the parallel fetch (skip for fast engine to reduce latency)
+    // Use brand/campus photos from the parallel fetch (skip for fast engine to reduce latency)
     let campusPhotoUrls: string[] = [];
     if (engine !== "fast" && !isGraphicDesign) {
       try {
@@ -788,12 +788,14 @@ CRITICAL TEXT & LOGO RULES:
         if (campusPhotos && campusPhotos.length > 0) {
           const lowerPrompt = (contentSummary + " " + (audience || "") + " " + (moment || "")).toLowerCase();
           const categoryPriority: Record<string, string[]> = {
-            "architecture": ["architecture", "building", "campus", "hall", "center", "library"],
-            "campus-life": ["student", "campus life", "community", "event", "club"],
-            "landscape": ["outdoor", "quad", "garden", "nature", "scenic"],
-            "athletics": ["athletic", "sport", "game", "team", "stadium"],
-            "traditions": ["tradition", "ceremony", "homecoming", "commencement", "graduation"],
+            "architecture": ["architecture", "building", "campus", "hall", "center", "library", "office", "headquarters"],
+            "campus-life": ["student", "campus life", "community", "event", "club", "team", "people", "culture"],
+            "landscape": ["outdoor", "quad", "garden", "nature", "scenic", "exterior"],
+            "athletics": ["athletic", "sport", "game", "team", "stadium", "fitness"],
+            "traditions": ["tradition", "ceremony", "homecoming", "commencement", "graduation", "heritage", "legacy"],
             "aerial": ["aerial", "overview", "campus view", "panoramic"],
+            "product": ["product", "brand", "service", "offering", "solution"],
+            "workspace": ["office", "workspace", "meeting", "conference", "lobby"],
           };
 
           const scored = campusPhotos.map((p: any) => {
