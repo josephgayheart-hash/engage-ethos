@@ -10,6 +10,7 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 import { usePageTracking } from "@/hooks/usePageTracking";
 import { AppLayout } from "@/components/app-shell/AppLayout";
 import { BrandedLoader } from "@/components/BrandedLoader";
+import { useIndustry } from "@/contexts/IndustryContext";
 
 // Page imports
 import Index from "./pages/Index";
@@ -132,6 +133,12 @@ function RequireApprover({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function RequireHigherEd({ children }: { children: React.ReactNode }) {
+  const { isHigherEd } = useIndustry();
+  if (!isHigherEd) return <Navigate to="/dashboard" replace />;
+  return <>{children}</>;
+}
+
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading, profile } = useAuth();
   if (isLoading) return <BrandedLoader />;
@@ -197,8 +204,8 @@ const AppRoutes = () => (
       <Route path="/image-generator" element={<ImageGeneratorPage />} />
       <Route path="/brand-audit" element={<BrandAuditPage />} />
       <Route path="/brand-studio" element={<BrandStudioPage />} />
-      <Route path="/giving-day-planner" element={<GivingDayPlannerPage />} />
-      <Route path="/stewardship-report" element={<StewardshipReportPage />} />
+      <Route path="/giving-day-planner" element={<RequireHigherEd><GivingDayPlannerPage /></RequireHigherEd>} />
+      <Route path="/stewardship-report" element={<RequireHigherEd><StewardshipReportPage /></RequireHigherEd>} />
       <Route path="/settings" element={<Navigate to="/university-settings" replace />} />
       <Route path="/university-settings" element={<UniversitySettingsPage />} />
       <Route path="/profile" element={<ProfilePage />} />
