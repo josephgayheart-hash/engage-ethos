@@ -382,7 +382,7 @@ const ImageGeneratorPage = () => {
             {/* Controls */}
             <Card>
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg">Image Settings</CardTitle>
+                <CardTitle className="text-lg">Image Studio</CardTitle>
                 <CardDescription>
                   {isHigherEd
                     ? "Describe your scene and select options. The generator uses your institutional profile for campus-accurate, brand-aligned imagery."
