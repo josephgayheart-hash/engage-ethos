@@ -121,9 +121,21 @@ const layoutDensityOptions = [
 
 const ImageGeneratorPage = () => {
   const { profile, user } = useAuth();
+  const { isHigherEd, labels } = useIndustry();
   const tenantId = profile?.tenant_id;
   const { profiles } = useInstitutionalProfiles();
   const location = useLocation();
+
+  // Industry-aware option lists
+  const channelOptions = useMemo(() =>
+    ALL_CHANNEL_OPTIONS.filter(c => isHigherEd || !(c as any).higherEdOnly),
+    [isHigherEd]
+  );
+  const toneOptions = isHigherEd ? HIGHER_ED_TONE_OPTIONS : ENTERPRISE_TONE_OPTIONS;
+  const audienceOptions = isHigherEd ? HIGHER_ED_AUDIENCE_OPTIONS : ENTERPRISE_AUDIENCE_OPTIONS;
+  const styleOptions = isHigherEd ? HIGHER_ED_STYLE_OPTIONS : ENTERPRISE_STYLE_OPTIONS;
+  const photoLabel = isHigherEd ? "campus photos" : "brand photos";
+  const profileLabel = isHigherEd ? "Institutional Profile" : "Brand Profile";
 
   const [contentDescription, setContentDescription] = useState("");
   const [channel, setChannel] = useState("social-media");
