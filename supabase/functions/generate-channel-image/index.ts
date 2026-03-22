@@ -781,9 +781,12 @@ CRITICAL TEXT & LOGO RULES:
 
     console.log("Generating channel image for:", channel, "content:", contentSummary.substring(0, 100));
 
-    // Use brand/campus photos from the parallel fetch (skip for fast engine to reduce latency)
+    // Use brand/campus photos from the parallel fetch
+    // For enterprise tenants: ALWAYS include brand photos (even on fast engine) since they define the brand's visual identity
+    // For higher-ed: skip on fast engine to reduce latency (campus architecture is less critical)
     let campusPhotoUrls: string[] = [];
-    if (engine !== "fast" && !isGraphicDesign) {
+    const shouldUseBrandPhotos = !isGraphicDesign && (!isHigherEd() || engine !== "fast");
+    if (shouldUseBrandPhotos) {
       try {
         const campusPhotos = (campusPhotoResult as any)?.data;
         if (campusPhotos && campusPhotos.length > 0) {
@@ -807,13 +810,15 @@ CRITICAL TEXT & LOGO RULES:
 
           scored.sort((a: any, b: any) => b.score - a.score);
           campusPhotoUrls = scored.slice(0, 3).map((p: any) => p.file_url);
-          console.log(`Using ${campusPhotoUrls.length} campus reference photos`);
+          console.log(`Using ${campusPhotoUrls.length} ${isHigherEd() ? 'campus' : 'brand'} reference photos`);
         }
       } catch (e) {
-        console.warn("Could not process campus photos:", e);
+        console.warn("Could not process brand photos:", e);
       }
+    } else if (isGraphicDesign) {
+      console.log("Graphic design mode — brand photos handled via design references");
     } else {
-      console.log("Fast engine — skipping campus reference photos for speed");
+      console.log("Fast engine (higher-ed) — skipping campus reference photos for speed");
     }
 
     // Collect design reference URLs (persistent from DNA + inline from user)
