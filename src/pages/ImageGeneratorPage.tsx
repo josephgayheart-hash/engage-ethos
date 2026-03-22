@@ -55,14 +55,22 @@ const ALL_CHANNEL_OPTIONS = [
   { value: "news-article", label: "News Article Featured (16:9)" },
 ] as const;
 
-const toneOptions = [
+const HIGHER_ED_TONE_OPTIONS = [
   "Warm & Welcoming", "Bold & Energizing", "Prestigious & Scholarly",
   "Conversational & Friendly", "Inspiring & Aspirational", "Professional & Polished",
 ];
+const ENTERPRISE_TONE_OPTIONS = [
+  "Warm & Welcoming", "Bold & Energizing", "Professional & Polished",
+  "Conversational & Friendly", "Inspiring & Aspirational", "Corporate & Authoritative",
+];
 
-const audienceOptions = [
+const HIGHER_ED_AUDIENCE_OPTIONS = [
   "Prospective Students", "Current Students", "Parents & Families",
   "Alumni", "Donors", "Faculty & Staff", "Community",
+];
+const ENTERPRISE_AUDIENCE_OPTIONS = [
+  "Customers", "Prospects", "Partners", "Employees",
+  "Investors", "Community", "Franchisees",
 ];
 
 const engineOptions = [
@@ -70,8 +78,15 @@ const engineOptions = [
   { value: "premium", label: "Premium", description: "Slower, highest quality & realism" },
 ];
 
-const styleOptions = [
+const HIGHER_ED_STYLE_OPTIONS = [
   { value: "photorealistic", label: "Photorealistic", description: "Editorial campus photography" },
+  { value: "cinematic", label: "Cinematic", description: "Dramatic lighting, film-like depth" },
+  { value: "illustrated", label: "Illustrated", description: "Stylized graphic illustration" },
+  { value: "watercolor", label: "Watercolor", description: "Soft, artistic watercolor style" },
+  { value: "minimal", label: "Minimal / Flat", description: "Clean, modern flat design" },
+];
+const ENTERPRISE_STYLE_OPTIONS = [
+  { value: "photorealistic", label: "Photorealistic", description: "Professional brand photography" },
   { value: "cinematic", label: "Cinematic", description: "Dramatic lighting, film-like depth" },
   { value: "illustrated", label: "Illustrated", description: "Stylized graphic illustration" },
   { value: "watercolor", label: "Watercolor", description: "Soft, artistic watercolor style" },
