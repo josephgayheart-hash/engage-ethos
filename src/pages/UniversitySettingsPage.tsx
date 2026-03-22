@@ -1655,7 +1655,7 @@ export default function UniversitySettingsPage() {
                         </Card>
                       </div>
                     ) : (
-                      <Card className="border-dashed">
+                      <Card className="border-dashed hidden lg:block">
                         <CardContent className="flex flex-col items-center justify-center py-16 text-center">
                           <Building2 className="w-12 h-12 text-muted-foreground/30 mb-4" />
                           <h3 className="font-medium text-lg mb-1">Select a Profile</h3>
