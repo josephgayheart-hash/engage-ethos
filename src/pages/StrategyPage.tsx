@@ -85,7 +85,7 @@ const channelOptions: { value: Channel; label: string }[] = [
 const StrategyPage = () => {
   const { toast } = useToast();
   const { profile, isAdmin, isApprover, tenant } = useAuth();
-  const { audiences, cohorts, labels: industryLabels } = useIndustry();
+  const { audiences, cohorts, labels: industryLabels, isHigherEd } = useIndustry();
   const audienceLabels: Record<string, string> = Object.fromEntries(audiences.map(a => [a.id, a.label]));
   const cohortLabels: Record<string, string> = Object.fromEntries(cohorts.map(c => [c.id, c.label]));
   const { addMessage, updateMessage } = useMessageLibrary();
@@ -935,14 +935,13 @@ const StrategyPage = () => {
           {/* Library Navigation */}
           <LibraryNav mode="journeys" />
 
-          {/* Playbook Kit Selector or Active Kit Guidance */}
-          {editMode === 'new' && !mapperResult && (
+          {/* Playbook Kit Selector or Active Kit Guidance — higher-ed only */}
+          {isHigherEd && editMode === 'new' && !mapperResult && (
             selectedPlaybookKit ? (
               <PlaybookKitGuidance
                 kit={selectedPlaybookKit}
                 onClearKit={() => {
                   setSelectedPlaybookKit(null);
-                  // Reset context when clearing kit
                   setContext(prev => ({ ...prev, audience: undefined, cohort: undefined }));
                   toast({
                     title: "Playbook Cleared",
@@ -954,14 +953,12 @@ const StrategyPage = () => {
               <PlaybookKitSelector
                 onSelectKit={(kit) => {
                   setSelectedPlaybookKit(kit);
-                  // Pre-populate context from kit
                   if (kit.target_audiences && kit.target_audiences.length > 0) {
                     setContext(prev => ({ ...prev, audience: kit.target_audiences![0] as MessageContext['audience'] }));
                   }
                   if (kit.target_cohorts && kit.target_cohorts.length > 0) {
                     setContext(prev => ({ ...prev, cohort: kit.target_cohorts![0] as MessageContext['cohort'] }));
                   }
-                  // Auto-select advancement-appropriate channels
                   if (kit.category === 'advancement') {
                     setSelectedChannels(['email', 'direct-mail', 'landing-page', 'phone-call', 'case-for-care']);
                   }
