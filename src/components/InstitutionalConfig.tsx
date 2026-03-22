@@ -1187,9 +1187,9 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
                 <AlertCircle className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
                 <div className="text-sm text-muted-foreground">
                   <p className="font-medium text-foreground mb-1">What happens without Content DNA?</p>
-                  <p>
-                    AI-generated messages will use general best practices. Setting up Content DNA ensures 
-                    outputs are tailored to your institution's specific voice and style guidelines.
+                   <p>
+                     AI-generated messages will use general best practices. Setting up Content DNA ensures 
+                     outputs are tailored to your {isHigherEd ? "institution's" : "organization's"} specific voice and style guidelines.
                   </p>
                 </div>
               </div>
