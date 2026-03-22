@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Users, Dna, Search } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAgencyMode } from "@/hooks/useAgencyMode";
+import { useIndustry } from "@/contexts/IndustryContext";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { BetaBanner } from "@/components/BetaBanner";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -19,25 +20,6 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { useState } from "react";
-
-const MAX_LOGO_HEIGHT = 22;
-const MAX_LOGO_WIDTH = 80;
-
-const quickNav = [
-  { label: "Dashboard", href: "/dashboard" },
-  { label: "Message Builder", href: "/build" },
-  { label: "Journey Designer", href: "/strategy" },
-  { label: "Evaluator", href: "/evaluate" },
-  { label: "My Library", href: "/library" },
-  { label: "Content DNA", href: "/admin/content-dna" },
-  { label: "Institution Settings", href: "/university-settings" },
-  { label: "Image Studio", href: "/image-generator" },
-  { label: "AI Copywriter", href: "/playground" },
-  { label: "Brand Studio", href: "/brand-studio" },
-  { label: "Tools", href: "/tools" },
-  { label: "Profile", href: "/profile" },
-  { label: "Settings", href: "/settings" },
-];
 
 export function AppTopBar() {
   const { tenant } = useAuth();
