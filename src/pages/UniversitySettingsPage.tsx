@@ -793,6 +793,28 @@ export default function UniversitySettingsPage() {
                             </Badge>
                           </div>
 
+                          {/* Location & Language metadata */}
+                          {(cfg.city || cfg.enterpriseRegion || cfg.primaryLanguage) && (
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                              {(cfg.city || cfg.stateProvince || cfg.country) && (
+                                <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                  <MapPin className="w-3 h-3" />
+                                  {[cfg.city, cfg.stateProvince, cfg.country].filter(Boolean).join(', ')}
+                                </span>
+                              )}
+                              {cfg.enterpriseRegion && (
+                                <Badge variant="secondary" className="text-[9px] h-4 px-1.5">{cfg.enterpriseRegion}</Badge>
+                              )}
+                              {cfg.primaryLanguage && (
+                                <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                  <Globe className="w-3 h-3" />
+                                  {cfg.primaryLanguage.toUpperCase()}
+                                  {cfg.secondaryLanguages?.length ? ` +${cfg.secondaryLanguages.length}` : ''}
+                                </span>
+                              )}
+                            </div>
+                          )}
+
                           {/* Color swatches */}
                           <div className="flex items-center gap-2">
                             {cfg.primaryColor && (
