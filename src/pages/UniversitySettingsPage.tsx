@@ -68,6 +68,7 @@ import {
   Users,
   MapPin,
   Globe,
+  FolderTree,
 } from "lucide-react";
 import type { InstitutionalConfig as InstitutionalConfigType, ProfileType as ConfigProfileType } from "@/types/campusvoice";
 
@@ -132,10 +133,13 @@ export default function UniversitySettingsPage() {
   const [profileToDuplicate, setProfileToDuplicate] = useState<InstitutionalProfile | null>(null);
   const [expandedProfiles, setExpandedProfiles] = useState<Set<string>>(new Set());
   const [isDeletingProfile, setIsDeletingProfile] = useState(false);
+  const [dragOverProfileId, setDragOverProfileId] = useState<string | null>(null);
+  const dragProfileIdRef = useRef<string | null>(null);
   
   // Local draft state for the entire profile — saved explicitly via Save button
   const [draftName, setDraftName] = useState('');
   const [draftType, setDraftType] = useState<ProfileType>('university');
+  const [draftParentId, setDraftParentId] = useState<string | null>(null);
   const [draftConfig, setDraftConfig] = useState<InstitutionalConfigType | null>(null);
   const [headerDirty, setHeaderDirty] = useState(false);
   const [configDirty, setConfigDirty] = useState(false);
@@ -179,6 +183,7 @@ export default function UniversitySettingsPage() {
     if (editingProfile) {
       setDraftName(editingProfile.config.unitName || editingProfile.name);
       setDraftType(editingProfile.profileType);
+      setDraftParentId(editingProfile.parentProfileId || null);
       setDraftConfig(editingProfile.config);
       setHeaderDirty(false);
       setConfigDirty(false);
@@ -238,7 +243,62 @@ export default function UniversitySettingsPage() {
     });
   };
 
-  // Branding handlers
+  // Drag & drop handlers for reparenting profiles
+  const handleDragStart = (profileId: string) => {
+    dragProfileIdRef.current = profileId;
+  };
+
+  const handleDragOver = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    if (dragProfileIdRef.current && dragProfileIdRef.current !== targetId) {
+      setDragOverProfileId(targetId);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setDragOverProfileId(null);
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetId: string | null) => {
+    e.preventDefault();
+    setDragOverProfileId(null);
+    const sourceId = dragProfileIdRef.current;
+    dragProfileIdRef.current = null;
+    if (!sourceId || sourceId === targetId) return;
+
+    // Prevent circular: can't drop onto own descendant
+    let checkId: string | null | undefined = targetId;
+    while (checkId) {
+      if (checkId === sourceId) return;
+      const parent = profiles.find(p => p.id === checkId);
+      checkId = parent?.parentProfileId;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('institutional_profiles')
+        .update({ parent_profile_id: targetId } as any)
+        .eq('id', sourceId);
+      if (error) throw error;
+
+      await refreshProfiles();
+      if (targetId) {
+        setExpandedProfiles(prev => new Set([...prev, targetId]));
+      }
+      const source = profiles.find(p => p.id === sourceId);
+      const target = targetId ? profiles.find(p => p.id === targetId) : null;
+      toast({
+        title: 'Profile moved',
+        description: target
+          ? `"${source?.name}" is now under "${target.name}"`
+          : `"${source?.name}" moved to root level`,
+      });
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    }
+  };
+
+
   const resizeImage = (file: File): Promise<Blob> => {
     return new Promise((resolve, reject) => {
       const img = document.createElement('img');
@@ -451,6 +511,11 @@ export default function UniversitySettingsPage() {
         updates.profile_type = draftType;
       }
 
+      // Save parent if changed
+      if (draftParentId !== (editingProfile.parentProfileId || null)) {
+        updates.parent_profile_id = draftParentId;
+      }
+
       const { error } = await supabase
         .from('institutional_profiles')
         .update(updates as any)
@@ -464,6 +529,7 @@ export default function UniversitySettingsPage() {
         name: (editingProfile.profileType === 'university' || editingProfile.profileType === 'headquarters') && headerDirty ? draftName.trim() : editingProfile.name,
         config: newConfig,
         profileType: draftType,
+        parentProfileId: draftParentId,
         updatedAt: new Date().toISOString(),
       };
       setEditingProfile(updatedProfile);
@@ -1040,10 +1106,17 @@ export default function UniversitySettingsPage() {
                             <div key={profile.id}>
                               {/* Parent Profile Card - Clean minimal design */}
                               <div 
-                                className={`group relative rounded-lg border p-3 cursor-pointer transition-all ${
-                                  isSelected 
-                                    ? 'border-primary bg-primary/5 shadow-sm' 
-                                    : 'border-border hover:border-primary/40 hover:bg-muted/30'
+                                draggable
+                                onDragStart={() => handleDragStart(profile.id)}
+                                onDragOver={(e) => handleDragOver(e, profile.id)}
+                                onDragLeave={handleDragLeave}
+                                onDrop={(e) => handleDrop(e, profile.id)}
+                                className={`group relative rounded-lg border p-3 cursor-grab active:cursor-grabbing transition-all ${
+                                  dragOverProfileId === profile.id
+                                    ? 'border-primary border-dashed bg-primary/10 shadow-md'
+                                    : isSelected 
+                                      ? 'border-primary bg-primary/5 shadow-sm' 
+                                      : 'border-border hover:border-primary/40 hover:bg-muted/30'
                                 }`}
                                 onClick={() => setEditingProfile(profile)}
                               >
@@ -1126,10 +1199,17 @@ export default function UniversitySettingsPage() {
                                     return (
                                       <div key={child.id}>
                                         <div 
-                                          className={`group rounded-md border p-2.5 cursor-pointer transition-all ${
-                                            isChildSelected 
-                                              ? 'border-primary bg-primary/5' 
-                                              : 'border-border hover:border-primary/40 hover:bg-muted/30'
+                                          draggable
+                                          onDragStart={(e) => { e.stopPropagation(); handleDragStart(child.id); }}
+                                          onDragOver={(e) => { e.stopPropagation(); handleDragOver(e, child.id); }}
+                                          onDragLeave={handleDragLeave}
+                                          onDrop={(e) => { e.stopPropagation(); handleDrop(e, child.id); }}
+                                          className={`group rounded-md border p-2.5 cursor-grab active:cursor-grabbing transition-all ${
+                                            dragOverProfileId === child.id
+                                              ? 'border-primary border-dashed bg-primary/10'
+                                              : isChildSelected 
+                                                ? 'border-primary bg-primary/5' 
+                                                : 'border-border hover:border-primary/40 hover:bg-muted/30'
                                           }`}
                                           onClick={() => setEditingProfile(child)}
                                         >
@@ -1189,10 +1269,17 @@ export default function UniversitySettingsPage() {
                                               return (
                                                 <div key={gc.id}>
                                                   <div
-                                                    className={`group rounded-md border p-2 cursor-pointer transition-all ${
-                                                      isGcSelected
-                                                        ? 'border-primary bg-primary/5'
-                                                        : 'border-border hover:border-primary/40 hover:bg-muted/30'
+                                                    draggable
+                                                    onDragStart={(e) => { e.stopPropagation(); handleDragStart(gc.id); }}
+                                                    onDragOver={(e) => { e.stopPropagation(); handleDragOver(e, gc.id); }}
+                                                    onDragLeave={handleDragLeave}
+                                                    onDrop={(e) => { e.stopPropagation(); handleDrop(e, gc.id); }}
+                                                    className={`group rounded-md border p-2 cursor-grab active:cursor-grabbing transition-all ${
+                                                      dragOverProfileId === gc.id
+                                                        ? 'border-primary border-dashed bg-primary/10'
+                                                        : isGcSelected
+                                                          ? 'border-primary bg-primary/5'
+                                                          : 'border-border hover:border-primary/40 hover:bg-muted/30'
                                                     }`}
                                                     onClick={() => setEditingProfile(gc)}
                                                   >
@@ -1235,10 +1322,17 @@ export default function UniversitySettingsPage() {
                                                         return (
                                                           <div
                                                             key={leaf.id}
-                                                            className={`rounded border p-1.5 cursor-pointer transition-all text-xs ${
-                                                              isLeafSelected
-                                                                ? 'border-primary bg-primary/5'
-                                                                : 'border-border hover:border-primary/40 hover:bg-muted/30'
+                                                            draggable
+                                                            onDragStart={(e) => { e.stopPropagation(); handleDragStart(leaf.id); }}
+                                                            onDragOver={(e) => { e.stopPropagation(); handleDragOver(e, leaf.id); }}
+                                                            onDragLeave={handleDragLeave}
+                                                            onDrop={(e) => { e.stopPropagation(); handleDrop(e, leaf.id); }}
+                                                            className={`rounded border p-1.5 cursor-grab active:cursor-grabbing transition-all text-xs ${
+                                                              dragOverProfileId === leaf.id
+                                                                ? 'border-primary border-dashed bg-primary/10'
+                                                                : isLeafSelected
+                                                                  ? 'border-primary bg-primary/5'
+                                                                  : 'border-border hover:border-primary/40 hover:bg-muted/30'
                                                             }`}
                                                             onClick={() => setEditingProfile(leaf)}
                                                           >
@@ -1267,6 +1361,19 @@ export default function UniversitySettingsPage() {
                             </div>
                           );
                         })}
+                      {/* Drop zone to move a profile to root level */}
+                      <div
+                        onDragOver={(e) => { e.preventDefault(); setDragOverProfileId('__root__'); }}
+                        onDragLeave={handleDragLeave}
+                        onDrop={(e) => { e.preventDefault(); setDragOverProfileId(null); handleDrop(e, null); }}
+                        className={`mt-2 rounded-md border-2 border-dashed p-2 text-center text-xs text-muted-foreground transition-all ${
+                          dragOverProfileId === '__root__'
+                            ? 'border-primary bg-primary/10 text-primary'
+                            : 'border-transparent'
+                        }`}
+                      >
+                        {dragOverProfileId && dragOverProfileId !== '__root__' ? '' : dragOverProfileId === '__root__' ? '↑ Drop here to move to root level' : ''}
+                      </div>
                       </div>
                     )}
                   </div>
@@ -1314,6 +1421,7 @@ export default function UniversitySettingsPage() {
                                     if (editingProfile) {
                                       setDraftName(editingProfile.config.unitName || editingProfile.name);
                                       setDraftType(editingProfile.profileType);
+                                      setDraftParentId(editingProfile.parentProfileId || null);
                                       setDraftConfig(editingProfile.config);
                                       setHeaderDirty(false);
                                       setConfigDirty(false);
@@ -1394,7 +1502,7 @@ export default function UniversitySettingsPage() {
                                 className="font-serif text-lg font-bold h-auto py-1 px-2 border-transparent hover:border-border focus:border-border w-full sm:max-w-xs"
                               />
                             </div>
-                            <div className="flex items-center gap-3 mt-2">
+                            <div className="flex flex-wrap items-center gap-3 mt-2">
                               <Select
                                 value={draftType}
                                 onValueChange={(val) => {
@@ -1416,12 +1524,52 @@ export default function UniversitySettingsPage() {
                                   ))}
                                 </SelectContent>
                               </Select>
-                              <span className="text-xs text-muted-foreground">
-                                {draftType === 'university' || draftType === 'headquarters'
-                                  ? 'Configure Content DNA, terminology, and branding'
-                                  : `Part of ${getParentProfile(editingProfile.id)?.name || 'parent organization'}`
-                                }
-                              </span>
+
+                              {/* Parent Profile selector */}
+                              <div className="flex items-center gap-1.5">
+                                <FolderTree className="w-3.5 h-3.5 text-muted-foreground" />
+                                <Select
+                                  value={draftParentId || '__none__'}
+                                  onValueChange={(val) => {
+                                    setDraftParentId(val === '__none__' ? null : val);
+                                    setHeaderDirty(true);
+                                  }}
+                                >
+                                  <SelectTrigger className="h-7 w-auto text-xs gap-1.5 border-transparent hover:border-border">
+                                    <SelectValue placeholder="No parent (root)" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="__none__">
+                                      <span className="text-muted-foreground">No parent (root level)</span>
+                                    </SelectItem>
+                                    {profiles
+                                      .filter(p => {
+                                        // Can't parent to itself
+                                        if (p.id === editingProfile.id) return false;
+                                        // Can't parent to own descendants (prevent cycles)
+                                        let current: string | null | undefined = p.parentProfileId;
+                                        while (current) {
+                                          if (current === editingProfile.id) return false;
+                                          const parent = profiles.find(pp => pp.id === current);
+                                          current = parent?.parentProfileId;
+                                        }
+                                        return true;
+                                      })
+                                      .map(p => (
+                                        <SelectItem key={p.id} value={p.id}>
+                                          <div className="flex items-center gap-2">
+                                            <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[p.profileType]}</span>
+                                            {p.config.unitName || p.name}
+                                            <Badge variant="outline" className="text-[9px] h-4 px-1 ml-1">
+                                              {PROFILE_TYPE_LABELS[p.profileType]}
+                                            </Badge>
+                                          </div>
+                                        </SelectItem>
+                                      ))
+                                    }
+                                  </SelectContent>
+                                </Select>
+                              </div>
                             </div>
 
                             {/* Location & Language info */}
