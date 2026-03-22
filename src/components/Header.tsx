@@ -24,6 +24,7 @@ const MAX_LOGO_WIDTH = 120;
 export function Header() {
   const { user, profile, tenant, isAdmin, isSuperAdmin, isApprover, logout } = useAuth();
   const { isAgency, labels } = useAgencyMode();
+  const { labels: industryLabels } = useIndustry();
   const navigate = useNavigate();
   const location = useLocation();
   const [referDialogOpen, setReferDialogOpen] = useState(false);
