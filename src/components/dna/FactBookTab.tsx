@@ -374,8 +374,8 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete all facts?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This will permanently delete all {facts.length} facts from your Fact Book. 
-                      This action cannot be undone.
+                       This will permanently delete all {facts.length} facts from your {bookLabel}. 
+                       This action cannot be undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
