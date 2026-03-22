@@ -1695,7 +1695,7 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
                   to="/organization-settings" 
                   className="underline hover:text-white font-medium"
                 >
-                  University Settings → Advancement
+                  Organization Settings → Advancement
                 </Link>
               </p>
             </div>
@@ -1989,7 +1989,7 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
                     <span>
                       <strong>Support Goal</strong> — Add your campaign target in{' '}
                       <Link to="/organization-settings" className="underline hover:text-amber-900 dark:hover:text-amber-100 font-medium">
-                        University Settings → Advancement
+                        Organization Settings → Advancement
                       </Link>
                     </span>
                   </li>
@@ -2000,7 +2000,7 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
                     <span>
                       <strong>Development Contact</strong> — Add advancement contact details in{' '}
                       <Link to="/organization-settings" className="underline hover:text-amber-900 dark:hover:text-amber-100 font-medium">
-                        University Settings → Advancement
+                        Organization Settings → Advancement
                       </Link>
                     </span>
                   </li>
