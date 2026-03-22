@@ -12,7 +12,7 @@ import { useIndustry } from '@/contexts/IndustryContext';
 const ONBOARDING_MESSAGES = [
   "Let's get your brand voice dialed in.",
   "A few steps and you'll be creating on-voice content.",
-  "Your institution's story deserves the best tools.",
+  "Your brand's story deserves the best tools.",
   "Set it up once, stay on-brand forever.",
   "Great messaging starts with great setup.",
   "You're building something powerful here.",
