@@ -8,6 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAgencyMode } from "@/hooks/useAgencyMode";
+import { useIndustry } from "@/contexts/IndustryContext";
 import { Building2, ArrowRight, Users, Settings, Palette } from "lucide-react";
 
 interface InstitutionStatus {
