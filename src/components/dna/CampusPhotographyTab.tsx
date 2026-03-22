@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { usePIIScanner } from '@/hooks/usePIIScanner';
 import { useCampusPhotography, PhotoAIAnalysis } from '@/hooks/useCampusPhotography';
+import { useIndustry } from '@/contexts/IndustryContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -89,6 +90,7 @@ function AnalysisDetail({ analysis }: { analysis: PhotoAIAnalysis }) {
 }
 
 export function CampusPhotographyTab({ profileId }: CampusPhotographyTabProps) {
+  const { isHigherEd, labels: industryLabels } = useIndustry();
   const {
     photos,
     isLoading,
@@ -139,8 +141,9 @@ export function CampusPhotographyTab({ profileId }: CampusPhotographyTabProps) {
       <Alert className="border-primary/20 bg-primary/5">
         <Info className="h-4 w-4" />
         <AlertDescription className="text-sm">
-          Upload your best campus photography — building exteriors, quad shots, student life candids, iconic landmarks. 
-          These teach the AI what your campus actually looks like, so generated images match your real aesthetic.
+          {isHigherEd 
+            ? 'Upload your best campus photography — building exteriors, quad shots, student life candids, iconic landmarks. These teach the AI what your campus actually looks like, so generated images match your real aesthetic.'
+            : 'Upload your best brand photography — office spaces, product shots, team photos, event imagery. These teach the AI what your brand looks like visually, so generated images match your real aesthetic.'}
           <strong className="block mt-1">Photos are automatically analyzed by AI to extract visual metadata (colors, mood, subjects) that improves image generation accuracy.</strong>
         </AlertDescription>
       </Alert>
@@ -221,7 +224,7 @@ export function CampusPhotographyTab({ profileId }: CampusPhotographyTabProps) {
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <ImagePlus className="w-4 h-4" />
-            Add Campus Photos
+            Add {industryLabels.photography}
           </CardTitle>
           <CardDescription>
             {photos.length}/{maxPhotos} photos uploaded · Select multiple files at once
@@ -233,7 +236,7 @@ export function CampusPhotographyTab({ profileId }: CampusPhotographyTabProps) {
             <Input
               value={description}
               onChange={e => setDescription(e.target.value)}
-              placeholder="e.g. Main quad at sunset"
+              placeholder={isHigherEd ? "e.g. Main quad at sunset" : "e.g. HQ lobby, product display"}
               className="h-9 text-sm"
             />
           </div>
@@ -283,7 +286,7 @@ export function CampusPhotographyTab({ profileId }: CampusPhotographyTabProps) {
           <CardContent className="py-12 text-center">
             <Camera className="w-10 h-10 mx-auto text-muted-foreground/40 mb-3" />
             <p className="text-sm text-muted-foreground">
-              No campus photos uploaded yet. Add photos to improve AI-generated imagery.
+              No {isHigherEd ? 'campus' : 'brand'} photos uploaded yet. Add photos to improve AI-generated imagery.
             </p>
           </CardContent>
         </Card>
