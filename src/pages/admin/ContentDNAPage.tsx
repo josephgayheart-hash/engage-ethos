@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { Link, useLocation, useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWorkspace } from '@/contexts/WorkspaceContext';
@@ -77,7 +77,16 @@ import { useIndustry } from '@/contexts/IndustryContext';
 import { DNATuningControls, DNAAdjustments } from '@/components/DNATuningControls';
 import { usePIIScanner } from '@/hooks/usePIIScanner';
 
-const SAMPLE_TYPES = [
+// Higher-ed-only sample type values, hidden for enterprise tenants
+const HIGHER_ED_ONLY_VALUES = new Set([
+  'commencement', 'phonathon', 'donor_stewardship', 'alumni_outreach',
+  'viewbook', 'academic_catalog', 'course_description', 'faculty_bio', 'student_handbook',
+]);
+
+// Higher-ed-only categories, hidden entirely for enterprise
+const HIGHER_ED_ONLY_CATEGORIES = new Set(['Academic']);
+
+const ALL_SAMPLE_TYPES = [
   // Core Communications
   { value: 'email', label: 'Email', category: 'Core Communications' },
   { value: 'sms', label: 'SMS/Text Message', category: 'Core Communications' },
@@ -99,12 +108,17 @@ const SAMPLE_TYPES = [
   { value: 'event_script', label: 'Event Script/Program', category: 'Speeches & Events' },
   { value: 'presentation', label: 'Presentation Script', category: 'Speeches & Events' },
   
-  // Outreach & Engagement
+  // Outreach & Engagement (some items higher-ed only)
   { value: 'call_script', label: 'Call Script', category: 'Outreach' },
   { value: 'phonathon', label: 'Phonathon Script', category: 'Outreach' },
   { value: 'donor_stewardship', label: 'Donor Stewardship', category: 'Outreach' },
   { value: 'thank_you', label: 'Thank You Message', category: 'Outreach' },
   { value: 'alumni_outreach', label: 'Alumni Outreach', category: 'Outreach' },
+  
+  // Enterprise Outreach (shown for enterprise tenants)
+  { value: 'customer_outreach', label: 'Customer Outreach', category: 'Outreach' },
+  { value: 'partner_comm', label: 'Partner Communication', category: 'Outreach' },
+  { value: 'investor_update', label: 'Investor Update', category: 'Outreach' },
   
   // Digital & Social
   { value: 'social', label: 'Social Media Post', category: 'Digital' },
@@ -113,7 +127,7 @@ const SAMPLE_TYPES = [
   { value: 'video_script', label: 'Video Script', category: 'Digital' },
   { value: 'podcast_script', label: 'Podcast Script', category: 'Digital' },
   
-  // Marketing & Recruitment
+  // Marketing & Recruitment (viewbook is higher-ed only)
   { value: 'marketing', label: 'Marketing Material', category: 'Marketing' },
   { value: 'brochure', label: 'Brochure/Flyer', category: 'Marketing' },
   { value: 'viewbook', label: 'Viewbook Copy', category: 'Marketing' },
@@ -129,12 +143,18 @@ const SAMPLE_TYPES = [
   { value: 'value_proposition', label: 'Value Proposition', category: 'Brand' },
   { value: 'boilerplate', label: 'Boilerplate Copy', category: 'Brand' },
   
-  // Academic & Administrative
+  // Academic & Administrative (higher-ed only)
   { value: 'academic_catalog', label: 'Academic Catalog', category: 'Academic' },
   { value: 'program_description', label: 'Program Description', category: 'Academic' },
   { value: 'course_description', label: 'Course Description', category: 'Academic' },
   { value: 'faculty_bio', label: 'Faculty Biography', category: 'Academic' },
   { value: 'student_handbook', label: 'Student Handbook', category: 'Academic' },
+  
+  // Corporate (enterprise only, replaces Academic)
+  { value: 'product_doc', label: 'Product Documentation', category: 'Corporate' },
+  { value: 'training_material', label: 'Training Material', category: 'Corporate' },
+  { value: 'corporate_policy', label: 'Corporate Policy', category: 'Corporate' },
+  { value: 'employee_handbook', label: 'Employee Handbook', category: 'Corporate' },
   
   // Reports & Publications
   { value: 'annual_report', label: 'Annual Report', category: 'Publications' },
@@ -194,10 +214,21 @@ function detectContentType(text: string): string | null {
 export default function ContentDNAPage() {
   const { tenant, profile, isAdmin } = useAuth();
   const { activeWorkspace, canSwitch } = useWorkspace();
-  const { labels: industryLabels } = useIndustry();
+  const { labels: industryLabels, isHigherEd } = useIndustry();
   const { checkFile } = usePIIScanner();
   const effectiveTenant = canSwitch && activeWorkspace ? activeWorkspace : tenant;
   const location = useLocation();
+  
+  // Enterprise tenants: hide higher-ed-only sample types & categories, show corporate ones
+  // Higher-ed tenants: hide enterprise-only items (customer_outreach etc.) & Corporate category
+  const ENTERPRISE_ONLY_VALUES = new Set(['customer_outreach', 'partner_comm', 'investor_update', 'product_doc', 'training_material', 'corporate_policy', 'employee_handbook']);
+  const ENTERPRISE_ONLY_CATEGORIES = new Set(['Corporate']);
+  const SAMPLE_TYPES = useMemo(() => {
+    if (isHigherEd) {
+      return ALL_SAMPLE_TYPES.filter(t => !ENTERPRISE_ONLY_VALUES.has(t.value) && !ENTERPRISE_ONLY_CATEGORIES.has(t.category));
+    }
+    return ALL_SAMPLE_TYPES.filter(t => !HIGHER_ED_ONLY_VALUES.has(t.value) && !HIGHER_ED_ONLY_CATEGORIES.has(t.category));
+  }, [isHigherEd]);
   
   // Brand pillar inline editing state
   const [editingPillarIndex, setEditingPillarIndex] = useState<number | null>(null);
@@ -751,12 +782,12 @@ export default function ContentDNAPage() {
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <h3 className={`font-medium mb-1 ${selectedProfile ? 'text-foreground' : 'text-amber-800'}`}>
-                      {selectedProfile ? 'Content DNA Profile Active' : 'Select an Institutional Profile'}
+                      {selectedProfile ? 'Content DNA Profile Active' : `Select a ${industryLabels.organization} Profile`}
                     </h3>
                     <p className={`text-sm ${selectedProfile ? 'text-muted-foreground' : 'text-amber-700'}`}>
                       {selectedProfile 
                         ? `Viewing and managing Content DNA for ${selectedProfile.name}. All samples and analysis are scoped to this profile.`
-                        : 'Content DNA needs to be associated with an institutional profile. Select a profile to view or configure its unique voice settings.'
+                        : `Content DNA needs to be associated with a ${industryLabels.organization.toLowerCase()} profile. Select a profile to view or configure its unique voice settings.`
                       }
                     </p>
                   </div>
@@ -824,9 +855,9 @@ export default function ContentDNAPage() {
                     <Building2 className="w-8 h-8 text-amber-600" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-medium text-amber-800 mb-1">Create an Institutional Profile</h3>
+                     <h3 className="font-medium text-amber-800 mb-1">Create a {industryLabels.organization} Profile</h3>
                     <p className="text-sm text-amber-700">
-                      Content DNA needs to be associated with an institutional profile. Create your first profile to get started.
+                       Content DNA needs to be associated with a {industryLabels.organization.toLowerCase()} profile. Create your first profile to get started.
                     </p>
                   </div>
                   <Button onClick={() => navigate('/university-settings?tab=profiles')} className="bg-amber-600 hover:bg-amber-700">
@@ -1570,7 +1601,7 @@ export default function ContentDNAPage() {
                       </SelectTrigger>
                       <SelectContent className="max-h-80">
                         {/* Group sample types by category */}
-                        {['Core Communications', 'Public Relations', 'Speeches & Events', 'Outreach', 'Digital', 'Marketing', 'Brand', 'Academic', 'Publications', 'Other'].map((category) => {
+                        {['Core Communications', 'Public Relations', 'Speeches & Events', 'Outreach', 'Digital', 'Marketing', 'Brand', 'Academic', 'Corporate', 'Publications', 'Other'].map((category) => {
                           const categoryTypes = SAMPLE_TYPES.filter(t => t.category === category);
                           if (categoryTypes.length === 0) return null;
                           return (
@@ -1592,7 +1623,7 @@ export default function ContentDNAPage() {
                     <Input
                       value={sampleTitle}
                       onChange={(e) => setSampleTitle(e.target.value)}
-                      placeholder="e.g., President's Welcome Letter 2024"
+                      placeholder={isHigherEd ? "e.g., President's Welcome Letter 2024" : "e.g., Q4 Brand Campaign Email"}
                     />
                   </div>
                   <div>
@@ -1600,7 +1631,7 @@ export default function ContentDNAPage() {
                     <Input
                       value={sourceDescription}
                       onChange={(e) => setSourceDescription(e.target.value)}
-                      placeholder="e.g., Annual new student welcome email"
+                      placeholder={isHigherEd ? "e.g., Annual new student welcome email" : "e.g., Quarterly customer newsletter"}
                     />
                   </div>
                   <div>
@@ -1730,7 +1761,7 @@ export default function ContentDNAPage() {
                         setTextInput(e.target.value);
                         handleTextInputChange(e.target.value, setSampleType);
                       }}
-                      placeholder="Paste your email, newsletter, or other communication here..."
+                      placeholder={isHigherEd ? "Paste your email, newsletter, or other communication here..." : "Paste your email, newsletter, or other brand communication here..."}
                       className="h-[180px]"
                     />
                   </div>
@@ -2601,7 +2632,7 @@ export default function ContentDNAPage() {
                                           if (!acc[type.category]) acc[type.category] = [];
                                           acc[type.category].push(type);
                                           return acc;
-                                        }, {} as Record<string, typeof SAMPLE_TYPES>)
+                                        }, {} as Record<string, typeof ALL_SAMPLE_TYPES>)
                                       ).map(([category, types]) => (
                                         <SelectGroup key={category}>
                                           <SelectLabel>{category}</SelectLabel>
@@ -2688,7 +2719,7 @@ export default function ContentDNAPage() {
                                           if (!acc[type.category]) acc[type.category] = [];
                                           acc[type.category].push(type);
                                           return acc;
-                                        }, {} as Record<string, typeof SAMPLE_TYPES>)
+                                        }, {} as Record<string, typeof ALL_SAMPLE_TYPES>)
                                       ).map(([category, types]) => (
                                         <SelectGroup key={category}>
                                           <SelectLabel>{category}</SelectLabel>
@@ -2883,7 +2914,7 @@ export default function ContentDNAPage() {
                                             if (!acc[type.category]) acc[type.category] = [];
                                             acc[type.category].push(type);
                                             return acc;
-                                          }, {} as Record<string, typeof SAMPLE_TYPES>)
+                                          }, {} as Record<string, typeof ALL_SAMPLE_TYPES>)
                                         ).map(([category, types]) => (
                                           <SelectGroup key={category}>
                                             <SelectLabel>{category}</SelectLabel>
