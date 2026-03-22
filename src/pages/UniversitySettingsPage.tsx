@@ -454,6 +454,11 @@ export default function UniversitySettingsPage() {
         updates.profile_type = draftType;
       }
 
+      // Save parent if changed
+      if (draftParentId !== (editingProfile.parentProfileId || null)) {
+        updates.parent_profile_id = draftParentId;
+      }
+
       const { error } = await supabase
         .from('institutional_profiles')
         .update(updates as any)
