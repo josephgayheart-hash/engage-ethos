@@ -165,6 +165,7 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
           domain,
           engine: imageEngine || undefined,
           imageStyle: imageStyle || undefined,
+          outputLanguage: outputLanguage || undefined,
         },
       });
       if (error) throw error;
