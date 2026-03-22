@@ -668,7 +668,8 @@ ${reserveLogoSpace ? "- Reserve a clean, uncluttered area (roughly bottom-right 
 
 LAYOUT:
 - Aspect ratio: ${spec.aspect} (${spec.width}x${spec.height} pixels). ${spec.aspect === "1:1" ? "Perfectly SQUARE." : `Match ${spec.aspect} proportions exactly.`}`
-      : `Generate a professional ${spec.style} for a higher education institution.
+      : isHigherEd()
+        ? `Generate a professional ${spec.style} for a higher education institution.
 
 Context: ${contentSummary}
 ${audienceContext}
@@ -713,7 +714,7 @@ SETTING & ENVIRONMENT RULES — READ CAREFULLY:
 CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
 - ABSOLUTELY NO TEXT of any kind in the image. No words, letters, numbers, symbols, abbreviations, university names, or institution names.
 - Do NOT put text on clothing — no "University", no school names, no abbreviations, no single letters, no letter marks, no monograms. Show PLAIN solid-color clothing in the brand palette instead. A plain hoodie in the brand color is ALWAYS better than one with any mark on it.
-- ANTI-HALLUCINATION: Do NOT render ANY recognizable university marks, letter logos, or symbols from ANY institution — not from this institution and not from any other institution. The AI does not know what any university's actual logo or mark looks like and WILL hallucinate the wrong one (e.g., rendering a Minnesota "M" for Arizona State, or a Michigan "M" for Maryland). This is brand-damaging. ALL clothing, banners, and surfaces must be PLAIN with no marks whatsoever.
+- ANTI-HALLUCINATION: Do NOT render ANY recognizable university marks, letter logos, or symbols from ANY institution — not from this institution and not from any other institution. The AI does not know what any university's actual logo or mark looks like and WILL hallucinate the wrong one. ALL clothing, banners, and surfaces must be PLAIN with no marks whatsoever.
 - Do NOT put text on banners, signs, buildings, flags, or any surface. All signage and banners should be BLANK or show only solid brand colors / abstract patterns.
 - Do NOT render any logos, crests, seals, emblems, wordmarks, letter marks, monograms, or the institution's name as text. AI cannot accurately reproduce these — any attempt will look wrong and damage the brand. The user will add these in Brand Studio.
 - Do NOT render any mascot, mascot costume, cartoon character, or animal figure.
@@ -724,7 +725,58 @@ CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
 - Professional quality: sharp focus on subject, creamy bokeh backgrounds, rich color depth
 - Feel warm, authentic, and aspirational — like a spread in a top university's viewbook
 - Match the tone and energy of the communication moment${toneContext ? ` — the visual should feel ${tone}` : ''}
-- Imagery should resonate with the target audience${audienceContext ? ` (${audience})` : ''} and reflect their lived experience`;
+- Imagery should resonate with the target audience${audienceContext ? ` (${audience})` : ''} and reflect their lived experience`
+        : `Generate a professional ${spec.style} for the brand "${schoolName || 'this organization'}".
+
+Context: ${contentSummary}
+${audienceContext}
+${goalContext}
+${toneContext}
+${momentContext}
+${cohortContext}
+${domainContext}
+${brandContext}
+${strictInstitutionConstraint}
+
+${campusContext}
+
+${colorPaletteInstruction}
+
+VISUAL STYLE: ${selectedStyle}
+
+CHANNEL-SPECIFIC BEST PRACTICES for ${spec.description}:
+${spec.bestPractices}
+
+Photography/art direction — follow the style of real corporate/brand marketing imagery:
+- Capture candid, authentic moments: professionals collaborating in a modern workspace, a customer using the product, a team celebrating a milestone, employees engaged in meaningful work
+- NEVER show people standing in a line, posing symmetrically, or in obviously staged arrangements — these look artificial
+- ANTI-CLONE RULE: NEVER generate twins, duplicates, or people who look similar — every person MUST have a distinctly different face shape, skin tone, hairstyle, hair color, hair length, body type, and apparent age.
+- Vary body language, posture, and gaze direction — people should look naturally occupied, not aware of the camera
+- CLOTHING VARIETY IS CRITICAL: Each person MUST wear a distinctly different outfit appropriate to the brand's industry — vary garment types, colors, layers, and styles. Mix brand-colored items with neutral professional clothing.
+- ALL CLOTHING MUST BE PLAIN: No company logos, wordmarks, or text on garments. Solid brand colors only.
+- Use natural or professional lighting — window light, warm office environments, outdoor golden hour
+- Include environmental storytelling: laptops, products, tools, coffee cups — items authentic to this brand's world
+- People should be diverse in a way that feels organic — different backgrounds, ages, body types — without appearing curated
+- Brand colors should appear subtly on clothing, office accents, product packaging — use ONLY the exact hex values from the palette above.
+
+SETTING & ENVIRONMENT RULES:
+- Use brand reference photos (if provided) as your PRIMARY guide for settings and visual tone.
+- If no reference photos, use professional environments appropriate for the brand's industry: modern offices, retail spaces, workshops, outdoor lifestyle settings.
+- The environment should feel authentic to this specific brand, not generic stock photography.
+
+- Composition: use shallow depth of field, leading lines, rule of thirds — professional editorial quality
+- CRITICAL — Aspect ratio: This image MUST be exactly ${spec.aspect} (${spec.width}x${spec.height}px). ${spec.aspect === "1:1" ? "Perfectly SQUARE." : spec.aspect === "16:9" ? "WIDE horizontal rectangle." : `Match ${spec.aspect} exactly.`}
+
+CRITICAL TEXT & LOGO RULES:
+- ABSOLUTELY NO TEXT of any kind in the image. No words, letters, numbers, symbols, company names.
+- Do NOT put text on clothing, signage, products, or any surface.
+- Do NOT render any logos, wordmarks, seals, or brand marks. The user will add these in Brand Studio.
+- ABSOLUTELY NO QR codes.
+- NEVER include "CampusVoice" or any platform branding.
+- The brand's identity should come through via COLORS, ENVIRONMENT, and MOOD — never through rendered text or logos.
+- Professional quality: sharp focus, rich color depth, premium feel
+- Match the tone and energy of the communication${toneContext ? ` — the visual should feel ${tone}` : ''}
+- Imagery should resonate with the target audience${audienceContext ? ` (${audience})` : ''}`;
 
     console.log("Generating channel image for:", channel, "content:", contentSummary.substring(0, 100));
 
