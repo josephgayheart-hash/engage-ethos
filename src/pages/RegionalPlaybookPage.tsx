@@ -98,9 +98,13 @@ const RegionalPlaybookPage = () => {
   const selectedProfile = profiles.find(p => p.id === selectedProfileId);
 
   const buildPrompt = (): string => {
+    const langInstruction = outputLanguage !== 'en'
+      ? `\n\nIMPORTANT: Generate ALL content in ${outputLanguages.find(l => l.value === outputLanguage)?.label || outputLanguage}. All emails, templates, talking points, and instructions must be in ${outputLanguages.find(l => l.value === outputLanguage)?.label}. Only section headers may remain in English for structure.`
+      : '';
+
     const base = `You are a regional operations strategist for ${industryLabels?.industryContext || 'enterprise brand management'}.
 Organization: ${selectedProfile?.name || 'Not specified'}
-Region: ${regionLabel}`;
+Region: ${regionLabel}${langInstruction}`;
 
     if (activeTab === 'site-visit') {
       return `${base}
