@@ -71,6 +71,11 @@ const channelIcons: Record<Channel, React.ReactNode> = {
   'talking-points': <Mic className="w-4 h-4" />,
   'news-article': <FileText className="w-4 h-4" />,
   'case-for-care': <Heart className="w-4 h-4" />,
+  'press-release': <FileText className="w-4 h-4" />,
+  'internal-memo': <FileText className="w-4 h-4" />,
+  'event-invite': <Mail className="w-4 h-4" />,
+  'proposal': <FileText className="w-4 h-4" />,
+  'investor-update': <FileText className="w-4 h-4" />,
 };
 
 const phaseColors: Record<StrategyPhase, string> = {
@@ -99,6 +104,11 @@ const channelColors: Record<Channel, string> = {
   'talking-points': 'bg-teal-500 text-white',
   'news-article': 'bg-slate-600 text-white',
   'case-for-care': 'bg-rose-500 text-white',
+  'press-release': 'bg-slate-500 text-white',
+  'internal-memo': 'bg-cyan-500 text-white',
+  'event-invite': 'bg-amber-500 text-white',
+  'proposal': 'bg-emerald-600 text-white',
+  'investor-update': 'bg-violet-500 text-white',
 };
 
 const channelBorderColors: Record<Channel, string> = {
@@ -114,6 +124,11 @@ const channelBorderColors: Record<Channel, string> = {
   'talking-points': 'border-l-teal-500',
   'news-article': 'border-l-slate-600',
   'case-for-care': 'border-l-rose-500',
+  'press-release': 'border-l-slate-500',
+  'internal-memo': 'border-l-cyan-500',
+  'event-invite': 'border-l-amber-500',
+  'proposal': 'border-l-emerald-600',
+  'investor-update': 'border-l-violet-500',
 };
 
 const channelDotColors: Record<Channel, string> = {
@@ -129,9 +144,14 @@ const channelDotColors: Record<Channel, string> = {
   'talking-points': 'bg-teal-500',
   'news-article': 'bg-slate-600',
   'case-for-care': 'bg-rose-500',
+  'press-release': 'bg-slate-500',
+  'internal-memo': 'bg-cyan-500',
+  'event-invite': 'bg-amber-500',
+  'proposal': 'bg-emerald-600',
+  'investor-update': 'bg-violet-500',
 };
 
-const allChannels: Channel[] = ['email', 'sms', 'portal', 'social-media', 'landing-page', 'direct-mail', 'phone-call', 'digital-ad-search', 'digital-ad-social', 'talking-points', 'news-article', 'case-for-care'];
+const allChannels: Channel[] = ['email', 'sms', 'portal', 'social-media', 'landing-page', 'direct-mail', 'phone-call', 'digital-ad-search', 'digital-ad-social', 'talking-points', 'news-article', 'case-for-care', 'press-release', 'internal-memo', 'event-invite', 'proposal', 'investor-update'];
 
 // Helper to format channel names with proper capitalization
 const formatChannelName = (channel: string): string => {

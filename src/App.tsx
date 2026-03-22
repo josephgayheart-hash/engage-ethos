@@ -88,6 +88,9 @@ import AboutPage from "./pages/AboutPage";
 import GivingDayPlannerPage from "./pages/GivingDayPlannerPage";
 import StewardshipReportPage from "./pages/StewardshipReportPage";
 import ForEnterprisePage from "./pages/ForEnterprisePage";
+import CampaignBriefPage from "./pages/CampaignBriefPage";
+import CompetitiveAnalyzerPage from "./pages/CompetitiveAnalyzerPage";
+import RegionAdapterPage from "./pages/RegionAdapterPage";
 
 const queryClient = new QueryClient();
 
@@ -201,6 +204,9 @@ const AppRoutes = () => (
       <Route path="/translate" element={<TranslationTool />} />
       <Route path="/web-analyzer" element={<WebContentAnalyzerPage />} />
       <Route path="/tools" element={<ToolsPage />} />
+      <Route path="/campaign-brief" element={<CampaignBriefPage />} />
+      <Route path="/competitive-analyzer" element={<CompetitiveAnalyzerPage />} />
+      <Route path="/region-adapter" element={<RegionAdapterPage />} />
       <Route path="/image-generator" element={<ImageGeneratorPage />} />
       <Route path="/brand-audit" element={<BrandAuditPage />} />
       <Route path="/brand-studio" element={<BrandStudioPage />} />

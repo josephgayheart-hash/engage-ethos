@@ -154,7 +154,12 @@ export type Channel =
   | 'digital-ad-social'
   | 'talking-points'
   | 'news-article'
-  | 'case-for-care';
+  | 'case-for-care'
+  | 'press-release'
+  | 'internal-memo'
+  | 'event-invite'
+  | 'proposal'
+  | 'investor-update';
 
 export type MessageDomain = 
   // Student domains

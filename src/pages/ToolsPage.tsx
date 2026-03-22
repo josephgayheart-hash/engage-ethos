@@ -16,6 +16,9 @@ import {
   LayoutGrid,
   List,
   ImageIcon,
+  Swords,
+  Globe2,
+  ClipboardList,
 } from "lucide-react";
 
 interface ToolItem {
@@ -42,6 +45,9 @@ const utilityTools: ToolItem[] = [
   { id: 'image-generator', title: 'Image Studio', description: 'Create on-brand visual content with AI', icon: ImageIcon, href: '/image-generator' },
   { id: 'call-script', title: 'Call Scripts', description: 'Phone outreach scripts', icon: Phone, href: '/call-script' },
   { id: 'playground', title: 'AI Copywriter', description: 'AI-powered messaging playground', icon: MessageCircle, href: '/playground' },
+  { id: 'campaign-brief', title: 'Campaign Brief Generator', description: 'Generate structured creative briefs', icon: ClipboardList, href: '/campaign-brief' },
+  { id: 'competitive-analyzer', title: 'Competitive Analyzer', description: 'Benchmark messaging against competitors', icon: Swords, href: '/competitive-analyzer' },
+  { id: 'region-adapter', title: 'Region & Tone Adapter', description: 'Adapt copy for multiple regions', icon: Globe2, href: '/region-adapter' },
 ];
 
 function ToolGrid({ tools, label, compact }: { tools: ToolItem[]; label: string; compact: boolean }) {
