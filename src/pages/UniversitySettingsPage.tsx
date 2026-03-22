@@ -1322,10 +1322,17 @@ export default function UniversitySettingsPage() {
                                                         return (
                                                           <div
                                                             key={leaf.id}
-                                                            className={`rounded border p-1.5 cursor-pointer transition-all text-xs ${
-                                                              isLeafSelected
-                                                                ? 'border-primary bg-primary/5'
-                                                                : 'border-border hover:border-primary/40 hover:bg-muted/30'
+                                                            draggable
+                                                            onDragStart={(e) => { e.stopPropagation(); handleDragStart(leaf.id); }}
+                                                            onDragOver={(e) => { e.stopPropagation(); handleDragOver(e, leaf.id); }}
+                                                            onDragLeave={handleDragLeave}
+                                                            onDrop={(e) => { e.stopPropagation(); handleDrop(e, leaf.id); }}
+                                                            className={`rounded border p-1.5 cursor-grab active:cursor-grabbing transition-all text-xs ${
+                                                              dragOverProfileId === leaf.id
+                                                                ? 'border-primary border-dashed bg-primary/10'
+                                                                : isLeafSelected
+                                                                  ? 'border-primary bg-primary/5'
+                                                                  : 'border-border hover:border-primary/40 hover:bg-muted/30'
                                                             }`}
                                                             onClick={() => setEditingProfile(leaf)}
                                                           >
