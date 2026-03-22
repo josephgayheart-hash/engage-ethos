@@ -837,7 +837,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Wand2 className="w-5 h-5" />
-                Import Fact Book
+                Import {bookLabel}
               </DialogTitle>
               <DialogDescription>
                 Scrape a URL, upload a PDF, or paste text to extract facts automatically
