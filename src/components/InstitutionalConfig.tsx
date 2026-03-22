@@ -767,7 +767,7 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Student Addressing</Label>
+              <Label className="text-sm font-medium">{isHigherEd ? 'Student Addressing' : 'Customer Addressing'}</Label>
               <Select
                 value={config.studentAddressing || 'first-name'}
                 onValueChange={(value: 'first-name' | 'full-name' | 'formal') => 
@@ -780,7 +780,7 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
                 <SelectContent>
                   <SelectItem value="first-name">First Name (Hi Sarah)</SelectItem>
                   <SelectItem value="full-name">Full Name (Dear Sarah Johnson)</SelectItem>
-                  <SelectItem value="formal">Formal (Dear Student)</SelectItem>
+                  <SelectItem value="formal">Formal ({isHigherEd ? 'Dear Student' : 'Dear Valued Customer'})</SelectItem>
                 </SelectContent>
               </Select>
             </div>
