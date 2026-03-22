@@ -580,7 +580,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
               <DialogDescription>
                 {addMode === 'select' 
                   ? 'Review the extracted facts and select which ones to add'
-                  : 'Add a statistic or data point to your Fact Book'}
+                  : `Add a statistic or data point to your ${bookLabel}`}
               </DialogDescription>
             </DialogHeader>
             
