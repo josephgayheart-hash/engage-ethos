@@ -902,9 +902,11 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                           <Globe className="w-4 h-4 text-primary" />
                           <Label className="font-medium">Scrape from URL</Label>
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          Paste a link to your institution's facts page and we'll extract the content automatically
-                        </p>
+                         <p className="text-xs text-muted-foreground">
+                           {isHigherEd 
+                             ? "Paste a link to your institution's facts page and we'll extract the content automatically"
+                             : "Paste a link to your company's about or facts page and we'll extract the content automatically"}
+                         </p>
                         <div className="flex gap-2">
                           <Input
                             value={scrapeUrl}
