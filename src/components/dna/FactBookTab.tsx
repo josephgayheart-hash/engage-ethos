@@ -478,9 +478,11 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
           <div className="text-center py-12">
             <BarChart3 className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
             <h3 className="font-medium text-lg mb-2">No facts yet</h3>
-            <p className="text-muted-foreground mb-4">
-              Import your institution's fact book or add statistics manually
-            </p>
+             <p className="text-muted-foreground mb-4">
+               {isHigherEd 
+                 ? "Import your institution's fact book or add statistics manually"
+                 : "Import your company's key data points or add statistics manually"}
+             </p>
             <div className="flex justify-center gap-2">
               <Button variant="outline" onClick={() => setShowImportDialog(true)}>
                 <Upload className="w-4 h-4 mr-2" />
