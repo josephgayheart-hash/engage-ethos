@@ -245,7 +245,13 @@ Use professional, actionable language suitable for a brand/marketing team.`;
                   {copied ? 'Copied' : 'Copy'}
                 </Button>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
+                {outputLanguage !== 'en' && (
+                  <TranslationToggle
+                    originalContent={generatedBrief}
+                    outputLanguage={outputLanguage}
+                  />
+                )}
                 <div className="prose prose-sm max-w-none dark:prose-invert whitespace-pre-wrap">
                   {generatedBrief}
                 </div>
