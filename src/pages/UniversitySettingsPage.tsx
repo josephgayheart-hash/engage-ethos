@@ -133,11 +133,14 @@ export default function UniversitySettingsPage() {
   const [expandedProfiles, setExpandedProfiles] = useState<Set<string>>(new Set());
   const [isDeletingProfile, setIsDeletingProfile] = useState(false);
   
-  // Local draft state for profile header edits (name + type) — saved explicitly via button
+  // Local draft state for the entire profile — saved explicitly via Save button
   const [draftName, setDraftName] = useState('');
   const [draftType, setDraftType] = useState<ProfileType>('university');
+  const [draftConfig, setDraftConfig] = useState<InstitutionalConfigType | null>(null);
   const [headerDirty, setHeaderDirty] = useState(false);
-  const [isSavingHeader, setIsSavingHeader] = useState(false);
+  const [configDirty, setConfigDirty] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const isDirty = headerDirty || configDirty;
   
   // Branding state
   const [isEditingInstitution, setIsEditingInstitution] = useState(false);
