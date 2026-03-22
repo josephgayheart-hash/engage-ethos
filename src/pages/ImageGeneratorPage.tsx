@@ -211,7 +211,7 @@ const ImageGeneratorPage = () => {
     setGenerationPhase(0);
     const phaseInterval = setInterval(() => {
       setGenerationPhase(prev => prev < 4 ? prev + 1 : prev);
-    }, engine === "premium" ? 6000 : 1200);
+    }, engine === "pro" ? 10000 : engine === "premium" ? 6000 : 1200);
     try {
           const effectiveStyle = creationMode === "graphic-design" ? "graphic-design" : style;
           const { data, error } = await supabase.functions.invoke("generate-channel-image", {
