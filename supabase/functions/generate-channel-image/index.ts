@@ -838,7 +838,7 @@ CRITICAL TEXT & LOGO RULES:
       ];
       if (campusPhotoUrls.length > 0) {
         messageContent.push(
-          { type: "text", text: "REFERENCE CAMPUS PHOTOGRAPHY — match the architectural style, lighting, environment, and photographic tone of these real campus images:" },
+          { type: "text", text: `REFERENCE BRAND PHOTOGRAPHY — match the visual style, lighting, environment, and photographic tone of these real ${isHigherEd() ? 'campus' : 'brand'} images:` },
           ...campusPhotoUrls.map(url => ({ type: "image_url", image_url: { url } })),
         );
       }
