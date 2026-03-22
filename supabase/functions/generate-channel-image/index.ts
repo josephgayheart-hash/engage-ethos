@@ -660,9 +660,9 @@ VISUAL APPROACH:
 - If design reference images are provided below, they are your PRIMARY style guide — override any generic style instructions with what you see in those samples. Your output must look like the NEXT piece created by the same designer.
 - Use illustrative and iconic elements that represent the content theme and message — but style them to match the design references if present
 - Blend these illustrative elements with bold graphic design techniques: color blocks, geometric shapes, gradients, layered compositions
-- Use the brand colors prominently and intentionally — this should unmistakably feel like THIS institution's marketing material
+- Use the brand colors prominently and intentionally — this should unmistakably feel like THIS ${orgLabel()}'s marketing material
 - NEVER use generic/stock iconography. Create bespoke visual elements that match the craftsmanship level of the design references.
-- ABSOLUTELY DO NOT attempt to render any university logo, crest, seal, emblem, shield, wordmark, OR the institution's name as text. AI cannot accurately reproduce institutional logos or spell institution names correctly — any attempt will look wrong and damage the brand. Logos and institution names will be added later by the user in Brand Studio.
+- ABSOLUTELY DO NOT attempt to render any ${isHigherEd() ? 'university' : 'company'} logo, crest, seal, emblem, shield, wordmark, OR the ${orgLabel()}'s name as text. AI cannot accurately reproduce ${isHigherEd() ? 'institutional' : 'brand'} logos or spell ${orgLabel()} names correctly — any attempt will look wrong and damage the brand. Logos and ${orgLabel()} names will be added later by the user in Brand Studio.
 ${reserveLogoSpace ? "- Reserve a clean, uncluttered area (roughly bottom-right quadrant) for a logo — use negative space, but do NOT render any frame or text marking that area" : ""}
 - The mood and energy should match: ${tone || "professional and polished"}
 
