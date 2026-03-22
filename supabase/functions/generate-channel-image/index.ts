@@ -328,6 +328,9 @@ serve(async (req) => {
     const brandColors: string[] = [];
     let tenantType = "";
     let strictInstitutionConstraint = "";
+    const isHigherEd = () => !tenantType || tenantType === "higher_ed";
+    const orgLabel = () => isHigherEd() ? "institution" : "organization";
+    const settingLabel = () => isHigherEd() ? "campus" : "brand";
 
     // ── Parallel DB fetch: tenant, profiles, and campus photos all at once ──
     const tenantPromise = tenantId
@@ -438,16 +441,23 @@ serve(async (req) => {
           ? tenantInstitutionName
           : "";
       if (schoolName) {
-        campusContext = `CAMPUS SETTING: This image should look like it was taken on the campus of ${schoolName}.`;
-        campusContext += ` Use your knowledge of ${schoolName}'s real campus to depict recognizable architectural styles, building materials, landscaping, and iconic landmarks or gathering spots that are characteristic of that institution.`;
-        campusContext += ` Think about what makes ${schoolName}'s campus visually distinctive — the types of buildings (Gothic, Brutalist, modern glass, red brick, limestone), signature quads, arches, clock towers, stadiums, or natural features.`;
-        if (unitName) {
-          campusContext += ` This content is specifically for the ${unitName}, so if that college/department has its own building or area on campus, reference that environment.`;
+        if (isHigherEd()) {
+          campusContext = `CAMPUS SETTING: This image should look like it was taken on the campus of ${schoolName}.`;
+          campusContext += ` Use your knowledge of ${schoolName}'s real campus to depict recognizable architectural styles, building materials, landscaping, and iconic landmarks or gathering spots that are characteristic of that institution.`;
+          campusContext += ` Think about what makes ${schoolName}'s campus visually distinctive — the types of buildings (Gothic, Brutalist, modern glass, red brick, limestone), signature quads, arches, clock towers, stadiums, or natural features.`;
+          if (unitName) {
+            campusContext += ` This content is specifically for the ${unitName}, so if that college/department has its own building or area on campus, reference that environment.`;
+          }
+        } else {
+          campusContext = `BRAND SETTING: This image represents ${schoolName}. Use a professional corporate or commercial environment appropriate for this brand — modern offices, retail locations, manufacturing facilities, or lifestyle settings that match the brand's industry.`;
+          if (unitName) {
+            campusContext += ` This content is specifically for the ${unitName} division/unit.`;
+          }
         }
       }
 
       if (profileId && schoolName) {
-        strictInstitutionConstraint = `SELECTED INSTITUTION LOCK: The selected institutional profile is "${schoolName}". Use ONLY this institution's identity, voice, and visual references. Do NOT use, merge, or reference any other institution/profile names, slogans, logos, mascots, or metadata. If any conflicting institution appears in context, ignore it completely.`;
+        strictInstitutionConstraint = `SELECTED ${orgLabel().toUpperCase()} LOCK: The selected profile is "${schoolName}". Use ONLY this ${orgLabel()}'s identity, voice, and visual references. Do NOT use, merge, or reference any other ${orgLabel()}/profile names, slogans, logos, mascots, or metadata. If any conflicting ${orgLabel()} appears in context, ignore it completely.`;
       }
     } catch (e) {
       console.warn("Could not process branding:", e);
@@ -458,7 +468,7 @@ serve(async (req) => {
     let brandGuidelinesSummary = ""; // shorter version for copy generation
     try {
       const dna = (contentDnaResult as any)?.data;
-      if (dna && isGraphicDesign) {
+      if (dna && (isGraphicDesign || !isHigherEd())) {
         const bp = dna.brand_platform as Record<string, any> | null;
         const va = dna.voice_analysis as Record<string, any> | null;
         const customInstructions = dna.custom_instructions as string | null;
@@ -482,7 +492,7 @@ serve(async (req) => {
         }
 
         if (parts.length > 0) {
-          brandGuidelinesContext = `\nINSTITUTIONAL BRAND GUIDELINES (from Content DNA):\n${parts.join('\n')}\n\nThe visual design MUST embody these brand values — the shapes, color use, composition, and energy should visually reflect the institution's brand personality, pillars, and promise. If custom graphic guidelines are provided above, follow them precisely for typography treatment, color usage ratios, and visual style. This is not generic design — it should FEEL like this specific institution's brand.`;
+          brandGuidelinesContext = `\n${orgLabel().toUpperCase()} BRAND GUIDELINES (from Content DNA):\n${parts.join('\n')}\n\nThe visual design MUST embody these brand values — the shapes, color use, composition, and energy should visually reflect the ${orgLabel()}'s brand personality, pillars, and promise. If custom graphic guidelines are provided above, follow them precisely for typography treatment, color usage ratios, and visual style. This is not generic design — it should FEEL like this specific ${orgLabel()}'s brand.`;
           brandGuidelinesSummary = parts.slice(0, 6).join('. ');
           console.log("Brand guidelines injected for graphic design:", parts.length, "elements");
         }
@@ -503,14 +513,14 @@ Rules:
 - Do NOT use maroon, burgundy, crimson, navy, teal, or ANY other color unless it exactly matches one of the hex values above
 - Do NOT approximate or substitute similar-looking colors — use the exact hex values provided
 - White and neutral grays are acceptable for non-branded elements like buildings, sidewalks, sky`
-      : "Use neutral, warm tones appropriate for higher education marketing.";
+      : isHigherEd() ? "Use neutral, warm tones appropriate for higher education marketing." : "Use neutral, professional tones appropriate for corporate/brand marketing.";
 
     const spec = channelSpecs[channel] || channelSpecs["social-media"];
     const audienceContext = audience ? `Target audience: ${audience}.` : "";
     const goalContext = goal ? `Communication goal: ${goal}.` : "";
     const toneContext = tone ? `Desired tone: ${tone}.` : "";
     const momentContext = moment ? `Communication moment: ${moment}.` : "";
-    const cohortContext = cohort && cohort !== 'none' ? `Student cohort: ${cohort}.` : "";
+    const cohortContext = cohort && cohort !== 'none' ? `${isHigherEd() ? 'Student cohort' : 'Audience segment'}: ${cohort}.` : "";
     const domainContext = domain ? `Content domain: ${domain}.` : "";
 
     // Style modifiers based on user selection
@@ -578,7 +588,7 @@ PALETTE LOCK: If brand hex colors are provided, use ONLY those exact hex colors 
             messages: [
               {
                 role: "system",
-                content: `You write short marketing copy for higher-ed promotional graphics. The copy must align with the institution's brand voice and guidelines.${brandGuidelinesSummary ? ` Brand context: ${brandGuidelinesSummary}` : ""}${strictInstitutionConstraint ? ` ${strictInstitutionConstraint}` : ""} SPELLING CHECK: Triple-check every word for correct spelling before returning. No typos, no truncated words, no abbreviations unless intentional. Return ONLY valid JSON with keys: headline, subheadline, cta. No markdown.`,
+                content: `You write short marketing copy for ${isHigherEd() ? 'higher-ed' : 'branded'} promotional graphics. The copy must align with the ${orgLabel()}'s brand voice and guidelines.${brandGuidelinesSummary ? ` Brand context: ${brandGuidelinesSummary}` : ""}${strictInstitutionConstraint ? ` ${strictInstitutionConstraint}` : ""} SPELLING CHECK: Triple-check every word for correct spelling before returning. No typos, no truncated words, no abbreviations unless intentional. Return ONLY valid JSON with keys: headline, subheadline, cta. No markdown.`,
               },
               {
                 role: "user",
@@ -607,7 +617,7 @@ PALETTE LOCK: If brand hex colors are provided, use ONLY those exact hex colors 
     }
 
     const prompt = isGraphicDesign
-      ? `You are an elite graphic designer creating a marketing-forward promotional graphic for a higher education institution.
+      ? `You are an elite graphic designer creating a marketing-forward promotional graphic for ${isHigherEd() ? 'a higher education institution' : `the brand "${schoolName || 'this organization'}"`}.
 
 CONTENT TO PROMOTE:
 ${contentSummary}
@@ -650,15 +660,16 @@ VISUAL APPROACH:
 - If design reference images are provided below, they are your PRIMARY style guide — override any generic style instructions with what you see in those samples. Your output must look like the NEXT piece created by the same designer.
 - Use illustrative and iconic elements that represent the content theme and message — but style them to match the design references if present
 - Blend these illustrative elements with bold graphic design techniques: color blocks, geometric shapes, gradients, layered compositions
-- Use the brand colors prominently and intentionally — this should unmistakably feel like THIS institution's marketing material
+- Use the brand colors prominently and intentionally — this should unmistakably feel like THIS ${orgLabel()}'s marketing material
 - NEVER use generic/stock iconography. Create bespoke visual elements that match the craftsmanship level of the design references.
-- ABSOLUTELY DO NOT attempt to render any university logo, crest, seal, emblem, shield, wordmark, OR the institution's name as text. AI cannot accurately reproduce institutional logos or spell institution names correctly — any attempt will look wrong and damage the brand. Logos and institution names will be added later by the user in Brand Studio.
+- ABSOLUTELY DO NOT attempt to render any ${isHigherEd() ? 'university' : 'company'} logo, crest, seal, emblem, shield, wordmark, OR the ${orgLabel()}'s name as text. AI cannot accurately reproduce ${isHigherEd() ? 'institutional' : 'brand'} logos or spell ${orgLabel()} names correctly — any attempt will look wrong and damage the brand. Logos and ${orgLabel()} names will be added later by the user in Brand Studio.
 ${reserveLogoSpace ? "- Reserve a clean, uncluttered area (roughly bottom-right quadrant) for a logo — use negative space, but do NOT render any frame or text marking that area" : ""}
 - The mood and energy should match: ${tone || "professional and polished"}
 
 LAYOUT:
 - Aspect ratio: ${spec.aspect} (${spec.width}x${spec.height} pixels). ${spec.aspect === "1:1" ? "Perfectly SQUARE." : `Match ${spec.aspect} proportions exactly.`}`
-      : `Generate a professional ${spec.style} for a higher education institution.
+      : isHigherEd()
+        ? `Generate a professional ${spec.style} for a higher education institution.
 
 Context: ${contentSummary}
 ${audienceContext}
@@ -703,7 +714,7 @@ SETTING & ENVIRONMENT RULES — READ CAREFULLY:
 CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
 - ABSOLUTELY NO TEXT of any kind in the image. No words, letters, numbers, symbols, abbreviations, university names, or institution names.
 - Do NOT put text on clothing — no "University", no school names, no abbreviations, no single letters, no letter marks, no monograms. Show PLAIN solid-color clothing in the brand palette instead. A plain hoodie in the brand color is ALWAYS better than one with any mark on it.
-- ANTI-HALLUCINATION: Do NOT render ANY recognizable university marks, letter logos, or symbols from ANY institution — not from this institution and not from any other institution. The AI does not know what any university's actual logo or mark looks like and WILL hallucinate the wrong one (e.g., rendering a Minnesota "M" for Arizona State, or a Michigan "M" for Maryland). This is brand-damaging. ALL clothing, banners, and surfaces must be PLAIN with no marks whatsoever.
+- ANTI-HALLUCINATION: Do NOT render ANY recognizable university marks, letter logos, or symbols from ANY institution — not from this institution and not from any other institution. The AI does not know what any university's actual logo or mark looks like and WILL hallucinate the wrong one. ALL clothing, banners, and surfaces must be PLAIN with no marks whatsoever.
 - Do NOT put text on banners, signs, buildings, flags, or any surface. All signage and banners should be BLANK or show only solid brand colors / abstract patterns.
 - Do NOT render any logos, crests, seals, emblems, wordmarks, letter marks, monograms, or the institution's name as text. AI cannot accurately reproduce these — any attempt will look wrong and damage the brand. The user will add these in Brand Studio.
 - Do NOT render any mascot, mascot costume, cartoon character, or animal figure.
@@ -714,11 +725,62 @@ CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
 - Professional quality: sharp focus on subject, creamy bokeh backgrounds, rich color depth
 - Feel warm, authentic, and aspirational — like a spread in a top university's viewbook
 - Match the tone and energy of the communication moment${toneContext ? ` — the visual should feel ${tone}` : ''}
-- Imagery should resonate with the target audience${audienceContext ? ` (${audience})` : ''} and reflect their lived experience`;
+- Imagery should resonate with the target audience${audienceContext ? ` (${audience})` : ''} and reflect their lived experience`
+        : `Generate a professional ${spec.style} for the brand "${schoolName || 'this organization'}".
+
+Context: ${contentSummary}
+${audienceContext}
+${goalContext}
+${toneContext}
+${momentContext}
+${cohortContext}
+${domainContext}
+${brandContext}
+${strictInstitutionConstraint}
+
+${campusContext}
+
+${colorPaletteInstruction}
+
+VISUAL STYLE: ${selectedStyle}
+
+CHANNEL-SPECIFIC BEST PRACTICES for ${spec.description}:
+${spec.bestPractices}
+
+Photography/art direction — follow the style of real corporate/brand marketing imagery:
+- Capture candid, authentic moments: professionals collaborating in a modern workspace, a customer using the product, a team celebrating a milestone, employees engaged in meaningful work
+- NEVER show people standing in a line, posing symmetrically, or in obviously staged arrangements — these look artificial
+- ANTI-CLONE RULE: NEVER generate twins, duplicates, or people who look similar — every person MUST have a distinctly different face shape, skin tone, hairstyle, hair color, hair length, body type, and apparent age.
+- Vary body language, posture, and gaze direction — people should look naturally occupied, not aware of the camera
+- CLOTHING VARIETY IS CRITICAL: Each person MUST wear a distinctly different outfit appropriate to the brand's industry — vary garment types, colors, layers, and styles. Mix brand-colored items with neutral professional clothing.
+- ALL CLOTHING MUST BE PLAIN: No company logos, wordmarks, or text on garments. Solid brand colors only.
+- Use natural or professional lighting — window light, warm office environments, outdoor golden hour
+- Include environmental storytelling: laptops, products, tools, coffee cups — items authentic to this brand's world
+- People should be diverse in a way that feels organic — different backgrounds, ages, body types — without appearing curated
+- Brand colors should appear subtly on clothing, office accents, product packaging — use ONLY the exact hex values from the palette above.
+
+SETTING & ENVIRONMENT RULES:
+- Use brand reference photos (if provided) as your PRIMARY guide for settings and visual tone.
+- If no reference photos, use professional environments appropriate for the brand's industry: modern offices, retail spaces, workshops, outdoor lifestyle settings.
+- The environment should feel authentic to this specific brand, not generic stock photography.
+
+- Composition: use shallow depth of field, leading lines, rule of thirds — professional editorial quality
+- CRITICAL — Aspect ratio: This image MUST be exactly ${spec.aspect} (${spec.width}x${spec.height}px). ${spec.aspect === "1:1" ? "Perfectly SQUARE." : spec.aspect === "16:9" ? "WIDE horizontal rectangle." : `Match ${spec.aspect} exactly.`}
+
+CRITICAL TEXT & LOGO RULES:
+- ABSOLUTELY NO TEXT of any kind in the image. No words, letters, numbers, symbols, company names.
+- Do NOT put text on clothing, signage, products, or any surface.
+- Do NOT render any logos, wordmarks, seals, or brand marks. The user will add these in Brand Studio.
+- ABSOLUTELY NO QR codes.
+- NEVER include "CampusVoice" or any platform branding.
+- The brand's identity should come through via COLORS, ENVIRONMENT, and MOOD — never through rendered text or logos.
+- Professional quality: sharp focus, rich color depth, premium feel
+- Match the tone and energy of the communication${toneContext ? ` — the visual should feel ${tone}` : ''}
+- Imagery should resonate with the target audience${audienceContext ? ` (${audience})` : ''}`;
 
     console.log("Generating channel image for:", channel, "content:", contentSummary.substring(0, 100));
 
-    // Use campus photos from the parallel fetch (skip for fast engine to reduce latency)
+    // Use brand/campus photos from the parallel fetch (skip for fast engine to reduce latency)
     let campusPhotoUrls: string[] = [];
     if (engine !== "fast" && !isGraphicDesign) {
       try {
@@ -726,12 +788,14 @@ CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
         if (campusPhotos && campusPhotos.length > 0) {
           const lowerPrompt = (contentSummary + " " + (audience || "") + " " + (moment || "")).toLowerCase();
           const categoryPriority: Record<string, string[]> = {
-            "architecture": ["architecture", "building", "campus", "hall", "center", "library"],
-            "campus-life": ["student", "campus life", "community", "event", "club"],
-            "landscape": ["outdoor", "quad", "garden", "nature", "scenic"],
-            "athletics": ["athletic", "sport", "game", "team", "stadium"],
-            "traditions": ["tradition", "ceremony", "homecoming", "commencement", "graduation"],
+            "architecture": ["architecture", "building", "campus", "hall", "center", "library", "office", "headquarters"],
+            "campus-life": ["student", "campus life", "community", "event", "club", "team", "people", "culture"],
+            "landscape": ["outdoor", "quad", "garden", "nature", "scenic", "exterior"],
+            "athletics": ["athletic", "sport", "game", "team", "stadium", "fitness"],
+            "traditions": ["tradition", "ceremony", "homecoming", "commencement", "graduation", "heritage", "legacy"],
             "aerial": ["aerial", "overview", "campus view", "panoramic"],
+            "product": ["product", "brand", "service", "offering", "solution"],
+            "workspace": ["office", "workspace", "meeting", "conference", "lobby"],
           };
 
           const scored = campusPhotos.map((p: any) => {
@@ -776,7 +840,7 @@ CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
       ];
       if (campusPhotoUrls.length > 0) {
         messageContent.push(
-          { type: "text", text: "REFERENCE CAMPUS PHOTOGRAPHY — match the architectural style, lighting, environment, and photographic tone of these real campus images:" },
+          { type: "text", text: `REFERENCE BRAND PHOTOGRAPHY — match the visual style, lighting, environment, and photographic tone of these real ${isHigherEd() ? 'campus' : 'brand'} images:` },
           ...campusPhotoUrls.map(url => ({ type: "image_url", image_url: { url } })),
         );
       }
@@ -790,7 +854,7 @@ CRITICAL TEXT & LOGO RULES — READ CAREFULLY:
         messageContent.push(
           { type: "text", text: `⚠️ MANDATORY STYLE REPLICATION — YOUR #1 PRIORITY ⚠️
 
-The following ${designRefUrls.length} image(s) are the institution's APPROVED design samples. Your output MUST look like it was made by the SAME designer who created these samples. This is not optional guidance — it is the most important instruction in this entire prompt.
+The following ${designRefUrls.length} image(s) are the ${orgLabel()}'s APPROVED design samples. Your output MUST look like it was made by the SAME designer who created these samples. This is not optional guidance — it is the most important instruction in this entire prompt.
 
 WHAT YOU MUST COPY FROM THESE SAMPLES:
 1. EXACT VISUAL TREATMENTS — If the samples use highlighted text (text with colored background strips), YOU must use highlighted text the same way. If they use text knockout/cutout effects, do the same. If they use duotone photo treatments, do the same.
