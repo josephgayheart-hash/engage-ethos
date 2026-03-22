@@ -77,7 +77,16 @@ import { useIndustry } from '@/contexts/IndustryContext';
 import { DNATuningControls, DNAAdjustments } from '@/components/DNATuningControls';
 import { usePIIScanner } from '@/hooks/usePIIScanner';
 
-const SAMPLE_TYPES = [
+// Higher-ed-only sample type values, hidden for enterprise tenants
+const HIGHER_ED_ONLY_VALUES = new Set([
+  'commencement', 'phonathon', 'donor_stewardship', 'alumni_outreach',
+  'viewbook', 'academic_catalog', 'course_description', 'faculty_bio', 'student_handbook',
+]);
+
+// Higher-ed-only categories, hidden entirely for enterprise
+const HIGHER_ED_ONLY_CATEGORIES = new Set(['Academic']);
+
+const ALL_SAMPLE_TYPES = [
   // Core Communications
   { value: 'email', label: 'Email', category: 'Core Communications' },
   { value: 'sms', label: 'SMS/Text Message', category: 'Core Communications' },
@@ -99,12 +108,17 @@ const SAMPLE_TYPES = [
   { value: 'event_script', label: 'Event Script/Program', category: 'Speeches & Events' },
   { value: 'presentation', label: 'Presentation Script', category: 'Speeches & Events' },
   
-  // Outreach & Engagement
+  // Outreach & Engagement (some items higher-ed only)
   { value: 'call_script', label: 'Call Script', category: 'Outreach' },
   { value: 'phonathon', label: 'Phonathon Script', category: 'Outreach' },
   { value: 'donor_stewardship', label: 'Donor Stewardship', category: 'Outreach' },
   { value: 'thank_you', label: 'Thank You Message', category: 'Outreach' },
   { value: 'alumni_outreach', label: 'Alumni Outreach', category: 'Outreach' },
+  
+  // Enterprise Outreach (shown for enterprise tenants)
+  { value: 'customer_outreach', label: 'Customer Outreach', category: 'Outreach' },
+  { value: 'partner_comm', label: 'Partner Communication', category: 'Outreach' },
+  { value: 'investor_update', label: 'Investor Update', category: 'Outreach' },
   
   // Digital & Social
   { value: 'social', label: 'Social Media Post', category: 'Digital' },
@@ -113,7 +127,7 @@ const SAMPLE_TYPES = [
   { value: 'video_script', label: 'Video Script', category: 'Digital' },
   { value: 'podcast_script', label: 'Podcast Script', category: 'Digital' },
   
-  // Marketing & Recruitment
+  // Marketing & Recruitment (viewbook is higher-ed only)
   { value: 'marketing', label: 'Marketing Material', category: 'Marketing' },
   { value: 'brochure', label: 'Brochure/Flyer', category: 'Marketing' },
   { value: 'viewbook', label: 'Viewbook Copy', category: 'Marketing' },
@@ -129,12 +143,18 @@ const SAMPLE_TYPES = [
   { value: 'value_proposition', label: 'Value Proposition', category: 'Brand' },
   { value: 'boilerplate', label: 'Boilerplate Copy', category: 'Brand' },
   
-  // Academic & Administrative
+  // Academic & Administrative (higher-ed only)
   { value: 'academic_catalog', label: 'Academic Catalog', category: 'Academic' },
   { value: 'program_description', label: 'Program Description', category: 'Academic' },
   { value: 'course_description', label: 'Course Description', category: 'Academic' },
   { value: 'faculty_bio', label: 'Faculty Biography', category: 'Academic' },
   { value: 'student_handbook', label: 'Student Handbook', category: 'Academic' },
+  
+  // Corporate (enterprise only, replaces Academic)
+  { value: 'product_doc', label: 'Product Documentation', category: 'Corporate' },
+  { value: 'training_material', label: 'Training Material', category: 'Corporate' },
+  { value: 'corporate_policy', label: 'Corporate Policy', category: 'Corporate' },
+  { value: 'employee_handbook', label: 'Employee Handbook', category: 'Corporate' },
   
   // Reports & Publications
   { value: 'annual_report', label: 'Annual Report', category: 'Publications' },
