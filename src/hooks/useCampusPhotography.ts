@@ -37,11 +37,13 @@ export interface CampusPhoto {
 
 const PHOTO_CATEGORIES = [
   { value: 'architecture', label: 'Architecture' },
-  { value: 'campus-life', label: 'Campus Life' },
+  { value: 'campus-life', label: 'People & Culture' },
   { value: 'landscape', label: 'Landscape' },
-  { value: 'athletics', label: 'Athletics' },
-  { value: 'traditions', label: 'Traditions' },
+  { value: 'athletics', label: 'Athletics & Events' },
+  { value: 'traditions', label: 'Traditions & Heritage' },
   { value: 'aerial', label: 'Aerial' },
+  { value: 'product', label: 'Product & Branding' },
+  { value: 'workspace', label: 'Office & Workspace' },
 ] as const;
 
 const MAX_PHOTOS = 20;
