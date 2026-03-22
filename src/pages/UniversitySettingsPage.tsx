@@ -1069,8 +1069,8 @@ export default function UniversitySettingsPage() {
                 </Card>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Profile List */}
-                  <div className="lg:col-span-1 space-y-4">
+                  {/* Profile List — hidden on mobile when editing */}
+                  <div className={`lg:col-span-1 space-y-4 ${editingProfile ? 'hidden lg:block' : ''}`}>
                     <div className="flex items-center justify-between">
                       <h2 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
                         Your Profiles
