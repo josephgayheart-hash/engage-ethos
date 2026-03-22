@@ -1347,59 +1347,12 @@ export default function UniversitySettingsPage() {
                                 )}
                               </div>
                             )}
-                            {headerDirty && (
+                            {isDirty && (
                               <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50">
-                                <Button
-                                  size="sm"
-                                  disabled={isSavingHeader || !draftName.trim()}
-                                  onClick={async () => {
-                                    if (!editingProfile || !draftName.trim()) return;
-                                    setIsSavingHeader(true);
-                                    try {
-                                      // Update name
-                                      if (editingProfile.profileType === 'university' || editingProfile.profileType === 'headquarters') {
-                                        await updateProfile(editingProfile.id, { name: draftName.trim() });
-                                      } else {
-                                        await updateProfile(editingProfile.id, { config: { ...editingProfile.config, unitName: draftName.trim() } });
-                                      }
-                                      // Update type if changed
-                                      if (draftType !== editingProfile.profileType) {
-                                        await supabase
-                                          .from('institutional_profiles')
-                                          .update({ profile_type: draftType } as any)
-                                          .eq('id', editingProfile.id);
-                                      }
-                                      // Refresh everything
-                                      await refreshProfiles();
-                                      setEditingProfile({
-                                        ...editingProfile,
-                                        name: editingProfile.profileType === 'university' || editingProfile.profileType === 'headquarters' ? draftName.trim() : editingProfile.name,
-                                        config: { ...editingProfile.config, unitName: draftName.trim() },
-                                        profileType: draftType,
-                                      });
-                                      setHeaderDirty(false);
-                                      toast({ title: "Profile updated", description: `"${draftName.trim()}" saved successfully.` });
-                                    } catch (e) {
-                                      console.error(e);
-                                      toast({ title: "Error", description: "Failed to save profile changes.", variant: "destructive" });
-                                    } finally {
-                                      setIsSavingHeader(false);
-                                    }
-                                  }}
-                                >
-                                  {isSavingHeader ? "Saving…" : "Save Changes"}
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    setDraftName(editingProfile.config.unitName || editingProfile.name);
-                                    setDraftType(editingProfile.profileType);
-                                    setHeaderDirty(false);
-                                  }}
-                                >
-                                  Cancel
-                                </Button>
+                                <Badge variant="outline" className="text-xs text-amber-600 border-amber-300 bg-amber-50 dark:bg-amber-900/20">
+                                  <AlertCircle className="w-3 h-3 mr-1" />
+                                  Unsaved changes
+                                </Badge>
                               </div>
                             )}
                             <p className="text-xs text-muted-foreground mt-2">
