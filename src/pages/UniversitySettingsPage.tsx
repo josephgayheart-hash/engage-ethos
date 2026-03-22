@@ -169,6 +169,15 @@ export default function UniversitySettingsPage() {
     }
   }, [effectiveTenant]);
 
+  // Sync draft header state when editing profile changes
+  useEffect(() => {
+    if (editingProfile) {
+      setDraftName(editingProfile.config.unitName || editingProfile.name);
+      setDraftType(editingProfile.profileType);
+      setHeaderDirty(false);
+    }
+  }, [editingProfile?.id]);
+
   // Fetch DNA stats for each profile
   useEffect(() => {
     const fetchDnaStats = async () => {
