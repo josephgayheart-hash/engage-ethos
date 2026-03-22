@@ -214,10 +214,21 @@ function detectContentType(text: string): string | null {
 export default function ContentDNAPage() {
   const { tenant, profile, isAdmin } = useAuth();
   const { activeWorkspace, canSwitch } = useWorkspace();
-  const { labels: industryLabels } = useIndustry();
+  const { labels: industryLabels, isHigherEd } = useIndustry();
   const { checkFile } = usePIIScanner();
   const effectiveTenant = canSwitch && activeWorkspace ? activeWorkspace : tenant;
   const location = useLocation();
+  
+  // Enterprise tenants: hide higher-ed-only sample types & categories, show corporate ones
+  // Higher-ed tenants: hide enterprise-only items (customer_outreach etc.) & Corporate category
+  const ENTERPRISE_ONLY_VALUES = new Set(['customer_outreach', 'partner_comm', 'investor_update', 'product_doc', 'training_material', 'corporate_policy', 'employee_handbook']);
+  const ENTERPRISE_ONLY_CATEGORIES = new Set(['Corporate']);
+  const SAMPLE_TYPES = useMemo(() => {
+    if (isHigherEd) {
+      return ALL_SAMPLE_TYPES.filter(t => !ENTERPRISE_ONLY_VALUES.has(t.value) && !ENTERPRISE_ONLY_CATEGORIES.has(t.category));
+    }
+    return ALL_SAMPLE_TYPES.filter(t => !HIGHER_ED_ONLY_VALUES.has(t.value) && !HIGHER_ED_ONLY_CATEGORIES.has(t.category));
+  }, [isHigherEd]);
   
   // Brand pillar inline editing state
   const [editingPillarIndex, setEditingPillarIndex] = useState<number | null>(null);
