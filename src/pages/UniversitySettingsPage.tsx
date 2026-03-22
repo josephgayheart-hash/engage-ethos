@@ -133,6 +133,8 @@ export default function UniversitySettingsPage() {
   const [profileToDuplicate, setProfileToDuplicate] = useState<InstitutionalProfile | null>(null);
   const [expandedProfiles, setExpandedProfiles] = useState<Set<string>>(new Set());
   const [isDeletingProfile, setIsDeletingProfile] = useState(false);
+  const [dragOverProfileId, setDragOverProfileId] = useState<string | null>(null);
+  const dragProfileIdRef = useRef<string | null>(null);
   
   // Local draft state for the entire profile — saved explicitly via Save button
   const [draftName, setDraftName] = useState('');
