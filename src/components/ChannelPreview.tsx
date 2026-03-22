@@ -100,6 +100,11 @@ const channelIcons: Record<Channel, React.ReactNode> = {
   'talking-points': <Mic className="w-4 h-4" />,
   'news-article': <FileText className="w-4 h-4" />,
   'case-for-care': <Heart className="w-4 h-4" />,
+  'press-release': <FileText className="w-4 h-4" />,
+  'internal-memo': <FileText className="w-4 h-4" />,
+  'event-invite': <Mail className="w-4 h-4" />,
+  'proposal': <FileText className="w-4 h-4" />,
+  'investor-update': <Building2 className="w-4 h-4" />,
 };
 
 const channelLabels: Record<Channel, string> = {
@@ -115,6 +120,11 @@ const channelLabels: Record<Channel, string> = {
   'talking-points': 'Executive Talking Points',
   'news-article': 'News Article',
   'case-for-care': 'Case for Support',
+  'press-release': 'Press Release',
+  'internal-memo': 'Internal Memo',
+  'event-invite': 'Event Invite',
+  'proposal': 'Proposal / RFP',
+  'investor-update': 'Investor Update',
 };
 
 export function ChannelPreview({ channel, content, onCopy, onContentChange, onSaveToLibrary, institutionName, branding, tenantId, profileId, audience, contentSummary, goal, tone, moment, cohort, domain, imageEngine, imageStyle, regenerateKey, outputLanguage }: ChannelPreviewProps) {

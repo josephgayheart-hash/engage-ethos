@@ -75,6 +75,11 @@ const channelIcons: Record<Channel, React.ReactNode> = {
   'talking-points': <Mic className="w-4 h-4" />,
   'news-article': <FileText className="w-4 h-4" />,
   'case-for-care': <Heart className="w-4 h-4" />,
+  'press-release': <FileText className="w-4 h-4" />,
+  'internal-memo': <FileText className="w-4 h-4" />,
+  'event-invite': <Mail className="w-4 h-4" />,
+  'proposal': <FileText className="w-4 h-4" />,
+  'investor-update': <FileText className="w-4 h-4" />,
 };
 
 const formatChannelName = (channel: string): string => {
