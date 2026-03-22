@@ -638,16 +638,16 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
               </AccordionTrigger>
               <AccordionContent className="space-y-4 pt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {renderTextField('Email Domain', 'emailDomain', 'e.g., @university.edu')}
-                  {renderTextField('Primary Contact Email', 'primaryContactEmail', 'e.g., success@university.edu')}
+                  {renderTextField('Email Domain', 'emailDomain', isHigherEd ? 'e.g., @university.edu' : 'e.g., @valvoline.com')}
+                  {renderTextField('Primary Contact Email', 'primaryContactEmail', isHigherEd ? 'e.g., success@university.edu' : 'e.g., info@company.com')}
                   {renderTextField('Primary Contact Phone', 'primaryContactPhone', 'e.g., (555) 123-4567')}
-                  {renderTextField('Advising Email', 'advisingEmail', 'e.g., advising@university.edu')}
-                  {renderTextField('General Help Email', 'generalHelpEmail', 'e.g., help@university.edu')}
+                  {renderTextField(isHigherEd ? 'Advising Email' : 'Support Email', 'advisingEmail', isHigherEd ? 'e.g., advising@university.edu' : 'e.g., support@company.com')}
+                  {renderTextField('General Help Email', 'generalHelpEmail', isHigherEd ? 'e.g., help@university.edu' : 'e.g., help@company.com')}
                   {renderTextField('Emergency Phone', 'emergencyPhone', 'e.g., (555) 911-0000')}
                   {renderTextField('Text Alert Number', 'textAlertNumber', 'e.g., 55555')}
                   {renderTextField('Appointment Booking Link', 'appointmentLink', 'e.g., calendly.com/advising')}
                 </div>
-                {renderArrayField('Website Links', 'websiteLinks', 'websiteLink', 'e.g., advising.lakewood.edu')}
+                {renderArrayField('Website Links', 'websiteLinks', 'websiteLink', isHigherEd ? 'e.g., advising.lakewood.edu' : 'e.g., www.company.com/support')}
                 {renderArrayField('Social Media Handles', 'socialMediaHandles', 'socialHandle', 'e.g., @LakewoodSuccess')}
               </AccordionContent>
             </AccordionItem>
