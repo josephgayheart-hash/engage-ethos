@@ -1229,7 +1229,7 @@ export default function ContentDNAPage() {
             </TabsTrigger>
             <TabsTrigger value="campus-photos" className="flex items-center gap-2">
               <Camera className="w-4 h-4" />
-              Campus Photos
+              {industryLabels.photography}
             </TabsTrigger>
             <TabsTrigger value="design-refs" className="flex items-center gap-2">
               <PenTool className="w-4 h-4" />
