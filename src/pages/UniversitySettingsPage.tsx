@@ -836,17 +836,26 @@ export default function UniversitySettingsPage() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Building2 className="w-5 h-5" />
-                      Create Institutional Profile
+                      {isHigherEd ? 'Create Institutional Profile' : `Create ${industryLabels.organization} Profile`}
                     </CardTitle>
                     <CardDescription>
-                      Set up a new institution profile with branding, contact info, and key systems
+                      {isHigherEd
+                        ? 'Set up a new institution profile with branding, contact info, and key systems'
+                        : `Set up a new ${industryLabels.organization.toLowerCase()} profile with region, language, and identity`}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <ProfileSetupWizard
-                      onComplete={handleCreateProfile}
-                      onCancel={() => setShowWizard(false)}
-                    />
+                    {isHigherEd ? (
+                      <ProfileSetupWizard
+                        onComplete={handleCreateProfile}
+                        onCancel={() => setShowWizard(false)}
+                      />
+                    ) : (
+                      <EnterpriseProfileWizard
+                        onComplete={handleCreateProfile}
+                        onCancel={() => setShowWizard(false)}
+                      />
+                    )}
                   </CardContent>
                 </Card>
               ) : showSubUnitWizard && subUnitParent ? (
