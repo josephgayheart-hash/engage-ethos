@@ -632,7 +632,7 @@ export default function UniversitySettingsPage() {
                           <Input
                             value={institutionName}
                             onChange={(e) => setInstitutionName(e.target.value)}
-                            placeholder={isAgency ? 'Agency name' : 'Institution name'}
+                            placeholder={isAgency ? 'Agency name' : `${industryLabels.organization} name`}
                             className="max-w-xs"
                           />
                           <div className="flex gap-2">
