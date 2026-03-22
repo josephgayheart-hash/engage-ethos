@@ -137,6 +137,7 @@ export default function UniversitySettingsPage() {
   // Local draft state for the entire profile — saved explicitly via Save button
   const [draftName, setDraftName] = useState('');
   const [draftType, setDraftType] = useState<ProfileType>('university');
+  const [draftParentId, setDraftParentId] = useState<string | null>(null);
   const [draftConfig, setDraftConfig] = useState<InstitutionalConfigType | null>(null);
   const [headerDirty, setHeaderDirty] = useState(false);
   const [configDirty, setConfigDirty] = useState(false);
