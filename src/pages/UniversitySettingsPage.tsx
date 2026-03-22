@@ -258,7 +258,7 @@ export default function UniversitySettingsPage() {
 
       await refreshProfile();
       setIsEditingInstitution(false);
-      toast({ title: 'Institution Updated', description: 'Your institution name has been saved.' });
+      toast({ title: `${industryLabels.organization} Updated`, description: `Your ${industryLabels.organization.toLowerCase()} name has been saved.` });
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
