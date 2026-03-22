@@ -1201,7 +1201,7 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
       {hasConfig && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg mt-6">
           <Check className="w-4 h-4 text-green-600" />
-          <span>Institutional settings will personalize all AI-generated message outputs.</span>
+          <span>{isHigherEd ? 'Institutional' : 'Organization'} settings will personalize all AI-generated message outputs.</span>
         </div>
       )}
     </div>
