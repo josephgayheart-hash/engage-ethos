@@ -821,8 +821,8 @@ const ImageGeneratorPage = () => {
                           ][generationPhase] : [
                             "Reading your brand profile…",
                             campusPhotoCount > 0
-                              ? `Training from ${campusPhotoCount} campus photo${campusPhotoCount > 1 ? "s" : ""}…`
-                              : "Matching your institutional profile & brand colors…",
+                              ? `Training from ${campusPhotoCount} ${photoLabel.replace(/s$/, '')}${campusPhotoCount > 1 ? "s" : ""}…`
+                              : `Matching your ${isHigherEd ? 'institutional' : 'brand'} profile & colors…`,
                             "Applying channel best practices…",
                             "Rendering with AI — optimized for this format…",
                             "Finalizing & uploading…",
