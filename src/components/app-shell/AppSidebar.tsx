@@ -37,6 +37,9 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 /* ── Navigation Groups ── */
 
+// Higher-ed specific routes hidden for non-higher-ed tenants
+const HIGHER_ED_ONLY_URLS = new Set(['/giving-day-planner', '/stewardship-report']);
+
 const createItems = [
   { title: "Message Builder", url: "/build", icon: PenTool },
   { title: "Journey Designer", url: "/strategy", icon: Route },
@@ -65,7 +68,7 @@ export function AppSidebar() {
   const { profile, tenant, isAdmin, isSuperAdmin, isApprover, logout } = useAuth();
   const { isAgency, labels } = useAgencyMode();
   const { activeWorkspace, canSwitch } = useWorkspace();
-  const { labels: industryLabels } = useIndustry();
+  const { labels: industryLabels, isHigherEd } = useIndustry();
   const { state } = useSidebar();
   const navigate = useNavigate();
   const [referDialogOpen, setReferDialogOpen] = useState(false);
@@ -74,6 +77,11 @@ export function AppSidebar() {
   // When a super admin switches to another workspace, hide platform-admin-only features
   const isViewingOwnWorkspace = !canSwitch || !activeWorkspace || activeWorkspace.id === tenant?.id;
   const showPlatformAdmin = isSuperAdmin && isViewingOwnWorkspace;
+
+  // Filter higher-ed-only items for non-higher-ed tenants
+  const filteredCreateItems = isHigherEd
+    ? createItems
+    : createItems.filter(item => !HIGHER_ED_ONLY_URLS.has(item.url));
 
   const handleLogout = async () => {
     await logout();
@@ -132,7 +140,7 @@ export function AppSidebar() {
           <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/60 px-3 mb-0.5">Create</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {createItems.map((item) => (
+              {filteredCreateItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.title}>
                     <NavLink to={item.url} className={navLinkClasses} activeClassName={activeClasses}>

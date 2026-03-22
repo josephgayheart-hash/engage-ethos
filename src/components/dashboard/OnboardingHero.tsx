@@ -7,6 +7,7 @@ import { CheckCircle2, Circle, ArrowRight, Sparkles } from 'lucide-react';
 import { UserDashboardContext } from '@/hooks/useUserDashboardContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAgencyMode } from '@/hooks/useAgencyMode';
+import { useIndustry } from '@/contexts/IndustryContext';
 
 const ONBOARDING_MESSAGES = [
   "Let's get your brand voice dialed in.",
@@ -24,6 +25,7 @@ interface OnboardingHeroProps {
 export function OnboardingHero({ context }: OnboardingHeroProps) {
   const { profile, tenant } = useAuth();
   const { isAgency } = useAgencyMode();
+  const { labels: industryLabels, isHigherEd } = useIndustry();
   const firstName = profile?.first_name || 'there';
   const { setupProgress } = context;
 
@@ -31,13 +33,10 @@ export function OnboardingHero({ context }: OnboardingHeroProps) {
     Math.floor(Math.random() * ONBOARDING_MESSAGES.length)
   );
 
-
-
-
   const getNextStep = () => {
-    if (!setupProgress.hasInstitution) return { label: 'Set Up Institution', href: '/university-settings' };
+    if (!setupProgress.hasInstitution) return { label: `Set Up ${industryLabels.organization}`, href: '/university-settings' };
     if (!setupProgress.hasDNA) return { label: 'Configure Content DNA', href: '/content-dna' };
-    if (!setupProgress.hasCampusPhotos) return { label: 'Add Campus Photos', href: '/admin/content-dna' };
+    if (!setupProgress.hasCampusPhotos) return { label: `Add ${industryLabels.photography}`, href: '/admin/content-dna' };
     return { label: 'Start Creating', href: '/build' };
   };
 
@@ -87,11 +86,11 @@ export function OnboardingHero({ context }: OnboardingHeroProps) {
             <div className="flex items-center justify-between">
               <StepIndicator label="Profile" completed={setupProgress.hasProfile} />
               <div className="flex-1 h-px bg-border mx-1.5" />
-              <StepIndicator label="Institution" completed={setupProgress.hasInstitution} />
+              <StepIndicator label={industryLabels.organization} completed={setupProgress.hasInstitution} />
               <div className="flex-1 h-px bg-border mx-1.5" />
               <StepIndicator label="Content DNA" completed={setupProgress.hasDNA} />
               <div className="flex-1 h-px bg-border mx-1.5" />
-              <StepIndicator label="Photos" completed={setupProgress.hasCampusPhotos} />
+              <StepIndicator label={isHigherEd ? "Photos" : "Brand Assets"} completed={setupProgress.hasCampusPhotos} />
             </div>
           </div>
 

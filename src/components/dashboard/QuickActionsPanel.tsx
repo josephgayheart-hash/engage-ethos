@@ -12,55 +12,62 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useIndustry } from "@/contexts/IndustryContext";
 
 const COMPACT_KEY = "campusvoice_quick_actions_compact";
 
-const coreActions = [
-  {
-    label: "Build",
-    description: "Create on-brand communications guided by your Content DNA and institutional voice.",
-    href: "/build",
-    icon: PenTool,
-    gradient: "from-primary/90 to-primary",
-  },
-  {
-    label: "Evaluate",
-    description: "Score existing messages for brand alignment, reading level, and tone consistency.",
-    href: "/evaluate",
-    icon: FileText,
-    gradient: "from-accent/90 to-accent",
-  },
-  {
-    label: "Journey",
-    description: "Map multi-touch communication sequences for key student lifecycle moments.",
-    href: "/strategy",
-    icon: Map,
-    gradient: "from-[hsl(var(--cyber-purple))]/90 to-[hsl(var(--cyber-purple))]",
-  },
-  {
-    label: "Library",
-    description: "Access your saved messages, shared templates, and approved content.",
-    href: "/library",
-    icon: FolderOpen,
-    gradient: "from-secondary/90 to-secondary",
-  },
-  {
-    label: "Image Studio",
-    description: "Generate on-brand campus visuals for social, email, and web channels.",
-    href: "/image-generator",
-    icon: Image,
-    gradient: "from-[hsl(var(--cyber-lime))]/80 to-[hsl(var(--cyber-purple))]/90",
-  },
-  {
-    label: "DNA Studio",
-    description: "Train and refine your Content DNA for better AI-generated results.",
-    href: "/admin/content-dna",
-    icon: Sparkles,
-    gradient: "from-[hsl(var(--cyber-lime))]/80 to-[hsl(var(--cyber-lime))]",
-  },
-];
-
 export function QuickActionsPanel() {
+  const { isHigherEd, labels } = useIndustry();
+
+  const coreActions = [
+    {
+      label: "Build",
+      description: "Create on-brand communications guided by your Content DNA and institutional voice.",
+      href: "/build",
+      icon: PenTool,
+      gradient: "from-primary/90 to-primary",
+    },
+    {
+      label: "Evaluate",
+      description: "Score existing messages for brand alignment, reading level, and tone consistency.",
+      href: "/evaluate",
+      icon: FileText,
+      gradient: "from-accent/90 to-accent",
+    },
+    {
+      label: "Journey",
+      description: isHigherEd
+        ? "Map multi-touch communication sequences for key student lifecycle moments."
+        : "Map multi-touch communication sequences for key audience lifecycle moments.",
+      href: "/strategy",
+      icon: Map,
+      gradient: "from-[hsl(var(--cyber-purple))]/90 to-[hsl(var(--cyber-purple))]",
+    },
+    {
+      label: "Library",
+      description: "Access your saved messages, shared templates, and approved content.",
+      href: "/library",
+      icon: FolderOpen,
+      gradient: "from-secondary/90 to-secondary",
+    },
+    {
+      label: "Image Studio",
+      description: isHigherEd
+        ? "Generate on-brand campus visuals for social, email, and web channels."
+        : "Generate on-brand visuals for social, email, and web channels.",
+      href: "/image-generator",
+      icon: Image,
+      gradient: "from-[hsl(var(--cyber-lime))]/80 to-[hsl(var(--cyber-purple))]/90",
+    },
+    {
+      label: "DNA Studio",
+      description: "Train and refine your Content DNA for better AI-generated results.",
+      href: "/admin/content-dna",
+      icon: Sparkles,
+      gradient: "from-[hsl(var(--cyber-lime))]/80 to-[hsl(var(--cyber-lime))]",
+    },
+  ];
+
   const [compact, setCompact] = useState(() => {
     try {
       return localStorage.getItem(COMPACT_KEY) === "true";

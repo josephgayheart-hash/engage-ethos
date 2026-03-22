@@ -1,5 +1,6 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserDashboardContext } from '@/hooks/useUserDashboardContext';
+import { useIndustry } from '@/contexts/IndustryContext';
 import { OnboardingHero } from './OnboardingHero';
 import { WorkflowHero } from './WorkflowHero';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -29,6 +30,8 @@ export function DashboardHero() {
 }
 
 function MarketingHero() {
+  const { isHigherEd } = useIndustry();
+
   return (
     <section className="border-b border-border bg-background">
       <div className="container mx-auto px-4 py-6">
@@ -39,7 +42,9 @@ function MarketingHero() {
             <span className="text-primary">Execute.</span>
           </h1>
           <p className="text-sm text-muted-foreground">
-            Your digital playbook for higher ed messaging at scale.
+            {isHigherEd
+              ? 'Your digital playbook for higher ed messaging at scale.'
+              : 'Your digital playbook for brand communications at scale.'}
           </p>
         </div>
       </div>
