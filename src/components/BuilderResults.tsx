@@ -12,6 +12,7 @@ import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useIndustry } from "@/contexts/IndustryContext";
 import { openInGoogleDocs, formatForGoogleDocs } from "@/lib/googleDocsExport";
 import { AIResultsGuidance } from "@/components/AIResultsGuidance";
+import { TranslationToggle } from "@/components/TranslationToggle";
 import type { BuilderResult, MessageContext, InstitutionalConfig } from "@/types/campusvoice";
 interface BuilderResultsProps {
   result: BuilderResult;
