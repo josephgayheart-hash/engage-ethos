@@ -681,15 +681,15 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
           <div className="p-4 bg-muted/50 rounded-lg mb-4">
             <h4 className="font-medium text-sm flex items-center gap-2 mb-2">
               <MapPin className="w-4 h-4" />
-              Campus Locations & Offices
+              {isHigherEd ? 'Campus Locations & Offices' : 'Locations & Offices'}
             </h4>
-            <p className="text-xs text-muted-foreground">Physical locations and office names to include in messages.</p>
+            <p className="text-xs text-muted-foreground">{isHigherEd ? 'Physical locations and office names to include in messages.' : 'Facility names and locations to reference in communications.'}</p>
           </div>
 
-          {renderArrayField('Building Names', 'buildingNames', 'buildingName', 'e.g., Student Success Center', 'Official names for buildings')}
-          {renderArrayField('Program Names', 'programNames', 'programName', 'e.g., First-Year Experience Program')}
-          {renderArrayField('Support Centers', 'supportCenters', 'supportCenter', 'e.g., Writing Center, Math Lab')}
-          {renderArrayField('Campus Terms', 'campusTerms', 'campusTerm', 'e.g., quad, commons, student union', 'Local campus geography terms')}
+          {renderArrayField(isHigherEd ? 'Building Names' : 'Facility Names', 'buildingNames', 'buildingName', isHigherEd ? 'e.g., Student Success Center' : 'e.g., Regional HQ, Innovation Lab', isHigherEd ? 'Official names for buildings' : 'Official names for facilities')}
+          {renderArrayField('Program Names', 'programNames', 'programName', isHigherEd ? 'e.g., First-Year Experience Program' : 'e.g., Leadership Development Program')}
+          {renderArrayField(isHigherEd ? 'Support Centers' : 'Support Resources', 'supportCenters', 'supportCenter', isHigherEd ? 'e.g., Writing Center, Math Lab' : 'e.g., Help Desk, Customer Support')}
+          {isHigherEd && renderArrayField('Campus Terms', 'campusTerms', 'campusTerm', 'e.g., quad, commons, student union', 'Local campus geography terms')}
           
           <Accordion type="multiple" className="w-full">
             <AccordionItem value="centers">
