@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { usePIIScanner } from '@/hooks/usePIIScanner';
 import { useCampusPhotography, PhotoAIAnalysis } from '@/hooks/useCampusPhotography';
+import { useIndustry } from '@/contexts/IndustryContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
