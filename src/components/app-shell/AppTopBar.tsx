@@ -21,14 +21,34 @@ import {
 } from "@/components/ui/command";
 import { useState } from "react";
 
+const MAX_LOGO_HEIGHT = 22;
+const MAX_LOGO_WIDTH = 80;
+
 export function AppTopBar() {
   const { tenant } = useAuth();
   const { isAgency } = useAgencyMode();
+  const { labels: industryLabels } = useIndustry();
   const { canSwitch, activeWorkspace } = useWorkspace();
   const [cmdOpen, setCmdOpen] = useState(false);
   const navigate = useNavigate();
 
   const displayTenant = canSwitch ? activeWorkspace : tenant;
+
+  const quickNav = [
+    { label: "Dashboard", href: "/dashboard" },
+    { label: "Message Builder", href: "/build" },
+    { label: "Journey Designer", href: "/strategy" },
+    { label: "Evaluator", href: "/evaluate" },
+    { label: "My Library", href: "/library" },
+    { label: "Content DNA", href: "/admin/content-dna" },
+    { label: industryLabels.organizationSettings, href: "/university-settings" },
+    { label: "Image Studio", href: "/image-generator" },
+    { label: "AI Copywriter", href: "/playground" },
+    { label: "Brand Studio", href: "/brand-studio" },
+    { label: "Tools", href: "/tools" },
+    { label: "Profile", href: "/profile" },
+    { label: "Settings", href: "/settings" },
+  ];
 
   // Cmd+K shortcut
   useEffect(() => {
