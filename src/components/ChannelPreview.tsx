@@ -83,6 +83,7 @@ interface ChannelPreviewProps {
   imageEngine?: string;
   imageStyle?: string;
   regenerateKey?: number;
+  outputLanguage?: string;
 }
 
 const channelIcons: Record<Channel, React.ReactNode> = {
