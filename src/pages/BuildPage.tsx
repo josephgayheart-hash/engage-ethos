@@ -103,6 +103,11 @@ const channelIcons: Record<Channel, LucideIcon> = {
   'talking-points': Mic,
   'news-article': Newspaper,
   'case-for-care': Heart,
+  'press-release': Newspaper,
+  'internal-memo': FileText,
+  'event-invite': CalendarIcon,
+  'proposal': FileEdit,
+  'investor-update': Building2,
 };
 
 const ALL_CHANNEL_OPTIONS: { value: Channel; label: string }[] = [
@@ -118,6 +123,11 @@ const ALL_CHANNEL_OPTIONS: { value: Channel; label: string }[] = [
   { value: 'talking-points', label: 'Executive Talking Points' },
   { value: 'news-article', label: 'News Article' },
   { value: 'case-for-care', label: 'Case for Support' },
+  { value: 'press-release', label: 'Press Release' },
+  { value: 'internal-memo', label: 'Internal Memo' },
+  { value: 'event-invite', label: 'Event Invite' },
+  { value: 'proposal', label: 'Proposal / RFP' },
+  { value: 'investor-update', label: 'Investor Update' },
 ];
 
 // Audience/cohort labels are now resolved dynamically from useIndustry()
