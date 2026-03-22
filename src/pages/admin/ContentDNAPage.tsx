@@ -926,7 +926,7 @@ export default function ContentDNAPage() {
                 <div>
                   <h2 className="font-serif text-xl font-bold mb-2">What is Content DNA?</h2>
                   <p className="text-primary-foreground/80 text-sm leading-relaxed">
-                    Content DNA captures your institution's unique voice and communication style. By uploading examples of your best communications—emails, newsletters, news stories, and more—our AI analyzes the patterns, tone, and vocabulary that make your messaging distinctly yours. This analysis then guides all AI-generated content to match your established brand voice.
+                    Content DNA captures your {isHigherEd ? "institution's" : "organization's"} unique voice and communication style. By uploading examples of your best communications—emails, newsletters, {isHigherEd ? 'news stories' : 'marketing materials'}, and more—our AI analyzes the patterns, tone, and vocabulary that make your messaging distinctly yours. This analysis then guides all AI-generated content to match your established brand voice.
                   </p>
                   <div className="flex items-center gap-4 mt-3 text-sm text-primary-foreground/60">
                     <span className="flex items-center gap-1">

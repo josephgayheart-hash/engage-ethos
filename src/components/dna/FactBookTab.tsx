@@ -94,8 +94,10 @@ const categoryIcons: Record<string, React.ComponentType<{ className?: string }>>
 
 export function FactBookTab({ profileId }: FactBookTabProps) {
   const { isAdmin } = useAuth();
-  const { vocabulary } = useIndustry();
+  const { vocabulary, isHigherEd } = useIndustry();
   const FACT_CATEGORIES = useMemo(() => getFactCategoriesForTenant(vocabulary.tenantType), [vocabulary.tenantType]);
+
+  const bookLabel = isHigherEd ? 'Fact Book' : 'Company Facts';
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const {
@@ -349,13 +351,15 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5" />
-              Fact Book
-            </CardTitle>
-            <CardDescription>
-              Institutional statistics and data points for use in messaging and Case for Support
-            </CardDescription>
+             <CardTitle className="flex items-center gap-2">
+               <BarChart3 className="w-5 h-5" />
+               {bookLabel}
+             </CardTitle>
+             <CardDescription>
+               {isHigherEd 
+                 ? 'Institutional statistics and data points for use in messaging and Case for Support'
+                 : 'Company statistics, milestones, and key data points for use in branded communications'}
+             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
             {facts.length > 0 && (
@@ -370,8 +374,8 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete all facts?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This will permanently delete all {facts.length} facts from your Fact Book. 
-                      This action cannot be undone.
+                       This will permanently delete all {facts.length} facts from your {bookLabel}. 
+                       This action cannot be undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -474,9 +478,11 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
           <div className="text-center py-12">
             <BarChart3 className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
             <h3 className="font-medium text-lg mb-2">No facts yet</h3>
-            <p className="text-muted-foreground mb-4">
-              Import your institution's fact book or add statistics manually
-            </p>
+             <p className="text-muted-foreground mb-4">
+               {isHigherEd 
+                 ? "Import your institution's fact book or add statistics manually"
+                 : "Import your company's key data points or add statistics manually"}
+             </p>
             <div className="flex justify-center gap-2">
               <Button variant="outline" onClick={() => setShowImportDialog(true)}>
                 <Upload className="w-4 h-4 mr-2" />
@@ -574,7 +580,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
               <DialogDescription>
                 {addMode === 'select' 
                   ? 'Review the extracted facts and select which ones to add'
-                  : 'Add a statistic or data point to your Fact Book'}
+                  : `Add a statistic or data point to your ${bookLabel}`}
               </DialogDescription>
             </DialogHeader>
             
@@ -753,7 +759,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                       <Input
                         value={newFact.label}
                         onChange={e => setNewFact(prev => ({ ...prev, label: e.target.value }))}
-                        placeholder="e.g., Total Enrollment"
+                        placeholder={isHigherEd ? "e.g., Total Enrollment" : "e.g., Global Locations"}
                       />
                     </div>
 
@@ -831,7 +837,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Wand2 className="w-5 h-5" />
-                Import Fact Book
+                Import {bookLabel}
               </DialogTitle>
               <DialogDescription>
                 Scrape a URL, upload a PDF, or paste text to extract facts automatically
@@ -881,7 +887,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                         <div className="h-px w-4 bg-border" />
                         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm bg-muted text-muted-foreground">
                           <Database className="w-4 h-4" />
-                          <span>Save to Fact Book</span>
+                          <span>Save to {bookLabel}</span>
                         </div>
                       </div>
                     </div>
@@ -896,14 +902,16 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                           <Globe className="w-4 h-4 text-primary" />
                           <Label className="font-medium">Scrape from URL</Label>
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          Paste a link to your institution's facts page and we'll extract the content automatically
-                        </p>
+                         <p className="text-xs text-muted-foreground">
+                           {isHigherEd 
+                             ? "Paste a link to your institution's facts page and we'll extract the content automatically"
+                             : "Paste a link to your company's about or facts page and we'll extract the content automatically"}
+                         </p>
                         <div className="flex gap-2">
                           <Input
                             value={scrapeUrl}
                             onChange={e => setScrapeUrl(e.target.value)}
-                            placeholder="https://yourschool.edu/facts"
+                            placeholder={isHigherEd ? "https://yourschool.edu/facts" : "https://company.com/about"}
                             className="flex-1"
                           />
                           <Button 
@@ -942,7 +950,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                         />
                         <FileText className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
                         <p className="font-medium text-lg">Click to upload a PDF</p>
-                        <p className="text-sm text-muted-foreground">or drag and drop your fact book document</p>
+                        <p className="text-sm text-muted-foreground">or drag and drop your {isHigherEd ? 'fact book' : 'company data'} document</p>
                       </div>
 
                       <div className="flex items-center gap-4">
@@ -961,11 +969,11 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                           />
                         </div>
                         <div className="md:col-span-2 space-y-2">
-                          <Label>Fact Book Text</Label>
+                          <Label>{bookLabel} Text</Label>
                           <Textarea
                             value={importText}
                             onChange={e => setImportText(e.target.value)}
-                            placeholder="Paste fact book content here..."
+                            placeholder={`Paste ${bookLabel.toLowerCase()} content here...`}
                             rows={8}
                             className="resize-none"
                           />
@@ -1011,7 +1019,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                       </div>
                       <div className="flex-1">
                         <h4 className="font-semibold text-foreground">
-                          Add to Your Fact Book
+                          Add to Your {bookLabel}
                         </h4>
                         <p className="text-sm text-muted-foreground">
                           Select the facts you want to import
