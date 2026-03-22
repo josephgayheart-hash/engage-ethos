@@ -588,7 +588,7 @@ PALETTE LOCK: If brand hex colors are provided, use ONLY those exact hex colors 
             messages: [
               {
                 role: "system",
-                content: `You write short marketing copy for higher-ed promotional graphics. The copy must align with the institution's brand voice and guidelines.${brandGuidelinesSummary ? ` Brand context: ${brandGuidelinesSummary}` : ""}${strictInstitutionConstraint ? ` ${strictInstitutionConstraint}` : ""} SPELLING CHECK: Triple-check every word for correct spelling before returning. No typos, no truncated words, no abbreviations unless intentional. Return ONLY valid JSON with keys: headline, subheadline, cta. No markdown.`,
+                content: `You write short marketing copy for ${isHigherEd() ? 'higher-ed' : 'branded'} promotional graphics. The copy must align with the ${orgLabel()}'s brand voice and guidelines.${brandGuidelinesSummary ? ` Brand context: ${brandGuidelinesSummary}` : ""}${strictInstitutionConstraint ? ` ${strictInstitutionConstraint}` : ""} SPELLING CHECK: Triple-check every word for correct spelling before returning. No typos, no truncated words, no abbreviations unless intentional. Return ONLY valid JSON with keys: headline, subheadline, cta. No markdown.`,
               },
               {
                 role: "user",
