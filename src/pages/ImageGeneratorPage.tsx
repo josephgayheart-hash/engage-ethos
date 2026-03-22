@@ -1082,7 +1082,7 @@ const ImageGeneratorPage = () => {
                       Your generated image will appear here
                     </p>
                     <p className="text-xs text-muted-foreground/60">
-                      Select a profile to use campus-specific imagery & brand colors
+                      Select a profile to use brand-specific imagery & colors
                     </p>
                   </div>
                 )}
