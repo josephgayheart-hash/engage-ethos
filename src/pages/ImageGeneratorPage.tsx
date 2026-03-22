@@ -456,7 +456,7 @@ const ImageGeneratorPage = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Institutional Profile</Label>
+                    <Label>{profileLabel}</Label>
                     <Select value={selectedProfileId} onValueChange={setSelectedProfileId}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select profile...">
