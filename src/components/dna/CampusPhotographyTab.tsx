@@ -141,8 +141,9 @@ export function CampusPhotographyTab({ profileId }: CampusPhotographyTabProps) {
       <Alert className="border-primary/20 bg-primary/5">
         <Info className="h-4 w-4" />
         <AlertDescription className="text-sm">
-          Upload your best campus photography — building exteriors, quad shots, student life candids, iconic landmarks. 
-          These teach the AI what your campus actually looks like, so generated images match your real aesthetic.
+          {isHigherEd 
+            ? 'Upload your best campus photography — building exteriors, quad shots, student life candids, iconic landmarks. These teach the AI what your campus actually looks like, so generated images match your real aesthetic.'
+            : 'Upload your best brand photography — office spaces, product shots, team photos, event imagery. These teach the AI what your brand looks like visually, so generated images match your real aesthetic.'}
           <strong className="block mt-1">Photos are automatically analyzed by AI to extract visual metadata (colors, mood, subjects) that improves image generation accuracy.</strong>
         </AlertDescription>
       </Alert>
