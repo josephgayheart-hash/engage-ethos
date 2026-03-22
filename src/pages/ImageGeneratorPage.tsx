@@ -844,7 +844,7 @@ const ImageGeneratorPage = () => {
                           </span>
                         ) : creationMode !== "graphic-design" ? (
                           <span className="flex items-center justify-center gap-1">
-                            No campus photos uploaded — imagery uses your profile &amp; brand details.{" "}
+                            No {photoLabel} uploaded — imagery uses your profile &amp; brand details.{" "}
                             <Link to="/admin/content-dna" className="text-primary hover:text-primary/80 inline-flex items-center gap-0.5 font-medium">
                               Add photos for even more accuracy <ExternalLink className="w-2.5 h-2.5" />
                             </Link>
