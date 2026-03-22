@@ -973,7 +973,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                           <Textarea
                             value={importText}
                             onChange={e => setImportText(e.target.value)}
-                            placeholder="Paste fact book content here..."
+                            placeholder={`Paste ${bookLabel.toLowerCase()} content here...`}
                             rows={8}
                             className="resize-none"
                           />
