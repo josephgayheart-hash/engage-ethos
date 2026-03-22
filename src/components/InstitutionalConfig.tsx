@@ -762,7 +762,7 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
               <Users className="w-4 h-4" />
               Naming Conventions
             </h4>
-            <p className="text-xs text-muted-foreground">How should messages address students and staff?</p>
+            <p className="text-xs text-muted-foreground">{isHigherEd ? 'How should messages address students and staff?' : 'How should messages address customers and team members?'}</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
