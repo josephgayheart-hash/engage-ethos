@@ -513,7 +513,7 @@ Rules:
 - Do NOT use maroon, burgundy, crimson, navy, teal, or ANY other color unless it exactly matches one of the hex values above
 - Do NOT approximate or substitute similar-looking colors — use the exact hex values provided
 - White and neutral grays are acceptable for non-branded elements like buildings, sidewalks, sky`
-      : "Use neutral, warm tones appropriate for higher education marketing.";
+      : isHigherEd() ? "Use neutral, warm tones appropriate for higher education marketing." : "Use neutral, professional tones appropriate for corporate/brand marketing.";
 
     const spec = channelSpecs[channel] || channelSpecs["social-media"];
     const audienceContext = audience ? `Target audience: ${audience}.` : "";
