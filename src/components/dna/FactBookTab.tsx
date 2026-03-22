@@ -950,7 +950,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                         />
                         <FileText className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
                         <p className="font-medium text-lg">Click to upload a PDF</p>
-                        <p className="text-sm text-muted-foreground">or drag and drop your fact book document</p>
+                        <p className="text-sm text-muted-foreground">or drag and drop your {isHigherEd ? 'fact book' : 'company data'} document</p>
                       </div>
 
                       <div className="flex items-center gap-4">
