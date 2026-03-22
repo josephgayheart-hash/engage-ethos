@@ -1100,7 +1100,7 @@ const ImageGeneratorPage = () => {
         onSaveToShared={saveDialogType === 'personal' ? handleSaveToSharedLibrary : undefined}
         libraryType={saveDialogType}
         contentType="image"
-        defaultName={`${profileInstitutionName || 'Campus Image'} — ${channelOptions.find(c => c.value === channel)?.label || channel}`}
+        defaultName={`${profileInstitutionName || 'Brand Image'} — ${channelOptions.find(c => c.value === channel)?.label || channel}`}
       />
 
       {/* Lightbox / Expanded View Dialog */}
