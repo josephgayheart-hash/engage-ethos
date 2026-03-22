@@ -985,7 +985,7 @@ const ImageGeneratorPage = () => {
                       {viewMode === "overlay" ? (
                         <BrandOverlayEditor
                           imageUrl={blankCanvasMode ? null : imageUrl}
-                          brandColors={brandColors}
+                          brandColors={brandColors.length > 0 ? brandColors : APP_DEFAULT_COLORS}
                           logoUrl={profileLogoUrl}
                           logoUrls={profileLogoUrls}
                           institutionName={profileInstitutionName}
