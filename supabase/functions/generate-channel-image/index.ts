@@ -527,6 +527,35 @@ Rules:
     const cohortContext = cohort && cohort !== 'none' ? `${isHigherEd() ? 'Student cohort' : 'Audience segment'}: ${cohort}.` : "";
     const domainContext = domain ? `Content domain: ${domain}.` : "";
 
+    // Build cultural/language context for image generation
+    const languageCultureMap: Record<string, { culture: string; people: string; setting: string }> = {
+      es: { culture: "Latin American or Spanish", people: "Hispanic/Latino individuals with culturally authentic features, hair, and skin tones", setting: "settings that feel culturally resonant with Spanish-speaking communities — warm colors, vibrant environments, communal gathering spaces" },
+      fr: { culture: "French or Francophone", people: "people who reflect French or Francophone African/Caribbean diversity", setting: "settings with European or Francophone cultural cues — cafés, elegant architecture, communal plazas" },
+      zh: { culture: "Chinese", people: "East Asian individuals, predominantly Chinese", setting: "settings that resonate with Chinese culture — modern campuses with Asian architectural influences, tea gardens, communal study halls" },
+      ja: { culture: "Japanese", people: "Japanese individuals", setting: "settings with Japanese cultural sensibility — clean minimalist spaces, cherry blossoms, organized communal areas" },
+      ko: { culture: "Korean", people: "Korean individuals", setting: "settings with Korean cultural touches — modern tech-forward spaces, stylish urban environments" },
+      pt: { culture: "Brazilian or Portuguese", people: "Brazilian or Portuguese individuals with diverse skin tones and features", setting: "warm, vibrant settings that feel culturally Brazilian or Portuguese" },
+      ar: { culture: "Arabic-speaking", people: "people from Middle Eastern and North African backgrounds, with culturally appropriate attire options", setting: "settings that feel culturally resonant — modern Middle Eastern architecture, communal spaces, warm desert-light tones" },
+      hi: { culture: "Indian/Hindi-speaking", people: "South Asian individuals with diverse skin tones and features", setting: "settings with South Asian cultural resonance — vibrant colors, modern Indian campuses, warm community spaces" },
+      de: { culture: "German", people: "Central European individuals", setting: "settings with German/Central European architectural and cultural cues" },
+      it: { culture: "Italian", people: "Southern European individuals", setting: "settings with Italian cultural warmth — piazzas, historic architecture, Mediterranean light" },
+      vi: { culture: "Vietnamese", people: "Vietnamese and Southeast Asian individuals", setting: "settings with Southeast Asian cultural resonance — lush greenery, warm community environments" },
+      ru: { culture: "Russian", people: "Eastern European/Russian individuals", setting: "settings with Eastern European architectural and cultural elements" },
+      tl: { culture: "Filipino", people: "Filipino individuals with diverse features", setting: "warm tropical or urban Filipino-inspired settings" },
+    };
+
+    let culturalContext = "";
+    if (outputLanguage && outputLanguage !== "en") {
+      const langCode = outputLanguage.split("-")[0].toLowerCase();
+      const cultureInfo = languageCultureMap[langCode];
+      if (cultureInfo) {
+        culturalContext = `\nCULTURAL & DEMOGRAPHIC CONTEXT (language: ${outputLanguage}):
+This content targets a ${cultureInfo.culture} audience. The people in this image should authentically represent ${cultureInfo.people}. Use ${cultureInfo.setting}. The visual representation must feel culturally genuine and relatable to this audience — not a token overlay on a generic Western scene. Signage, environmental details, and the overall atmosphere should feel natural for this cultural context.`;
+      } else {
+        culturalContext = `\nCULTURAL CONTEXT: This content is being produced in the "${outputLanguage}" language. Ensure the people, environment, and cultural cues in the image feel authentic and appropriate for the audience that speaks this language.`;
+      }
+    }
+
     // Style modifiers based on user selection
     const styleDirections: Record<string, string> = {
       photorealistic: "Photorealistic editorial campus photography — looks indistinguishable from a real photo taken by a professional university photographer.",
