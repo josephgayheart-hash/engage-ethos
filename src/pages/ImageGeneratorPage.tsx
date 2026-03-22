@@ -944,7 +944,7 @@ const ImageGeneratorPage = () => {
                           </button>
                         </>
                       )}
-                      {(brandColors.length > 0 || profileConfig) && (
+                      {true && (
                         <>
                           <button
                             onClick={() => setViewMode("overlay")}
