@@ -860,9 +860,11 @@ const ImageGeneratorPage = () => {
                         ) : null}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {engine === "premium"
-                          ? "Premium engine — up to 60 seconds"
-                          : "Estimated 15–30 seconds"}
+                        {engine === "pro"
+                          ? "Pro engine — up to 90 seconds"
+                          : engine === "premium"
+                            ? "Premium engine — up to 60 seconds"
+                            : "Estimated 15–30 seconds"}
                       </p>
                     </div>
 
