@@ -911,7 +911,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                           <Input
                             value={scrapeUrl}
                             onChange={e => setScrapeUrl(e.target.value)}
-                            placeholder="https://yourschool.edu/facts"
+                            placeholder={isHigherEd ? "https://yourschool.edu/facts" : "https://company.com/about"}
                             className="flex-1"
                           />
                           <Button 
