@@ -254,6 +254,9 @@ export function EnterpriseProfileWizard({
       {currentStep.id === 'level' && (
         <div className="space-y-3">
           <h3 className="text-sm font-medium text-foreground">What level is this profile?</h3>
+          <p className="text-xs text-muted-foreground">
+            Profiles can represent any level of your organization — regions (APAC, LATAM, EMEA), divisions, business units, franchise groups, or individual locations. Each profile gets its own voice and brand settings.
+          </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {availableLevels.map((lvl) => {
               const config = LEVEL_CONFIG[lvl];
