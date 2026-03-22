@@ -133,11 +133,14 @@ export default function UniversitySettingsPage() {
   const [expandedProfiles, setExpandedProfiles] = useState<Set<string>>(new Set());
   const [isDeletingProfile, setIsDeletingProfile] = useState(false);
   
-  // Local draft state for profile header edits (name + type) — saved explicitly via button
+  // Local draft state for the entire profile — saved explicitly via Save button
   const [draftName, setDraftName] = useState('');
   const [draftType, setDraftType] = useState<ProfileType>('university');
+  const [draftConfig, setDraftConfig] = useState<InstitutionalConfigType | null>(null);
   const [headerDirty, setHeaderDirty] = useState(false);
-  const [isSavingHeader, setIsSavingHeader] = useState(false);
+  const [configDirty, setConfigDirty] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const isDirty = headerDirty || configDirty;
   
   // Branding state
   const [isEditingInstitution, setIsEditingInstitution] = useState(false);
@@ -171,12 +174,14 @@ export default function UniversitySettingsPage() {
     }
   }, [effectiveTenant]);
 
-  // Sync draft header state when editing profile changes
+  // Sync all draft state when editing profile changes
   useEffect(() => {
     if (editingProfile) {
       setDraftName(editingProfile.config.unitName || editingProfile.name);
       setDraftType(editingProfile.profileType);
+      setDraftConfig(editingProfile.config);
       setHeaderDirty(false);
+      setConfigDirty(false);
     }
   }, [editingProfile?.id]);
 
@@ -415,10 +420,62 @@ export default function UniversitySettingsPage() {
     }
   };
 
-  const handleUpdateConfig = async (config: InstitutionalConfigType) => {
+  const handleUpdateConfig = (config: InstitutionalConfigType) => {
     if (!editingProfile) return;
-    await updateProfile(editingProfile.id, { config });
-    setEditingProfile({ ...editingProfile, config });
+    setDraftConfig(config);
+    setConfigDirty(true);
+  };
+
+  // Master save handler for all profile changes (name, type, config)
+  const handleSaveProfile = async () => {
+    if (!editingProfile) return;
+    setIsSavingProfile(true);
+    try {
+      const updates: Record<string, unknown> = {};
+      const newConfig = draftConfig || editingProfile.config;
+
+      // Apply name change
+      if (headerDirty) {
+        if (editingProfile.profileType === 'university' || editingProfile.profileType === 'headquarters') {
+          updates.name = draftName.trim();
+        }
+        // Always store unitName in config
+        newConfig.unitName = draftName.trim();
+      }
+
+      // Save config
+      updates.config = JSON.parse(JSON.stringify(newConfig));
+
+      // Save type if changed
+      if (draftType !== editingProfile.profileType) {
+        updates.profile_type = draftType;
+      }
+
+      const { error } = await supabase
+        .from('institutional_profiles')
+        .update(updates as any)
+        .eq('id', editingProfile.id);
+
+      if (error) throw error;
+
+      await refreshProfiles();
+      const updatedProfile: InstitutionalProfile = {
+        ...editingProfile,
+        name: (editingProfile.profileType === 'university' || editingProfile.profileType === 'headquarters') && headerDirty ? draftName.trim() : editingProfile.name,
+        config: newConfig,
+        profileType: draftType,
+        updatedAt: new Date().toISOString(),
+      };
+      setEditingProfile(updatedProfile);
+      setHeaderDirty(false);
+      setConfigDirty(false);
+      toast({ title: "Profile saved", description: `"${draftName.trim()}" updated successfully.` });
+    } catch (e: any) {
+      console.error(e);
+      toast({ title: "Error", description: e.message || "Failed to save profile.", variant: "destructive" });
+    } finally {
+      setIsSavingProfile(false);
+    }
   };
 
   const handleRenameProfile = async (newName: string) => {
@@ -1138,8 +1195,37 @@ export default function UniversitySettingsPage() {
                               </div>
                             </div>
 
-                            {/* Right: Actions */}
+                            {/* Right: Save + Actions */}
                             <div className="flex items-center gap-2">
+                              {isDirty && (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    className="h-8 gap-1.5"
+                                    disabled={isSavingProfile || !draftName.trim()}
+                                    onClick={handleSaveProfile}
+                                  >
+                                    {isSavingProfile ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                                    Save Changes
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8"
+                                    onClick={() => {
+                                      if (editingProfile) {
+                                        setDraftName(editingProfile.config.unitName || editingProfile.name);
+                                        setDraftType(editingProfile.profileType);
+                                        setDraftConfig(editingProfile.config);
+                                        setHeaderDirty(false);
+                                        setConfigDirty(false);
+                                      }
+                                    }}
+                                  >
+                                    Discard
+                                  </Button>
+                                </>
+                              )}
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -1261,59 +1347,12 @@ export default function UniversitySettingsPage() {
                                 )}
                               </div>
                             )}
-                            {headerDirty && (
+                            {isDirty && (
                               <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50">
-                                <Button
-                                  size="sm"
-                                  disabled={isSavingHeader || !draftName.trim()}
-                                  onClick={async () => {
-                                    if (!editingProfile || !draftName.trim()) return;
-                                    setIsSavingHeader(true);
-                                    try {
-                                      // Update name
-                                      if (editingProfile.profileType === 'university' || editingProfile.profileType === 'headquarters') {
-                                        await updateProfile(editingProfile.id, { name: draftName.trim() });
-                                      } else {
-                                        await updateProfile(editingProfile.id, { config: { ...editingProfile.config, unitName: draftName.trim() } });
-                                      }
-                                      // Update type if changed
-                                      if (draftType !== editingProfile.profileType) {
-                                        await supabase
-                                          .from('institutional_profiles')
-                                          .update({ profile_type: draftType } as any)
-                                          .eq('id', editingProfile.id);
-                                      }
-                                      // Refresh everything
-                                      await refreshProfiles();
-                                      setEditingProfile({
-                                        ...editingProfile,
-                                        name: editingProfile.profileType === 'university' || editingProfile.profileType === 'headquarters' ? draftName.trim() : editingProfile.name,
-                                        config: { ...editingProfile.config, unitName: draftName.trim() },
-                                        profileType: draftType,
-                                      });
-                                      setHeaderDirty(false);
-                                      toast({ title: "Profile updated", description: `"${draftName.trim()}" saved successfully.` });
-                                    } catch (e) {
-                                      console.error(e);
-                                      toast({ title: "Error", description: "Failed to save profile changes.", variant: "destructive" });
-                                    } finally {
-                                      setIsSavingHeader(false);
-                                    }
-                                  }}
-                                >
-                                  {isSavingHeader ? "Saving…" : "Save Changes"}
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    setDraftName(editingProfile.config.unitName || editingProfile.name);
-                                    setDraftType(editingProfile.profileType);
-                                    setHeaderDirty(false);
-                                  }}
-                                >
-                                  Cancel
-                                </Button>
+                                <Badge variant="outline" className="text-xs text-amber-600 border-amber-300 bg-amber-50 dark:bg-amber-900/20">
+                                  <AlertCircle className="w-3 h-3 mr-1" />
+                                  Unsaved changes
+                                </Badge>
                               </div>
                             )}
                             <p className="text-xs text-muted-foreground mt-2">
@@ -1354,7 +1393,7 @@ export default function UniversitySettingsPage() {
                           })()}
                           
                           <InstitutionalConfig 
-                            config={editingProfile.config} 
+                            config={draftConfig || editingProfile.config} 
                             onChange={handleUpdateConfig}
                             profileId={editingProfile.id}
                           />
