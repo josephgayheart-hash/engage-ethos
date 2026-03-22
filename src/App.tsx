@@ -91,6 +91,7 @@ import ForEnterprisePage from "./pages/ForEnterprisePage";
 import CampaignBriefPage from "./pages/CampaignBriefPage";
 import CompetitiveAnalyzerPage from "./pages/CompetitiveAnalyzerPage";
 import RegionAdapterPage from "./pages/RegionAdapterPage";
+import RegionalPlaybookPage from "./pages/RegionalPlaybookPage";
 
 const queryClient = new QueryClient();
 
@@ -207,6 +208,7 @@ const AppRoutes = () => (
       <Route path="/campaign-brief" element={<CampaignBriefPage />} />
       <Route path="/competitive-analyzer" element={<CompetitiveAnalyzerPage />} />
       <Route path="/region-adapter" element={<RegionAdapterPage />} />
+      <Route path="/regional-playbook" element={<RegionalPlaybookPage />} />
       <Route path="/image-generator" element={<ImageGeneratorPage />} />
       <Route path="/brand-audit" element={<BrandAuditPage />} />
       <Route path="/brand-studio" element={<BrandStudioPage />} />
