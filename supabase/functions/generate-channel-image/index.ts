@@ -328,6 +328,7 @@ serve(async (req) => {
     const brandColors: string[] = [];
     let tenantType = "";
     let strictInstitutionConstraint = "";
+    let schoolName = "";
     const isHigherEd = () => !tenantType || tenantType === "higher_ed";
     const orgLabel = () => isHigherEd() ? "institution" : "organization";
     const settingLabel = () => isHigherEd() ? "campus" : "brand";
@@ -436,7 +437,7 @@ serve(async (req) => {
         console.warn("Stripped platform brand name from image prompt context");
       }
 
-      const schoolName = universityName && !isBadBrand(universityName)
+      schoolName = universityName && !isBadBrand(universityName)
         ? universityName
         : tenantInstitutionName && !isBadBrand(tenantInstitutionName)
           ? tenantInstitutionName
