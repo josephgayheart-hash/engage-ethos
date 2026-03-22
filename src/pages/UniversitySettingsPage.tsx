@@ -258,7 +258,7 @@ export default function UniversitySettingsPage() {
 
       await refreshProfile();
       setIsEditingInstitution(false);
-      toast({ title: 'Institution Updated', description: 'Your institution name has been saved.' });
+      toast({ title: `${industryLabels.organization} Updated`, description: `Your ${industryLabels.organization.toLowerCase()} name has been saved.` });
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
@@ -304,7 +304,7 @@ export default function UniversitySettingsPage() {
 
       setLogoUrl(publicUrl);
       await refreshProfile();
-      toast({ title: 'Logo Uploaded', description: 'Your institution logo has been updated.' });
+      toast({ title: 'Logo Uploaded', description: `Your ${industryLabels.organization.toLowerCase()} logo has been updated.` });
     } catch (error: any) {
       toast({ title: 'Upload Failed', description: error.message, variant: 'destructive' });
     } finally {
@@ -597,12 +597,12 @@ export default function UniversitySettingsPage() {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2">
                     {isAgency ? <Users className="w-5 h-5 text-amber-600" /> : <Building2 className="w-5 h-5" />}
-                    {isAgency ? `${tenant?.institution_name || 'Agency'} Branding` : 'Institution Branding'}
+                    {isAgency ? `${tenant?.institution_name || 'Agency'} Branding` : `${industryLabels.organization} Branding`}
                   </CardTitle>
                   <CardDescription>
                     {isAgency 
                       ? 'Your agency\'s visual identity — logo, colors, and brand assets'
-                      : 'Your institution identity and per-profile visual branding at a glance'
+                      : `Your ${industryLabels.organization.toLowerCase()} identity and per-profile visual branding at a glance`
                     }
                   </CardDescription>
                 </CardHeader>
@@ -632,7 +632,7 @@ export default function UniversitySettingsPage() {
                           <Input
                             value={institutionName}
                             onChange={(e) => setInstitutionName(e.target.value)}
-                            placeholder={isAgency ? 'Agency name' : 'Institution name'}
+                            placeholder={isAgency ? 'Agency name' : `${industryLabels.organization} name`}
                             className="max-w-xs"
                           />
                           <div className="flex gap-2">

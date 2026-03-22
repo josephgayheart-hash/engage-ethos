@@ -1,5 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { useIndustry } from "@/contexts/IndustryContext";
 
 interface AgencyLabels {
   // Navigation & Header
@@ -58,6 +59,7 @@ interface AgencyModeResult {
 export function useAgencyMode(): AgencyModeResult {
   const { tenant } = useAuth();
   const { activeWorkspace, canSwitch } = useWorkspace();
+  const { labels: industryLabels, isHigherEd } = useIndustry();
   
   // Use active workspace when super admin is switching workspaces
   const effectiveTenant = canSwitch && activeWorkspace ? activeWorkspace : tenant;
@@ -118,7 +120,7 @@ export function useAgencyMode(): AgencyModeResult {
         profile: 'Profile',
         profiles: 'Profiles',
         addProfile: 'Create Profile',
-        settings: 'University Settings',
+        settings: industryLabels.organizationSettings,
         settingsPath: '/university-settings',
         library: 'Library',
         selectProfile: 'Generate As',
@@ -128,36 +130,36 @@ export function useAgencyMode(): AgencyModeResult {
         dashboardPath: '/',
         
         // Settings Page
-        settingsPageTitle: 'University Settings',
-        settingsPageDescription: 'Manage your institution\'s profiles and sub-units',
+        settingsPageTitle: industryLabels.organizationSettings,
+        settingsPageDescription: `Manage your ${industryLabels.organization.toLowerCase()}'s profiles and sub-units`,
         createProfileButton: 'Create Profile',
         profileTerm: 'Profile',
-        subUnitTerm: 'Sub-unit',
+        subUnitTerm: isHigherEd ? 'Sub-unit' : industryLabels.subUnit,
         manageProfilesLabel: 'Manage Profiles',
         
         // Wizard
-        wizardTitle: 'Create Institutional Profile',
-        wizardDescription: 'Set up a new institutional profile for your organization',
-        identityStepTitle: 'Institution Identity',
-        identityStepDescription: 'Enter your institution\'s basic information',
-        institutionNameLabel: 'Institution Name',
-        institutionNamePlaceholder: 'Enter institution name',
-        institutionNameHelper: 'The official name of your institution',
-        logoLabel: 'Institution Logo',
-        logoHelper: 'Upload your institution\'s official logo',
+        wizardTitle: `Create ${industryLabels.organization} Profile`,
+        wizardDescription: `Set up a new ${industryLabels.organization.toLowerCase()} profile for your organization`,
+        identityStepTitle: `${industryLabels.organization} Identity`,
+        identityStepDescription: `Enter your ${industryLabels.organization.toLowerCase()}'s basic information`,
+        institutionNameLabel: `${industryLabels.organization} Name`,
+        institutionNamePlaceholder: `Enter ${industryLabels.organization.toLowerCase()} name`,
+        institutionNameHelper: `The official name of your ${industryLabels.organization.toLowerCase()}`,
+        logoLabel: `${industryLabels.organization} Logo`,
+        logoHelper: `Upload your ${industryLabels.organization.toLowerCase()}'s official logo`,
         
         // Sub-unit wizard
-        subUnitWizardTitle: 'Create Sub-unit',
-        subUnitWizardDescription: 'Create a sub-unit within this profile',
+        subUnitWizardTitle: isHigherEd ? 'Create Sub-unit' : `Add ${industryLabels.subUnit}`,
+        subUnitWizardDescription: isHigherEd ? 'Create a sub-unit within this profile' : `Create a ${industryLabels.subUnit.toLowerCase()} within this profile`,
         
         // Profile selector
         selectorLabel: 'Generate As',
         selectorPlaceholder: 'Select a profile',
-        selectorEmptyState: 'No institutional profiles configured. Create one in University Settings.',
+        selectorEmptyState: `No profiles configured. Create one in ${industryLabels.organizationSettings}.`,
         
         // Account type
-        accountType: 'University',
-        accountTypeLabel: 'Institution Account',
+        accountType: industryLabels.organization,
+        accountTypeLabel: `${industryLabels.organization} Account`,
       };
 
   return {

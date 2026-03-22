@@ -100,7 +100,7 @@ export function InstitutionManagementCard() {
         {!status || status.profileCount === 0 ? (
           <div className="text-center py-2">
             <p className="text-sm text-muted-foreground mb-2">
-              No institutional profile set up yet.
+              No {industryLabels.organization.toLowerCase()} profile set up yet.
             </p>
             <Button variant="outline" size="sm" asChild>
               <Link to={settingsHref}>
