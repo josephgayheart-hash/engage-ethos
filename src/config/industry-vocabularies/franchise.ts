@@ -27,6 +27,7 @@ export const franchiseVocabulary: IndustryVocabulary = {
     photography: 'Brand Photography',
     storyBank: 'Success Stories',
     factBook: 'Performance Metrics',
+    organizationProfile: 'Brand Profile',
     industryContext: 'franchise brand management',
     contentStyle: 'franchise marketing and local dealer communications',
   },

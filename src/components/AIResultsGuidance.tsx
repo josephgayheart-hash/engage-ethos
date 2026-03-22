@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Lightbulb, Settings, Dna, ArrowRight } from "lucide-react";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
+import { useIndustry } from "@/contexts/IndustryContext";
 
 interface AIResultsGuidanceProps {
   className?: string;
@@ -12,7 +13,9 @@ interface AIResultsGuidanceProps {
 export function AIResultsGuidance({ className = "", variant = "default" }: AIResultsGuidanceProps) {
   const { contentDNA } = useContentDNAForGeneration();
   const { profiles } = useInstitutionalProfiles();
+  const { labels } = useIndustry();
 
+  const profileLabel = labels.organizationProfile;
   const hasDNA = !!contentDNA;
   const hasProfile = (profiles?.length ?? 0) > 0;
   const bothConfigured = hasDNA && hasProfile;
@@ -22,8 +25,8 @@ export function AIResultsGuidance({ className = "", variant = "default" }: AIRes
     : "Not getting the results you want?";
 
   const description = bothConfigured
-    ? "Fine-tune your Content DNA or update your institutional profile for even more precise, on-brand output."
-    : "AI-generated content improves dramatically when your institutional voice and brand are configured. Set up your profile and Content DNA to unlock better results.";
+    ? `Fine-tune your Content DNA or update your ${profileLabel.toLowerCase()} for even more precise, on-brand output.`
+    : `AI-generated content improves dramatically when your voice and brand are configured. Set up your ${profileLabel.toLowerCase()} and Content DNA to unlock better results.`;
 
   if (variant === "subtle") {
     return (
@@ -31,7 +34,7 @@ export function AIResultsGuidance({ className = "", variant = "default" }: AIRes
         <Lightbulb className="w-3.5 h-3.5 shrink-0" />
         <span>
           Results improve with your{" "}
-          <Link to="/settings" className="text-primary hover:underline">institutional profile</Link>
+          <Link to="/settings" className="text-primary hover:underline">{profileLabel.toLowerCase()}</Link>
           {" & "}
           <Link to="/admin/content-dna" className="text-primary hover:underline">Content DNA</Link>.
         </span>
@@ -53,7 +56,7 @@ export function AIResultsGuidance({ className = "", variant = "default" }: AIRes
                 className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
               >
                 <Settings className="w-3.5 h-3.5" />
-                Set Up Institutional Profile
+                Set Up {profileLabel}
                 <ArrowRight className="w-3 h-3" />
               </Link>
             )}

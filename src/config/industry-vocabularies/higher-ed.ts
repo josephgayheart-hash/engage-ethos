@@ -27,6 +27,7 @@ export const higherEdVocabulary: IndustryVocabulary = {
     photography: 'Campus Photography',
     storyBank: 'Story Bank',
     factBook: 'Fact Book',
+    organizationProfile: 'Institutional Profile',
     industryContext: 'higher education',
     contentStyle: 'institutional communications',
   },

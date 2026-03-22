@@ -138,6 +138,7 @@ export interface IndustryLabels {
   photography: string;          // "Campus Photography" | "Brand Photography"
   storyBank: string;            // "Story Bank" | "Success Stories"
   factBook: string;             // "Fact Book" | "Key Metrics"
+  organizationProfile: string;  // "Institutional Profile" | "Company Profile" | "Brand Profile"
   
   // AI prompt context
   industryContext: string;      // "higher education" | "enterprise franchise" | "nonprofit"
