@@ -127,6 +127,10 @@ const BuildPage = () => {
   const { profile, isAdmin, isApprover, tenant } = useAuth();
   const { audiences, cohorts, labels: industryLabels, isHigherEd } = useIndustry();
   
+  // Higher-ed-only channels gated
+  const HIGHER_ED_ONLY_CHANNELS = new Set<Channel>(['case-for-care']);
+  const channelOptions = ALL_CHANNEL_OPTIONS.filter(c => isHigherEd || !HIGHER_ED_ONLY_CHANNELS.has(c.value));
+
   // Dynamic label resolvers (replaced hardcoded audienceLabels/cohortLabels)
   const audienceLabels: Record<string, string> = Object.fromEntries(audiences.map(a => [a.id, a.label]));
   const cohortLabels: Record<string, string> = Object.fromEntries(cohorts.map(c => [c.id, c.label]));
