@@ -525,7 +525,7 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
               Brand Colors
             </h4>
             <p className="text-xs text-muted-foreground mb-4">
-              Define your institution's official brand colors. These will be used in all message outputs, PDFs, and exports.
+              Define your {isHigherEd ? "institution's" : "organization's"} official brand colors. These will be used in all message outputs, PDFs, and exports.
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
