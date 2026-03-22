@@ -648,7 +648,7 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
                   {renderTextField('Appointment Booking Link', 'appointmentLink', 'e.g., calendly.com/advising')}
                 </div>
                 {renderArrayField('Website Links', 'websiteLinks', 'websiteLink', isHigherEd ? 'e.g., advising.lakewood.edu' : 'e.g., www.company.com/support')}
-                {renderArrayField('Social Media Handles', 'socialMediaHandles', 'socialHandle', 'e.g., @LakewoodSuccess')}
+                {renderArrayField('Social Media Handles', 'socialMediaHandles', 'socialHandle', isHigherEd ? 'e.g., @LakewoodSuccess' : 'e.g., @Valvoline')}
               </AccordionContent>
             </AccordionItem>
           </Accordion>
