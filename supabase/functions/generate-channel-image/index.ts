@@ -468,7 +468,7 @@ serve(async (req) => {
     let brandGuidelinesSummary = ""; // shorter version for copy generation
     try {
       const dna = (contentDnaResult as any)?.data;
-      if (dna && isGraphicDesign) {
+      if (dna && (isGraphicDesign || !isHigherEd())) {
         const bp = dna.brand_platform as Record<string, any> | null;
         const va = dna.voice_analysis as Record<string, any> | null;
         const customInstructions = dna.custom_instructions as string | null;
