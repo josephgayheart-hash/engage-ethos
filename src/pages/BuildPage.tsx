@@ -1227,6 +1227,7 @@ const BuildPage = () => {
               onCompletionShown={() => setShowOverlay(false)}
               context={{
                 mode: "builder",
+                profileLabel: industryLabels.organizationProfile,
                 profileName: selectedProfileName,
                 useContentDNA,
                 hasBrandPlatform: !!(useContentDNA && contentDNA?.brandPlatform),

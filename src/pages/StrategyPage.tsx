@@ -1327,6 +1327,7 @@ const StrategyPage = () => {
               onCompletionShown={() => setShowOverlay(false)}
               context={{
                 mode: "journey",
+                profileLabel: industryLabels.organizationProfile,
                 profileName: selectedProfileName,
                 useContentDNA,
                 hasBrandPlatform: !!(useContentDNA && contentDNA?.brandPlatform),
