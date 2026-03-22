@@ -35,8 +35,8 @@ export function LibraryOverviewPanel() {
 
   const primaryColor = tenant?.primary_color || 'hsl(var(--primary))';
   const accentColor = tenant?.accent_color || 'hsl(var(--accent))';
-  const universityLabel = isAgency ? labels.profileTerm : 'University';
-  const libraryLabel = isAgency ? 'Template Library' : 'University Library';
+  const universityLabel = isAgency ? labels.profileTerm : 'Organization';
+  const libraryLabel = isAgency ? 'Template Library' : 'Shared Library';
   const activeCollections = collections.filter(c => c.status === 'active');
 
   useEffect(() => {
