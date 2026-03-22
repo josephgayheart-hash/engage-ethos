@@ -621,12 +621,12 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {renderTextField('Institution Name', 'institutionName', 'e.g., Lakewood University')}
-            {renderTextField('Abbreviation', 'institutionAbbreviation', 'e.g., LU, LWU')}
-            {renderTextField('Mascot / Nickname', 'mascot', 'e.g., Griffins')}
+            {renderTextField('Institution Name', 'institutionName', isHigherEd ? 'e.g., Lakewood University' : 'e.g., Valvoline Inc.')}
+            {renderTextField('Abbreviation', 'institutionAbbreviation', isHigherEd ? 'e.g., LU, LWU' : 'e.g., VLV')}
+            {renderTextField(isHigherEd ? 'Mascot / Nickname' : 'Brand Nickname', 'mascot', isHigherEd ? 'e.g., Griffins' : 'e.g., The V')}
           </div>
           
-          {renderArrayField('Slogans & Spirit Phrases', 'slogans', 'slogan', 'e.g., Go Griffins!', 'Phrases used in communications to build school spirit')}
+          {renderArrayField(isHigherEd ? 'Slogans & Spirit Phrases' : 'Taglines & Brand Phrases', 'slogans', 'slogan', isHigherEd ? 'e.g., Go Griffins!' : 'e.g., It runs in the family', isHigherEd ? 'Phrases used in communications to build school spirit' : 'Key brand phrases used across communications')}
           
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="contact">
