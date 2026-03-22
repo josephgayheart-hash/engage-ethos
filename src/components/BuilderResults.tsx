@@ -12,6 +12,7 @@ import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useIndustry } from "@/contexts/IndustryContext";
 import { openInGoogleDocs, formatForGoogleDocs } from "@/lib/googleDocsExport";
 import { AIResultsGuidance } from "@/components/AIResultsGuidance";
+import { TranslationToggle } from "@/components/TranslationToggle";
 import type { BuilderResult, MessageContext, InstitutionalConfig } from "@/types/campusvoice";
 interface BuilderResultsProps {
   result: BuilderResult;
@@ -221,6 +222,16 @@ export function BuilderResults({
                       </Button>
                     </div>
                     <p className="text-sm whitespace-pre-wrap pr-24">{draft}</p>
+
+                    {/* Translation Toggle */}
+                    {context?.outputLanguage && context.outputLanguage !== 'en' && (
+                      <TranslationToggle
+                        originalContent={draft}
+                        outputLanguage={context.outputLanguage}
+                        onToggle={() => {}}
+                        className="mt-3"
+                      />
+                    )}
                 </div>
                 
                 {/* Save Actions */}

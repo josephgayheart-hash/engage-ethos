@@ -1506,6 +1506,7 @@ const BuildPage = () => {
                       imageEngine={imageEngine}
                       imageStyle={imageStyle}
                       regenerateKey={imageRegenerateKey}
+                      outputLanguage={context.outputLanguage}
                     />
                   );
                 })}

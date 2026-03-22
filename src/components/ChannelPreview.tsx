@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ChannelMockup } from "@/components/image-generator/ChannelMockup";
@@ -15,6 +15,7 @@ import { SalesforceCredentialsDialog } from "@/components/SalesforceCredentialsD
 import { SlateCredentialsDialog } from "@/components/SlateCredentialsDialog";
 import { openInGoogleDocs, formatForGoogleDocs } from "@/lib/googleDocsExport";
 import { exportTalkingPointsToPDF, exportCaseForSupportToPDF, type BrandingOptions } from "@/lib/pdfExport";
+import { TranslationToggle } from "@/components/TranslationToggle";
 import { 
   Copy, 
   Check, 
@@ -83,6 +84,7 @@ interface ChannelPreviewProps {
   imageEngine?: string;
   imageStyle?: string;
   regenerateKey?: number;
+  outputLanguage?: string;
 }
 
 const channelIcons: Record<Channel, React.ReactNode> = {
@@ -115,7 +117,7 @@ const channelLabels: Record<Channel, string> = {
   'case-for-care': 'Case for Support',
 };
 
-export function ChannelPreview({ channel, content, onCopy, onContentChange, onSaveToLibrary, institutionName, branding, tenantId, profileId, audience, contentSummary, goal, tone, moment, cohort, domain, imageEngine, imageStyle, regenerateKey }: ChannelPreviewProps) {
+export function ChannelPreview({ channel, content, onCopy, onContentChange, onSaveToLibrary, institutionName, branding, tenantId, profileId, audience, contentSummary, goal, tone, moment, cohort, domain, imageEngine, imageStyle, regenerateKey, outputLanguage }: ChannelPreviewProps) {
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState<ChannelDrafts[keyof ChannelDrafts]>(content);
@@ -124,6 +126,8 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
   const [channelImageUrl, setChannelImageUrl] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [showInContext, setShowInContext] = useState(false);
+  const [translatedContent, setTranslatedContent] = useState<string | null>(null);
+  const [showingEnglish, setShowingEnglish] = useState(false);
   const { toast } = useToast();
 
   // Channels that support AI image generation
@@ -2122,6 +2126,13 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
         {isEditing ? renderEditContent() : renderContent()}
 
         <AIResultsGuidance variant="subtle" className="mt-3" />
+
+        {/* Translation Toggle — show when content is in a non-English language */}
+        <TranslationToggle
+          originalContent={getFullContent(content)}
+          outputLanguage={outputLanguage || "en"}
+          className="mt-3"
+        />
 
         {/* In Context Mockup Preview */}
         {isVisualChannel && channelImageUrl && (
