@@ -224,7 +224,7 @@ export function CampusPhotographyTab({ profileId }: CampusPhotographyTabProps) {
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <ImagePlus className="w-4 h-4" />
-            Add Campus Photos
+            Add {industryLabels.photography}
           </CardTitle>
           <CardDescription>
             {photos.length}/{maxPhotos} photos uploaded · Select multiple files at once
