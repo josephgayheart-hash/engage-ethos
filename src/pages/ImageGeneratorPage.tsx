@@ -299,7 +299,7 @@ const ImageGeneratorPage = () => {
         const dataUrl = canvas.toDataURL(mimeType, 0.95);
         const a = document.createElement("a");
         a.href = dataUrl;
-        a.download = `campus-image-${channel}-${Date.now()}.${format}`;
+        a.download = `brand-image-${channel}-${Date.now()}.${format}`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
