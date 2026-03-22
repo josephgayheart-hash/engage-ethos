@@ -1361,6 +1361,19 @@ export default function UniversitySettingsPage() {
                             </div>
                           );
                         })}
+                      {/* Drop zone to move a profile to root level */}
+                      <div
+                        onDragOver={(e) => { e.preventDefault(); setDragOverProfileId('__root__'); }}
+                        onDragLeave={handleDragLeave}
+                        onDrop={(e) => { e.preventDefault(); setDragOverProfileId(null); handleDrop(e, null); }}
+                        className={`mt-2 rounded-md border-2 border-dashed p-2 text-center text-xs text-muted-foreground transition-all ${
+                          dragOverProfileId === '__root__'
+                            ? 'border-primary bg-primary/10 text-primary'
+                            : 'border-transparent'
+                        }`}
+                      >
+                        {dragOverProfileId && dragOverProfileId !== '__root__' ? '' : dragOverProfileId === '__root__' ? '↑ Drop here to move to root level' : ''}
+                      </div>
                       </div>
                     )}
                   </div>
