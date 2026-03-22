@@ -506,7 +506,7 @@ export interface MapperResult {
   journey: StrategyJourney;
 }
 
-export type ProfileType = 'university' | 'college' | 'division' | 'unit' | 'department';
+export type ProfileType = 'university' | 'college' | 'division' | 'unit' | 'department' | 'headquarters' | 'region' | 'location';
 
 /** Institution type is now a dynamic string resolved from industry vocabulary classificationOptions */
 export type InstitutionType = string;
