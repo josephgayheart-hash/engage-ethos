@@ -1472,7 +1472,6 @@ export default function UniversitySettingsPage() {
                                 </Select>
                               </div>
                             </div>
-                            </div>
 
                             {/* Location & Language info */}
                             {(editingProfile.config.city || editingProfile.config.enterpriseRegion || editingProfile.config.primaryLanguage) && (
