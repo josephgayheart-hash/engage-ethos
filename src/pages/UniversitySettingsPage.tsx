@@ -243,7 +243,62 @@ export default function UniversitySettingsPage() {
     });
   };
 
-  // Branding handlers
+  // Drag & drop handlers for reparenting profiles
+  const handleDragStart = (profileId: string) => {
+    dragProfileIdRef.current = profileId;
+  };
+
+  const handleDragOver = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    if (dragProfileIdRef.current && dragProfileIdRef.current !== targetId) {
+      setDragOverProfileId(targetId);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setDragOverProfileId(null);
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetId: string | null) => {
+    e.preventDefault();
+    setDragOverProfileId(null);
+    const sourceId = dragProfileIdRef.current;
+    dragProfileIdRef.current = null;
+    if (!sourceId || sourceId === targetId) return;
+
+    // Prevent circular: can't drop onto own descendant
+    let checkId: string | null | undefined = targetId;
+    while (checkId) {
+      if (checkId === sourceId) return;
+      const parent = profiles.find(p => p.id === checkId);
+      checkId = parent?.parentProfileId;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('institutional_profiles')
+        .update({ parent_profile_id: targetId } as any)
+        .eq('id', sourceId);
+      if (error) throw error;
+
+      await refreshProfiles();
+      if (targetId) {
+        setExpandedProfiles(prev => new Set([...prev, targetId]));
+      }
+      const source = profiles.find(p => p.id === sourceId);
+      const target = targetId ? profiles.find(p => p.id === targetId) : null;
+      toast({
+        title: 'Profile moved',
+        description: target
+          ? `"${source?.name}" is now under "${target.name}"`
+          : `"${source?.name}" moved to root level`,
+      });
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    }
+  };
+
+
   const resizeImage = (file: File): Promise<Blob> => {
     return new Promise((resolve, reject) => {
       const img = document.createElement('img');
