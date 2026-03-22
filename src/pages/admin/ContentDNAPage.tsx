@@ -835,7 +835,7 @@ export default function ContentDNAPage() {
                       variant="ghost"
                       size="sm"
                       className="gap-1.5 text-muted-foreground"
-                      onClick={() => navigate('/university-settings?tab=profiles')}
+                      onClick={() => navigate('/organization-settings?tab=profiles')}
                     >
                       <Settings className="w-4 h-4" />
                       Manage
@@ -860,7 +860,7 @@ export default function ContentDNAPage() {
                        Content DNA needs to be associated with a {industryLabels.organization.toLowerCase()} profile. Create your first profile to get started.
                     </p>
                   </div>
-                  <Button onClick={() => navigate('/university-settings?tab=profiles')} className="bg-amber-600 hover:bg-amber-700">
+                  <Button onClick={() => navigate('/organization-settings?tab=profiles')} className="bg-amber-600 hover:bg-amber-700">
                     <Plus className="w-4 h-4 mr-1" />
                     Create Profile
                   </Button>
@@ -1054,7 +1054,7 @@ export default function ContentDNAPage() {
                       variant="outline"
                       size="sm"
                       className="gap-1.5"
-                      onClick={() => navigate('/university-settings')}
+                      onClick={() => navigate('/organization-settings')}
                     >
                       <Pencil className="w-3.5 h-3.5" />
                       <span className="hidden sm:inline">Edit Settings</span>
@@ -1315,7 +1315,7 @@ export default function ContentDNAPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => navigate('/university-settings')}
+                        onClick={() => navigate('/organization-settings')}
                       >
                         <Pencil className="w-4 h-4 mr-1" />
                         Edit Settings

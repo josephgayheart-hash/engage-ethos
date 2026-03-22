@@ -240,7 +240,7 @@ export function Header() {
                       </>
                     ) : (
                       <DropdownMenuItem asChild>
-                        <Link to="/university-settings" className="flex items-center gap-2 cursor-pointer">
+                        <Link to="/organization-settings" className="flex items-center gap-2 cursor-pointer">
                           <Building2 className="w-4 h-4" />
                           {industryLabels.organizationSettings}
                         </Link>
@@ -305,7 +305,7 @@ export function Header() {
                 {isAdmin && (
                   <>
                     <DropdownMenuItem asChild>
-                      <Link to={isAgency ? "/agency/clients" : "/university-settings"} className="flex items-center gap-2 cursor-pointer">
+                      <Link to={isAgency ? "/agency/clients" : "/organization-settings"} className="flex items-center gap-2 cursor-pointer">
                         {isAgency ? <Briefcase className="w-4 h-4" /> : <Building2 className="w-4 h-4" />}
                         {isAgency ? labels.settings : industryLabels.organizationSettings}
                       </Link>

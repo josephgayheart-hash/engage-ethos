@@ -168,7 +168,7 @@ export function UniversityDNAHealthPanel({
             </CardDescription>
           </div>
           <Button variant="ghost" size="sm" asChild>
-            <Link to="/university-settings?tab=profiles">
+            <Link to="/organization-settings?tab=profiles">
               Configure
               <ExternalLink className="w-3 h-3 ml-1" />
             </Link>
@@ -248,7 +248,7 @@ export function UniversityDNAHealthPanel({
             <AlertTriangle className="w-8 h-8 mx-auto mb-2 text-amber-500" />
             <p className="text-sm">No profiles configured</p>
             <Button variant="outline" size="sm" className="mt-2" asChild>
-              <Link to="/university-settings?tab=profiles">
+              <Link to="/organization-settings?tab=profiles">
                 Create Profile
               </Link>
             </Button>

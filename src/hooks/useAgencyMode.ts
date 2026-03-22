@@ -121,7 +121,7 @@ export function useAgencyMode(): AgencyModeResult {
         profiles: 'Profiles',
         addProfile: 'Create Profile',
         settings: industryLabels.organizationSettings,
-        settingsPath: '/university-settings',
+        settingsPath: '/organization-settings',
         library: 'Library',
         selectProfile: 'Generate As',
         noProfiles: 'No profiles configured yet',

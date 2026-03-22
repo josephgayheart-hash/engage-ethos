@@ -94,7 +94,7 @@ export default function UniversityDashboardPage() {
               {formatTime(lastRefresh)}
             </Button>
             <Button variant="outline" asChild>
-              <Link to="/university-settings">
+              <Link to="/organization-settings">
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
               </Link>

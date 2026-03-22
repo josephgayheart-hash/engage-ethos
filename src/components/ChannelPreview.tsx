@@ -1692,10 +1692,10 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
                 <Settings className="w-3 h-3" />
                 Set your Support Goal in{' '}
                 <Link 
-                  to="/university-settings" 
+                  to="/organization-settings" 
                   className="underline hover:text-white font-medium"
                 >
-                  University Settings → Advancement
+                  Organization Settings → Advancement
                 </Link>
               </p>
             </div>
@@ -1988,8 +1988,8 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
                     <Target className="w-4 h-4" />
                     <span>
                       <strong>Support Goal</strong> — Add your campaign target in{' '}
-                      <Link to="/university-settings" className="underline hover:text-amber-900 dark:hover:text-amber-100 font-medium">
-                        University Settings → Advancement
+                      <Link to="/organization-settings" className="underline hover:text-amber-900 dark:hover:text-amber-100 font-medium">
+                        Organization Settings → Advancement
                       </Link>
                     </span>
                   </li>
@@ -1999,8 +1999,8 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
                     <User className="w-4 h-4" />
                     <span>
                       <strong>Development Contact</strong> — Add advancement contact details in{' '}
-                      <Link to="/university-settings" className="underline hover:text-amber-900 dark:hover:text-amber-100 font-medium">
-                        University Settings → Advancement
+                      <Link to="/organization-settings" className="underline hover:text-amber-900 dark:hover:text-amber-100 font-medium">
+                        Organization Settings → Advancement
                       </Link>
                     </span>
                   </li>

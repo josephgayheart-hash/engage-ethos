@@ -51,7 +51,7 @@ export function InsightCards({ context }: InsightCardsProps) {
       </Link>
 
       {/* Card 2: Institution Profile */}
-      <Link to="/university-settings" className="group">
+      <Link to="/organization-settings" className="group">
         <div className="bg-card/60 backdrop-blur-sm border border-border/50 rounded-lg p-3 transition-all group-hover:border-primary/30 group-hover:shadow-sm h-full">
           <PillTitle icon={Building2} label="Institution Profile" color="accent" />
           <div className="flex items-center gap-2.5 mt-1.5">
