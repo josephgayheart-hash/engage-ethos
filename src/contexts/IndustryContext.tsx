@@ -2,6 +2,7 @@ import { createContext, useContext, useMemo, ReactNode } from 'react';
 import type { IndustryVocabulary, IndustryLabels, IndustryAudience, IndustryMoment, IndustryDomain, IndustryGoal, IndustryCohort, IndustryDepartment, IndustryStoryType } from '@/types/industry';
 import { getVocabularyForTenant } from '@/config/industry-vocabularies';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWorkspace } from '@/contexts/WorkspaceContext';
 
 interface IndustryContextValue {
   /** The full resolved vocabulary for the current tenant */
@@ -46,8 +47,10 @@ interface IndustryProviderProps {
 
 export function IndustryProvider({ children, tenantType: tenantTypeOverride, industryConfigOverrides }: IndustryProviderProps) {
   const { tenant } = useAuth();
+  const { activeWorkspace, canSwitch } = useWorkspace();
+  const effectiveTenant = canSwitch && activeWorkspace ? activeWorkspace : tenant;
   
-  const effectiveTenantType = tenantTypeOverride ?? tenant?.tenant_type ?? null;
+  const effectiveTenantType = tenantTypeOverride ?? effectiveTenant?.tenant_type ?? null;
 
   const value = useMemo<IndustryContextValue>(() => {
     const vocabulary = getVocabularyForTenant(effectiveTenantType);

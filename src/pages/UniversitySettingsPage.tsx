@@ -7,6 +7,7 @@ import { SubUnitSetupWizard } from "@/components/SubUnitSetupWizard";
 import { useInstitutionalProfiles, type InstitutionalProfile, type ProfileType } from "@/hooks/useInstitutionalProfiles";
 import { useIndustry } from "@/contexts/IndustryContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { useAgencyMode } from "@/hooks/useAgencyMode";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -94,8 +95,10 @@ export default function UniversitySettingsPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { tenant, refreshProfile, isAdmin, isSuperAdmin } = useAuth();
+  const { activeWorkspace, canSwitch, refreshWorkspaces } = useWorkspace();
   const { isAgency, labels } = useAgencyMode();
   const { labels: industryLabels, isHigherEd } = useIndustry();
+  const effectiveTenant = canSwitch && activeWorkspace ? activeWorkspace : tenant;
   const PROFILE_TYPE_LABELS: Record<string, string> = {
     university: industryLabels.organization,
     college: industryLabels.subUnit,
@@ -143,26 +146,26 @@ export default function UniversitySettingsPage() {
   const [dnaStats, setDnaStats] = useState<Record<string, { samples: number; hasAnalysis: boolean }>>({});
 
   useEffect(() => {
-    if (tenant?.institution_name) {
-      setInstitutionName(tenant.institution_name);
+    if (effectiveTenant?.institution_name) {
+      setInstitutionName(effectiveTenant.institution_name);
     }
-    if (tenant?.logo_url) {
-      setLogoUrl(tenant.logo_url);
+    if (effectiveTenant?.logo_url) {
+      setLogoUrl(effectiveTenant.logo_url);
     }
-    if (tenant?.primary_color) {
-      setPrimaryColor(tenant.primary_color);
-      setPrimaryColorInput(tenant.primary_color);
+    if (effectiveTenant?.primary_color) {
+      setPrimaryColor(effectiveTenant.primary_color);
+      setPrimaryColorInput(effectiveTenant.primary_color);
     }
-    if (tenant?.accent_color) {
-      setAccentColor(tenant.accent_color);
-      setAccentColorInput(tenant.accent_color);
+    if (effectiveTenant?.accent_color) {
+      setAccentColor(effectiveTenant.accent_color);
+      setAccentColorInput(effectiveTenant.accent_color);
     }
-  }, [tenant]);
+  }, [effectiveTenant]);
 
   // Fetch DNA stats for each profile
   useEffect(() => {
     const fetchDnaStats = async () => {
-      if (!tenant?.id || profiles.length === 0) return;
+      if (!effectiveTenant?.id || profiles.length === 0) return;
       
       const stats: Record<string, { samples: number; hasAnalysis: boolean }> = {};
       
@@ -182,7 +185,7 @@ export default function UniversitySettingsPage() {
     };
     
     fetchDnaStats();
-  }, [tenant?.id, profiles]);
+  }, [effectiveTenant?.id, profiles]);
 
   // Auto-expand parents with sub-units when the user opens the Profiles tab (first time only)
   useEffect(() => {
@@ -245,18 +248,19 @@ export default function UniversitySettingsPage() {
   };
 
   const handleSaveInstitution = async () => {
-    if (!tenant?.id || !institutionName.trim()) return;
+    if (!effectiveTenant?.id || !institutionName.trim()) return;
     
     setIsSavingInstitution(true);
     try {
       const { error } = await supabase
         .from('tenants')
         .update({ institution_name: institutionName.trim() })
-        .eq('id', tenant.id);
+        .eq('id', effectiveTenant.id);
 
       if (error) throw error;
 
       await refreshProfile();
+      await refreshWorkspaces();
       setIsEditingInstitution(false);
       toast({ title: `${industryLabels.organization} Updated`, description: `Your ${industryLabels.organization.toLowerCase()} name has been saved.` });
     } catch (error: any) {
@@ -268,7 +272,7 @@ export default function UniversitySettingsPage() {
 
   const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !tenant?.id) return;
+    if (!file || !effectiveTenant?.id) return;
 
     if (file.size > MAX_LOGO_SIZE) {
       toast({ title: 'File too large', description: 'Logo must be less than 2MB', variant: 'destructive' });
@@ -278,12 +282,12 @@ export default function UniversitySettingsPage() {
     setIsUploadingLogo(true);
     try {
       const resizedBlob = await resizeImage(file);
-      const fileName = `${tenant.id}/logo-${Date.now()}.png`;
+      const fileName = `${effectiveTenant.id}/logo-${Date.now()}.png`;
 
-      if (tenant.logo_url) {
-        const oldPath = tenant.logo_url.split('/').pop();
+      if (effectiveTenant.logo_url) {
+        const oldPath = effectiveTenant.logo_url.split('/').pop();
         if (oldPath) {
-          await supabase.storage.from('institution-logos').remove([`${tenant.id}/${oldPath}`]);
+          await supabase.storage.from('institution-logos').remove([`${effectiveTenant.id}/${oldPath}`]);
         }
       }
 
@@ -298,12 +302,13 @@ export default function UniversitySettingsPage() {
       const { error: updateError } = await supabase
         .from('tenants')
         .update({ logo_url: publicUrl })
-        .eq('id', tenant.id);
+        .eq('id', effectiveTenant.id);
 
       if (updateError) throw updateError;
 
       setLogoUrl(publicUrl);
       await refreshProfile();
+      await refreshWorkspaces();
       toast({ title: 'Logo Uploaded', description: `Your ${industryLabels.organization.toLowerCase()} logo has been updated.` });
     } catch (error: any) {
       toast({ title: 'Upload Failed', description: error.message, variant: 'destructive' });
@@ -314,19 +319,20 @@ export default function UniversitySettingsPage() {
   };
 
   const handleRemoveLogo = async () => {
-    if (!tenant?.id || !tenant.logo_url) return;
+    if (!effectiveTenant?.id || !effectiveTenant.logo_url) return;
 
     setIsUploadingLogo(true);
     try {
-      const urlParts = tenant.logo_url.split('/');
+      const urlParts = effectiveTenant.logo_url.split('/');
       const fileName = urlParts[urlParts.length - 1];
-      await supabase.storage.from('institution-logos').remove([`${tenant.id}/${fileName}`]);
+      await supabase.storage.from('institution-logos').remove([`${effectiveTenant.id}/${fileName}`]);
 
-      const { error } = await supabase.from('tenants').update({ logo_url: null }).eq('id', tenant.id);
+      const { error } = await supabase.from('tenants').update({ logo_url: null }).eq('id', effectiveTenant.id);
       if (error) throw error;
 
       setLogoUrl(null);
       await refreshProfile();
+      await refreshWorkspaces();
       toast({ title: 'Logo Removed' });
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -336,20 +342,21 @@ export default function UniversitySettingsPage() {
   };
 
   const handleSaveColors = async () => {
-    if (!tenant?.id) return;
+    if (!effectiveTenant?.id) return;
 
     setIsSavingColors(true);
     try {
       const { error } = await supabase
         .from('tenants')
         .update({ primary_color: primaryColorInput, accent_color: accentColorInput })
-        .eq('id', tenant.id);
+        .eq('id', effectiveTenant.id);
 
       if (error) throw error;
 
       setPrimaryColor(primaryColorInput);
       setAccentColor(accentColorInput);
       await refreshProfile();
+      await refreshWorkspaces();
       toast({ title: 'Colors Saved' });
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -545,7 +552,7 @@ export default function UniversitySettingsPage() {
               <div className="flex items-center gap-3">
                 <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${isAgency ? 'bg-amber-500/10' : 'bg-primary/10'}`}>
                   {logoUrl ? (
-                    <img src={logoUrl} alt={tenant?.institution_name || ''} className="w-10 h-10 object-contain rounded" />
+                    <img src={logoUrl} alt={effectiveTenant?.institution_name || labels.settingsPageTitle} className="w-10 h-10 object-contain rounded" />
                   ) : isAgency ? (
                     <Users className="w-6 h-6 text-amber-600" />
                   ) : (
@@ -555,7 +562,7 @@ export default function UniversitySettingsPage() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h1 className="font-serif text-2xl md:text-3xl font-bold">
-                      {tenant?.institution_name || (isAgency ? 'Agency Settings' : industryLabels.organizationSettings)}
+                      {labels.settingsPageTitle}
                     </h1>
                     {isAgency && (
                       <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400">
