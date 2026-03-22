@@ -1114,52 +1114,151 @@ export default function UniversitySettingsPage() {
                                 </div>
                               </div>
                               
-                              {/* Child Profiles (Sub-units) */}
+                              {/* Child Profiles (Sub-units) — recursive */}
                               {hasChildren && isExpanded && (
                                 <div className="ml-4 mt-1.5 space-y-1 border-l-2 border-primary/20 pl-3">
                                   {children.map(child => {
                                     const isChildSelected = editingProfile?.id === child.id;
+                                    const grandchildren = getChildProfiles(child.id);
+                                    const hasGrandchildren = grandchildren.length > 0;
+                                    const isChildExpanded = expandedProfiles.has(child.id);
+
                                     return (
-                                      <div 
-                                        key={child.id}
-                                        className={`group rounded-md border p-2.5 cursor-pointer transition-all ${
-                                          isChildSelected 
-                                            ? 'border-primary bg-primary/5' 
-                                            : 'border-border hover:border-primary/40 hover:bg-muted/30'
-                                        }`}
-                                        onClick={() => setEditingProfile(child)}
-                                      >
-                                        <div className="flex items-center gap-2">
-                                          <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[child.profileType]}</span>
-                                          <div className="flex-1 min-w-0">
-                                            <span className="text-sm font-medium truncate block">{child.config.unitName || child.name}</span>
-                                            {(child.config.city || child.config.primaryLanguage) && (
-                                              <span className="text-[10px] text-muted-foreground flex items-center gap-1.5">
-                                                {child.config.city && (
-                                                  <span className="flex items-center gap-0.5">
-                                                    <MapPin className="w-2.5 h-2.5" />
-                                                    {[child.config.city, child.config.country].filter(Boolean).join(', ')}
-                                                  </span>
-                                                )}
-                                                {child.config.primaryLanguage && (
-                                                  <span className="flex items-center gap-0.5">
-                                                    <Globe className="w-2.5 h-2.5" />
-                                                    {child.config.primaryLanguage.toUpperCase()}
-                                                  </span>
-                                                )}
+                                      <div key={child.id}>
+                                        <div 
+                                          className={`group rounded-md border p-2.5 cursor-pointer transition-all ${
+                                            isChildSelected 
+                                              ? 'border-primary bg-primary/5' 
+                                              : 'border-border hover:border-primary/40 hover:bg-muted/30'
+                                          }`}
+                                          onClick={() => setEditingProfile(child)}
+                                        >
+                                          <div className="flex items-center gap-2">
+                                            <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[child.profileType]}</span>
+                                            <div className="flex-1 min-w-0">
+                                              <span className="text-sm font-medium truncate block">{child.config.unitName || child.name}</span>
+                                              {(child.config.city || child.config.primaryLanguage) && (
+                                                <span className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+                                                  {child.config.city && (
+                                                    <span className="flex items-center gap-0.5">
+                                                      <MapPin className="w-2.5 h-2.5" />
+                                                      {[child.config.city, child.config.country].filter(Boolean).join(', ')}
+                                                    </span>
+                                                  )}
+                                                  {child.config.primaryLanguage && (
+                                                    <span className="flex items-center gap-0.5">
+                                                      <Globe className="w-2.5 h-2.5" />
+                                                      {child.config.primaryLanguage.toUpperCase()}
+                                                    </span>
+                                                  )}
+                                                </span>
+                                              )}
+                                            </div>
+                                            {hasGrandchildren && (
+                                              <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  toggleExpanded(child.id);
+                                                }}
+                                                className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] rounded border bg-background hover:bg-muted transition-colors"
+                                              >
+                                                <ChevronDown className={`w-2.5 h-2.5 transition-transform duration-200 ${isChildExpanded ? '' : '-rotate-90'}`} />
+                                                <span>{grandchildren.length}</span>
+                                              </button>
+                                            )}
+                                            {isChildSelected && (
+                                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                                Active
                                               </span>
                                             )}
+                                            <Badge variant="outline" className="text-[10px] h-4 px-1.5 flex-shrink-0">
+                                              {PROFILE_TYPE_LABELS[child.profileType]}
+                                            </Badge>
                                           </div>
-                                          {isChildSelected && (
-                                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                                              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                                              Active
-                                            </span>
-                                          )}
-                                          <Badge variant="outline" className="text-[10px] h-4 px-1.5 flex-shrink-0">
-                                            {PROFILE_TYPE_LABELS[child.profileType]}
-                                          </Badge>
                                         </div>
+                                        {/* Grandchildren (recursive nesting) */}
+                                        {hasGrandchildren && isChildExpanded && (
+                                          <div className="ml-4 mt-1 space-y-1 border-l-2 border-muted pl-3">
+                                            {grandchildren.map(gc => {
+                                              const isGcSelected = editingProfile?.id === gc.id;
+                                              const gcChildren = getChildProfiles(gc.id);
+                                              const hasGcChildren = gcChildren.length > 0;
+                                              const isGcExpanded = expandedProfiles.has(gc.id);
+                                              return (
+                                                <div key={gc.id}>
+                                                  <div
+                                                    className={`group rounded-md border p-2 cursor-pointer transition-all ${
+                                                      isGcSelected
+                                                        ? 'border-primary bg-primary/5'
+                                                        : 'border-border hover:border-primary/40 hover:bg-muted/30'
+                                                    }`}
+                                                    onClick={() => setEditingProfile(gc)}
+                                                  >
+                                                    <div className="flex items-center gap-2">
+                                                      <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[gc.profileType]}</span>
+                                                      <div className="flex-1 min-w-0">
+                                                        <span className="text-xs font-medium truncate block">{gc.config.unitName || gc.name}</span>
+                                                        {gc.config.city && (
+                                                          <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                                                            <MapPin className="w-2 h-2" />
+                                                            {[gc.config.city, gc.config.country].filter(Boolean).join(', ')}
+                                                          </span>
+                                                        )}
+                                                      </div>
+                                                      {hasGcChildren && (
+                                                        <button
+                                                          type="button"
+                                                          onClick={(e) => { e.stopPropagation(); toggleExpanded(gc.id); }}
+                                                          className="flex items-center gap-1 px-1 py-0.5 text-[10px] rounded border bg-background hover:bg-muted transition-colors"
+                                                        >
+                                                          <ChevronDown className={`w-2.5 h-2.5 transition-transform duration-200 ${isGcExpanded ? '' : '-rotate-90'}`} />
+                                                          <span>{gcChildren.length}</span>
+                                                        </button>
+                                                      )}
+                                                      {isGcSelected && (
+                                                        <span className="inline-flex items-center gap-1 px-1 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                                                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                                        </span>
+                                                      )}
+                                                      <Badge variant="outline" className="text-[9px] h-4 px-1 flex-shrink-0">
+                                                        {PROFILE_TYPE_LABELS[gc.profileType]}
+                                                      </Badge>
+                                                    </div>
+                                                  </div>
+                                                  {/* 4th level children */}
+                                                  {hasGcChildren && isGcExpanded && (
+                                                    <div className="ml-3 mt-1 space-y-1 border-l border-muted-foreground/20 pl-2">
+                                                      {gcChildren.map(leaf => {
+                                                        const isLeafSelected = editingProfile?.id === leaf.id;
+                                                        return (
+                                                          <div
+                                                            key={leaf.id}
+                                                            className={`rounded border p-1.5 cursor-pointer transition-all text-xs ${
+                                                              isLeafSelected
+                                                                ? 'border-primary bg-primary/5'
+                                                                : 'border-border hover:border-primary/40 hover:bg-muted/30'
+                                                            }`}
+                                                            onClick={() => setEditingProfile(leaf)}
+                                                          >
+                                                            <div className="flex items-center gap-1.5">
+                                                              <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[leaf.profileType]}</span>
+                                                              <span className="font-medium truncate flex-1">{leaf.config.unitName || leaf.name}</span>
+                                                              <Badge variant="outline" className="text-[9px] h-3.5 px-1">
+                                                                {PROFILE_TYPE_LABELS[leaf.profileType]}
+                                                              </Badge>
+                                                            </div>
+                                                          </div>
+                                                        );
+                                                      })}
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              );
+                                            })}
+                                          </div>
+                                        )}
                                       </div>
                                     );
                                   })}
