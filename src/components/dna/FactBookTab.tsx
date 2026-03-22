@@ -1019,7 +1019,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                       </div>
                       <div className="flex-1">
                         <h4 className="font-semibold text-foreground">
-                          Add to Your Fact Book
+                          Add to Your {bookLabel}
                         </h4>
                         <p className="text-sm text-muted-foreground">
                           Select the facts you want to import
