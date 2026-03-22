@@ -1069,8 +1069,8 @@ export default function UniversitySettingsPage() {
                 </Card>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Profile List */}
-                  <div className="lg:col-span-1 space-y-4">
+                  {/* Profile List — hidden on mobile when editing */}
+                  <div className={`lg:col-span-1 space-y-4 ${editingProfile ? 'hidden lg:block' : ''}`}>
                     <div className="flex items-center justify-between">
                       <h2 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
                         Your Profiles
@@ -1385,8 +1385,16 @@ export default function UniversitySettingsPage() {
                         {/* Sticky Action Bar */}
                         <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border rounded-lg p-3 shadow-sm">
                           <div className="flex flex-wrap items-center justify-between gap-3">
-                            {/* Left: Editing indicator */}
+                            {/* Left: Back button (mobile) + Editing indicator */}
                             <div className="flex items-center gap-3">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 lg:hidden"
+                                onClick={() => setEditingProfile(null)}
+                              >
+                                <ArrowLeft className="w-4 h-4" />
+                              </Button>
                               <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800">
                                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                                 <span className="text-sm font-medium text-green-700 dark:text-green-400">
@@ -1647,7 +1655,7 @@ export default function UniversitySettingsPage() {
                         </Card>
                       </div>
                     ) : (
-                      <Card className="border-dashed">
+                      <Card className="border-dashed hidden lg:block">
                         <CardContent className="flex flex-col items-center justify-center py-16 text-center">
                           <Building2 className="w-12 h-12 text-muted-foreground/30 mb-4" />
                           <h3 className="font-medium text-lg mb-1">Select a Profile</h3>
