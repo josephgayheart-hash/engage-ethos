@@ -52,6 +52,7 @@ type HeadlineAlign = "left" | "center" | "right";
 const BrandStudioPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { labels: industryLabels } = useIndustry();
   const state = (location.state as BrandStudioState | null) || ({} as Partial<BrandStudioState>);
   const restore = state.restoreOverlay;
   const canvasRef = useRef<HTMLDivElement>(null);
