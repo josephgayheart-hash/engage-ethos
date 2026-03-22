@@ -1074,7 +1074,25 @@ export default function UniversitySettingsPage() {
                                       >
                                         <div className="flex items-center gap-2">
                                           <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[child.profileType]}</span>
-                                          <span className="flex-1 text-sm font-medium truncate">{child.config.unitName || child.name}</span>
+                                          <div className="flex-1 min-w-0">
+                                            <span className="text-sm font-medium truncate block">{child.config.unitName || child.name}</span>
+                                            {(child.config.city || child.config.primaryLanguage) && (
+                                              <span className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+                                                {child.config.city && (
+                                                  <span className="flex items-center gap-0.5">
+                                                    <MapPin className="w-2.5 h-2.5" />
+                                                    {[child.config.city, child.config.country].filter(Boolean).join(', ')}
+                                                  </span>
+                                                )}
+                                                {child.config.primaryLanguage && (
+                                                  <span className="flex items-center gap-0.5">
+                                                    <Globe className="w-2.5 h-2.5" />
+                                                    {child.config.primaryLanguage.toUpperCase()}
+                                                  </span>
+                                                )}
+                                              </span>
+                                            )}
+                                          </div>
                                           {isChildSelected && (
                                             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
                                               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
