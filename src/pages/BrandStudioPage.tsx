@@ -495,7 +495,7 @@ const BrandStudioPage = () => {
 
           {/* Profile selector */}
           <div className="space-y-1.5">
-            <label className="text-sm font-medium">Institutional Profile</label>
+            <label className="text-sm font-medium">{industryLabels.organizationProfile}</label>
             <Select value={selectedProfileId} onValueChange={(v) => { setSelectedProfileId(v); }}>
               <SelectTrigger>
                 <SelectValue placeholder={profilesLoading ? "Loading profiles…" : "Select a profile"} />
