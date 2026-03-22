@@ -215,6 +215,18 @@ Use professional, actionable language suitable for a brand/marketing team.`;
                 <Textarea placeholder="Core messages or talking points to include..." value={keyMessages} onChange={e => setKeyMessages(e.target.value)} rows={2} />
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="flex items-center gap-1.5"><Languages className="w-3.5 h-3.5" /> Output Language</Label>
+                  <Select value={outputLanguage} onValueChange={setOutputLanguage}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {outputLanguages.map(l => <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               <Button onClick={handleGenerate} disabled={isGenerating} className="w-full gap-2">
                 <Sparkles className="w-4 h-4" />
                 {isGenerating ? 'Generating Brief...' : 'Generate Campaign Brief'}
