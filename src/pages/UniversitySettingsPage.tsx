@@ -420,10 +420,62 @@ export default function UniversitySettingsPage() {
     }
   };
 
-  const handleUpdateConfig = async (config: InstitutionalConfigType) => {
+  const handleUpdateConfig = (config: InstitutionalConfigType) => {
     if (!editingProfile) return;
-    await updateProfile(editingProfile.id, { config });
-    setEditingProfile({ ...editingProfile, config });
+    setDraftConfig(config);
+    setConfigDirty(true);
+  };
+
+  // Master save handler for all profile changes (name, type, config)
+  const handleSaveProfile = async () => {
+    if (!editingProfile) return;
+    setIsSavingProfile(true);
+    try {
+      const updates: Record<string, unknown> = {};
+      const newConfig = draftConfig || editingProfile.config;
+
+      // Apply name change
+      if (headerDirty) {
+        if (editingProfile.profileType === 'university' || editingProfile.profileType === 'headquarters') {
+          updates.name = draftName.trim();
+        }
+        // Always store unitName in config
+        newConfig.unitName = draftName.trim();
+      }
+
+      // Save config
+      updates.config = JSON.parse(JSON.stringify(newConfig));
+
+      // Save type if changed
+      if (draftType !== editingProfile.profileType) {
+        updates.profile_type = draftType;
+      }
+
+      const { error } = await supabase
+        .from('institutional_profiles')
+        .update(updates as any)
+        .eq('id', editingProfile.id);
+
+      if (error) throw error;
+
+      await refreshProfiles();
+      const updatedProfile: InstitutionalProfile = {
+        ...editingProfile,
+        name: (editingProfile.profileType === 'university' || editingProfile.profileType === 'headquarters') && headerDirty ? draftName.trim() : editingProfile.name,
+        config: newConfig,
+        profileType: draftType,
+        updatedAt: new Date().toISOString(),
+      };
+      setEditingProfile(updatedProfile);
+      setHeaderDirty(false);
+      setConfigDirty(false);
+      toast({ title: "Profile saved", description: `"${draftName.trim()}" updated successfully.` });
+    } catch (e: any) {
+      console.error(e);
+      toast({ title: "Error", description: e.message || "Failed to save profile.", variant: "destructive" });
+    } finally {
+      setIsSavingProfile(false);
+    }
   };
 
   const handleRenameProfile = async (newName: string) => {
