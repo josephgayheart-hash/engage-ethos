@@ -68,6 +68,7 @@ import {
   Users,
   MapPin,
   Globe,
+  FolderTree,
 } from "lucide-react";
 import type { InstitutionalConfig as InstitutionalConfigType, ProfileType as ConfigProfileType } from "@/types/campusvoice";
 
