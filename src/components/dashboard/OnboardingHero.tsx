@@ -34,7 +34,7 @@ export function OnboardingHero({ context }: OnboardingHeroProps) {
   );
 
   const getNextStep = () => {
-    if (!setupProgress.hasInstitution) return { label: `Set Up ${industryLabels.organization}`, href: '/university-settings' };
+    if (!setupProgress.hasInstitution) return { label: `Set Up ${industryLabels.organization}`, href: '/organization-settings' };
     if (!setupProgress.hasDNA) return { label: 'Configure Content DNA', href: '/content-dna' };
     if (!setupProgress.hasCampusPhotos) return { label: `Add ${industryLabels.photography}`, href: '/admin/content-dna' };
     return { label: 'Start Creating', href: '/build' };

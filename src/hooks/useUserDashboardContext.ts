@@ -385,7 +385,7 @@ export function useUserDashboardContext(): UserDashboardContext {
 
     if (mode === 'onboarding') {
       if (!setupProgress.hasInstitution) {
-        actions.push({ label: 'Set Up Institution', href: '/university-settings', priority: 1 });
+        actions.push({ label: 'Set Up Institution', href: '/organization-settings', priority: 1 });
       }
       if (!setupProgress.hasDNA) {
         actions.push({ label: 'Configure Content DNA', href: '/content-dna', priority: 2 });

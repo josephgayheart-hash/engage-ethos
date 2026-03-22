@@ -51,7 +51,7 @@ export function InstitutionManagementCard() {
     fetchProfiles();
   }, [tenant?.id]);
 
-  const settingsHref = isAgency ? "/agency/clients" : "/university-settings";
+  const settingsHref = isAgency ? "/agency/clients" : "/organization-settings";
   const entityLabel = isAgency ? labels.profileTerm : industryLabels.organization;
 
   const primaryColor = tenant?.primary_color || "hsl(var(--primary))";

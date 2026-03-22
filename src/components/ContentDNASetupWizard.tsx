@@ -291,7 +291,7 @@ export function ContentDNASetupWizard({ initialProfileId, onComplete, onCancel }
                 <div className="text-center py-8">
                   <AlertCircle className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
                   <p className="text-sm text-muted-foreground mb-3">No profiles found. Create one first.</p>
-                  <Button size="sm" variant="outline" onClick={() => navigate('/university-settings?tab=profiles')}>
+                  <Button size="sm" variant="outline" onClick={() => navigate('/organization-settings?tab=profiles')}>
                     Create Profile
                   </Button>
                 </div>

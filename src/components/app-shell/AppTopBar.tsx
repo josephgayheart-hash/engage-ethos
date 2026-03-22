@@ -41,7 +41,7 @@ export function AppTopBar() {
     { label: "Evaluator", href: "/evaluate" },
     { label: "My Library", href: "/library" },
     { label: "Content DNA", href: "/admin/content-dna" },
-    { label: industryLabels.organizationSettings, href: "/university-settings" },
+    { label: industryLabels.organizationSettings, href: "/organization-settings" },
     { label: "Image Studio", href: "/image-generator" },
     { label: "AI Copywriter", href: "/playground" },
     { label: "Brand Studio", href: "/brand-studio" },
