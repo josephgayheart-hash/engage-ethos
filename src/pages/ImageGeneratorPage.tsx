@@ -29,13 +29,11 @@ import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
 import { toast } from "sonner";
 
-const channelOptions = [
-  // Social
+const ALL_CHANNEL_OPTIONS = [
   { value: "_social", label: "── Social ──", disabled: true },
   { value: "social-media", label: "Social Media Post (1:1)" },
   { value: "digital-ad-social", label: "Social Ad (1:1)" },
   { value: "story", label: "Story — IG / FB / Snapchat (9:16)" },
-  // Digital
   { value: "_digital", label: "── Digital ──", disabled: true },
   { value: "email", label: "Email Header (16:9)" },
   { value: "landing-page", label: "Landing Page Hero (16:9)" },
@@ -46,18 +44,16 @@ const channelOptions = [
   { value: "facebook-cover", label: "Facebook Cover (2.63:1)" },
   { value: "portal-banner", label: "Portal / App Banner (3:1)" },
   { value: "presentation-slide", label: "Presentation Slide (16:9)" },
-  // Print
   { value: "_print", label: "── Print ──", disabled: true },
   { value: "direct-mail", label: "Direct Mail Postcard (4:3)" },
   { value: "event-flyer", label: "Event Flyer / Poster (4:5)" },
   { value: "print-ad", label: "Print Ad (8.5×11)" },
-  { value: "viewbook", label: "Viewbook / Brochure (4:3)" },
-  { value: "donor-report", label: "Donor / Annual Report (8.5×11)" },
-  // Messaging
+  { value: "viewbook", label: "Viewbook / Brochure (4:3)", higherEdOnly: true },
+  { value: "donor-report", label: "Donor / Annual Report (8.5×11)", higherEdOnly: true },
   { value: "_messaging", label: "── Messaging ──", disabled: true },
   { value: "mms", label: "MMS / Text Message (1:1)" },
   { value: "news-article", label: "News Article Featured (16:9)" },
-];
+] as const;
 
 const toneOptions = [
   "Warm & Welcoming", "Bold & Energizing", "Prestigious & Scholarly",
