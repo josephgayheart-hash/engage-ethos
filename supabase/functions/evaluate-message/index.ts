@@ -659,6 +659,8 @@ FACT USAGE GUIDELINES BY CHANNEL:
 CRITICAL: These stories and facts are SPECIFICALLY SELECTED by the user. Incorporate them prominently and authentically in the generated content.
 ` : ""}` : '';
 
+    const audienceLabel = industryContext === 'higher education' ? 'student-facing' : 'audience-facing';
+
     switch (mode) {
       case 'evaluator':
         if (!message) {
@@ -668,7 +670,7 @@ CRITICAL: These stories and facts are SPECIFICALLY SELECTED by the user. Incorpo
           );
         }
         modePrompt = EVALUATOR_PROMPT;
-        userPrompt = `Please evaluate the following student-facing message:
+        userPrompt = `Please evaluate the following ${audienceLabel} message:
 ${contextStr}
 ${institutionalStr}
 
@@ -680,7 +682,7 @@ Provide your evaluation as JSON.`;
 
       case 'builder':
         modePrompt = BUILDER_PROMPT;
-        userPrompt = `Please design a new student-facing message based on this context:
+        userPrompt = `Please design a new ${audienceLabel} message based on this context:
 ${contextStr}
 ${institutionalStr}
 
@@ -724,7 +726,7 @@ Provide the complete journey as JSON.`;
 
       default:
         modePrompt = EVALUATOR_PROMPT;
-        userPrompt = `Please evaluate the following student-facing message:
+        userPrompt = `Please evaluate the following ${audienceLabel} message:
 ${contextStr}
 
 MESSAGE:

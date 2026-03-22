@@ -9,6 +9,7 @@ import { AIBadge } from "@/components/ui/ai-indicator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
+import { useIndustry } from "@/contexts/IndustryContext";
 import { openInGoogleDocs, formatForGoogleDocs } from "@/lib/googleDocsExport";
 import { AIResultsGuidance } from "@/components/AIResultsGuidance";
 import type { BuilderResult, MessageContext, InstitutionalConfig } from "@/types/campusvoice";
@@ -16,6 +17,7 @@ interface BuilderResultsProps {
   result: BuilderResult;
   context?: MessageContext;
   institutionalConfig?: InstitutionalConfig;
+  selectedModel?: string;
   onSaveToLibrary?: (content: string, title: string) => void;
   onSubmitToShared?: (content: string) => void;
   onRegeneratedDraft?: (draft: string) => void;
@@ -25,12 +27,14 @@ export function BuilderResults({
   result, 
   context, 
   institutionalConfig,
+  selectedModel,
   onSaveToLibrary, 
   onSubmitToShared,
   onRegeneratedDraft 
 }: BuilderResultsProps) {
   const { toast } = useToast();
   const { contentDNA } = useContentDNAForGeneration();
+  const { labels: industryLabels } = useIndustry();
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [savedIndex, setSavedIndex] = useState<number | null>(null);
   const [activeDraft, setActiveDraft] = useState(0);
@@ -89,7 +93,10 @@ export function BuilderResults({
           type: 'builder',
           context,
           institutionalConfig,
-          contentDNA: contentDNA || undefined
+          contentDNA: contentDNA || undefined,
+          model: selectedModel,
+          industryContext: industryLabels.industryContext,
+          contentStyle: industryLabels.contentStyle,
         }
       });
 
