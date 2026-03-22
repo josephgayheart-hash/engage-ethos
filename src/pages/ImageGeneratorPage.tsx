@@ -75,7 +75,8 @@ const ENTERPRISE_AUDIENCE_OPTIONS = [
 
 const engineOptions = [
   { value: "fast", label: "Fast", description: "Quick generation, good quality" },
-  { value: "premium", label: "Premium", description: "Slower, highest quality & realism" },
+  { value: "premium", label: "Premium", description: "Higher fidelity & detail" },
+  { value: "pro", label: "Pro", description: "Best quality, slower & more expensive" },
 ];
 
 const HIGHER_ED_STYLE_OPTIONS = [
@@ -210,7 +211,7 @@ const ImageGeneratorPage = () => {
     setGenerationPhase(0);
     const phaseInterval = setInterval(() => {
       setGenerationPhase(prev => prev < 4 ? prev + 1 : prev);
-    }, engine === "premium" ? 6000 : 1200);
+    }, engine === "pro" ? 10000 : engine === "premium" ? 6000 : 1200);
     try {
           const effectiveStyle = creationMode === "graphic-design" ? "graphic-design" : style;
           const { data, error } = await supabase.functions.invoke("generate-channel-image", {
@@ -381,7 +382,7 @@ const ImageGeneratorPage = () => {
             {/* Controls */}
             <Card>
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg">Image Settings</CardTitle>
+                <CardTitle className="text-lg">Image Studio</CardTitle>
                 <CardDescription>
                   {isHigherEd
                     ? "Describe your scene and select options. The generator uses your institutional profile for campus-accurate, brand-aligned imagery."
@@ -859,9 +860,11 @@ const ImageGeneratorPage = () => {
                         ) : null}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {engine === "premium"
-                          ? "Premium engine — up to 60 seconds"
-                          : "Estimated 15–30 seconds"}
+                        {engine === "pro"
+                          ? "Pro engine — up to 90 seconds"
+                          : engine === "premium"
+                            ? "Premium engine — up to 60 seconds"
+                            : "Estimated 15–30 seconds"}
                       </p>
                     </div>
 
