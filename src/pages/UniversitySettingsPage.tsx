@@ -174,12 +174,14 @@ export default function UniversitySettingsPage() {
     }
   }, [effectiveTenant]);
 
-  // Sync draft header state when editing profile changes
+  // Sync all draft state when editing profile changes
   useEffect(() => {
     if (editingProfile) {
       setDraftName(editingProfile.config.unitName || editingProfile.name);
       setDraftType(editingProfile.profileType);
+      setDraftConfig(editingProfile.config);
       setHeaderDirty(false);
+      setConfigDirty(false);
     }
   }, [editingProfile?.id]);
 
