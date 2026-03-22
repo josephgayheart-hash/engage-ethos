@@ -726,7 +726,7 @@ Provide the complete journey as JSON.`;
 
       default:
         modePrompt = EVALUATOR_PROMPT;
-        userPrompt = `Please evaluate the following student-facing message:
+        userPrompt = `Please evaluate the following ${audienceLabel} message:
 ${contextStr}
 
 MESSAGE:
