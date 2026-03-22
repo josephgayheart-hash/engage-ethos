@@ -782,12 +782,12 @@ export default function ContentDNAPage() {
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <h3 className={`font-medium mb-1 ${selectedProfile ? 'text-foreground' : 'text-amber-800'}`}>
-                      {selectedProfile ? 'Content DNA Profile Active' : 'Select an Institutional Profile'}
+                      {selectedProfile ? 'Content DNA Profile Active' : `Select a ${industryLabels.organization} Profile`}
                     </h3>
                     <p className={`text-sm ${selectedProfile ? 'text-muted-foreground' : 'text-amber-700'}`}>
                       {selectedProfile 
                         ? `Viewing and managing Content DNA for ${selectedProfile.name}. All samples and analysis are scoped to this profile.`
-                        : 'Content DNA needs to be associated with an institutional profile. Select a profile to view or configure its unique voice settings.'
+                        : `Content DNA needs to be associated with a ${industryLabels.organization.toLowerCase()} profile. Select a profile to view or configure its unique voice settings.`
                       }
                     </p>
                   </div>
@@ -855,9 +855,9 @@ export default function ContentDNAPage() {
                     <Building2 className="w-8 h-8 text-amber-600" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-medium text-amber-800 mb-1">Create an Institutional Profile</h3>
+                     <h3 className="font-medium text-amber-800 mb-1">Create a {industryLabels.organization} Profile</h3>
                     <p className="text-sm text-amber-700">
-                      Content DNA needs to be associated with an institutional profile. Create your first profile to get started.
+                       Content DNA needs to be associated with a {industryLabels.organization.toLowerCase()} profile. Create your first profile to get started.
                     </p>
                   </div>
                   <Button onClick={() => navigate('/university-settings?tab=profiles')} className="bg-amber-600 hover:bg-amber-700">
@@ -1623,7 +1623,7 @@ export default function ContentDNAPage() {
                     <Input
                       value={sampleTitle}
                       onChange={(e) => setSampleTitle(e.target.value)}
-                      placeholder="e.g., President's Welcome Letter 2024"
+                      placeholder={isHigherEd ? "e.g., President's Welcome Letter 2024" : "e.g., Q4 Brand Campaign Email"}
                     />
                   </div>
                   <div>
@@ -1631,7 +1631,7 @@ export default function ContentDNAPage() {
                     <Input
                       value={sourceDescription}
                       onChange={(e) => setSourceDescription(e.target.value)}
-                      placeholder="e.g., Annual new student welcome email"
+                      placeholder={isHigherEd ? "e.g., Annual new student welcome email" : "e.g., Quarterly customer newsletter"}
                     />
                   </div>
                   <div>
@@ -1761,7 +1761,7 @@ export default function ContentDNAPage() {
                         setTextInput(e.target.value);
                         handleTextInputChange(e.target.value, setSampleType);
                       }}
-                      placeholder="Paste your email, newsletter, or other communication here..."
+                      placeholder={isHigherEd ? "Paste your email, newsletter, or other communication here..." : "Paste your email, newsletter, or other brand communication here..."}
                       className="h-[180px]"
                     />
                   </div>
