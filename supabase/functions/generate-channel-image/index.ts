@@ -457,7 +457,7 @@ serve(async (req) => {
       }
 
       if (profileId && schoolName) {
-        strictInstitutionConstraint = `SELECTED INSTITUTION LOCK: The selected institutional profile is "${schoolName}". Use ONLY this institution's identity, voice, and visual references. Do NOT use, merge, or reference any other institution/profile names, slogans, logos, mascots, or metadata. If any conflicting institution appears in context, ignore it completely.`;
+        strictInstitutionConstraint = `SELECTED ${orgLabel().toUpperCase()} LOCK: The selected profile is "${schoolName}". Use ONLY this ${orgLabel()}'s identity, voice, and visual references. Do NOT use, merge, or reference any other ${orgLabel()}/profile names, slogans, logos, mascots, or metadata. If any conflicting ${orgLabel()} appears in context, ignore it completely.`;
       }
     } catch (e) {
       console.warn("Could not process branding:", e);
