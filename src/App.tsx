@@ -88,6 +88,9 @@ import AboutPage from "./pages/AboutPage";
 import GivingDayPlannerPage from "./pages/GivingDayPlannerPage";
 import StewardshipReportPage from "./pages/StewardshipReportPage";
 import ForEnterprisePage from "./pages/ForEnterprisePage";
+import CampaignBriefPage from "./pages/CampaignBriefPage";
+import CompetitiveAnalyzerPage from "./pages/CompetitiveAnalyzerPage";
+import RegionAdapterPage from "./pages/RegionAdapterPage";
 
 const queryClient = new QueryClient();
 
