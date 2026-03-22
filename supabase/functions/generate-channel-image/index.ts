@@ -621,11 +621,11 @@ PALETTE LOCK: If brand hex colors are provided, use ONLY those exact hex colors 
             messages: [
               {
                 role: "system",
-                content: `You write short marketing copy for ${isHigherEd() ? 'higher-ed' : 'branded'} promotional graphics. The copy must align with the ${orgLabel()}'s brand voice and guidelines.${brandGuidelinesSummary ? ` Brand context: ${brandGuidelinesSummary}` : ""}${strictInstitutionConstraint ? ` ${strictInstitutionConstraint}` : ""} SPELLING CHECK: Triple-check every word for correct spelling before returning. No typos, no truncated words, no abbreviations unless intentional. Return ONLY valid JSON with keys: headline, subheadline, cta. No markdown.`,
+                content: `You write short marketing copy for ${isHigherEd() ? 'higher-ed' : 'branded'} promotional graphics. The copy must align with the ${orgLabel()}'s brand voice and guidelines.${brandGuidelinesSummary ? ` Brand context: ${brandGuidelinesSummary}` : ""}${strictInstitutionConstraint ? ` ${strictInstitutionConstraint}` : ""}${outputLanguage && outputLanguage !== "en" ? ` IMPORTANT: Write ALL copy in ${outputLanguage} language. The headline, subheadline, and CTA must all be in ${outputLanguage}.` : ""} SPELLING CHECK: Triple-check every word for correct spelling before returning. No typos, no truncated words, no abbreviations unless intentional. Return ONLY valid JSON with keys: headline, subheadline, cta. No markdown.`,
               },
               {
                 role: "user",
-                content: `Source content:\n${contentSummary}\n\nAudience: ${audience || "general"}\nTone: ${tone || "professional and polished"}\nGoal: ${goal || "promote a program"}\nBrand colors: ${brandColors.length > 0 ? brandColors.join(', ') : 'not specified'}\n\nTask: Summarize to core message and produce:\n- headline: max 8 words, punchy and on-brand\n- subheadline: max 18 words, compelling and action-oriented\n- cta: max 4 words, clear call-to-action\nNo quotation marks around values in final output JSON.`,
+                content: `Source content:\n${contentSummary}\n\nAudience: ${audience || "general"}\nTone: ${tone || "professional and polished"}\nGoal: ${goal || "promote a program"}\nBrand colors: ${brandColors.length > 0 ? brandColors.join(', ') : 'not specified'}${outputLanguage && outputLanguage !== "en" ? `\nOutput language: ${outputLanguage}` : ""}\n\nTask: Summarize to core message and produce:\n- headline: max 8 words, punchy and on-brand\n- subheadline: max 18 words, compelling and action-oriented\n- cta: max 4 words, clear call-to-action\nNo quotation marks around values in final output JSON.`,
               },
             ],
           }),
