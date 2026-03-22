@@ -660,6 +660,7 @@ ${goalContext}
 ${toneContext}
 ${brandContext}
 ${strictInstitutionConstraint}
+${culturalContext}
 
 ${colorPaletteInstruction}
 ${designSubParams}
