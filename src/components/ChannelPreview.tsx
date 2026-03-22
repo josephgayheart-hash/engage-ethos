@@ -15,6 +15,7 @@ import { SalesforceCredentialsDialog } from "@/components/SalesforceCredentialsD
 import { SlateCredentialsDialog } from "@/components/SlateCredentialsDialog";
 import { openInGoogleDocs, formatForGoogleDocs } from "@/lib/googleDocsExport";
 import { exportTalkingPointsToPDF, exportCaseForSupportToPDF, type BrandingOptions } from "@/lib/pdfExport";
+import { TranslationToggle } from "@/components/TranslationToggle";
 import { 
   Copy, 
   Check, 
