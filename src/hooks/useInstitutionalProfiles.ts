@@ -5,7 +5,7 @@ import { useActiveWorkspaceId } from '@/contexts/WorkspaceContext';
 import type { InstitutionalConfig } from '@/types/campusvoice';
 import type { Json } from '@/integrations/supabase/types';
 
-export type ProfileType = 'university' | 'college' | 'division' | 'unit' | 'department';
+export type ProfileType = 'university' | 'college' | 'division' | 'unit' | 'department' | 'headquarters' | 'region' | 'location';
 
 export interface InstitutionalProfile {
   id: string;
