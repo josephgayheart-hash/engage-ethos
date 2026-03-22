@@ -1150,8 +1150,8 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
                       <Dna className="w-10 h-10 text-primary" />
                     </div>
                     <h3 className="font-serif text-xl font-semibold mb-2">Set Up Content DNA</h3>
-                    <p className="text-muted-foreground text-sm mb-6">
-                      Content DNA captures your institution's unique voice and communication style. 
+                     <p className="text-muted-foreground text-sm mb-6">
+                       Content DNA captures your {isHigherEd ? "institution's" : "organization's"} unique voice and communication style. 
                       Upload sample communications and let AI analyze your patterns, tone, and vocabulary.
                     </p>
                     
