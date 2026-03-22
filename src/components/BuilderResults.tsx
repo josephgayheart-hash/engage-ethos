@@ -9,6 +9,7 @@ import { AIBadge } from "@/components/ui/ai-indicator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
+import { useIndustry } from "@/contexts/IndustryContext";
 import { openInGoogleDocs, formatForGoogleDocs } from "@/lib/googleDocsExport";
 import { AIResultsGuidance } from "@/components/AIResultsGuidance";
 import type { BuilderResult, MessageContext, InstitutionalConfig } from "@/types/campusvoice";
