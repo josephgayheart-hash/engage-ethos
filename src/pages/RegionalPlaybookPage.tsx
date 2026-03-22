@@ -424,16 +424,30 @@ Tone should be organized, warm, and brand-aligned.`;
           {/* Generated Content */}
           {generatedContent && (
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-base">
-                  {activeTab === 'site-visit' ? 'Site Visit Playbook' : activeTab === 'rep-engagement' ? 'Rep Engagement Plan' : 'Event Coordination Playbook'}
-                </CardTitle>
-                <Button variant="ghost" size="sm" onClick={handleCopy} className="gap-1.5">
+              <CardHeader className="flex flex-row items-start justify-between gap-2">
+                <div className="space-y-1">
+                  <CardTitle className="text-base">
+                    {activeTab === 'site-visit' ? 'Site Visit Playbook' : activeTab === 'rep-engagement' ? 'Rep Engagement Plan' : 'Event Coordination Playbook'}
+                  </CardTitle>
+                  {outputLanguage !== 'en' && (
+                    <Badge variant="outline" className="gap-1 text-xs">
+                      <Languages className="w-3 h-3" />
+                      {outputLanguages.find(l => l.value === outputLanguage)?.label}
+                    </Badge>
+                  )}
+                </div>
+                <Button variant="ghost" size="sm" onClick={handleCopy} className="gap-1.5 shrink-0">
                   {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                   {copied ? 'Copied' : 'Copy'}
                 </Button>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
+                {outputLanguage !== 'en' && (
+                  <TranslationToggle
+                    originalContent={generatedContent}
+                    outputLanguage={outputLanguage}
+                  />
+                )}
                 <div className="prose prose-sm max-w-none dark:prose-invert whitespace-pre-wrap">
                   {generatedContent}
                 </div>
