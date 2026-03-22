@@ -460,8 +460,16 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {([
                 { field: 'logoUrlSecondary' as const, label: 'Secondary Logo', desc: 'Horizontal, stacked, or reversed variant' },
-                { field: 'logoUrlAthletic' as const, label: 'Athletic Mark', desc: 'Team logo or athletics identity' },
-                { field: 'logoUrlPresidential' as const, label: 'Presidential Mark', desc: 'Presidential seal or mark' },
+                ...(isHigherEd
+                  ? [
+                      { field: 'logoUrlAthletic' as const, label: 'Athletic Mark', desc: 'Team logo or athletics identity' },
+                      { field: 'logoUrlPresidential' as const, label: 'Presidential Mark', desc: 'Presidential seal or mark' },
+                    ]
+                  : [
+                      { field: 'logoUrlAthletic' as const, label: 'Icon / Favicon', desc: 'App icon, favicon, or compact mark' },
+                      { field: 'logoUrlPresidential' as const, label: 'Executive Mark', desc: 'Leadership or corporate seal' },
+                    ]
+                ),
               ]).map((logo) => {
                 const url = config[logo.field] as string | undefined;
                 return (
