@@ -90,6 +90,7 @@ function AnalysisDetail({ analysis }: { analysis: PhotoAIAnalysis }) {
 }
 
 export function CampusPhotographyTab({ profileId }: CampusPhotographyTabProps) {
+  const { isHigherEd, labels: industryLabels } = useIndustry();
   const {
     photos,
     isLoading,
