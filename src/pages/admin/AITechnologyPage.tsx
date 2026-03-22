@@ -631,7 +631,7 @@ export default function AITechnologyPage() {
                     {toolConsumptionMatrix.map((row) => {
                       const StatusIcon = ({ level }: { level: ConsumptionLevel }) => {
                         if (level === "full") return <CheckCircle2 className="h-3.5 w-3.5 text-accent mx-auto" />;
-                        if (level === "partial") return <Minus className="h-3.5 w-3.5 text-yellow-500 mx-auto" />;
+                        if (level === "partial") return <Minus className="h-3.5 w-3.5 text-pillar-susceptibility mx-auto" />;
                         return <XCircle className="h-3.5 w-3.5 text-muted-foreground/30 mx-auto" />;
                       };
                       return (
