@@ -116,7 +116,7 @@ const channelLabels: Record<Channel, string> = {
   'case-for-care': 'Case for Support',
 };
 
-export function ChannelPreview({ channel, content, onCopy, onContentChange, onSaveToLibrary, institutionName, branding, tenantId, profileId, audience, contentSummary, goal, tone, moment, cohort, domain, imageEngine, imageStyle, regenerateKey }: ChannelPreviewProps) {
+export function ChannelPreview({ channel, content, onCopy, onContentChange, onSaveToLibrary, institutionName, branding, tenantId, profileId, audience, contentSummary, goal, tone, moment, cohort, domain, imageEngine, imageStyle, regenerateKey, outputLanguage }: ChannelPreviewProps) {
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState<ChannelDrafts[keyof ChannelDrafts]>(content);
