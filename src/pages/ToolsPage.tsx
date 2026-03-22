@@ -19,6 +19,7 @@ import {
   Swords,
   Globe2,
   ClipboardList,
+  MapPin,
 } from "lucide-react";
 
 interface ToolItem {
