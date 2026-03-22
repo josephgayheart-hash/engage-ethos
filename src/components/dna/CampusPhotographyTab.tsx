@@ -286,7 +286,7 @@ export function CampusPhotographyTab({ profileId }: CampusPhotographyTabProps) {
           <CardContent className="py-12 text-center">
             <Camera className="w-10 h-10 mx-auto text-muted-foreground/40 mb-3" />
             <p className="text-sm text-muted-foreground">
-              No campus photos uploaded yet. Add photos to improve AI-generated imagery.
+              No {isHigherEd ? 'campus' : 'brand'} photos uploaded yet. Add photos to improve AI-generated imagery.
             </p>
           </CardContent>
         </Card>
