@@ -233,14 +233,14 @@ export function ContentDNAStatusCard() {
               {(status?.campusPhotoCount ?? 0) > 0 && (
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Camera className="w-3 h-3" />
-                  <span>{status!.campusPhotoCount} campus photo{status!.campusPhotoCount !== 1 ? "s" : ""} for AI training</span>
+                  <span>{status!.campusPhotoCount} brand photo{status!.campusPhotoCount !== 1 ? "s" : ""} for AI training</span>
                 </div>
               )}
               {(status?.campusPhotoCount ?? 0) === 0 && (
                 <div className="flex items-center gap-1.5 text-xs text-amber-600">
                   <Camera className="w-3 h-3" />
                   <Link to="/admin/content-dna" className="hover:underline">
-                    Add campus photos for better visuals →
+                    Add brand photos for better visuals →
                   </Link>
                 </div>
               )}

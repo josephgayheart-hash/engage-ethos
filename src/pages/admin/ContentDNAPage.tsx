@@ -1383,7 +1383,7 @@ export default function ContentDNAPage() {
                     <div className="text-center py-4">
                       <Camera className="w-8 h-8 mx-auto text-muted-foreground/30 mb-2" />
                       <p className="text-sm text-muted-foreground">
-                        No campus photos yet. Upload photos to improve AI-generated imagery accuracy.
+                        No photos yet. Upload photos to improve AI-generated imagery accuracy.
                       </p>
                     </div>
                   )}
