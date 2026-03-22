@@ -698,7 +698,7 @@ export interface InstitutionalConfig {
   enterpriseMarket?: string;       // e.g., "Southeast US", "DACH"
   primaryLanguage?: string;        // ISO language code e.g., "en", "es", "fr"
   secondaryLanguages?: string[];   // Additional supported languages
-  enterpriseLevel?: 'hq' | 'region' | 'division' | 'location';
+  enterpriseLevel?: 'headquarters' | 'region' | 'division' | 'location';
   locationCode?: string;           // Internal identifier e.g., "NA-SE-001"
   timezone?: string;               // e.g., "America/New_York"
   country?: string;                // e.g., "United States"
