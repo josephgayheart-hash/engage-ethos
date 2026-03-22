@@ -105,7 +105,7 @@ const channelIcons: Record<Channel, LucideIcon> = {
   'case-for-care': Heart,
 };
 
-const channelOptions: { value: Channel; label: string }[] = [
+const ALL_CHANNEL_OPTIONS: { value: Channel; label: string }[] = [
   { value: 'email', label: 'Email' },
   { value: 'sms', label: 'SMS/Text' },
   { value: 'social-media', label: 'Social Media' },
