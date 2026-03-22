@@ -95,7 +95,7 @@ export default function UniversitySettingsPage() {
   const [searchParams] = useSearchParams();
   const { tenant, refreshProfile, isAdmin, isSuperAdmin } = useAuth();
   const { isAgency, labels } = useAgencyMode();
-  const { labels: industryLabels } = useIndustry();
+  const { labels: industryLabels, isHigherEd } = useIndustry();
   const PROFILE_TYPE_LABELS: Record<string, string> = {
     university: industryLabels.organization,
     college: industryLabels.subUnit,
