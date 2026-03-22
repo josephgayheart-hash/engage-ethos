@@ -91,6 +91,7 @@ import ForEnterprisePage from "./pages/ForEnterprisePage";
 import CampaignBriefPage from "./pages/CampaignBriefPage";
 import CompetitiveAnalyzerPage from "./pages/CompetitiveAnalyzerPage";
 import RegionAdapterPage from "./pages/RegionAdapterPage";
+import RegionalPlaybookPage from "./pages/RegionalPlaybookPage";
 
 const queryClient = new QueryClient();
 
