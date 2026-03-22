@@ -65,6 +65,9 @@ const PROFILE_TYPE_ICONS: Record<ProfileType, React.ReactNode> = {
   division: <Layers className="w-4 h-4" />,
   unit: <Building className="w-4 h-4" />,
   department: <Briefcase className="w-4 h-4" />,
+  headquarters: <Building2 className="w-4 h-4" />,
+  region: <Layers className="w-4 h-4" />,
+  location: <Building className="w-4 h-4" />,
 };
 
 const PROFILE_TYPE_LABELS: Record<ProfileType, string> = {
@@ -73,6 +76,9 @@ const PROFILE_TYPE_LABELS: Record<ProfileType, string> = {
   division: 'Division',
   unit: 'Unit',
   department: 'Department',
+  headquarters: 'Headquarters',
+  region: 'Region',
+  location: 'Location',
 };
 
 export default function AgencyClientsPage() {
