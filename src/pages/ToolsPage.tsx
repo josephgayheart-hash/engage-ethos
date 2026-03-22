@@ -49,6 +49,7 @@ const utilityTools: ToolItem[] = [
   { id: 'campaign-brief', title: 'Campaign Brief Generator', description: 'Generate structured creative briefs', icon: ClipboardList, href: '/campaign-brief' },
   { id: 'competitive-analyzer', title: 'Competitive Analyzer', description: 'Benchmark messaging against competitors', icon: Swords, href: '/competitive-analyzer' },
   { id: 'region-adapter', title: 'Region & Tone Adapter', description: 'Adapt copy for multiple regions', icon: Globe2, href: '/region-adapter' },
+  { id: 'regional-playbook', title: 'Regional Manager Playbook', description: 'Site visits, rep engagement & event playbooks', icon: MapPin, href: '/regional-playbook' },
 ];
 
 function ToolGrid({ tools, label, compact }: { tools: ToolItem[]; label: string; compact: boolean }) {

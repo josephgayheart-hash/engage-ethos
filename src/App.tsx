@@ -208,6 +208,7 @@ const AppRoutes = () => (
       <Route path="/campaign-brief" element={<CampaignBriefPage />} />
       <Route path="/competitive-analyzer" element={<CompetitiveAnalyzerPage />} />
       <Route path="/region-adapter" element={<RegionAdapterPage />} />
+      <Route path="/regional-playbook" element={<RegionalPlaybookPage />} />
       <Route path="/image-generator" element={<ImageGeneratorPage />} />
       <Route path="/brand-audit" element={<BrandAuditPage />} />
       <Route path="/brand-studio" element={<BrandStudioPage />} />
