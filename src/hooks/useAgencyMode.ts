@@ -59,6 +59,8 @@ interface AgencyModeResult {
 export function useAgencyMode(): AgencyModeResult {
   const { tenant } = useAuth();
   const { activeWorkspace, canSwitch } = useWorkspace();
+  const { labels: industryLabels, isHigherEd } = useIndustry();
+  const { activeWorkspace, canSwitch } = useWorkspace();
   
   // Use active workspace when super admin is switching workspaces
   const effectiveTenant = canSwitch && activeWorkspace ? activeWorkspace : tenant;
