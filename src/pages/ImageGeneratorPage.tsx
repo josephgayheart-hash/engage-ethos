@@ -1067,7 +1067,7 @@ const ImageGeneratorPage = () => {
                           <FolderPlus className="w-4 h-4 mr-1" /> Save to Library
                         </Button>
                         <Button variant="outline" size="sm" className="flex-1" onClick={() => { setSaveDialogType('shared'); setSaveDialogOpen(true); }}>
-                          <Library className="w-4 h-4 mr-1" /> University Library
+                          <Library className="w-4 h-4 mr-1" /> Shared Library
                         </Button>
                         <Button variant="outline" size="sm" className="flex-1" onClick={handleGenerate}>
                           <RefreshCw className="w-4 h-4 mr-1" /> Regenerate
