@@ -240,7 +240,7 @@ export function Header() {
                       <DropdownMenuItem asChild>
                         <Link to="/university-settings" className="flex items-center gap-2 cursor-pointer">
                           <Building2 className="w-4 h-4" />
-                          University Settings
+                          {industryLabels.organizationSettings}
                         </Link>
                       </DropdownMenuItem>
                     )}
