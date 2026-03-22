@@ -2127,6 +2127,29 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
 
         <AIResultsGuidance variant="subtle" className="mt-3" />
 
+        {/* Translation Toggle — show when content is in a non-English language */}
+        {outputLanguage && outputLanguage !== 'en' && (
+          <div className="mt-3 flex items-center gap-2">
+            <TranslationToggle
+              originalContent={getFullContent(content)}
+              outputLanguage={outputLanguage}
+              onToggle={(translated, isEnglish) => {
+                setShowingEnglish(isEnglish);
+                setTranslatedContent(isEnglish ? translated : null);
+              }}
+            />
+            {showingEnglish && (
+              <span className="text-xs text-muted-foreground italic">Showing English translation for review</span>
+            )}
+          </div>
+        )}
+        {showingEnglish && translatedContent && (
+          <div className="mt-3 p-3 bg-muted/40 rounded-lg border border-border/50">
+            <p className="text-xs font-medium text-muted-foreground mb-1.5">English Translation</p>
+            <p className="text-sm whitespace-pre-wrap">{translatedContent}</p>
+          </div>
+        )}
+
         {/* In Context Mockup Preview */}
         {isVisualChannel && channelImageUrl && (
           <div className="mt-4 border-t border-border pt-4">
