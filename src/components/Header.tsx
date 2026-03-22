@@ -305,7 +305,7 @@ export function Header() {
                     <DropdownMenuItem asChild>
                       <Link to={isAgency ? "/agency/clients" : "/university-settings"} className="flex items-center gap-2 cursor-pointer">
                         {isAgency ? <Briefcase className="w-4 h-4" /> : <Building2 className="w-4 h-4" />}
-                        {isAgency ? labels.settings : "University Settings"}
+                        {isAgency ? labels.settings : industryLabels.organizationSettings}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
