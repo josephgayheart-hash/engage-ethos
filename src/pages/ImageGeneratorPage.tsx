@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIndustry } from "@/contexts/IndustryContext";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { supabase } from "@/integrations/supabase/client";
 import { ImageIcon, Download, RefreshCw, Loader2, Sparkles, Palette, Camera, Users, Target, Eye, Image, ExternalLink, PaintBucket, Maximize2, FolderPlus, Library, ChevronDown, Trash2, ZoomIn, X } from "lucide-react";
@@ -28,13 +29,11 @@ import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { SaveToLibraryDialog } from "@/components/library/SaveToLibraryDialog";
 import { toast } from "sonner";
 
-const channelOptions = [
-  // Social
+const ALL_CHANNEL_OPTIONS = [
   { value: "_social", label: "── Social ──", disabled: true },
   { value: "social-media", label: "Social Media Post (1:1)" },
   { value: "digital-ad-social", label: "Social Ad (1:1)" },
   { value: "story", label: "Story — IG / FB / Snapchat (9:16)" },
-  // Digital
   { value: "_digital", label: "── Digital ──", disabled: true },
   { value: "email", label: "Email Header (16:9)" },
   { value: "landing-page", label: "Landing Page Hero (16:9)" },
@@ -45,27 +44,33 @@ const channelOptions = [
   { value: "facebook-cover", label: "Facebook Cover (2.63:1)" },
   { value: "portal-banner", label: "Portal / App Banner (3:1)" },
   { value: "presentation-slide", label: "Presentation Slide (16:9)" },
-  // Print
   { value: "_print", label: "── Print ──", disabled: true },
   { value: "direct-mail", label: "Direct Mail Postcard (4:3)" },
   { value: "event-flyer", label: "Event Flyer / Poster (4:5)" },
   { value: "print-ad", label: "Print Ad (8.5×11)" },
-  { value: "viewbook", label: "Viewbook / Brochure (4:3)" },
-  { value: "donor-report", label: "Donor / Annual Report (8.5×11)" },
-  // Messaging
+  { value: "viewbook", label: "Viewbook / Brochure (4:3)", higherEdOnly: true },
+  { value: "donor-report", label: "Donor / Annual Report (8.5×11)", higherEdOnly: true },
   { value: "_messaging", label: "── Messaging ──", disabled: true },
   { value: "mms", label: "MMS / Text Message (1:1)" },
   { value: "news-article", label: "News Article Featured (16:9)" },
-];
+] as const;
 
-const toneOptions = [
+const HIGHER_ED_TONE_OPTIONS = [
   "Warm & Welcoming", "Bold & Energizing", "Prestigious & Scholarly",
   "Conversational & Friendly", "Inspiring & Aspirational", "Professional & Polished",
 ];
+const ENTERPRISE_TONE_OPTIONS = [
+  "Warm & Welcoming", "Bold & Energizing", "Professional & Polished",
+  "Conversational & Friendly", "Inspiring & Aspirational", "Corporate & Authoritative",
+];
 
-const audienceOptions = [
+const HIGHER_ED_AUDIENCE_OPTIONS = [
   "Prospective Students", "Current Students", "Parents & Families",
   "Alumni", "Donors", "Faculty & Staff", "Community",
+];
+const ENTERPRISE_AUDIENCE_OPTIONS = [
+  "Customers", "Prospects", "Partners", "Employees",
+  "Investors", "Community", "Franchisees",
 ];
 
 const engineOptions = [
@@ -73,8 +78,15 @@ const engineOptions = [
   { value: "premium", label: "Premium", description: "Slower, highest quality & realism" },
 ];
 
-const styleOptions = [
+const HIGHER_ED_STYLE_OPTIONS = [
   { value: "photorealistic", label: "Photorealistic", description: "Editorial campus photography" },
+  { value: "cinematic", label: "Cinematic", description: "Dramatic lighting, film-like depth" },
+  { value: "illustrated", label: "Illustrated", description: "Stylized graphic illustration" },
+  { value: "watercolor", label: "Watercolor", description: "Soft, artistic watercolor style" },
+  { value: "minimal", label: "Minimal / Flat", description: "Clean, modern flat design" },
+];
+const ENTERPRISE_STYLE_OPTIONS = [
+  { value: "photorealistic", label: "Photorealistic", description: "Professional brand photography" },
   { value: "cinematic", label: "Cinematic", description: "Dramatic lighting, film-like depth" },
   { value: "illustrated", label: "Illustrated", description: "Stylized graphic illustration" },
   { value: "watercolor", label: "Watercolor", description: "Soft, artistic watercolor style" },
@@ -109,9 +121,21 @@ const layoutDensityOptions = [
 
 const ImageGeneratorPage = () => {
   const { profile, user } = useAuth();
+  const { isHigherEd, labels } = useIndustry();
   const tenantId = profile?.tenant_id;
   const { profiles } = useInstitutionalProfiles();
   const location = useLocation();
+
+  // Industry-aware option lists
+  const channelOptions = useMemo(() =>
+    ALL_CHANNEL_OPTIONS.filter(c => isHigherEd || !(c as any).higherEdOnly),
+    [isHigherEd]
+  );
+  const toneOptions = isHigherEd ? HIGHER_ED_TONE_OPTIONS : ENTERPRISE_TONE_OPTIONS;
+  const audienceOptions = isHigherEd ? HIGHER_ED_AUDIENCE_OPTIONS : ENTERPRISE_AUDIENCE_OPTIONS;
+  const styleOptions = isHigherEd ? HIGHER_ED_STYLE_OPTIONS : ENTERPRISE_STYLE_OPTIONS;
+  const photoLabel = isHigherEd ? "campus photos" : "brand photos";
+  const profileLabel = isHigherEd ? "Institutional Profile" : "Brand Profile";
 
   const [contentDescription, setContentDescription] = useState("");
   const [channel, setChannel] = useState("social-media");
@@ -258,7 +282,7 @@ const ImageGeneratorPage = () => {
         const orientation = img.width > img.height ? 'l' : 'p';
         const pdf = new jsPDF(orientation as any, 'px', [img.width, img.height]);
         pdf.addImage(img, 'PNG', 0, 0, img.width, img.height);
-        pdf.save(`campus-image-${channel}-${Date.now()}.pdf`);
+        pdf.save(`brand-image-${channel}-${Date.now()}.pdf`);
         URL.revokeObjectURL(img.src);
       } else {
         // Convert to desired format via canvas
@@ -275,7 +299,7 @@ const ImageGeneratorPage = () => {
         const dataUrl = canvas.toDataURL(mimeType, 0.95);
         const a = document.createElement("a");
         a.href = dataUrl;
-        a.download = `campus-image-${channel}-${Date.now()}.${format}`;
+        a.download = `brand-image-${channel}-${Date.now()}.${format}`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -324,7 +348,7 @@ const ImageGeneratorPage = () => {
       required_fields: { audience: audience ? [audience] : [], moment: [], channel: channel ? [channel] : ['social-media'] },
       metadata: { source: 'image-studio', sceneDescription: contentDescription, tone, goal },
     }).select('id').single();
-    if (error) { toast.error('Failed to save to University Library.'); return undefined; }
+    if (error) { toast.error('Failed to save to Shared Library.'); return undefined; }
     return data?.id;
   }, [imageUrl, channel, audience, tone, goal, contentDescription, selectedProfileId, profile, user]);
 
@@ -341,8 +365,10 @@ const ImageGeneratorPage = () => {
               Image Studio
             </h1>
             <p className="text-sm text-muted-foreground">
-              Generate on-brand campus imagery using your institution's profile, colors, architecture, and identity.
-              Images are always grounded in your institutional details — upload campus photos in Content DNA Studio for even greater visual accuracy.
+              {isHigherEd
+                ? "Generate on-brand campus imagery using your institution's profile, colors, architecture, and identity. Images are always grounded in your institutional details — upload campus photos in Content DNA Studio for even greater visual accuracy."
+                : "Generate on-brand imagery using your organization's profile, colors, and identity. Images are grounded in your brand details — upload brand photos in Content DNA Studio for even greater visual accuracy."
+              }
             </p>
           </div>
         </div>
@@ -357,7 +383,10 @@ const ImageGeneratorPage = () => {
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg">Image Settings</CardTitle>
                 <CardDescription>
-                  Describe your scene and select options. The generator uses your institutional profile for campus-accurate, brand-aligned imagery.
+                  {isHigherEd
+                    ? "Describe your scene and select options. The generator uses your institutional profile for campus-accurate, brand-aligned imagery."
+                    : "Describe your scene and select options. The generator uses your brand profile for on-brand, visually aligned imagery."
+                  }
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -389,7 +418,9 @@ const ImageGeneratorPage = () => {
                     id="description"
                     placeholder={creationMode === "graphic-design"
                       ? "e.g. Open house event flyer with bold headline 'Discover Your Future' and event details — Saturday, April 12"
-                      : "e.g. Students collaborating on a research project in a modern science lab during golden hour"
+                      : isHigherEd
+                        ? "e.g. Students collaborating on a research project in a modern science lab during golden hour"
+                        : "e.g. Team collaborating in a modern workspace with brand products visible on the conference table"
                     }
                     value={contentDescription}
                     onChange={(e) => setContentDescription(e.target.value)}
@@ -424,7 +455,7 @@ const ImageGeneratorPage = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Institutional Profile</Label>
+                    <Label>{profileLabel}</Label>
                     <Select value={selectedProfileId} onValueChange={setSelectedProfileId}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select profile...">
@@ -673,7 +704,7 @@ const ImageGeneratorPage = () => {
                 <div className="space-y-2">
                   <Label>Communication Goal</Label>
                   <Textarea
-                    placeholder="e.g. Drive enrollment interest, celebrate alumni achievement..."
+                    placeholder={isHigherEd ? "e.g. Drive enrollment interest, celebrate alumni achievement..." : "e.g. Boost brand awareness, promote new product launch, drive event attendance..."}
                     value={goal}
                     onChange={(e) => setGoal(e.target.value)}
                     rows={2}
@@ -790,8 +821,8 @@ const ImageGeneratorPage = () => {
                           ][generationPhase] : [
                             "Reading your brand profile…",
                             campusPhotoCount > 0
-                              ? `Training from ${campusPhotoCount} campus photo${campusPhotoCount > 1 ? "s" : ""}…`
-                              : "Matching your institutional profile & brand colors…",
+                              ? `Training from ${campusPhotoCount} ${photoLabel.replace(/s$/, '')}${campusPhotoCount > 1 ? "s" : ""}…`
+                              : `Matching your ${isHigherEd ? 'institutional' : 'brand'} profile & colors…`,
                             "Applying channel best practices…",
                             "Rendering with AI — optimized for this format…",
                             "Finalizing & uploading…",
@@ -809,11 +840,11 @@ const ImageGeneratorPage = () => {
                         {creationMode !== "graphic-design" && campusPhotoCount > 0 ? (
                           <span className="flex items-center justify-center gap-1">
                             <Camera className="w-3 h-3 text-primary" />
-                            {campusPhotoCount} campus photo{campusPhotoCount > 1 ? "s" : ""} guiding visual style
+                            {campusPhotoCount} {photoLabel} guiding visual style
                           </span>
                         ) : creationMode !== "graphic-design" ? (
                           <span className="flex items-center justify-center gap-1">
-                            No campus photos uploaded — imagery uses your profile &amp; brand details.{" "}
+                            No {photoLabel} uploaded — imagery uses your profile &amp; brand details.{" "}
                             <Link to="/admin/content-dna" className="text-primary hover:text-primary/80 inline-flex items-center gap-0.5 font-medium">
                               Add photos for even more accuracy <ExternalLink className="w-2.5 h-2.5" />
                             </Link>
@@ -982,7 +1013,7 @@ const ImageGeneratorPage = () => {
                         <div className="relative group rounded-lg overflow-hidden">
                           <img
                             src={imageUrl}
-                            alt="Generated campus image"
+                            alt="Generated brand image"
                             className="w-full rounded-lg"
                           />
                           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
@@ -1036,7 +1067,7 @@ const ImageGeneratorPage = () => {
                           <FolderPlus className="w-4 h-4 mr-1" /> Save to Library
                         </Button>
                         <Button variant="outline" size="sm" className="flex-1" onClick={() => { setSaveDialogType('shared'); setSaveDialogOpen(true); }}>
-                          <Library className="w-4 h-4 mr-1" /> University Library
+                          <Library className="w-4 h-4 mr-1" /> Shared Library
                         </Button>
                         <Button variant="outline" size="sm" className="flex-1" onClick={handleGenerate}>
                           <RefreshCw className="w-4 h-4 mr-1" /> Regenerate
@@ -1051,7 +1082,7 @@ const ImageGeneratorPage = () => {
                       Your generated image will appear here
                     </p>
                     <p className="text-xs text-muted-foreground/60">
-                      Select a profile to use campus-specific imagery & brand colors
+                      Select a profile to use brand-specific imagery & colors
                     </p>
                   </div>
                 )}
@@ -1069,7 +1100,7 @@ const ImageGeneratorPage = () => {
         onSaveToShared={saveDialogType === 'personal' ? handleSaveToSharedLibrary : undefined}
         libraryType={saveDialogType}
         contentType="image"
-        defaultName={`${profileInstitutionName || 'Campus Image'} — ${channelOptions.find(c => c.value === channel)?.label || channel}`}
+        defaultName={`${profileInstitutionName || 'Brand Image'} — ${channelOptions.find(c => c.value === channel)?.label || channel}`}
       />
 
       {/* Lightbox / Expanded View Dialog */}
