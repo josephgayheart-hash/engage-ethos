@@ -351,13 +351,15 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5" />
-              Fact Book
-            </CardTitle>
-            <CardDescription>
-              Institutional statistics and data points for use in messaging and Case for Support
-            </CardDescription>
+             <CardTitle className="flex items-center gap-2">
+               <BarChart3 className="w-5 h-5" />
+               {bookLabel}
+             </CardTitle>
+             <CardDescription>
+               {isHigherEd 
+                 ? 'Institutional statistics and data points for use in messaging and Case for Support'
+                 : 'Company statistics, milestones, and key data points for use in branded communications'}
+             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
             {facts.length > 0 && (
