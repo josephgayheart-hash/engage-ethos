@@ -328,6 +328,9 @@ serve(async (req) => {
     const brandColors: string[] = [];
     let tenantType = "";
     let strictInstitutionConstraint = "";
+    const isHigherEd = () => !tenantType || tenantType === "higher_ed";
+    const orgLabel = () => isHigherEd() ? "institution" : "organization";
+    const settingLabel = () => isHigherEd() ? "campus" : "brand";
 
     // ── Parallel DB fetch: tenant, profiles, and campus photos all at once ──
     const tenantPromise = tenantId
