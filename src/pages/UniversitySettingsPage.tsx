@@ -1138,12 +1138,45 @@ export default function UniversitySettingsPage() {
                                 className="font-serif text-lg font-bold h-auto py-1 px-2 border-transparent hover:border-border focus:border-border w-full sm:max-w-xs"
                               />
                             </div>
-                            <CardDescription className="mt-1">
-                              {editingProfile.profileType === 'university' 
-                                ? 'Configure Content DNA, terminology, and branding'
-                                : `Part of ${getParentProfile(editingProfile.id)?.name || 'parent institution'}`
-                              }
-                            </CardDescription>
+                            <div className="flex items-center gap-3 mt-2">
+                              <Select
+                                value={editingProfile.profileType}
+                                onValueChange={async (val) => {
+                                  const newType = val as ProfileType;
+                                  try {
+                                    await supabase
+                                      .from('institutional_profiles')
+                                      .update({ profile_type: newType } as any)
+                                      .eq('id', editingProfile.id);
+                                    setEditingProfile({ ...editingProfile, profileType: newType });
+                                    refreshProfiles();
+                                    toast({ title: "Profile type updated", description: `Changed to ${PROFILE_TYPE_LABELS[newType]}.` });
+                                  } catch (e) {
+                                    console.error(e);
+                                  }
+                                }}
+                              >
+                                <SelectTrigger className="h-7 w-auto text-xs gap-1.5 border-transparent hover:border-border">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {Object.entries(PROFILE_TYPE_LABELS).map(([key, label]) => (
+                                    <SelectItem key={key} value={key}>
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-muted-foreground">{PROFILE_TYPE_ICONS[key as ProfileType]}</span>
+                                        {label}
+                                      </div>
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <span className="text-xs text-muted-foreground">
+                                {editingProfile.profileType === 'university' || editingProfile.profileType === 'headquarters'
+                                  ? 'Configure Content DNA, terminology, and branding'
+                                  : `Part of ${getParentProfile(editingProfile.id)?.name || 'parent organization'}`
+                                }
+                              </span>
+                            </div>
                             <p className="text-xs text-muted-foreground mt-2">
                               Last updated {format(new Date(editingProfile.updatedAt), 'MMM d, yyyy \'at\' h:mm a')}
                             </p>
