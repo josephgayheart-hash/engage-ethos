@@ -520,7 +520,7 @@ Rules:
     const goalContext = goal ? `Communication goal: ${goal}.` : "";
     const toneContext = tone ? `Desired tone: ${tone}.` : "";
     const momentContext = moment ? `Communication moment: ${moment}.` : "";
-    const cohortContext = cohort && cohort !== 'none' ? `Student cohort: ${cohort}.` : "";
+    const cohortContext = cohort && cohort !== 'none' ? `${isHigherEd() ? 'Student cohort' : 'Audience segment'}: ${cohort}.` : "";
     const domainContext = domain ? `Content domain: ${domain}.` : "";
 
     // Style modifiers based on user selection
