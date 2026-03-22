@@ -330,7 +330,7 @@ export function ScratchpadCapture() {
                       if (rawText.trim().length >= 10 && !isOrganizing) handleOrganize();
                     }
                   }}
-                  placeholder="Drop your notes, talking points, or rough ideas here... e.g. 'Need to reach admitted students who haven't enrolled. Dean wants a 3-touch sequence by next week.'"
+                  placeholder="Drop your notes, talking points, or rough ideas here... e.g. 'Need to reach key audience segment. Leadership wants a 3-touch sequence by next week.'"
                   className="min-h-[100px] max-h-[200px] resize-none border-0 bg-transparent text-base leading-relaxed focus-visible:ring-0 focus-visible:ring-offset-0 pb-14 px-4 py-3"
                   autoFocus
                 />
