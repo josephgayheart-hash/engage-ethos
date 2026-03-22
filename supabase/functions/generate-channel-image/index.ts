@@ -441,11 +441,18 @@ serve(async (req) => {
           ? tenantInstitutionName
           : "";
       if (schoolName) {
-        campusContext = `CAMPUS SETTING: This image should look like it was taken on the campus of ${schoolName}.`;
-        campusContext += ` Use your knowledge of ${schoolName}'s real campus to depict recognizable architectural styles, building materials, landscaping, and iconic landmarks or gathering spots that are characteristic of that institution.`;
-        campusContext += ` Think about what makes ${schoolName}'s campus visually distinctive — the types of buildings (Gothic, Brutalist, modern glass, red brick, limestone), signature quads, arches, clock towers, stadiums, or natural features.`;
-        if (unitName) {
-          campusContext += ` This content is specifically for the ${unitName}, so if that college/department has its own building or area on campus, reference that environment.`;
+        if (isHigherEd()) {
+          campusContext = `CAMPUS SETTING: This image should look like it was taken on the campus of ${schoolName}.`;
+          campusContext += ` Use your knowledge of ${schoolName}'s real campus to depict recognizable architectural styles, building materials, landscaping, and iconic landmarks or gathering spots that are characteristic of that institution.`;
+          campusContext += ` Think about what makes ${schoolName}'s campus visually distinctive — the types of buildings (Gothic, Brutalist, modern glass, red brick, limestone), signature quads, arches, clock towers, stadiums, or natural features.`;
+          if (unitName) {
+            campusContext += ` This content is specifically for the ${unitName}, so if that college/department has its own building or area on campus, reference that environment.`;
+          }
+        } else {
+          campusContext = `BRAND SETTING: This image represents ${schoolName}. Use a professional corporate or commercial environment appropriate for this brand — modern offices, retail locations, manufacturing facilities, or lifestyle settings that match the brand's industry.`;
+          if (unitName) {
+            campusContext += ` This content is specifically for the ${unitName} division/unit.`;
+          }
         }
       }
 
