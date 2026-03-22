@@ -68,7 +68,7 @@ const CampaignBriefPage = () => {
 
 Campaign Name: ${campaignName}
 Campaign Type: ${campaignTypes.find(t => t.value === campaignType)?.label || campaignType}
-Organization: ${selectedProfile?.name || tenant?.name || 'Not specified'}
+Organization: ${selectedProfile?.name || 'Not specified'}
 Objective: ${objective}
 Target Audience: ${audiences.find(a => a.id === audience)?.label || audience || 'General'}
 Timeline: ${timeline || 'Not specified'}
