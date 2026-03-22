@@ -366,7 +366,8 @@ serve(async (req) => {
       : Promise.resolve({ data: null });
 
     // Design references — persistent style inspiration images from Content DNA
-    const designRefsQuery = isGraphicDesign && (profileId || tenantId)
+    // Always fetch for any tenant (enterprise needs them in photo mode too, not just graphic-design)
+    const designRefsQuery = (profileId || tenantId)
       ? (() => {
           let q = supabaseAdmin.from("design_references").select("file_url, name, description").eq("is_active", true);
           if (profileId) q = q.eq("profile_id", profileId);
