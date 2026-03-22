@@ -602,7 +602,7 @@ export default function UniversitySettingsPage() {
                   <CardDescription>
                     {isAgency 
                       ? 'Your agency\'s visual identity — logo, colors, and brand assets'
-                      : 'Your institution identity and per-profile visual branding at a glance'
+                      : `Your ${industryLabels.organization.toLowerCase()} identity and per-profile visual branding at a glance`
                     }
                   </CardDescription>
                 </CardHeader>
