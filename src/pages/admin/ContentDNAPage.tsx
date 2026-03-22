@@ -1601,7 +1601,7 @@ export default function ContentDNAPage() {
                       </SelectTrigger>
                       <SelectContent className="max-h-80">
                         {/* Group sample types by category */}
-                        {['Core Communications', 'Public Relations', 'Speeches & Events', 'Outreach', 'Digital', 'Marketing', 'Brand', 'Academic', 'Publications', 'Other'].map((category) => {
+                        {['Core Communications', 'Public Relations', 'Speeches & Events', 'Outreach', 'Digital', 'Marketing', 'Brand', 'Academic', 'Corporate', 'Publications', 'Other'].map((category) => {
                           const categoryTypes = SAMPLE_TYPES.filter(t => t.category === category);
                           if (categoryTypes.length === 0) return null;
                           return (
