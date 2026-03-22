@@ -852,7 +852,7 @@ CRITICAL TEXT & LOGO RULES:
         messageContent.push(
           { type: "text", text: `⚠️ MANDATORY STYLE REPLICATION — YOUR #1 PRIORITY ⚠️
 
-The following ${designRefUrls.length} image(s) are the institution's APPROVED design samples. Your output MUST look like it was made by the SAME designer who created these samples. This is not optional guidance — it is the most important instruction in this entire prompt.
+The following ${designRefUrls.length} image(s) are the ${orgLabel()}'s APPROVED design samples. Your output MUST look like it was made by the SAME designer who created these samples. This is not optional guidance — it is the most important instruction in this entire prompt.
 
 WHAT YOU MUST COPY FROM THESE SAMPLES:
 1. EXACT VISUAL TREATMENTS — If the samples use highlighted text (text with colored background strips), YOU must use highlighted text the same way. If they use text knockout/cutout effects, do the same. If they use duotone photo treatments, do the same.
