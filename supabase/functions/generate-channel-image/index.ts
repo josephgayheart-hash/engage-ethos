@@ -306,9 +306,11 @@ serve(async (req) => {
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
     // Select model based on engine param
-    const selectedModel = engine === "premium"
+    const selectedModel = engine === "pro"
       ? "google/gemini-3-pro-image-preview"
-      : "google/gemini-2.5-flash-image";
+      : engine === "premium"
+        ? "google/gemini-3.1-flash-image-preview"
+        : "google/gemini-2.5-flash-image";
 
     const isGraphicDesign = imageStyle === "graphic-design";
 
