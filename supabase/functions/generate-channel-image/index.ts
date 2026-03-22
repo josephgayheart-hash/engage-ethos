@@ -617,7 +617,7 @@ PALETTE LOCK: If brand hex colors are provided, use ONLY those exact hex colors 
     }
 
     const prompt = isGraphicDesign
-      ? `You are an elite graphic designer creating a marketing-forward promotional graphic for a higher education institution.
+      ? `You are an elite graphic designer creating a marketing-forward promotional graphic for ${isHigherEd() ? 'a higher education institution' : `the brand "${schoolName || 'this organization'}"`}.
 
 CONTENT TO PROMOTE:
 ${contentSummary}
