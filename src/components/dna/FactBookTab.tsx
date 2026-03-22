@@ -887,7 +887,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                         <div className="h-px w-4 bg-border" />
                         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm bg-muted text-muted-foreground">
                           <Database className="w-4 h-4" />
-                          <span>Save to Fact Book</span>
+                          <span>Save to {bookLabel}</span>
                         </div>
                       </div>
                     </div>
