@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import {
   Loader2, Building2, Dna, Users, Target, BookMarked, Mail, Sparkles, Map,
   Check, Shield, Palette, MessageSquare, FileText, Brain, Zap, BarChart3,
-  Quote, Type, Gauge, Hash, Layers, GraduationCap, Camera, ExternalLink
+  Quote, Type, Gauge, Hash, Layers, GraduationCap, Camera, ExternalLink, Globe
 } from "lucide-react";
 
 interface DNAStats {
@@ -52,6 +52,7 @@ interface GenerationContext {
   dnaStats?: DNAStats;
   profileStats?: ProfileStats;
   campusPhotoCount?: number;
+  outputLanguage?: string;
 }
 
 interface GenerationLoadingOverlayProps {
@@ -125,6 +126,18 @@ function buildPhases(ctx: GenerationContext): (PhaseItem & { key: string })[] {
   const pLabel = ctx.profileLabel || "profile";
   const pLabelLower = pLabel.toLowerCase();
 
+  const langNameMap: Record<string, string> = {
+    es: "Spanish", fr: "French", zh: "Chinese", ja: "Japanese", ko: "Korean",
+    pt: "Portuguese", ar: "Arabic", hi: "Hindi", de: "German", it: "Italian",
+    vi: "Vietnamese", ru: "Russian", tl: "Filipino",
+  };
+  const hasLang = ctx.outputLanguage && ctx.outputLanguage !== "en";
+  const langCode = hasLang ? ctx.outputLanguage!.split("-")[0].toLowerCase() : "";
+  const langName = langNameMap[langCode] || ctx.outputLanguage || "";
+  const langPhase: (PhaseItem & { key: string })[] = hasLang ? [
+    { key: "translate", message: `Translating output to ${langName}…`, completedMessage: `Output translated to ${langName}`, detail: `Language: ${langName}`, icon: Globe, proofItems: [] },
+  ] : [];
+
   if (ctx.mode === "journey") {
     return [
       { key: "profile", message: `Loading ${pLabelLower}…`, completedMessage: `${pLabel} loaded`, detail: profileDetail, icon: Building2, proofItems: buildProofItems(ctx, "profile") },
@@ -133,6 +146,7 @@ function buildPhases(ctx: GenerationContext): (PhaseItem & { key: string })[] {
       { key: "flow", message: "Designing multi-channel touchpoint flow…", completedMessage: "Multi-channel touchpoint flow designed", detail: ctx.journeyWeeks ? `${ctx.journeyWeeks}-week timeline` : undefined, icon: Map, proofItems: [] },
       { key: "stories", message: "Weaving in stories & proof points…", completedMessage: "Stories & proof points woven in", detail: ctx.hasStories || ctx.hasFacts ? `${ctx.storyCount || 0} stories, ${ctx.factCount || 0} facts` : "No stories/facts selected", icon: BookMarked, proofItems: buildProofItems(ctx, "stories") },
       { key: "generate", message: "Generating on-brand journey content…", completedMessage: "On-brand journey content generated", detail: `${ctx.channels?.length || 0} channels`, icon: Mail, proofItems: [] },
+      ...langPhase,
       { key: "score", message: "Scoring brand adherence & finalizing…", completedMessage: "Brand adherence scored & finalized", detail: undefined, icon: Sparkles, proofItems: [] },
     ];
   }
@@ -143,6 +157,7 @@ function buildPhases(ctx: GenerationContext): (PhaseItem & { key: string })[] {
     { key: "brand", message: "Applying brand pillars & proof points…", completedMessage: "Brand pillars & proof points applied", detail: ctx.brandPillarCount ? `${ctx.brandPillarCount} pillar${ctx.brandPillarCount > 1 ? "s" : ""} selected` : undefined, icon: Target, proofItems: buildProofItems(ctx, "brand") },
     { key: "stories", message: "Weaving in stories & data points…", completedMessage: "Stories & data points woven in", detail: ctx.hasStories || ctx.hasFacts ? `${ctx.storyCount || 0} stories, ${ctx.factCount || 0} facts` : "No stories/facts selected", icon: BookMarked, proofItems: buildProofItems(ctx, "stories") },
     { key: "generate", message: "Generating on-brand drafts per channel…", completedMessage: "On-brand drafts generated per channel", detail: `${ctx.channels?.length || 0} channel${(ctx.channels?.length || 0) > 1 ? "s" : ""}`, icon: Mail, proofItems: [] },
+    ...langPhase,
     { key: "score", message: "Scoring brand adherence & finalizing…", completedMessage: "Brand adherence scored & finalized", detail: undefined, icon: Sparkles, proofItems: [] },
   ];
 }

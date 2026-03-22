@@ -1366,6 +1366,7 @@ const StrategyPage = () => {
                   leadershipTitle: institutionalConfig.presidentTitle || institutionalConfig.deanTitle || institutionalConfig.directorTitle,
                 } : undefined,
                 campusPhotoCount,
+                outputLanguage: context.outputLanguage,
               }}
             />
           )}
