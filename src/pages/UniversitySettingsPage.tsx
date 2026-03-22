@@ -1205,6 +1205,28 @@ export default function UniversitySettingsPage() {
                                 }
                               </span>
                             </div>
+
+                            {/* Location & Language info */}
+                            {(editingProfile.config.city || editingProfile.config.enterpriseRegion || editingProfile.config.primaryLanguage) && (
+                              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5">
+                                {(editingProfile.config.city || editingProfile.config.stateProvince || editingProfile.config.country) && (
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                                    <MapPin className="w-3.5 h-3.5" />
+                                    {[editingProfile.config.city, editingProfile.config.stateProvince, editingProfile.config.country].filter(Boolean).join(', ')}
+                                  </span>
+                                )}
+                                {editingProfile.config.enterpriseRegion && (
+                                  <Badge variant="secondary" className="text-[10px] h-5">{editingProfile.config.enterpriseRegion}</Badge>
+                                )}
+                                {editingProfile.config.primaryLanguage && (
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                                    <Globe className="w-3.5 h-3.5" />
+                                    {editingProfile.config.primaryLanguage.toUpperCase()}
+                                    {editingProfile.config.secondaryLanguages?.length ? ` + ${editingProfile.config.secondaryLanguages.join(', ')}` : ''}
+                                  </span>
+                                )}
+                              </div>
+                            )}
                             {headerDirty && (
                               <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50">
                                 <Button
