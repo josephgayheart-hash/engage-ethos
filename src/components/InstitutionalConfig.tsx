@@ -1033,8 +1033,8 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
                   </div>
                   <div>
                     <h4 className="font-semibold text-green-800 dark:text-green-400">Content DNA Active</h4>
-                    <p className="text-xs text-green-700 dark:text-green-500">
-                      Your institution's voice profile is being applied to all AI-generated messages
+                     <p className="text-xs text-green-700 dark:text-green-500">
+                       Your {isHigherEd ? "institution's" : "organization's"} voice profile is being applied to all AI-generated messages
                     </p>
                   </div>
                 </div>
