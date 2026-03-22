@@ -126,6 +126,8 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
   const [channelImageUrl, setChannelImageUrl] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [showInContext, setShowInContext] = useState(false);
+  const [translatedContent, setTranslatedContent] = useState<string | null>(null);
+  const [showingEnglish, setShowingEnglish] = useState(false);
   const { toast } = useToast();
 
   // Channels that support AI image generation
