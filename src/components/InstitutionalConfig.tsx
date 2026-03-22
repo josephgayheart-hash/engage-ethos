@@ -409,9 +409,9 @@ export function InstitutionalConfig({ config, onChange, profileId }: Institution
                   <ImageIcon className="w-4 h-4" />
                   Profile Logo
                 </h4>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Upload a custom logo for this profile. If not set, the institution logo will be used.
-                </p>
+                 <p className="text-xs text-muted-foreground mt-1">
+                   Upload a custom logo for this profile. If not set, the {isHigherEd ? 'institution' : 'organization'} logo will be used.
+                 </p>
                 {!config.logoUrl && (
                   <label className="inline-block mt-2">
                     <Button
