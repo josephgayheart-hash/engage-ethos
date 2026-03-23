@@ -42,12 +42,15 @@ const outputLanguages = [
 const CompetitiveAnalyzerPage = () => {
   const { toast } = useToast();
   const { labels: industryLabels } = useIndustry();
+  const { profile: authProfile } = useAuth();
+  const { profiles } = useInstitutionalProfiles(authProfile?.tenant_id);
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
 
   const [yourCopy, setYourCopy] = useState('');
   const [competitors, setCompetitors] = useState<string[]>(['']);
   const [analysis, setAnalysis] = useState('');
+  const [displayContent, setDisplayContent] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [outputLanguage, setOutputLanguage] = useState('en');
 
   const addCompetitor = () => setCompetitors(prev => [...prev, '']);

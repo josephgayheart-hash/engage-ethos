@@ -127,12 +127,6 @@ Use professional, actionable language suitable for a brand/marketing team.${lang
     }
   };
 
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(generatedBrief);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-    toast({ title: "Copied to clipboard" });
-  };
 
   return (
     <div className="bg-background">

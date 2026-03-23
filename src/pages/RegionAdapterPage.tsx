@@ -50,12 +50,15 @@ const regions = [
 const RegionAdapterPage = () => {
   const { toast } = useToast();
   const { labels: industryLabels } = useIndustry();
+  const { profile: authProfile } = useAuth();
+  const { profiles } = useInstitutionalProfiles(authProfile?.tenant_id);
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
 
   const [sourceCopy, setSourceCopy] = useState('');
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const [adaptations, setAdaptations] = useState<Record<string, string>>({});
   const [isAdapting, setIsAdapting] = useState(false);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [displayContent, setDisplayContent] = useState('');
   const [outputLanguage, setOutputLanguage] = useState('en');
 
   const toggleRegion = (id: string) => {
