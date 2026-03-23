@@ -191,7 +191,14 @@ Use this exact format for each region:
           </Card>
 
           <Card>
-            <CardContent className="pt-4">
+            <CardContent className="pt-4 space-y-3">
+              <div className="space-y-1.5">
+                <Label>Profile</Label>
+                <InstitutionalProfileSelector
+                  selectedProfileId={selectedProfileId}
+                  onProfileChange={(id) => setSelectedProfileId(id)}
+                />
+              </div>
               <div className="space-y-1.5">
                 <Label className="flex items-center gap-1.5"><Languages className="w-3.5 h-3.5" /> Output Language</Label>
                 <Select value={outputLanguage} onValueChange={setOutputLanguage}>
