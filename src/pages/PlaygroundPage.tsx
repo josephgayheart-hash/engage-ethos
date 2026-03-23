@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useLastUsedProfile } from "@/hooks/useLastUsedProfile";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
