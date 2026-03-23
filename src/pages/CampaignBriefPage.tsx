@@ -1,15 +1,13 @@
 import { useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AIBadge } from "@/components/ui/ai-indicator";
 import { TranslationToggle } from "@/components/TranslationToggle";
+import { PlaybookRenderer } from "@/components/playbook/PlaybookRenderer";
 import { useToast } from "@/hooks/use-toast";
 import { useIndustry } from "@/contexts/IndustryContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,10 +21,7 @@ import {
   Users,
   Calendar,
   Download,
-  Copy,
-  Check,
   Languages,
-  Printer,
 } from "lucide-react";
 
 const outputLanguages = [
