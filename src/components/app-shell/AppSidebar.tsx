@@ -52,6 +52,13 @@ const createItems = [
   { title: "Evaluator", url: "/evaluate", icon: ClipboardCheck },
 ];
 
+const fieldOpsItems = [
+  { title: "Campaign Brief", url: "/campaign-brief", icon: ClipboardList },
+  { title: "Competitive Analyzer", url: "/competitive-analyzer", icon: Swords },
+  { title: "Region & Tone Adapter", url: "/region-adapter", icon: Globe2 },
+  { title: "Regional Playbook", url: "/regional-playbook", icon: MapPin },
+];
+
 const manageItems = [
   { title: "My Library", url: "/library", icon: FolderOpen },
   { title: "Collections", url: "/shared-library", icon: Layers },
