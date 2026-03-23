@@ -22,6 +22,8 @@ import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useToolTracking } from "@/hooks/useToolTracking";
 import { supabase } from "@/integrations/supabase/client";
 import { useIndustry } from "@/contexts/IndustryContext";
+import { useLastUsedProfile } from "@/hooks/useLastUsedProfile";
+import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { cn } from "@/lib/utils";
 import { WaveBackground } from "@/components/WaveBackground";
 import { 
