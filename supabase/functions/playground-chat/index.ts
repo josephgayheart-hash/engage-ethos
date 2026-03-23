@@ -7,7 +7,21 @@ serve(async (req) => {
   }
 
   try {
-    const { message, history, institutionalConfig, contentDNA, profileConfig, model, industryContext: reqIndustryContext, contentStyle: reqContentStyle } = await req.json();
+    const body = await req.json();
+    const { institutionalConfig, contentDNA, profileConfig, model, industryContext: reqIndustryContext, contentStyle: reqContentStyle, systemPrompt: reqSystemPrompt } = body;
+    
+    // Support both formats: { message, history } (playground) and { messages } (standalone tools)
+    let message: string;
+    let history: Array<{ role: string; content: string }>;
+    if (body.messages && Array.isArray(body.messages)) {
+      // Standalone tool format: messages array
+      history = body.messages.slice(0, -1);
+      message = body.messages[body.messages.length - 1]?.content || '';
+    } else {
+      message = body.message || '';
+      history = body.history || [];
+    }
+    
     const industryContext = reqIndustryContext || 'higher education';
     const contentStyle = reqContentStyle || 'institutional communications';
     
