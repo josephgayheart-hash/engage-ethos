@@ -53,7 +53,20 @@ const StewardshipReportPage = () => {
   const { saveDraft } = useUserDrafts('stewardship');
 
   // Profile selection
-  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const { profiles } = useInstitutionalProfiles();
+  const { lastUsedProfileId, setLastUsedProfileId } = useLastUsedProfile(profiles);
+  const [selectedProfileId, setSelectedProfileIdLocal] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (selectedProfileId || !lastUsedProfileId || !profiles?.length) return;
+    const found = profiles.find(p => p.id === lastUsedProfileId);
+    if (found) setSelectedProfileIdLocal(lastUsedProfileId);
+  }, [lastUsedProfileId, profiles, selectedProfileId]);
+
+  const setSelectedProfileId = useCallback((id: string | null) => {
+    setSelectedProfileIdLocal(id);
+    if (id) setLastUsedProfileId(id);
+  }, [setLastUsedProfileId]);
 
   // Data hooks
   const { facts, isLoading: factsLoading } = useFactBook({ profileId: selectedProfileId });

@@ -45,7 +45,19 @@ const CompetitiveAnalyzerPage = () => {
   const { labels: industryLabels } = useIndustry();
   const { profile: authProfile } = useAuth();
   const { profiles } = useInstitutionalProfiles();
-  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const { lastUsedProfileId, setLastUsedProfileId } = useLastUsedProfile(profiles);
+  const [selectedProfileId, setSelectedProfileIdLocal] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (selectedProfileId || !lastUsedProfileId || !profiles?.length) return;
+    const found = profiles.find(p => p.id === lastUsedProfileId);
+    if (found) setSelectedProfileIdLocal(lastUsedProfileId);
+  }, [lastUsedProfileId, profiles, selectedProfileId]);
+
+  const setSelectedProfileId = useCallback((id: string | null) => {
+    setSelectedProfileIdLocal(id);
+    if (id) setLastUsedProfileId(id);
+  }, [setLastUsedProfileId]);
 
   const [yourCopy, setYourCopy] = useState('');
   const [competitors, setCompetitors] = useState<string[]>(['']);

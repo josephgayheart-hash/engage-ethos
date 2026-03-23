@@ -152,7 +152,7 @@ const BuildPage = () => {
   const { trackToolUse } = useToolTracking();
   const { profiles } = useInstitutionalProfiles();
   const { saveDraft, currentDraft, setCurrentDraft, deleteDraft, loadDraftById } = useUserDrafts('message');
-  const { lastUsedProfileId, setLastUsedProfileId, isLoaded: profilePrefLoaded } = useLastUsedProfile();
+  const { lastUsedProfileId, setLastUsedProfileId, isLoaded: profilePrefLoaded } = useLastUsedProfile(profiles);
   
   // Check for profileId from URL params (from Content DNA page navigation)
   const profileIdFromUrl = searchParams.get('profileId');

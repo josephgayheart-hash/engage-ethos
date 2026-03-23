@@ -50,7 +50,23 @@ const PlaygroundPage = () => {
   const [selectedModel, setSelectedModel] = useState<AIModel>('google/gemini-2.5-flash');
   
   // Context selections
-  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const { lastUsedProfileId, setLastUsedProfileId } = useLastUsedProfile(profiles);
+  const [selectedProfileId, setSelectedProfileIdLocal] = useState<string | null>(null);
+
+  // Auto-initialize from last used / root profile
+  useEffect(() => {
+    if (selectedProfileId || !lastUsedProfileId || !profiles?.length) return;
+    if (currentConversation) return; // Let conversation sync handle it
+    const found = profiles.find(p => p.id === lastUsedProfileId);
+    if (found) {
+      setSelectedProfileIdLocal(lastUsedProfileId);
+    }
+  }, [lastUsedProfileId, profiles, selectedProfileId, currentConversation]);
+
+  const setSelectedProfileId = useCallback((id: string | null) => {
+    setSelectedProfileIdLocal(id);
+    if (id) setLastUsedProfileId(id);
+  }, [setLastUsedProfileId]);
   const [selectedDNAId, setSelectedDNAId] = useState<string | null>(null);
   const [contentDNA, setContentDNA] = useState<ContentDNAData | null>(null);
   const [profileConfig, setProfileConfig] = useState<Record<string, unknown> | null>(null);
