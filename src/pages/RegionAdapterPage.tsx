@@ -212,37 +212,29 @@ Use this exact format for each region:
 
           {adaptations._full && (
             <Card className="print:shadow-none print:border-none">
-              <CardHeader className="flex flex-row items-center justify-between print:px-0">
-                <div className="flex items-center gap-2">
-                  <CardTitle className="text-base">Regional Adaptations</CardTitle>
-                  {outputLanguage !== 'en' && (
-                    <Badge variant="outline" className="gap-1 text-xs print:hidden">
-                      <Languages className="w-3 h-3" />
-                      {outputLanguages.find(l => l.value === outputLanguage)?.label}
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex items-center gap-1 shrink-0 print:hidden">
-                  <Button variant="ghost" size="sm" onClick={() => window.print()} className="gap-1.5">
-                    <Printer className="w-3.5 h-3.5" />
-                    Print
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleCopy(adaptations._full, 'full')} className="gap-1.5">
-                    {copiedId === 'full' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                    {copiedId === 'full' ? 'Copied' : 'Copy All'}
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {outputLanguage !== 'en' && (
-                  <TranslationToggle
-                    originalContent={adaptations._full}
-                    outputLanguage={outputLanguage}
-                  />
-                )}
-                <div className="prose prose-sm max-w-none dark:prose-invert [&_h1]:text-lg [&_h1]:font-bold [&_h1]:border-b [&_h1]:border-border [&_h1]:pb-2 [&_h1]:mb-4 [&_h2]:text-base [&_h2]:font-semibold [&_h2]:mt-6 [&_h2]:mb-2 [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:mt-4 [&_h3]:mb-1 [&_ul]:my-2 [&_ul]:pl-5 [&_ul]:list-disc [&_ol]:my-2 [&_ol]:pl-5 [&_ol]:list-decimal [&_li]:my-1 [&_li]:leading-relaxed [&_p]:my-2 [&_p]:leading-relaxed [&_strong]:text-foreground [&_blockquote]:border-l-4 [&_blockquote]:border-primary/30 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground [&_hr]:my-4 [&_hr]:border-border [&_table]:w-full [&_table]:border-collapse [&_table]:my-4 [&_table]:text-sm [&_th]:border [&_th]:border-border [&_th]:bg-muted/50 [&_th]:px-3 [&_th]:py-2 [&_th]:text-left [&_th]:font-semibold [&_td]:border [&_td]:border-border [&_td]:px-3 [&_td]:py-2">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{adaptations._full}</ReactMarkdown>
-                </div>
+              <CardContent className="pt-6 print:px-0">
+                <PlaybookRenderer
+                  content={displayContent || adaptations._full}
+                  title="Regional Adaptations"
+                  outputLanguage={outputLanguage}
+                  outputLanguageLabel={outputLanguages.find(l => l.value === outputLanguage)?.label}
+                  brandColors={{
+                    primary: profiles.find(p => p.id === selectedProfileId)?.config?.primaryColor || profiles.find(p => p.id === selectedProfileId)?.config?.accentColor,
+                    secondary: profiles.find(p => p.id === selectedProfileId)?.config?.secondaryColor,
+                    tertiary: profiles.find(p => p.id === selectedProfileId)?.config?.tertiaryColor,
+                  }}
+                  orgName={profiles.find(p => p.id === selectedProfileId)?.name}
+                  translationToggle={
+                    outputLanguage !== 'en' ? (
+                      <TranslationToggle
+                        originalContent={adaptations._full}
+                        outputLanguage={outputLanguage}
+                        inline={false}
+                        onToggle={(content) => setDisplayContent(content)}
+                      />
+                    ) : undefined
+                  }
+                />
               </CardContent>
             </Card>
           )}
