@@ -197,6 +197,7 @@ Tone should be organized, warm, and brand-aligned.`;
 
       if (error) throw error;
       setGeneratedContent(data?.reply || 'No content generated.');
+      setDisplayContent('');
     } catch (err: any) {
       toast({ title: "Generation failed", description: err.message, variant: "destructive" });
     } finally {
