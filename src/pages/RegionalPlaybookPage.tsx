@@ -83,6 +83,7 @@ const RegionalPlaybookPage = () => {
   const [expectedAttendees, setExpectedAttendees] = useState('');
 
   const [generatedContent, setGeneratedContent] = useState('');
+  const [displayContent, setDisplayContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
 
   const regionLabel = region === 'custom' ? customRegion : regionOptions.find(r => r.value === region)?.label || 'your region';
@@ -196,6 +197,7 @@ Tone should be organized, warm, and brand-aligned.`;
 
       if (error) throw error;
       setGeneratedContent(data?.reply || 'No content generated.');
+      setDisplayContent('');
     } catch (err: any) {
       toast({ title: "Generation failed", description: err.message, variant: "destructive" });
     } finally {
@@ -431,7 +433,7 @@ Tone should be organized, warm, and brand-aligned.`;
             <Card className="print:shadow-none print:border-none">
               <CardContent className="pt-6 print:px-0">
                 <PlaybookRenderer
-                  content={generatedContent}
+                  content={displayContent || generatedContent}
                   title={playbookTitle}
                   outputLanguage={outputLanguage}
                   outputLanguageLabel={outputLanguages.find(l => l.value === outputLanguage)?.label}
@@ -446,6 +448,8 @@ Tone should be organized, warm, and brand-aligned.`;
                       <TranslationToggle
                         originalContent={generatedContent}
                         outputLanguage={outputLanguage}
+                        inline={false}
+                        onToggle={(content) => setDisplayContent(content)}
                       />
                     ) : undefined
                   }
