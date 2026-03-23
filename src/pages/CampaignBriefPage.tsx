@@ -68,8 +68,8 @@ const CampaignBriefPage = () => {
   const [outputLanguage, setOutputLanguage] = useState('en');
 
   const [generatedBrief, setGeneratedBrief] = useState('');
+  const [displayContent, setDisplayContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   const handleGenerate = async () => {
     if (!campaignName || !campaignType || !objective) {
