@@ -431,7 +431,7 @@ Tone should be organized, warm, and brand-aligned.`;
             <Card className="print:shadow-none print:border-none">
               <CardContent className="pt-6 print:px-0">
                 <PlaybookRenderer
-                  content={generatedContent}
+                  content={displayContent || generatedContent}
                   title={playbookTitle}
                   outputLanguage={outputLanguage}
                   outputLanguageLabel={outputLanguages.find(l => l.value === outputLanguage)?.label}
@@ -446,6 +446,8 @@ Tone should be organized, warm, and brand-aligned.`;
                       <TranslationToggle
                         originalContent={generatedContent}
                         outputLanguage={outputLanguage}
+                        inline={false}
+                        onToggle={(content) => setDisplayContent(content)}
                       />
                     ) : undefined
                   }
