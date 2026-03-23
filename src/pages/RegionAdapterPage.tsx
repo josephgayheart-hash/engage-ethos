@@ -51,7 +51,7 @@ const RegionAdapterPage = () => {
   const { toast } = useToast();
   const { labels: industryLabels } = useIndustry();
   const { profile: authProfile } = useAuth();
-  const { profiles } = useInstitutionalProfiles(authProfile?.tenant_id);
+  const { profiles } = useInstitutionalProfiles();
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
 
   const [sourceCopy, setSourceCopy] = useState('');
