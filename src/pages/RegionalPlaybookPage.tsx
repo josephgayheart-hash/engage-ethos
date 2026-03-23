@@ -84,7 +84,6 @@ const RegionalPlaybookPage = () => {
 
   const [generatedContent, setGeneratedContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   const regionLabel = region === 'custom' ? customRegion : regionOptions.find(r => r.value === region)?.label || 'your region';
   const selectedProfile = profiles.find(p => p.id === selectedProfileId);
