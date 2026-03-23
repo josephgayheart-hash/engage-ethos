@@ -105,6 +105,7 @@ const StrategyPage = () => {
   const { trackToolUse } = useToolTracking();
   const { createCollection, addItemToCollection } = useLibraryCollections();
   const { saveDraft, currentDraft, setCurrentDraft, deleteDraft, loadDraftById } = useUserDrafts('journey');
+  const { profiles } = useInstitutionalProfiles();
   const location = useLocation();
   const resultsRef = useRef<HTMLDivElement>(null);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
