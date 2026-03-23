@@ -243,23 +243,29 @@ Use professional, actionable language suitable for a brand/marketing team.${lang
 
           {/* Generated Brief */}
           {generatedBrief && (
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
+            <Card className="print:shadow-none print:border-none">
+              <CardHeader className="flex flex-row items-center justify-between print:px-0">
                 <CardTitle className="text-base">Generated Campaign Brief</CardTitle>
-                <Button variant="ghost" size="sm" onClick={handleCopy} className="gap-1.5">
-                  {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  {copied ? 'Copied' : 'Copy'}
-                </Button>
+                <div className="flex items-center gap-1 print:hidden">
+                  <Button variant="ghost" size="sm" onClick={() => window.print()} className="gap-1.5">
+                    <Printer className="w-3.5 h-3.5" />
+                    Print
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={handleCopy} className="gap-1.5">
+                    {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copied ? 'Copied' : 'Copy'}
+                  </Button>
+                </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 print:px-0">
                 {outputLanguage !== 'en' && (
                   <TranslationToggle
                     originalContent={generatedBrief}
                     outputLanguage={outputLanguage}
                   />
                 )}
-                <div className="prose prose-sm max-w-none dark:prose-invert whitespace-pre-wrap">
-                  {generatedBrief}
+                <div className="prose prose-sm max-w-none dark:prose-invert [&_h1]:text-lg [&_h1]:font-bold [&_h1]:border-b [&_h1]:border-border [&_h1]:pb-2 [&_h1]:mb-4 [&_h2]:text-base [&_h2]:font-semibold [&_h2]:mt-6 [&_h2]:mb-2 [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:mt-4 [&_h3]:mb-1 [&_ul]:my-2 [&_ul]:pl-5 [&_ul]:list-disc [&_ol]:my-2 [&_ol]:pl-5 [&_ol]:list-decimal [&_li]:my-1 [&_li]:leading-relaxed [&_p]:my-2 [&_p]:leading-relaxed [&_strong]:text-foreground [&_blockquote]:border-l-4 [&_blockquote]:border-primary/30 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground [&_hr]:my-4 [&_hr]:border-border">
+                  <ReactMarkdown>{generatedBrief}</ReactMarkdown>
                 </div>
               </CardContent>
             </Card>
