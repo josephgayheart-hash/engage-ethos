@@ -131,12 +131,6 @@ Use this exact format for each region:
     }
   };
 
-  const handleCopy = async (text: string, id: string) => {
-    await navigator.clipboard.writeText(text);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
-    toast({ title: "Copied to clipboard" });
-  };
 
   return (
     <div className="bg-background">

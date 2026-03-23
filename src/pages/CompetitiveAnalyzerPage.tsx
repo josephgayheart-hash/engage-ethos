@@ -105,12 +105,6 @@ Provide a structured analysis with clear headers, bullet points, and a different
     }
   };
 
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(analysis);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-    toast({ title: "Copied to clipboard" });
-  };
 
   return (
     <div className="bg-background">
