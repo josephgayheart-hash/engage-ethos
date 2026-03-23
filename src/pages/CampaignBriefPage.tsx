@@ -82,6 +82,11 @@ const CampaignBriefPage = () => {
     setIsGenerating(true);
     try {
       const selectedProfile = profiles.find(p => p.id === selectedProfileId);
+      const selectedLangLabel = outputLanguages.find(l => l.value === outputLanguage)?.label || outputLanguage;
+      const langInstruction = outputLanguage !== 'en'
+        ? `\n\nIMPORTANT: Generate the ENTIRE brief in ${selectedLangLabel}. All sections, descriptions, and recommendations must be in ${selectedLangLabel}. Only the numbered section headers may remain in English for structure.`
+        : '';
+
       const prompt = `Generate a comprehensive campaign brief for the following:
 
 Campaign Name: ${campaignName}
@@ -105,7 +110,7 @@ Generate a structured creative brief with these sections:
 8. Success Metrics
 9. Risk Considerations
 
-Use professional, actionable language suitable for a brand/marketing team.`;
+Use professional, actionable language suitable for a brand/marketing team.${langInstruction}`;
 
       const { data, error } = await supabase.functions.invoke('playground-chat', {
         body: {
