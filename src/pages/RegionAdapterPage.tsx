@@ -5,7 +5,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AIBadge } from "@/components/ui/ai-indicator";
+import { TranslationToggle } from "@/components/TranslationToggle";
 import { useToast } from "@/hooks/use-toast";
 import { useIndustry } from "@/contexts/IndustryContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,7 +16,25 @@ import {
   Sparkles,
   Copy,
   Check,
+  Languages,
 } from "lucide-react";
+
+const outputLanguages = [
+  { value: 'en', label: 'English' },
+  { value: 'es', label: 'Spanish' },
+  { value: 'fr', label: 'French' },
+  { value: 'pt', label: 'Portuguese' },
+  { value: 'de', label: 'German' },
+  { value: 'zh', label: 'Chinese' },
+  { value: 'ja', label: 'Japanese' },
+  { value: 'ko', label: 'Korean' },
+  { value: 'ar', label: 'Arabic' },
+  { value: 'hi', label: 'Hindi' },
+  { value: 'it', label: 'Italian' },
+  { value: 'ru', label: 'Russian' },
+  { value: 'vi', label: 'Vietnamese' },
+  { value: 'th', label: 'Thai' },
+];
 
 const regions = [
   { id: 'north-america', label: 'North America', description: 'US & Canada — casual, direct tone' },
@@ -35,6 +55,7 @@ const RegionAdapterPage = () => {
   const [adaptations, setAdaptations] = useState<Record<string, string>>({});
   const [isAdapting, setIsAdapting] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [outputLanguage, setOutputLanguage] = useState('en');
 
   const toggleRegion = (id: string) => {
     setSelectedRegions(prev => prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]);
@@ -53,12 +74,17 @@ const RegionAdapterPage = () => {
         return `- ${r?.label}: ${r?.description}`;
       }).join('\n');
 
+      const selectedLangLabel = outputLanguages.find(l => l.value === outputLanguage)?.label || outputLanguage;
+      const langInstruction = outputLanguage !== 'en'
+        ? `\n\nIMPORTANT: Generate ALL adapted copy and adaptation notes in ${selectedLangLabel}. The adapted messaging for each region must be written in ${selectedLangLabel}. Only region name headers may remain in English.`
+        : '';
+
       const prompt = `You are a regional brand adaptation specialist for ${industryLabels?.industryContext || 'enterprise brand management'}.
 
 Take the following source copy and adapt it for each specified region. Each adaptation should:
 1. Maintain the core message and brand positioning
 2. Adjust tone, formality, and cultural references for the region
-3. Use region-appropriate idioms and phrasing (still in English unless specified)
+3. Use region-appropriate idioms and phrasing${outputLanguage === 'en' ? ' (still in English unless specified)' : ''}
 4. Consider local business customs and communication norms
 5. Flag any culturally sensitive elements
 
@@ -80,7 +106,7 @@ Use this exact format for each region:
 **Adaptation Notes:**
 [explanation of changes]
 
----`;
+---${langInstruction}`;
 
       const { data, error } = await supabase.functions.invoke('playground-chat', {
         body: {
@@ -93,12 +119,6 @@ Use this exact format for each region:
       if (error) throw error;
 
       const reply = data?.reply || '';
-      // Store as a single block — regions are separated by headers
-      const result: Record<string, string> = {};
-      selectedRegions.forEach(id => {
-        const r = regions.find(reg => reg.id === id);
-        if (r) result[id] = reply; // full reply for now
-      });
       setAdaptations({ _full: reply });
     } catch (err: any) {
       toast({ title: "Adaptation failed", description: err.message, variant: "destructive" });
@@ -172,6 +192,20 @@ Use this exact format for each region:
             </CardContent>
           </Card>
 
+          <Card>
+            <CardContent className="pt-4">
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-1.5"><Languages className="w-3.5 h-3.5" /> Output Language</Label>
+                <Select value={outputLanguage} onValueChange={setOutputLanguage}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {outputLanguages.map(l => <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+
           <Button onClick={handleAdapt} disabled={isAdapting} className="w-full gap-2">
             <Sparkles className="w-4 h-4" />
             {isAdapting ? 'Adapting for Regions...' : `Adapt for ${selectedRegions.length} Region${selectedRegions.length !== 1 ? 's' : ''}`}
@@ -181,13 +215,27 @@ Use this exact format for each region:
           {adaptations._full && (
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-base">Regional Adaptations</CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-base">Regional Adaptations</CardTitle>
+                  {outputLanguage !== 'en' && (
+                    <Badge variant="outline" className="gap-1 text-xs">
+                      <Languages className="w-3 h-3" />
+                      {outputLanguages.find(l => l.value === outputLanguage)?.label}
+                    </Badge>
+                  )}
+                </div>
                 <Button variant="ghost" size="sm" onClick={() => handleCopy(adaptations._full, 'full')} className="gap-1.5">
                   {copiedId === 'full' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                   {copiedId === 'full' ? 'Copied' : 'Copy All'}
                 </Button>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
+                {outputLanguage !== 'en' && (
+                  <TranslationToggle
+                    originalContent={adaptations._full}
+                    outputLanguage={outputLanguage}
+                  />
+                )}
                 <div className="prose prose-sm max-w-none dark:prose-invert whitespace-pre-wrap">
                   {adaptations._full}
                 </div>

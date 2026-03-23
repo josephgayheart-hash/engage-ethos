@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AIBadge } from "@/components/ui/ai-indicator";
+import { TranslationToggle } from "@/components/TranslationToggle";
 import { useToast } from "@/hooks/use-toast";
 import { useIndustry } from "@/contexts/IndustryContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,8 +17,26 @@ import {
   Check,
   Plus,
   X,
+  Languages,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+
+const outputLanguages = [
+  { value: 'en', label: 'English' },
+  { value: 'es', label: 'Spanish' },
+  { value: 'fr', label: 'French' },
+  { value: 'pt', label: 'Portuguese' },
+  { value: 'de', label: 'German' },
+  { value: 'zh', label: 'Chinese' },
+  { value: 'ja', label: 'Japanese' },
+  { value: 'ko', label: 'Korean' },
+  { value: 'ar', label: 'Arabic' },
+  { value: 'hi', label: 'Hindi' },
+  { value: 'it', label: 'Italian' },
+  { value: 'ru', label: 'Russian' },
+  { value: 'vi', label: 'Vietnamese' },
+  { value: 'th', label: 'Thai' },
+];
 
 const CompetitiveAnalyzerPage = () => {
   const { toast } = useToast();
@@ -27,6 +47,7 @@ const CompetitiveAnalyzerPage = () => {
   const [analysis, setAnalysis] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [outputLanguage, setOutputLanguage] = useState('en');
 
   const addCompetitor = () => setCompetitors(prev => [...prev, '']);
   const removeCompetitor = (i: number) => setCompetitors(prev => prev.filter((_, idx) => idx !== i));
@@ -41,6 +62,11 @@ const CompetitiveAnalyzerPage = () => {
 
     setIsAnalyzing(true);
     try {
+      const selectedLangLabel = outputLanguages.find(l => l.value === outputLanguage)?.label || outputLanguage;
+      const langInstruction = outputLanguage !== 'en'
+        ? `\n\nIMPORTANT: Generate the ENTIRE analysis in ${selectedLangLabel}. All sections, bullet points, and recommendations must be in ${selectedLangLabel}. Only section headers may remain in English for structure.`
+        : '';
+
       const prompt = `You are a competitive messaging analyst for ${industryLabels?.industryContext || 'enterprise brand management'}.
 
 Analyze the following brand copy against competitor samples. Identify:
@@ -56,7 +82,7 @@ ${yourCopy}
 ## Competitor Samples:
 ${filledCompetitors.map((c, i) => `### Competitor ${i + 1}:\n${c}`).join('\n\n')}
 
-Provide a structured analysis with clear headers, bullet points, and a differentiation score (0–100).`;
+Provide a structured analysis with clear headers, bullet points, and a differentiation score (0–100).${langInstruction}`;
 
       const { data, error } = await supabase.functions.invoke('playground-chat', {
         body: {
@@ -143,6 +169,20 @@ Provide a structured analysis with clear headers, bullet points, and a different
             </CardContent>
           </Card>
 
+          <Card>
+            <CardContent className="pt-4">
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-1.5"><Languages className="w-3.5 h-3.5" /> Output Language</Label>
+                <Select value={outputLanguage} onValueChange={setOutputLanguage}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {outputLanguages.map(l => <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+
           <Button onClick={handleAnalyze} disabled={isAnalyzing} className="w-full gap-2">
             <Sparkles className="w-4 h-4" />
             {isAnalyzing ? 'Analyzing Differentiation...' : 'Analyze Competitive Positioning'}
@@ -152,13 +192,27 @@ Provide a structured analysis with clear headers, bullet points, and a different
           {analysis && (
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-base">Competitive Analysis</CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-base">Competitive Analysis</CardTitle>
+                  {outputLanguage !== 'en' && (
+                    <Badge variant="outline" className="gap-1 text-xs">
+                      <Languages className="w-3 h-3" />
+                      {outputLanguages.find(l => l.value === outputLanguage)?.label}
+                    </Badge>
+                  )}
+                </div>
                 <Button variant="ghost" size="sm" onClick={handleCopy} className="gap-1.5">
                   {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                   {copied ? 'Copied' : 'Copy'}
                 </Button>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
+                {outputLanguage !== 'en' && (
+                  <TranslationToggle
+                    originalContent={analysis}
+                    outputLanguage={outputLanguage}
+                  />
+                )}
                 <div className="prose prose-sm max-w-none dark:prose-invert whitespace-pre-wrap">
                   {analysis}
                 </div>
