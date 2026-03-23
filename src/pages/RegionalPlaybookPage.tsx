@@ -203,12 +203,7 @@ Tone should be organized, warm, and brand-aligned.`;
     }
   };
 
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(generatedContent);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-    toast({ title: "Copied to clipboard" });
-  };
+  const playbookTitle = activeTab === 'site-visit' ? 'Site Visit Playbook' : activeTab === 'rep-engagement' ? 'Rep Engagement Plan' : 'Event Coordination Playbook';
 
   return (
     <div className="bg-background">
