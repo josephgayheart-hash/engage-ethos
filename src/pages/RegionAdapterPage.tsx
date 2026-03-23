@@ -215,21 +215,27 @@ Use this exact format for each region:
           </Button>
 
           {adaptations._full && (
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
+            <Card className="print:shadow-none print:border-none">
+              <CardHeader className="flex flex-row items-center justify-between print:px-0">
                 <div className="flex items-center gap-2">
                   <CardTitle className="text-base">Regional Adaptations</CardTitle>
                   {outputLanguage !== 'en' && (
-                    <Badge variant="outline" className="gap-1 text-xs">
+                    <Badge variant="outline" className="gap-1 text-xs print:hidden">
                       <Languages className="w-3 h-3" />
                       {outputLanguages.find(l => l.value === outputLanguage)?.label}
                     </Badge>
                   )}
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => handleCopy(adaptations._full, 'full')} className="gap-1.5">
-                  {copiedId === 'full' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  {copiedId === 'full' ? 'Copied' : 'Copy All'}
-                </Button>
+                <div className="flex items-center gap-1 shrink-0 print:hidden">
+                  <Button variant="ghost" size="sm" onClick={() => window.print()} className="gap-1.5">
+                    <Printer className="w-3.5 h-3.5" />
+                    Print
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleCopy(adaptations._full, 'full')} className="gap-1.5">
+                    {copiedId === 'full' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copiedId === 'full' ? 'Copied' : 'Copy All'}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 {outputLanguage !== 'en' && (
