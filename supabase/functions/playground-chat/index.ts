@@ -179,8 +179,23 @@ ${profileInstructions}
     const selectedModel = validModels.includes(model) ? model : 'google/gemini-2.5-flash';
     console.log("Using model:", selectedModel);
 
+    // Determine if this is a standalone tool call (non-streaming) vs playground (streaming)
+    const isStandaloneCall = !!body.messages;
+    
+    console.log("Calling AI gateway, streaming:", !isStandaloneCall);
+
+    // Determine which model to use
+    const validModels = [
+      'google/gemini-2.5-flash',
+      'google/gemini-2.5-flash-lite', 
+      'google/gemini-2.5-pro',
+      'openai/gpt-5-mini'
+    ];
+    const selectedModel = validModels.includes(model) ? model : 'google/gemini-2.5-flash';
+    console.log("Using model:", selectedModel);
+
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s for streaming
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -191,7 +206,7 @@ ${profileInstructions}
       body: JSON.stringify({
         model: selectedModel,
         messages: conversationMessages,
-        stream: true,
+        stream: !isStandaloneCall,
       }),
       signal: controller.signal,
     });
@@ -218,9 +233,16 @@ ${profileInstructions}
       throw new Error(`AI gateway error: ${response.status}`);
     }
 
-    console.log("Streaming response back to client");
+    if (isStandaloneCall) {
+      // Non-streaming: return JSON { reply }
+      const result = await response.json();
+      const reply = result.choices?.[0]?.message?.content || '';
+      return new Response(JSON.stringify({ reply }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    // Return the stream directly
+    console.log("Streaming response back to client");
     return new Response(response.body, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
