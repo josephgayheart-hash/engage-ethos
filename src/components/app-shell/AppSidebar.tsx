@@ -4,6 +4,7 @@ import {
   Home, PenTool, Route, ClipboardCheck, Wrench, FolderOpen, Library, FileEdit,
   Sparkles, ImageIcon, Palette, CheckCircle, Settings, Building2, Layers, BarChart3,
   Shield, Contact, LogOut, User, UserPlus, ChevronsUpDown, Search, Dna, Gift, Heart, Cpu,
+  ClipboardList, Swords, Globe2, MapPin,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -49,6 +50,13 @@ const createItems = [
   { title: "Image Studio", url: "/image-generator", icon: ImageIcon },
   { title: "Brand Studio", url: "/brand-studio", icon: Palette },
   { title: "Evaluator", url: "/evaluate", icon: ClipboardCheck },
+];
+
+const fieldOpsItems = [
+  { title: "Campaign Brief", url: "/campaign-brief", icon: ClipboardList },
+  { title: "Competitive Analyzer", url: "/competitive-analyzer", icon: Swords },
+  { title: "Region & Tone Adapter", url: "/region-adapter", icon: Globe2 },
+  { title: "Regional Playbook", url: "/regional-playbook", icon: MapPin },
 ];
 
 const manageItems = [
@@ -141,6 +149,27 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {filteredCreateItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild tooltip={item.title}>
+                    <NavLink to={item.url} className={navLinkClasses} activeClassName={activeClasses}>
+                      <item.icon className="shrink-0 !w-4 !h-4" />
+                      <span>{item.title}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarSeparator className="my-0.5" />
+
+        {/* Field Ops */}
+        <SidebarGroup className="py-1">
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/60 px-3 mb-0.5">Field Ops</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {fieldOpsItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.title}>
                     <NavLink to={item.url} className={navLinkClasses} activeClassName={activeClasses}>
