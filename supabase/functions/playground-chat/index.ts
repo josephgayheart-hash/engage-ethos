@@ -167,22 +167,8 @@ ${profileInstructions}
       { role: "user", content: message }
     ];
 
-    console.log("Calling AI gateway with streaming...");
-
-    // Determine which model to use
-    const validModels = [
-      'google/gemini-2.5-flash',
-      'google/gemini-2.5-flash-lite', 
-      'google/gemini-2.5-pro',
-      'openai/gpt-5-mini'
-    ];
-    const selectedModel = validModels.includes(model) ? model : 'google/gemini-2.5-flash';
-    console.log("Using model:", selectedModel);
-
     // Determine if this is a standalone tool call (non-streaming) vs playground (streaming)
     const isStandaloneCall = !!body.messages;
-    
-    console.log("Calling AI gateway, streaming:", !isStandaloneCall);
 
     // Determine which model to use
     const validModels = [
@@ -192,7 +178,7 @@ ${profileInstructions}
       'openai/gpt-5-mini'
     ];
     const selectedModel = validModels.includes(model) ? model : 'google/gemini-2.5-flash';
-    console.log("Using model:", selectedModel);
+    console.log("Using model:", selectedModel, "streaming:", !isStandaloneCall);
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 60000);
