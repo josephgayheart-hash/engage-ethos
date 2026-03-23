@@ -18,6 +18,7 @@ import {
   Copy,
   Check,
   Languages,
+  Printer,
 } from "lucide-react";
 
 const outputLanguages = [
