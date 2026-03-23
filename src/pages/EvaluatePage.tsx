@@ -24,6 +24,8 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useToolTracking } from "@/hooks/useToolTracking";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { cn } from "@/lib/utils";
+import { useLastUsedProfile } from "@/hooks/useLastUsedProfile";
+import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { ArrowLeft, ArrowRight, FileText, AlertCircle, Save, RefreshCw, CalendarIcon, Clock, Building2, Target, Users } from "lucide-react";
 import { evaluateMessage } from "@/lib/evaluateMessage";
 import { useAuth } from "@/contexts/AuthContext";
