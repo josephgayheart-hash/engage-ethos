@@ -31,6 +31,7 @@ import {
   HandshakeIcon,
   TrendingUp,
   Languages,
+  Printer,
 } from "lucide-react";
 
 const outputLanguages = [
