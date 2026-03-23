@@ -19,6 +19,7 @@ import {
   Plus,
   X,
   Languages,
+  Printer,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
