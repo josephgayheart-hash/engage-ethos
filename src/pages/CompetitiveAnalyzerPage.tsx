@@ -1,26 +1,24 @@
 import { useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AIBadge } from "@/components/ui/ai-indicator";
 import { TranslationToggle } from "@/components/TranslationToggle";
+import { PlaybookRenderer } from "@/components/playbook/PlaybookRenderer";
 import { useToast } from "@/hooks/use-toast";
 import { useIndustry } from "@/contexts/IndustryContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
+import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Swords,
   Sparkles,
-  Copy,
-  Check,
   Plus,
   X,
   Languages,
-  Printer,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
