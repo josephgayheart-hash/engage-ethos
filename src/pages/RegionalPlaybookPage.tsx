@@ -435,6 +435,12 @@ Tone should be organized, warm, and brand-aligned.`;
                   title={playbookTitle}
                   outputLanguage={outputLanguage}
                   outputLanguageLabel={outputLanguages.find(l => l.value === outputLanguage)?.label}
+                  brandColors={{
+                    primary: selectedProfile?.config?.primaryColor || selectedProfile?.config?.accentColor,
+                    secondary: selectedProfile?.config?.secondaryColor,
+                    tertiary: selectedProfile?.config?.tertiaryColor,
+                  }}
+                  orgName={selectedProfile?.name}
                   translationToggle={
                     outputLanguage !== 'en' ? (
                       <TranslationToggle
