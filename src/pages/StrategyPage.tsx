@@ -40,6 +40,7 @@ import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useToolTracking } from "@/hooks/useToolTracking";
 import { useLastUsedProfile } from "@/hooks/useLastUsedProfile";
 import { useLibraryCollections } from "@/hooks/useLibraryCollections";
+import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { useUserDrafts } from "@/hooks/useUserDrafts";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target, Users, UserCheck, Mail, FileDown, MessageSquare, Globe, Phone, FileText, Search, Megaphone, Building2, FileEdit, Smartphone, LayoutTemplate, Send, Mic, Newspaper, Heart, BookOpen, type LucideIcon } from "lucide-react";
