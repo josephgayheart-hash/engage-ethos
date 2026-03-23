@@ -38,6 +38,7 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useToolTracking } from "@/hooks/useToolTracking";
+import { useLastUsedProfile } from "@/hooks/useLastUsedProfile";
 import { useLibraryCollections } from "@/hooks/useLibraryCollections";
 import { useUserDrafts } from "@/hooks/useUserDrafts";
 import { cn } from "@/lib/utils";
