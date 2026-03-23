@@ -83,6 +83,7 @@ const RegionalPlaybookPage = () => {
   const [expectedAttendees, setExpectedAttendees] = useState('');
 
   const [generatedContent, setGeneratedContent] = useState('');
+  const [displayContent, setDisplayContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
 
   const regionLabel = region === 'custom' ? customRegion : regionOptions.find(r => r.value === region)?.label || 'your region';
