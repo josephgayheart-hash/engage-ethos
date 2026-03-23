@@ -38,7 +38,9 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useToolTracking } from "@/hooks/useToolTracking";
+import { useLastUsedProfile } from "@/hooks/useLastUsedProfile";
 import { useLibraryCollections } from "@/hooks/useLibraryCollections";
+import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { useUserDrafts } from "@/hooks/useUserDrafts";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, ArrowRight, Map, RefreshCw, Calendar as CalendarIcon, Save, Share2, BookMarked, Clock, Target, Users, UserCheck, Mail, FileDown, MessageSquare, Globe, Phone, FileText, Search, Megaphone, Building2, FileEdit, Smartphone, LayoutTemplate, Send, Mic, Newspaper, Heart, BookOpen, type LucideIcon } from "lucide-react";
@@ -103,11 +105,28 @@ const StrategyPage = () => {
   const { trackToolUse } = useToolTracking();
   const { createCollection, addItemToCollection } = useLibraryCollections();
   const { saveDraft, currentDraft, setCurrentDraft, deleteDraft, loadDraftById } = useUserDrafts('journey');
+  const { profiles } = useInstitutionalProfiles();
   const location = useLocation();
   const resultsRef = useRef<HTMLDivElement>(null);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
-  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const { lastUsedProfileId, setLastUsedProfileId } = useLastUsedProfile(profiles);
+  const [selectedProfileId, setSelectedProfileIdLocal] = useState<string | null>(null);
   const [selectedProfileName, setSelectedProfileName] = useState<string | undefined>(undefined);
+
+  // Auto-initialize from last used / root profile
+  useEffect(() => {
+    if (selectedProfileId || !lastUsedProfileId || !profiles?.length) return;
+    const found = profiles.find(p => p.id === lastUsedProfileId);
+    if (found) {
+      setSelectedProfileIdLocal(lastUsedProfileId);
+      setSelectedProfileName(found.name);
+    }
+  }, [lastUsedProfileId, profiles, selectedProfileId]);
+
+  const setSelectedProfileId = useCallback((id: string | null) => {
+    setSelectedProfileIdLocal(id);
+    if (id) setLastUsedProfileId(id);
+  }, [setLastUsedProfileId]);
   const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfig | null>(null);
   const [context, setContext] = useState<MessageContext>({
     audience: undefined,

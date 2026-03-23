@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useLastUsedProfile } from "@/hooks/useLastUsedProfile";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,7 +65,19 @@ const CampaignBriefPage = () => {
   const [budget, setBudget] = useState('');
   const [keyMessages, setKeyMessages] = useState('');
   const [constraints, setConstraints] = useState('');
-  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const { lastUsedProfileId, setLastUsedProfileId } = useLastUsedProfile(profiles);
+  const [selectedProfileId, setSelectedProfileIdLocal] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (selectedProfileId || !lastUsedProfileId || !profiles?.length) return;
+    const found = profiles.find(p => p.id === lastUsedProfileId);
+    if (found) setSelectedProfileIdLocal(lastUsedProfileId);
+  }, [lastUsedProfileId, profiles, selectedProfileId]);
+
+  const setSelectedProfileId = useCallback((id: string | null) => {
+    setSelectedProfileIdLocal(id);
+    if (id) setLastUsedProfileId(id);
+  }, [setLastUsedProfileId]);
   const [outputLanguage, setOutputLanguage] = useState('en');
 
   const [generatedBrief, setGeneratedBrief] = useState('');

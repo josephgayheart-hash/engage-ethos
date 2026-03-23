@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { ContextSelector } from "@/components/ContextSelector";
@@ -24,6 +24,8 @@ import { useMessageLibrary } from "@/hooks/useMessageLibrary";
 import { useToolTracking } from "@/hooks/useToolTracking";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { cn } from "@/lib/utils";
+import { useLastUsedProfile } from "@/hooks/useLastUsedProfile";
+import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { ArrowLeft, ArrowRight, FileText, AlertCircle, Save, RefreshCw, CalendarIcon, Clock, Building2, Target, Users } from "lucide-react";
 import { evaluateMessage } from "@/lib/evaluateMessage";
 import { useAuth } from "@/contexts/AuthContext";
@@ -36,9 +38,25 @@ const EvaluatePage = () => {
   const { labels: industryLabels } = useIndustry();
   const { addMessage } = useMessageLibrary();
   const { trackToolUse } = useToolTracking();
-  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const { profiles } = useInstitutionalProfiles();
+  const { lastUsedProfileId, setLastUsedProfileId } = useLastUsedProfile(profiles);
+  const [selectedProfileId, setSelectedProfileIdLocal] = useState<string | null>(null);
   const [selectedProfileName, setSelectedProfileName] = useState<string | undefined>(undefined);
   const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfig | null>(null);
+
+  useEffect(() => {
+    if (selectedProfileId || !lastUsedProfileId || !profiles?.length) return;
+    const found = profiles.find(p => p.id === lastUsedProfileId);
+    if (found) {
+      setSelectedProfileIdLocal(lastUsedProfileId);
+      setSelectedProfileName(found.name);
+    }
+  }, [lastUsedProfileId, profiles, selectedProfileId]);
+
+  const setSelectedProfileId = useCallback((id: string | null) => {
+    setSelectedProfileIdLocal(id);
+    if (id) setLastUsedProfileId(id);
+  }, [setLastUsedProfileId]);
   const [messageContent, setMessageContent] = useState("");
   const [context, setContext] = useState<MessageContext>({
     audience: 'first-year',

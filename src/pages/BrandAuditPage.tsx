@@ -1,4 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useLastUsedProfile } from "@/hooks/useLastUsedProfile";
+import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,8 +28,24 @@ import { cn } from "@/lib/utils";
 
 export default function BrandAuditPage() {
   const { toast } = useToast();
-  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const { profiles } = useInstitutionalProfiles();
+  const { lastUsedProfileId, setLastUsedProfileId } = useLastUsedProfile(profiles);
+  const [selectedProfileId, setSelectedProfileIdLocal] = useState<string | null>(null);
   const [selectedProfileName, setSelectedProfileName] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (selectedProfileId || !lastUsedProfileId || !profiles?.length) return;
+    const found = profiles.find(p => p.id === lastUsedProfileId);
+    if (found) {
+      setSelectedProfileIdLocal(lastUsedProfileId);
+      setSelectedProfileName(found.name);
+    }
+  }, [lastUsedProfileId, profiles, selectedProfileId]);
+
+  const setSelectedProfileId = useCallback((id: string | null) => {
+    setSelectedProfileIdLocal(id);
+    if (id) setLastUsedProfileId(id);
+  }, [setLastUsedProfileId]);
   const [activeTab, setActiveTab] = useState<'inventory' | 'analyze' | 'report'>('inventory');
   const [selectedChecklistItems, setSelectedChecklistItems] = useState<string[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);

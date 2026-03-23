@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { InstitutionalProfileSelector } from "@/components/InstitutionalProfileSelector";
@@ -22,6 +22,8 @@ import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useToolTracking } from "@/hooks/useToolTracking";
 import { supabase } from "@/integrations/supabase/client";
 import { useIndustry } from "@/contexts/IndustryContext";
+import { useLastUsedProfile } from "@/hooks/useLastUsedProfile";
+import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { cn } from "@/lib/utils";
 import { WaveBackground } from "@/components/WaveBackground";
 import { 
@@ -109,9 +111,25 @@ const CallScriptPage = () => {
   const { addMessage } = useMessageLibrary();
   const { trackToolUse } = useToolTracking();
   const { labels: industryLabels } = useIndustry();
-  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const { profiles } = useInstitutionalProfiles();
+  const { lastUsedProfileId, setLastUsedProfileId } = useLastUsedProfile(profiles);
+  const [selectedProfileId, setSelectedProfileIdLocal] = useState<string | null>(null);
   const [selectedProfileName, setSelectedProfileName] = useState<string | undefined>(undefined);
   const [institutionalConfig, setInstitutionalConfig] = useState<InstitutionalConfig | null>(null);
+
+  useEffect(() => {
+    if (selectedProfileId || !lastUsedProfileId || !profiles?.length) return;
+    const found = profiles.find(p => p.id === lastUsedProfileId);
+    if (found) {
+      setSelectedProfileIdLocal(lastUsedProfileId);
+      setSelectedProfileName(found.name);
+    }
+  }, [lastUsedProfileId, profiles, selectedProfileId]);
+
+  const setSelectedProfileId = useCallback((id: string | null) => {
+    setSelectedProfileIdLocal(id);
+    if (id) setLastUsedProfileId(id);
+  }, [setLastUsedProfileId]);
   
   // Content DNA and Brand Layer state
   const [useContentDNA, setUseContentDNA] = useState(true);

@@ -19,12 +19,18 @@ interface LastUsedProfileData {
   timestamp: number;
 }
 
+interface ProfileLike {
+  id: string;
+  parentProfileId?: string | null;
+}
+
 /**
  * Hook to persist and retrieve the last used institutional profile across tools.
+ * When no stored preference exists, automatically defaults to the root (parent) profile.
  * This provides a consistent experience when users navigate between Content DNA,
  * Builder, Web Analyzer, and other tools.
  */
-export function useLastUsedProfile() {
+export function useLastUsedProfile(profiles?: ProfileLike[]) {
   const workspaceId = useActiveWorkspaceId();
   const [lastUsedProfileId, setLastUsedProfileIdState] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -43,6 +49,8 @@ export function useLastUsedProfile() {
         // Only use if it's for the same workspace
         if (data.tenantId === workspaceId) {
           setLastUsedProfileIdState(data.profileId);
+          setIsLoaded(true);
+          return;
         }
       }
     } catch (e) {
@@ -50,6 +58,17 @@ export function useLastUsedProfile() {
     }
     setIsLoaded(true);
   }, [workspaceId]);
+
+  // Auto-default to root profile when no stored preference and profiles are available
+  useEffect(() => {
+    if (!isLoaded || lastUsedProfileId || !profiles?.length) return;
+
+    // Find the root profile (no parent)
+    const rootProfile = profiles.find(p => !p.parentProfileId);
+    if (rootProfile) {
+      setLastUsedProfileIdState(rootProfile.id);
+    }
+  }, [isLoaded, lastUsedProfileId, profiles]);
 
   // Save to localStorage
   const setLastUsedProfileId = useCallback((profileId: string | null) => {

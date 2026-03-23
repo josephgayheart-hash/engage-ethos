@@ -58,7 +58,7 @@ export default function WebContentAnalyzerPage() {
   const { toast: showToast } = useToast();
   const location = useLocation();
   const { profiles } = useInstitutionalProfiles();
-  const { lastUsedProfileId, setLastUsedProfileId, isLoaded: profilePrefLoaded } = useLastUsedProfile();
+  const { lastUsedProfileId, setLastUsedProfileId, isLoaded: profilePrefLoaded } = useLastUsedProfile(profiles);
   
   // Draft management
   const { saveDraft, loadDraftById, currentDraft, setCurrentDraft, deleteDraft } = useUserDrafts('analysis');
