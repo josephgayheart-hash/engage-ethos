@@ -597,3 +597,49 @@
     opacity: 1;
   }
 }
+
+/* Print styles for playbook output */
+@media print {
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide app chrome */
+  nav, header, aside, footer,
+  [data-sidebar], [data-topbar],
+  .print\\:hidden {
+    display: none !important;
+  }
+
+  /* Full-width content */
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .container {
+    max-width: 100% !important;
+    padding: 0 0.5in !important;
+  }
+
+  /* Section color blocks print with background */
+  .border-l-4 {
+    border-left-width: 4px !important;
+  }
+
+  /* Page break control */
+  .print\\:break-inside-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Clean card styling */
+  .print\\:shadow-none {
+    box-shadow: none !important;
+  }
+  .print\\:border-none {
+    border: none !important;
+  }
+}

@@ -1,16 +1,14 @@
-import { useState, useRef } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AIBadge } from "@/components/ui/ai-indicator";
 import { TranslationToggle } from "@/components/TranslationToggle";
+import { PlaybookRenderer } from "@/components/playbook/PlaybookRenderer";
 import { useToast } from "@/hooks/use-toast";
 import { useIndustry } from "@/contexts/IndustryContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,19 +18,10 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   MapPin,
   Sparkles,
-  Copy,
-  Check,
   Users,
   Calendar,
-  Phone,
-  Mail,
-  ClipboardList,
   Building2,
-  Target,
-  HandshakeIcon,
-  TrendingUp,
   Languages,
-  Printer,
 } from "lucide-react";
 
 const outputLanguages = [
@@ -95,7 +84,6 @@ const RegionalPlaybookPage = () => {
 
   const [generatedContent, setGeneratedContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   const regionLabel = region === 'custom' ? customRegion : regionOptions.find(r => r.value === region)?.label || 'your region';
   const selectedProfile = profiles.find(p => p.id === selectedProfileId);
@@ -215,12 +203,7 @@ Tone should be organized, warm, and brand-aligned.`;
     }
   };
 
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(generatedContent);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-    toast({ title: "Copied to clipboard" });
-  };
+  const playbookTitle = activeTab === 'site-visit' ? 'Site Visit Playbook' : activeTab === 'rep-engagement' ? 'Rep Engagement Plan' : 'Event Coordination Playbook';
 
   return (
     <div className="bg-background">
@@ -446,39 +429,21 @@ Tone should be organized, warm, and brand-aligned.`;
           {/* Generated Content */}
           {generatedContent && (
             <Card className="print:shadow-none print:border-none">
-              <CardHeader className="flex flex-row items-start justify-between gap-2 print:px-0">
-                <div className="space-y-1">
-                  <CardTitle className="text-base">
-                    {activeTab === 'site-visit' ? 'Site Visit Playbook' : activeTab === 'rep-engagement' ? 'Rep Engagement Plan' : 'Event Coordination Playbook'}
-                  </CardTitle>
-                  {outputLanguage !== 'en' && (
-                    <Badge variant="outline" className="gap-1 text-xs print:hidden">
-                      <Languages className="w-3 h-3" />
-                      {outputLanguages.find(l => l.value === outputLanguage)?.label}
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex items-center gap-1 shrink-0 print:hidden">
-                  <Button variant="ghost" size="sm" onClick={() => window.print()} className="gap-1.5">
-                    <Printer className="w-3.5 h-3.5" />
-                    Print
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={handleCopy} className="gap-1.5">
-                    {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                    {copied ? 'Copied' : 'Copy'}
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4 print:px-0">
-                {outputLanguage !== 'en' && (
-                  <TranslationToggle
-                    originalContent={generatedContent}
-                    outputLanguage={outputLanguage}
-                  />
-                )}
-                <div className="prose prose-sm max-w-none dark:prose-invert [&_h1]:text-lg [&_h1]:font-bold [&_h1]:border-b [&_h1]:border-border [&_h1]:pb-2 [&_h1]:mb-4 [&_h2]:text-base [&_h2]:font-semibold [&_h2]:mt-6 [&_h2]:mb-2 [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:mt-4 [&_h3]:mb-1 [&_ul]:my-2 [&_ul]:pl-5 [&_ul]:list-disc [&_ol]:my-2 [&_ol]:pl-5 [&_ol]:list-decimal [&_li]:my-1 [&_li]:leading-relaxed [&_p]:my-2 [&_p]:leading-relaxed [&_strong]:text-foreground [&_blockquote]:border-l-4 [&_blockquote]:border-primary/30 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground [&_hr]:my-4 [&_hr]:border-border [&_table]:w-full [&_table]:border-collapse [&_table]:my-4 [&_table]:text-sm [&_th]:border [&_th]:border-border [&_th]:bg-muted/50 [&_th]:px-3 [&_th]:py-2 [&_th]:text-left [&_th]:font-semibold [&_td]:border [&_td]:border-border [&_td]:px-3 [&_td]:py-2">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{generatedContent}</ReactMarkdown>
-                </div>
+              <CardContent className="pt-6 print:px-0">
+                <PlaybookRenderer
+                  content={generatedContent}
+                  title={playbookTitle}
+                  outputLanguage={outputLanguage}
+                  outputLanguageLabel={outputLanguages.find(l => l.value === outputLanguage)?.label}
+                  translationToggle={
+                    outputLanguage !== 'en' ? (
+                      <TranslationToggle
+                        originalContent={generatedContent}
+                        outputLanguage={outputLanguage}
+                      />
+                    ) : undefined
+                  }
+                />
               </CardContent>
             </Card>
           )}
