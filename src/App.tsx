@@ -9,6 +9,7 @@ import { FeedbackButton } from "@/components/FeedbackButton";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { usePageTracking } from "@/hooks/usePageTracking";
 import { AppLayout } from "@/components/app-shell/AppLayout";
+import { EmbedLayout } from "@/components/app-shell/EmbedLayout";
 import { BrandedLoader } from "@/components/BrandedLoader";
 import { useIndustry } from "@/contexts/IndustryContext";
 
@@ -252,6 +253,24 @@ const AppRoutes = () => (
         <Route path="/admin/nda-links" element={<NDALinksPage />} />
         <Route path="/admin/ai-technology" element={<AITechnologyPage />} />
       </Route>
+    </Route>
+
+    {/* Embed routes — Salesforce Canvas / iframe, stripped app shell */}
+    <Route element={<RequireAuth><EmbedLayout /></RequireAuth>}>
+      <Route path="/embed/evaluate" element={<EvaluatePage />} />
+      <Route path="/embed/build" element={<BuildPage />} />
+      <Route path="/embed/playground" element={<PlaygroundPage />} />
+      <Route path="/embed/campaign-brief" element={<CampaignBriefPage />} />
+      <Route path="/embed/competitive-analyzer" element={<CompetitiveAnalyzerPage />} />
+      <Route path="/embed/region-adapter" element={<RegionAdapterPage />} />
+      <Route path="/embed/regional-playbook" element={<RegionalPlaybookPage />} />
+      <Route path="/embed/brand-audit" element={<BrandAuditPage />} />
+      <Route path="/embed/brand-studio" element={<BrandStudioPage />} />
+      <Route path="/embed/image-generator" element={<ImageGeneratorPage />} />
+      <Route path="/embed/web-analyzer" element={<WebContentAnalyzerPage />} />
+      <Route path="/embed/translate" element={<TranslationTool />} />
+      <Route path="/embed/brand-voice" element={<BrandVoiceScorer />} />
+      <Route path="/embed/subject-optimizer" element={<SubjectLineOptimizer />} />
     </Route>
 
     {/* Catch-all */}
