@@ -1,10 +1,10 @@
-import { MessageSquare, Users, GraduationCap, Sparkles } from 'lucide-react';
+import { Cpu, Layers, Shield, Sparkles } from 'lucide-react';
 
 const stats = [
-  { icon: MessageSquare, value: '2,400+', label: 'Messages Generated' },
-  { icon: GraduationCap, value: '12', label: 'Institutions Onboarded' },
-  { icon: Users, value: '85+', label: 'Active Users' },
-  { icon: Sparkles, value: '94%', label: 'Avg Brand Score' },
+  { icon: Cpu, value: '8', label: 'AI Models Orchestrated' },
+  { icon: Layers, value: '35+', label: 'Cloud Functions' },
+  { icon: Shield, value: '100%', label: 'Brand-Scored Output' },
+  { icon: Sparkles, value: '10+', label: 'Content Tools' },
 ];
 
 export function SocialProofStrip() {
@@ -12,9 +12,9 @@ export function SocialProofStrip() {
     <section className="py-10 px-4 sm:px-6 lg:px-8" style={{ background: 'hsl(222 47% 11%)' }}>
       <div className="max-w-5xl mx-auto">
         <h2 className="text-center text-xs uppercase tracking-[0.2em] text-white/30 mb-8 font-medium">
-          Trusted by forward-thinking institutions
+          What powers the platform
         </h2>
-        <ul className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8" aria-label="Platform impact metrics">
+        <ul className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8" aria-label="Platform capabilities">
           {stats.map((stat, i) => {
             const colors = [
               'hsl(82 85% 55%)',
