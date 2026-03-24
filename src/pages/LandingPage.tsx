@@ -218,9 +218,9 @@ export default function LandingPage() {
           <div className="text-center space-y-7">
             {/* Strategic Messaging Intelligence badge — primary */}
             <div className="animate-fade-in">
-              <Badge 
+                <Badge 
                 variant="secondary" 
-                className="bg-[hsl(270_70%_60%_/_0.15)] text-[hsl(270_70%_70%)] border-[hsl(270_70%_60%_/_0.3)] px-4 py-1.5 text-sm font-semibold backdrop-blur-sm"
+                className="bg-[hsl(270_70%_60%_/_0.15)] hover:bg-[hsl(270_70%_60%_/_0.25)] text-[hsl(270_70%_70%)] border-[hsl(270_70%_60%_/_0.3)] px-4 py-1.5 text-sm font-semibold backdrop-blur-sm"
               >
                 <Sparkles className="w-3.5 h-3.5 mr-1.5" />
                 Strategic Messaging Intelligence
