@@ -117,11 +117,12 @@ export function AppSidebar() {
       {/* Logo Header */}
       {!collapsed && (
         <SidebarHeader className="border-b border-sidebar-border px-2 py-2">
-          <div className="flex items-center justify-center gap-0">
+          <div className="flex flex-col items-center justify-center gap-0">
             <NavLink to="/dashboard" className="flex items-center gap-0">
-              <span className="font-semibold text-xs tracking-tight text-foreground">CampusVoice.ai</span>
-              <span className="text-[6px] text-muted-foreground -mt-1.5 ml-px">®</span>
+              <span className="font-semibold text-xs tracking-tight text-foreground">{brand.wordmark}</span>
+              {brand.registeredMark && <span className="text-[6px] text-muted-foreground -mt-1.5 ml-px">®</span>}
             </NavLink>
+            <span className="text-[8px] text-muted-foreground/60 leading-tight mt-0.5 text-center max-w-[10rem]">{brand.tagline}</span>
           </div>
         </SidebarHeader>
       )}
