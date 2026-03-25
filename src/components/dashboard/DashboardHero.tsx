@@ -1,6 +1,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserDashboardContext } from '@/hooks/useUserDashboardContext';
 import { useIndustry } from '@/contexts/IndustryContext';
+import { useBrandMode } from '@/contexts/BrandModeContext';
 import { OnboardingHero } from './OnboardingHero';
 import { WorkflowHero } from './WorkflowHero';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -31,20 +32,17 @@ export function DashboardHero() {
 
 function MarketingHero() {
   const { isHigherEd } = useIndustry();
+  const { brand } = useBrandMode();
 
   return (
     <section className="border-b border-border bg-background">
       <div className="container mx-auto px-4 py-6">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-xl md:text-2xl font-semibold text-foreground mb-1">
-            <span className="text-primary">Plan.</span>{' '}
-            <span className="text-accent">Strategize.</span>{' '}
-            <span className="text-primary">Execute.</span>
+            {brand.heroHeadline}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {isHigherEd
-              ? 'Your digital playbook for higher ed messaging at scale.'
-              : 'Your digital playbook for brand communications at scale.'}
+            {brand.heroSub}
           </p>
         </div>
       </div>
