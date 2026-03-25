@@ -82,7 +82,7 @@ export function AppSidebar() {
   const { profile, tenant, isAdmin, isSuperAdmin, isApprover, logout } = useAuth();
   const { isAgency, labels } = useAgencyMode();
   const { activeWorkspace, canSwitch } = useWorkspace();
-  const { labels: industryLabels, isHigherEd } = useIndustry();
+  const { labels: industryLabels, isHigherEd, isEnterprise } = useIndustry();
   const { brand } = useBrandMode();
   const { state } = useSidebar();
   const navigate = useNavigate();
