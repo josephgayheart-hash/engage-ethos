@@ -58,7 +58,7 @@ export function SocialCaptionGenerator({ onInsert, platforms, institutionName }:
       <Input
         value={topic}
         onChange={(e) => setTopic(e.target.value)}
-        placeholder="What's this post about? e.g. Spring open house event"
+        placeholder="What's this post about? e.g. Product launch, company milestone"
         className="text-xs h-8"
       />
       <div className="flex items-center gap-2">
