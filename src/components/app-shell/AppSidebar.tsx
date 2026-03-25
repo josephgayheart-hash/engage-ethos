@@ -4,7 +4,7 @@ import {
   Home, PenTool, Route, ClipboardCheck, Wrench, FolderOpen, Library, FileEdit,
   Sparkles, ImageIcon, Palette, CheckCircle, Settings, Building2, Layers, BarChart3,
   Shield, Contact, LogOut, User, UserPlus, ChevronsUpDown, Search, Dna, Gift, Heart, Cpu,
-  ClipboardList, Swords, Globe2, MapPin,
+  ClipboardList, Swords, Globe2, MapPin, Share2,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -62,6 +62,7 @@ const fieldOpsItemsDef = (nav: NavItems) => [
   { title: "Competitive Analyzer", url: "/competitive-analyzer", icon: Swords },
   { title: nav.regionAdapter, url: "/region-adapter", icon: Globe2 },
   { title: nav.regionalPlaybook, url: "/regional-playbook", icon: MapPin },
+  { title: nav.socialPosts ?? "Social Posts", url: "/social-posts", icon: Share2 },
 ];
 
 const manageItems = [
