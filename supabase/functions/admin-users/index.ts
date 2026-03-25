@@ -717,24 +717,91 @@ serve(async (req) => {
           );
         }
 
-        // Create auth user
-        const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
-          email: request.email,
-          password,
-          email_confirm: true,
-        });
+        // Create auth user (with orphan recovery like create_user)
+        const createOnboardingAuthUser = async () => {
+          return await adminClient.auth.admin.createUser({
+            email: request.email,
+            password,
+            email_confirm: true,
+          });
+        };
+
+        let authData: any = null;
+        const { data: firstAuthData, error: authError } = await createOnboardingAuthUser();
 
         if (authError) {
           console.error("Auth creation error during onboarding approval:", authError.message, authError);
-          // Provide user-friendly error messages
-          let errorMessage = authError.message;
-          if (authError.message.includes("already been registered") || authError.message.includes("already exists")) {
-            errorMessage = `A user with email "${request.email}" already exists. They may need to be deleted first or this request should be rejected.`;
+          
+          const isDuplicateEmail =
+            authError.message.includes("already been registered") ||
+            authError.message.includes("already exists");
+
+          if (!isDuplicateEmail) {
+            return new Response(
+              JSON.stringify({ error: authError.message }),
+              { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
           }
-          return new Response(
-            JSON.stringify({ error: errorMessage }),
-            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
+
+          // Check if it's an orphan auth user (no profile) and clean up
+          const normalizedEmail = String(request.email || "").toLowerCase();
+          let existingAuthUser: any = null;
+
+          let page = 1;
+          const perPage = 1000;
+          while (!existingAuthUser) {
+            const { data: usersPage, error: listError } = await adminClient.auth.admin.listUsers({ page, perPage });
+            if (listError) { console.error("Auth list users error:", listError); break; }
+            existingAuthUser = usersPage.users.find((u: any) => (u.email || "").toLowerCase() === normalizedEmail) ?? null;
+            if (existingAuthUser || usersPage.users.length < perPage) break;
+            page += 1;
+          }
+
+          if (existingAuthUser) {
+            const { data: existingProfile } = await adminClient
+              .from("profiles")
+              .select("id, tenant_id")
+              .eq("id", existingAuthUser.id)
+              .maybeSingle();
+
+            if (existingProfile) {
+              return new Response(
+                JSON.stringify({ error: `A user with email "${request.email}" already exists with a profile. They may need to be deleted first or this request should be rejected.` }),
+                { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+              );
+            }
+
+            // Orphan auth user: delete and retry
+            console.log(`Orphan auth user detected for ${request.email} during onboarding approval. Cleaning up...`);
+            await adminClient.from("institutional_profiles").update({ created_by_user_id: null }).eq("created_by_user_id", existingAuthUser.id);
+            const { error: orphanDeleteError } = await adminClient.auth.admin.deleteUser(existingAuthUser.id);
+            if (orphanDeleteError) {
+              console.error("Error deleting orphan auth user:", orphanDeleteError);
+              return new Response(
+                JSON.stringify({ error: "Unable to clean up existing auth record. Please try again." }),
+                { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+              );
+            }
+
+            const { data: retryAuthData, error: retryAuthError } = await createOnboardingAuthUser();
+            if (retryAuthError) {
+              console.error("Auth creation error after orphan cleanup:", retryAuthError.message);
+              return new Response(
+                JSON.stringify({ error: "Unable to recreate user after orphan cleanup. Please try again." }),
+                { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+              );
+            }
+            authData = retryAuthData;
+          }
+
+          if (!authData) {
+            return new Response(
+              JSON.stringify({ error: `A user with email "${request.email}" already exists. They may need to be deleted first or this request should be rejected.` }),
+              { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+        } else {
+          authData = firstAuthData;
         }
 
         // Determine tenant for super_admin role - they go to CampusVoice System tenant
