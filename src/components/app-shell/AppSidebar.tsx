@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAgencyMode } from "@/hooks/useAgencyMode";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { useIndustry } from "@/contexts/IndustryContext";
+import { useBrandMode } from "@/contexts/BrandModeContext";
 import { ReferColleagueDialog } from "@/components/ReferColleagueDialog";
 
 import {
@@ -77,6 +78,7 @@ export function AppSidebar() {
   const { isAgency, labels } = useAgencyMode();
   const { activeWorkspace, canSwitch } = useWorkspace();
   const { labels: industryLabels, isHigherEd } = useIndustry();
+  const { brand } = useBrandMode();
   const { state } = useSidebar();
   const navigate = useNavigate();
   const [referDialogOpen, setReferDialogOpen] = useState(false);
