@@ -16,6 +16,7 @@ export const brandConfig = {
       playground: "AI Copywriter",
       campaignBrief: "Campaign Brief",
       regionalPlaybook: "Regional Playbook",
+      socialPosts: "Social Posts",
     },
     heroHeadline: "Find your voice. Reach every student.",
     heroSub: "AI-powered messaging built for higher education teams.",
@@ -37,6 +38,7 @@ export const brandConfig = {
       playground: "Brand Sandbox",
       campaignBrief: "Channel Brief Generator",
       regionalPlaybook: "Field Manager Playbook",
+      socialPosts: "Social Content Queue",
     },
     heroHeadline: "One Brand. Every Location. Every Time.",
     heroSub:
