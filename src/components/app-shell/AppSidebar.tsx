@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Home, PenTool, Route, ClipboardCheck, Wrench, FolderOpen, Library, FileEdit,
@@ -41,6 +41,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 // Higher-ed specific routes hidden for non-higher-ed tenants
 const HIGHER_ED_ONLY_URLS = new Set(['/giving-day-planner', '/stewardship-report']);
+
+import { brandConfig } from "@/config/brandConfig";
 
 const createItemsDef = (nav: typeof brandConfig.campusvoice.navItems) => [
   { title: nav.messageBuilder, url: "/build", icon: PenTool },
