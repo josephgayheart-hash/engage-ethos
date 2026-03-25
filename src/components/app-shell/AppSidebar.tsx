@@ -44,7 +44,9 @@ const HIGHER_ED_ONLY_URLS = new Set(['/giving-day-planner', '/stewardship-report
 
 import { brandConfig } from "@/config/brandConfig";
 
-const createItemsDef = (nav: typeof brandConfig.campusvoice.navItems) => [
+type NavItems = Record<string, string>;
+
+const createItemsDef = (nav: NavItems) => [
   { title: nav.messageBuilder, url: "/build", icon: PenTool },
   { title: "Journey Designer", url: "/strategy", icon: Route },
   { title: "Giving Day Planner", url: "/giving-day-planner", icon: Gift },
@@ -55,7 +57,7 @@ const createItemsDef = (nav: typeof brandConfig.campusvoice.navItems) => [
   { title: "Evaluator", url: "/evaluate", icon: ClipboardCheck },
 ];
 
-const fieldOpsItemsDef = (nav: typeof brandConfig.campusvoice.navItems) => [
+const fieldOpsItemsDef = (nav: NavItems) => [
   { title: nav.campaignBrief, url: "/campaign-brief", icon: ClipboardList },
   { title: "Competitive Analyzer", url: "/competitive-analyzer", icon: Swords },
   { title: nav.regionAdapter, url: "/region-adapter", icon: Globe2 },
