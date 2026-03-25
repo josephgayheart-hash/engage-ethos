@@ -8,6 +8,7 @@ import { UserDashboardContext } from '@/hooks/useUserDashboardContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAgencyMode } from '@/hooks/useAgencyMode';
 import { useWorkspace } from '@/contexts/WorkspaceContext';
+import { useBrandMode } from '@/contexts/BrandModeContext';
 import { InsightCards } from './InsightCards';
 
 const ROTATING_MESSAGES = [
@@ -33,6 +34,7 @@ export function WorkflowHero({ context }: WorkflowHeroProps) {
   const { profile, tenant } = useAuth();
   const { isAgency, labels } = useAgencyMode();
   const { activeWorkspace, canSwitch } = useWorkspace();
+  const { brand } = useBrandMode();
   const firstName = profile?.first_name || 'there';
   
   const { mode, platformInsight } = context;

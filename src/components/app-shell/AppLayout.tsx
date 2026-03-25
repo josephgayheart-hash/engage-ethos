@@ -7,6 +7,7 @@ import { WorkspaceSwitchOverlay } from "./WorkspaceSwitchOverlay";
 import { useAuth } from "@/contexts/AuthContext";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
 import { IndustryProvider } from "@/contexts/IndustryContext";
+import { BrandModeProvider } from "@/contexts/BrandModeContext";
 
 export function AppLayout() {
   const { isImpersonating, impersonatedUserEmail, exitImpersonation } = useAuth();
@@ -14,6 +15,7 @@ export function AppLayout() {
   return (
     <WorkspaceProvider>
       <IndustryProvider>
+        <BrandModeProvider>
         <WorkspaceSwitchOverlay />
         <SidebarProvider>
           <AppSidebar />
@@ -30,6 +32,7 @@ export function AppLayout() {
             </div>
           </SidebarInset>
         </SidebarProvider>
+        </BrandModeProvider>
       </IndustryProvider>
     </WorkspaceProvider>
   );

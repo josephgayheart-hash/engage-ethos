@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
 import { IndustryProvider } from "@/contexts/IndustryContext";
+import { BrandModeProvider } from "@/contexts/BrandModeContext";
 import { EmbedProvider } from "@/contexts/EmbedContext";
 import { BrandedLoader } from "@/components/BrandedLoader";
 
@@ -13,11 +14,13 @@ export function EmbedLayout() {
   return (
     <WorkspaceProvider>
       <IndustryProvider>
-        <EmbedProvider>
-          <div className="min-h-screen bg-background">
-            <Outlet />
-          </div>
-        </EmbedProvider>
+        <BrandModeProvider>
+          <EmbedProvider>
+            <div className="min-h-screen bg-background">
+              <Outlet />
+            </div>
+          </EmbedProvider>
+        </BrandModeProvider>
       </IndustryProvider>
     </WorkspaceProvider>
   );

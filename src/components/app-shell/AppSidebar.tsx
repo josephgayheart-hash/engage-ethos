@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Home, PenTool, Route, ClipboardCheck, Wrench, FolderOpen, Library, FileEdit,
@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAgencyMode } from "@/hooks/useAgencyMode";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { useIndustry } from "@/contexts/IndustryContext";
+import { useBrandMode } from "@/contexts/BrandModeContext";
 import { ReferColleagueDialog } from "@/components/ReferColleagueDialog";
 
 import {
@@ -41,22 +42,26 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 // Higher-ed specific routes hidden for non-higher-ed tenants
 const HIGHER_ED_ONLY_URLS = new Set(['/giving-day-planner', '/stewardship-report']);
 
-const createItems = [
-  { title: "Message Builder", url: "/build", icon: PenTool },
+import { brandConfig } from "@/config/brandConfig";
+
+type NavItems = Record<string, string>;
+
+const createItemsDef = (nav: NavItems) => [
+  { title: nav.messageBuilder, url: "/build", icon: PenTool },
   { title: "Journey Designer", url: "/strategy", icon: Route },
   { title: "Giving Day Planner", url: "/giving-day-planner", icon: Gift },
   { title: "Stewardship Report", url: "/stewardship-report", icon: Heart },
-  { title: "AI Copywriter", url: "/playground", icon: Sparkles },
+  { title: nav.playground, url: "/playground", icon: Sparkles },
   { title: "Image Studio", url: "/image-generator", icon: ImageIcon },
   { title: "Brand Studio", url: "/brand-studio", icon: Palette },
   { title: "Evaluator", url: "/evaluate", icon: ClipboardCheck },
 ];
 
-const fieldOpsItems = [
-  { title: "Campaign Brief", url: "/campaign-brief", icon: ClipboardList },
+const fieldOpsItemsDef = (nav: NavItems) => [
+  { title: nav.campaignBrief, url: "/campaign-brief", icon: ClipboardList },
   { title: "Competitive Analyzer", url: "/competitive-analyzer", icon: Swords },
-  { title: "Region & Tone Adapter", url: "/region-adapter", icon: Globe2 },
-  { title: "Regional Playbook", url: "/regional-playbook", icon: MapPin },
+  { title: nav.regionAdapter, url: "/region-adapter", icon: Globe2 },
+  { title: nav.regionalPlaybook, url: "/regional-playbook", icon: MapPin },
 ];
 
 const manageItems = [
@@ -77,6 +82,7 @@ export function AppSidebar() {
   const { isAgency, labels } = useAgencyMode();
   const { activeWorkspace, canSwitch } = useWorkspace();
   const { labels: industryLabels, isHigherEd } = useIndustry();
+  const { brand } = useBrandMode();
   const { state } = useSidebar();
   const navigate = useNavigate();
   const [referDialogOpen, setReferDialogOpen] = useState(false);
@@ -85,6 +91,9 @@ export function AppSidebar() {
   // When a super admin switches to another workspace, hide platform-admin-only features
   const isViewingOwnWorkspace = !canSwitch || !activeWorkspace || activeWorkspace.id === tenant?.id;
   const showPlatformAdmin = isSuperAdmin && isViewingOwnWorkspace;
+
+  const createItems = useMemo(() => createItemsDef(brand.navItems), [brand.navItems]);
+  const fieldOpsItems = useMemo(() => fieldOpsItemsDef(brand.navItems), [brand.navItems]);
 
   // Filter higher-ed-only items for non-higher-ed tenants
   const filteredCreateItems = isHigherEd
@@ -115,11 +124,12 @@ export function AppSidebar() {
       {/* Logo Header */}
       {!collapsed && (
         <SidebarHeader className="border-b border-sidebar-border px-2 py-2">
-          <div className="flex items-center justify-center gap-0">
+          <div className="flex flex-col items-center justify-center gap-0">
             <NavLink to="/dashboard" className="flex items-center gap-0">
-              <span className="font-semibold text-xs tracking-tight text-foreground">CampusVoice.ai</span>
-              <span className="text-[6px] text-muted-foreground -mt-1.5 ml-px">®</span>
+              <span className="font-semibold text-xs tracking-tight text-foreground">{brand.wordmark}</span>
+              {brand.registeredMark && <span className="text-[6px] text-muted-foreground -mt-1.5 ml-px">®</span>}
             </NavLink>
+            <span className="text-[8px] text-muted-foreground/60 leading-tight mt-0.5 text-center max-w-[10rem]">{brand.tagline}</span>
           </div>
         </SidebarHeader>
       )}

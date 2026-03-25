@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { DashboardHero } from "@/components/dashboard";
 import { ScratchpadCapture } from "@/components/dashboard/ScratchpadCapture";
 
@@ -11,8 +12,15 @@ import { QuickLaunchBar } from "@/components/dashboard/QuickLaunchBar";
 import { LibraryOverviewPanel } from "@/components/dashboard/LibraryOverviewPanel";
 import { ImpactMetricsCard } from "@/components/dashboard/ImpactMetricsCard";
 import { TeamActivityFeed } from "@/components/dashboard/TeamActivityFeed";
+import { useBrandMode } from "@/contexts/BrandModeContext";
 
 const Index = () => {
+  const { brand } = useBrandMode();
+
+  useEffect(() => {
+    document.title = `${brand.name} — Dashboard`;
+  }, [brand.name]);
+
   return (
     <div className="bg-background">
       <DashboardHero />
