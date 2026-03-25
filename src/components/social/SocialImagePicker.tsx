@@ -77,7 +77,7 @@ export function SocialImagePicker({ imageUrl, onImageChange, brandColors, logoUr
           <Textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Describe the image... e.g. Students walking on campus on a sunny spring day"
+            placeholder="Describe the image... e.g. Modern office team collaborating around a table"
             className="text-xs min-h-[60px]"
           />
           <Button size="sm" onClick={generateImage} disabled={generating} className="w-full h-8 text-xs">
