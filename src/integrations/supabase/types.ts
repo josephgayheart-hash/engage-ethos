@@ -2384,6 +2384,81 @@ export type Database = {
           },
         ]
       }
+      social_posts: {
+        Row: {
+          brand_overlay_data: Json | null
+          cadence: string | null
+          caption: string | null
+          created_at: string
+          cta_text: string | null
+          cta_url: string | null
+          id: string
+          image_url: string | null
+          platform: string[]
+          profile_id: string | null
+          publish_error: string | null
+          published_at: string | null
+          scheduled_at: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brand_overlay_data?: Json | null
+          cadence?: string | null
+          caption?: string | null
+          created_at?: string
+          cta_text?: string | null
+          cta_url?: string | null
+          id?: string
+          image_url?: string | null
+          platform?: string[]
+          profile_id?: string | null
+          publish_error?: string | null
+          published_at?: string | null
+          scheduled_at?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          brand_overlay_data?: Json | null
+          cadence?: string | null
+          caption?: string | null
+          created_at?: string
+          cta_text?: string | null
+          cta_url?: string | null
+          id?: string
+          image_url?: string | null
+          platform?: string[]
+          profile_id?: string | null
+          publish_error?: string | null
+          published_at?: string | null
+          scheduled_at?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_posts_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "institutional_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_posts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       story_bank: {
         Row: {
           campaigns: string[] | null
