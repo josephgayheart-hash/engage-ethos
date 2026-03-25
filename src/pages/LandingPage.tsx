@@ -469,6 +469,63 @@ export default function LandingPage() {
       {/* Pricing Signal */}
       <PricingSignalSection />
 
+      {/* Fieldmark Enterprise Section */}
+      <section className="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden" style={{ backgroundColor: '#1a1a2e' }}>
+        {/* Subtle glow accents */}
+        <div className="absolute top-16 right-[10%] w-64 h-64 rounded-full blur-[100px] opacity-30" style={{ backgroundColor: '#0082cb' }} />
+        <div className="absolute bottom-20 left-[8%] w-48 h-48 rounded-full blur-[80px] opacity-20" style={{ backgroundColor: '#0082cb' }} />
+
+        <div className="max-w-4xl mx-auto relative z-10">
+          {/* Fieldmark wordmark */}
+          <div className="mb-8">
+            <span className="text-2xl font-bold tracking-tight text-white">Fieldmark</span>
+          </div>
+
+          <p className="text-sm font-medium uppercase tracking-widest mb-3" style={{ color: '#0082cb' }}>
+            Built for Enterprise. Ready for the Field.
+          </p>
+
+          <h2 className="font-serif text-3xl sm:text-4xl text-white mb-4 leading-tight">
+            Introducing <span style={{ color: '#0082cb' }}>Fieldmark</span>
+          </h2>
+
+          <p className="text-lg text-white/70 mb-4 max-w-3xl">
+            Brand governance built for manufacturers, franchise networks, and distributed reseller channels.
+          </p>
+
+          <p className="text-white/60 mb-8 max-w-3xl leading-relaxed">
+            Enterprise brands with hundreds of locations face a unique challenge — keeping every franchisee, dealer, and field rep on-brand at scale. Fieldmark brings AI-powered brand compliance directly into the tools your teams already use, with real-time scoring, regional adaptation, and full audit visibility.
+          </p>
+
+          <ul className="space-y-3 mb-10 max-w-2xl">
+            {[
+              "Real-time brand scoring before content publishes",
+              "Regional and cultural adaptation with locked brand core",
+              "Full audit trail — who posted what, when, and at what score",
+              "Embeds natively in Salesforce via Canvas App — zero adoption friction",
+              "Built for 100+ location networks: franchises, dealers, resellers",
+            ].map((item) => (
+              <li key={item} className="flex items-start gap-2.5 text-white/80 text-sm">
+                <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" style={{ color: '#0082cb' }} />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+
+          <Button
+            asChild
+            size="lg"
+            className="rounded-full px-8 font-semibold text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300"
+            style={{ backgroundColor: '#0082cb' }}
+          >
+            <Link to="/for-enterprise">
+              Explore Fieldmark for Enterprise
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Link>
+          </Button>
+        </div>
+      </section>
+
 
       {/* Secondary CTA Section - Vibrant Purple */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(270_60%_50%)] relative overflow-hidden">
