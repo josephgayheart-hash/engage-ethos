@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar as CalendarIcon, ImageIcon, Send, Save } from "lucide-react";
+import { Calendar as CalendarIcon, Send, Save } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown, Sparkles } from "lucide-react";
+import { SocialCaptionGenerator } from "./SocialCaptionGenerator";
+import { SocialImagePicker } from "./SocialImagePicker";
 import type { SocialPost } from "@/hooks/useSocialPosts";
 
 const PLATFORMS = [
@@ -33,9 +37,13 @@ interface Props {
   onPublish: (id: string) => void;
   isSaving: boolean;
   isPublishing: boolean;
+  brandColors?: string[];
+  logoUrl?: string;
+  logoUrls?: string[];
+  institutionName?: string;
 }
 
-export function PostComposerCard({ post, onSave, onPublish, isSaving, isPublishing }: Props) {
+export function PostComposerCard({ post, onSave, onPublish, isSaving, isPublishing, brandColors, logoUrl, logoUrls, institutionName }: Props) {
   const [caption, setCaption] = useState("");
   const [ctaText, setCtaText] = useState("");
   const [ctaUrl, setCtaUrl] = useState("");
@@ -44,6 +52,7 @@ export function PostComposerCard({ post, onSave, onPublish, isSaving, isPublishi
   const [scheduledDate, setScheduledDate] = useState<Date | undefined>();
   const [scheduledTime, setScheduledTime] = useState("10:00");
   const [cadence, setCadence] = useState("");
+  const [showAiCaption, setShowAiCaption] = useState(false);
 
   useEffect(() => {
     if (post) {
@@ -93,6 +102,9 @@ export function PostComposerCard({ post, onSave, onPublish, isSaving, isPublishi
     });
   };
 
+  const charLimit = platforms.includes("twitter") ? 280 : 2200;
+  const isOverLimit = caption.length > charLimit;
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -118,32 +130,48 @@ export function PostComposerCard({ post, onSave, onPublish, isSaving, isPublishi
           </div>
         </div>
 
-        {/* Image URL */}
-        <div className="space-y-1.5">
-          <Label className="text-xs">Image URL</Label>
-          <div className="flex gap-2">
-            <Input
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="Paste image URL or use Image Studio"
-              className="text-xs h-8"
-            />
-          </div>
-          {imageUrl && (
-            <img src={imageUrl} alt="Preview" className="w-full h-32 object-cover rounded mt-1" />
-          )}
-        </div>
+        {/* Image Picker with AI Generate + Brand Overlay */}
+        <SocialImagePicker
+          imageUrl={imageUrl}
+          onImageChange={setImageUrl}
+          brandColors={brandColors}
+          logoUrl={logoUrl}
+          logoUrls={logoUrls}
+          institutionName={institutionName}
+        />
 
-        {/* Caption */}
+        {/* Caption with AI toggle */}
         <div className="space-y-1.5">
-          <Label className="text-xs">Caption</Label>
+          <div className="flex items-center justify-between">
+            <Label className="text-xs">Caption</Label>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 text-[10px] gap-1 text-primary"
+              onClick={() => setShowAiCaption(!showAiCaption)}
+            >
+              <Sparkles className="h-3 w-3" />
+              {showAiCaption ? "Hide AI" : "AI Draft"}
+            </Button>
+          </div>
+
+          {showAiCaption && (
+            <SocialCaptionGenerator
+              onInsert={setCaption}
+              platforms={platforms}
+              institutionName={institutionName}
+            />
+          )}
+
           <Textarea
             value={caption}
             onChange={(e) => setCaption(e.target.value)}
             placeholder="Write your post..."
             className="text-xs min-h-[100px]"
           />
-          <p className="text-[10px] text-muted-foreground text-right">{caption.length} chars</p>
+          <p className={`text-[10px] text-right ${isOverLimit ? "text-destructive font-medium" : "text-muted-foreground"}`}>
+            {caption.length}/{charLimit} chars
+          </p>
         </div>
 
         {/* CTA */}
