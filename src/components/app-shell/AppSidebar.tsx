@@ -90,6 +90,9 @@ export function AppSidebar() {
   const isViewingOwnWorkspace = !canSwitch || !activeWorkspace || activeWorkspace.id === tenant?.id;
   const showPlatformAdmin = isSuperAdmin && isViewingOwnWorkspace;
 
+  const createItems = useMemo(() => createItemsDef(brand.navItems), [brand.navItems]);
+  const fieldOpsItems = useMemo(() => fieldOpsItemsDef(brand.navItems), [brand.navItems]);
+
   // Filter higher-ed-only items for non-higher-ed tenants
   const filteredCreateItems = isHigherEd
     ? createItems
