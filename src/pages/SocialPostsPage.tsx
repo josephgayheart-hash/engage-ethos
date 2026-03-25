@@ -6,11 +6,22 @@ import { PostComposerCard } from "@/components/social/PostComposerCard";
 import { PostQueueList } from "@/components/social/PostQueueList";
 import { SEOHead } from "@/components/SEOHead";
 import { useBrandMode } from "@/contexts/BrandModeContext";
+import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function SocialPostsPage() {
   const { brand } = useBrandMode();
   const { posts, isLoading, upsert, remove, publish } = useSocialPosts();
   const [selected, setSelected] = useState<SocialPost | null>(null);
+  const { user } = useAuth();
+  const { profiles } = useInstitutionalProfiles();
+  const activeProfile = profiles?.[0];
+  const config = activeProfile?.config as any;
+
+  const brandColors = config?.brandColors || [];
+  const logoUrl = config?.logoUrl;
+  const logoUrls = config?.logoUrls;
+  const institutionName = activeProfile?.name;
 
   const handleSave = (data: Partial<SocialPost>) => {
     upsert.mutate(data as any, {
@@ -35,7 +46,6 @@ export default function SocialPostsPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4">
-          {/* Queue */}
           <div>
             <PostQueueList
               posts={posts}
@@ -47,7 +57,6 @@ export default function SocialPostsPage() {
             />
           </div>
 
-          {/* Composer */}
           <div>
             <PostComposerCard
               post={selected}
@@ -55,6 +64,10 @@ export default function SocialPostsPage() {
               onPublish={(id) => publish.mutate(id)}
               isSaving={upsert.isPending}
               isPublishing={publish.isPending}
+              brandColors={brandColors}
+              logoUrl={logoUrl}
+              logoUrls={logoUrls}
+              institutionName={institutionName}
             />
           </div>
         </div>
