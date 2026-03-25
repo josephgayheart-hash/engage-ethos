@@ -82,7 +82,7 @@ export function AppSidebar() {
   const { profile, tenant, isAdmin, isSuperAdmin, isApprover, logout } = useAuth();
   const { isAgency, labels } = useAgencyMode();
   const { activeWorkspace, canSwitch } = useWorkspace();
-  const { labels: industryLabels, isHigherEd } = useIndustry();
+  const { labels: industryLabels, isHigherEd, isEnterprise } = useIndustry();
   const { brand } = useBrandMode();
   const { state } = useSidebar();
   const navigate = useNavigate();
@@ -175,24 +175,26 @@ export function AppSidebar() {
 
         <SidebarSeparator className="my-0.5" />
 
-        {/* Field Ops */}
-        <SidebarGroup className="py-1">
-          <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/60 px-3 mb-0.5">Field Ops</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {fieldOpsItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={item.title}>
-                    <NavLink to={item.url} className={navLinkClasses} activeClassName={activeClasses}>
-                      <item.icon className="shrink-0 !w-4 !h-4" />
-                      <span>{item.title}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {/* Field Ops — enterprise/franchise only */}
+        {isEnterprise && (
+          <SidebarGroup className="py-1">
+            <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/60 px-3 mb-0.5">Field Ops</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {fieldOpsItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild tooltip={item.title}>
+                      <NavLink to={item.url} className={navLinkClasses} activeClassName={activeClasses}>
+                        <item.icon className="shrink-0 !w-4 !h-4" />
+                        <span>{item.title}</span>
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         <SidebarSeparator className="my-0.5" />
 
