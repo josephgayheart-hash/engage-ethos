@@ -671,7 +671,49 @@ serve(async (req) => {
         const { requestId, password, tenantId: targetTenantId, createNewTenant: shouldCreateTenant, newTenantName, newTenantType, role: assignedRole } = body;
 
         let effectiveApprovalTenantId = isSuperAdmin ? targetTenantId : adminTenantId;
-        
+        let createdApprovalTenantId: string | null = null;
+
+        const rollbackCreatedApprovalTenant = async () => {
+          if (!createdApprovalTenantId) return;
+
+          const tenantIdToRollback = createdApprovalTenantId;
+
+          const { error: configDeleteError } = await adminClient
+            .from("institutional_config")
+            .delete()
+            .eq("tenant_id", tenantIdToRollback);
+
+          if (configDeleteError) {
+            console.error("Failed to delete institutional config during rollback:", configDeleteError);
+          }
+
+          const { error: tenantDeleteError } = await adminClient
+            .from("tenants")
+            .delete()
+            .eq("id", tenantIdToRollback);
+
+          if (tenantDeleteError) {
+            console.error("Failed to delete tenant during rollback:", tenantDeleteError);
+            return;
+          }
+
+          console.log(`Rolled back newly created tenant ${tenantIdToRollback}`);
+          createdApprovalTenantId = null;
+        };
+
+        const { data: request, error: requestError } = await adminClient
+          .from("onboarding_requests")
+          .select("*")
+          .eq("id", requestId)
+          .single();
+
+        if (requestError || !request) {
+          return new Response(
+            JSON.stringify({ error: "Request not found" }),
+            { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
         // Handle creating a new tenant if requested
         if (shouldCreateTenant && newTenantName) {
           const { data: newTenant, error: tenantError } = await adminClient
@@ -688,32 +730,30 @@ serve(async (req) => {
             );
           }
 
-          // Create institutional config for the new tenant
-          await adminClient
+          createdApprovalTenantId = newTenant.id;
+
+          const { error: configError } = await adminClient
             .from("institutional_config")
             .insert({ tenant_id: newTenant.id });
+
+          if (configError) {
+            console.error("Failed to create institutional config:", configError);
+            await rollbackCreatedApprovalTenant();
+            return new Response(
+              JSON.stringify({ error: `Failed to initialize institution: ${configError.message}` }),
+              { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
 
           effectiveApprovalTenantId = newTenant.id;
           console.log(`Created new tenant: ${newTenantName} with ID ${newTenant.id}`);
         }
         
         if (!effectiveApprovalTenantId) {
+          await rollbackCreatedApprovalTenant();
           return new Response(
             JSON.stringify({ error: "Tenant ID required for onboarding approval" }),
             { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
-
-        const { data: request, error: requestError } = await adminClient
-          .from("onboarding_requests")
-          .select("*")
-          .eq("id", requestId)
-          .single();
-
-        if (requestError || !request) {
-          return new Response(
-            JSON.stringify({ error: "Request not found" }),
-            { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
 
@@ -737,6 +777,7 @@ serve(async (req) => {
             authError.message.includes("already exists");
 
           if (!isDuplicateEmail) {
+            await rollbackCreatedApprovalTenant();
             return new Response(
               JSON.stringify({ error: authError.message }),
               { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -765,6 +806,7 @@ serve(async (req) => {
               .maybeSingle();
 
             if (existingProfile) {
+              await rollbackCreatedApprovalTenant();
               return new Response(
                 JSON.stringify({ error: `A user with email "${request.email}" already exists with a profile. They may need to be deleted first or this request should be rejected.` }),
                 { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -777,6 +819,7 @@ serve(async (req) => {
             const { error: orphanDeleteError } = await adminClient.auth.admin.deleteUser(existingAuthUser.id);
             if (orphanDeleteError) {
               console.error("Error deleting orphan auth user:", orphanDeleteError);
+              await rollbackCreatedApprovalTenant();
               return new Response(
                 JSON.stringify({ error: "Unable to clean up existing auth record. Please try again." }),
                 { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -786,6 +829,7 @@ serve(async (req) => {
             const { data: retryAuthData, error: retryAuthError } = await createOnboardingAuthUser();
             if (retryAuthError) {
               console.error("Auth creation error after orphan cleanup:", retryAuthError.message);
+              await rollbackCreatedApprovalTenant();
               return new Response(
                 JSON.stringify({ error: "Unable to recreate user after orphan cleanup. Please try again." }),
                 { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -795,6 +839,7 @@ serve(async (req) => {
           }
 
           if (!authData) {
+            await rollbackCreatedApprovalTenant();
             return new Response(
               JSON.stringify({ error: `A user with email "${request.email}" already exists. They may need to be deleted first or this request should be rejected.` }),
               { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -827,6 +872,7 @@ serve(async (req) => {
 
         if (profileError) {
           await adminClient.auth.admin.deleteUser(authData.user.id);
+          await rollbackCreatedApprovalTenant();
           return new Response(
             JSON.stringify({ error: profileError.message }),
             { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -840,6 +886,7 @@ serve(async (req) => {
         if (userRole === 'super_admin' && !isSuperAdmin) {
           console.error(`Security violation: Non-super admin ${requestingUser.id} attempted to create super_admin via onboarding`);
           await adminClient.auth.admin.deleteUser(authData.user.id);
+          await rollbackCreatedApprovalTenant();
           return new Response(
             JSON.stringify({ error: "Only CampusVoice Super Admins can create other Super Admin accounts" }),
             { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
