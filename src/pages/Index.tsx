@@ -40,6 +40,8 @@ const Index = () => {
 
           <LibraryOverviewPanel />
 
+          <EmailHistoryPanel />
+
           <section className="grid md:grid-cols-2 gap-4">
             <InstitutionManagementCard />
             <ContentDNAStatusCard />
