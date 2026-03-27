@@ -1,0 +1,1 @@
+DELETE FROM personal_messages WHERE metadata->>'isSeedMessage' = 'true';
