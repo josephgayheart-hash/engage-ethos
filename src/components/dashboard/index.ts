@@ -5,3 +5,4 @@ export { RecentMessagesPanel } from './RecentMessagesPanel';
 export { ContentDNAStatusCard } from './ContentDNAStatusCard';
 export { AdminTeamOverview } from './AdminTeamOverview';
 export { QuickLaunchBar } from './QuickLaunchBar';
+export { EmailHistoryPanel } from './EmailHistoryPanel';

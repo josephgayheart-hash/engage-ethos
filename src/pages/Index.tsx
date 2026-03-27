@@ -12,6 +12,7 @@ import { QuickLaunchBar } from "@/components/dashboard/QuickLaunchBar";
 import { LibraryOverviewPanel } from "@/components/dashboard/LibraryOverviewPanel";
 import { ImpactMetricsCard } from "@/components/dashboard/ImpactMetricsCard";
 import { TeamActivityFeed } from "@/components/dashboard/TeamActivityFeed";
+import { EmailHistoryPanel } from "@/components/dashboard/EmailHistoryPanel";
 import { useBrandMode } from "@/contexts/BrandModeContext";
 
 const Index = () => {
