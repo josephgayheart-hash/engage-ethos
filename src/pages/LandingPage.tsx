@@ -497,7 +497,9 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing Signal */}
-      <PricingSignalSection />
+      <ScrollRevealSection>
+        <PricingSignalSection />
+      </ScrollRevealSection>
 
       {/* Fieldmark Enterprise Section */}
       <section className="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden" style={{ backgroundColor: '#1a1a2e' }}>
