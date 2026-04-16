@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -109,33 +109,35 @@ export function QuickActionsPanel() {
           ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6"
           : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
       )}>
-        {coreActions.map((action) => {
+        {coreActions.map((action, index) => {
           const Icon = action.icon;
+          const delayStyle = { animationDelay: `${index * 60}ms` };
 
           if (compact) {
             return (
               <Link
                 key={action.href}
                 to={action.href}
-                className="group relative overflow-hidden rounded-xl p-3 flex items-center gap-2.5 bg-card border border-border/60 hover:border-primary/40 hover:shadow-md transition-all"
+                className="group relative overflow-hidden rounded-xl p-3 flex items-center gap-2.5 bg-card border border-border/60 hover:border-primary/40 hover:shadow-md transition-all opacity-0 animate-scale-fade-in"
+                style={delayStyle}
               >
-                <div className={cn("w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center shrink-0", action.gradient)}>
+                <div className={cn("w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform", action.gradient)}>
                   <Icon className="w-4 h-4 text-white" />
                 </div>
                 <span className="text-sm font-medium text-foreground">{action.label}</span>
-                <ArrowRight className="w-3.5 h-3.5 ml-auto text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                <ArrowRight className="w-3.5 h-3.5 ml-auto text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
               </Link>
             );
           }
 
           return (
-            <Link key={action.href} to={action.href} className="group">
-              <div className="relative h-full overflow-hidden rounded-xl border border-border/60 bg-card hover:border-primary/30 hover:shadow-lg transition-all duration-300">
+            <Link key={action.href} to={action.href} className="group opacity-0 animate-scale-fade-in" style={delayStyle}>
+              <div className="relative h-full overflow-hidden rounded-xl border border-border/60 bg-card hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
                 {/* Gradient accent strip */}
                 <div className={cn("h-1.5 w-full bg-gradient-to-r", action.gradient)} />
                 <div className="p-5 flex flex-col gap-3">
                   <div className={cn(
-                    "w-11 h-11 rounded-xl bg-gradient-to-br flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform",
+                    "w-11 h-11 rounded-xl bg-gradient-to-br flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 group-hover:shadow-md transition-all duration-300",
                     action.gradient
                   )}>
                     <Icon className="w-5 h-5 text-white" />

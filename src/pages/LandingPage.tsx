@@ -35,6 +35,8 @@ import { RequestDemoDialog } from '@/components/landing/RequestDemoDialog';
 import { MessageBuilderShowcase, JourneyBuilderShowcase } from '@/components/landing/ProductShowcases';
 import { StickyCtaBar } from '@/components/landing/StickyCtaBar';
 import { SocialProofStrip } from '@/components/landing/SocialProofStrip';
+import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { cn } from '@/lib/utils';
 
 // JSON-LD schemas for landing page
 const landingPageSchemas = [
@@ -166,6 +168,22 @@ const HERO_NOUNS = [
   { text: "Leaders", color: "hsl(200 100% 50%)" },
   { text: "Audience Connection.", color: "hsl(270 70% 60%)" },
 ];
+
+function ScrollRevealSection({ children, className }: { children: React.ReactNode; className?: string }) {
+  const { ref, isVisible } = useScrollReveal<HTMLDivElement>();
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "transition-none",
+        isVisible ? "opacity-100 animate-reveal-up" : "opacity-0",
+        className
+      )}
+    >
+      {children}
+    </div>
+  );
+}
 
 export default function LandingPage() {
   const [nounIndex, setNounIndex] = useState(() => Math.floor(Math.random() * HERO_NOUNS.length));
@@ -308,13 +326,19 @@ export default function LandingPage() {
       </header>
 
       {/* Social Proof Strip */}
-      <SocialProofStrip />
+      <ScrollRevealSection>
+        <SocialProofStrip />
+      </ScrollRevealSection>
 
       {/* AI Credibility — Position #2 */}
-      <AICredibilitySection />
+      <ScrollRevealSection>
+        <AICredibilitySection />
+      </ScrollRevealSection>
 
       {/* How It Works Section */}
-      <HowItWorksSection />
+      <ScrollRevealSection>
+        <HowItWorksSection />
+      </ScrollRevealSection>
 
       {/* Product Showcases Section — Top 2 inline + 3 tabbed */}
       <section className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-background relative overflow-hidden">
@@ -322,25 +346,27 @@ export default function LandingPage() {
         <div className="absolute bottom-32 left-[5%] w-40 h-40 bg-[hsl(270_70%_60%_/_0.06)] rounded-full blur-3xl" />
 
         <div className="max-w-6xl mx-auto relative z-10 space-y-24 sm:space-y-32">
-          <div className="text-center">
-            <Badge className="mb-4 bg-[hsl(270_70%_60%_/_0.15)] text-[hsl(270_70%_55%)] border-[hsl(270_70%_60%_/_0.3)]">
-              <Sparkles className="w-3 h-3 mr-1" />
-              Product Tour
-            </Badge>
-            <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-3">
-              See it in action.
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              From AI-powered messaging to brand-perfect visuals — explore the tools that make CampusVoice different.
-            </p>
-          </div>
+          <ScrollRevealSection>
+            <div className="text-center">
+              <Badge className="mb-4 bg-[hsl(270_70%_60%_/_0.15)] text-[hsl(270_70%_55%)] border-[hsl(270_70%_60%_/_0.3)]">
+                <Sparkles className="w-3 h-3 mr-1" />
+                Product Tour
+              </Badge>
+              <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-3">
+                See it in action.
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                From AI-powered messaging to brand-perfect visuals — explore the tools that make CampusVoice different.
+              </p>
+            </div>
+          </ScrollRevealSection>
 
           {/* Top 2 showcases inline */}
-          <MessageBuilderShowcase />
-          <JourneyBuilderShowcase />
+          <ScrollRevealSection><MessageBuilderShowcase /></ScrollRevealSection>
+          <ScrollRevealSection><JourneyBuilderShowcase /></ScrollRevealSection>
 
           {/* Remaining 3 in tabbed format */}
-          <ProductTourTabs />
+          <ScrollRevealSection><ProductTourTabs /></ScrollRevealSection>
         </div>
       </section>
 
@@ -366,14 +392,16 @@ export default function LandingPage() {
         </div>
         
         <div className="max-w-5xl mx-auto relative z-10">
-          <div className="text-center mb-12">
-            <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-3">
-              <span className="text-[hsl(270_70%_55%)]">Stop Reacting.</span> Start Planning.
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Most comms are written on instinct. CampusVoice gives you the playbook to plan and execute with confidence.
-            </p>
-          </div>
+          <ScrollRevealSection>
+            <div className="text-center mb-12">
+              <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-3">
+                <span className="text-[hsl(270_70%_55%)]">Stop Reacting.</span> Start Planning.
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Most comms are written on instinct. CampusVoice gives you the playbook to plan and execute with confidence.
+              </p>
+            </div>
+          </ScrollRevealSection>
 
           <ul className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8" aria-label="Core value propositions">
             {valueProps.map((prop, index) => {
@@ -385,7 +413,7 @@ export default function LandingPage() {
               ];
               const color = colors[index % 4];
               return (
-                <li key={prop.title} className="text-center list-none">
+                <li key={prop.title} className="text-center list-none opacity-0 animate-reveal-up" style={{ animationDelay: `${index * 100}ms` }}>
                   <div className={`w-12 h-12 rounded-2xl ${color.bg} flex items-center justify-center mx-auto mb-4 rotate-3 hover:rotate-0 transition-transform`}>
                     <CheckCircle2 className={`w-6 h-6 ${color.icon}`} />
                   </div>
@@ -404,18 +432,20 @@ export default function LandingPage() {
         <div className="absolute bottom-20 right-[15%] w-44 h-44 bg-[hsl(270_70%_60%_/_0.12)] rounded-full blur-3xl" />
         
         <div className="max-w-6xl mx-auto relative z-10">
-          <div className="text-center mb-12">
-            <Badge className="mb-4 bg-[hsl(82_85%_55%_/_0.2)] text-[hsl(82_70%_35%)] border-[hsl(82_85%_55%_/_0.4)]">
-              <Zap className="w-3 h-3 mr-1" />
-              Core Capabilities
-            </Badge>
-            <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-3">
-              Powered by <span className="text-[hsl(200_100%_45%)]">Communication Science</span>
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Every feature is designed around how people actually make decisions.
-            </p>
-          </div>
+          <ScrollRevealSection>
+            <div className="text-center mb-12">
+              <Badge className="mb-4 bg-[hsl(82_85%_55%_/_0.2)] text-[hsl(82_70%_35%)] border-[hsl(82_85%_55%_/_0.4)]">
+                <Zap className="w-3 h-3 mr-1" />
+                Core Capabilities
+              </Badge>
+              <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-3">
+                Powered by <span className="text-[hsl(200_100%_45%)]">Communication Science</span>
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Every feature is designed around how people actually make decisions.
+              </p>
+            </div>
+          </ScrollRevealSection>
 
           <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5" aria-label="CampusVoice feature list">
             {features.map((feature, index) => {
@@ -427,7 +457,7 @@ export default function LandingPage() {
               ];
               const colors = cardColors[index % 4];
               return (
-                <li key={feature.title} className="list-none">
+                <li key={feature.title} className="list-none opacity-0 animate-reveal-up" style={{ animationDelay: `${index * 80}ms` }}>
                   <Link 
                     to={feature.link}
                     className={`group ${colors.bg} ${colors.border} border-2 rounded-2xl p-6 ${colors.hoverBorder} hover:shadow-2xl hover:-translate-y-3 hover:scale-[1.02] transition-all duration-500 ease-out cursor-pointer block h-full`}
@@ -467,7 +497,9 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing Signal */}
-      <PricingSignalSection />
+      <ScrollRevealSection>
+        <PricingSignalSection />
+      </ScrollRevealSection>
 
       {/* Fieldmark Enterprise Section */}
       <section className="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden" style={{ backgroundColor: '#1a1a2e' }}>
