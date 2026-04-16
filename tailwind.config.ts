@@ -110,6 +110,14 @@ export default {
           from: { opacity: "0", transform: "translateY(20px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
+        "slide-up-sm": {
+          from: { opacity: "0", transform: "translateY(10px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "scale-fade-in": {
+          from: { opacity: "0", transform: "scale(0.95)" },
+          to: { opacity: "1", transform: "scale(1)" },
+        },
         "spotlight-rotate": {
           from: { transform: "rotate(0deg)" },
           to: { transform: "rotate(360deg)" },
@@ -130,12 +138,18 @@ export default {
           "90%": { opacity: "1" },
           "100%": { transform: "translateX(1200%)", opacity: "0" },
         },
+        "reveal-up": {
+          from: { opacity: "0", transform: "translateY(40px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.5s ease-out forwards",
         "slide-up": "slide-up 0.5s ease-out forwards",
+        "slide-up-sm": "slide-up-sm 0.4s ease-out forwards",
+        "scale-fade-in": "scale-fade-in 0.4s ease-out forwards",
         "spotlight-slow": "spotlight-rotate 20s linear infinite",
         "spotlight-reverse": "spotlight-rotate 25s linear infinite reverse",
         "float-slow": "float-orb 8s ease-in-out infinite",
@@ -143,6 +157,7 @@ export default {
         "float-fast": "float-orb 4s ease-in-out infinite",
         "gradient-shift": "gradient-shift 3s ease-in-out infinite",
         "beam-flow": "beam-flow 4s linear infinite",
+        "reveal-up": "reveal-up 0.7s ease-out forwards",
       },
     },
   },
