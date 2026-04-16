@@ -432,18 +432,20 @@ export default function LandingPage() {
         <div className="absolute bottom-20 right-[15%] w-44 h-44 bg-[hsl(270_70%_60%_/_0.12)] rounded-full blur-3xl" />
         
         <div className="max-w-6xl mx-auto relative z-10">
-          <div className="text-center mb-12">
-            <Badge className="mb-4 bg-[hsl(82_85%_55%_/_0.2)] text-[hsl(82_70%_35%)] border-[hsl(82_85%_55%_/_0.4)]">
-              <Zap className="w-3 h-3 mr-1" />
-              Core Capabilities
-            </Badge>
-            <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-3">
-              Powered by <span className="text-[hsl(200_100%_45%)]">Communication Science</span>
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Every feature is designed around how people actually make decisions.
-            </p>
-          </div>
+          <ScrollRevealSection>
+            <div className="text-center mb-12">
+              <Badge className="mb-4 bg-[hsl(82_85%_55%_/_0.2)] text-[hsl(82_70%_35%)] border-[hsl(82_85%_55%_/_0.4)]">
+                <Zap className="w-3 h-3 mr-1" />
+                Core Capabilities
+              </Badge>
+              <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-3">
+                Powered by <span className="text-[hsl(200_100%_45%)]">Communication Science</span>
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Every feature is designed around how people actually make decisions.
+              </p>
+            </div>
+          </ScrollRevealSection>
 
           <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5" aria-label="CampusVoice feature list">
             {features.map((feature, index) => {
@@ -455,7 +457,7 @@ export default function LandingPage() {
               ];
               const colors = cardColors[index % 4];
               return (
-                <li key={feature.title} className="list-none">
+                <li key={feature.title} className="list-none opacity-0 animate-reveal-up" style={{ animationDelay: `${index * 80}ms` }}>
                   <Link 
                     to={feature.link}
                     className={`group ${colors.bg} ${colors.border} border-2 rounded-2xl p-6 ${colors.hoverBorder} hover:shadow-2xl hover:-translate-y-3 hover:scale-[1.02] transition-all duration-500 ease-out cursor-pointer block h-full`}
