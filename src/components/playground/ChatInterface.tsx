@@ -125,7 +125,7 @@ export function ChatInterface({
         ) : isEmpty ? (
           /* Empty state — centered greeting */
           <div className="flex flex-col items-center justify-center h-full px-4">
-            <div className="max-w-lg w-full text-center space-y-6">
+            <div className="max-w-lg w-full text-center space-y-6 opacity-0 animate-scale-fade-in">
               <div className="space-y-2">
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
                   <Sparkles className="w-6 h-6 text-primary" />
@@ -150,8 +150,10 @@ export function ChatInterface({
                       key={i}
                       onClick={() => handleSuggestedPrompt(prompt.text)}
                       className="text-left px-4 py-3 rounded-xl border border-border/60 bg-background 
-                                 hover:border-primary/30 hover:bg-muted/50 transition-all duration-150
-                                 group cursor-pointer"
+                                 hover:border-primary/30 hover:bg-muted/50 hover:-translate-y-0.5 hover:shadow-md
+                                 transition-all duration-200 group cursor-pointer
+                                 opacity-0 animate-slide-up-sm"
+                      style={{ animationDelay: `${200 + i * 80}ms` }}
                     >
                       <div className="flex items-start gap-2.5">
                         <Icon className="w-4 h-4 text-muted-foreground group-hover:text-primary mt-0.5 shrink-0 transition-colors" />
@@ -168,12 +170,12 @@ export function ChatInterface({
         ) : (
           /* Messages */
           <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
-            {messages.map((message) => (
-              <div key={message.id} className="group">
+            {messages.map((message, idx) => (
+              <div key={message.id} className="group animate-slide-up-sm" style={{ animationDelay: `${Math.min(idx * 30, 300)}ms` }}>
                 {message.role === 'user' ? (
                   /* User message — right-aligned bubble */
                   <div className="flex justify-end">
-                    <div className="max-w-[80%] bg-primary text-primary-foreground rounded-2xl rounded-br-md px-4 py-3">
+                    <div className="max-w-[80%] bg-primary text-primary-foreground rounded-2xl rounded-br-md px-4 py-3 shadow-sm">
                       <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                     </div>
                   </div>
@@ -194,7 +196,7 @@ export function ChatInterface({
             
             {/* Streaming response */}
             {streamingContent && (
-              <div className="space-y-1">
+              <div className="space-y-1 animate-fade-in">
                 <div className={cn(
                   "text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none",
                   proseClasses
@@ -205,13 +207,13 @@ export function ChatInterface({
               </div>
             )}
             
-            {/* Typing indicator */}
+            {/* Typing indicator — polished bouncing dots */}
             {isLoading && !streamingContent && (
-              <div className="flex items-center gap-1.5 py-2">
-                <div className="flex space-x-1">
-                  <div className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <div className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <div className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              <div className="flex items-center gap-2 py-2 animate-fade-in">
+                <div className="flex items-center gap-1 px-3 py-2 rounded-2xl bg-muted/60">
+                  <div className="w-1.5 h-1.5 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <div className="w-1.5 h-1.5 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <div className="w-1.5 h-1.5 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
               </div>
             )}
@@ -219,12 +221,15 @@ export function ChatInterface({
         )}
       </div>
 
-      {/* Input area — floating at bottom */}
+      {/* Input area — floating at bottom with glass effect */}
       <div className="p-3 sm:p-4">
         <div className="max-w-3xl mx-auto">
-          <div className="relative flex items-end bg-muted/50 border border-border/60 rounded-2xl 
-                          focus-within:border-primary/40 focus-within:ring-1 focus-within:ring-primary/20 
-                          transition-all duration-150 shadow-sm">
+          <div className={cn(
+            "relative flex items-end rounded-2xl transition-all duration-200 shadow-sm",
+            "bg-muted/50 border border-border/60",
+            "focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10 focus-within:shadow-md",
+            "backdrop-blur-sm"
+          )}>
             <textarea
               ref={textareaRef}
               value={input}
@@ -243,9 +248,9 @@ export function ChatInterface({
                 disabled={!input.trim() || isLoading}
                 size="icon"
                 className={cn(
-                  "h-8 w-8 rounded-xl shrink-0 transition-all",
+                  "h-8 w-8 rounded-xl shrink-0 transition-all duration-200",
                   input.trim() 
-                    ? "bg-primary text-primary-foreground shadow-sm" 
+                    ? "bg-primary text-primary-foreground shadow-sm hover:shadow-md hover:scale-105" 
                     : "bg-muted-foreground/20 text-muted-foreground"
                 )}
               >
