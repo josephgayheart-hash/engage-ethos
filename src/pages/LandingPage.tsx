@@ -35,6 +35,8 @@ import { RequestDemoDialog } from '@/components/landing/RequestDemoDialog';
 import { MessageBuilderShowcase, JourneyBuilderShowcase } from '@/components/landing/ProductShowcases';
 import { StickyCtaBar } from '@/components/landing/StickyCtaBar';
 import { SocialProofStrip } from '@/components/landing/SocialProofStrip';
+import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { cn } from '@/lib/utils';
 
 // JSON-LD schemas for landing page
 const landingPageSchemas = [
@@ -166,6 +168,22 @@ const HERO_NOUNS = [
   { text: "Leaders", color: "hsl(200 100% 50%)" },
   { text: "Audience Connection.", color: "hsl(270 70% 60%)" },
 ];
+
+function ScrollRevealSection({ children, className }: { children: React.ReactNode; className?: string }) {
+  const { ref, isVisible } = useScrollReveal<HTMLDivElement>();
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "transition-none",
+        isVisible ? "opacity-100 animate-reveal-up" : "opacity-0",
+        className
+      )}
+    >
+      {children}
+    </div>
+  );
+}
 
 export default function LandingPage() {
   const [nounIndex, setNounIndex] = useState(() => Math.floor(Math.random() * HERO_NOUNS.length));
