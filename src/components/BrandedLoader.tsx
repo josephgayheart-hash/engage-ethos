@@ -6,9 +6,9 @@ export function BrandedLoader() {
       <img
         src={campusvoiceLogo}
         alt="CampusVoice.AI"
-        className="h-8 w-auto opacity-60 animate-pulse"
+        className="h-8 w-auto opacity-0 animate-scale-fade-in"
       />
-      <div className="flex gap-1.5">
+      <div className="flex gap-1.5 opacity-0 animate-fade-in" style={{ animationDelay: '200ms' }}>
         {[0, 1, 2].map((i) => (
           <div
             key={i}

@@ -27,7 +27,7 @@ export function AppLayout() {
               />
             )}
             <AppTopBar />
-            <div className="flex-1">
+            <div className="flex-1 animate-fade-in">
               <Outlet />
             </div>
           </SidebarInset>
