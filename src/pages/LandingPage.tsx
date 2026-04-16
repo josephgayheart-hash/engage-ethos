@@ -392,14 +392,16 @@ export default function LandingPage() {
         </div>
         
         <div className="max-w-5xl mx-auto relative z-10">
-          <div className="text-center mb-12">
-            <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-3">
-              <span className="text-[hsl(270_70%_55%)]">Stop Reacting.</span> Start Planning.
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Most comms are written on instinct. CampusVoice gives you the playbook to plan and execute with confidence.
-            </p>
-          </div>
+          <ScrollRevealSection>
+            <div className="text-center mb-12">
+              <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-3">
+                <span className="text-[hsl(270_70%_55%)]">Stop Reacting.</span> Start Planning.
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Most comms are written on instinct. CampusVoice gives you the playbook to plan and execute with confidence.
+              </p>
+            </div>
+          </ScrollRevealSection>
 
           <ul className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8" aria-label="Core value propositions">
             {valueProps.map((prop, index) => {
@@ -411,7 +413,7 @@ export default function LandingPage() {
               ];
               const color = colors[index % 4];
               return (
-                <li key={prop.title} className="text-center list-none">
+                <li key={prop.title} className="text-center list-none opacity-0 animate-reveal-up" style={{ animationDelay: `${index * 100}ms` }}>
                   <div className={`w-12 h-12 rounded-2xl ${color.bg} flex items-center justify-center mx-auto mb-4 rotate-3 hover:rotate-0 transition-transform`}>
                     <CheckCircle2 className={`w-6 h-6 ${color.icon}`} />
                   </div>
