@@ -346,25 +346,27 @@ export default function LandingPage() {
         <div className="absolute bottom-32 left-[5%] w-40 h-40 bg-[hsl(270_70%_60%_/_0.06)] rounded-full blur-3xl" />
 
         <div className="max-w-6xl mx-auto relative z-10 space-y-24 sm:space-y-32">
-          <div className="text-center">
-            <Badge className="mb-4 bg-[hsl(270_70%_60%_/_0.15)] text-[hsl(270_70%_55%)] border-[hsl(270_70%_60%_/_0.3)]">
-              <Sparkles className="w-3 h-3 mr-1" />
-              Product Tour
-            </Badge>
-            <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-3">
-              See it in action.
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              From AI-powered messaging to brand-perfect visuals — explore the tools that make CampusVoice different.
-            </p>
-          </div>
+          <ScrollRevealSection>
+            <div className="text-center">
+              <Badge className="mb-4 bg-[hsl(270_70%_60%_/_0.15)] text-[hsl(270_70%_55%)] border-[hsl(270_70%_60%_/_0.3)]">
+                <Sparkles className="w-3 h-3 mr-1" />
+                Product Tour
+              </Badge>
+              <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-3">
+                See it in action.
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                From AI-powered messaging to brand-perfect visuals — explore the tools that make CampusVoice different.
+              </p>
+            </div>
+          </ScrollRevealSection>
 
           {/* Top 2 showcases inline */}
-          <MessageBuilderShowcase />
-          <JourneyBuilderShowcase />
+          <ScrollRevealSection><MessageBuilderShowcase /></ScrollRevealSection>
+          <ScrollRevealSection><JourneyBuilderShowcase /></ScrollRevealSection>
 
           {/* Remaining 3 in tabbed format */}
-          <ProductTourTabs />
+          <ScrollRevealSection><ProductTourTabs /></ScrollRevealSection>
         </div>
       </section>
 
