@@ -117,8 +117,8 @@ export function AppSidebar() {
 
   const initials = `${profile?.first_name?.[0] ?? ""}${profile?.last_name?.[0] ?? ""}`;
 
-  const navLinkClasses = "hover:bg-sidebar-accent/50 h-9 text-[13px]";
-  const activeClasses = "bg-sidebar-accent text-sidebar-accent-foreground font-medium border-l-2 border-primary";
+  const navLinkClasses = "hover:bg-sidebar-accent/50 h-9 text-[13px] transition-all duration-200 hover:translate-x-0.5";
+  const activeClasses = "bg-sidebar-accent text-sidebar-accent-foreground font-medium border-l-2 border-primary shadow-sm";
 
   return (
     <Sidebar collapsible="icon">

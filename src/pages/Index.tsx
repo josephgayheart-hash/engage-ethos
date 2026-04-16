@@ -14,6 +14,25 @@ import { ImpactMetricsCard } from "@/components/dashboard/ImpactMetricsCard";
 import { TeamActivityFeed } from "@/components/dashboard/TeamActivityFeed";
 import { EmailHistoryPanel } from "@/components/dashboard/EmailHistoryPanel";
 import { useBrandMode } from "@/contexts/BrandModeContext";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
+import { cn } from "@/lib/utils";
+
+function RevealSection({ children, className, delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+  const { ref, isVisible } = useScrollReveal<HTMLDivElement>();
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "opacity-0 transition-none",
+        isVisible && "animate-slide-up-sm",
+        className
+      )}
+      style={isVisible ? { animationDelay: `${delay}ms` } : undefined}
+    >
+      {children}
+    </div>
+  );
+}
 
 const Index = () => {
   const { brand } = useBrandMode();
@@ -28,28 +47,48 @@ const Index = () => {
 
       <main className="container mx-auto px-4 py-4">
         <div className="max-w-6xl mx-auto space-y-4">
-          <ScratchpadCapture />
+          <RevealSection>
+            <ScratchpadCapture />
+          </RevealSection>
           
-          <QuickActionsPanel />
+          <RevealSection delay={60}>
+            <QuickActionsPanel />
+          </RevealSection>
 
-          <ImpactMetricsCard />
+          <RevealSection delay={120}>
+            <ImpactMetricsCard />
+          </RevealSection>
           
-          <section id="my-drafts">
-            <MyDraftsCard />
-          </section>
+          <RevealSection>
+            <section id="my-drafts">
+              <MyDraftsCard />
+            </section>
+          </RevealSection>
 
-          <LibraryOverviewPanel />
+          <RevealSection>
+            <LibraryOverviewPanel />
+          </RevealSection>
 
-          <EmailHistoryPanel />
+          <RevealSection>
+            <EmailHistoryPanel />
+          </RevealSection>
 
-          <section className="grid md:grid-cols-2 gap-4">
-            <InstitutionManagementCard />
-            <ContentDNAStatusCard />
-          </section>
+          <RevealSection>
+            <section className="grid md:grid-cols-2 gap-4">
+              <InstitutionManagementCard />
+              <ContentDNAStatusCard />
+            </section>
+          </RevealSection>
 
-          <TeamActivityFeed />
-          <AdminTeamOverview />
-          <QuickLaunchBar />
+          <RevealSection>
+            <TeamActivityFeed />
+          </RevealSection>
+          <RevealSection>
+            <AdminTeamOverview />
+          </RevealSection>
+          <RevealSection>
+            <QuickLaunchBar />
+          </RevealSection>
         </div>
       </main>
 
