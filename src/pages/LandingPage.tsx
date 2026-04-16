@@ -326,13 +326,19 @@ export default function LandingPage() {
       </header>
 
       {/* Social Proof Strip */}
-      <SocialProofStrip />
+      <ScrollRevealSection>
+        <SocialProofStrip />
+      </ScrollRevealSection>
 
       {/* AI Credibility — Position #2 */}
-      <AICredibilitySection />
+      <ScrollRevealSection>
+        <AICredibilitySection />
+      </ScrollRevealSection>
 
       {/* How It Works Section */}
-      <HowItWorksSection />
+      <ScrollRevealSection>
+        <HowItWorksSection />
+      </ScrollRevealSection>
 
       {/* Product Showcases Section — Top 2 inline + 3 tabbed */}
       <section className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-background relative overflow-hidden">
