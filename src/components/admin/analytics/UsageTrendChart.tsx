@@ -242,8 +242,8 @@ export function UsageTrendChart({ data, isLoading, compact }: UsageTrendChartPro
               size="sm"
               className="bg-muted/40 rounded-md p-0.5"
             >
-              <ToggleGroupItem value="day" className="h-7 px-2.5 text-xs data-[state=on]:bg-background data-[state=on]:shadow-sm">Day</ToggleGroupItem>
-              <ToggleGroupItem value="month" className="h-7 px-2.5 text-xs data-[state=on]:bg-background data-[state=on]:shadow-sm">Month</ToggleGroupItem>
+              <ToggleGroupItem value="day" className="h-7 px-2.5 text-xs text-muted-foreground data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm">Day</ToggleGroupItem>
+              <ToggleGroupItem value="month" className="h-7 px-2.5 text-xs text-muted-foreground data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm">Month</ToggleGroupItem>
             </ToggleGroup>
           </div>
         </div>
