@@ -126,11 +126,11 @@ export const useAdminAnalytics = (tenantId?: string) => {
           .select('id, institution_name, status, tenant_type')
           .neq('id', '00000000-0000-0000-0000-000000000000'),
         
-        // Tool usage events (last 90 days)
+        // Tool usage events (last 365 days for flexible range filtering)
         supabase
           .from('tool_usage_events')
           .select('*')
-          .gte('created_at', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
+          .gte('created_at', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString())
           .order('created_at', { ascending: false }),
         
         // DNA samples
@@ -214,8 +214,7 @@ export const useAdminAnalytics = (tenantId?: string) => {
       });
 
       const dailyUsage = Array.from(dailyMap.values())
-        .sort((a, b) => a.date.localeCompare(b.date))
-        .slice(-30);
+        .sort((a, b) => a.date.localeCompare(b.date));
 
       // Tool usage breakdown
       const toolMap = new Map<string, ToolUsageBreakdown>();
