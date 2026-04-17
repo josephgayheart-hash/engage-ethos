@@ -214,8 +214,7 @@ export const useAdminAnalytics = (tenantId?: string) => {
       });
 
       const dailyUsage = Array.from(dailyMap.values())
-        .sort((a, b) => a.date.localeCompare(b.date))
-        .slice(-30);
+        .sort((a, b) => a.date.localeCompare(b.date));
 
       // Tool usage breakdown
       const toolMap = new Map<string, ToolUsageBreakdown>();
