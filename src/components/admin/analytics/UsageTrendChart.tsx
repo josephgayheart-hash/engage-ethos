@@ -194,7 +194,7 @@ export function UsageTrendChart({ data, isLoading, compact }: UsageTrendChartPro
               <ToggleGroupItem
                 key={p.key}
                 value={p.key}
-                className="h-7 px-2.5 text-xs data-[state=on]:bg-background data-[state=on]:shadow-sm"
+                className="h-7 px-2.5 text-xs text-muted-foreground data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm"
               >
                 {p.label}
               </ToggleGroupItem>
