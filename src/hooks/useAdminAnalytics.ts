@@ -152,9 +152,10 @@ export const useAdminAnalytics = (tenantId?: string) => {
         supabase.from('campus_photo_samples').select('id, tenant_id, profile_id, is_active').eq('is_active', true)
       ]);
 
-      const users = usersResult.data || [];
+      // Exclude internal/super-admin accounts from platform-wide metrics
+      const users = (usersResult.data || []).filter(u => !isExcludedUser(u.id));
       const tenants = tenantsResult.data || [];
-      const toolEvents = toolEventsResult.data || [];
+      const toolEvents = (toolEventsResult.data || []).filter(e => !isExcludedUser(e.user_id));
       const dnaSamples = dnaSamplesResult.data || [];
       const dnaAnalyses = dnaAnalysesResult.data || [];
       const messages = messagesResult.data || [];
