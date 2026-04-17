@@ -4,6 +4,7 @@ import { Activity, MessageSquare, FileCheck, Image, PenTool } from 'lucide-react
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveWorkspaceId } from '@/contexts/WorkspaceContext';
+import { EXCLUDED_USER_IDS } from '@/lib/analyticsExclusions';
 import { formatDistanceToNow } from 'date-fns';
 
 interface ActivityEvent {
@@ -50,6 +51,7 @@ export function TeamActivityFeed() {
         .select('id, tool_name, action, created_at, user_id')
         .eq('tenant_id', workspaceId)
         .neq('tool_name', 'page_view')
+        .not('user_id', 'in', `(${EXCLUDED_USER_IDS.join(',')})`)
         .gte('created_at', sevenDaysAgo.toISOString())
         .order('created_at', { ascending: false })
         .limit(8);
