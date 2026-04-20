@@ -160,21 +160,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     let isMounted = true;
 
-    // Check for stored impersonation state on mount
-    const storedImpersonation = localStorage.getItem(IMPERSONATION_STORAGE_KEY);
+    // Check for stored impersonation state on mount (sessionStorage clears on tab close)
+    const storedImpersonation = sessionStorage.getItem(IMPERSONATION_STORAGE_KEY);
     if (storedImpersonation) {
       try {
         const parsed = JSON.parse(storedImpersonation);
         if (isMounted) {
           setImpersonation({
             isImpersonating: true,
-            originalAccessToken: parsed.originalAccessToken,
-            originalRefreshToken: parsed.originalRefreshToken,
-            impersonatedUserEmail: parsed.impersonatedUserEmail,
+            impersonatedUserEmail: parsed.impersonatedUserEmail ?? null,
           });
         }
       } catch (e) {
-        localStorage.removeItem(IMPERSONATION_STORAGE_KEY);
+        sessionStorage.removeItem(IMPERSONATION_STORAGE_KEY);
       }
     }
 
