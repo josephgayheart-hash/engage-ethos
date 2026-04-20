@@ -22,8 +22,14 @@ serve(async (req) => {
     const body = await req.json();
     const { action, email, password, firstName, lastName, tenantId, setupKey, userId, newEmail, institutionName, role } = body;
 
-    // Simple security check - require a setup key
-    if (setupKey !== "CAMPUSVOICE_SETUP_2024") {
+    // Security: setup key must come from environment, not hardcoded.
+    // If BOOTSTRAP_SETUP_KEY is not set, the bootstrap endpoint is disabled entirely.
+    const EXPECTED_SETUP_KEY = Deno.env.get("BOOTSTRAP_SETUP_KEY");
+    if (!EXPECTED_SETUP_KEY || typeof setupKey !== "string" || setupKey.length < 16 || setupKey !== EXPECTED_SETUP_KEY) {
+      console.warn("Bootstrap rejected: invalid or missing setup key", {
+        hasEnvKey: Boolean(EXPECTED_SETUP_KEY),
+        providedPrefix: typeof setupKey === "string" ? setupKey.slice(0, 4) : null,
+      });
       return new Response(
         JSON.stringify({ error: "Invalid setup key" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }

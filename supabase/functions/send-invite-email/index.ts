@@ -37,10 +37,50 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Authorization: caller must be an authenticated admin or super_admin
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const authedClient = createClient(SUPABASE_URL!, Deno.env.get("SUPABASE_ANON_KEY")!, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await authedClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const callerId = claimsData.claims.sub as string;
+
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
+
+    // Verify caller is admin or super_admin
+    const { data: roles } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", callerId);
+    const roleSet = new Set((roles ?? []).map((r: { role: string }) => r.role));
+    const isAuthorized =
+      roleSet.has("super_admin") ||
+      roleSet.has("admin") ||
+      roleSet.has("agency_admin");
+    if (!isAuthorized) {
+      return new Response(
+        JSON.stringify({ error: "Forbidden: admin role required" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const { email, firstName, lastName, temporaryPassword, institutionName, role, tenantId, userId, inviterName }: InviteEmailRequest = await req.json();
 
-    console.log(`Sending invite email to ${email} for ${institutionName} (invited by ${inviterName || 'system'})`);
+    console.log(`Sending invite email to ${email} for ${institutionName} (invited by ${inviterName || 'system'}, caller=${callerId})`);
 
     const roleDisplayName = role === 'super_admin' 
       ? 'CampusVoice Super Admin' 

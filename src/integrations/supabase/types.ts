@@ -2773,6 +2773,20 @@ export type Database = {
         }
         Returns: boolean
       }
+      get_nda_link_for_signing: {
+        Args: { _slug: string }
+        Returns: {
+          agreement_version: string
+          expires_at: string
+          id: string
+          is_active: boolean
+          is_one_time: boolean
+          label: string
+          redirect_url: string
+          slug: string
+          status: string
+        }[]
+      }
       get_user_tenant_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
@@ -2785,6 +2799,7 @@ export type Database = {
       is_agency_member: { Args: { _user_id: string }; Returns: boolean }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
       is_user_active: { Args: { _user_id: string }; Returns: boolean }
+      mark_nda_link_signed: { Args: { _link_id: string }; Returns: undefined }
       search_content_samples: {
         Args: {
           p_limit?: number

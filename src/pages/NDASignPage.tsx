@@ -87,20 +87,19 @@ export default function NDASignPage() {
   useEffect(() => {
     if (!slug) { setPageState("not-found"); return; }
     (async () => {
-      const { data, error } = await supabase
-        .from("nda_links")
-        .select("*")
-        .eq("slug", slug)
-        .maybeSingle();
-      if (error || !data) { setPageState("not-found"); return; }
-      const l = data as unknown as NDALink;
+      // Use SECURITY DEFINER RPC which returns only non-PII fields needed for signing
+      const { data, error } = await supabase.rpc("get_nda_link_for_signing", { _slug: slug });
+      if (error || !data || (Array.isArray(data) && data.length === 0)) {
+        setPageState("not-found");
+        return;
+      }
+      const row = Array.isArray(data) ? data[0] : data;
+      const l = row as unknown as NDALink;
       if (l.expires_at && new Date(l.expires_at) < new Date()) { setPageState("expired"); return; }
       if (l.status === "signed" && l.is_one_time) { setPageState("signed"); return; }
       if (l.status === "revoked" || !l.is_active) { setPageState("expired"); return; }
       setLink(l);
-      if (l.recipient_name) setName(l.recipient_name);
-      if (l.recipient_email) setEmail(l.recipient_email);
-      if (l.organization) setOrg(l.organization);
+      // Do NOT pre-fill recipient PII — visitor enters their own info for privacy
       setPageState("form");
     })();
   }, [slug]);
@@ -196,7 +195,7 @@ export default function NDASignPage() {
       if (error) throw error;
 
       if (link.is_one_time) {
-        await supabase.from("nda_links").update({ status: "signed" }).eq("id", link.id);
+        await supabase.rpc("mark_nda_link_signed", { _link_id: link.id });
       }
 
       setSubmittedAt(new Date().toLocaleString());
