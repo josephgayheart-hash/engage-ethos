@@ -144,7 +144,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       // Update last login (skip if impersonating)
-      const storedImpersonation = localStorage.getItem(IMPERSONATION_STORAGE_KEY);
+      const storedImpersonation = sessionStorage.getItem(IMPERSONATION_STORAGE_KEY);
       if (!storedImpersonation) {
         await supabase
           .from('profiles')
