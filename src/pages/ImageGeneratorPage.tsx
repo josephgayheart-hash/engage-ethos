@@ -659,7 +659,7 @@ const ImageGeneratorPage = () => {
                           try {
                             const ext = file.name.split('.').pop();
                             // Tenant-scoped path so storage RLS allows the upload.
-                            const tenantSegment = workspaceId || tenant?.id;
+                            const tenantSegment = tenantId;
                             if (!tenantSegment) {
                               throw new Error('No active workspace.');
                             }
