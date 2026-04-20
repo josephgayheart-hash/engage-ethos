@@ -255,14 +255,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = async () => {
     // Clear impersonation state if exists
-    localStorage.removeItem(IMPERSONATION_STORAGE_KEY);
+    sessionStorage.removeItem(IMPERSONATION_STORAGE_KEY);
     setImpersonation({
       isImpersonating: false,
-      originalAccessToken: null,
-      originalRefreshToken: null,
       impersonatedUserEmail: null,
     });
-    
+
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
@@ -284,10 +282,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     try {
-      // Store current session before impersonating
-      const currentAccessToken = session.access_token;
-      const currentRefreshToken = session.refresh_token;
-
       // Call edge function to get impersonation token
       const { data, error } = await supabase.functions.invoke('impersonate-user', {
         body: { targetUserId }
@@ -299,13 +293,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return;
       }
 
-      // Store original session in localStorage
+      // Store only the impersonated email flag in sessionStorage (clears on tab close).
+      // We intentionally do NOT persist the super-admin's tokens — on exit, the admin
+      // is required to sign in again. This avoids exposing long-lived tokens to XSS.
       const impersonationData = {
-        originalAccessToken: currentAccessToken,
-        originalRefreshToken: currentRefreshToken,
         impersonatedUserEmail: data.targetUser.email,
       };
-      localStorage.setItem(IMPERSONATION_STORAGE_KEY, JSON.stringify(impersonationData));
+      sessionStorage.setItem(IMPERSONATION_STORAGE_KEY, JSON.stringify(impersonationData));
 
       // Verify the OTP token to get a session
       const { error: verifyError } = await supabase.auth.verifyOtp({
@@ -315,20 +309,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (verifyError) {
         console.error('Token verification error:', verifyError);
-        localStorage.removeItem(IMPERSONATION_STORAGE_KEY);
+        sessionStorage.removeItem(IMPERSONATION_STORAGE_KEY);
         toast.error('Failed to verify impersonation token');
         return;
       }
 
       setImpersonation({
         isImpersonating: true,
-        originalAccessToken: currentAccessToken,
-        originalRefreshToken: currentRefreshToken,
         impersonatedUserEmail: data.targetUser.email,
       });
 
       toast.success(`Now viewing as ${data.targetUser.email}`);
-      
+
       // Reload to ensure fresh state
       window.location.href = '/dashboard';
 
@@ -339,41 +331,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const exitImpersonation = async () => {
-    const storedImpersonation = localStorage.getItem(IMPERSONATION_STORAGE_KEY);
-    if (!storedImpersonation) {
-      toast.error('No impersonation session found');
-      return;
-    }
-
     try {
-      const { originalAccessToken, originalRefreshToken } = JSON.parse(storedImpersonation);
-
-      // Clear impersonation state first
-      localStorage.removeItem(IMPERSONATION_STORAGE_KEY);
+      sessionStorage.removeItem(IMPERSONATION_STORAGE_KEY);
       setImpersonation({
         isImpersonating: false,
-        originalAccessToken: null,
-        originalRefreshToken: null,
         impersonatedUserEmail: null,
       });
 
-      // Restore original session
-      const { error } = await supabase.auth.setSession({
-        access_token: originalAccessToken,
-        refresh_token: originalRefreshToken,
-      });
-
-      if (error) {
-        console.error('Session restore error:', error);
-        toast.error('Failed to restore session. Please log in again.');
-        await supabase.auth.signOut();
-        window.location.href = '/login';
-        return;
-      }
-
-      toast.success('Exited impersonation mode');
-      window.location.href = '/admin/panel';
-
+      // Sign the impersonated session out and force the super admin to re-authenticate.
+      // This avoids the previous pattern of stashing the original refresh token in
+      // browser storage where XSS could read it.
+      await supabase.auth.signOut();
+      toast.success('Exited impersonation. Please sign in again.');
+      window.location.href = '/login';
     } catch (error) {
       console.error('Exit impersonation error:', error);
       toast.error('Failed to exit impersonation');
