@@ -48,7 +48,26 @@ export function useDesignReferences({ profileId }: { profileId: string | null })
 
       const { data, error } = await query;
       if (error) throw error;
-      setReferences((data || []) as unknown as DesignReference[]);
+
+      // Bucket is private — convert stored file_url (legacy public url) into
+      // a short-lived signed url for in-app display.
+      const rows = (data || []) as unknown as DesignReference[];
+      const signed = await Promise.all(
+        rows.map(async (r) => {
+          const path = r.file_url.includes('/design-references/')
+            ? r.file_url.split('/design-references/')[1]
+            : r.file_url;
+          try {
+            const { data: s } = await supabase.storage
+              .from('design-references')
+              .createSignedUrl(path, 60 * 60); // 1 hour
+            return { ...r, file_url: s?.signedUrl || r.file_url };
+          } catch {
+            return r;
+          }
+        })
+      );
+      setReferences(signed);
     } catch (err) {
       console.error('Failed to fetch design references:', err);
     } finally {
@@ -93,10 +112,9 @@ export function useDesignReferences({ profileId }: { profileId: string | null })
           .upload(path, file, { contentType: file.type });
         if (uploadError) throw uploadError;
 
-        const { data: urlData } = supabase.storage
-          .from('design-references')
-          .getPublicUrl(path);
-
+        // Store the storage path itself; we sign URLs at read time.
+        // (file_url historically held a public URL, but the bucket is now
+        // private. We keep using the column to hold the path for compatibility.)
         const { error: insertError } = await supabase
           .from('design_references' as any)
           .insert({
@@ -104,7 +122,7 @@ export function useDesignReferences({ profileId }: { profileId: string | null })
             profile_id: profileId,
             user_id: user.id,
             file_name: file.name,
-            file_url: urlData.publicUrl,
+            file_url: path,
             name: name || file.name.replace(/\.[^/.]+$/, ''),
             description: description || null,
             reference_type: referenceType,
@@ -133,10 +151,14 @@ export function useDesignReferences({ profileId }: { profileId: string | null })
     try {
       const ref = references.find(r => r.id === id);
       if (ref) {
-        // Extract storage path from URL
-        const urlParts = ref.file_url.split('/design-references/');
-        if (urlParts[1]) {
-          await supabase.storage.from('design-references').remove([urlParts[1]]);
+        // file_url may be a signed URL (from fetchReferences) or a raw path
+        // (from a fresh insert). Pull out the underlying object path.
+        let path = ref.file_url;
+        if (path.includes('/design-references/')) {
+          path = path.split('/design-references/')[1].split('?')[0];
+        }
+        if (path) {
+          await supabase.storage.from('design-references').remove([path]);
         }
       }
 
