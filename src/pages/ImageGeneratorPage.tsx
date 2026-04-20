@@ -658,11 +658,18 @@ const ImageGeneratorPage = () => {
                           setIsUploadingRef(true);
                           try {
                             const ext = file.name.split('.').pop();
-                            const path = `inline/${crypto.randomUUID()}.${ext}`;
+                            // Tenant-scoped path so storage RLS allows the upload.
+                            const tenantSegment = tenantId;
+                            if (!tenantSegment) {
+                              throw new Error('No active workspace.');
+                            }
+                            const path = `${tenantSegment}/inline/${crypto.randomUUID()}.${ext}`;
                             const { error } = await supabase.storage.from('design-references').upload(path, file, { contentType: file.type });
                             if (error) throw error;
-                            const { data } = supabase.storage.from('design-references').getPublicUrl(path);
-                            setStyleReferenceUrl(data.publicUrl);
+                            const { data: signed } = await supabase.storage
+                              .from('design-references')
+                              .createSignedUrl(path, 60 * 60);
+                            setStyleReferenceUrl(signed?.signedUrl || '');
                           } catch (err) {
                             console.error(err);
                             toast.error('Failed to upload style reference');

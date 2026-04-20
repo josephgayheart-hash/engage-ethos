@@ -301,7 +301,7 @@ const BrandStudioPage = () => {
         const base64Data = dataUrl.split(",")[1];
         const byteArray = Uint8Array.from(atob(base64Data), (c) => c.charCodeAt(0));
         const blob = new Blob([byteArray], { type: "image/png" });
-        const filePath = `branded-images/${user?.id || "anon"}/${Date.now()}.png`;
+        const filePath = `${tenant?.id || profile?.tenant_id || "anon"}/branded-images/${user?.id || "anon"}/${Date.now()}.png`;
 
         const { error: uploadError } = await supabase.storage
           .from("collection-assets")
@@ -392,7 +392,7 @@ const BrandStudioPage = () => {
         const base64Data = dataUrl.split(",")[1];
         const byteArray = Uint8Array.from(atob(base64Data), (c) => c.charCodeAt(0));
         const blob = new Blob([byteArray], { type: "image/png" });
-        const filePath = `branded-images/${user?.id || "anon"}/shared-${Date.now()}.png`;
+        const filePath = `${tenant?.id || profile?.tenant_id || "anon"}/branded-images/${user?.id || "anon"}/shared-${Date.now()}.png`;
 
         const { error: uploadError } = await supabase.storage
           .from("collection-assets")

@@ -860,8 +860,28 @@ CRITICAL TEXT & LOGO RULES:
     try {
       const persistentRefs = (designRefsResult as any)?.data;
       if (persistentRefs && persistentRefs.length > 0) {
-        designRefUrls.push(...persistentRefs.map((r: any) => r.file_url));
-        console.log(`Using ${persistentRefs.length} persistent design references from Content DNA`);
+        // The design-references bucket is private. file_url historically held a
+        // public URL but new rows store the storage path. Either way, extract
+        // the path and mint a short-lived signed URL the AI gateway can fetch.
+        const signed = await Promise.all(
+          persistentRefs.map(async (r: any) => {
+            const raw: string = r.file_url || "";
+            const path = raw.includes("/design-references/")
+              ? raw.split("/design-references/")[1].split("?")[0]
+              : raw;
+            if (!path) return null;
+            try {
+              const { data } = await supabaseAdmin.storage
+                .from("design-references")
+                .createSignedUrl(path, 60 * 30); // 30 minutes
+              return data?.signedUrl || null;
+            } catch {
+              return null;
+            }
+          })
+        );
+        designRefUrls.push(...signed.filter((u): u is string => !!u));
+        console.log(`Using ${designRefUrls.length} persistent design references from Content DNA`);
       }
       if (styleReferenceUrl) {
         designRefUrls.push(styleReferenceUrl);
