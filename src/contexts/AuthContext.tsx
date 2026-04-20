@@ -88,8 +88,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [impersonation, setImpersonation] = useState<ImpersonationState>({
     isImpersonating: false,
-    originalAccessToken: null,
-    originalRefreshToken: null,
     impersonatedUserEmail: null,
   });
 
