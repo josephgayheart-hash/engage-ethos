@@ -38,8 +38,6 @@ export interface Tenant {
 
 interface ImpersonationState {
   isImpersonating: boolean;
-  originalAccessToken: string | null;
-  originalRefreshToken: string | null;
   impersonatedUserEmail: string | null;
 }
 
