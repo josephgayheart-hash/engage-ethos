@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useLastUsedProfile } from "@/hooks/useLastUsedProfile";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,7 +14,6 @@ import { ContextSelector } from "@/components/playground/ContextSelector";
 import { ModelSelector, type AIModel } from "@/components/playground/ModelSelector";
 import { PanelLeft, ExternalLink, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useRef } from "react";
 
 interface ContentDNAData {
   voiceAnalysis: Record<string, unknown> | null;
