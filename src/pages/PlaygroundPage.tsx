@@ -335,11 +335,32 @@ const PlaygroundPage = () => {
           />
         </div>
 
-        <ModelSelector
-          value={selectedModel}
-          onChange={setSelectedModel}
-          disabled={isSending}
-        />
+        <div className="flex items-center gap-2">
+          {popoutOpen ? (
+            <button
+              onClick={handleClosePopout}
+              className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-primary/10 text-primary text-xs font-medium hover:bg-primary/15 transition-colors"
+              title="Close pop-out window"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+              Popped out
+              <X className="w-3 h-3" />
+            </button>
+          ) : (
+            <button
+              onClick={handleOpenPopout}
+              className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+              title="Pop out into a separate window"
+            >
+              <ExternalLink className="w-4 h-4" />
+            </button>
+          )}
+          <ModelSelector
+            value={selectedModel}
+            onChange={setSelectedModel}
+            disabled={isSending}
+          />
+        </div>
       </div>
 
       {/* Main area */}
