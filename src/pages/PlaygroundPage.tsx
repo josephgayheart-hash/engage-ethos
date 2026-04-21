@@ -48,6 +48,44 @@ const PlaygroundPage = () => {
   const [showSidebar, setShowSidebar] = useState(true);
   const [streamingContent, setStreamingContent] = useState('');
   const [selectedModel, setSelectedModel] = useState<AIModel>('google/gemini-2.5-flash');
+  const popoutRef = useRef<Window | null>(null);
+  const [popoutOpen, setPopoutOpen] = useState(false);
+
+  // Poll popout window state
+  useEffect(() => {
+    if (!popoutOpen) return;
+    const interval = setInterval(() => {
+      if (!popoutRef.current || popoutRef.current.closed) {
+        popoutRef.current = null;
+        setPopoutOpen(false);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [popoutOpen]);
+
+  const handleOpenPopout = useCallback(() => {
+    if (popoutRef.current && !popoutRef.current.closed) {
+      popoutRef.current.focus();
+      return;
+    }
+    const win = window.open(
+      '/copywriter-popout',
+      'copywriter',
+      'width=480,height=780,resizable=yes,scrollbars=yes'
+    );
+    if (win) {
+      popoutRef.current = win;
+      setPopoutOpen(true);
+    }
+  }, []);
+
+  const handleClosePopout = useCallback(() => {
+    if (popoutRef.current && !popoutRef.current.closed) {
+      popoutRef.current.close();
+    }
+    popoutRef.current = null;
+    setPopoutOpen(false);
+  }, []);
   
   // Context selections
   const { lastUsedProfileId, setLastUsedProfileId } = useLastUsedProfile(profiles);
