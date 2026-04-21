@@ -3,6 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
 import { format } from "date-fns";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface NDAResponse {
   id: string;
@@ -28,8 +30,31 @@ interface Props {
 }
 
 export function NDAResponseDetailDrawer({ response, onClose }: Props) {
-  if (!response) return null;
+  const [signedSigUrl, setSignedSigUrl] = useState<string | null>(null);
 
+  useEffect(() => {
+    setSignedSigUrl(null);
+    if (!response?.drawn_signature_url) return;
+    // The stored value is now a storage path (private bucket). Fetch a signed URL.
+    let cancelled = false;
+    (async () => {
+      const path = response.drawn_signature_url!;
+      // Backward compatibility: if it's still a full URL (legacy public bucket), use it directly.
+      if (/^https?:\/\//i.test(path)) {
+        if (!cancelled) setSignedSigUrl(path);
+        return;
+      }
+      const { data, error } = await supabase.storage
+        .from("nda-signatures")
+        .createSignedUrl(path, 60 * 10); // 10 minutes
+      if (!cancelled && !error && data?.signedUrl) {
+        setSignedSigUrl(data.signedUrl);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [response?.drawn_signature_url]);
+
+  if (!response) return null;
   const r = response;
 
   return (
@@ -57,9 +82,9 @@ export function NDAResponseDetailDrawer({ response, onClose }: Props) {
             <div className="border rounded-md p-3 bg-muted/30">
               <p className="font-serif text-lg italic">{r.typed_signature}</p>
             </div>
-            {r.drawn_signature_url && (
+            {r.drawn_signature_url && signedSigUrl && (
               <div className="border rounded-md p-3 bg-background">
-                <img src={r.drawn_signature_url} alt="Drawn signature" className="max-h-24 mx-auto" />
+                <img src={signedSigUrl} alt="Drawn signature" className="max-h-24 mx-auto" />
               </div>
             )}
           </div>

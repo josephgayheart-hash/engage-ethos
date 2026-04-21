@@ -159,17 +159,20 @@ export default function NDASignPage() {
 
     setSubmitting(true);
     try {
+      // Store the storage path (not a public URL) — bucket is private,
+      // admins fetch a signed URL on demand when viewing the response.
       let drawnSigUrl: string | null = null;
       if (hasDrawn && canvasRef.current) {
         const blob = await new Promise<Blob | null>((res) => canvasRef.current!.toBlob(res, "image/png"));
         if (blob) {
-          const fileName = `${link.slug}-${Date.now()}.png`;
+          // Sanitize slug to match the storage RLS pattern: ^[a-zA-Z0-9_-]+-[0-9]+\.png$
+          const safeSlug = link.slug.replace(/[^a-zA-Z0-9_-]/g, "-");
+          const fileName = `${safeSlug}-${Date.now()}.png`;
           const { error: uploadErr } = await supabase.storage
             .from("nda-signatures")
             .upload(fileName, blob, { contentType: "image/png" });
           if (!uploadErr) {
-            const { data: urlData } = supabase.storage.from("nda-signatures").getPublicUrl(fileName);
-            drawnSigUrl = urlData.publicUrl;
+            drawnSigUrl = fileName;
           }
         }
       }
