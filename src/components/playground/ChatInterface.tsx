@@ -6,10 +6,10 @@ import {
   Send, 
   RefreshCw, 
   Sparkles, 
-  Target, 
+  PenLine, 
   Lightbulb, 
-  BookOpen, 
-  Shield,
+  Wand2, 
+  Calendar,
   ArrowUp
 } from 'lucide-react';
 import type { PlaygroundMessage } from '@/hooks/usePlaygroundConversations';
@@ -34,20 +34,20 @@ interface ChatInterfaceProps {
 
 const suggestedPrompts = [
   {
-    icon: Target,
-    text: "Draft a re-enrollment message for at-risk students",
+    icon: PenLine,
+    text: "Help me expand this draft into a fuller piece",
   },
   {
-    icon: Shield,
-    text: "Review this message against our voice guidelines",
+    icon: Wand2,
+    text: "Rewrite this in our brand voice",
   },
   {
     icon: Lightbulb,
-    text: "Best strategies for financial aid communications?",
+    text: "Brainstorm 10 headline options for this topic",
   },
   {
-    icon: BookOpen,
-    text: "How to use social proof effectively?",
+    icon: Calendar,
+    text: "Plan a 4-week content series on this theme",
   }
 ];
 
@@ -131,12 +131,12 @@ export function ChatInterface({
                   <Sparkles className="w-6 h-6 text-primary" />
                 </div>
                 <h2 className="text-xl font-semibold text-foreground">
-                  {profileName ? `Writing for ${profileName}` : "How can I help you today?"}
+                  {profileName ? `Writing for ${profileName}` : "What are we writing today?"}
                 </h2>
                 <p className="text-sm text-muted-foreground">
                   {hasDNA 
-                    ? "Your Content DNA is active — I'll write in your institutional voice."
-                    : "I can help create, review, and strategize your communications."
+                    ? "Your Content DNA is active — I'll expand, refine, and plan in your voice."
+                    : "Your writing & planning companion. Drafts, rewrites, brainstorms, calendars."
                   }
                 </p>
               </div>
