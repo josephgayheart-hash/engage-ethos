@@ -277,6 +277,56 @@ export function usePlaygroundConversations() {
     fetchConversations();
   }, [fetchConversations]);
 
+  // Realtime cross-window sync for conversations + messages
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const channel = supabase
+      .channel(`playground-sync-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'playground_conversations', filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const row = payload.new as PlaygroundConversation;
+            setConversations(prev => prev.some(c => c.id === row.id) ? prev : [row, ...prev]);
+          } else if (payload.eventType === 'UPDATE') {
+            const row = payload.new as PlaygroundConversation;
+            setConversations(prev => {
+              const next = prev.map(c => c.id === row.id ? { ...c, ...row } : c);
+              return next.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+            });
+            setCurrentConversation(prev => prev?.id === row.id ? { ...prev, ...row } : prev);
+          } else if (payload.eventType === 'DELETE') {
+            const oldRow = payload.old as Partial<PlaygroundConversation>;
+            if (!oldRow.id) return;
+            setConversations(prev => prev.filter(c => c.id !== oldRow.id));
+            setCurrentConversation(prev => prev?.id === oldRow.id ? null : prev);
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'playground_messages' },
+        (payload) => {
+          const row = payload.new as PlaygroundMessage;
+          setCurrentConversation(curr => {
+            if (!curr || curr.id !== row.conversation_id) return curr;
+            setMessages(prev => prev.some(m => m.id === row.id) ? prev : [...prev, {
+              ...row,
+              role: row.role as 'user' | 'assistant' | 'system'
+            }]);
+            return curr;
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
+
   return {
     conversations,
     currentConversation,

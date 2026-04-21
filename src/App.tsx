@@ -94,6 +94,10 @@ import CompetitiveAnalyzerPage from "./pages/CompetitiveAnalyzerPage";
 import RegionAdapterPage from "./pages/RegionAdapterPage";
 import RegionalPlaybookPage from "./pages/RegionalPlaybookPage";
 import SocialPostsPage from "./pages/SocialPostsPage";
+import CopywriterPopoutPage from "./pages/CopywriterPopoutPage";
+import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
+import { IndustryProvider } from "@/contexts/IndustryContext";
+import { BrandModeProvider } from "@/contexts/BrandModeContext";
 
 const queryClient = new QueryClient();
 
@@ -256,6 +260,22 @@ const AppRoutes = () => (
         <Route path="/admin/ai-technology" element={<AITechnologyPage />} />
       </Route>
     </Route>
+
+    {/* Pop-out Copywriter — minimal chrome, shares localStorage session */}
+    <Route
+      path="/copywriter-popout"
+      element={
+        <RequireAuth>
+          <WorkspaceProvider>
+            <IndustryProvider>
+              <BrandModeProvider>
+                <CopywriterPopoutPage />
+              </BrandModeProvider>
+            </IndustryProvider>
+          </WorkspaceProvider>
+        </RequireAuth>
+      }
+    />
 
     {/* Embed routes — Salesforce Canvas / iframe, stripped app shell */}
     <Route element={<RequireAuth><EmbedLayout /></RequireAuth>}>
