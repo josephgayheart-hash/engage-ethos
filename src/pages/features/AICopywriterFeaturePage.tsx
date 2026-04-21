@@ -109,14 +109,14 @@ export default function AICopywriterFeaturePage() {
           <div className="max-w-4xl mx-auto text-center">
             <Badge className="mb-6 bg-teal-500/10 text-teal-600 border-teal-500/20 animate-fade-in">
               <Bot className="w-3 h-3 mr-1" />
-              AI Messaging Assistant
+              Writing & Planning Companion
             </Badge>
             <h1 className="font-serif text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight animate-fade-in" style={{ animationDelay: "0.1s" }}>
-              Chat Your Way
-              <span className="block text-teal-600">To On-Brand Copy.</span>
+              Your Brand-Aware
+              <span className="block text-teal-600">Writing Partner.</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: "0.2s" }}>
-              A conversational AI that knows your institution's voice, facts, and stories. Just describe what you need — it writes in your brand.
+              A conversational companion for writers and marketers. Expand drafts, refine voice, brainstorm angles, and plan content — all grounded in your Content DNA.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: "0.3s" }}>
               <Link to="/request-access">
