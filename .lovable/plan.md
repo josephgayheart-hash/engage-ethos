@@ -1,89 +1,61 @@
 
 
-## Plan: Social Media Post Builder with Direct Publishing
+# Pop-Out Copywriter Window
 
-Extends the previously approved Social Post Builder plan with the ability to publish directly to social platforms from the app.
+Let users detach the AI Copywriter into its own resizable browser window that stays signed in, keeps conversation history, and can sit alongside other apps on their desktop. No native desktop install required — uses standard browser pop-out windows that share the authenticated session.
 
----
+## How it works (the user-facing experience)
 
-### Direct Publishing Architecture
+1. In the Copywriter (`/playground`), a new **"Pop out"** button appears next to the sidebar toggle in the top bar.
+2. Clicking it opens a focused, chrome-light window (~480×780, resizable) at a new route `/copywriter-popout`.
+3. The popout shows the same chat UI without the app sidebar, top nav, or workspace selector — just: profile/DNA selector, model selector, conversation list (collapsible), and chat.
+4. The user stays signed in automatically (Supabase's session lives in `localStorage`, which is shared across all windows on the same origin).
+5. Conversations sync live: a message sent in the popout shows up in the main app tab and vice versa (via Supabase Realtime on `playground_messages`).
+6. The main app shows a small "Copywriter open in popout" indicator with a "Bring back" button that focuses the popout window.
+7. Closing the popout returns the user to normal — no data loss, conversations are already persisted.
+8. If the user is signed out in any window, the popout detects it and shows a "Session expired — sign in" screen that opens the main app login.
 
-Since there are no pre-built connectors for social platforms, direct posting requires **platform API credentials** stored as secrets in edge functions.
+## Why a popout (not a true native desktop app)
 
-**Supported platforms and requirements:**
+- **Zero install.** Works on Mac, Windows, Linux, Chromebook instantly.
+- **Always authenticated.** Same-origin popups inherit `localStorage` and cookies from the parent — the existing Supabase session is reused with no re-login.
+- **Stays on top / across desktops.** Modern browsers (Chrome, Edge, Arc, Brave) let users pin a window, send it to another desktop/space, or use OS-level "always on top" tools.
+- **Optionally installable as a PWA later** — the popout route is a perfect candidate for a "Install Copywriter" experience (Chrome's "Install this site as an app" creates a standalone window with its own dock icon). We can add this in a follow-up.
 
-| Platform | API Type | Credentials Needed |
-|---|---|---|
-| X / Twitter | OAuth 1.0a | Consumer Key/Secret + Access Token/Secret |
-| LinkedIn | OAuth 2.0 | Client ID/Secret + Access Token (user must authorize) |
-| Facebook/Instagram | Graph API | App ID/Secret + Page Access Token |
+## Technical plan
 
-**Approach:** A single edge function `publish-social-post` that accepts platform, caption, image URL, and CTA — then routes to the correct platform API.
+**1. New route + lightweight layout**
+- Add `src/pages/CopywriterPopoutPage.tsx` — reuses the existing `ChatInterface`, `ConversationList`, `ContextSelector`, `ModelSelector`, and the `usePlaygroundConversations` hook. Same logic as `PlaygroundPage` but rendered in a compact shell (no `AppSidebar`, no `AppTopBar`).
+- Register the route in `src/App.tsx` outside `AppLayout`, wrapped instead in a minimal provider stack (`WorkspaceProvider` → `IndustryProvider` → `BrandModeProvider`) — same pattern as `EmbedLayout`. No auth-gating change needed since the existing auth flow handles it.
 
----
+**2. "Pop out" trigger in `PlaygroundPage`**
+- Add a button (icon: `ExternalLink` from lucide) in the top bar.
+- Opens with: `window.open('/copywriter-popout', 'copywriter', 'width=480,height=780,resizable=yes,scrollbars=yes')`. Store the returned `Window` reference in a ref so re-clicking focuses the existing popout instead of opening a new one.
+- Show a small inline pill ("Copywriter popped out · Bring back") when popout is open; hide on `window.closed` polling.
 
-### New / Modified Files
+**3. Live cross-window sync**
+- Update `usePlaygroundConversations` to subscribe to Supabase Realtime on `playground_messages` and `playground_conversations` filtered by the current `user_id`.
+- On `INSERT`/`UPDATE` events, merge into local state if the change isn't already present. This makes both windows stay in sync without polling.
+- Migration: `ALTER PUBLICATION supabase_realtime ADD TABLE public.playground_messages, public.playground_conversations;` and ensure `REPLICA IDENTITY FULL` on both tables.
 
-**Database:**
-- `social_posts` table (as previously planned) — add `published_at` timestamptz column and `publish_error` text column for tracking publish results
+**4. Session continuity**
+- No code change needed for auth — `supabase.auth` reads from `localStorage` which is shared across windows on the same origin, and the existing `onAuthStateChange` listener in `AuthContext` will react to sign-in/sign-out events fired from any tab.
+- Add a defensive check in the popout: if `useAuth()` reports `!user` after initial load, render a "Session expired" screen with a button that opens `/login` in the main window (`window.opener?.focus()` + `window.opener.location = '/login'`).
 
-**Edge Function:**
-- `supabase/functions/publish-social-post/index.ts` — Routes to platform APIs:
-  - **X/Twitter**: Uses `api.x.com/2/tweets` with OAuth 1.0a signing, optional media upload via `upload.twitter.com/1.1/media/upload.json`
-  - **LinkedIn**: Uses `api.linkedin.com/v2/ugcPosts` with Bearer token
-  - **Facebook/Instagram**: Uses Graph API `/{page-id}/feed` or `/{ig-user-id}/media`
-  - Returns success/failure per platform, updates `social_posts.status` to `published` and sets `published_at`
+**5. Small polish**
+- The popout's `<title>` updates to the current conversation title so it's recognizable in the OS taskbar/dock.
+- Set a favicon-friendly compact view (existing favicon is fine).
+- Persist `showSidebar` state to `localStorage` keyed `popout-sidebar` so the user's preferred layout sticks.
 
-**Frontend components:**
-- `src/pages/SocialPostsPage.tsx` — Main page with queue + composer
-- `src/components/social/PostComposerCard.tsx` — Compose form with platform selector, caption, image, schedule, and **"Publish Now"** button
-- `src/components/social/PostQueueList.tsx` — Queue view with status badges (draft / scheduled / published / failed)
-- `src/components/social/PostImagePicker.tsx` — Upload / AI generate / brand overlay
-- `src/components/social/PlatformAccountsDialog.tsx` — Settings dialog where users connect their social accounts (enter API credentials per platform)
-- `src/hooks/useSocialPosts.ts` — CRUD hook + `publishPost` mutation that invokes the edge function
+## Files touched
 
-**Modified files:**
-- `src/App.tsx` — Add `/social-posts` route
-- `src/config/brandConfig.ts` — Add `socialPosts` nav label
-- `src/components/app-shell/AppSidebar.tsx` — Add nav item
+- **New**: `src/pages/CopywriterPopoutPage.tsx`
+- **Edit**: `src/App.tsx` (add route), `src/pages/PlaygroundPage.tsx` (pop-out button + open/focus logic), `src/hooks/usePlaygroundConversations.ts` (Realtime subscription)
+- **Migration**: enable Realtime on `playground_messages` and `playground_conversations`
 
-**Secrets (requested on first use):**
-- `TWITTER_CONSUMER_KEY`, `TWITTER_CONSUMER_SECRET`, `TWITTER_ACCESS_TOKEN`, `TWITTER_ACCESS_TOKEN_SECRET`
-- LinkedIn and Facebook tokens would be added when those platforms are enabled
+## Out of scope (can be follow-ups)
 
----
-
-### Publishing Flow
-
-```text
-User clicks "Publish Now" or scheduled time arrives
-  → Frontend calls useSocialPosts.publishPost(postId)
-    → supabase.functions.invoke('publish-social-post', { postId, platforms })
-      → Edge function reads post from DB
-      → For each platform in post.platform[]:
-          → Upload image if present
-          → Post content via platform API
-          → Record result
-      → Update social_posts: status='published', published_at=now()
-      → Return per-platform results
-```
-
----
-
-### Phased Rollout
-
-**Phase 1 (this build):** X/Twitter direct posting + queue UI with draft/schedule/publish workflow
-**Phase 2 (follow-up):** LinkedIn and Facebook/Instagram posting, scheduled auto-publish via pg_cron
-
-This keeps the initial build focused while establishing the architecture for all platforms.
-
----
-
-### Technical Notes
-
-- Twitter uses OAuth 1.0a signature — the edge function handles HMAC-SHA1 signing server-side
-- Image uploads to Twitter require a two-step flow (upload media, then attach media_id to tweet)
-- Platform credentials are stored as Supabase secrets, never exposed to the client
-- RLS on `social_posts`: users CRUD their own tenant's posts, admins view all within tenant
-- The "Publish Now" button is only enabled when at least one platform has credentials configured
+- A true installable desktop app (Electron / Tauri shell). Not needed unless the user wants offline mode, OS notifications, or "always on top" without using browser/OS tools.
+- PWA install banner for the popout route. Easy to add later but introduces service-worker complexity inside the Lovable preview.
+- Multi-window conflict resolution beyond Realtime sync (e.g. "user is typing" indicators).
 
