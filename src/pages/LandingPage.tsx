@@ -347,12 +347,14 @@ export default function LandingPage() {
             </div>
           </ScrollRevealSection>
 
-          {/* Top 2 showcases inline */}
-          <ScrollRevealSection><MessageBuilderShowcase /></ScrollRevealSection>
-          <ScrollRevealSection><JourneyBuilderShowcase /></ScrollRevealSection>
+          {/* Top 2 showcases inline (lazy) */}
+          <Suspense fallback={<div className="h-64" />}>
+            <ScrollRevealSection><MessageBuilderShowcase /></ScrollRevealSection>
+            <ScrollRevealSection><JourneyBuilderShowcase /></ScrollRevealSection>
 
-          {/* Remaining 3 in tabbed format */}
-          <ScrollRevealSection><ProductTourTabs /></ScrollRevealSection>
+            {/* Remaining 3 in tabbed format */}
+            <ScrollRevealSection><ProductTourTabs /></ScrollRevealSection>
+          </Suspense>
         </div>
       </section>
 
