@@ -61,6 +61,7 @@ export default function RequestAccessPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [step, setStep] = useState<1 | 2>(1);
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
 
