@@ -10,6 +10,8 @@ import { LandingFooter } from "@/components/landing/LandingFooter";
 import { SEOHead } from "@/components/SEOHead";
 import { ArrowRight, Sparkles, Send, Loader2, Lock, Wand2, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
@@ -169,13 +171,21 @@ export default function TryCopywriterPage() {
                     </div>
                     <div
                       className={cn(
-                        "max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap",
+                        "max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed",
                         m.role === "user"
-                          ? "bg-foreground text-background"
+                          ? "bg-foreground text-background whitespace-pre-wrap"
                           : "bg-muted/50 text-foreground border border-border/40",
                       )}
                     >
-                      {m.content}
+                      {m.role === "user" ? (
+                        m.content
+                      ) : (
+                        <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-headings:mt-3 prose-headings:mb-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5 prose-strong:text-foreground prose-headings:text-foreground prose-a:text-[hsl(82_85%_45%)]">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {m.content}
+                          </ReactMarkdown>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
