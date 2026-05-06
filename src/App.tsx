@@ -185,6 +185,7 @@ const AppRoutes = () => (
     <Route path="/privacy" element={<PrivacyPolicyPage />} />
     <Route path="/terms" element={<TermsOfServicePage />} />
     <Route path="/about" element={<AboutPage />} />
+    <Route path="/try-copywriter" element={<TryCopywriterPage />} />
 
     {/* Authenticated routes — wrapped in AppLayout sidebar shell */}
     <Route element={<RequireAuth><AppLayout /></RequireAuth>}>
@@ -192,7 +193,7 @@ const AppRoutes = () => (
       <Route path="/onboarding" element={<OnboardingPage />} />
       <Route path="/feedback" element={<BetaFeedbackPage />} />
       <Route path="/evaluate" element={<EvaluatePage />} />
-      <Route path="/try-copywriter" element={<TryCopywriterPage />} />
+      
       <Route path="/build" element={<BuildPage />} />
       <Route path="/strategy" element={<StrategyPage />} />
       <Route path="/call-script" element={<CallScriptPage />} />
