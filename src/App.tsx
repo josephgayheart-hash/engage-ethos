@@ -21,6 +21,7 @@ import PersonalLibrary from "./pages/PersonalLibrary";
 import SharedLibrary from "./pages/SharedLibrary";
 import AdminPanel from "./pages/AdminPanel";
 import EvaluatePage from "./pages/EvaluatePage";
+import TryCopywriterPage from "./pages/TryCopywriterPage";
 import BuildPage from "./pages/BuildPage";
 import StrategyPage from "./pages/StrategyPage";
 import CallScriptPage from "./pages/CallScriptPage";
@@ -191,6 +192,7 @@ const AppRoutes = () => (
       <Route path="/onboarding" element={<OnboardingPage />} />
       <Route path="/feedback" element={<BetaFeedbackPage />} />
       <Route path="/evaluate" element={<EvaluatePage />} />
+      <Route path="/try-copywriter" element={<TryCopywriterPage />} />
       <Route path="/build" element={<BuildPage />} />
       <Route path="/strategy" element={<StrategyPage />} />
       <Route path="/call-script" element={<CallScriptPage />} />

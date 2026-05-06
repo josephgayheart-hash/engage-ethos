@@ -1,5 +1,8 @@
 project_id = "yeuwpuzbccqnqdlnjhfm"
 
+[functions.public-copywriter-demo]
+verify_jwt = false
+
 [functions.resend-invite]
 verify_jwt = false
 
