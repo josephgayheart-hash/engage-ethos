@@ -192,6 +192,7 @@ const AppRoutes = () => (
       <Route path="/onboarding" element={<OnboardingPage />} />
       <Route path="/feedback" element={<BetaFeedbackPage />} />
       <Route path="/evaluate" element={<EvaluatePage />} />
+      <Route path="/try-copywriter" element={<TryCopywriterPage />} />
       <Route path="/build" element={<BuildPage />} />
       <Route path="/strategy" element={<StrategyPage />} />
       <Route path="/call-script" element={<CallScriptPage />} />
