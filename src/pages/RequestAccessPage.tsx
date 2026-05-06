@@ -303,155 +303,211 @@ export default function RequestAccessPage() {
                 </Alert>
               )}
 
+              {/* Step indicator */}
+              <div className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground -mt-1">
+                <span className={step === 1 ? 'text-foreground font-semibold' : ''}>1. Email</span>
+                <span className="opacity-40">›</span>
+                <span className={step === 2 ? 'text-foreground font-semibold' : ''}>2. Your details</span>
+              </div>
+
               {/* Form */}
-              <form onSubmit={handleSubmit} className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <Label htmlFor="firstName" className="text-xs font-medium text-foreground">First Name *</Label>
-                    <Input
-                      id="firstName"
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleChange}
-                      className="h-9 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="lastName" className="text-xs font-medium text-foreground">Last Name *</Label>
-                    <Input
-                      id="lastName"
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      className="h-9 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
-                      required
-                    />
-                  </div>
-                </div>
+              <form
+                onSubmit={(e) => {
+                  if (step === 1) {
+                    e.preventDefault();
+                    if (!formData.email || !formData.institutionName) {
+                      setError('Email and institution are required.');
+                      return;
+                    }
+                    setError(null);
+                    setStep(2);
+                    return;
+                  }
+                  handleSubmit(e);
+                }}
+                className="space-y-3"
+              >
+                {/* STEP 1 — Email + Institution only */}
+                {step === 1 && (
+                  <>
+                    <div className="space-y-1">
+                      <Label htmlFor="email" className="text-xs font-medium text-foreground">Work Email *</Label>
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="you@institution.edu"
+                        className="h-10 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                        required
+                        autoFocus
+                      />
+                    </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <Label htmlFor="email" className="text-xs font-medium text-foreground">Email *</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      placeholder="you@institution.edu"
-                      className="h-9 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="phone" className="text-xs font-medium text-foreground">Phone</Label>
-                    <Input
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      placeholder="(555) 123-4567"
-                      className="h-9 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
-                    />
-                  </div>
-                </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="institutionName" className="text-xs font-medium text-foreground">Institution / Company *</Label>
+                      <Input
+                        id="institutionName"
+                        name="institutionName"
+                        value={formData.institutionName}
+                        onChange={handleChange}
+                        placeholder="University Name"
+                        className="h-10 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                        required
+                        disabled={isSameInstitution && !!institutionFromUrl}
+                      />
+                      {isSameInstitution && institutionFromUrl && (
+                        <p className="text-xs text-muted-foreground">
+                          You'll be joining the existing {institutionFromUrl} team
+                        </p>
+                      )}
+                    </div>
 
-                <div className="space-y-1">
-                  <Label htmlFor="institutionName" className="text-xs font-medium text-foreground">Institution / Company *</Label>
-                  <Input
-                    id="institutionName"
-                    name="institutionName"
-                    value={formData.institutionName}
-                    onChange={handleChange}
-                    placeholder="University Name"
-                    className="h-9 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
-                    required
-                    disabled={isSameInstitution && !!institutionFromUrl}
-                  />
-                  {isSameInstitution && institutionFromUrl && (
-                    <p className="text-xs text-muted-foreground">
-                      You'll be joining the existing {institutionFromUrl} team
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <Label htmlFor="department" className="text-xs font-medium text-foreground">Department</Label>
-                    <Input
-                      id="department"
-                      name="department"
-                      value={formData.department}
-                      onChange={handleChange}
-                      placeholder="e.g., Enrollment"
-                      className="h-9 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="title" className="text-xs font-medium text-foreground">Title</Label>
-                    <Input
-                      id="title"
-                      name="title"
-                      value={formData.title}
-                      onChange={handleChange}
-                      placeholder="e.g., Director"
-                      className="h-9 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <Label htmlFor="referralSource" className="text-xs font-medium text-foreground">How did you hear about us?</Label>
-                  <Select
-                    value={formData.referralSource}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, referralSource: value }))}
-                  >
-                    <SelectTrigger className="h-9 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors">
-                      <SelectValue placeholder="Select an option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {REFERRAL_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex items-start space-x-2">
-                  <Checkbox
-                    id="privacy-consent"
-                    checked={agreedToPrivacy}
-                    onCheckedChange={(checked) => setAgreedToPrivacy(checked === true)}
-                  />
-                  <label htmlFor="privacy-consent" className="text-xs text-muted-foreground leading-tight cursor-pointer">
-                    I agree to the{' '}
-                    <Link to="/privacy" target="_blank" className="text-accent underline underline-offset-2 hover:text-accent/80">
-                      Privacy Policy
-                    </Link>
-                  </label>
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full h-10 text-sm font-semibold rounded-xl gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
-                  disabled={isSubmitting || !agreedToPrivacy}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Submitting...
-                    </>
-                  ) : (
-                    <>
-                      Request Access
+                    <Button
+                      type="submit"
+                      className="w-full h-10 text-sm font-semibold rounded-xl gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                      Continue
                       <ArrowRight className="w-4 h-4" />
-                    </>
-                  )}
-                </Button>
+                    </Button>
+
+                    <p className="text-[11px] text-center text-muted-foreground">
+                      Just two quick fields to start. We'll ask for your name on the next step.
+                    </p>
+                  </>
+                )}
+
+                {/* STEP 2 — Name + optional details + consent */}
+                {step === 2 && (
+                  <>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label htmlFor="firstName" className="text-xs font-medium text-foreground">First Name *</Label>
+                        <Input
+                          id="firstName"
+                          name="firstName"
+                          value={formData.firstName}
+                          onChange={handleChange}
+                          className="h-9 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                          required
+                          autoFocus
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="lastName" className="text-xs font-medium text-foreground">Last Name *</Label>
+                        <Input
+                          id="lastName"
+                          name="lastName"
+                          value={formData.lastName}
+                          onChange={handleChange}
+                          className="h-9 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label htmlFor="phone" className="text-xs font-medium text-foreground">Phone</Label>
+                        <Input
+                          id="phone"
+                          name="phone"
+                          type="tel"
+                          value={formData.phone}
+                          onChange={handleChange}
+                          placeholder="(555) 123-4567"
+                          className="h-9 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="department" className="text-xs font-medium text-foreground">Department</Label>
+                        <Input
+                          id="department"
+                          name="department"
+                          value={formData.department}
+                          onChange={handleChange}
+                          placeholder="e.g., Enrollment"
+                          className="h-9 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label htmlFor="title" className="text-xs font-medium text-foreground">Title</Label>
+                      <Input
+                        id="title"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleChange}
+                        placeholder="e.g., Director of Communications"
+                        className="h-9 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label htmlFor="referralSource" className="text-xs font-medium text-foreground">How did you hear about us?</Label>
+                      <Select
+                        value={formData.referralSource}
+                        onValueChange={(value) => setFormData(prev => ({ ...prev, referralSource: value }))}
+                      >
+                        <SelectTrigger className="h-9 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors">
+                          <SelectValue placeholder="Select an option" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {REFERRAL_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex items-start space-x-2">
+                      <Checkbox
+                        id="privacy-consent"
+                        checked={agreedToPrivacy}
+                        onCheckedChange={(checked) => setAgreedToPrivacy(checked === true)}
+                      />
+                      <label htmlFor="privacy-consent" className="text-xs text-muted-foreground leading-tight cursor-pointer">
+                        I agree to the{' '}
+                        <Link to="/privacy" target="_blank" className="text-accent underline underline-offset-2 hover:text-accent/80">
+                          Privacy Policy
+                        </Link>
+                      </label>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => setStep(1)}
+                        className="h-10 px-3 text-sm"
+                      >
+                        <ArrowLeft className="w-4 h-4 mr-1" />
+                        Back
+                      </Button>
+                      <Button
+                        type="submit"
+                        className="flex-1 h-10 text-sm font-semibold rounded-xl gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+                        disabled={isSubmitting || !agreedToPrivacy}
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Submitting...
+                          </>
+                        ) : (
+                          <>
+                            Request Access
+                            <ArrowRight className="w-4 h-4" />
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </>
+                )}
               </form>
 
               <p className="text-center text-sm text-muted-foreground">
