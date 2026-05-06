@@ -162,21 +162,6 @@ const trustIndicators = [
   { icon: GraduationCap, label: 'Built for Teams' },
 ];
 
-const HERO_NOUNS = [
-  { text: "Planners", color: "hsl(82 85% 55%)" },
-  { text: "Smarter Messaging.", color: "hsl(200 100% 50%)" },
-  { text: "Strategists", color: "hsl(270 70% 60%)" },
-  { text: "Brand Consistency.", color: "hsl(82 85% 55%)" },
-  { text: "Storytellers", color: "hsl(200 100% 50%)" },
-  { text: "Strategic Impact.", color: "hsl(270 70% 60%)" },
-  { text: "Communicators", color: "hsl(82 85% 55%)" },
-  { text: "Audience Growth.", color: "hsl(200 100% 50%)" },
-  { text: "Brand Teams", color: "hsl(270 70% 60%)" },
-  { text: "Every Touchpoint.", color: "hsl(82 85% 55%)" },
-  { text: "Leaders", color: "hsl(200 100% 50%)" },
-  { text: "Audience Connection.", color: "hsl(270 70% 60%)" },
-];
-
 function ScrollRevealSection({ children, className }: { children: React.ReactNode; className?: string }) {
   const { ref, isVisible } = useScrollReveal<HTMLDivElement>();
   return (
@@ -194,22 +179,6 @@ function ScrollRevealSection({ children, className }: { children: React.ReactNod
 }
 
 export default function LandingPage() {
-  const [nounIndex, setNounIndex] = useState(() => Math.floor(Math.random() * HERO_NOUNS.length));
-  const [nounFade, setNounFade] = useState(true);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setNounFade(false);
-      setTimeout(() => {
-        setNounIndex(prev => (prev + 1) % HERO_NOUNS.length);
-        setNounFade(true);
-      }, 400);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const currentNoun = HERO_NOUNS[nounIndex];
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <StickyCtaBar />
