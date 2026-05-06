@@ -21,6 +21,7 @@ import PersonalLibrary from "./pages/PersonalLibrary";
 import SharedLibrary from "./pages/SharedLibrary";
 import AdminPanel from "./pages/AdminPanel";
 import EvaluatePage from "./pages/EvaluatePage";
+import TryCopywriterPage from "./pages/TryCopywriterPage";
 import BuildPage from "./pages/BuildPage";
 import StrategyPage from "./pages/StrategyPage";
 import CallScriptPage from "./pages/CallScriptPage";
