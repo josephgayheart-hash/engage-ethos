@@ -245,32 +245,25 @@ export default function LandingPage() {
               </Badge>
             </div>
 
-            {/* Primary headline — rotating noun on second line */}
-            <h1 
+            {/* Primary headline — concrete, scannable */}
+            <h1
               className="font-serif text-4xl sm:text-5xl lg:text-6xl tracking-tight animate-fade-in max-w-4xl mx-auto leading-tight"
               style={{ animationDelay: '0.15s' }}
             >
-              <span className="text-white">Built for</span>
-              <br />
+              <span className="text-white">AI copywriting that stays</span>{' '}
               <span
-                className="inline-block font-semibold transition-all duration-500"
-                style={{
-                  opacity: nounFade ? 1 : 0,
-                  transform: nounFade ? 'translateY(0)' : 'translateY(8px)',
-                  color: currentNoun.color,
-                }}
+                className="font-semibold bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_65%)] bg-clip-text text-transparent"
               >
-                {currentNoun.text}
+                on your brand.
               </span>
             </h1>
 
             {/* Sub-header */}
-            <p 
-              className="text-lg sm:text-xl text-white/50 max-w-2xl mx-auto leading-relaxed animate-fade-in"
+            <p
+              className="text-lg sm:text-xl text-white/70 max-w-2xl mx-auto leading-relaxed animate-fade-in"
               style={{ animationDelay: '0.25s' }}
             >
-              Your Brand. Every Channel. Always{' '}
-              <span className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_65%)] bg-clip-text text-transparent font-semibold">On-Voice.</span>
+              Upload your brand voice once. Generate emails, social posts, journeys, and campaigns that sound like <span className="text-white font-semibold">you</span> — across every channel.
             </p>
 
             {/* CTA Buttons */}
