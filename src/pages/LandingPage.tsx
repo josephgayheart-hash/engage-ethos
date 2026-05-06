@@ -310,10 +310,11 @@ export default function LandingPage() {
         </div>
       </header>
 
+      {/* Hero product proof — static, mobile-fast */}
+      <HeroProductProof />
+
       {/* Social Proof Strip */}
-      <ScrollRevealSection>
-        <SocialProofStrip />
-      </ScrollRevealSection>
+      <SocialProofStrip />
 
       {/* AI Credibility — Position #2 */}
       <ScrollRevealSection>
