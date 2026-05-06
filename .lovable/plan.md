@@ -1,61 +1,72 @@
+## Goal
 
+Convert the warm visitors you already have. Current data shows 21 visitors, 82% bounce, ~9-second sessions, 62% mobile, no signups. The fix is to make the first 5 seconds clearer, give visitors a way to *experience* the product before signing up, and reduce the cost of the signup ask.
 
-# Pop-Out Copywriter Window
+## Changes
 
-Let users detach the AI Copywriter into its own resizable browser window that stays signed in, keeps conversation history, and can sit alongside other apps on their desktop. No native desktop install required — uses standard browser pop-out windows that share the authenticated session.
+### 1. Sharper, less abstract hero (`src/pages/LandingPage.tsx`)
 
-## How it works (the user-facing experience)
+The rotating noun ("Built for Planners / Smarter Messaging / Strategists…") is creative but ambiguous on a 9-second visit. Replace with a concrete, scannable hero that answers *what is this* and *who is it for* immediately.
 
-1. In the Copywriter (`/playground`), a new **"Pop out"** button appears next to the sidebar toggle in the top bar.
-2. Clicking it opens a focused, chrome-light window (~480×780, resizable) at a new route `/copywriter-popout`.
-3. The popout shows the same chat UI without the app sidebar, top nav, or workspace selector — just: profile/DNA selector, model selector, conversation list (collapsible), and chat.
-4. The user stays signed in automatically (Supabase's session lives in `localStorage`, which is shared across all windows on the same origin).
-5. Conversations sync live: a message sent in the popout shows up in the main app tab and vice versa (via Supabase Realtime on `playground_messages`).
-6. The main app shows a small "Copywriter open in popout" indicator with a "Bring back" button that focuses the popout window.
-7. Closing the popout returns the user to normal — no data loss, conversations are already persisted.
-8. If the user is signed out in any window, the popout detects it and shows a "Session expired — sign in" screen that opens the main app login.
+- New H1 (static, no rotation): **"AI copywriting that stays on your brand."**
+- Subhead (one line): **"Upload your brand voice once. Generate emails, social posts, journeys, and campaigns that sound like you — across every channel."**
+- Keep the "Strategic Messaging Intelligence" badge but smaller.
+- Add a one-line audience tag under the CTAs: *"For higher-ed, enterprise, nonprofit, and healthcare brand teams."*
 
-## Why a popout (not a true native desktop app)
+### 2. Add a low-commitment CTA next to "Get Early Access"
 
-- **Zero install.** Works on Mac, Windows, Linux, Chromebook instantly.
-- **Always authenticated.** Same-origin popups inherit `localStorage` and cookies from the parent — the existing Supabase session is reused with no re-login.
-- **Stays on top / across desktops.** Modern browsers (Chrome, Edge, Arc, Brave) let users pin a window, send it to another desktop/space, or use OS-level "always on top" tools.
-- **Optionally installable as a PWA later** — the popout route is a perfect candidate for a "Install Copywriter" experience (Chrome's "Install this site as an app" creates a standalone window with its own dock icon). We can add this in a follow-up.
+Right now both CTAs are commitment-heavy (full form OR sign in). Add a third, frictionless option:
 
-## Technical plan
+- Primary: **Get Early Access** (unchanged)
+- Secondary (NEW): **Try the Evaluator → free, no signup** linking to `/evaluate` (or `/features/evaluate` if `/evaluate` requires auth — we'll verify and route appropriately).
+- Tertiary: Sign In (smaller, as today).
 
-**1. New route + lightweight layout**
-- Add `src/pages/CopywriterPopoutPage.tsx` — reuses the existing `ChatInterface`, `ConversationList`, `ContextSelector`, `ModelSelector`, and the `usePlaygroundConversations` hook. Same logic as `PlaygroundPage` but rendered in a compact shell (no `AppSidebar`, no `AppTopBar`).
-- Register the route in `src/App.tsx` outside `AppLayout`, wrapped instead in a minimal provider stack (`WorkspaceProvider` → `IndustryProvider` → `BrandModeProvider`) — same pattern as `EmbedLayout`. No auth-gating change needed since the existing auth flow handles it.
+This gives warm visitors a way to *touch the product* in one click, which is the single biggest lever for converting 9-second bounces.
 
-**2. "Pop out" trigger in `PlaygroundPage`**
-- Add a button (icon: `ExternalLink` from lucide) in the top bar.
-- Opens with: `window.open('/copywriter-popout', 'copywriter', 'width=480,height=780,resizable=yes,scrollbars=yes')`. Store the returned `Window` reference in a ref so re-clicking focuses the existing popout instead of opening a new one.
-- Show a small inline pill ("Copywriter popped out · Bring back") when popout is open; hide on `window.closed` polling.
+### 3. Inline product proof above the fold (mobile-friendly)
 
-**3. Live cross-window sync**
-- Update `usePlaygroundConversations` to subscribe to Supabase Realtime on `playground_messages` and `playground_conversations` filtered by the current `user_id`.
-- On `INSERT`/`UPDATE` events, merge into local state if the change isn't already present. This makes both windows stay in sync without polling.
-- Migration: `ALTER PUBLICATION supabase_realtime ADD TABLE public.playground_messages, public.playground_conversations;` and ensure `REPLICA IDENTITY FULL` on both tables.
+Add a single static visual under the hero (before scroll-revealed sections) showing a real generated message with brand voice applied — a screenshot-style card, not an animation. Static = fast on mobile.
 
-**4. Session continuity**
-- No code change needed for auth — `supabase.auth` reads from `localStorage` which is shared across windows on the same origin, and the existing `onAuthStateChange` listener in `AuthContext` will react to sign-in/sign-out events fired from any tab.
-- Add a defensive check in the popout: if `useAuth()` reports `!user` after initial load, render a "Session expired" screen with a button that opens `/login` in the main window (`window.opener?.focus()` + `window.opener.location = '/login'`).
+- New component `src/components/landing/HeroProductProof.tsx`: a styled "before / after" card — left shows a plain prompt ("Write a welcome email"), right shows a branded result with the user's logo color, voice tone, and a snippet.
+- Renders below the hero, above `SocialProofStrip`.
+- No animation, no scroll-trigger, no large images — pure CSS so it's instant on mobile.
 
-**5. Small polish**
-- The popout's `<title>` updates to the current conversation title so it's recognizable in the OS taskbar/dock.
-- Set a favicon-friendly compact view (existing favicon is fine).
-- Persist `showSidebar` state to `localStorage` keyed `popout-sidebar` so the user's preferred layout sticks.
+### 4. Trim the `/request-access` form (`src/pages/RequestAccessPage.tsx`)
+
+Today's required fields: First Name, Last Name, Email, Institution. Optional: Phone, Department, Title, Referral source.
+
+Change to a **two-step** flow:
+
+- **Step 1 (visible on load):** Email + Institution only. Single "Continue" button.
+- **Step 2 (after Continue):** First name, Last name, optional Phone/Department/Title, Referral source, submit.
+
+Visitors get a tiny first ask, commit, then complete. We keep all the same data; we just stop scaring people off at the door. Form state and submission logic stay identical.
+
+### 5. Mobile performance trim on the landing page
+
+13 of 21 visits are mobile. The hero has 4 animated floating orbs + dot grid + scroll-reveal on every section. On mid-tier phones this is heavy.
+
+- Hide all 4 floating orbs on mobile (already partial — verify `hidden sm:block` everywhere).
+- Disable scroll-reveal on the first 2 below-fold sections so they render immediately (no opacity-0 → opacity-100 wait).
+- Lazy-load `ProductTourTabs`, `EnterpriseShowcases`, and other heavy showcase components below the fold using `React.lazy` + `Suspense`.
+
+### 6. Sticky CTA: add the Evaluator option
+
+`src/components/landing/StickyCtaBar.tsx` currently has only "Get Early Access." Add a small secondary "Try free" link so the lower-friction path follows the user as they scroll.
+
+## Out of scope (follow-ups if you want)
+
+- Adding a 30-sec demo video (need recorded footage).
+- A/B testing framework — too early at 21 visitors/week to be statistically meaningful.
+- Pricing page — separate question.
 
 ## Files touched
 
-- **New**: `src/pages/CopywriterPopoutPage.tsx`
-- **Edit**: `src/App.tsx` (add route), `src/pages/PlaygroundPage.tsx` (pop-out button + open/focus logic), `src/hooks/usePlaygroundConversations.ts` (Realtime subscription)
-- **Migration**: enable Realtime on `playground_messages` and `playground_conversations`
+- `src/pages/LandingPage.tsx` — hero copy, CTA group, audience line, lazy-loading.
+- `src/components/landing/HeroProductProof.tsx` — NEW static proof card.
+- `src/components/landing/StickyCtaBar.tsx` — add secondary "Try free" link.
+- `src/pages/RequestAccessPage.tsx` — split into 2-step flow (no schema/db changes).
 
-## Out of scope (can be follow-ups)
+## Why this works
 
-- A true installable desktop app (Electron / Tauri shell). Not needed unless the user wants offline mode, OS notifications, or "always on top" without using browser/OS tools.
-- PWA install banner for the popout route. Easy to add later but introduces service-worker complexity inside the Lovable preview.
-- Multi-window conflict resolution beyond Realtime sync (e.g. "user is typing" indicators).
-
+The data says: warm visitors arrive, can't decode the offer in 9 seconds, and have no way to try the product without filling a form. Steps 1–3 fix decoding and give a try-now path; step 4 lowers the cost of the signup; step 5 removes mobile friction. Same traffic, different funnel math.

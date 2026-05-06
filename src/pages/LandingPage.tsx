@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
+import { lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  MessageSquare, 
-  BarChart3, 
-  BookOpen, 
-  Shield, 
+import {
+  MessageSquare,
+  BarChart3,
+  BookOpen,
+  Shield,
   ArrowRight,
   Sparkles,
   Target,
@@ -27,16 +27,24 @@ import HowItWorksSection from '@/components/landing/HowItWorksSection';
 
 import PricingSignalSection from '@/components/landing/PricingSignalSection';
 import AICredibilitySection from '@/components/landing/AICredibilitySection';
-import ProductTourTabs from '@/components/landing/ProductTourTabs';
 import { LandingNav } from '@/components/landing/LandingNav';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { SEOHead, getOrganizationSchema, getSoftwareApplicationSchema } from '@/components/SEOHead';
 import { RequestDemoDialog } from '@/components/landing/RequestDemoDialog';
-import { MessageBuilderShowcase, JourneyBuilderShowcase } from '@/components/landing/ProductShowcases';
 import { StickyCtaBar } from '@/components/landing/StickyCtaBar';
 import { SocialProofStrip } from '@/components/landing/SocialProofStrip';
+import { HeroProductProof } from '@/components/landing/HeroProductProof';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { cn } from '@/lib/utils';
+
+// Lazy-load heavy below-the-fold showcases for faster mobile LCP
+const ProductTourTabs = lazy(() => import('@/components/landing/ProductTourTabs'));
+const MessageBuilderShowcase = lazy(() =>
+  import('@/components/landing/ProductShowcases').then(m => ({ default: m.MessageBuilderShowcase }))
+);
+const JourneyBuilderShowcase = lazy(() =>
+  import('@/components/landing/ProductShowcases').then(m => ({ default: m.JourneyBuilderShowcase }))
+);
 
 // JSON-LD schemas for landing page
 const landingPageSchemas = [
@@ -154,21 +162,6 @@ const trustIndicators = [
   { icon: GraduationCap, label: 'Built for Teams' },
 ];
 
-const HERO_NOUNS = [
-  { text: "Planners", color: "hsl(82 85% 55%)" },
-  { text: "Smarter Messaging.", color: "hsl(200 100% 50%)" },
-  { text: "Strategists", color: "hsl(270 70% 60%)" },
-  { text: "Brand Consistency.", color: "hsl(82 85% 55%)" },
-  { text: "Storytellers", color: "hsl(200 100% 50%)" },
-  { text: "Strategic Impact.", color: "hsl(270 70% 60%)" },
-  { text: "Communicators", color: "hsl(82 85% 55%)" },
-  { text: "Audience Growth.", color: "hsl(200 100% 50%)" },
-  { text: "Brand Teams", color: "hsl(270 70% 60%)" },
-  { text: "Every Touchpoint.", color: "hsl(82 85% 55%)" },
-  { text: "Leaders", color: "hsl(200 100% 50%)" },
-  { text: "Audience Connection.", color: "hsl(270 70% 60%)" },
-];
-
 function ScrollRevealSection({ children, className }: { children: React.ReactNode; className?: string }) {
   const { ref, isVisible } = useScrollReveal<HTMLDivElement>();
   return (
@@ -186,22 +179,6 @@ function ScrollRevealSection({ children, className }: { children: React.ReactNod
 }
 
 export default function LandingPage() {
-  const [nounIndex, setNounIndex] = useState(() => Math.floor(Math.random() * HERO_NOUNS.length));
-  const [nounFade, setNounFade] = useState(true);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setNounFade(false);
-      setTimeout(() => {
-        setNounIndex(prev => (prev + 1) % HERO_NOUNS.length);
-        setNounFade(true);
-      }, 400);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const currentNoun = HERO_NOUNS[nounIndex];
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <StickyCtaBar />
@@ -245,40 +222,33 @@ export default function LandingPage() {
               </Badge>
             </div>
 
-            {/* Primary headline — rotating noun on second line */}
-            <h1 
+            {/* Primary headline — concrete, scannable */}
+            <h1
               className="font-serif text-4xl sm:text-5xl lg:text-6xl tracking-tight animate-fade-in max-w-4xl mx-auto leading-tight"
               style={{ animationDelay: '0.15s' }}
             >
-              <span className="text-white">Built for</span>
-              <br />
+              <span className="text-white">AI copywriting that stays</span>{' '}
               <span
-                className="inline-block font-semibold transition-all duration-500"
-                style={{
-                  opacity: nounFade ? 1 : 0,
-                  transform: nounFade ? 'translateY(0)' : 'translateY(8px)',
-                  color: currentNoun.color,
-                }}
+                className="font-semibold bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_65%)] bg-clip-text text-transparent"
               >
-                {currentNoun.text}
+                on your brand.
               </span>
             </h1>
 
             {/* Sub-header */}
-            <p 
-              className="text-lg sm:text-xl text-white/50 max-w-2xl mx-auto leading-relaxed animate-fade-in"
+            <p
+              className="text-lg sm:text-xl text-white/70 max-w-2xl mx-auto leading-relaxed animate-fade-in"
               style={{ animationDelay: '0.25s' }}
             >
-              Your Brand. Every Channel. Always{' '}
-              <span className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_65%)] bg-clip-text text-transparent font-semibold">On-Voice.</span>
+              Upload your brand voice once. Generate emails, social posts, journeys, and campaigns that sound like <span className="text-white font-semibold">you</span> — across every channel.
             </p>
 
             {/* CTA Buttons */}
-            <div 
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center sm:items-start pt-2 animate-fade-in"
+            <div
+              className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center sm:items-start pt-2 animate-fade-in"
               style={{ animationDelay: '0.35s' }}
             >
-              <Button 
+              <Button
                 asChild
                 size="lg"
                 className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] shadow-[0_0_30px_hsl(82_85%_55%_/_0.3)] hover:shadow-[0_0_40px_hsl(82_85%_55%_/_0.5)] transition-all duration-300 text-base px-8 py-6 font-bold border-0"
@@ -289,20 +259,35 @@ export default function LandingPage() {
                 </Link>
               </Button>
               <div className="flex flex-col items-center">
-                <Button 
+                <Button
                   asChild
                   variant="ghost"
                   size="lg"
-                  className="border-2 border-white/30 text-white bg-white/5 hover:bg-white/15 hover:border-white/50 text-base px-8 py-6 backdrop-blur-sm"
+                  className="border-2 border-[hsl(82_85%_55%_/_0.4)] text-white bg-white/5 hover:bg-[hsl(82_85%_55%_/_0.15)] hover:border-[hsl(82_85%_55%_/_0.6)] text-base px-8 py-6 backdrop-blur-sm"
                 >
-                  <Link to="/login">
-                    Sign In
+                  <Link to="/evaluate">
+                    Try the Evaluator
                   </Link>
                 </Button>
-                <Link to="/login" className="text-white/35 text-[10px] mt-1 hover:text-white/55 transition-colors">
-                  Already have an account?
-                </Link>
+                <span className="text-[hsl(82_85%_65%)] text-[10px] mt-1 font-medium">
+                  Free · No signup
+                </span>
               </div>
+            </div>
+
+            {/* Audience tag */}
+            <p
+              className="text-white/50 text-sm animate-fade-in pt-1"
+              style={{ animationDelay: '0.45s' }}
+            >
+              For higher-ed, enterprise, nonprofit, and healthcare brand teams.
+            </p>
+
+            {/* Sign in — small tertiary */}
+            <div className="animate-fade-in pt-1" style={{ animationDelay: '0.5s' }}>
+              <Link to="/login" className="text-white/40 text-xs hover:text-white/70 transition-colors">
+                Already have an account? Sign in
+              </Link>
             </div>
 
           </div>
@@ -325,10 +310,11 @@ export default function LandingPage() {
         </div>
       </header>
 
+      {/* Hero product proof — static, mobile-fast */}
+      <HeroProductProof />
+
       {/* Social Proof Strip */}
-      <ScrollRevealSection>
-        <SocialProofStrip />
-      </ScrollRevealSection>
+      <SocialProofStrip />
 
       {/* AI Credibility — Position #2 */}
       <ScrollRevealSection>
@@ -361,12 +347,14 @@ export default function LandingPage() {
             </div>
           </ScrollRevealSection>
 
-          {/* Top 2 showcases inline */}
-          <ScrollRevealSection><MessageBuilderShowcase /></ScrollRevealSection>
-          <ScrollRevealSection><JourneyBuilderShowcase /></ScrollRevealSection>
+          {/* Top 2 showcases inline (lazy) */}
+          <Suspense fallback={<div className="h-64" />}>
+            <ScrollRevealSection><MessageBuilderShowcase /></ScrollRevealSection>
+            <ScrollRevealSection><JourneyBuilderShowcase /></ScrollRevealSection>
 
-          {/* Remaining 3 in tabbed format */}
-          <ScrollRevealSection><ProductTourTabs /></ScrollRevealSection>
+            {/* Remaining 3 in tabbed format */}
+            <ScrollRevealSection><ProductTourTabs /></ScrollRevealSection>
+          </Suspense>
         </div>
       </section>
 

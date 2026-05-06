@@ -39,6 +39,12 @@ export function StickyCtaBar() {
             Get started with CampusVoice
           </p>
           <div className="flex items-center gap-2 flex-shrink-0">
+            <Link
+              to="/evaluate"
+              className="hidden sm:inline-flex text-white/80 hover:text-white text-xs font-medium underline-offset-4 hover:underline"
+            >
+              Try free
+            </Link>
             <Button
               asChild
               size="sm"
