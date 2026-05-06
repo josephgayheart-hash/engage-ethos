@@ -11,6 +11,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { ArrowRight, Sparkles, Send, Loader2, Lock, Wand2, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
+import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
