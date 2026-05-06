@@ -267,11 +267,11 @@ export default function LandingPage() {
             </p>
 
             {/* CTA Buttons */}
-            <div 
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center sm:items-start pt-2 animate-fade-in"
+            <div
+              className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center sm:items-start pt-2 animate-fade-in"
               style={{ animationDelay: '0.35s' }}
             >
-              <Button 
+              <Button
                 asChild
                 size="lg"
                 className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] shadow-[0_0_30px_hsl(82_85%_55%_/_0.3)] hover:shadow-[0_0_40px_hsl(82_85%_55%_/_0.5)] transition-all duration-300 text-base px-8 py-6 font-bold border-0"
@@ -282,20 +282,35 @@ export default function LandingPage() {
                 </Link>
               </Button>
               <div className="flex flex-col items-center">
-                <Button 
+                <Button
                   asChild
                   variant="ghost"
                   size="lg"
-                  className="border-2 border-white/30 text-white bg-white/5 hover:bg-white/15 hover:border-white/50 text-base px-8 py-6 backdrop-blur-sm"
+                  className="border-2 border-[hsl(82_85%_55%_/_0.4)] text-white bg-white/5 hover:bg-[hsl(82_85%_55%_/_0.15)] hover:border-[hsl(82_85%_55%_/_0.6)] text-base px-8 py-6 backdrop-blur-sm"
                 >
-                  <Link to="/login">
-                    Sign In
+                  <Link to="/evaluate">
+                    Try the Evaluator
                   </Link>
                 </Button>
-                <Link to="/login" className="text-white/35 text-[10px] mt-1 hover:text-white/55 transition-colors">
-                  Already have an account?
-                </Link>
+                <span className="text-[hsl(82_85%_65%)] text-[10px] mt-1 font-medium">
+                  Free · No signup
+                </span>
               </div>
+            </div>
+
+            {/* Audience tag */}
+            <p
+              className="text-white/50 text-sm animate-fade-in pt-1"
+              style={{ animationDelay: '0.45s' }}
+            >
+              For higher-ed, enterprise, nonprofit, and healthcare brand teams.
+            </p>
+
+            {/* Sign in — small tertiary */}
+            <div className="animate-fade-in pt-1" style={{ animationDelay: '0.5s' }}>
+              <Link to="/login" className="text-white/40 text-xs hover:text-white/70 transition-colors">
+                Already have an account? Sign in
+              </Link>
             </div>
 
           </div>
