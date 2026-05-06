@@ -265,8 +265,8 @@ export default function LandingPage() {
                   size="lg"
                   className="border-2 border-[hsl(82_85%_55%_/_0.4)] text-white bg-white/5 hover:bg-[hsl(82_85%_55%_/_0.15)] hover:border-[hsl(82_85%_55%_/_0.6)] text-base px-8 py-6 backdrop-blur-sm"
                 >
-                  <Link to="/evaluate">
-                    Try the Evaluator
+                  <Link to="/try-copywriter">
+                    Try the AI Copywriter
                   </Link>
                 </Button>
                 <span className="text-[hsl(82_85%_65%)] text-[10px] mt-1 font-medium">
