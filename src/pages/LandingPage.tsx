@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
+import { lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  MessageSquare, 
-  BarChart3, 
-  BookOpen, 
-  Shield, 
+import {
+  MessageSquare,
+  BarChart3,
+  BookOpen,
+  Shield,
   ArrowRight,
   Sparkles,
   Target,
@@ -27,16 +27,24 @@ import HowItWorksSection from '@/components/landing/HowItWorksSection';
 
 import PricingSignalSection from '@/components/landing/PricingSignalSection';
 import AICredibilitySection from '@/components/landing/AICredibilitySection';
-import ProductTourTabs from '@/components/landing/ProductTourTabs';
 import { LandingNav } from '@/components/landing/LandingNav';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { SEOHead, getOrganizationSchema, getSoftwareApplicationSchema } from '@/components/SEOHead';
 import { RequestDemoDialog } from '@/components/landing/RequestDemoDialog';
-import { MessageBuilderShowcase, JourneyBuilderShowcase } from '@/components/landing/ProductShowcases';
 import { StickyCtaBar } from '@/components/landing/StickyCtaBar';
 import { SocialProofStrip } from '@/components/landing/SocialProofStrip';
+import { HeroProductProof } from '@/components/landing/HeroProductProof';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { cn } from '@/lib/utils';
+
+// Lazy-load heavy below-the-fold showcases for faster mobile LCP
+const ProductTourTabs = lazy(() => import('@/components/landing/ProductTourTabs'));
+const MessageBuilderShowcase = lazy(() =>
+  import('@/components/landing/ProductShowcases').then(m => ({ default: m.MessageBuilderShowcase }))
+);
+const JourneyBuilderShowcase = lazy(() =>
+  import('@/components/landing/ProductShowcases').then(m => ({ default: m.JourneyBuilderShowcase }))
+);
 
 // JSON-LD schemas for landing page
 const landingPageSchemas = [
