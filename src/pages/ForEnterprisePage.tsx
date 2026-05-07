@@ -23,6 +23,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { RequestDemoDialog } from "@/components/landing/RequestDemoDialog";
+import fieldmarkLogoWhite from "@/assets/fieldmark-logo-white.png";
 import { SEOHead } from "@/components/SEOHead";
 import { WaveBackground } from "@/components/WaveBackground";
 import GlowOrbs from "@/components/landing/GlowOrbs";
