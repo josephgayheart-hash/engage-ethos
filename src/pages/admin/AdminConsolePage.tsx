@@ -53,7 +53,8 @@ import {
   FileSignature,
   Plus,
   Copy,
-  Mail
+  Mail,
+  Cloud
 } from 'lucide-react';
 
 interface UserStats {
@@ -660,6 +661,14 @@ export default function AdminConsolePage() {
       color: 'bg-[hsl(45,93%,47%)]',
       stat: 'Review queue'
     }] : []),
+    {
+      title: 'Salesforce Canvas Embed',
+      description: 'Embed Copywriter, Message Builder & Translate inside Salesforce',
+      icon: Cloud,
+      href: '/docs/salesforce-canvas',
+      color: 'bg-[hsl(210,90%,45%)]',
+      stat: 'Integration guide'
+    },
   ];
 
   return (
