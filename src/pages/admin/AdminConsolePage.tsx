@@ -53,7 +53,8 @@ import {
   FileSignature,
   Plus,
   Copy,
-  Mail
+  Mail,
+  Cloud
 } from 'lucide-react';
 
 interface UserStats {
