@@ -96,6 +96,7 @@ import RegionAdapterPage from "./pages/RegionAdapterPage";
 import RegionalPlaybookPage from "./pages/RegionalPlaybookPage";
 import SocialPostsPage from "./pages/SocialPostsPage";
 import CopywriterPopoutPage from "./pages/CopywriterPopoutPage";
+import SalesforceCanvasGuidePage from "./pages/docs/SalesforceCanvasGuidePage";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
 import { IndustryProvider } from "@/contexts/IndustryContext";
 import { BrandModeProvider } from "@/contexts/BrandModeContext";
@@ -186,6 +187,8 @@ const AppRoutes = () => (
     <Route path="/terms" element={<TermsOfServicePage />} />
     <Route path="/about" element={<AboutPage />} />
     <Route path="/try-copywriter" element={<TryCopywriterPage />} />
+    <Route path="/docs/salesforce-canvas" element={<SalesforceCanvasGuidePage />} />
+    <Route path="/integrations/salesforce-canvas" element={<Navigate to="/docs/salesforce-canvas" replace />} />
 
     {/* Authenticated routes — wrapped in AppLayout sidebar shell */}
     <Route element={<RequireAuth><AppLayout /></RequireAuth>}>
