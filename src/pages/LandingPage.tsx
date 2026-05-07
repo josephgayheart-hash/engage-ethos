@@ -496,9 +496,13 @@ export default function LandingPage() {
         <div className="absolute bottom-20 left-[8%] w-48 h-48 rounded-full blur-[80px] opacity-20" style={{ backgroundColor: '#0082cb' }} />
 
         <div className="max-w-4xl mx-auto relative z-10">
-          {/* Fieldmark wordmark */}
+          {/* Fieldmark logo */}
           <div className="mb-8">
-            <span className="text-2xl font-bold tracking-tight text-white">Fieldmark</span>
+            <img
+              src={fieldmarkLogoWhite}
+              alt="Fieldmark"
+              className="h-10 sm:h-12 w-auto"
+            />
           </div>
 
           <p className="text-sm font-medium uppercase tracking-widest mb-3" style={{ color: '#0082cb' }}>
