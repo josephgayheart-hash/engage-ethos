@@ -96,6 +96,7 @@ import RegionAdapterPage from "./pages/RegionAdapterPage";
 import RegionalPlaybookPage from "./pages/RegionalPlaybookPage";
 import SocialPostsPage from "./pages/SocialPostsPage";
 import CopywriterPopoutPage from "./pages/CopywriterPopoutPage";
+import SalesforceCanvasGuidePage from "./pages/docs/SalesforceCanvasGuidePage";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
 import { IndustryProvider } from "@/contexts/IndustryContext";
 import { BrandModeProvider } from "@/contexts/BrandModeContext";
