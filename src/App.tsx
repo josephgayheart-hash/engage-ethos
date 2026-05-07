@@ -187,6 +187,8 @@ const AppRoutes = () => (
     <Route path="/terms" element={<TermsOfServicePage />} />
     <Route path="/about" element={<AboutPage />} />
     <Route path="/try-copywriter" element={<TryCopywriterPage />} />
+    <Route path="/docs/salesforce-canvas" element={<SalesforceCanvasGuidePage />} />
+    <Route path="/integrations/salesforce-canvas" element={<Navigate to="/docs/salesforce-canvas" replace />} />
 
     {/* Authenticated routes — wrapped in AppLayout sidebar shell */}
     <Route element={<RequireAuth><AppLayout /></RequireAuth>}>
