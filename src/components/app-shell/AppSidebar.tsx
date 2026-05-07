@@ -13,7 +13,6 @@ import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { useIndustry } from "@/contexts/IndustryContext";
 import { useBrandMode } from "@/contexts/BrandModeContext";
 import { ReferColleagueDialog } from "@/components/ReferColleagueDialog";
-import { useBrandMode as _unusedBrandModeHook } from "@/contexts/BrandModeContext";
 import fieldmarkLogo from "@/assets/fieldmark-logo.png";
 
 import {
