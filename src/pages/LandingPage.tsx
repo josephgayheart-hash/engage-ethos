@@ -23,6 +23,7 @@ import {
   BarChart
 } from 'lucide-react';
 import campusvoiceLogo from '@/assets/campusvoice-logo-new.png';
+import fieldmarkLogoWhite from '@/assets/fieldmark-logo-white.png';
 import HowItWorksSection from '@/components/landing/HowItWorksSection';
 
 import PricingSignalSection from '@/components/landing/PricingSignalSection';
