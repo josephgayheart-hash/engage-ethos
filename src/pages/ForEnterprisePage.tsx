@@ -23,6 +23,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { RequestDemoDialog } from "@/components/landing/RequestDemoDialog";
+import fieldmarkLogoWhite from "@/assets/fieldmark-logo-white.png";
 import { SEOHead } from "@/components/SEOHead";
 import { WaveBackground } from "@/components/WaveBackground";
 import GlowOrbs from "@/components/landing/GlowOrbs";
@@ -215,6 +216,11 @@ export default function ForEnterprisePage() {
           <GlowOrbs variant="hero" />
           <div className="relative z-10 pt-12 pb-20 sm:pt-20 sm:pb-28 px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto text-center">
+              <img
+                src={fieldmarkLogoWhite}
+                alt="Fieldmark"
+                className="h-12 sm:h-14 w-auto mx-auto mb-8"
+              />
               <Badge
                 variant="outline"
                 className="mb-6 px-4 py-1.5 text-sm font-medium border-[hsl(var(--cyber-lime)_/_0.4)] text-[hsl(var(--cyber-lime))] bg-[hsl(var(--cyber-lime)_/_0.08)]"
