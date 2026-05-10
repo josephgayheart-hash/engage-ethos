@@ -101,6 +101,7 @@ import SalesforceCanvasGuidePage from "./pages/docs/SalesforceCanvasGuidePage";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
 import { IndustryProvider } from "@/contexts/IndustryContext";
 import { BrandModeProvider } from "@/contexts/BrandModeContext";
+import { PostHogIdentifier } from "@/components/PostHogIdentifier";
 
 const queryClient = new QueryClient();
 
@@ -313,6 +314,7 @@ const App = () => (
     <TooltipProvider>
       <BrowserRouter>
         <AuthProvider>
+          <PostHogIdentifier />
           <PageTracker />
           <ScrollToTop />
           <Toaster />
