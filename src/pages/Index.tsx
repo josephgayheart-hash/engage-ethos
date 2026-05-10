@@ -1,4 +1,6 @@
 import { useEffect } from "react";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { DashboardHero } from "@/components/dashboard";
 import { ScratchpadCapture } from "@/components/dashboard/ScratchpadCapture";
 
