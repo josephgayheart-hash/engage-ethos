@@ -38,10 +38,15 @@ function RevealSection({ children, className, delay = 0 }: { children: React.Rea
 
 const Index = () => {
   const { brand } = useBrandMode();
+  const { isSuperAdmin, isImpersonating } = useAuth();
 
   useEffect(() => {
     document.title = `${brand.name} — Dashboard`;
   }, [brand.name]);
+
+  if (isSuperAdmin && !isImpersonating) {
+    return <Navigate to="/platform" replace />;
+  }
 
   return (
     <div className="bg-background">
