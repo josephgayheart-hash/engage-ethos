@@ -436,16 +436,26 @@ export default function PlatformOpsPage() {
           </Card>
         </div>
 
-        {/* Third-party analytics placeholder */}
-        <Card className="mb-6 border-dashed">
-          <CardContent className="py-6 flex items-center justify-between gap-4">
+        {/* PostHog analytics */}
+        <Card className="mb-6">
+          <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
             <div>
-              <p className="font-medium text-sm">Connect a third-party analytics provider</p>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Activity className="w-4 h-4" /> PostHog Analytics
+              </CardTitle>
               <p className="text-xs text-muted-foreground mt-1">
-                Drop in Plausible, GA4, or PostHog for full session, traffic source, and conversion analytics.
+                Sessions, autocaptured events, funnels, and recordings — identified by user &amp; tenant.
               </p>
             </div>
-            <Button variant="outline" size="sm" disabled>Coming soon</Button>
+            <Button variant="outline" size="sm" asChild>
+              <a href="https://us.posthog.com" target="_blank" rel="noreferrer">
+                Open PostHog <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
+              </a>
+            </Button>
+          </CardHeader>
+          <CardContent className="text-xs text-muted-foreground">
+            Tracking is live on every page. To embed a specific dashboard here, open it in PostHog →
+            Share → Embed, then paste the iframe URL.
           </CardContent>
         </Card>
 
