@@ -175,10 +175,10 @@ function buildTenantActivity(
 const QUICK_LINKS = [
   { label: "Users", icon: Users, href: "/admin/users" },
   { label: "Onboarding Requests", icon: Inbox, href: "/admin/onboarding" },
-  { label: "Beta Feedback", icon: MessageSquare, href: "/admin/feedback" },
+  { label: "Beta Feedback", icon: MessageSquare, href: "/feedback" },
   { label: "Security Events", icon: Shield, href: "/admin/security-events" },
   { label: "NDA Links", icon: FileSignature, href: "/admin/nda-links" },
-  { label: "QA Diagnostics", icon: Server, href: "/admin/qa-diagnostics" },
+  { label: "QA Diagnostics", icon: Server, href: "/admin/qa" },
   { label: "AI Tech", icon: Database, href: "/admin/ai-technology" },
   { label: "Admin Console", icon: Activity, href: "/admin/console" },
 ];
