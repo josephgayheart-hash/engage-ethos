@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { WaveBackground } from "@/components/WaveBackground";
+import { PostHogAnalyticsPanel } from "@/components/platform/PostHogAnalyticsPanel";
 import {
   Activity, Users, Building2, TrendingUp, RefreshCw, AlertTriangle,
   Mail, Shield, FileSignature, Database, Inbox, MessageSquare, ExternalLink, Server,
@@ -436,28 +437,7 @@ export default function PlatformOpsPage() {
           </Card>
         </div>
 
-        {/* PostHog analytics */}
-        <Card className="mb-6">
-          <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
-            <div>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Activity className="w-4 h-4" /> PostHog Analytics
-              </CardTitle>
-              <p className="text-xs text-muted-foreground mt-1">
-                Sessions, autocaptured events, funnels, and recordings — identified by user &amp; tenant.
-              </p>
-            </div>
-            <Button variant="outline" size="sm" asChild>
-              <a href="https://us.posthog.com" target="_blank" rel="noreferrer">
-                Open PostHog <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
-              </a>
-            </Button>
-          </CardHeader>
-          <CardContent className="text-xs text-muted-foreground">
-            Tracking is live on every page. To embed a specific dashboard here, open it in PostHog →
-            Share → Embed, then paste the iframe URL.
-          </CardContent>
-        </Card>
+        <PostHogAnalyticsPanel />
 
         {/* Quick Links */}
         <Card>
