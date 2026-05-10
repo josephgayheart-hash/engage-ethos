@@ -136,7 +136,18 @@ export default function LoginPage() {
           return;
         }
 
-        navigate(profile.password_reset_required ? '/change-password' : '/dashboard');
+        if (profile.password_reset_required) {
+          navigate('/change-password');
+        } else {
+          // Super admins land on Platform Ops, everyone else on dashboard
+          const { data: roleRow } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', data.user.id)
+            .eq('role', 'super_admin')
+            .maybeSingle();
+          navigate(roleRow ? '/platform' : '/dashboard');
+        }
       }
     } catch {
       setError('An unexpected error occurred. Please try again.');
