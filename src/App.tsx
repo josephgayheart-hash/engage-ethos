@@ -254,6 +254,7 @@ const AppRoutes = () => (
 
       {/* Super Admin routes */}
       <Route element={<RequireSuperAdmin><Outlet /></RequireSuperAdmin>}>
+        <Route path="/platform" element={<PlatformOpsPage />} />
         <Route path="/admin/panel" element={<AdminPanel />} />
         <Route path="/admin/onboarding" element={<AdminOnboardingPage />} />
         <Route path="/admin/qa" element={<QADiagnosticsPage />} />
