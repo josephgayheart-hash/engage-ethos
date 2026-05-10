@@ -50,6 +50,7 @@ import InstitutionDetailPage from "./pages/admin/InstitutionDetailPage";
 import UserDetailPage from "./pages/admin/UserDetailPage";
 import ContentDNAPage from "./pages/admin/ContentDNAPage";
 import SecurityEventsPage from "./pages/admin/SecurityEventsPage";
+import PlatformOpsPage from "./pages/admin/PlatformOpsPage";
 import ApprovalsPage from "./pages/ApprovalsPage";
 import InitialSetupPage from "./pages/InitialSetupPage";
 import MessageDetailPage from "./pages/MessageDetailPage";
@@ -253,6 +254,7 @@ const AppRoutes = () => (
 
       {/* Super Admin routes */}
       <Route element={<RequireSuperAdmin><Outlet /></RequireSuperAdmin>}>
+        <Route path="/platform" element={<PlatformOpsPage />} />
         <Route path="/admin/panel" element={<AdminPanel />} />
         <Route path="/admin/onboarding" element={<AdminOnboardingPage />} />
         <Route path="/admin/qa" element={<QADiagnosticsPage />} />

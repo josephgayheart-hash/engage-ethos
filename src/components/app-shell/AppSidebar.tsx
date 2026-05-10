@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Home, PenTool, Route, ClipboardCheck, Wrench, FolderOpen, Library, FileEdit,
   Sparkles, ImageIcon, Palette, CheckCircle, Settings, Building2, Layers, BarChart3,
-  Shield, Contact, LogOut, User, UserPlus, ChevronsUpDown, Search, Dna, Gift, Heart, Cpu,
+  Shield, Contact, LogOut, User, UserPlus, ChevronsUpDown, Search, Dna, Gift, Heart, Cpu, Activity,
   ClipboardList, Swords, Globe2, MapPin, Share2,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
@@ -74,6 +74,7 @@ const manageItems = [
 ];
 
 const superAdminItems = [
+  { title: "Platform Ops", url: "/platform", icon: Activity },
   { title: "Super Admin Panel", url: "/admin/panel", icon: Shield },
   { title: "CRM", url: "/admin/crm", icon: Contact },
   { title: "AI Technology", url: "/admin/ai-technology", icon: Cpu },
