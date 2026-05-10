@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Home, PenTool, Route, ClipboardCheck, Wrench, FolderOpen, Library, FileEdit,
   Sparkles, ImageIcon, Palette, CheckCircle, Settings, Building2, Layers, BarChart3,
-  Shield, Contact, LogOut, User, UserPlus, ChevronsUpDown, Search, Dna, Gift, Heart, Cpu,
+  Shield, Contact, LogOut, User, UserPlus, ChevronsUpDown, Search, Dna, Gift, Heart, Cpu, Activity,
   ClipboardList, Swords, Globe2, MapPin, Share2,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
