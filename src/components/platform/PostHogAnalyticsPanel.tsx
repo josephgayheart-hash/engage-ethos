@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Activity, ExternalLink, RefreshCw, Globe, Video, Users, BarChart3,
   Eye, MousePointerClick, Smartphone, MapPin, TrendingUp, Play,
+  Radio, ArrowUpRight, ArrowDownRight, AlertTriangle, Chrome, LogOut,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toastError } from "@/lib/errors";
@@ -46,27 +47,46 @@ function timeAgo(iso: string) {
   return `${Math.floor(s / 86400)}d ago`;
 }
 
-function Sparkline({ values }: { values: number[] }) {
+function pctDelta(curr: number, prev: number) {
+  if (!prev) return curr > 0 ? 100 : 0;
+  return ((curr - prev) / prev) * 100;
+}
+
+function Sparkline({ values, color = "hsl(var(--primary))" }: { values: number[]; color?: string }) {
   if (!values.length) return null;
   const max = Math.max(...values, 1);
-  const w = 100, h = 28;
+  const w = 100, h = 32;
   const step = w / Math.max(values.length - 1, 1);
   const pts = values.map((v, i) => `${(i * step).toFixed(2)},${(h - (v / max) * h).toFixed(2)}`).join(" ");
+  const area = `0,${h} ${pts} ${w},${h}`;
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-7" preserveAspectRatio="none">
-      <polyline points={pts} fill="none" stroke="hsl(var(--primary))" strokeWidth="1.5" />
+    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-8" preserveAspectRatio="none">
+      <polygon points={area} fill={color} fillOpacity="0.12" />
+      <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" />
     </svg>
   );
 }
 
-function Stat({ icon: Icon, label, value, sub }: { icon: any; label: string; value: string; sub?: string }) {
+function HeroStat({
+  label, value, delta, sparkValues, accent,
+}: { label: string; value: string; delta?: number; sparkValues?: number[]; accent: string }) {
+  const up = delta != null && delta >= 0;
   return (
-    <div className="rounded-lg border bg-card p-3">
-      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-        <Icon className="w-3.5 h-3.5" /> {label}
+    <div className="relative rounded-xl border bg-gradient-to-br from-card to-muted/40 p-4 overflow-hidden">
+      <div className="absolute inset-x-0 top-0 h-0.5" style={{ background: accent }} />
+      <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="flex items-end justify-between gap-2 mt-1">
+        <div className="text-3xl font-bold font-serif tabular-nums leading-none">{value}</div>
+        {delta != null && (
+          <div className={`flex items-center gap-0.5 text-xs font-medium ${up ? "text-emerald-600" : "text-rose-600"}`}>
+            {up ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
+            {Math.abs(delta).toFixed(0)}%
+          </div>
+        )}
       </div>
-      <div className="text-2xl font-semibold mt-1 tabular-nums">{value}</div>
-      {sub && <div className="text-[11px] text-muted-foreground mt-0.5">{sub}</div>}
+      {sparkValues && sparkValues.length > 0 && (
+        <div className="mt-2"><Sparkline values={sparkValues} color={accent} /></div>
+      )}
     </div>
   );
 }
@@ -87,6 +107,45 @@ function BarRow({ label, value, max, href }: { label: string; value: number; max
         <div className="h-1.5 rounded-full bg-muted overflow-hidden">
           <div className="h-full bg-primary/70" style={{ width: `${pct}%` }} />
         </div>
+      </div>
+    </div>
+  );
+}
+
+function Heatmap({ data }: { data: { dow: number; hour: number; c: number }[] }) {
+  const max = Math.max(...data.map((d) => d.c), 1);
+  const grid: Record<string, number> = {};
+  data.forEach((d) => { grid[`${d.dow}-${d.hour}`] = d.c; });
+  // PostHog toDayOfWeek: 1=Mon..7=Sun
+  const dows = [1, 2, 3, 4, 5, 6, 7];
+  const dowLabels = ["M", "T", "W", "T", "F", "S", "S"];
+  return (
+    <div className="overflow-x-auto">
+      <div className="inline-block min-w-full">
+        <div className="flex gap-1 pl-6 mb-1">
+          {Array.from({ length: 24 }).map((_, h) => (
+            <div key={h} className="w-3.5 text-[8px] text-muted-foreground text-center tabular-nums">
+              {h % 6 === 0 ? h : ""}
+            </div>
+          ))}
+        </div>
+        {dows.map((dow, i) => (
+          <div key={dow} className="flex items-center gap-1">
+            <div className="w-5 text-[10px] text-muted-foreground">{dowLabels[i]}</div>
+            {Array.from({ length: 24 }).map((_, h) => {
+              const v = grid[`${dow}-${h}`] || 0;
+              const intensity = v ? 0.15 + (v / max) * 0.85 : 0;
+              return (
+                <div
+                  key={h}
+                  className="w-3.5 h-3.5 rounded-[2px]"
+                  style={{ backgroundColor: v ? `hsl(82 85% 45% / ${intensity})` : "hsl(var(--muted))" }}
+                  title={`${dowLabels[i]} ${h}:00 — ${v} pageviews`}
+                />
+              );
+            })}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -124,37 +183,61 @@ export function PostHogAnalyticsPanel() {
   useEffect(() => {
     if (tab === "replays" && replays === null) load("replays");
     if (tab === "persons" && persons === null) load("persons");
+    // Auto-refresh live every 30s on overview
+    if (tab === "overview") {
+      const t = setInterval(() => load("overview"), 30_000);
+      return () => clearInterval(t);
+    }
     // eslint-disable-next-line
   }, [tab]);
 
   const overview = useMemo(() => {
     if (!data) return null;
-    const totals = rowsFromQuery(data.totals)[0] || {};
-    const daily = rowsFromQuery(data.daily);
-    const topPages = rowsFromQuery(data.topPages);
-    const sources = rowsFromQuery(data.sources);
-    const devices = rowsFromQuery(data.devices);
-    const countries = rowsFromQuery(data.countries);
-    const topEvents = rowsFromQuery(data.topEvents);
-    return { totals, daily, topPages, sources, devices, countries, topEvents };
+    return {
+      live: Number(rowsFromQuery(data.live)[0]?.live || 0),
+      today: rowsFromQuery(data.today)[0] || {},
+      yesterday: rowsFromQuery(data.yesterday)[0] || {},
+      totals: rowsFromQuery(data.totals)[0] || {},
+      prevTotals: rowsFromQuery(data.prevTotals)[0] || {},
+      daily: rowsFromQuery(data.daily),
+      topPages: rowsFromQuery(data.topPages),
+      sources: rowsFromQuery(data.sources),
+      devices: rowsFromQuery(data.devices),
+      countries: rowsFromQuery(data.countries),
+      browsers: rowsFromQuery(data.browsers),
+      topEvents: rowsFromQuery(data.topEvents),
+      newVsReturning: rowsFromQuery(data.newVsReturning)[0] || {},
+      hourly: rowsFromQuery(data.hourly).map((r) => ({ dow: Number(r.dow), hour: Number(r.hour), c: Number(r.c) })),
+      exits: rowsFromQuery(data.exits),
+      exceptions: rowsFromQuery(data.exceptions),
+    };
   }, [data]);
 
   const phProjectUrl = projectId ? `${POSTHOG_BASE}/project/${projectId}` : POSTHOG_BASE;
 
   return (
-    <Card className="mb-6">
-      <CardHeader className="pb-3 flex-row items-start justify-between space-y-0 gap-4">
+    <Card className="mb-6 overflow-hidden">
+      <CardHeader className="pb-3 flex-row items-start justify-between space-y-0 gap-4 bg-gradient-to-r from-muted/30 to-transparent">
         <div>
           <CardTitle className="text-base flex items-center gap-2">
-            <Activity className="w-4 h-4" /> PostHog Analytics
+            <Activity className="w-4 h-4" /> Website Analytics
+            {overview && overview.live > 0 && (
+              <Badge variant="outline" className="text-[10px] gap-1 border-emerald-500/40 text-emerald-700 dark:text-emerald-400">
+                <span className="relative flex w-1.5 h-1.5">
+                  <span className="absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-75" />
+                  <span className="relative rounded-full w-1.5 h-1.5 bg-emerald-500" />
+                </span>
+                {overview.live} live
+              </Badge>
+            )}
           </CardTitle>
           <p className="text-xs text-muted-foreground mt-1">
-            Native website analytics & session replays — pulled live from PostHog.
+            Real-time traffic, conversions, and product engagement — pulled live from PostHog.
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Select value={String(days)} onValueChange={(v) => setDays(Number(v))}>
-            <SelectTrigger className="h-8 w-[110px] text-xs"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-8 w-[120px] text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="1">Last 24h</SelectItem>
               <SelectItem value="7">Last 7 days</SelectItem>
@@ -185,27 +268,70 @@ export function PostHogAnalyticsPanel() {
           {/* OVERVIEW */}
           <TabsContent value="overview" className="mt-4 space-y-4">
             {loading && !overview ? (
-              <div className="grid grid-cols-3 gap-3">
-                {[0, 1, 2].map((i) => <Skeleton key={i} className="h-20" />)}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-24" />)}
               </div>
             ) : overview ? (
               <>
-                <div className="grid grid-cols-3 gap-3">
-                  <Stat icon={Eye} label="Pageviews" value={fmt(Number(overview.totals.pageviews || 0))} sub={`Last ${days} day${days > 1 ? "s" : ""}`} />
-                  <Stat icon={Users} label="Unique visitors" value={fmt(Number(overview.totals.visitors || 0))} />
-                  <Stat icon={TrendingUp} label="Sessions" value={fmt(Number(overview.totals.sessions || 0))} />
+                {/* Hero pulse strip */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <HeroStat
+                    label="Live Visitors"
+                    value={String(overview.live)}
+                    accent="hsl(142 71% 45%)"
+                  />
+                  <HeroStat
+                    label="Pageviews Today"
+                    value={fmt(Number(overview.today.pageviews || 0))}
+                    delta={pctDelta(Number(overview.today.pageviews || 0), Number(overview.yesterday.pageviews || 0))}
+                    accent="hsl(82 85% 45%)"
+                  />
+                  <HeroStat
+                    label={`Visitors (${days}d)`}
+                    value={fmt(Number(overview.totals.visitors || 0))}
+                    delta={pctDelta(Number(overview.totals.visitors || 0), Number(overview.prevTotals.visitors || 0))}
+                    sparkValues={overview.daily.map((d: any) => Number(d.visitors || 0))}
+                    accent="hsl(270 70% 55%)"
+                  />
+                  <HeroStat
+                    label={`Pageviews (${days}d)`}
+                    value={fmt(Number(overview.totals.pageviews || 0))}
+                    delta={pctDelta(Number(overview.totals.pageviews || 0), Number(overview.prevTotals.pageviews || 0))}
+                    sparkValues={overview.daily.map((d: any) => Number(d.pageviews || 0))}
+                    accent="hsl(200 100% 50%)"
+                  />
                 </div>
 
-                {/* Trend */}
-                <div className="rounded-lg border p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs font-medium flex items-center gap-1.5"><TrendingUp className="w-3.5 h-3.5" /> Daily trend</p>
-                    <span className="text-[11px] text-muted-foreground">pageviews</span>
+                {/* Secondary KPIs */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="rounded-lg border p-3">
+                    <div className="text-[11px] uppercase tracking-wider text-muted-foreground flex items-center gap-1"><TrendingUp className="w-3 h-3" /> Sessions</div>
+                    <div className="text-xl font-semibold mt-1 tabular-nums">{fmt(Number(overview.totals.sessions || 0))}</div>
                   </div>
-                  <Sparkline values={overview.daily.map((d: any) => Number(d.pageviews || 0))} />
-                  <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
-                    <span>{overview.daily[0]?.day || ""}</span>
-                    <span>{overview.daily[overview.daily.length - 1]?.day || ""}</span>
+                  {(() => {
+                    const n = Number(overview.newVsReturning.new_visitors || 0);
+                    const r = Number(overview.newVsReturning.returning_visitors || 0);
+                    const total = n + r;
+                    const newPct = total ? (n / total) * 100 : 0;
+                    return (
+                      <div className="rounded-lg border p-3 col-span-2">
+                        <div className="text-[11px] uppercase tracking-wider text-muted-foreground">New vs Returning</div>
+                        <div className="flex items-center gap-3 mt-2">
+                          <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden flex">
+                            <div className="h-full bg-primary" style={{ width: `${newPct}%` }} />
+                            <div className="h-full bg-purple-500/70" style={{ width: `${100 - newPct}%` }} />
+                          </div>
+                          <span className="text-xs tabular-nums whitespace-nowrap">{newPct.toFixed(0)}% new</span>
+                        </div>
+                        <div className="flex items-center justify-between text-[10px] text-muted-foreground mt-1">
+                          <span>{fmt(n)} new</span><span>{fmt(r)} returning</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                  <div className="rounded-lg border p-3">
+                    <div className="text-[11px] uppercase tracking-wider text-muted-foreground flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Errors ({days}d)</div>
+                    <div className="text-xl font-semibold mt-1 tabular-nums">{fmt(overview.exceptions.reduce((a: number, e: any) => a + Number(e.c || 0), 0))}</div>
                   </div>
                 </div>
 
@@ -224,7 +350,7 @@ export function PostHogAnalyticsPanel() {
 
                   {/* Sources */}
                   <div className="rounded-lg border p-3">
-                    <p className="text-xs font-medium mb-2 flex items-center gap-1.5"><ExternalLink className="w-3.5 h-3.5" /> Top sources</p>
+                    <p className="text-xs font-medium mb-2 flex items-center gap-1.5"><ExternalLink className="w-3.5 h-3.5" /> Acquisition channels</p>
                     {(() => {
                       const max = Math.max(...overview.sources.map((r: any) => Number(r.visits) || 0), 1);
                       return overview.sources.map((r: any, i: number) => (
@@ -259,16 +385,64 @@ export function PostHogAnalyticsPanel() {
                   </div>
                 </div>
 
-                {/* Top events */}
+                {/* Heatmap */}
                 <div className="rounded-lg border p-3">
-                  <p className="text-xs font-medium mb-2 flex items-center gap-1.5"><MousePointerClick className="w-3.5 h-3.5" /> Top custom events</p>
-                  {(() => {
-                    const max = Math.max(...overview.topEvents.map((r: any) => Number(r.c) || 0), 1);
-                    return overview.topEvents.map((r: any, i: number) => (
-                      <BarRow key={i} label={r.event} value={Number(r.c) || 0} max={max} />
-                    ));
-                  })()}
-                  {!overview.topEvents.length && <p className="text-xs text-muted-foreground">No custom events yet.</p>}
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-medium flex items-center gap-1.5"><Radio className="w-3.5 h-3.5" /> Traffic heatmap (last 14 days, by day × hour)</p>
+                    <span className="text-[10px] text-muted-foreground">UTC</span>
+                  </div>
+                  {overview.hourly.length ? <Heatmap data={overview.hourly} /> : <p className="text-xs text-muted-foreground">No data yet.</p>}
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-3">
+                  {/* Browsers */}
+                  <div className="rounded-lg border p-3">
+                    <p className="text-xs font-medium mb-2 flex items-center gap-1.5"><Chrome className="w-3.5 h-3.5" /> Browsers</p>
+                    {(() => {
+                      const max = Math.max(...overview.browsers.map((r: any) => Number(r.visitors) || 0), 1);
+                      return overview.browsers.map((r: any, i: number) => (
+                        <BarRow key={i} label={r.browser} value={Number(r.visitors) || 0} max={max} />
+                      ));
+                    })()}
+                    {!overview.browsers.length && <p className="text-xs text-muted-foreground">No data yet.</p>}
+                  </div>
+
+                  {/* Top exit pages */}
+                  <div className="rounded-lg border p-3">
+                    <p className="text-xs font-medium mb-2 flex items-center gap-1.5"><LogOut className="w-3.5 h-3.5" /> Top exit pages</p>
+                    {(() => {
+                      const max = Math.max(...overview.exits.map((r: any) => Number(r.exits) || 0), 1);
+                      return overview.exits.map((r: any, i: number) => (
+                        <BarRow key={i} label={r.path} value={Number(r.exits) || 0} max={max} />
+                      ));
+                    })()}
+                    {!overview.exits.length && <p className="text-xs text-muted-foreground">No data yet.</p>}
+                  </div>
+                </div>
+
+                {/* Top events + Errors */}
+                <div className="grid md:grid-cols-2 gap-3">
+                  <div className="rounded-lg border p-3">
+                    <p className="text-xs font-medium mb-2 flex items-center gap-1.5"><MousePointerClick className="w-3.5 h-3.5" /> Top product events</p>
+                    {(() => {
+                      const max = Math.max(...overview.topEvents.map((r: any) => Number(r.c) || 0), 1);
+                      return overview.topEvents.map((r: any, i: number) => (
+                        <BarRow key={i} label={r.event} value={Number(r.c) || 0} max={max} />
+                      ));
+                    })()}
+                    {!overview.topEvents.length && <p className="text-xs text-muted-foreground">No custom events yet.</p>}
+                  </div>
+
+                  <div className="rounded-lg border p-3">
+                    <p className="text-xs font-medium mb-2 flex items-center gap-1.5"><AlertTriangle className="w-3.5 h-3.5" /> Front-end errors</p>
+                    {(() => {
+                      const max = Math.max(...overview.exceptions.map((r: any) => Number(r.c) || 0), 1);
+                      return overview.exceptions.map((r: any, i: number) => (
+                        <BarRow key={i} label={r.err} value={Number(r.c) || 0} max={max} />
+                      ));
+                    })()}
+                    {!overview.exceptions.length && <p className="text-xs text-muted-foreground">No errors captured 🎉</p>}
+                  </div>
                 </div>
               </>
             ) : null}
