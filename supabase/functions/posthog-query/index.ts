@@ -63,65 +63,40 @@ Deno.serve(async (req) => {
     let payload: any = {};
 
     if (section === "overview") {
-      const [
-        live, today, yesterday, totals, prevTotals, daily,
-        topPages, sources, devices, countries, browsers, topEvents,
-        newVsReturning, hourly, exits, exceptions,
-      ] = await Promise.all([
-        // Live (last 5 min)
-        hogql(`SELECT count(DISTINCT person_id) AS live FROM events WHERE event = '$pageview' AND timestamp > now() - interval 5 minute`),
-        // Today
-        hogql(`SELECT count() AS pageviews, count(DISTINCT person_id) AS visitors FROM events WHERE event = '$pageview' AND timestamp >= toStartOfDay(now())`),
-        // Yesterday (same hour)
-        hogql(`SELECT count() AS pageviews, count(DISTINCT person_id) AS visitors FROM events WHERE event = '$pageview' AND timestamp >= toStartOfDay(now() - interval 1 day) AND timestamp < toStartOfDay(now() - interval 1 day) + (now() - toStartOfDay(now()))`),
-        // Range totals
-        hogql(`SELECT count() AS pageviews, count(DISTINCT person_id) AS visitors, count(DISTINCT properties.$session_id) AS sessions FROM events WHERE event = '$pageview' AND timestamp > ${since}`),
-        // Previous-period totals (for delta)
-        hogql(`SELECT count() AS pageviews, count(DISTINCT person_id) AS visitors, count(DISTINCT properties.$session_id) AS sessions FROM events WHERE event = '$pageview' AND timestamp > ${prevSince} AND timestamp <= ${since}`),
-        // Daily series
-        hogql(`SELECT toDate(timestamp) AS day, count() AS pageviews, count(DISTINCT person_id) AS visitors FROM events WHERE event = '$pageview' AND timestamp > ${since} GROUP BY day ORDER BY day`),
-        // Top pages
-        hogql(`SELECT properties.$pathname AS path, count() AS views, count(DISTINCT person_id) AS visitors FROM events WHERE event = '$pageview' AND timestamp > ${since} GROUP BY path ORDER BY views DESC LIMIT 12`),
-        // Acquisition sources
-        hogql(`SELECT coalesce(nullIf(properties.$referring_domain, ''), 'direct') AS source, count() AS visits FROM events WHERE event = '$pageview' AND timestamp > ${since} GROUP BY source ORDER BY visits DESC LIMIT 10`),
-        // Devices
-        hogql(`SELECT coalesce(properties.$device_type, 'unknown') AS device, count(DISTINCT person_id) AS visitors FROM events WHERE event = '$pageview' AND timestamp > ${since} GROUP BY device ORDER BY visitors DESC`),
-        // Countries
-        hogql(`SELECT coalesce(properties.$geoip_country_name, 'Unknown') AS country, count(DISTINCT person_id) AS visitors FROM events WHERE event = '$pageview' AND timestamp > ${since} GROUP BY country ORDER BY visitors DESC LIMIT 10`),
-        // Browsers
-        hogql(`SELECT coalesce(properties.$browser, 'unknown') AS browser, count(DISTINCT person_id) AS visitors FROM events WHERE event = '$pageview' AND timestamp > ${since} GROUP BY browser ORDER BY visitors DESC LIMIT 8`),
-        // Top custom events
-        hogql(`SELECT event, count() AS c FROM events WHERE timestamp > ${since} AND event NOT LIKE '$%' GROUP BY event ORDER BY c DESC LIMIT 12`),
-        // New vs Returning (based on first-seen vs current visit)
-        hogql(`
-          SELECT
-            sumIf(1, person.created_at > ${since}) AS new_visitors,
-            sumIf(1, person.created_at <= ${since}) AS returning_visitors
-          FROM (
-            SELECT DISTINCT person_id, person.created_at
-            FROM events
-            WHERE event = '$pageview' AND timestamp > ${since}
-          )
-        `),
-        // Hourly heatmap (day-of-week × hour)
-        hogql(`SELECT toDayOfWeek(timestamp) AS dow, toHour(timestamp) AS hour, count() AS c FROM events WHERE event = '$pageview' AND timestamp > now() - interval 14 day GROUP BY dow, hour ORDER BY dow, hour`),
-        // Top exit pages (last pageview per session)
-        hogql(`
-          SELECT path, count() AS exits FROM (
-            SELECT properties.$session_id AS sid, argMax(properties.$pathname, timestamp) AS path
-            FROM events WHERE event = '$pageview' AND timestamp > ${since} AND properties.$session_id IS NOT NULL
-            GROUP BY sid
-          ) GROUP BY path ORDER BY exits DESC LIMIT 8
-        `),
-        // Exceptions (errors)
-        hogql(`SELECT coalesce(properties.$exception_type, properties.$exception_message, 'unknown') AS err, count() AS c FROM events WHERE event = '$exception' AND timestamp > ${since} GROUP BY err ORDER BY c DESC LIMIT 8`),
-      ]);
-
-      payload = {
-        live, today, yesterday, totals, prevTotals, daily,
-        topPages, sources, devices, countries, browsers, topEvents,
-        newVsReturning, hourly, exits, exceptions,
+      const elapsedSec = `(toUnixTimestamp(now()) - toUnixTimestamp(toStartOfDay(now())))`;
+      const queries: Record<string, string> = {
+        live: `SELECT count(DISTINCT person_id) AS live FROM events WHERE event = '$pageview' AND timestamp > now() - interval 5 minute`,
+        today: `SELECT count() AS pageviews, count(DISTINCT person_id) AS visitors FROM events WHERE event = '$pageview' AND timestamp >= toStartOfDay(now())`,
+        yesterday: `SELECT count() AS pageviews, count(DISTINCT person_id) AS visitors FROM events WHERE event = '$pageview' AND timestamp >= toStartOfDay(now()) - interval 1 day AND timestamp < toStartOfDay(now()) - interval 1 day + toIntervalSecond(${elapsedSec})`,
+        totals: `SELECT count() AS pageviews, count(DISTINCT person_id) AS visitors, count(DISTINCT properties.$session_id) AS sessions FROM events WHERE event = '$pageview' AND timestamp > ${since}`,
+        prevTotals: `SELECT count() AS pageviews, count(DISTINCT person_id) AS visitors, count(DISTINCT properties.$session_id) AS sessions FROM events WHERE event = '$pageview' AND timestamp > ${prevSince} AND timestamp <= ${since}`,
+        daily: `SELECT toDate(timestamp) AS day, count() AS pageviews, count(DISTINCT person_id) AS visitors FROM events WHERE event = '$pageview' AND timestamp > ${since} GROUP BY day ORDER BY day`,
+        topPages: `SELECT properties.$pathname AS path, count() AS views, count(DISTINCT person_id) AS visitors FROM events WHERE event = '$pageview' AND timestamp > ${since} GROUP BY path ORDER BY views DESC LIMIT 12`,
+        sources: `SELECT coalesce(nullIf(properties.$referring_domain, ''), 'direct') AS source, count() AS visits FROM events WHERE event = '$pageview' AND timestamp > ${since} GROUP BY source ORDER BY visits DESC LIMIT 10`,
+        devices: `SELECT coalesce(properties.$device_type, 'unknown') AS device, count(DISTINCT person_id) AS visitors FROM events WHERE event = '$pageview' AND timestamp > ${since} GROUP BY device ORDER BY visitors DESC`,
+        countries: `SELECT coalesce(properties.$geoip_country_name, 'Unknown') AS country, count(DISTINCT person_id) AS visitors FROM events WHERE event = '$pageview' AND timestamp > ${since} GROUP BY country ORDER BY visitors DESC LIMIT 10`,
+        browsers: `SELECT coalesce(properties.$browser, 'unknown') AS browser, count(DISTINCT person_id) AS visitors FROM events WHERE event = '$pageview' AND timestamp > ${since} GROUP BY browser ORDER BY visitors DESC LIMIT 8`,
+        topEvents: `SELECT event, count() AS c FROM events WHERE timestamp > ${since} AND event NOT LIKE '$%' GROUP BY event ORDER BY c DESC LIMIT 12`,
+        newVsReturning: `SELECT countIf(first_seen > ${since}) AS new_visitors, countIf(first_seen <= ${since}) AS returning_visitors FROM (SELECT person_id, min(person.created_at) AS first_seen FROM events WHERE event = '$pageview' AND timestamp > ${since} GROUP BY person_id)`,
+        hourly: `SELECT toDayOfWeek(timestamp) AS dow, toHour(timestamp) AS hour, count() AS c FROM events WHERE event = '$pageview' AND timestamp > now() - interval 14 day GROUP BY dow, hour ORDER BY dow, hour`,
+        exits: `SELECT path, count() AS exits FROM (SELECT properties.$session_id AS sid, argMax(properties.$pathname, timestamp) AS path FROM events WHERE event = '$pageview' AND timestamp > ${since} AND properties.$session_id IS NOT NULL GROUP BY sid) GROUP BY path ORDER BY exits DESC LIMIT 8`,
+        exceptions: `SELECT coalesce(properties.$exception_type, properties.$exception_message, 'unknown') AS err, count() AS c FROM events WHERE event = '$exception' AND timestamp > ${since} GROUP BY err ORDER BY c DESC LIMIT 8`,
       };
+
+      const keys = Object.keys(queries);
+      const settled = await Promise.allSettled(keys.map((k) => hogql(queries[k])));
+      const errors: Record<string, string> = {};
+      settled.forEach((r, i) => {
+        const key = keys[i];
+        if (r.status === "fulfilled") {
+          payload[key] = r.value;
+        } else {
+          payload[key] = { columns: [], results: [] };
+          errors[key] = String((r as any).reason?.message || r.reason).slice(0, 240);
+          console.error(`[posthog-query] ${key} failed:`, errors[key]);
+        }
+      });
+      if (Object.keys(errors).length) payload._errors = errors;
     } else if (section === "replays") {
       const list = await ph(`/api/projects/${PROJECT_ID}/session_recordings/?limit=25`);
       payload = { recordings: list.results || [] };
