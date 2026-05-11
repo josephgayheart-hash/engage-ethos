@@ -248,6 +248,9 @@ export default function PlatformOpsPage() {
           </div>
         </div>
 
+        {/* Executive website analytics — top of dashboard */}
+        <PostHogAnalyticsPanel />
+
         {/* KPI row */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
           {isLoading ? (
@@ -437,7 +440,6 @@ export default function PlatformOpsPage() {
           </Card>
         </div>
 
-        <PostHogAnalyticsPanel />
 
         {/* Quick Links */}
         <Card>
