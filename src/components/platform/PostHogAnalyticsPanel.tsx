@@ -114,7 +114,7 @@ export function PostHogAnalyticsPanel() {
       if (section === "replays") setReplays((res as any).recordings || []);
       if (section === "persons") setPersons((res as any).persons || []);
     } catch (e: any) {
-      toastError(e, "Failed to load PostHog data");
+      toastError("Failed to load PostHog data", e);
     } finally {
       setLoading(false);
     }
