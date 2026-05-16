@@ -32,6 +32,21 @@ export function identifyPostHog(
   props?: { email?: string | null; name?: string | null; tenantId?: string | null; tenantName?: string | null; role?: string | null }
 ) {
   if (!initialized) return;
+  if (isExcludedFromAnalytics(props?.email)) {
+    try {
+      posthog.opt_out_capturing();
+      posthog.reset();
+    } catch (e) {
+      console.warn("PostHog opt-out failed:", e);
+    }
+    return;
+  }
+  // Ensure prior opt-out is cleared for non-excluded users
+  try {
+    if (posthog.has_opted_out_capturing?.()) {
+      posthog.opt_in_capturing();
+    }
+  } catch {}
   posthog.identify(userId, {
     email: props?.email ?? undefined,
     name: props?.name ?? undefined,
