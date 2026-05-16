@@ -5,6 +5,15 @@ const POSTHOG_HOST = "https://us.i.posthog.com";
 
 let initialized = false;
 
+// Internal accounts excluded from PostHog analytics (case-insensitive email match).
+const EXCLUDED_EMAILS = new Set<string>([
+  "tyler@campusvoice.ai",
+]);
+
+export function isExcludedFromAnalytics(email?: string | null): boolean {
+  return !!email && EXCLUDED_EMAILS.has(email.toLowerCase());
+}
+
 export function initPostHog() {
   if (initialized || typeof window === "undefined") return;
   initialized = true;
