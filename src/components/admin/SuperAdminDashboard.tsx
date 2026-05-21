@@ -28,6 +28,7 @@ import {
   AlertsInsightsCard,
   ToolUsageBreakdownCard
 } from './analytics';
+import { FieldmarkDemoSwitcher } from './FieldmarkDemoSwitcher';
 
 interface SuperAdminDashboardProps {
   pendingRequestsCount: number;
@@ -160,6 +161,9 @@ export function SuperAdminDashboard({
 
         {/* Command Center Tab - Overview Dashboard */}
         <TabsContent value="command-center" className="space-y-6 mt-4">
+          {/* Fieldmark demo shortcut */}
+          <FieldmarkDemoSwitcher />
+
           {/* KPI Cards */}
           <AnalyticsKPICards data={analytics!} isLoading={isLoading} />
 
