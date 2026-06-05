@@ -309,9 +309,14 @@ export default function PersonalAIPage() {
               Your private, model-agnostic writing & thinking copilot. No profile, no DNA — just you and the model.
             </p>
           </div>
-          <Badge variant="outline" className="gap-1">
-            <Sparkles className="h-3 w-3" /> Super Admin only · stored locally in this browser
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" asChild className="gap-1">
+              <Link to="/admin/personal-ai/edits"><GitCompare className="h-4 w-4" /> Edit Tracker</Link>
+            </Button>
+            <Badge variant="outline" className="gap-1">
+              <Sparkles className="h-3 w-3" /> Super Admin
+            </Badge>
+          </div>
         </header>
 
         <div className="grid grid-cols-12 gap-4 h-[calc(100vh-180px)]">
