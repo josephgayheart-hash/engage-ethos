@@ -438,34 +438,168 @@ export default function PersonalAIPage() {
     if (html) { setArtifactHtml(html); setArtifactTab("preview"); setArtifactOpen(true); }
   };
 
+  // Group threads by recency for sidebar
+  const groupedThreads = useMemo(() => {
+    const sorted = [...threads].sort((a, b) => b.updatedAt - a.updatedAt);
+    const now = Date.now();
+    const day = 24 * 60 * 60 * 1000;
+    const groups: { label: string; items: Thread[] }[] = [
+      { label: "Today", items: [] },
+      { label: "Yesterday", items: [] },
+      { label: "Previous 7 days", items: [] },
+      { label: "Older", items: [] },
+    ];
+    for (const t of sorted) {
+      const age = now - t.updatedAt;
+      if (age < day) groups[0].items.push(t);
+      else if (age < 2 * day) groups[1].items.push(t);
+      else if (age < 7 * day) groups[2].items.push(t);
+      else groups[3].items.push(t);
+    }
+    return groups.filter(g => g.items.length);
+  }, [threads]);
+
+  const currentModelLabel = MODELS.find(m => m.id === active?.model)?.label ?? "Model";
+  const isEmpty = (active?.messages.length ?? 0) === 0 && !streaming;
+
+  const Composer = (
+    <div className="space-y-2">
+      {pendingAttachments.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {pendingAttachments.map((a, i) => (
+            <Badge key={i} variant="secondary" className="gap-1.5 pl-2 pr-1 py-1 rounded-lg font-normal">
+              {a.kind === "image" ? <ImageIcon className="h-3 w-3" /> : <FileText className="h-3 w-3" />}
+              <span className="truncate max-w-[200px]">{a.name}</span>
+              <button
+                onClick={() => setPendingAttachments(prev => prev.filter((_, j) => j !== i))}
+                className="ml-0.5 p-0.5 hover:bg-background/60 rounded"
+                aria-label="Remove attachment"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          ))}
+        </div>
+      )}
+
+      <div className="relative rounded-3xl border border-border/60 bg-card shadow-[0_2px_24px_-12px_rgba(0,0,0,0.15)] focus-within:border-border focus-within:shadow-[0_2px_30px_-10px_rgba(0,0,0,0.2)] transition-shadow">
+        <Textarea
+          ref={inputRef}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
+          }}
+          placeholder={imageMode ? "Describe an image to generate…" : "Message Personal AI…"}
+          className="min-h-[56px] max-h-[280px] resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-5 pt-4 pb-12 text-[15px] leading-relaxed placeholder:text-muted-foreground/60"
+          disabled={streaming}
+        />
+        <div className="absolute left-2 bottom-2 flex items-center gap-0.5">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground" disabled={streaming} aria-label="Attach">
+                <Plus className="h-[18px] w-[18px]" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-52">
+              <DropdownMenuItem onClick={() => imageRef.current?.click()}>
+                <ImageIcon className="h-4 w-4 mr-2" /> Attach image
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => fileRef.current?.click()}>
+                <Paperclip className="h-4 w-4 mr-2" /> Attach file
+                <span className="ml-auto text-[10px] text-muted-foreground">PDF · DOCX · TXT</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel className="text-[10px] uppercase tracking-wide text-muted-foreground">Recipes</DropdownMenuLabel>
+              {RECIPES.map(r => (
+                <DropdownMenuItem key={r.id} onClick={() => { setInput(r.prompt + input); inputRef.current?.focus(); }}>
+                  <Sparkles className="h-4 w-4 mr-2 text-muted-foreground" /> {r.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <input ref={imageRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => { handleFiles(e.target.files, true); e.target.value = ""; }} />
+          <input ref={fileRef} type="file" accept=".pdf,.docx,.txt,.md,.csv,.json" multiple className="hidden" onChange={(e) => { handleFiles(e.target.files, false); e.target.value = ""; }} />
+
+          <Toggle pressed={webSearch} onPressedChange={setWebSearch} size="sm"
+            className="h-8 px-2.5 gap-1.5 rounded-full text-xs text-muted-foreground hover:text-foreground data-[state=on]:bg-primary/10 data-[state=on]:text-primary data-[state=on]:border data-[state=on]:border-primary/20"
+            aria-label="Web search">
+            <Globe className="h-3.5 w-3.5" /> Search
+          </Toggle>
+          <Toggle pressed={imageMode} onPressedChange={setImageMode} size="sm"
+            className="h-8 px-2.5 gap-1.5 rounded-full text-xs text-muted-foreground hover:text-foreground data-[state=on]:bg-primary/10 data-[state=on]:text-primary data-[state=on]:border data-[state=on]:border-primary/20"
+            aria-label="Image mode">
+            <Wand2 className="h-3.5 w-3.5" /> Image
+          </Toggle>
+        </div>
+        <div className="absolute right-2 bottom-2">
+          {streaming ? (
+            <Button onClick={stop} size="icon" variant="default" className="h-9 w-9 rounded-full" aria-label="Stop">
+              <Square className="h-4 w-4 fill-current" />
+            </Button>
+          ) : (
+            <Button
+              onClick={handleSend}
+              disabled={!input.trim() && pendingAttachments.length === 0}
+              size="icon"
+              className="h-9 w-9 rounded-full disabled:bg-muted disabled:text-muted-foreground"
+              aria-label="Send"
+            >
+              <ArrowUp className="h-[18px] w-[18px]" />
+            </Button>
+          )}
+        </div>
+      </div>
+      <p className="text-[11px] text-muted-foreground/70 text-center">
+        Personal AI can make mistakes. Verify important info.
+      </p>
+    </div>
+  );
+
   return (
-    <div className="h-screen flex bg-background">
+    <div className="h-screen flex bg-background text-foreground">
       {/* Sidebar */}
-      <aside className="w-64 shrink-0 border-r flex flex-col bg-muted/30">
+      <aside className="w-64 shrink-0 border-r border-border/60 flex flex-col bg-muted/20">
         <div className="p-3">
-          <Button onClick={createThread} variant="outline" className="w-full justify-start gap-2 h-9">
-            <Plus className="h-4 w-4" /> New chat
+          <Button
+            onClick={createThread}
+            variant="outline"
+            className="w-full justify-start gap-2 h-9 rounded-lg border-border/60 bg-background hover:bg-accent"
+          >
+            <MessageSquarePlus className="h-4 w-4" /> New chat
           </Button>
         </div>
         <ScrollArea className="flex-1">
-          <div className="px-2 pb-2 space-y-0.5">
-            {threads.sort((a,b) => b.updatedAt - a.updatedAt).map(t => (
-              <div
-                key={t.id}
-                className={`group flex items-center gap-2 rounded-md px-3 py-2 cursor-pointer text-sm transition ${
-                  t.id === activeId ? "bg-accent text-accent-foreground" : "hover:bg-muted"
-                }`}
-                onClick={() => setActiveId(t.id)}
-              >
-                <span className="flex-1 truncate">{t.title}</span>
-                <button
-                  type="button"
-                  className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition"
-                  onClick={(e) => { e.stopPropagation(); deleteThread(t.id); }}
-                  aria-label="Delete"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
+          <div className="px-2 pb-3 space-y-3">
+            {groupedThreads.map(g => (
+              <div key={g.label}>
+                <div className="px-3 pt-2 pb-1 text-[10px] uppercase tracking-wider text-muted-foreground/70 font-medium">
+                  {g.label}
+                </div>
+                <div className="space-y-0.5">
+                  {g.items.map(t => (
+                    <div
+                      key={t.id}
+                      className={cn(
+                        "group flex items-center gap-2 rounded-lg px-3 py-2 cursor-pointer text-sm transition",
+                        t.id === activeId
+                          ? "bg-accent text-accent-foreground"
+                          : "text-foreground/80 hover:bg-muted hover:text-foreground"
+                      )}
+                      onClick={() => setActiveId(t.id)}
+                    >
+                      <span className="flex-1 truncate">{t.title}</span>
+                      <button
+                        type="button"
+                        className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition p-0.5 rounded"
+                        onClick={(e) => { e.stopPropagation(); deleteThread(t.id); }}
+                        aria-label="Delete chat"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
@@ -474,213 +608,188 @@ export default function PersonalAIPage() {
 
       {/* Main */}
       <main className="flex-1 flex flex-col min-w-0">
-        <header className="h-12 border-b flex items-center justify-between px-3 shrink-0 gap-2">
+        <header className="h-14 border-b border-border/60 flex items-center justify-between px-4 shrink-0 gap-2 bg-background/80 backdrop-blur">
           <Select value={active?.model} onValueChange={(v) => updateActive({ model: v })}>
-            <SelectTrigger className="h-8 w-[220px] text-sm border-0 shadow-none focus:ring-0 px-2">
-              <SelectValue />
+            <SelectTrigger className="h-9 w-auto min-w-[180px] text-sm border-0 shadow-none focus:ring-0 px-2.5 gap-1.5 font-medium hover:bg-muted rounded-lg">
+              <SelectValue placeholder={currentModelLabel} />
             </SelectTrigger>
             <SelectContent>
               {MODELS.map(m => (<SelectItem key={m.id} value={m.id}>{m.label}</SelectItem>))}
             </SelectContent>
           </Select>
-          <div className="flex items-center gap-1">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-xs">
-                  <Sparkles className="h-3.5 w-3.5" /> Recipes
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="text-xs">Quick prompts</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {RECIPES.map(r => (
-                  <DropdownMenuItem key={r.id} onClick={() => { setInput(r.prompt + input); inputRef.current?.focus(); }}>
-                    {r.label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
         </header>
 
         <div className="flex-1 flex min-h-0">
           {/* Chat column */}
           <div className="flex-1 flex flex-col min-w-0">
-            <ScrollArea className="flex-1">
-              <div ref={scrollRef} className="max-w-3xl mx-auto w-full px-4 py-6 space-y-6">
-                {active?.messages.map((m, i) => (
-                  <div key={i} className="group">
-                    {m.role === "user" ? (
-                      <div className="flex justify-end">
-                        <div className="max-w-[85%] space-y-2">
-                          {m.attachments?.length ? (
-                            <div className="flex flex-wrap gap-2 justify-end">
-                              {m.attachments.map((a, j) => (
-                                <Badge key={j} variant="secondary" className="gap-1 text-xs">
-                                  {a.kind === "image" ? <ImageIcon className="h-3 w-3" /> : <FileText className="h-3 w-3" />}
-                                  {a.name}
-                                </Badge>
-                              ))}
-                            </div>
-                          ) : null}
-                          {m.content && (
-                            <div className="rounded-2xl px-4 py-2.5 text-sm bg-primary text-primary-foreground whitespace-pre-wrap">
-                              {m.content}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-sm space-y-2">
-                        {m.imageUrl ? (
-                          <div className="space-y-2">
-                            <img src={m.imageUrl} alt="Generated" className="rounded-lg border max-w-full" />
-                            <button onClick={() => downloadImage(m.imageUrl!)} className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
-                              <Download className="h-3 w-3" /> Download
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-headings:my-3 prose-pre:my-2">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.content}</ReactMarkdown>
-                          </div>
-                        )}
-                        {m.searchSources?.length ? (
-                          <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t">
-                            <div className="font-medium flex items-center gap-1"><Globe className="h-3 w-3" /> Sources</div>
-                            {m.searchSources.map((s, j) => (
-                              <a key={j} href={s.url} target="_blank" rel="noopener noreferrer" className="block truncate hover:text-foreground">
-                                [{j + 1}] {s.title}
-                              </a>
-                            ))}
-                          </div>
-                        ) : null}
-                        {m.content && (
-                          <div className="opacity-0 group-hover:opacity-100 flex items-center gap-3 text-xs text-muted-foreground transition">
-                            <button onClick={() => copyMsg(m.content)} className="inline-flex items-center gap-1 hover:text-foreground"><Copy className="h-3 w-3" /> Copy</button>
-                            <button onClick={() => downloadMd(m)} className="inline-flex items-center gap-1 hover:text-foreground"><Download className="h-3 w-3" /> .md</button>
-                            {extractHtmlArtifact(m.content) && (
-                              <button onClick={() => openHtmlArtifact(m.content)} className="inline-flex items-center gap-1 hover:text-foreground"><Eye className="h-3 w-3" /> Open artifact</button>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )}
+            {isEmpty ? (
+              <div className="flex-1 flex flex-col items-center justify-center px-4">
+                <div className="w-full max-w-2xl space-y-8">
+                  <div className="text-center space-y-2">
+                    <h1 className="text-3xl font-semibold tracking-tight">How can I help today?</h1>
+                    <p className="text-sm text-muted-foreground">
+                      Rewrite an email, summarize a meeting, generate an image, or build an HTML mock.
+                    </p>
                   </div>
-                ))}
-
-                {streamText && (
-                  <div className="text-sm">
-                    <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-headings:my-3 prose-pre:my-2">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{streamText}</ReactMarkdown>
-                    </div>
-                  </div>
-                )}
-
-                {streamImage && (
-                  <img src={streamImage} alt="Generating…" className={`rounded-lg border max-w-full transition-[filter] ${streamImageFinal ? "blur-0" : "blur-2xl"}`} />
-                )}
-
-                {streaming && !streamText && !streamImage && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" /> {imageMode ? "Generating image…" : webSearch ? "Searching the web…" : "Thinking…"}
-                  </div>
-                )}
-              </div>
-            </ScrollArea>
-
-            <div className="border-t bg-background">
-              <div className="max-w-3xl mx-auto w-full px-4 py-3 space-y-2">
-                {pendingAttachments.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {pendingAttachments.map((a, i) => (
-                      <Badge key={i} variant="secondary" className="gap-1 pr-1">
-                        {a.kind === "image" ? <ImageIcon className="h-3 w-3" /> : <FileText className="h-3 w-3" />}
-                        <span className="truncate max-w-[180px]">{a.name}</span>
-                        <button onClick={() => setPendingAttachments(prev => prev.filter((_, j) => j !== i))} className="ml-1 hover:bg-muted rounded">
-                          <X className="h-3 w-3" />
-                        </button>
-                      </Badge>
+                  {Composer}
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {RECIPES.slice(0, 4).map(r => (
+                      <button
+                        key={r.id}
+                        onClick={() => { setInput(r.prompt); inputRef.current?.focus(); }}
+                        className="text-xs px-3 py-1.5 rounded-full border border-border/60 bg-card hover:bg-muted text-foreground/80 hover:text-foreground transition"
+                      >
+                        {r.label}
+                      </button>
                     ))}
                   </div>
-                )}
+                </div>
+              </div>
+            ) : (
+              <>
+                <ScrollArea className="flex-1">
+                  <div ref={scrollRef} className="max-w-3xl mx-auto w-full px-4 py-8 space-y-8">
+                    {active?.messages.map((m, i) => (
+                      <div key={i} className="group">
+                        {m.role === "user" ? (
+                          <div className="flex justify-end">
+                            <div className="max-w-[85%] space-y-2">
+                              {m.attachments?.length ? (
+                                <div className="flex flex-wrap gap-1.5 justify-end">
+                                  {m.attachments.map((a, j) => (
+                                    <Badge key={j} variant="secondary" className="gap-1 text-xs font-normal">
+                                      {a.kind === "image" ? <ImageIcon className="h-3 w-3" /> : <FileText className="h-3 w-3" />}
+                                      {a.name}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              ) : null}
+                              {m.content && (
+                                <div className="rounded-2xl px-4 py-2.5 text-[15px] leading-relaxed bg-muted text-foreground whitespace-pre-wrap">
+                                  {m.content}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex gap-3">
+                            <div className="shrink-0 h-7 w-7 rounded-full bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center text-primary-foreground shadow-sm">
+                              <Sparkles className="h-3.5 w-3.5" />
+                            </div>
+                            <div className="flex-1 min-w-0 space-y-3 pt-0.5">
+                              {m.imageUrl ? (
+                                <div className="space-y-2">
+                                  <img src={m.imageUrl} alt="Generated" className="rounded-xl border max-w-full" />
+                                  <button onClick={() => downloadImage(m.imageUrl!)} className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+                                    <Download className="h-3 w-3" /> Download
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="prose prose-sm dark:prose-invert max-w-none text-[15px] leading-relaxed prose-p:my-3 prose-headings:mt-5 prose-headings:mb-2 prose-pre:my-3 prose-pre:rounded-xl prose-pre:bg-muted prose-pre:text-foreground prose-code:text-foreground prose-code:before:content-none prose-code:after:content-none prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-[13px] prose-li:my-1 prose-ul:my-3 prose-ol:my-3">
+                                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.content}</ReactMarkdown>
+                                </div>
+                              )}
+                              {m.searchSources?.length ? (
+                                <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t border-border/40">
+                                  <div className="font-medium flex items-center gap-1 text-foreground/70"><Globe className="h-3 w-3" /> Sources</div>
+                                  {m.searchSources.map((s, j) => (
+                                    <a key={j} href={s.url} target="_blank" rel="noopener noreferrer" className="block truncate hover:text-foreground">
+                                      [{j + 1}] {s.title}
+                                    </a>
+                                  ))}
+                                </div>
+                              ) : null}
+                              {m.content && (
+                                <div className="flex items-center gap-1 -ml-1.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition">
+                                  <button onClick={() => copyMsg(m.content, m.ts)} className="h-7 w-7 inline-flex items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Copy">
+                                    {copiedTs === m.ts ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+                                  </button>
+                                  <button onClick={() => downloadMd(m)} className="h-7 w-7 inline-flex items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Download markdown">
+                                    <Download className="h-3.5 w-3.5" />
+                                  </button>
+                                  {extractHtmlArtifact(m.content) && (
+                                    <button onClick={() => openHtmlArtifact(m.content)} className="h-7 px-2 inline-flex items-center gap-1 rounded-md text-xs text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Open artifact">
+                                      <Eye className="h-3.5 w-3.5" /> Artifact
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
 
-                <div className="relative rounded-2xl border bg-background shadow-sm focus-within:ring-1 focus-within:ring-ring">
-                  <Textarea
-                    ref={inputRef}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
-                    }}
-                    placeholder={imageMode ? "Describe an image…" : "Message…"}
-                    className="min-h-[60px] max-h-[300px] resize-none border-0 bg-transparent focus-visible:ring-0 pl-3 pr-12 pt-3 pb-10"
-                    disabled={streaming}
-                  />
-                  <div className="absolute left-2 bottom-2 flex items-center gap-0.5">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" disabled={streaming}>
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start">
-                        <DropdownMenuItem onClick={() => imageRef.current?.click()}>
-                          <ImageIcon className="h-4 w-4 mr-2" /> Attach image
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => fileRef.current?.click()}>
-                          <Paperclip className="h-4 w-4 mr-2" /> Attach file (PDF, DOCX, TXT)
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    <input ref={imageRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => { handleFiles(e.target.files, true); e.target.value = ""; }} />
-                    <input ref={fileRef} type="file" accept=".pdf,.docx,.txt,.md,.csv,.json" multiple className="hidden" onChange={(e) => { handleFiles(e.target.files, false); e.target.value = ""; }} />
+                    {streamText && (
+                      <div className="flex gap-3">
+                        <div className="shrink-0 h-7 w-7 rounded-full bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center text-primary-foreground shadow-sm">
+                          <Sparkles className="h-3.5 w-3.5" />
+                        </div>
+                        <div className="flex-1 min-w-0 pt-0.5">
+                          <div className="prose prose-sm dark:prose-invert max-w-none text-[15px] leading-relaxed prose-p:my-3 prose-headings:mt-5 prose-headings:mb-2 prose-pre:my-3 prose-pre:rounded-xl prose-pre:bg-muted prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none prose-li:my-1">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{streamText + "▍"}</ReactMarkdown>
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
-                    <Toggle pressed={webSearch} onPressedChange={setWebSearch} size="sm" className="h-8 gap-1 text-xs data-[state=on]:bg-primary/10 data-[state=on]:text-primary" aria-label="Web search">
-                      <Globe className="h-3.5 w-3.5" /> Web
-                    </Toggle>
-                    <Toggle pressed={imageMode} onPressedChange={setImageMode} size="sm" className="h-8 gap-1 text-xs data-[state=on]:bg-primary/10 data-[state=on]:text-primary" aria-label="Image mode">
-                      <Wand2 className="h-3.5 w-3.5" /> Image
-                    </Toggle>
-                  </div>
-                  <div className="absolute right-2 bottom-2">
-                    {streaming ? (
-                      <Button onClick={stop} size="icon" variant="ghost" className="h-8 w-8"><Square className="h-4 w-4" /></Button>
-                    ) : (
-                      <Button onClick={handleSend} disabled={!input.trim() && pendingAttachments.length === 0} size="icon" className="h-8 w-8">
-                        <Send className="h-4 w-4" />
-                      </Button>
+                    {streamImage && (
+                      <div className="flex gap-3">
+                        <div className="shrink-0 h-7 w-7 rounded-full bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center text-primary-foreground shadow-sm">
+                          <Sparkles className="h-3.5 w-3.5" />
+                        </div>
+                        <img src={streamImage} alt="Generating…" className={cn("rounded-xl border max-w-full transition-[filter] duration-500", streamImageFinal ? "blur-0" : "blur-2xl")} />
+                      </div>
+                    )}
+
+                    {streaming && !streamText && !streamImage && (
+                      <div className="flex gap-3 items-center">
+                        <div className="shrink-0 h-7 w-7 rounded-full bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center text-primary-foreground shadow-sm">
+                          <Sparkles className="h-3.5 w-3.5" />
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          {imageMode ? "Generating image…" : webSearch ? "Searching the web…" : "Thinking…"}
+                        </div>
+                      </div>
                     )}
                   </div>
+                </ScrollArea>
+
+                <div className="bg-gradient-to-t from-background via-background to-transparent pt-4">
+                  <div className="max-w-3xl mx-auto w-full px-4 pb-4">
+                    {Composer}
+                  </div>
                 </div>
-                <p className="text-[11px] text-muted-foreground text-center">
-                  Enter to send · Shift+Enter for newline · + to attach · Web/Image toggles · Recipes top-right
-                </p>
-              </div>
-            </div>
+              </>
+            )}
           </div>
 
           {/* Artifact panel */}
           {artifactOpen && (
-            <aside className="w-[45%] min-w-[420px] border-l flex flex-col bg-muted/20">
-              <div className="h-12 border-b flex items-center justify-between px-3 shrink-0">
+            <aside className="w-[45%] min-w-[420px] border-l border-border/60 flex flex-col bg-muted/10">
+              <div className="h-14 border-b border-border/60 flex items-center justify-between px-3 shrink-0 bg-background/60">
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="gap-1"><CodeIcon className="h-3 w-3" /> HTML artifact</Badge>
-                  <div className="flex rounded-md border bg-background overflow-hidden">
-                    <button onClick={() => setArtifactTab("preview")} className={`px-2 py-1 text-xs inline-flex items-center gap-1 ${artifactTab === "preview" ? "bg-accent" : ""}`}>
+                  <Badge variant="outline" className="gap-1 font-normal"><CodeIcon className="h-3 w-3" /> HTML artifact</Badge>
+                  <div className="flex rounded-lg border border-border/60 bg-background overflow-hidden">
+                    <button onClick={() => setArtifactTab("preview")} className={cn("px-2.5 py-1 text-xs inline-flex items-center gap-1", artifactTab === "preview" ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground")}>
                       <Eye className="h-3 w-3" /> Preview
                     </button>
-                    <button onClick={() => setArtifactTab("code")} className={`px-2 py-1 text-xs inline-flex items-center gap-1 ${artifactTab === "code" ? "bg-accent" : ""}`}>
+                    <button onClick={() => setArtifactTab("code")} className={cn("px-2.5 py-1 text-xs inline-flex items-center gap-1 border-l border-border/60", artifactTab === "code" ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground")}>
                       <CodeIcon className="h-3 w-3" /> Code
                     </button>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Button size="sm" variant="ghost" className="h-7 gap-1 text-xs" onClick={() => {
+                  <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" onClick={() => copyMsg(artifactHtml)}>
+                    <Copy className="h-3 w-3" /> Copy
+                  </Button>
+                  <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" onClick={() => {
                     const blob = new Blob([artifactHtml], { type: "text/html" });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement("a"); a.href = url; a.download = `artifact-${Date.now()}.html`; a.click(); URL.revokeObjectURL(url);
                   }}><Download className="h-3 w-3" /> .html</Button>
-                  <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setArtifactOpen(false)}><X className="h-4 w-4" /></Button>
+                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => setArtifactOpen(false)} aria-label="Close artifact"><X className="h-4 w-4" /></Button>
                 </div>
               </div>
               <div className="flex-1 min-h-0">
@@ -688,7 +797,7 @@ export default function PersonalAIPage() {
                   <iframe title="Artifact preview" srcDoc={artifactHtml} sandbox="allow-scripts" className="w-full h-full bg-white" />
                 ) : (
                   <ScrollArea className="h-full">
-                    <pre className="text-xs p-3 whitespace-pre-wrap font-mono">{artifactHtml}</pre>
+                    <pre className="text-xs p-4 whitespace-pre-wrap font-mono leading-relaxed">{artifactHtml}</pre>
                   </ScrollArea>
                 )}
               </div>
