@@ -492,7 +492,18 @@ export default function PersonalAIPage() {
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
           }}
-          placeholder={imageMode ? "Describe an image to generate…" : "Message Personal AI…"}
+          onPaste={(e) => {
+            const pasted = e.clipboardData.getData("text");
+            // Large paste → convert to a doc attachment so the composer stays usable
+            if (pasted && pasted.length > 2000) {
+              e.preventDefault();
+              const lineCount = pasted.split("\n").length;
+              const name = `Pasted text (${pasted.length.toLocaleString()} chars · ${lineCount} lines).txt`;
+              setPendingAttachments(prev => [...prev, { name, kind: "doc", text: pasted }]);
+              toast({ title: "Long paste attached", description: "Added as a file so the message box stays clean." });
+            }
+          }}
+          placeholder={imageMode ? "Describe an image to generate…" : "Message Personal AI…  (paste long text and it'll attach as a file)"}
           className="min-h-[56px] max-h-[280px] resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-5 pt-4 pb-12 text-[15px] leading-relaxed placeholder:text-muted-foreground/60"
           disabled={streaming}
         />

@@ -26,7 +26,7 @@ serve(async (req) => {
     let textBody = String(message || "");
     if (files.length) {
       const blocks = files.map((f: any) =>
-        `--- Attached file: ${f.name} ---\n${(f.text || "").slice(0, 60000)}\n--- end file ---`
+        `--- Attached file: ${f.name} ---\n${(f.text || "").slice(0, 200000)}\n--- end file ---`
       ).join("\n\n");
       textBody = `${blocks}\n\n${textBody}`;
     }
