@@ -38,22 +38,14 @@ const STORAGE_KEY = "personal-ai-threads-v1";
 const ACTIVE_KEY = "personal-ai-active-v1";
 
 const MODELS = [
+  { id: "google/gemini-3-pro-preview", label: "Gemini 3 Pro (preview)" },
+  { id: "google/gemini-3-flash-preview", label: "Gemini 3 Flash (preview)" },
   { id: "google/gemini-2.5-pro", label: "Gemini 2.5 Pro" },
   { id: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash" },
   { id: "google/gemini-2.5-flash-lite", label: "Gemini 2.5 Flash Lite" },
-  { id: "google/gemini-3-flash-preview", label: "Gemini 3 Flash (preview)" },
-  { id: "google/gemini-3.1-flash-lite-preview", label: "Gemini 3.1 Flash Lite (preview)" },
-  { id: "google/gemini-3.1-pro-preview", label: "Gemini 3.1 Pro (preview)" },
-  { id: "google/gemini-3.5-flash", label: "Gemini 3.5 Flash" },
   { id: "openai/gpt-5", label: "GPT-5" },
   { id: "openai/gpt-5-mini", label: "GPT-5 Mini" },
   { id: "openai/gpt-5-nano", label: "GPT-5 Nano" },
-  { id: "openai/gpt-5.2", label: "GPT-5.2" },
-  { id: "openai/gpt-5.4", label: "GPT-5.4" },
-  { id: "openai/gpt-5.4-mini", label: "GPT-5.4 Mini" },
-  { id: "openai/gpt-5.4-pro", label: "GPT-5.4 Pro" },
-  { id: "openai/gpt-5.5", label: "GPT-5.5" },
-  { id: "openai/gpt-5.5-pro", label: "GPT-5.5 Pro" },
 ];
 
 const DEFAULT_SYSTEM_PROMPT = `You are Tyler's personal communications copilot for his professional work at Valvoline Global Operations (VGO).
