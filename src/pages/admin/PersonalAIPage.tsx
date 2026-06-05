@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from "react";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,9 +13,10 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { LogEditDialog } from "@/components/admin/LogEditDialog";
 import {
   Sparkles, Send, Copy, Trash2, Plus, MessageSquare, Wand2, FileText,
-  Mail, ScrollText, Loader2, Settings2, BrainCircuit, RefreshCw,
+  Mail, ScrollText, Loader2, Settings2, BrainCircuit, RefreshCw, GitCompare,
 } from "lucide-react";
 
 type Role = "user" | "assistant" | "system";
