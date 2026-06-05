@@ -16,7 +16,7 @@ import { WaveBackground } from "@/components/WaveBackground";
 import { PostHogAnalyticsPanel } from "@/components/platform/PostHogAnalyticsPanel";
 import {
   Activity, Users, Building2, TrendingUp, RefreshCw, AlertTriangle,
-  Mail, Shield, FileSignature, Database, Inbox, MessageSquare, ExternalLink, Server,
+  Mail, Shield, FileSignature, Database, Inbox, MessageSquare, ExternalLink, Server, Sparkles,
 } from "lucide-react";
 
 type Counts = { total: number; recent: number };
