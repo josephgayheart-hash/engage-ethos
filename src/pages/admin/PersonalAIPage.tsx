@@ -161,6 +161,16 @@ export default function PersonalAIPage() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [active?.messages.length, streamText, streamImage]);
 
+  // Migrate any persisted thread using a model ID no longer in MODELS
+  useEffect(() => {
+    const valid = new Set(MODELS.map(m => m.id));
+    const needsFix = threads.some(t => !valid.has(t.model));
+    if (needsFix) {
+      setThreads(prev => prev.map(t => valid.has(t.model) ? t : { ...t, model: MODELS[0].id }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   if (!isSuperAdmin) return <Navigate to="/dashboard" replace />;
 
   const updateActive = (patch: Partial<Thread>) => {
