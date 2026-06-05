@@ -15,9 +15,11 @@ import {
   DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 import {
-  Send, Copy, Trash2, Plus, Square, Loader2, Paperclip, Image as ImageIcon,
+  ArrowUp, Copy, Trash2, Plus, Square, Loader2, Paperclip, Image as ImageIcon,
   Globe, Wand2, FileText, X, Download, Code as CodeIcon, Eye, Sparkles,
+  MessageSquarePlus, Check, RefreshCw,
 } from "lucide-react";
 
 type Role = "user" | "assistant";
