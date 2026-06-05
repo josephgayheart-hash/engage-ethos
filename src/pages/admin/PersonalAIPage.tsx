@@ -415,13 +415,33 @@ export default function PersonalAIPage() {
                         ) : (
                           <div className="whitespace-pre-wrap">{m.content}</div>
                         )}
-                        <button
-                          onClick={() => copyMsg(m.content)}
-                          className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 bg-background border rounded-md p-1 shadow-sm transition"
-                          aria-label="Copy"
-                        >
-                          <Copy className="h-3 w-3" />
-                        </button>
+                        <div className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 flex gap-1 transition">
+                          {m.role === "assistant" && (
+                            <button
+                              onClick={() => {
+                                const lastUser = [...(active?.messages ?? [])].slice(0, i).reverse().find(x => x.role === "user");
+                                setEditDialog({
+                                  open: true,
+                                  original: m.content,
+                                  sourceMessageId: `${active?.id}:${i}`,
+                                  promptContext: lastUser?.content,
+                                });
+                              }}
+                              className="bg-background border rounded-md p-1 shadow-sm hover:bg-accent"
+                              aria-label="I edited this"
+                              title="I edited this — log my final version"
+                            >
+                              <GitCompare className="h-3 w-3" />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => copyMsg(m.content)}
+                            className="bg-background border rounded-md p-1 shadow-sm hover:bg-accent"
+                            aria-label="Copy"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
