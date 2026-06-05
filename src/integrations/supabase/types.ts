@@ -1794,6 +1794,60 @@ export type Database = {
           },
         ]
       }
+      personal_ai_edits: {
+        Row: {
+          created_at: string
+          final_text: string
+          id: string
+          model: string | null
+          notes: string | null
+          original_text: string
+          prompt_context: string | null
+          source: string
+          source_message_id: string | null
+          updated_at: string
+          user_id: string
+          word_count_final: number
+          word_count_original: number
+          words_added: string[]
+          words_removed: string[]
+        }
+        Insert: {
+          created_at?: string
+          final_text: string
+          id?: string
+          model?: string | null
+          notes?: string | null
+          original_text: string
+          prompt_context?: string | null
+          source?: string
+          source_message_id?: string | null
+          updated_at?: string
+          user_id: string
+          word_count_final?: number
+          word_count_original?: number
+          words_added?: string[]
+          words_removed?: string[]
+        }
+        Update: {
+          created_at?: string
+          final_text?: string
+          id?: string
+          model?: string | null
+          notes?: string | null
+          original_text?: string
+          prompt_context?: string | null
+          source?: string
+          source_message_id?: string | null
+          updated_at?: string
+          user_id?: string
+          word_count_final?: number
+          word_count_original?: number
+          words_added?: string[]
+          words_removed?: string[]
+        }
+        Relationships: []
+      }
       personal_messages: {
         Row: {
           approved: boolean | null
