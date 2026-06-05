@@ -157,6 +157,7 @@ export default function PersonalAIPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const imageRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const [copiedTs, setCopiedTs] = useState<number | null>(null);
 
   const active = useMemo(() => threads.find(t => t.id === activeId) ?? threads[0], [threads, activeId]);
 
