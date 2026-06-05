@@ -91,25 +91,25 @@ const PRESETS: { id: string; label: string; icon: any; prompt: string }[] = [
     id: "rewrite",
     label: "Rewrite in my voice",
     icon: Wand2,
-    prompt: "Rewrite the following in my voice — executive, clear, warm, decisive. Keep it tight. Return only the rewrite.\n\n---\n\n",
+    prompt: "Rewrite the following in my voice. Executive, clear, direct, no buzzwords, no em dashes. Then list the key improvements made.\n\n---\n\n",
   },
   {
     id: "email",
-    label: "Polish this email",
+    label: "Polish executive email",
     icon: Mail,
-    prompt: "Polish this email in my voice. Tight subject line, clear ask up front, crisp close. Return: Subject + body.\n\n---\n\n",
+    prompt: "Polish this email in my voice. Objective up front, short paragraphs, clear ask, next steps at the end. Return: Subject line + body, then a short list of key improvements made.\n\n---\n\n",
   },
   {
     id: "summary",
-    label: "Executive summary",
+    label: "Meeting summary",
     icon: ScrollText,
-    prompt: "Give me an executive summary of the following. Lead with the bottom line, then 3–5 key points, then implications / next steps.\n\n---\n\n",
+    prompt: "Turn the following into a concise meeting summary using this structure: Key Decisions, Key Takeaways, Risks / Concerns, Next Steps, Owners.\n\n---\n\n",
   },
   {
     id: "tighten",
     label: "Tighten / shorten",
     icon: FileText,
-    prompt: "Tighten this without losing meaning. Cut filler, strengthen verbs, keep my voice. Return only the revision.\n\n---\n\n",
+    prompt: "Tighten this without losing meaning. Cut filler, strengthen verbs, preserve my intent and voice. Return only the revision.\n\n---\n\n",
   },
 ];
 
