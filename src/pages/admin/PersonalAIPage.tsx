@@ -418,7 +418,7 @@ export default function PersonalAIPage() {
     }
   };
 
-  const [copiedTs, setCopiedTs] = useState<number | null>(null);
+  const stop = () => abortRef.current?.abort();
   const copyMsg = async (content: string, ts?: number) => {
     await navigator.clipboard.writeText(content);
     if (ts) { setCopiedTs(ts); setTimeout(() => setCopiedTs(c => c === ts ? null : c), 1500); }
