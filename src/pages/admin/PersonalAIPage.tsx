@@ -562,6 +562,16 @@ export default function PersonalAIPage() {
           </aside>
         </div>
       </div>
+
+      <LogEditDialog
+        open={editDialog.open}
+        onOpenChange={(o) => setEditDialog(s => ({ ...s, open: o }))}
+        initialOriginal={editDialog.original}
+        source="chat"
+        sourceMessageId={editDialog.sourceMessageId}
+        promptContext={editDialog.promptContext}
+        model={active?.model}
+      />
     </div>
   );
 }
