@@ -418,8 +418,12 @@ export default function PersonalAIPage() {
     }
   };
 
-  const stop = () => abortRef.current?.abort();
-  const copyMsg = async (content: string) => { await navigator.clipboard.writeText(content); toast({ title: "Copied" }); };
+  const [copiedTs, setCopiedTs] = useState<number | null>(null);
+  const copyMsg = async (content: string, ts?: number) => {
+    await navigator.clipboard.writeText(content);
+    if (ts) { setCopiedTs(ts); setTimeout(() => setCopiedTs(c => c === ts ? null : c), 1500); }
+    else toast({ title: "Copied" });
+  };
   const downloadMd = (m: Msg) => {
     const blob = new Blob([m.content], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
