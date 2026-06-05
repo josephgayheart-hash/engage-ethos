@@ -52,6 +52,7 @@ import ContentDNAPage from "./pages/admin/ContentDNAPage";
 import SecurityEventsPage from "./pages/admin/SecurityEventsPage";
 import PlatformOpsPage from "./pages/admin/PlatformOpsPage";
 import PersonalAIPage from "./pages/admin/PersonalAIPage";
+import PersonalAIEditsPage from "./pages/admin/PersonalAIEditsPage";
 import ApprovalsPage from "./pages/ApprovalsPage";
 import InitialSetupPage from "./pages/InitialSetupPage";
 import MessageDetailPage from "./pages/MessageDetailPage";
