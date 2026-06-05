@@ -117,6 +117,7 @@ export function FeedbackButton() {
   };
 
   if (!user) return null;
+  if (location.pathname.startsWith("/admin/personal-ai")) return null;
 
   return (
     <>
