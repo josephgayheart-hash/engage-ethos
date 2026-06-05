@@ -16,7 +16,7 @@ import { WaveBackground } from "@/components/WaveBackground";
 import { PostHogAnalyticsPanel } from "@/components/platform/PostHogAnalyticsPanel";
 import {
   Activity, Users, Building2, TrendingUp, RefreshCw, AlertTriangle,
-  Mail, Shield, FileSignature, Database, Inbox, MessageSquare, ExternalLink, Server,
+  Mail, Shield, FileSignature, Database, Inbox, MessageSquare, ExternalLink, Server, Sparkles,
 } from "lucide-react";
 
 type Counts = { total: number; recent: number };
@@ -181,6 +181,7 @@ const QUICK_LINKS = [
   { label: "NDA Links", icon: FileSignature, href: "/admin/nda-links" },
   { label: "QA Diagnostics", icon: Server, href: "/admin/qa" },
   { label: "AI Tech", icon: Database, href: "/admin/ai-technology" },
+  { label: "Personal AI", icon: Sparkles, href: "/admin/personal-ai" },
   { label: "Admin Console", icon: Activity, href: "/admin/console" },
 ];
 

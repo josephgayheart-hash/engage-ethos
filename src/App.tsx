@@ -51,6 +51,7 @@ import UserDetailPage from "./pages/admin/UserDetailPage";
 import ContentDNAPage from "./pages/admin/ContentDNAPage";
 import SecurityEventsPage from "./pages/admin/SecurityEventsPage";
 import PlatformOpsPage from "./pages/admin/PlatformOpsPage";
+import PersonalAIPage from "./pages/admin/PersonalAIPage";
 import ApprovalsPage from "./pages/ApprovalsPage";
 import InitialSetupPage from "./pages/InitialSetupPage";
 import MessageDetailPage from "./pages/MessageDetailPage";
@@ -267,6 +268,7 @@ const AppRoutes = () => (
         <Route path="/admin/crm" element={<CRMPage />} />
         <Route path="/admin/nda-links" element={<NDALinksPage />} />
         <Route path="/admin/ai-technology" element={<AITechnologyPage />} />
+        <Route path="/admin/personal-ai" element={<PersonalAIPage />} />
       </Route>
     </Route>
 
