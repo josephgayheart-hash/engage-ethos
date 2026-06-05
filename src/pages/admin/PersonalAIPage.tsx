@@ -155,6 +155,7 @@ export default function PersonalAIPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const [editDialog, setEditDialog] = useState<{ open: boolean; original: string; sourceMessageId?: string; promptContext?: string }>({ open: false, original: "" });
 
   const active = useMemo(() => threads.find(t => t.id === activeId) ?? threads[0], [threads, activeId]);
 
