@@ -316,6 +316,14 @@ export function Header() {
                         {isSuperAdmin ? "Super Admin Panel" : "Admin Console"}
                       </Link>
                     </DropdownMenuItem>
+                    {isSuperAdmin && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin/personal-ai" className="flex items-center gap-2 cursor-pointer">
+                          <Sparkles className="w-4 h-4" />
+                          Personal AI
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                   </>
                 )}
                 <DropdownMenuItem onClick={() => setReferDialogOpen(true)} className="cursor-pointer">
