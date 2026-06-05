@@ -181,6 +181,7 @@ const QUICK_LINKS = [
   { label: "NDA Links", icon: FileSignature, href: "/admin/nda-links" },
   { label: "QA Diagnostics", icon: Server, href: "/admin/qa" },
   { label: "AI Tech", icon: Database, href: "/admin/ai-technology" },
+  { label: "Personal AI", icon: Sparkles, href: "/admin/personal-ai" },
   { label: "Admin Console", icon: Activity, href: "/admin/console" },
 ];
 
