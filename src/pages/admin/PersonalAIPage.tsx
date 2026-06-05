@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from "react";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,9 +13,10 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { LogEditDialog } from "@/components/admin/LogEditDialog";
 import {
   Sparkles, Send, Copy, Trash2, Plus, MessageSquare, Wand2, FileText,
-  Mail, ScrollText, Loader2, Settings2, BrainCircuit, RefreshCw,
+  Mail, ScrollText, Loader2, Settings2, BrainCircuit, RefreshCw, GitCompare,
 } from "lucide-react";
 
 type Role = "user" | "assistant" | "system";
@@ -154,6 +155,7 @@ export default function PersonalAIPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const [editDialog, setEditDialog] = useState<{ open: boolean; original: string; sourceMessageId?: string; promptContext?: string }>({ open: false, original: "" });
 
   const active = useMemo(() => threads.find(t => t.id === activeId) ?? threads[0], [threads, activeId]);
 
@@ -307,9 +309,14 @@ export default function PersonalAIPage() {
               Your private, model-agnostic writing & thinking copilot. No profile, no DNA — just you and the model.
             </p>
           </div>
-          <Badge variant="outline" className="gap-1">
-            <Sparkles className="h-3 w-3" /> Super Admin only · stored locally in this browser
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" asChild className="gap-1">
+              <Link to="/admin/personal-ai/edits"><GitCompare className="h-4 w-4" /> Edit Tracker</Link>
+            </Button>
+            <Badge variant="outline" className="gap-1">
+              <Sparkles className="h-3 w-3" /> Super Admin
+            </Badge>
+          </div>
         </header>
 
         <div className="grid grid-cols-12 gap-4 h-[calc(100vh-180px)]">
@@ -408,13 +415,33 @@ export default function PersonalAIPage() {
                         ) : (
                           <div className="whitespace-pre-wrap">{m.content}</div>
                         )}
-                        <button
-                          onClick={() => copyMsg(m.content)}
-                          className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 bg-background border rounded-md p-1 shadow-sm transition"
-                          aria-label="Copy"
-                        >
-                          <Copy className="h-3 w-3" />
-                        </button>
+                        <div className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 flex gap-1 transition">
+                          {m.role === "assistant" && (
+                            <button
+                              onClick={() => {
+                                const lastUser = [...(active?.messages ?? [])].slice(0, i).reverse().find(x => x.role === "user");
+                                setEditDialog({
+                                  open: true,
+                                  original: m.content,
+                                  sourceMessageId: `${active?.id}:${i}`,
+                                  promptContext: lastUser?.content,
+                                });
+                              }}
+                              className="bg-background border rounded-md p-1 shadow-sm hover:bg-accent"
+                              aria-label="I edited this"
+                              title="I edited this — log my final version"
+                            >
+                              <GitCompare className="h-3 w-3" />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => copyMsg(m.content)}
+                            className="bg-background border rounded-md p-1 shadow-sm hover:bg-accent"
+                            aria-label="Copy"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -535,6 +562,16 @@ export default function PersonalAIPage() {
           </aside>
         </div>
       </div>
+
+      <LogEditDialog
+        open={editDialog.open}
+        onOpenChange={(o) => setEditDialog(s => ({ ...s, open: o }))}
+        initialOriginal={editDialog.original}
+        source="chat"
+        sourceMessageId={editDialog.sourceMessageId}
+        promptContext={editDialog.promptContext}
+        model={active?.model}
+      />
     </div>
   );
 }

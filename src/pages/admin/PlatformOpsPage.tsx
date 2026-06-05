@@ -182,6 +182,7 @@ const QUICK_LINKS = [
   { label: "QA Diagnostics", icon: Server, href: "/admin/qa" },
   { label: "AI Tech", icon: Database, href: "/admin/ai-technology" },
   { label: "Personal AI", icon: Sparkles, href: "/admin/personal-ai" },
+  { label: "Edit Tracker", icon: Sparkles, href: "/admin/personal-ai/edits" },
   { label: "Admin Console", icon: Activity, href: "/admin/console" },
 ];
 
