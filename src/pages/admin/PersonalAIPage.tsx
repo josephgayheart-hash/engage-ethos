@@ -645,7 +645,7 @@ export default function PersonalAIPage() {
             }
           }}
           placeholder={imageMode ? "Describe an image to generate…" : "Message Personal AI…  (paste long text and it'll attach as a file)"}
-          className="min-h-[56px] max-h-[280px] resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-5 pt-4 pb-12 text-[15px] leading-relaxed placeholder:text-muted-foreground/60"
+          className="min-h-[56px] max-h-[480px] resize-none overflow-y-auto border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-5 pt-4 pb-12 text-[15px] leading-relaxed placeholder:text-muted-foreground/60"
           disabled={streaming}
         />
         <div className="absolute left-2 bottom-2 flex items-center gap-0.5">
