@@ -688,13 +688,6 @@ export default function PersonalAIPage() {
             </SelectContent>
           </Select>
           </div>
-            <SelectTrigger className="h-9 w-auto min-w-[180px] text-sm border-0 shadow-none focus:ring-0 px-2.5 gap-1.5 font-medium hover:bg-muted rounded-lg">
-              <SelectValue placeholder={currentModelLabel} />
-            </SelectTrigger>
-            <SelectContent>
-              {MODELS.map(m => (<SelectItem key={m.id} value={m.id}>{m.label}</SelectItem>))}
-            </SelectContent>
-          </Select>
           <Button
             variant="ghost"
             size="sm"
