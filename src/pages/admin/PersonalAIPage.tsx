@@ -805,9 +805,21 @@ export default function PersonalAIPage() {
                                   <button onClick={() => copyMsg(m.content, m.ts)} className="h-7 w-7 inline-flex items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Copy">
                                     {copiedTs === m.ts ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
                                   </button>
-                                  <button onClick={() => downloadMd(m)} className="h-7 w-7 inline-flex items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Download markdown">
-                                    <Download className="h-3.5 w-3.5" />
-                                  </button>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <button className="h-7 w-7 inline-flex items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Download">
+                                        <Download className="h-3.5 w-3.5" />
+                                      </button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="start" className="w-44">
+                                      <DropdownMenuLabel className="text-xs">Download as</DropdownMenuLabel>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem onClick={() => downloadAs(m, "docx")}>Word (.docx)</DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => downloadAs(m, "pptx")}>PowerPoint (.pptx)</DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => downloadAs(m, "pdf")}>PDF</DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => downloadAs(m, "md")}>Markdown (.md)</DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
                                   {extractHtmlArtifact(m.content) && (
                                     <button onClick={() => openHtmlArtifact(m.content)} className="h-7 px-2 inline-flex items-center gap-1 rounded-md text-xs text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Open artifact">
                                       <Eye className="h-3.5 w-3.5" /> Artifact
