@@ -551,9 +551,9 @@ export default function PersonalAIPage() {
         setArtifactOpen(true);
       }
       // Auto-open the most recent generated file artifact (PDF/image/HTML/SVG/etc.)
-      const files = extractFileArtifacts(acc);
-      if (files.length) {
-        setFileArtifact(files[files.length - 1]);
+      const artifactFiles = extractFileArtifacts(acc);
+      if (artifactFiles.length) {
+        setFileArtifact(artifactFiles[artifactFiles.length - 1]);
         setArtifactOpen(true);
       }
     } catch (err: any) {
