@@ -1848,6 +1848,57 @@ export type Database = {
         }
         Relationships: []
       }
+      personal_ai_facts: {
+        Row: {
+          category: string | null
+          created_at: string
+          fact: string
+          id: string
+          source_thread_id: string | null
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          fact: string
+          id?: string
+          source_thread_id?: string | null
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          fact?: string
+          id?: string
+          source_thread_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      personal_ai_profile: {
+        Row: {
+          created_at: string
+          memory_enabled: boolean
+          system_prompt: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          memory_enabled?: boolean
+          system_prompt?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          memory_enabled?: boolean
+          system_prompt?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       personal_messages: {
         Row: {
           approved: boolean | null

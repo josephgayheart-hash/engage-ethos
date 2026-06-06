@@ -19,8 +19,9 @@ import { cn } from "@/lib/utils";
 import {
   ArrowUp, Copy, Trash2, Plus, Square, Loader2, Paperclip, Image as ImageIcon,
   Globe, Wand2, FileText, X, Download, Code as CodeIcon, Eye, Sparkles,
-  MessageSquarePlus, Check, RefreshCw,
+  MessageSquarePlus, Check, RefreshCw, Brain,
 } from "lucide-react";
+import { MemoryDialog } from "@/components/personal-ai/MemoryDialog";
 
 type Role = "user" | "assistant";
 interface Attachment { name: string; kind: "image" | "doc"; dataUrl?: string; text?: string }
@@ -150,6 +151,17 @@ export default function PersonalAIPage() {
   const imageRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const [copiedTs, setCopiedTs] = useState<number | null>(null);
+  const [memoryOpen, setMemoryOpen] = useState(false);
+  const [savedProfilePrompt, setSavedProfilePrompt] = useState<string | null>(null);
+
+  // Load saved system-prompt profile once so new threads use it as default
+  useEffect(() => {
+    if (!isSuperAdmin) return;
+    (async () => {
+      const { data } = await supabase.from("personal_ai_profile").select("system_prompt").maybeSingle();
+      if (data?.system_prompt?.trim()) setSavedProfilePrompt(data.system_prompt);
+    })();
+  }, [isSuperAdmin]);
 
   const active = useMemo(() => threads.find(t => t.id === activeId) ?? threads[0], [threads, activeId]);
 
@@ -177,7 +189,8 @@ export default function PersonalAIPage() {
     setThreads(prev => prev.map(t => t.id === activeId ? { ...t, ...patch, updatedAt: Date.now() } : t));
   };
   const createThread = () => {
-    const t = newThread(active?.model, active?.systemPrompt);
+    const sys = savedProfilePrompt ?? active?.systemPrompt ?? DEFAULT_SYSTEM_PROMPT;
+    const t = newThread(active?.model, sys);
     setThreads(prev => [t, ...prev]);
     setActiveId(t.id);
   };
@@ -402,6 +415,11 @@ export default function PersonalAIPage() {
         t.id === activeId ? { ...t, messages: [...newMessages, finalMsg], updatedAt: Date.now() } : t
       ));
       setStreamText("");
+
+      // Fire-and-forget: extract durable facts from this turn
+      supabase.functions.invoke("personal-ai-extract-memory", {
+        body: { userMessage: text, assistantMessage: acc, threadId: activeId },
+      }).catch(() => {});
 
       // Auto-open artifact if HTML detected
       const html = extractHtmlArtifact(acc);
@@ -630,7 +648,21 @@ export default function PersonalAIPage() {
               {MODELS.map(m => (<SelectItem key={m.id} value={m.id}>{m.label}</SelectItem>))}
             </SelectContent>
           </Select>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setMemoryOpen(true)}
+            className="h-9 gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+          >
+            <Brain className="h-4 w-4" /> Memory
+          </Button>
         </header>
+        <MemoryDialog
+          open={memoryOpen}
+          onOpenChange={setMemoryOpen}
+          defaultPrompt={DEFAULT_SYSTEM_PROMPT}
+          onProfileSaved={(p) => setSavedProfilePrompt(p)}
+        />
 
         <div className="flex-1 flex min-h-0">
           {/* Chat column */}
