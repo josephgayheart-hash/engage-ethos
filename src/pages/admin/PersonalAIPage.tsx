@@ -154,6 +154,8 @@ export default function PersonalAIPage() {
   const abortRef = useRef<AbortController | null>(null);
   const [copiedTs, setCopiedTs] = useState<number | null>(null);
   const [memoryOpen, setMemoryOpen] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const dragDepth = useRef(0);
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     const v = localStorage.getItem("personal-ai-sidebar-open");
     return v === null ? true : v === "1";
