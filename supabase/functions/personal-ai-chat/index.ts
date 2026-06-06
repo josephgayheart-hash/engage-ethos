@@ -20,8 +20,9 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // ---- Personal memory injection (profile + learned facts) ----
+    // ---- Personal memory + tenant brand injection ----
     let memoryBlock = "";
+    let tenantBrand: { name?: string; logo_url?: string | null; primary_color?: string; accent_color?: string } | null = null;
     try {
       const authHeader = req.headers.get("Authorization") ?? "";
       if (authHeader) {
@@ -33,10 +34,26 @@ serve(async (req) => {
         const { data: userData } = await supabase.auth.getUser(token);
         const uid = userData?.user?.id;
         if (uid) {
-          const [{ data: prof }, { data: facts }] = await Promise.all([
+          const [{ data: prof }, { data: facts }, { data: profileRow }] = await Promise.all([
             supabase.from("personal_ai_profile").select("system_prompt,memory_enabled,use_cases,about_me,response_prefs,voice_profile").eq("user_id", uid).maybeSingle(),
             supabase.from("personal_ai_facts").select("fact,category").eq("user_id", uid).order("created_at", { ascending: false }).limit(80),
+            supabase.from("profiles").select("tenant_id").eq("id", uid).maybeSingle(),
           ]);
+          if (profileRow?.tenant_id) {
+            const { data: t } = await supabase
+              .from("tenants")
+              .select("institution_name,logo_url,primary_color,accent_color")
+              .eq("id", profileRow.tenant_id)
+              .maybeSingle();
+            if (t) {
+              tenantBrand = {
+                name: t.institution_name,
+                logo_url: t.logo_url,
+                primary_color: t.primary_color,
+                accent_color: t.accent_color,
+              };
+            }
+          }
           const parts: string[] = [];
           if (prof?.system_prompt?.trim()) parts.push(`# About the user (always apply)\n${prof.system_prompt.trim()}`);
           if (prof?.about_me?.trim()) parts.push(`# About the user\n${prof.about_me.trim()}`);
@@ -75,6 +92,18 @@ serve(async (req) => {
             const block = Object.entries(grouped).map(([k, v]) => `**${k}**\n${v.join("\n")}`).join("\n\n");
             parts.push(`# Things you remember about the user (learned across past chats)\n${block}\n\nUse these silently to personalize answers. Do not list them back unless asked.`);
           }
+          if (tenantBrand) {
+            parts.push(
+              `# Workspace brand (use for every generated artifact)\n` +
+              `- Organization: ${tenantBrand.name}\n` +
+              `- Primary color (use as accent): ${tenantBrand.primary_color}\n` +
+              `- Secondary color: ${tenantBrand.accent_color}\n` +
+              (tenantBrand.logo_url ? `- Logo URL (place on every slide/cover): ${tenantBrand.logo_url}\n` : "") +
+              `When you call generate_pptx, generate_pdf, generate_docx, or generate_html, you MUST pass theme.accent = "${tenantBrand.primary_color}", theme.secondary = "${tenantBrand.accent_color}"` +
+              (tenantBrand.logo_url ? `, and theme.logo_url = "${tenantBrand.logo_url}"` : "") +
+              `. Never produce an unbranded deliverable.`
+            );
+          }
           if (parts.length) memoryBlock = parts.join("\n\n---\n\n");
         }
       }
@@ -83,6 +112,7 @@ serve(async (req) => {
     }
 
     const finalSystem = memoryBlock ? `${systemPrompt}\n\n---\n\n${memoryBlock}` : systemPrompt;
+
 
     let userContent: any;
     let textBody = String(message || "");
