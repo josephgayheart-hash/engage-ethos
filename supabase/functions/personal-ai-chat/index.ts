@@ -314,7 +314,7 @@ serve(async (req) => {
             properties: {
               title: { type: "string" },
               subtitle: { type: "string" },
-              author: { type: "string" },
+              author: { type: "string", description: "OMIT unless the user explicitly named a byline for this PDF. Never default to the operator's name, workspace, or anyone from memory." },
               blocks: {
                 type: "array",
                 items: {
