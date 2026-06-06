@@ -595,57 +595,99 @@ export default function PersonalAIPage() {
   return (
     <div className="h-screen flex bg-background text-foreground">
       {/* Sidebar */}
-      <aside className="w-64 shrink-0 border-r border-border/60 flex flex-col bg-muted/20">
-        <div className="p-3">
-          <Button
-            onClick={createThread}
-            variant="outline"
-            className="w-full justify-start gap-2 h-9 rounded-lg border-border/60 bg-background hover:bg-accent"
-          >
-            <MessageSquarePlus className="h-4 w-4" /> New chat
-          </Button>
-        </div>
-        <ScrollArea className="flex-1">
-          <div className="px-2 pb-3 space-y-3">
-            {groupedThreads.map(g => (
-              <div key={g.label}>
-                <div className="px-3 pt-2 pb-1 text-[10px] uppercase tracking-wider text-muted-foreground/70 font-medium">
-                  {g.label}
-                </div>
-                <div className="space-y-0.5">
-                  {g.items.map(t => (
-                    <div
-                      key={t.id}
-                      className={cn(
-                        "group flex items-center gap-2 rounded-lg px-3 py-2 cursor-pointer text-sm transition",
-                        t.id === activeId
-                          ? "bg-accent text-accent-foreground"
-                          : "text-foreground/80 hover:bg-muted hover:text-foreground"
-                      )}
-                      onClick={() => setActiveId(t.id)}
-                    >
-                      <span className="flex-1 truncate">{t.title}</span>
-                      <button
-                        type="button"
-                        className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition p-0.5 rounded"
-                        onClick={(e) => { e.stopPropagation(); deleteThread(t.id); }}
-                        aria-label="Delete chat"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+      {sidebarOpen && (
+        <aside className="w-64 shrink-0 border-r border-border/60 flex flex-col bg-muted/20">
+          <div className="p-3 flex items-center gap-2">
+            <Button
+              onClick={createThread}
+              variant="outline"
+              className="flex-1 justify-start gap-2 h-9 rounded-lg border-border/60 bg-background hover:bg-accent"
+            >
+              <MessageSquarePlus className="h-4 w-4" /> New chat
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 shrink-0 text-muted-foreground hover:text-foreground"
+              onClick={() => setSidebarOpen(false)}
+              aria-label="Close sidebar"
+            >
+              <PanelLeftClose className="h-4 w-4" />
+            </Button>
           </div>
-        </ScrollArea>
-      </aside>
+          <ScrollArea className="flex-1">
+            <div className="px-2 pb-3 space-y-3">
+              {groupedThreads.map(g => (
+                <div key={g.label}>
+                  <div className="px-3 pt-2 pb-1 text-[10px] uppercase tracking-wider text-muted-foreground/70 font-medium">
+                    {g.label}
+                  </div>
+                  <div className="space-y-0.5">
+                    {g.items.map(t => (
+                      <div
+                        key={t.id}
+                        className={cn(
+                          "group flex items-center gap-2 rounded-lg px-3 py-2 cursor-pointer text-sm transition",
+                          t.id === activeId
+                            ? "bg-accent text-accent-foreground"
+                            : "text-foreground/80 hover:bg-muted hover:text-foreground"
+                        )}
+                        onClick={() => setActiveId(t.id)}
+                      >
+                        <span className="flex-1 truncate">{t.title}</span>
+                        <button
+                          type="button"
+                          className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition p-0.5 rounded"
+                          onClick={(e) => { e.stopPropagation(); deleteThread(t.id); }}
+                          aria-label="Delete chat"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+        </aside>
+      )}
 
       {/* Main */}
       <main className="flex-1 flex flex-col min-w-0">
         <header className="h-14 border-b border-border/60 flex items-center justify-between px-4 shrink-0 gap-2 bg-background/80 backdrop-blur">
-          <Select value={active?.model} onValueChange={(v) => updateActive({ model: v })}>
+          <div className="flex items-center gap-1">
+            {!sidebarOpen && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 text-muted-foreground hover:text-foreground"
+                  onClick={() => setSidebarOpen(true)}
+                  aria-label="Open sidebar"
+                >
+                  <PanelLeftOpen className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 text-muted-foreground hover:text-foreground"
+                  onClick={createThread}
+                  aria-label="New chat"
+                >
+                  <MessageSquarePlus className="h-4 w-4" />
+                </Button>
+              </>
+            )}
+            <Select value={active?.model} onValueChange={(v) => updateActive({ model: v })}>
+            <SelectTrigger className="h-9 w-auto min-w-[180px] text-sm border-0 shadow-none focus:ring-0 px-2.5 gap-1.5 font-medium hover:bg-muted rounded-lg">
+              <SelectValue placeholder={currentModelLabel} />
+            </SelectTrigger>
+            <SelectContent>
+              {MODELS.map(m => (<SelectItem key={m.id} value={m.id}>{m.label}</SelectItem>))}
+            </SelectContent>
+          </Select>
+          </div>
             <SelectTrigger className="h-9 w-auto min-w-[180px] text-sm border-0 shadow-none focus:ring-0 px-2.5 gap-1.5 font-medium hover:bg-muted rounded-lg">
               <SelectValue placeholder={currentModelLabel} />
             </SelectTrigger>
