@@ -550,6 +550,12 @@ export default function PersonalAIPage() {
         setArtifactTab("preview");
         setArtifactOpen(true);
       }
+      // Auto-open the most recent generated file artifact (PDF/image/HTML/SVG/etc.)
+      const files = extractFileArtifacts(acc);
+      if (files.length) {
+        setFileArtifact(files[files.length - 1]);
+        setArtifactOpen(true);
+      }
     } catch (err: any) {
       if (err.name !== "AbortError") {
         toast({ title: "Generation failed", description: err.message ?? "Unknown error", variant: "destructive" });
