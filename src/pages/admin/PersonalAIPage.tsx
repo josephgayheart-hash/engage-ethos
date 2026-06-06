@@ -212,6 +212,15 @@ export default function PersonalAIPage() {
   useEffect(() => { saveThreads(threads); }, [threads]);
   useEffect(() => { localStorage.setItem(ACTIVE_KEY, activeId); }, [activeId]);
   useEffect(() => { inputRef.current?.focus(); }, [activeId]);
+
+  // Auto-grow the composer textarea so long text doesn't overflow or scroll prematurely.
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    const max = 480; // generous max before internal scroll kicks in
+    el.style.height = Math.min(el.scrollHeight, max) + "px";
+  }, [input]);
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [active?.messages.length, streamText, streamImage]);
@@ -636,7 +645,7 @@ export default function PersonalAIPage() {
             }
           }}
           placeholder={imageMode ? "Describe an image to generate…" : "Message Personal AI…  (paste long text and it'll attach as a file)"}
-          className="min-h-[56px] max-h-[280px] resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-5 pt-4 pb-12 text-[15px] leading-relaxed placeholder:text-muted-foreground/60"
+          className="min-h-[56px] max-h-[480px] resize-none overflow-y-auto border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-5 pt-4 pb-12 text-[15px] leading-relaxed placeholder:text-muted-foreground/60"
           disabled={streaming}
         />
         <div className="absolute left-2 bottom-2 flex items-center gap-0.5">
