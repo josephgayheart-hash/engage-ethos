@@ -1,8 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "../_shared/resilience.ts";
 
-// Streaming chat for Personal AI Workbench. Supports vision (image_url parts),
-// optional pre-fetched web search context, and the full Lovable AI model list.
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -13,15 +12,51 @@ serve(async (req) => {
       history = [],
       model = "google/gemini-2.5-pro",
       systemPrompt = "You are a helpful assistant.",
-      images = [], // [{ name, dataUrl }]
-      files = [],  // [{ name, text }]
-      searchContext = "", // pre-fetched web search snippets
+      images = [],
+      files = [],
+      searchContext = "",
     } = body;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Build user content. If images attached, use vision content blocks.
+    // ---- Personal memory injection (profile + learned facts) ----
+    let memoryBlock = "";
+    try {
+      const authHeader = req.headers.get("Authorization") ?? "";
+      if (authHeader) {
+        const supabase = createClient(
+          Deno.env.get("SUPABASE_URL")!,
+          Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+        );
+        const token = authHeader.replace("Bearer ", "");
+        const { data: userData } = await supabase.auth.getUser(token);
+        const uid = userData?.user?.id;
+        if (uid) {
+          const [{ data: prof }, { data: facts }] = await Promise.all([
+            supabase.from("personal_ai_profile").select("system_prompt,memory_enabled").eq("user_id", uid).maybeSingle(),
+            supabase.from("personal_ai_facts").select("fact,category").eq("user_id", uid).order("created_at", { ascending: false }).limit(80),
+          ]);
+          const parts: string[] = [];
+          if (prof?.system_prompt?.trim()) parts.push(`# About the user (always apply)\n${prof.system_prompt.trim()}`);
+          if (prof?.memory_enabled !== false && facts && facts.length) {
+            const grouped: Record<string, string[]> = {};
+            for (const f of facts as any[]) {
+              const k = f.category || "general";
+              (grouped[k] ||= []).push(`- ${f.fact}`);
+            }
+            const block = Object.entries(grouped).map(([k, v]) => `**${k}**\n${v.join("\n")}`).join("\n\n");
+            parts.push(`# Things you remember about the user (learned across past chats)\n${block}\n\nUse these silently to personalize answers. Do not list them back unless asked.`);
+          }
+          if (parts.length) memoryBlock = parts.join("\n\n---\n\n");
+        }
+      }
+    } catch (e) {
+      console.warn("memory injection failed:", e);
+    }
+
+    const finalSystem = memoryBlock ? `${systemPrompt}\n\n---\n\n${memoryBlock}` : systemPrompt;
+
     let userContent: any;
     let textBody = String(message || "");
     if (files.length) {
@@ -44,7 +79,7 @@ serve(async (req) => {
     }
 
     const messages = [
-      { role: "system", content: systemPrompt },
+      { role: "system", content: finalSystem },
       ...history.slice(-30).map((m: any) => ({ role: m.role, content: m.content })),
       { role: "user", content: userContent },
     ];
