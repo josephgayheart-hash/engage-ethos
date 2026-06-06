@@ -80,7 +80,39 @@ const RECIPES: { id: string; label: string; prompt: string }[] = [
 function loadThreads(): Thread[] {
   try { const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : []; } catch { return []; }
 }
-function saveThreads(t: Thread[]) { localStorage.setItem(STORAGE_KEY, JSON.stringify(t)); }
+function sanitizeForStorage(threads: Thread[]): Thread[] {
+  // Strip heavy payloads (image dataURLs, long file text, generated images) so we don't blow the ~5MB localStorage quota.
+  const MAX_DOC_TEXT = 4000;
+  return threads.map(t => ({
+    ...t,
+    messages: t.messages.map(m => ({
+      ...m,
+      imageUrl: undefined,
+      attachments: m.attachments?.map(a => ({
+        name: a.name,
+        kind: a.kind,
+        dataUrl: undefined,
+        text: a.text && a.text.length > MAX_DOC_TEXT ? a.text.slice(0, MAX_DOC_TEXT) + `\n\n…[truncated for storage]` : a.text,
+      })),
+    })),
+  }));
+}
+function saveThreads(t: Thread[]) {
+  const tryWrite = (data: Thread[]) => localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  let data = sanitizeForStorage(t);
+  // Cap total threads to last 50 to bound size
+  if (data.length > 50) data = data.slice(0, 50);
+  try { tryWrite(data); return; } catch {}
+  // Drop oldest threads until it fits
+  while (data.length > 1) {
+    data = data.slice(0, Math.max(1, Math.floor(data.length * 0.7)));
+    try { tryWrite(data); return; } catch {}
+  }
+  // Last resort: keep only most recent thread with empty messages
+  try { tryWrite([{ ...data[0], messages: data[0].messages.slice(-20) }]); } catch {
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
+  }
+}
 function newThread(model = MODELS[0].id, systemPrompt = DEFAULT_SYSTEM_PROMPT): Thread {
   return { id: crypto.randomUUID(), title: "New chat", updatedAt: Date.now(), messages: [], systemPrompt, model };
 }
