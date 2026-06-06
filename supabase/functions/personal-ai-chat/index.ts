@@ -180,9 +180,9 @@ serve(async (req) => {
               theme: {
                 type: "object",
                 properties: {
-                  accent: { type: "string", description: "Hex like #0E2A47. Use workspace primary color." },
-                  secondary: { type: "string", description: "Hex secondary brand color." },
-                  logo_url: { type: "string", description: "Workspace logo URL (placed on every slide)." },
+                  accent: { type: "string", description: "Hex color (e.g. #0E2A47). ONLY set if the user explicitly provided a brand color, template, or asset in this conversation. Never default to CampusVoice, Fieldmark, or any workspace branding." },
+                  secondary: { type: "string", description: "Secondary hex color. Same rule: only when user-provided." },
+                  logo_url: { type: "string", description: "Logo URL. ONLY set if the user uploaded/linked their own logo in this conversation. Do NOT pull a workspace logo." },
                   fontHead: { type: "string" },
                   fontBody: { type: "string" },
                 },
