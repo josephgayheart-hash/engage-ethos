@@ -413,6 +413,45 @@ export type Database = {
           },
         ]
       }
+      compass_locker_items: {
+        Row: {
+          content: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          kind: string
+          mime_type: string | null
+          size_bytes: number | null
+          storage_path: string | null
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          kind: string
+          mime_type?: string | null
+          size_bytes?: number | null
+          storage_path?: string | null
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          kind?: string
+          mime_type?: string | null
+          size_bytes?: number | null
+          storage_path?: string | null
+          title?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       content_dna_activity: {
         Row: {
           action: string
