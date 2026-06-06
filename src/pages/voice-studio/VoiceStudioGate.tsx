@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BrandedLoader } from "@/components/BrandedLoader";
 
 /**
- * Wraps /voice-studio. Anyone authenticated can use Voice Studio, but
+ * Wraps /voice-studio. Anyone authenticated can use Compass, but
  * tool-only users without a completed setup get bounced to /voice-studio/setup.
  */
 export function VoiceStudioGate({ children }: { children: React.ReactNode }) {
@@ -34,8 +34,8 @@ export function VoiceStudioGate({ children }: { children: React.ReactNode }) {
   }, [user, isToolOnly]);
 
   if (isLoading || !checked) return <BrandedLoader />;
-  if (isToolOnly && !setupDone && location.pathname !== "/voice-studio/setup") {
-    return <Navigate to="/voice-studio/setup" replace />;
+  if (isToolOnly && !setupDone && location.pathname !== "/compass/setup") {
+    return <Navigate to="/compass/setup" replace />;
   }
   return <>{children}</>;
 }

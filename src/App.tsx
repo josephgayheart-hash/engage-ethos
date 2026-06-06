@@ -127,10 +127,10 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// Wraps the main app shell. Tool-only users get bounced to Voice Studio.
+// Wraps the main app shell. Tool-only users get bounced to Compass.
 function RequireFullApp({ children }: { children: React.ReactNode }) {
   const { profile } = useAuth();
-  if (profile?.tool_only) return <Navigate to="/voice-studio" replace />;
+  if (profile?.tool_only) return <Navigate to="/compass" replace />;
   return <>{children}</>;
 }
 
@@ -170,7 +170,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   if (isLoading) return <BrandedLoader />;
   if (user && !profile) return <BrandedLoader />;
   if (user && profile?.status === 'active' && !profile.password_reset_required) {
-    if (profile.tool_only) return <Navigate to="/voice-studio" replace />;
+    if (profile.tool_only) return <Navigate to="/compass" replace />;
     return <Navigate to="/dashboard" replace />;
   }
   return <>{children}</>;
@@ -207,9 +207,9 @@ const AppRoutes = () => (
     <Route path="/docs/salesforce-canvas" element={<SalesforceCanvasGuidePage />} />
     <Route path="/integrations/salesforce-canvas" element={<Navigate to="/docs/salesforce-canvas" replace />} />
 
-    {/* Voice Studio — full-bleed, no app sidebar. Available to super admins and tool-only users. */}
+    {/* Compass — full-bleed, no app sidebar. Available to super admins and tool-only users. */}
     <Route
-      path="/voice-studio"
+      path="/compass"
       element={
         <RequireAuth>
           <VoiceStudioGate>
@@ -219,7 +219,7 @@ const AppRoutes = () => (
       }
     />
     <Route
-      path="/voice-studio/setup"
+      path="/compass/setup"
       element={
         <RequireAuth>
           <VoiceStudioSetup />
@@ -302,9 +302,9 @@ const AppRoutes = () => (
         <Route path="/admin/crm" element={<CRMPage />} />
         <Route path="/admin/nda-links" element={<NDALinksPage />} />
         <Route path="/admin/ai-technology" element={<AITechnologyPage />} />
-        <Route path="/admin/personal-ai" element={<Navigate to="/voice-studio" replace />} />
+        <Route path="/admin/personal-ai" element={<Navigate to="/compass" replace />} />
         <Route path="/admin/personal-ai/edits" element={<PersonalAIEditsPage />} />
-        <Route path="/admin/voice-studio-users" element={<ToolOnlyUsersPage />} />
+        <Route path="/admin/compass-users" element={<ToolOnlyUsersPage />} />
       </Route>
     </Route>
 

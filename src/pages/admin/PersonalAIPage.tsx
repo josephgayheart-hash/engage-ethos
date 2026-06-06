@@ -171,7 +171,7 @@ export default function PersonalAIPage() {
 
   const active = useMemo(() => threads.find(t => t.id === activeId) ?? threads[0], [threads, activeId]);
 
-  useEffect(() => { document.title = "Voice Studio"; }, []);
+  useEffect(() => { document.title = "Compass"; }, []);
   useEffect(() => { saveThreads(threads); }, [threads]);
   useEffect(() => { localStorage.setItem(ACTIVE_KEY, activeId); }, [activeId]);
   useEffect(() => { inputRef.current?.focus(); }, [activeId]);
@@ -693,7 +693,7 @@ export default function PersonalAIPage() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate("/voice-studio/setup")}
+              onClick={() => navigate("/compass/setup")}
               className="h-9 gap-1.5 text-sm text-muted-foreground hover:text-foreground"
             >
               <RefreshCw className="h-4 w-4" /> Setup
@@ -724,7 +724,7 @@ export default function PersonalAIPage() {
                   <div className="text-center space-y-2">
                     <h1 className="text-3xl font-semibold tracking-tight">How can I help today?</h1>
                     <p className="text-sm text-muted-foreground">
-                      Voice Studio writes in your voice. Rewrite an email, summarize a meeting, or draft something new.
+                      Compass writes in your voice. Rewrite an email, summarize a meeting, or draft something new.
                     </p>
                   </div>
                   {Composer}
