@@ -34,11 +34,38 @@ serve(async (req) => {
         const uid = userData?.user?.id;
         if (uid) {
           const [{ data: prof }, { data: facts }] = await Promise.all([
-            supabase.from("personal_ai_profile").select("system_prompt,memory_enabled").eq("user_id", uid).maybeSingle(),
+            supabase.from("personal_ai_profile").select("system_prompt,memory_enabled,use_cases,about_me,response_prefs,voice_profile").eq("user_id", uid).maybeSingle(),
             supabase.from("personal_ai_facts").select("fact,category").eq("user_id", uid).order("created_at", { ascending: false }).limit(80),
           ]);
           const parts: string[] = [];
           if (prof?.system_prompt?.trim()) parts.push(`# About the user (always apply)\n${prof.system_prompt.trim()}`);
+          if (prof?.about_me?.trim()) parts.push(`# About the user\n${prof.about_me.trim()}`);
+          if (Array.isArray(prof?.use_cases) && prof.use_cases.length) {
+            parts.push(`# Primary use cases\n${(prof.use_cases as string[]).map((u) => `- ${u}`).join("\n")}`);
+          }
+          if (prof?.response_prefs && typeof prof.response_prefs === "object") {
+            const rp = prof.response_prefs as Record<string, unknown>;
+            const lines: string[] = [];
+            if (rp.length) lines.push(`- Length: ${rp.length}`);
+            if (rp.format) lines.push(`- Format: ${rp.format}`);
+            if (typeof rp.formality === "number") lines.push(`- Formality (1 casual → 10 formal): ${rp.formality}`);
+            if (rp.banned_words) lines.push(`- Never use these words/phrases: ${rp.banned_words}`);
+            if (rp.no_em_dash) lines.push(`- Do not use em dashes (—). Use commas, parens, or periods instead.`);
+            if (rp.use_markdown === false) lines.push(`- Plain text only. Do not use markdown.`);
+            if (lines.length) parts.push(`# Response preferences (apply to every reply)\n${lines.join("\n")}`);
+          }
+          if (prof?.voice_profile && typeof prof.voice_profile === "object") {
+            const vp = prof.voice_profile as Record<string, unknown>;
+            const vpLines: string[] = ["# The user's writing voice (mirror this when ghostwriting)"];
+            if (vp.tone) vpLines.push(`Tone: ${vp.tone}`);
+            if (vp.sentence_rhythm) vpLines.push(`Rhythm: ${vp.sentence_rhythm}`);
+            if (Array.isArray(vp.vocabulary) && vp.vocabulary.length) vpLines.push(`Vocabulary: ${(vp.vocabulary as string[]).join(", ")}`);
+            if (Array.isArray(vp.structural_habits) && vp.structural_habits.length) vpLines.push(`Structural habits:\n${(vp.structural_habits as string[]).map((s) => `- ${s}`).join("\n")}`);
+            if (Array.isArray(vp.do) && vp.do.length) vpLines.push(`Do:\n${(vp.do as string[]).map((s) => `- ${s}`).join("\n")}`);
+            if (Array.isArray(vp.dont) && vp.dont.length) vpLines.push(`Don't:\n${(vp.dont as string[]).map((s) => `- ${s}`).join("\n")}`);
+            if (Array.isArray(vp.signature_examples) && vp.signature_examples.length) vpLines.push(`Signature phrases:\n${(vp.signature_examples as string[]).map((s) => `- "${s}"`).join("\n")}`);
+            parts.push(vpLines.join("\n"));
+          }
           if (prof?.memory_enabled !== false && facts && facts.length) {
             const grouped: Record<string, string[]> = {};
             for (const f of facts as any[]) {
