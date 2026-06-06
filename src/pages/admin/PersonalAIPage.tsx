@@ -1125,7 +1125,7 @@ export default function PersonalAIPage() {
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" asChild>
-                        <a href={artifactBlobUrl || fileArtifact.url} target="_blank" rel="noopener noreferrer"><ExternalLink className="h-3 w-3" /> Open</a>
+                        <a href={fileArtifact.url} target="_blank" rel="noopener noreferrer"><ExternalLink className="h-3 w-3" /> Open</a>
                       </Button>
                       <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" asChild>
                         <a href={fileArtifact.downloadUrl}><Download className="h-3 w-3" /> Download</a>
