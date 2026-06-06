@@ -127,6 +127,13 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Wraps the main app shell. Tool-only users get bounced to Voice Studio.
+function RequireFullApp({ children }: { children: React.ReactNode }) {
+  const { profile } = useAuth();
+  if (profile?.tool_only) return <Navigate to="/voice-studio" replace />;
+  return <>{children}</>;
+}
+
 function RequireAdmin({ children }: { children: React.ReactNode }) {
   const { isAdmin, isLoading } = useAuth();
   if (isLoading) return <BrandedLoader />;
@@ -162,7 +169,10 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading, profile } = useAuth();
   if (isLoading) return <BrandedLoader />;
   if (user && !profile) return <BrandedLoader />;
-  if (user && profile?.status === 'active' && !profile.password_reset_required) return <Navigate to="/dashboard" replace />;
+  if (user && profile?.status === 'active' && !profile.password_reset_required) {
+    if (profile.tool_only) return <Navigate to="/voice-studio" replace />;
+    return <Navigate to="/dashboard" replace />;
+  }
   return <>{children}</>;
 }
 
