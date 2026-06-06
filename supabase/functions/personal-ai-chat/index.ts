@@ -20,8 +20,9 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // ---- Personal memory injection (profile + learned facts) ----
+    // ---- Personal memory + tenant brand injection ----
     let memoryBlock = "";
+    let tenantBrand: { name?: string; logo_url?: string | null; primary_color?: string; accent_color?: string } | null = null;
     try {
       const authHeader = req.headers.get("Authorization") ?? "";
       if (authHeader) {
@@ -33,10 +34,26 @@ serve(async (req) => {
         const { data: userData } = await supabase.auth.getUser(token);
         const uid = userData?.user?.id;
         if (uid) {
-          const [{ data: prof }, { data: facts }] = await Promise.all([
+          const [{ data: prof }, { data: facts }, { data: profileRow }] = await Promise.all([
             supabase.from("personal_ai_profile").select("system_prompt,memory_enabled,use_cases,about_me,response_prefs,voice_profile").eq("user_id", uid).maybeSingle(),
             supabase.from("personal_ai_facts").select("fact,category").eq("user_id", uid).order("created_at", { ascending: false }).limit(80),
+            supabase.from("profiles").select("tenant_id").eq("id", uid).maybeSingle(),
           ]);
+          if (profileRow?.tenant_id) {
+            const { data: t } = await supabase
+              .from("tenants")
+              .select("institution_name,logo_url,primary_color,accent_color")
+              .eq("id", profileRow.tenant_id)
+              .maybeSingle();
+            if (t) {
+              tenantBrand = {
+                name: t.institution_name,
+                logo_url: t.logo_url,
+                primary_color: t.primary_color,
+                accent_color: t.accent_color,
+              };
+            }
+          }
           const parts: string[] = [];
           if (prof?.system_prompt?.trim()) parts.push(`# About the user (always apply)\n${prof.system_prompt.trim()}`);
           if (prof?.about_me?.trim()) parts.push(`# About the user\n${prof.about_me.trim()}`);
@@ -75,6 +92,18 @@ serve(async (req) => {
             const block = Object.entries(grouped).map(([k, v]) => `**${k}**\n${v.join("\n")}`).join("\n\n");
             parts.push(`# Things you remember about the user (learned across past chats)\n${block}\n\nUse these silently to personalize answers. Do not list them back unless asked.`);
           }
+          if (tenantBrand) {
+            parts.push(
+              `# Workspace brand (use for every generated artifact)\n` +
+              `- Organization: ${tenantBrand.name}\n` +
+              `- Primary color (use as accent): ${tenantBrand.primary_color}\n` +
+              `- Secondary color: ${tenantBrand.accent_color}\n` +
+              (tenantBrand.logo_url ? `- Logo URL (place on every slide/cover): ${tenantBrand.logo_url}\n` : "") +
+              `When you call generate_pptx, generate_pdf, generate_docx, or generate_html, you MUST pass theme.accent = "${tenantBrand.primary_color}", theme.secondary = "${tenantBrand.accent_color}"` +
+              (tenantBrand.logo_url ? `, and theme.logo_url = "${tenantBrand.logo_url}"` : "") +
+              `. Never produce an unbranded deliverable.`
+            );
+          }
           if (parts.length) memoryBlock = parts.join("\n\n---\n\n");
         }
       }
@@ -83,6 +112,7 @@ serve(async (req) => {
     }
 
     const finalSystem = memoryBlock ? `${systemPrompt}\n\n---\n\n${memoryBlock}` : systemPrompt;
+
 
     let userContent: any;
     let textBody = String(message || "");
@@ -126,10 +156,10 @@ serve(async (req) => {
       }
       const claudeModel = model.replace(/^anthropic\//, "");
 
-      // Convert messages: pull system out, normalize images.
+      // Convert messages: pull system out, normalize images. Trim to last 10 turns to ease token pressure.
       const sys = finalSystem;
       const baseMsgs = [
-        ...history.slice(-30).map((m: any) => ({ role: m.role, content: m.content })),
+        ...history.slice(-10).map((m: any) => ({ role: m.role, content: m.content })),
         { role: "user", content: userContent },
       ].map((m: any) => {
         if (typeof m.content === "string") return { role: m.role, content: m.content };
@@ -146,36 +176,85 @@ serve(async (req) => {
         return { role: m.role, content: parts };
       });
 
-      // Tools available to Claude
       const tools = [
         {
           name: "generate_pptx",
+
           description:
-            "Generate a downloadable PowerPoint (.pptx) presentation. Use when the user asks for slides, a deck, a presentation, or a pitch. Return a clear title and 5-15 well-structured slides. Each slide should have either bullets (3-6 short bullets) OR a body paragraph, not both.",
+            "Generate a downloadable, fully-branded PowerPoint deck. Use whenever the user asks for slides, a deck, a pitch, or a presentation. " +
+            "Produce 8-15 slides. MIX LAYOUTS — never use the same layout twice in a row. " +
+            "Always pass theme.accent (workspace primary color), theme.secondary, and theme.logo_url if the workspace brand was provided in the system prompt. " +
+            "Each slide MUST pick a layout: 'title' (section divider), 'bullets' (3-5 short bullets), 'two_column' (left vs right), 'stat' (1-3 big numbers with labels), 'quote' (pull quote + attribution), or 'image' (hero image with caption). " +
+            "For 'stat' slides, provide a `stats` array of {value, label, sublabel}. For 'two_column' provide `left` and `right` objects with optional heading + bullets. For 'image' provide image_url. For 'quote' provide quote + attribution.",
           input_schema: {
             type: "object",
             properties: {
-              title: { type: "string", description: "Deck title shown on the cover slide." },
-              subtitle: { type: "string", description: "Optional subtitle / one-line description." },
-              author: { type: "string", description: "Optional author/byline." },
+              title: { type: "string", description: "Deck title shown on the cover." },
+              subtitle: { type: "string" },
+              author: { type: "string" },
               theme: {
                 type: "object",
                 properties: {
-                  accent: { type: "string", description: "Hex color like #0E2A47 for the accent bar." },
+                  accent: { type: "string", description: "Hex like #0E2A47. Use workspace primary color." },
+                  secondary: { type: "string", description: "Hex secondary brand color." },
+                  logo_url: { type: "string", description: "Workspace logo URL (placed on every slide)." },
+                  fontHead: { type: "string" },
+                  fontBody: { type: "string" },
                 },
               },
               slides: {
                 type: "array",
-                description: "Content slides (the cover is added automatically).",
+                description: "Content slides (cover added automatically). 8-15 slides, mixed layouts.",
                 items: {
                   type: "object",
                   properties: {
+                    layout: {
+                      type: "string",
+                      enum: ["title", "bullets", "two_column", "stat", "quote", "image"],
+                      description: "Slide layout type. Vary across the deck.",
+                    },
                     title: { type: "string" },
-                    bullets: { type: "array", items: { type: "string" } },
+                    subtitle: { type: "string" },
+                    bullets: { type: "array", items: { type: "string" }, description: "For 'bullets' layout: 3-5 short bullets." },
                     body: { type: "string" },
+                    image_url: { type: "string", description: "For 'image' or 'two_column' layout." },
+                    image_caption: { type: "string" },
+                    stats: {
+                      type: "array",
+                      description: "For 'stat' layout: 1-3 big-number callouts.",
+                      items: {
+                        type: "object",
+                        properties: {
+                          value: { type: "string", description: "Big number, e.g. '87%' or '$1.2M'." },
+                          label: { type: "string", description: "Short label under the number." },
+                          sublabel: { type: "string", description: "Optional smaller detail line." },
+                        },
+                        required: ["value", "label"],
+                      },
+                    },
+                    quote: { type: "string", description: "For 'quote' layout: the pull quote." },
+                    attribution: { type: "string", description: "Who said the quote." },
+                    left: {
+                      type: "object",
+                      description: "For 'two_column' layout: left column content.",
+                      properties: {
+                        heading: { type: "string" },
+                        bullets: { type: "array", items: { type: "string" } },
+                        body: { type: "string" },
+                      },
+                    },
+                    right: {
+                      type: "object",
+                      description: "For 'two_column' layout: right column content.",
+                      properties: {
+                        heading: { type: "string" },
+                        bullets: { type: "array", items: { type: "string" } },
+                        body: { type: "string" },
+                      },
+                    },
                     notes: { type: "string", description: "Optional speaker notes." },
                   },
-                  required: ["title"],
+                  required: ["layout", "title"],
                 },
               },
             },
@@ -185,16 +264,15 @@ serve(async (req) => {
         {
           name: "generate_docx",
           description:
-            "Generate a downloadable Microsoft Word (.docx) document. Use when the user asks for a doc, memo, brief, report, letter, essay, or written deliverable. Structure the document with headings, paragraphs, bullets, and numbered lists as appropriate. Prefer well-structured headings (heading1/2/3) over a wall of paragraphs.",
+            "Generate a downloadable Microsoft Word (.docx) document. Use when the user asks for a doc, memo, brief, report, letter, essay, or written deliverable. Structure with headings, paragraphs, bullets, and numbered lists.",
           input_schema: {
             type: "object",
             properties: {
               title: { type: "string", description: "Document title shown at the top." },
-              subtitle: { type: "string", description: "Optional subtitle / one-line description." },
-              author: { type: "string", description: "Optional author/byline." },
+              subtitle: { type: "string" },
+              author: { type: "string" },
               blocks: {
                 type: "array",
-                description: "Ordered content blocks that make up the document body.",
                 items: {
                   type: "object",
                   properties: {
@@ -202,8 +280,8 @@ serve(async (req) => {
                       type: "string",
                       enum: ["heading1", "heading2", "heading3", "paragraph", "bullets", "numbered", "quote", "page_break"],
                     },
-                    text: { type: "string", description: "Text content for heading/paragraph/quote blocks." },
-                    items: { type: "array", items: { type: "string" }, description: "List items for bullets/numbered blocks." },
+                    text: { type: "string" },
+                    items: { type: "array", items: { type: "string" } },
                   },
                   required: ["type"],
                 },
@@ -212,6 +290,7 @@ serve(async (req) => {
             required: ["title", "blocks"],
           },
         },
+
         {
           name: "generate_html",
           description:
