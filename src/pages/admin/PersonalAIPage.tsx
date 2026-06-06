@@ -510,11 +510,14 @@ export default function PersonalAIPage() {
       const images = attachments.filter(a => a.kind === "image").map(a => ({ name: a.name, dataUrl: a.dataUrl! }));
       const files = attachments.filter(a => a.kind === "doc").map(a => ({ name: a.name, text: a.text! }));
 
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      const accessToken = currentSession?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
       const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/personal-ai-chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${accessToken}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
         },
         signal: controller.signal,
         body: JSON.stringify({
