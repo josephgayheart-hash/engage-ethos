@@ -123,6 +123,37 @@ function extractHtmlArtifact(text: string): string | null {
   return m ? m[1].trim() : null;
 }
 
+// File artifacts emitted by Claude tools (pptx/docx/pdf/html/svg/image).
+// Marker format: <!--artifact:{"filename":..,"url":..,"downloadUrl":..}-->
+export type FileArtifact = { filename: string; url: string; downloadUrl: string; kind: "pdf" | "image" | "html" | "svg" | "docx" | "pptx" | "other" };
+function kindFromName(name: string): FileArtifact["kind"] {
+  const ext = name.toLowerCase().split(".").pop() || "";
+  if (ext === "pdf") return "pdf";
+  if (["png", "jpg", "jpeg", "webp", "gif"].includes(ext)) return "image";
+  if (ext === "html" || ext === "htm") return "html";
+  if (ext === "svg") return "svg";
+  if (ext === "docx") return "docx";
+  if (ext === "pptx") return "pptx";
+  return "other";
+}
+function extractFileArtifacts(text: string): FileArtifact[] {
+  const out: FileArtifact[] = [];
+  const re = /<!--artifact:(\{[\s\S]*?\})-->/g;
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    try {
+      const j = JSON.parse(m[1]);
+      if (j?.url && j?.filename) {
+        out.push({ filename: j.filename, url: j.url, downloadUrl: j.downloadUrl || j.url, kind: kindFromName(j.filename) });
+      }
+    } catch { /* ignore */ }
+  }
+  return out;
+}
+function stripArtifactMarkers(text: string): string {
+  return text.replace(/<!--artifact:\{[\s\S]*?\}-->\n?/g, "");
+}
+
 async function parsePdfToText(file: File): Promise<string> {
   const pdfjs: any = await import("pdfjs-dist");
   // @ts-ignore
