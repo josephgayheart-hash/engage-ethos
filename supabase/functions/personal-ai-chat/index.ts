@@ -431,6 +431,43 @@ serve(async (req) => {
                       tool_use_id: call.id,
                       content: `File generated successfully. Filename: ${json.filename}. Download URL already shown to the user.`,
                     });
+                  } else if (
+                    call.name === "generate_html" ||
+                    call.name === "generate_svg" ||
+                    call.name === "generate_pdf" ||
+                    call.name === "generate_image"
+                  ) {
+                    const endpoint = {
+                      generate_html: "compass-generate-html",
+                      generate_svg: "compass-generate-svg",
+                      generate_pdf: "compass-generate-pdf",
+                      generate_image: "compass-generate-image",
+                    }[call.name]!;
+                    const icon = {
+                      generate_html: "🌐",
+                      generate_svg: "🎨",
+                      generate_pdf: "📕",
+                      generate_image: "🖼️",
+                    }[call.name]!;
+                    const label = {
+                      generate_html: "HTML page",
+                      generate_svg: "SVG graphic",
+                      generate_pdf: "PDF",
+                      generate_image: "image",
+                    }[call.name]!;
+                    const r = await fetch(`${SUPABASE_URL}/functions/v1/${endpoint}`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json", Authorization: authForward },
+                      body: JSON.stringify(call.input),
+                    });
+                    const json = await r.json();
+                    if (!r.ok) throw new Error(json.error || `status ${r.status}`);
+                    push({ content: `\n${icon} **[Download ${json.filename}](${json.url})** — ${label}, link valid 7 days.\n\n` });
+                    toolResults.push({
+                      type: "tool_result",
+                      tool_use_id: call.id,
+                      content: `File generated successfully. Filename: ${json.filename}. Download URL already shown to the user.`,
+                    });
                   } else {
                     toolResults.push({
                       type: "tool_result",
