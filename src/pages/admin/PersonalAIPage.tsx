@@ -154,6 +154,8 @@ export default function PersonalAIPage() {
   const abortRef = useRef<AbortController | null>(null);
   const [copiedTs, setCopiedTs] = useState<number | null>(null);
   const [memoryOpen, setMemoryOpen] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const dragDepth = useRef(0);
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     const v = localStorage.getItem("personal-ai-sidebar-open");
     return v === null ? true : v === "1";
@@ -210,24 +212,49 @@ export default function PersonalAIPage() {
     });
   };
 
-  const handleFiles = async (files: FileList | null, asImage = false) => {
-    if (!files?.length) return;
+  const TEXTY_EXT = /\.(txt|md|markdown|csv|tsv|json|jsonl|ya?ml|xml|html?|css|scss|less|js|jsx|ts|tsx|py|rb|go|rs|java|kt|swift|c|h|cpp|hpp|cs|php|sh|bash|zsh|sql|env|ini|toml|conf|log|srt|vtt)$/i;
+  const isProbablyText = (s: string) => {
+    if (!s) return true;
+    const sample = s.slice(0, 2000);
+    let bad = 0;
+    for (let i = 0; i < sample.length; i++) {
+      const c = sample.charCodeAt(i);
+      if (c === 0) return false;
+      if ((c < 9 || (c > 13 && c < 32)) && c !== 27) bad++;
+    }
+    return bad / sample.length < 0.05;
+  };
+
+  const handleFiles = async (files: FileList | File[] | null, asImage = false) => {
+    if (!files || (files as FileList).length === 0 && (files as File[]).length === 0) return;
+    const list = Array.from(files as ArrayLike<File>);
     const next: Attachment[] = [];
-    for (const f of Array.from(files)) {
+    for (const f of list) {
       try {
+        const lower = f.name.toLowerCase();
         if (asImage || f.type.startsWith("image/")) {
           const dataUrl = await fileToDataUrl(f);
           next.push({ name: f.name, kind: "image", dataUrl });
-        } else if (f.name.toLowerCase().endsWith(".pdf") || f.type === "application/pdf") {
+        } else if (lower.endsWith(".pdf") || f.type === "application/pdf") {
           const text = await parsePdfToText(f);
           next.push({ name: f.name, kind: "doc", text });
-        } else if (f.name.toLowerCase().endsWith(".docx")) {
+        } else if (lower.endsWith(".docx")) {
           const text = await parseDocxToText(f);
           next.push({ name: f.name, kind: "doc", text });
-        } else {
-          // treat as text
+        } else if (TEXTY_EXT.test(lower) || f.type.startsWith("text/") || f.type.includes("json") || f.type.includes("xml")) {
           const text = await f.text();
           next.push({ name: f.name, kind: "doc", text });
+        } else {
+          // Try reading as text; if it's binary, attach as a stub doc with metadata
+          const text = await f.text().catch(() => "");
+          if (text && isProbablyText(text)) {
+            next.push({ name: f.name, kind: "doc", text });
+          } else {
+            const sizeKb = Math.max(1, Math.round(f.size / 1024));
+            const stub = `[Binary file attached: ${f.name} · ${f.type || "unknown type"} · ${sizeKb} KB]\n\nThe file's raw contents can't be inspected as text. Describe what you'd like me to do with it (e.g. summarize the filename, draft an email referencing it, etc.).`;
+            next.push({ name: f.name, kind: "doc", text: stub });
+            toast({ title: `${f.name} attached as reference`, description: "Binary file — I can see the name and type, not the contents." });
+          }
         }
       } catch (e: any) {
         toast({ title: `Couldn't read ${f.name}`, description: e.message, variant: "destructive" });
@@ -538,7 +565,35 @@ export default function PersonalAIPage() {
         </div>
       )}
 
-      <div className="relative rounded-3xl border border-border/60 bg-card shadow-[0_2px_24px_-12px_rgba(0,0,0,0.15)] focus-within:border-border focus-within:shadow-[0_2px_30px_-10px_rgba(0,0,0,0.2)] transition-shadow">
+      <div
+        className={cn(
+          "relative rounded-3xl border border-border/60 bg-card shadow-[0_2px_24px_-12px_rgba(0,0,0,0.15)] focus-within:border-border focus-within:shadow-[0_2px_30px_-10px_rgba(0,0,0,0.2)] transition-shadow",
+          dragOver && "border-primary ring-2 ring-primary/30 bg-primary/[0.03]"
+        )}
+        onDragEnter={(e) => {
+          if (!e.dataTransfer?.types?.includes("Files")) return;
+          e.preventDefault();
+          dragDepth.current += 1;
+          setDragOver(true);
+        }}
+        onDragOver={(e) => {
+          if (!e.dataTransfer?.types?.includes("Files")) return;
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "copy";
+        }}
+        onDragLeave={(e) => {
+          if (!e.dataTransfer?.types?.includes("Files")) return;
+          dragDepth.current = Math.max(0, dragDepth.current - 1);
+          if (dragDepth.current === 0) setDragOver(false);
+        }}
+        onDrop={(e) => {
+          if (!e.dataTransfer?.files?.length) return;
+          e.preventDefault();
+          dragDepth.current = 0;
+          setDragOver(false);
+          handleFiles(e.dataTransfer.files);
+        }}
+      >
         <Textarea
           ref={inputRef}
           value={input}
@@ -547,6 +602,13 @@ export default function PersonalAIPage() {
             if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
           }}
           onPaste={(e) => {
+            // Files (images, etc.) pasted from clipboard
+            const files = Array.from(e.clipboardData.files || []);
+            if (files.length) {
+              e.preventDefault();
+              handleFiles(files);
+              return;
+            }
             const pasted = e.clipboardData.getData("text");
             // Large paste → convert to a doc attachment so the composer stays usable
             if (pasted && pasted.length > 2000) {
@@ -574,7 +636,7 @@ export default function PersonalAIPage() {
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => fileRef.current?.click()}>
                 <Paperclip className="h-4 w-4 mr-2" /> Attach file
-                <span className="ml-auto text-[10px] text-muted-foreground">PDF · DOCX · TXT</span>
+                <span className="ml-auto text-[10px] text-muted-foreground">Any type</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuLabel className="text-[10px] uppercase tracking-wide text-muted-foreground">Recipes</DropdownMenuLabel>
@@ -586,7 +648,7 @@ export default function PersonalAIPage() {
             </DropdownMenuContent>
           </DropdownMenu>
           <input ref={imageRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => { handleFiles(e.target.files, true); e.target.value = ""; }} />
-          <input ref={fileRef} type="file" accept=".pdf,.docx,.txt,.md,.csv,.json" multiple className="hidden" onChange={(e) => { handleFiles(e.target.files, false); e.target.value = ""; }} />
+          <input ref={fileRef} type="file" multiple className="hidden" onChange={(e) => { handleFiles(e.target.files, false); e.target.value = ""; }} />
 
           <Toggle pressed={webSearch} onPressedChange={setWebSearch} size="sm"
             className="h-8 px-2.5 gap-1.5 rounded-full text-xs text-muted-foreground hover:text-foreground data-[state=on]:bg-primary/10 data-[state=on]:text-primary data-[state=on]:border data-[state=on]:border-primary/20"
@@ -616,6 +678,13 @@ export default function PersonalAIPage() {
             </Button>
           )}
         </div>
+        {dragOver && (
+          <div className="pointer-events-none absolute inset-0 rounded-3xl flex items-center justify-center bg-primary/5 backdrop-blur-[2px]">
+            <div className="flex items-center gap-2 text-sm font-medium text-primary">
+              <Paperclip className="h-4 w-4" /> Drop files to attach
+            </div>
+          </div>
+        )}
       </div>
       <p className="text-[11px] text-muted-foreground/70 text-center">
         Personal AI can make mistakes. Verify important info.
