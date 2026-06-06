@@ -140,6 +140,8 @@ export default function PersonalAIPage() {
   const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
   const [imageMode, setImageMode] = useState(false);
   const [webSearch, setWebSearch] = useState(false);
+  const [deepResearch, setDeepResearch] = useState(false);
+  const [extendedThinking, setExtendedThinking] = useState(false);
   const [streaming, setStreaming] = useState(false);
   const [streamText, setStreamText] = useState("");
   const [streamImage, setStreamImage] = useState<string | null>(null);
