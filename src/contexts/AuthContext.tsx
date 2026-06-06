@@ -17,6 +17,7 @@ export interface UserProfile {
   department: string | null;
   title: string | null;
   password_reset_required: boolean;
+  tool_only: boolean;
   created_at: string;
   last_login_at: string | null;
 }
