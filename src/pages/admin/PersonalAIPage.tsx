@@ -724,7 +724,7 @@ export default function PersonalAIPage() {
                   <div className="text-center space-y-2">
                     <h1 className="text-3xl font-semibold tracking-tight">How can I help today?</h1>
                     <p className="text-sm text-muted-foreground">
-                      Rewrite an email, summarize a meeting, generate an image, or build an HTML mock.
+                      Voice Studio writes in your voice. Rewrite an email, summarize a meeting, or draft something new.
                     </p>
                   </div>
                   {Composer}
