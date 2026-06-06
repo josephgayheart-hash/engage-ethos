@@ -104,7 +104,7 @@ serve(async (req) => {
 
     const pptx = new PptxGenJS();
     pptx.layout = "LAYOUT_WIDE"; // 13.333 x 7.5
-    pptx.author = author || "CampusVoice";
+    if (author) pptx.author = author;
     pptx.title = title;
 
     const W = 13.333;
