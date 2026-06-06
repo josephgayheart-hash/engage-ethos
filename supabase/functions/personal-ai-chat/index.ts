@@ -212,6 +212,73 @@ serve(async (req) => {
             required: ["title", "blocks"],
           },
         },
+        {
+          name: "generate_html",
+          description:
+            "Generate a downloadable, standalone HTML page (.html). Use for landing pages, microsites, email templates, interactive demos, or any web artifact. Include all CSS inline in <style> tags. If you pass a fragment instead of a full document, set full_page=true (default) to auto-wrap it in styled boilerplate.",
+          input_schema: {
+            type: "object",
+            properties: {
+              title: { type: "string", description: "Page/file title." },
+              html: { type: "string", description: "Full HTML document OR a body fragment." },
+              full_page: { type: "boolean", description: "Wrap fragment in styled <!DOCTYPE html> shell. Default true." },
+            },
+            required: ["title", "html"],
+          },
+        },
+        {
+          name: "generate_svg",
+          description:
+            "Generate a downloadable SVG vector graphic (.svg). Use for logos, icons, diagrams, illustrations, infographics, charts. Output must be valid <svg>...</svg> markup with width/height or viewBox.",
+          input_schema: {
+            type: "object",
+            properties: {
+              title: { type: "string", description: "Graphic title / filename base." },
+              svg: { type: "string", description: "Full <svg>...</svg> markup." },
+            },
+            required: ["title", "svg"],
+          },
+        },
+        {
+          name: "generate_pdf",
+          description:
+            "Generate a downloadable PDF (.pdf) document. Use for reports, one-pagers, briefs, contracts, printable deliverables. Structure with headings, paragraphs, bullets, numbered lists, and quotes.",
+          input_schema: {
+            type: "object",
+            properties: {
+              title: { type: "string" },
+              subtitle: { type: "string" },
+              author: { type: "string" },
+              blocks: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    type: { type: "string", enum: ["heading1", "heading2", "heading3", "paragraph", "bullets", "numbered", "quote", "page_break"] },
+                    text: { type: "string" },
+                    items: { type: "array", items: { type: "string" } },
+                  },
+                  required: ["type"],
+                },
+              },
+            },
+            required: ["title", "blocks"],
+          },
+        },
+        {
+          name: "generate_image",
+          description:
+            "Generate an AI image (.png) from a text prompt. Use for photos, illustrations, concept art, mockups, hero visuals. Be vivid and specific in the prompt.",
+          input_schema: {
+            type: "object",
+            properties: {
+              prompt: { type: "string", description: "Detailed visual description." },
+              title: { type: "string", description: "Filename base." },
+              size: { type: "string", enum: ["1024x1024", "1024x1536", "1536x1024"], description: "Default 1024x1024." },
+            },
+            required: ["prompt", "title"],
+          },
+        },
       ];
 
       const encoder = new TextEncoder();
