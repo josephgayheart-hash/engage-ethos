@@ -1073,11 +1073,16 @@ export default function PersonalAIPage() {
                                               title={`Open ${f.filename} in preview`}
                                             >
                                               {isImage ? (
-                                                <img src={f.url} alt={f.filename} className="w-[280px] h-[180px] object-cover bg-muted" />
+                                                <div className="w-[280px] h-[180px] bg-muted/40 flex items-center justify-center">
+                                                  <img src={f.url} alt={f.filename} className="max-w-full max-h-full object-contain" />
+                                                </div>
                                               ) : isPdf ? (
-                                                <iframe title={f.filename} src={f.url} className="w-[280px] h-[180px] bg-white pointer-events-none" />
+                                                <div className="w-[280px] h-[180px] bg-gradient-to-br from-rose-50 to-rose-100 dark:from-rose-950/30 dark:to-rose-900/20 flex flex-col items-center justify-center gap-1.5">
+                                                  <FileText className="h-10 w-10 text-rose-500/80" />
+                                                  <span className="text-[10px] font-semibold tracking-widest text-rose-600/80 dark:text-rose-400/80">PDF</span>
+                                                </div>
                                               ) : (
-                                                <div className="w-[280px] h-[120px] bg-muted flex items-center justify-center text-4xl">{b.emoji}</div>
+                                                <div className="w-[280px] h-[140px] bg-gradient-to-br from-muted to-muted/40 flex items-center justify-center text-5xl">{b.emoji}</div>
                                               )}
                                               <div className="flex items-center gap-2 px-3 py-2 border-t border-border/60 w-[280px]">
                                                 <span className="min-w-0 flex flex-col flex-1">
