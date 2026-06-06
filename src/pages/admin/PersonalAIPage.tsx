@@ -378,9 +378,9 @@ export default function PersonalAIPage() {
     try {
       let searchContext = "";
       let searchSources: { title: string; url: string }[] = [];
-      if (webSearch && text) {
+      if ((webSearch || deepResearch) && text) {
         try {
-          const r = await runWebSearch(text);
+          const r = await runWebSearch(text, deepResearch);
           searchContext = r.context;
           searchSources = r.sources;
         } catch (e: any) {
