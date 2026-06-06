@@ -4,7 +4,7 @@ import {
   Home, PenTool, Route, ClipboardCheck, Wrench, FolderOpen, Library, FileEdit,
   Sparkles, ImageIcon, Palette, CheckCircle, Settings, Building2, Layers, BarChart3,
   Shield, Contact, LogOut, User, UserPlus, ChevronsUpDown, Search, Dna, Gift, Heart, Cpu, Activity,
-  ClipboardList, Swords, Globe2, MapPin, Share2, Mic,
+  ClipboardList, Swords, Globe2, MapPin, Share2, Compass,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -76,7 +76,7 @@ const manageItems = [
 const superAdminItems = [
   { title: "Platform Ops", url: "/platform", icon: Activity },
   { title: "Super Admin Panel", url: "/admin/panel", icon: Shield },
-  { title: "Compass", url: "/compass", icon: Mic },
+  { title: "Compass", url: "/compass", icon: Compass },
   { title: "Compass Users", url: "/admin/compass-users", icon: UserPlus },
   { title: "CRM", url: "/admin/crm", icon: Contact },
   { title: "AI Technology", url: "/admin/ai-technology", icon: Cpu },

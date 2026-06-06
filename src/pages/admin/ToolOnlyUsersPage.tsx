@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, UserPlus, Copy, Check, RefreshCw, Mic } from "lucide-react";
+import { Loader2, UserPlus, Copy, Check, RefreshCw, Compass } from "lucide-react";
 
 interface ToolUser {
   id: string;
@@ -101,7 +101,7 @@ export default function ToolOnlyUsersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
-            <Mic className="h-5 w-5" /> Compass users
+            <Compass className="h-5 w-5" /> Compass users
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
             Users with access only to Compass. They can't see anything else in the app.
