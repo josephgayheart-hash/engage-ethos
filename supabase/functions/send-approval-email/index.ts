@@ -35,11 +35,44 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Require an authenticated admin (or super_admin) caller.
+  const authHeader = req.headers.get("Authorization") || req.headers.get("authorization");
+  if (!authHeader || !authHeader.toLowerCase().startsWith("bearer ")) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  const supabaseAuthClient = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
+  const token = authHeader.replace(/^[Bb]earer\s+/, "").trim();
+  const { data: userData } = await supabaseAuthClient.auth.getUser(token);
+  const callerId = userData?.user?.id ?? null;
+  if (!callerId) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  const { data: roleRows } = await supabaseAuthClient
+    .from("user_roles").select("role").eq("user_id", callerId).in("role", ["admin", "super_admin"]);
+  if (!roleRows || roleRows.length === 0) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
     const { email, firstName, lastName, temporaryPassword, institutionName, role, userId, tenantId }: ApprovalEmailRequest = await req.json();
 
+    // Validate recipient email
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRe.test(email) || email.length > 254) {
+      return new Response(JSON.stringify({ error: "Invalid email" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     console.log(`Sending approval email to ${email} for ${institutionName}`);
+
 
     const roleDisplayName = role === 'super_admin' 
       ? 'CampusVoice Super Admin' 

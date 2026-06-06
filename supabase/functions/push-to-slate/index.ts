@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/resilience.ts";
+import { requireAuth } from "../_shared/requireAuth.ts";
 
 // Map CampusVoice channels to Slate Deliver communication types
 const SLATE_COMM_TYPES: Record<string, { type: string; label: string }> = {
@@ -32,6 +33,10 @@ serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+
+  const __auth = await requireAuth(req, corsHeaders);
+  if ('error' in __auth) return __auth.error;
 
   try {
     const {
