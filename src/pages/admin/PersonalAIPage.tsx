@@ -641,7 +641,7 @@ export default function PersonalAIPage() {
             </DropdownMenuContent>
           </DropdownMenu>
           <input ref={imageRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => { handleFiles(e.target.files, true); e.target.value = ""; }} />
-          <input ref={fileRef} type="file" accept=".pdf,.docx,.txt,.md,.csv,.json" multiple className="hidden" onChange={(e) => { handleFiles(e.target.files, false); e.target.value = ""; }} />
+          <input ref={fileRef} type="file" multiple className="hidden" onChange={(e) => { handleFiles(e.target.files, false); e.target.value = ""; }} />
 
           <Toggle pressed={webSearch} onPressedChange={setWebSearch} size="sm"
             className="h-8 px-2.5 gap-1.5 rounded-full text-xs text-muted-foreground hover:text-foreground data-[state=on]:bg-primary/10 data-[state=on]:text-primary data-[state=on]:border data-[state=on]:border-primary/20"
