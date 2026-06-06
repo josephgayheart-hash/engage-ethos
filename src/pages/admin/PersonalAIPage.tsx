@@ -39,14 +39,15 @@ const STORAGE_KEY = "personal-ai-threads-v1";
 const ACTIVE_KEY = "personal-ai-active-v1";
 
 const MODELS = [
+  { id: "anthropic/claude-sonnet-4-5", label: "Claude Sonnet 4.5" },
+  { id: "anthropic/claude-opus-4-5", label: "Claude Opus 4.5" },
+  { id: "anthropic/claude-haiku-4-5", label: "Claude Haiku 4.5" },
   { id: "google/gemini-3-pro-preview", label: "Gemini 3 Pro (preview)" },
   { id: "google/gemini-3-flash-preview", label: "Gemini 3 Flash (preview)" },
   { id: "google/gemini-2.5-pro", label: "Gemini 2.5 Pro" },
   { id: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash" },
-  { id: "google/gemini-2.5-flash-lite", label: "Gemini 2.5 Flash Lite" },
   { id: "openai/gpt-5", label: "GPT-5" },
   { id: "openai/gpt-5-mini", label: "GPT-5 Mini" },
-  { id: "openai/gpt-5-nano", label: "GPT-5 Nano" },
 ];
 
 const DEFAULT_SYSTEM_PROMPT = `You are Tyler's personal communications copilot for his professional work at Valvoline Global Operations (VGO).
