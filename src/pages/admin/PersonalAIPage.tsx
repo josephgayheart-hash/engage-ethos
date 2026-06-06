@@ -151,6 +151,17 @@ export default function PersonalAIPage() {
   const imageRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const [copiedTs, setCopiedTs] = useState<number | null>(null);
+  const [memoryOpen, setMemoryOpen] = useState(false);
+  const [savedProfilePrompt, setSavedProfilePrompt] = useState<string | null>(null);
+
+  // Load saved system-prompt profile once so new threads use it as default
+  useEffect(() => {
+    if (!isSuperAdmin) return;
+    (async () => {
+      const { data } = await supabase.from("personal_ai_profile").select("system_prompt").maybeSingle();
+      if (data?.system_prompt?.trim()) setSavedProfilePrompt(data.system_prompt);
+    })();
+  }, [isSuperAdmin]);
 
   const active = useMemo(() => threads.find(t => t.id === activeId) ?? threads[0], [threads, activeId]);
 
