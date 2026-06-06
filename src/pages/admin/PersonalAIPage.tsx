@@ -233,6 +233,12 @@ export default function PersonalAIPage() {
   const [artifactHtml, setArtifactHtml] = useState<string>("");
   const [fileArtifact, setFileArtifact] = useState<FileArtifact | null>(null);
   const [artifactBlobUrl, setArtifactBlobUrl] = useState<string>("");
+  const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
+  const [artifactFullscreen, setArtifactFullscreen] = useState(false);
+  const deviceWidthFor = (d: "desktop" | "tablet" | "mobile") =>
+    d === "mobile" ? 414 : d === "tablet" ? 834 : 1280;
+
+
 
   // Fetch the artifact as a blob and create a same-origin object URL so the
   // iframe preview and "Open" actions aren't blocked by Chrome's cross-origin
