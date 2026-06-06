@@ -678,6 +678,13 @@ export default function PersonalAIPage() {
             </Button>
           )}
         </div>
+        {dragOver && (
+          <div className="pointer-events-none absolute inset-0 rounded-3xl flex items-center justify-center bg-primary/5 backdrop-blur-[2px]">
+            <div className="flex items-center gap-2 text-sm font-medium text-primary">
+              <Paperclip className="h-4 w-4" /> Drop files to attach
+            </div>
+          </div>
+        )}
       </div>
       <p className="text-[11px] text-muted-foreground/70 text-center">
         Personal AI can make mistakes. Verify important info.
