@@ -210,24 +210,49 @@ export default function PersonalAIPage() {
     });
   };
 
-  const handleFiles = async (files: FileList | null, asImage = false) => {
-    if (!files?.length) return;
+  const TEXTY_EXT = /\.(txt|md|markdown|csv|tsv|json|jsonl|ya?ml|xml|html?|css|scss|less|js|jsx|ts|tsx|py|rb|go|rs|java|kt|swift|c|h|cpp|hpp|cs|php|sh|bash|zsh|sql|env|ini|toml|conf|log|srt|vtt)$/i;
+  const isProbablyText = (s: string) => {
+    if (!s) return true;
+    const sample = s.slice(0, 2000);
+    let bad = 0;
+    for (let i = 0; i < sample.length; i++) {
+      const c = sample.charCodeAt(i);
+      if (c === 0) return false;
+      if ((c < 9 || (c > 13 && c < 32)) && c !== 27) bad++;
+    }
+    return bad / sample.length < 0.05;
+  };
+
+  const handleFiles = async (files: FileList | File[] | null, asImage = false) => {
+    if (!files || (files as FileList).length === 0 && (files as File[]).length === 0) return;
+    const list = Array.from(files as ArrayLike<File>);
     const next: Attachment[] = [];
-    for (const f of Array.from(files)) {
+    for (const f of list) {
       try {
+        const lower = f.name.toLowerCase();
         if (asImage || f.type.startsWith("image/")) {
           const dataUrl = await fileToDataUrl(f);
           next.push({ name: f.name, kind: "image", dataUrl });
-        } else if (f.name.toLowerCase().endsWith(".pdf") || f.type === "application/pdf") {
+        } else if (lower.endsWith(".pdf") || f.type === "application/pdf") {
           const text = await parsePdfToText(f);
           next.push({ name: f.name, kind: "doc", text });
-        } else if (f.name.toLowerCase().endsWith(".docx")) {
+        } else if (lower.endsWith(".docx")) {
           const text = await parseDocxToText(f);
           next.push({ name: f.name, kind: "doc", text });
-        } else {
-          // treat as text
+        } else if (TEXTY_EXT.test(lower) || f.type.startsWith("text/") || f.type.includes("json") || f.type.includes("xml")) {
           const text = await f.text();
           next.push({ name: f.name, kind: "doc", text });
+        } else {
+          // Try reading as text; if it's binary, attach as a stub doc with metadata
+          const text = await f.text().catch(() => "");
+          if (text && isProbablyText(text)) {
+            next.push({ name: f.name, kind: "doc", text });
+          } else {
+            const sizeKb = Math.max(1, Math.round(f.size / 1024));
+            const stub = `[Binary file attached: ${f.name} · ${f.type || "unknown type"} · ${sizeKb} KB]\n\nThe file's raw contents can't be inspected as text. Describe what you'd like me to do with it (e.g. summarize the filename, draft an email referencing it, etc.).`;
+            next.push({ name: f.name, kind: "doc", text: stub });
+            toast({ title: `${f.name} attached as reference`, description: "Binary file — I can see the name and type, not the contents." });
+          }
         }
       } catch (e: any) {
         toast({ title: `Couldn't read ${f.name}`, description: e.message, variant: "destructive" });
