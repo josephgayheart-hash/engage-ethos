@@ -76,8 +76,8 @@ const manageItems = [
 const superAdminItems = [
   { title: "Platform Ops", url: "/platform", icon: Activity },
   { title: "Super Admin Panel", url: "/admin/panel", icon: Shield },
-  { title: "Voice Studio", url: "/voice-studio", icon: Mic },
-  { title: "Voice Studio Users", url: "/admin/voice-studio-users", icon: UserPlus },
+  { title: "Compass", url: "/compass", icon: Mic },
+  { title: "Compass Users", url: "/admin/compass-users", icon: UserPlus },
   { title: "CRM", url: "/admin/crm", icon: Contact },
   { title: "AI Technology", url: "/admin/ai-technology", icon: Cpu },
 ];

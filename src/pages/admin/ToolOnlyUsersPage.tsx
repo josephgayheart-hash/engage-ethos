@@ -50,7 +50,7 @@ export default function ToolOnlyUsersPage() {
     setLoading(false);
   };
 
-  useEffect(() => { document.title = "Voice Studio users"; load(); }, []);
+  useEffect(() => { document.title = "Compass users"; load(); }, []);
 
   if (!isSuperAdmin) return <Navigate to="/dashboard" replace />;
 
@@ -69,7 +69,7 @@ export default function ToolOnlyUsersPage() {
       if (data?.error) throw new Error(data.error);
       setResultPwd(data.temporaryPassword);
       setResultEmail(data.email ?? email.trim());
-      toast({ title: "Voice Studio user created", description: "Share the temporary password securely." });
+      toast({ title: "Compass user created", description: "Share the temporary password securely." });
       await load();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Invite failed";
@@ -101,10 +101,10 @@ export default function ToolOnlyUsersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
-            <Mic className="h-5 w-5" /> Voice Studio users
+            <Mic className="h-5 w-5" /> Compass users
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Users with access only to Voice Studio. They can't see anything else in the app.
+            Users with access only to Compass. They can't see anything else in the app.
           </p>
         </div>
         <Button onClick={() => { resetForm(); setOpen(true); }}>
@@ -130,7 +130,7 @@ export default function ToolOnlyUsersPage() {
               </td></tr>
             ) : users.length === 0 ? (
               <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
-                No Voice Studio users yet. Invite your first one.
+                No Compass users yet. Invite your first one.
               </td></tr>
             ) : users.map(u => (
               <tr key={u.id} className="border-t border-border/60 hover:bg-muted/20">
@@ -154,9 +154,9 @@ export default function ToolOnlyUsersPage() {
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Invite a Voice Studio user</DialogTitle>
+            <DialogTitle>Invite a Compass user</DialogTitle>
             <DialogDescription>
-              They'll only see Voice Studio when they sign in — nothing else in the app.
+              They'll only see Compass when they sign in — nothing else in the app.
             </DialogDescription>
           </DialogHeader>
 

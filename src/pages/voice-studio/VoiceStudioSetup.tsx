@@ -64,7 +64,7 @@ export default function VoiceStudioSetup() {
   const [s3, setS3] = useState("");
 
   useEffect(() => {
-    document.title = "Voice Studio — Setup";
+    document.title = "Compass — Setup";
     if (!user) return;
     (async () => {
       const { data: prof } = await supabase
@@ -155,8 +155,8 @@ export default function VoiceStudioSetup() {
         .eq("user_id", user.id);
 
       await refreshProfile();
-      toast({ title: "Voice Studio is ready", description: "You're all set — let's write something." });
-      navigate("/voice-studio");
+      toast({ title: "Compass is ready", description: "You're all set — let's write something." });
+      navigate("/compass");
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Setup failed";
       toast({ title: "Couldn't save setup", description: msg, variant: "destructive" });
@@ -174,7 +174,7 @@ export default function VoiceStudioSetup() {
             <Sparkles className="h-4 w-4" />
           </div>
           <div>
-            <h1 className="text-lg font-semibold tracking-tight">Voice Studio</h1>
+            <h1 className="text-lg font-semibold tracking-tight">Compass</h1>
             <p className="text-xs text-muted-foreground">Quick setup — about 2 minutes</p>
           </div>
         </div>
@@ -201,7 +201,7 @@ export default function VoiceStudioSetup() {
           {step === 0 && (
             <div className="space-y-4">
               <div>
-                <h2 className="text-xl font-semibold">How will you use Voice Studio?</h2>
+                <h2 className="text-xl font-semibold">How will you use Compass?</h2>
                 <p className="text-sm text-muted-foreground mt-1">Pick everything that fits. We'll tune the assistant to those use cases.</p>
               </div>
               <div className="grid sm:grid-cols-2 gap-2">

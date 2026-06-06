@@ -116,19 +116,19 @@ serve(async (req) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: "Voice Studio <noreply@campusvoice.ai>",
+            from: "Compass <noreply@campusvoice.ai>",
             to: [email],
-            subject: "Your Voice Studio access is ready",
+            subject: "Your Compass access is ready",
             html: `
               <div style="font-family:system-ui,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#111">
-                <h1 style="font-size:22px;margin:0 0 16px">Welcome to Voice Studio${firstName ? `, ${firstName}` : ""}</h1>
-                <p style="line-height:1.6">You've been invited to use Voice Studio — a private AI writing copilot trained to your voice.</p>
+                <h1 style="font-size:22px;margin:0 0 16px">Welcome to Compass${firstName ? `, ${firstName}` : ""}</h1>
+                <p style="line-height:1.6">You've been invited to use Compass — a private AI writing copilot trained to your voice.</p>
                 <div style="background:#f5f5f5;border-radius:8px;padding:16px;margin:20px 0">
                   <div><strong>Email:</strong> ${email}</div>
                   <div style="margin-top:6px"><strong>Temporary password:</strong> <code style="background:#fff;padding:2px 6px;border-radius:4px">${temporaryPassword}</code></div>
                 </div>
                 <p style="line-height:1.6">Sign in here, then walk through a 2-minute setup to train your voice:</p>
-                <p><a href="${signInUrl}" style="display:inline-block;background:#111;color:#fff;padding:10px 18px;border-radius:6px;text-decoration:none">Sign in to Voice Studio</a></p>
+                <p><a href="${signInUrl}" style="display:inline-block;background:#111;color:#fff;padding:10px 18px;border-radius:6px;text-decoration:none">Sign in to Compass</a></p>
                 <p style="font-size:12px;color:#666;margin-top:24px">If you didn't expect this email, you can ignore it.</p>
               </div>
             `,
