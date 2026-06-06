@@ -23,12 +23,46 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Require an authenticated super_admin caller.
+  const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+  const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  const authHeader = req.headers.get('Authorization') || req.headers.get('authorization');
+  if (!authHeader || !authHeader.toLowerCase().startsWith('bearer ')) {
+    return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
+      status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+  const supabaseClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+  const token = authHeader.replace(/^[Bb]earer\s+/, '').trim();
+  const { data: userData } = await supabaseClient.auth.getUser(token);
+  const userId = userData?.user?.id ?? null;
+  if (!userId) {
+    return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
+      status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+  const { data: roleRow } = await supabaseClient
+    .from('user_roles').select('role').eq('user_id', userId).eq('role', 'super_admin').maybeSingle();
+  if (!roleRow) {
+    return new Response(JSON.stringify({ success: false, error: 'Forbidden' }), {
+      status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
   try {
     const { prospect_id, to_email, to_name, subject, body, html_body, from_name, from_email, reply_to }: SendEmailRequest = await req.json();
 
-    if (!to_email || !subject || (!body && !html_body)) {
+    // Basic email format validation
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!to_email || !emailRe.test(to_email) || to_email.length > 254) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Missing required fields: to_email, subject, body or html_body' }),
+        JSON.stringify({ success: false, error: 'Invalid to_email' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    if (!subject || (!body && !html_body)) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Missing required fields: subject, body or html_body' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -41,19 +75,6 @@ serve(async (req) => {
       );
     }
 
-    const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    
-    // Get user from auth header
-    const authHeader = req.headers.get('Authorization');
-    let userId: string | null = null;
-    
-    if (authHeader) {
-      const supabaseClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-      const token = authHeader.replace('Bearer ', '');
-      const { data: { user } } = await supabaseClient.auth.getUser(token);
-      userId = user?.id || null;
-    }
 
     const senderName = from_name || 'CampusVoice Team';
     const senderEmail = from_email || 'noreply@campusvoice.ai';
