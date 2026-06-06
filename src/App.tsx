@@ -207,8 +207,28 @@ const AppRoutes = () => (
     <Route path="/docs/salesforce-canvas" element={<SalesforceCanvasGuidePage />} />
     <Route path="/integrations/salesforce-canvas" element={<Navigate to="/docs/salesforce-canvas" replace />} />
 
+    {/* Voice Studio — full-bleed, no app sidebar. Available to super admins and tool-only users. */}
+    <Route
+      path="/voice-studio"
+      element={
+        <RequireAuth>
+          <VoiceStudioGate>
+            <PersonalAIPage />
+          </VoiceStudioGate>
+        </RequireAuth>
+      }
+    />
+    <Route
+      path="/voice-studio/setup"
+      element={
+        <RequireAuth>
+          <VoiceStudioSetup />
+        </RequireAuth>
+      }
+    />
+
     {/* Authenticated routes — wrapped in AppLayout sidebar shell */}
-    <Route element={<RequireAuth><AppLayout /></RequireAuth>}>
+    <Route element={<RequireAuth><RequireFullApp><AppLayout /></RequireFullApp></RequireAuth>}>
       <Route path="/dashboard" element={<Index />} />
       <Route path="/onboarding" element={<OnboardingPage />} />
       <Route path="/feedback" element={<BetaFeedbackPage />} />
