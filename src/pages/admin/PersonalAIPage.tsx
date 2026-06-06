@@ -188,7 +188,7 @@ export default function PersonalAIPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!isSuperAdmin) return <Navigate to="/dashboard" replace />;
+  if (!isSuperAdmin && !isToolOnly) return <Navigate to="/dashboard" replace />;
 
   const updateActive = (patch: Partial<Thread>) => {
     setThreads(prev => prev.map(t => t.id === activeId ? { ...t, ...patch, updatedAt: Date.now() } : t));
