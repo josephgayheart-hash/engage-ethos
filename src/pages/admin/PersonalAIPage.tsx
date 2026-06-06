@@ -452,10 +452,14 @@ export default function PersonalAIPage() {
     if (ts) { setCopiedTs(ts); setTimeout(() => setCopiedTs(c => c === ts ? null : c), 1500); }
     else toast({ title: "Copied" });
   };
-  const downloadMd = (m: Msg) => {
-    const blob = new Blob([m.content], { type: "text/markdown" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = `response-${m.ts}.md`; a.click(); URL.revokeObjectURL(url);
+  const downloadAs = async (m: Msg, format: "md" | "docx" | "pptx" | "pdf") => {
+    try {
+      const { exportResponse } = await import("@/lib/exportResponse");
+      await exportResponse(format, m.content, active?.title);
+    } catch (e) {
+      console.error("export failed:", e);
+      toast({ title: "Export failed", description: e instanceof Error ? e.message : "Please try again.", variant: "destructive" });
+    }
   };
   const downloadImage = (url: string) => {
     const a = document.createElement("a"); a.href = url; a.download = `image-${Date.now()}.png`; a.click();
