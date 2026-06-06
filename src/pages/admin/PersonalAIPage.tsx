@@ -997,6 +997,34 @@ export default function PersonalAIPage() {
                                     </div>
                                   )}
                                   {(() => {
+                                    const html = extractHtmlArtifact(m.content);
+                                    if (!html) return null;
+                                    return (
+                                      <div className="pt-1">
+                                        <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
+                                          <div className="flex items-center justify-between px-3 py-2 border-b border-border/60 bg-muted/40">
+                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                              <CodeIcon className="h-3.5 w-3.5" />
+                                              <span className="font-medium text-foreground">HTML preview</span>
+                                            </div>
+                                            <button
+                                              onClick={() => openHtmlArtifact(m.content)}
+                                              className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground"
+                                            >
+                                              <Eye className="h-3.5 w-3.5" /> Open full preview
+                                            </button>
+                                          </div>
+                                          <iframe
+                                            title="Inline HTML preview"
+                                            srcDoc={html}
+                                            sandbox="allow-scripts"
+                                            className="w-full h-[320px] bg-white"
+                                          />
+                                        </div>
+                                      </div>
+                                    );
+                                  })()}
+                                  {(() => {
                                     const files = extractFileArtifacts(m.content);
                                     if (!files.length) return null;
                                     return (
@@ -1004,28 +1032,39 @@ export default function PersonalAIPage() {
                                         {files.map((f, i) => {
                                           const b = artifactBadge(f.kind);
                                           const isActive = fileArtifact?.url === f.url && artifactOpen;
+                                          const isImage = f.kind === "image";
+                                          const isPdf = f.kind === "pdf";
                                           return (
                                             <button
                                               key={i}
                                               onClick={() => { setFileArtifact(f); setArtifactOpen(true); }}
                                               className={cn(
-                                                "group inline-flex items-center gap-2 max-w-full rounded-xl border bg-card hover:bg-accent/50 transition px-3 py-2 text-left",
+                                                "group flex flex-col rounded-xl border bg-card hover:bg-accent/30 transition overflow-hidden text-left",
                                                 isActive ? "border-primary/60 ring-1 ring-primary/30" : "border-border/60"
                                               )}
                                               title={`Open ${f.filename} in preview`}
                                             >
-                                              <span className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center text-base shrink-0">{b.emoji}</span>
-                                              <span className="min-w-0 flex flex-col">
-                                                <span className="text-sm font-medium truncate max-w-[280px]">{f.filename}</span>
-                                                <span className="text-[11px] text-muted-foreground uppercase tracking-wide">{b.label} · Click to preview</span>
-                                              </span>
-                                              <Eye className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground ml-1 shrink-0" />
+                                              {isImage ? (
+                                                <img src={f.url} alt={f.filename} className="w-[280px] h-[180px] object-cover bg-muted" />
+                                              ) : isPdf ? (
+                                                <iframe title={f.filename} src={f.url} className="w-[280px] h-[180px] bg-white pointer-events-none" />
+                                              ) : (
+                                                <div className="w-[280px] h-[120px] bg-muted flex items-center justify-center text-4xl">{b.emoji}</div>
+                                              )}
+                                              <div className="flex items-center gap-2 px-3 py-2 border-t border-border/60 w-[280px]">
+                                                <span className="min-w-0 flex flex-col flex-1">
+                                                  <span className="text-sm font-medium truncate">{f.filename}</span>
+                                                  <span className="text-[11px] text-muted-foreground uppercase tracking-wide">{b.label} · Click to preview</span>
+                                                </span>
+                                                <Eye className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground shrink-0" />
+                                              </div>
                                             </button>
                                           );
                                         })}
                                       </div>
                                     );
                                   })()}
+
                                 </>
                               )}
                               {m.searchSources?.length ? (
