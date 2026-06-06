@@ -629,7 +629,7 @@ export default function PersonalAIPage() {
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => fileRef.current?.click()}>
                 <Paperclip className="h-4 w-4 mr-2" /> Attach file
-                <span className="ml-auto text-[10px] text-muted-foreground">PDF · DOCX · TXT</span>
+                <span className="ml-auto text-[10px] text-muted-foreground">Any type</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuLabel className="text-[10px] uppercase tracking-wide text-muted-foreground">Recipes</DropdownMenuLabel>
