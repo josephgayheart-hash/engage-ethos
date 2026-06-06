@@ -222,8 +222,11 @@ export default function PersonalAIPage() {
     el.style.height = Math.min(el.scrollHeight, max) + "px";
   }, [input]);
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [active?.messages.length, streamText, streamImage]);
+    const el = scrollRef.current;
+    if (!el) return;
+    // Use instant scroll while streaming to avoid stacking smooth-scroll animations
+    el.scrollTo({ top: el.scrollHeight, behavior: streaming ? "auto" : "smooth" });
+  }, [active?.messages.length, streamText, streamImage, streaming]);
 
   // Migrate any persisted thread using a model ID no longer in MODELS
   useEffect(() => {
@@ -465,6 +468,8 @@ export default function PersonalAIPage() {
       let buf = "";
       let acc = "";
       let done = false;
+      let rafPending = false;
+      const flush = () => { rafPending = false; setStreamText(acc); };
       while (!done) {
         const { done: rDone, value } = await reader.read();
         if (rDone) break;
@@ -481,10 +486,14 @@ export default function PersonalAIPage() {
           try {
             const parsed = JSON.parse(json);
             const delta = parsed.choices?.[0]?.delta?.content;
-            if (delta) { acc += delta; setStreamText(acc); }
+            if (delta) {
+              acc += delta;
+              if (!rafPending) { rafPending = true; requestAnimationFrame(flush); }
+            }
           } catch { buf = line + "\n" + buf; break; }
         }
       }
+      setStreamText(acc);
 
       const finalMsg: Msg = {
         role: "assistant",
