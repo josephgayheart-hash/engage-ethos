@@ -182,6 +182,36 @@ serve(async (req) => {
             required: ["title", "slides"],
           },
         },
+        {
+          name: "generate_docx",
+          description:
+            "Generate a downloadable Microsoft Word (.docx) document. Use when the user asks for a doc, memo, brief, report, letter, essay, or written deliverable. Structure the document with headings, paragraphs, bullets, and numbered lists as appropriate. Prefer well-structured headings (heading1/2/3) over a wall of paragraphs.",
+          input_schema: {
+            type: "object",
+            properties: {
+              title: { type: "string", description: "Document title shown at the top." },
+              subtitle: { type: "string", description: "Optional subtitle / one-line description." },
+              author: { type: "string", description: "Optional author/byline." },
+              blocks: {
+                type: "array",
+                description: "Ordered content blocks that make up the document body.",
+                items: {
+                  type: "object",
+                  properties: {
+                    type: {
+                      type: "string",
+                      enum: ["heading1", "heading2", "heading3", "paragraph", "bullets", "numbered", "quote", "page_break"],
+                    },
+                    text: { type: "string", description: "Text content for heading/paragraph/quote blocks." },
+                    items: { type: "array", items: { type: "string" }, description: "List items for bullets/numbered blocks." },
+                  },
+                  required: ["type"],
+                },
+              },
+            },
+            required: ["title", "blocks"],
+          },
+        },
       ];
 
       const encoder = new TextEncoder();
@@ -312,6 +342,23 @@ serve(async (req) => {
                     if (!r.ok) throw new Error(json.error || `status ${r.status}`);
                     // Surface a download link inline immediately
                     push({ content: `\n📎 **[Download ${json.filename}](${json.url})** — ${json.slide_count} slides, link valid 7 days.\n\n` });
+                    toolResults.push({
+                      type: "tool_result",
+                      tool_use_id: call.id,
+                      content: `File generated successfully. Filename: ${json.filename}. Download URL already shown to the user.`,
+                    });
+                  } else if (call.name === "generate_docx") {
+                    const r = await fetch(`${SUPABASE_URL}/functions/v1/compass-generate-docx`, {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: authForward,
+                      },
+                      body: JSON.stringify(call.input),
+                    });
+                    const json = await r.json();
+                    if (!r.ok) throw new Error(json.error || `status ${r.status}`);
+                    push({ content: `\n📄 **[Download ${json.filename}](${json.url})** — Word document, link valid 7 days.\n\n` });
                     toolResults.push({
                       type: "tool_result",
                       tool_use_id: call.id,
