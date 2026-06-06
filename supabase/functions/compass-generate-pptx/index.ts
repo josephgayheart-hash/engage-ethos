@@ -71,27 +71,13 @@ serve(async (req) => {
     const slides: Slide[] = Array.isArray(body.slides) ? body.slides.slice(0, 30) : [];
     const theme = body.theme || {};
 
-    // Brand defaults: fall back to user's tenant if model didn't pass them
+    // Brand: ONLY use what the caller explicitly provided. Never pull workspace/tenant defaults.
+    // If nothing is provided, fall back to a clean neutral (dark gray on white) — no product branding.
     let brandAccent = hex(theme.accent, "");
     let brandSecondary = hex(theme.secondary, "");
     let brandLogoUrl: string | null = typeof theme.logo_url === "string" ? theme.logo_url : null;
-    if (!brandAccent || !brandLogoUrl) {
-      const { data: prof } = await supabase.from("profiles").select("tenant_id").eq("id", uid).maybeSingle();
-      if (prof?.tenant_id) {
-        const { data: t } = await supabase
-          .from("tenants")
-          .select("logo_url,primary_color,accent_color")
-          .eq("id", prof.tenant_id)
-          .maybeSingle();
-        if (t) {
-          if (!brandAccent) brandAccent = hex(t.primary_color, "0E2A47");
-          if (!brandSecondary) brandSecondary = hex(t.accent_color, "C9A24D");
-          if (!brandLogoUrl) brandLogoUrl = t.logo_url || null;
-        }
-      }
-    }
-    if (!brandAccent) brandAccent = "0E2A47";
-    if (!brandSecondary) brandSecondary = "C9A24D";
+    if (!brandAccent) brandAccent = "111827"; // neutral slate
+    if (!brandSecondary) brandSecondary = "6B7280"; // neutral gray
 
     const fontHead = (theme.fontHead || "Calibri").toString().slice(0, 40);
     const fontBody = (theme.fontBody || "Calibri").toString().slice(0, 40);
