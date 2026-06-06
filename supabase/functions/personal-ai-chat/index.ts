@@ -128,12 +128,11 @@ serve(async (req) => {
 
       // Convert messages: pull system out, normalize images.
       const sys = finalSystem;
-      const aMsgs = [
+      const baseMsgs = [
         ...history.slice(-30).map((m: any) => ({ role: m.role, content: m.content })),
         { role: "user", content: userContent },
       ].map((m: any) => {
         if (typeof m.content === "string") return { role: m.role, content: m.content };
-        // multimodal: convert image_url -> image
         const parts = (m.content as any[]).map((p) => {
           if (p.type === "text") return { type: "text", text: p.text };
           if (p.type === "image_url") {
@@ -147,85 +146,219 @@ serve(async (req) => {
         return { role: m.role, content: parts };
       });
 
-      const aResp = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "x-api-key": ANTHROPIC_API_KEY,
-          "anthropic-version": "2023-06-01",
-          "Content-Type": "application/json",
+      // Tools available to Claude
+      const tools = [
+        {
+          name: "generate_pptx",
+          description:
+            "Generate a downloadable PowerPoint (.pptx) presentation. Use when the user asks for slides, a deck, a presentation, or a pitch. Return a clear title and 5-15 well-structured slides. Each slide should have either bullets (3-6 short bullets) OR a body paragraph, not both.",
+          input_schema: {
+            type: "object",
+            properties: {
+              title: { type: "string", description: "Deck title shown on the cover slide." },
+              subtitle: { type: "string", description: "Optional subtitle / one-line description." },
+              author: { type: "string", description: "Optional author/byline." },
+              theme: {
+                type: "object",
+                properties: {
+                  accent: { type: "string", description: "Hex color like #0E2A47 for the accent bar." },
+                },
+              },
+              slides: {
+                type: "array",
+                description: "Content slides (the cover is added automatically).",
+                items: {
+                  type: "object",
+                  properties: {
+                    title: { type: "string" },
+                    bullets: { type: "array", items: { type: "string" } },
+                    body: { type: "string" },
+                    notes: { type: "string", description: "Optional speaker notes." },
+                  },
+                  required: ["title"],
+                },
+              },
+            },
+            required: ["title", "slides"],
+          },
         },
-        body: JSON.stringify({
-          model: claudeModel,
-          max_tokens: 4096,
-          system: sys,
-          messages: aMsgs,
-          stream: true,
-        }),
-        signal: controller.signal,
-      });
-      clearTimeout(timeoutId);
+      ];
 
-      if (!aResp.ok || !aResp.body) {
-        const errText = await aResp.text();
-        console.error("Anthropic error:", aResp.status, errText);
-        const msg = aResp.status === 429 ? "Rate limit exceeded. Try again in a moment."
-          : aResp.status === 401 ? "Anthropic API key is invalid."
-          : aResp.status === 402 ? "Anthropic credits exhausted. Add a balance in console.anthropic.com."
-          : `Anthropic error: ${aResp.status}`;
-        return new Response(JSON.stringify({ error: msg }), {
-          status: aResp.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      // Translate Anthropic SSE -> OpenAI-style SSE the frontend already parses.
       const encoder = new TextEncoder();
       const decoder = new TextDecoder();
       const id = `chatcmpl-${crypto.randomUUID()}`;
       const created = Math.floor(Date.now() / 1000);
+      const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+      const authForward = req.headers.get("Authorization") ?? "";
+
       const stream = new ReadableStream({
         async start(controller2) {
-          const reader = aResp.body!.getReader();
-          let buf = "";
           const push = (delta: Record<string, unknown>) => {
             const obj = { id, object: "chat.completion.chunk", created, model: claudeModel, choices: [{ index: 0, delta, finish_reason: null }] };
             controller2.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`));
           };
+
+          // Multi-turn loop: stream Claude; if it calls a tool, execute it, append tool_result, loop again.
+          let convo: any[] = baseMsgs;
+          const MAX_TURNS = 4;
           try {
-            while (true) {
-              const { value, done } = await reader.read();
-              if (done) break;
-              buf += decoder.decode(value, { stream: true });
-              const events = buf.split("\n\n");
-              buf = events.pop() ?? "";
-              for (const evt of events) {
-                const dataLine = evt.split("\n").find((l) => l.startsWith("data:"));
-                if (!dataLine) continue;
-                const payload = dataLine.slice(5).trim();
-                if (!payload || payload === "[DONE]") continue;
-                try {
-                  const json = JSON.parse(payload);
-                  if (json.type === "content_block_delta" && json.delta?.type === "text_delta") {
-                    push({ content: json.delta.text });
-                  } else if (json.type === "message_stop") {
-                    const finish = { id, object: "chat.completion.chunk", created, model: claudeModel, choices: [{ index: 0, delta: {}, finish_reason: "stop" }] };
-                    controller2.enqueue(encoder.encode(`data: ${JSON.stringify(finish)}\n\n`));
-                  } else if (json.type === "error") {
-                    push({ content: `\n\n[Anthropic error: ${json.error?.message || "unknown"}]` });
-                  }
-                } catch { /* ignore parse blips */ }
+            for (let turn = 0; turn < MAX_TURNS; turn++) {
+              const aResp = await fetch("https://api.anthropic.com/v1/messages", {
+                method: "POST",
+                headers: {
+                  "x-api-key": ANTHROPIC_API_KEY,
+                  "anthropic-version": "2023-06-01",
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  model: claudeModel,
+                  max_tokens: 4096,
+                  system: sys,
+                  messages: convo,
+                  tools,
+                  stream: true,
+                }),
+                signal: controller.signal,
+              });
+              if (!aResp.ok || !aResp.body) {
+                const errText = await aResp.text();
+                console.error("Anthropic error:", aResp.status, errText);
+                push({ content: `\n\n[Anthropic error ${aResp.status}]` });
+                break;
               }
+
+              const reader = aResp.body.getReader();
+              let buf = "";
+              // Track per-block state for this streamed message
+              const blocks: Record<number, any> = {};
+              let stopReason: string | null = null;
+
+              outer: while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                buf += decoder.decode(value, { stream: true });
+                const events = buf.split("\n\n");
+                buf = events.pop() ?? "";
+                for (const evt of events) {
+                  const dataLine = evt.split("\n").find((l) => l.startsWith("data:"));
+                  if (!dataLine) continue;
+                  const payload = dataLine.slice(5).trim();
+                  if (!payload || payload === "[DONE]") continue;
+                  try {
+                    const json = JSON.parse(payload);
+                    if (json.type === "content_block_start") {
+                      const idx = json.index;
+                      const cb = json.content_block;
+                      if (cb.type === "text") blocks[idx] = { type: "text", text: "" };
+                      else if (cb.type === "tool_use") blocks[idx] = { type: "tool_use", id: cb.id, name: cb.name, input: "" };
+                    } else if (json.type === "content_block_delta") {
+                      const idx = json.index;
+                      const d = json.delta;
+                      const b = blocks[idx];
+                      if (!b) continue;
+                      if (d.type === "text_delta" && b.type === "text") {
+                        b.text += d.text;
+                        push({ content: d.text });
+                      } else if (d.type === "input_json_delta" && b.type === "tool_use") {
+                        b.input += d.partial_json || "";
+                      }
+                    } else if (json.type === "message_delta") {
+                      if (json.delta?.stop_reason) stopReason = json.delta.stop_reason;
+                    } else if (json.type === "message_stop") {
+                      break outer;
+                    } else if (json.type === "error") {
+                      push({ content: `\n\n[Anthropic error: ${json.error?.message || "unknown"}]` });
+                      break outer;
+                    }
+                  } catch { /* ignore parse blips */ }
+                }
+              }
+
+              // Build assistant message from blocks
+              const assistantContent: any[] = [];
+              const toolCalls: { id: string; name: string; input: any }[] = [];
+              for (const idx of Object.keys(blocks).map(Number).sort((a, b) => a - b)) {
+                const b = blocks[idx];
+                if (b.type === "text") {
+                  if (b.text) assistantContent.push({ type: "text", text: b.text });
+                } else if (b.type === "tool_use") {
+                  let parsed: any = {};
+                  try { parsed = b.input ? JSON.parse(b.input) : {}; } catch { parsed = {}; }
+                  assistantContent.push({ type: "tool_use", id: b.id, name: b.name, input: parsed });
+                  toolCalls.push({ id: b.id, name: b.name, input: parsed });
+                }
+              }
+
+              if (stopReason !== "tool_use" || toolCalls.length === 0) {
+                // Done
+                break;
+              }
+
+              // Execute tools, build tool_result content
+              push({ content: `\n\n_Building your file…_\n` });
+              const toolResults: any[] = [];
+              for (const call of toolCalls) {
+                try {
+                  if (call.name === "generate_pptx") {
+                    const r = await fetch(`${SUPABASE_URL}/functions/v1/compass-generate-pptx`, {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: authForward,
+                      },
+                      body: JSON.stringify(call.input),
+                    });
+                    const json = await r.json();
+                    if (!r.ok) throw new Error(json.error || `status ${r.status}`);
+                    // Surface a download link inline immediately
+                    push({ content: `\n📎 **[Download ${json.filename}](${json.url})** — ${json.slide_count} slides, link valid 7 days.\n\n` });
+                    toolResults.push({
+                      type: "tool_result",
+                      tool_use_id: call.id,
+                      content: `File generated successfully. Filename: ${json.filename}. Download URL already shown to the user.`,
+                    });
+                  } else {
+                    toolResults.push({
+                      type: "tool_result",
+                      tool_use_id: call.id,
+                      content: `Unknown tool: ${call.name}`,
+                      is_error: true,
+                    });
+                  }
+                } catch (e) {
+                  console.error("tool exec error:", e);
+                  push({ content: `\n\n[Tool error: ${e instanceof Error ? e.message : "failed"}]\n\n` });
+                  toolResults.push({
+                    type: "tool_result",
+                    tool_use_id: call.id,
+                    content: `Error: ${e instanceof Error ? e.message : "failed"}`,
+                    is_error: true,
+                  });
+                }
+              }
+
+              convo = [
+                ...convo,
+                { role: "assistant", content: assistantContent },
+                { role: "user", content: toolResults },
+              ];
+              // Loop continues — Claude will produce a wrap-up reply.
             }
+            clearTimeout(timeoutId);
+            const finish = { id, object: "chat.completion.chunk", created, model: claudeModel, choices: [{ index: 0, delta: {}, finish_reason: "stop" }] };
+            controller2.enqueue(encoder.encode(`data: ${JSON.stringify(finish)}\n\n`));
             controller2.enqueue(encoder.encode("data: [DONE]\n\n"));
             controller2.close();
           } catch (e) {
             console.error("anthropic stream error:", e);
-            controller2.error(e);
+            try { controller2.error(e); } catch { /* noop */ }
           }
         },
       });
 
       return new Response(stream, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
     }
+
 
     // ---- Lovable AI Gateway path (Gemini / GPT) ----
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
