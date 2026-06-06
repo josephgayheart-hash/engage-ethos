@@ -689,14 +689,24 @@ export default function PersonalAIPage() {
             </SelectContent>
           </Select>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setMemoryOpen(true)}
-            className="h-9 gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-          >
-            <Brain className="h-4 w-4" /> Memory
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/voice-studio/setup")}
+              className="h-9 gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <RefreshCw className="h-4 w-4" /> Setup
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setMemoryOpen(true)}
+              className="h-9 gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <Brain className="h-4 w-4" /> Memory
+            </Button>
+          </div>
         </header>
         <MemoryDialog
           open={memoryOpen}
