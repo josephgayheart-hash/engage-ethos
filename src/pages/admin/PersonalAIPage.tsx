@@ -1312,6 +1312,15 @@ export default function PersonalAIPage() {
                         className="h-full"
                       />
                     </div>
+                  ) : (fileArtifact.kind === "pptx" || fileArtifact.kind === "docx") ? (
+                    <div className="mx-auto h-full rounded-lg shadow-lg overflow-hidden bg-white ring-1 ring-border/60" style={{ maxWidth: 1100 }}>
+                      <iframe
+                        title={fileArtifact.filename}
+                        src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileArtifact.url)}`}
+                        className="w-full h-full bg-white"
+                        allowFullScreen
+                      />
+                    </div>
                   ) : (
                     <div className="h-full flex flex-col items-center justify-center gap-3 p-6 text-center">
                       <FileText className="h-12 w-12 text-muted-foreground/60" />
