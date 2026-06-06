@@ -123,7 +123,7 @@ function fileToDataUrl(file: File): Promise<string> {
 }
 
 export default function PersonalAIPage() {
-  const { isSuperAdmin, isToolOnly } = useAuth();
+  const { isSuperAdmin, isToolOnly, profile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [threads, setThreads] = useState<Thread[]>(() => {
