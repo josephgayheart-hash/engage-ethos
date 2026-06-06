@@ -22,6 +22,7 @@ import {
   MessageSquarePlus, Check, RefreshCw, Brain, PanelLeftClose, PanelLeftOpen, ExternalLink,
 } from "lucide-react";
 import { MemoryDialog } from "@/components/personal-ai/MemoryDialog";
+import { ArtifactPreviewFrame } from "@/components/personal-ai/ArtifactPreviewFrame";
 
 type Role = "user" | "assistant";
 interface Attachment { name: string; kind: "image" | "doc"; dataUrl?: string; text?: string }
