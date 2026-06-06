@@ -123,7 +123,7 @@ function fileToDataUrl(file: File): Promise<string> {
 }
 
 export default function PersonalAIPage() {
-  const { isSuperAdmin, isToolOnly } = useAuth();
+  const { isSuperAdmin, isToolOnly, profile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [threads, setThreads] = useState<Thread[]>(() => {
@@ -493,6 +493,31 @@ export default function PersonalAIPage() {
   const currentModelLabel = MODELS.find(m => m.id === active?.model)?.label ?? "Model";
   const isEmpty = (active?.messages.length ?? 0) === 0 && !streaming;
 
+  const firstName = (profile?.first_name?.trim().split(/\s+/)[0]) || "there";
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours();
+    const tod = hour < 5 ? "night owl" : hour < 12 ? "morning" : hour < 17 ? "afternoon" : hour < 21 ? "evening" : "night";
+    const lines = [
+      `Hey ${firstName}, what are we working on?`,
+      `Good ${tod}, ${firstName}. Where should we start?`,
+      `Welcome back, ${firstName}. What's on your plate?`,
+      `Hi ${firstName} — ready when you are.`,
+      `${firstName}, let's make something good.`,
+      `Back at it, ${firstName}?`,
+      `Hey ${firstName}. What needs sharpening today?`,
+      `${firstName}, drop it in — I'll help shape it.`,
+      `Good to see you, ${firstName}. What's first?`,
+      `${firstName}, what are we writing?`,
+      `Let's get to it, ${firstName}.`,
+      `Hi ${firstName}. What's the brief?`,
+      `${firstName}, pick a thread or start fresh.`,
+      `Hey ${firstName} — paste, type, or upload. I'm listening.`,
+    ];
+    return lines[Math.floor(Math.random() * lines.length)];
+    // rotate per thread + per page load
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeId, firstName]);
+
   const Composer = (
     <div className="space-y-2">
       {pendingAttachments.length > 0 && (
@@ -727,7 +752,7 @@ export default function PersonalAIPage() {
               <div className="flex-1 flex flex-col items-center justify-center px-4">
                 <div className="w-full max-w-2xl space-y-8">
                   <div className="text-center space-y-2">
-                    <h1 className="text-3xl font-semibold tracking-tight">How can I help today?</h1>
+                    <h1 className="text-3xl font-semibold tracking-tight">{greeting}</h1>
                     <p className="text-sm text-muted-foreground">
                       Compass writes in your voice. Rewrite an email, summarize a meeting, or draft something new.
                     </p>
