@@ -297,11 +297,30 @@ export default function PersonalAIPage() {
     el.style.height = Math.min(el.scrollHeight, max) + "px";
   }, [input]);
   useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    // Use instant scroll while streaming to avoid stacking smooth-scroll animations
+    const inner = scrollRef.current;
+    if (!inner) return;
+    // Radix ScrollArea: the real scroller is the viewport ancestor, not the inner content div.
+    const viewport = inner.closest('[data-radix-scroll-area-viewport]') as HTMLElement | null;
+    const el = viewport ?? inner;
+    // Use instant scroll while streaming so the view follows generated content without lag.
     el.scrollTo({ top: el.scrollHeight, behavior: streaming ? "auto" : "smooth" });
   }, [active?.messages.length, streamText, streamImage, streaming]);
+
+  // While streaming, continuously follow the bottom (covers cases where text grows
+  // between React re-renders, e.g. long code blocks rendered incrementally).
+  useEffect(() => {
+    if (!streaming) return;
+    const inner = scrollRef.current;
+    if (!inner) return;
+    const viewport = (inner.closest('[data-radix-scroll-area-viewport]') as HTMLElement | null) ?? inner;
+    let raf = 0;
+    const tick = () => {
+      viewport.scrollTop = viewport.scrollHeight;
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [streaming]);
 
   // Migrate any persisted thread using a model ID no longer in MODELS
   useEffect(() => {
