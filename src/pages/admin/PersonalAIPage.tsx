@@ -1041,11 +1041,12 @@ export default function PersonalAIPage() {
                                               <Eye className="h-3.5 w-3.5" /> Open full preview
                                             </button>
                                           </div>
-                                          <iframe
+                                          <ArtifactPreviewFrame
                                             title="Inline HTML preview"
                                             srcDoc={html}
                                             sandbox="allow-scripts"
-                                            className="w-full h-[320px] bg-white"
+                                            deviceWidth={1280}
+                                            height={420}
                                           />
                                         </div>
                                       </div>
