@@ -402,10 +402,12 @@ export default function PersonalAIPage() {
           message: text,
           history: active.messages.map(m => ({ role: m.role, content: m.content })),
           model: active.model,
-          systemPrompt: active.systemPrompt,
+          systemPrompt: active.systemPrompt + (deepResearch ? "\n\nDeep research mode: synthesize across the provided sources, cite [n] inline, surface conflicting evidence, and end with a short \"What I checked\" list." : ""),
           images,
           files,
           searchContext,
+          deepResearch,
+          extendedThinking,
         }),
       });
 
