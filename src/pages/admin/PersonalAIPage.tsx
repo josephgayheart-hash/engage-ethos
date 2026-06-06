@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import {
   ArrowUp, Copy, Trash2, Plus, Square, Loader2, Paperclip, Image as ImageIcon,
   Globe, Wand2, FileText, X, Download, Code as CodeIcon, Eye, Sparkles,
-  MessageSquarePlus, Check, RefreshCw, Brain, PanelLeftClose, PanelLeftOpen,
+  MessageSquarePlus, Check, RefreshCw, Brain, PanelLeftClose, PanelLeftOpen, ExternalLink,
 } from "lucide-react";
 import { MemoryDialog } from "@/components/personal-ai/MemoryDialog";
 
@@ -866,6 +866,15 @@ export default function PersonalAIPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
+                  <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" onClick={() => {
+                    const blob = new Blob([artifactHtml], { type: "text/html" });
+                    const url = URL.createObjectURL(blob);
+                    const w = window.open(url, "_blank", "noopener,noreferrer");
+                    if (!w) { toast({ title: "Popup blocked", description: "Allow popups to open the artifact in a new tab.", variant: "destructive" }); }
+                    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+                  }}>
+                    <ExternalLink className="h-3 w-3" /> Open in browser
+                  </Button>
                   <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" onClick={() => copyMsg(artifactHtml)}>
                     <Copy className="h-3 w-3" /> Copy
                   </Button>
