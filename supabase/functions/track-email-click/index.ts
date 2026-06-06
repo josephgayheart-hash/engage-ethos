@@ -4,6 +4,27 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
+// Allowlisted destination hostnames. Add more here if you ever need to track
+// clicks to additional first-party domains.
+const ALLOWED_HOSTS = new Set<string>([
+  "campusvoice.ai",
+  "www.campusvoice.ai",
+  "app.campusvoice.ai",
+  "engage-ethos.lovable.app",
+]);
+
+function isAllowedDestination(raw: string): URL | null {
+  try {
+    const u = new URL(raw);
+    if (u.protocol !== "https:" && u.protocol !== "http:") return null;
+    const host = u.hostname.toLowerCase();
+    if (ALLOWED_HOSTS.has(host)) return u;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 const handler = async (req: Request): Promise<Response> => {
   try {
     const url = new URL(req.url);
@@ -17,22 +38,25 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response("Missing destination URL", { status: 400 });
     }
 
-    // Decode the destination URL
     const decodedUrl = decodeURIComponent(destination);
+    const allowed = isAllowedDestination(decodedUrl);
+    if (!allowed) {
+      console.warn("Blocked redirect to non-allowlisted destination:", decodedUrl);
+      return new Response("Invalid destination", { status: 400 });
+    }
 
     // Track the click if we have a nudge ID
     if (nudgeId && nudgeId !== "undefined") {
       try {
         const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
-        
+
         const clickEvent = {
           link_name: linkName,
-          url: decodedUrl,
+          url: allowed.toString(),
           clicked_at: new Date().toISOString(),
           user_agent: req.headers.get("user-agent") || null,
         };
 
-        // Get current nudge data
         const { data: nudge, error: fetchError } = await supabase
           .from("email_nudges")
           .select("link_clicks, clicked_at")
@@ -42,11 +66,9 @@ const handler = async (req: Request): Promise<Response> => {
         if (fetchError) {
           console.error("Error fetching nudge:", fetchError);
         } else {
-          // Append click to link_clicks array
           const currentClicks = (nudge?.link_clicks as any[]) || [];
           const updatedClicks = [...currentClicks, clickEvent];
 
-          // Update the nudge with click data
           const { error: updateError } = await supabase
             .from("email_nudges")
             .update({
@@ -64,29 +86,18 @@ const handler = async (req: Request): Promise<Response> => {
         }
       } catch (dbError) {
         console.error("Database error tracking click:", dbError);
-        // Don't block redirect on tracking errors
       }
     }
 
-    // Redirect to the destination
     return new Response(null, {
       status: 302,
       headers: {
-        "Location": decodedUrl,
+        "Location": allowed.toString(),
         "Cache-Control": "no-cache, no-store, must-revalidate",
       },
     });
   } catch (error: any) {
     console.error("Error in track-email-click:", error);
-    // On error, try to redirect anyway if we have a destination
-    const url = new URL(req.url);
-    const destination = url.searchParams.get("url");
-    if (destination) {
-      return new Response(null, {
-        status: 302,
-        headers: { "Location": decodeURIComponent(destination) },
-      });
-    }
     return new Response("Error processing request", { status: 500 });
   }
 };
