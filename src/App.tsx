@@ -302,8 +302,9 @@ const AppRoutes = () => (
         <Route path="/admin/crm" element={<CRMPage />} />
         <Route path="/admin/nda-links" element={<NDALinksPage />} />
         <Route path="/admin/ai-technology" element={<AITechnologyPage />} />
-        <Route path="/admin/personal-ai" element={<PersonalAIPage />} />
+        <Route path="/admin/personal-ai" element={<Navigate to="/voice-studio" replace />} />
         <Route path="/admin/personal-ai/edits" element={<PersonalAIEditsPage />} />
+        <Route path="/admin/voice-studio-users" element={<ToolOnlyUsersPage />} />
       </Route>
     </Route>
 
