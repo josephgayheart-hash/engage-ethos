@@ -468,6 +468,8 @@ export default function PersonalAIPage() {
       let buf = "";
       let acc = "";
       let done = false;
+      let rafPending = false;
+      const flush = () => { rafPending = false; setStreamText(acc); };
       while (!done) {
         const { done: rDone, value } = await reader.read();
         if (rDone) break;
@@ -484,10 +486,14 @@ export default function PersonalAIPage() {
           try {
             const parsed = JSON.parse(json);
             const delta = parsed.choices?.[0]?.delta?.content;
-            if (delta) { acc += delta; setStreamText(acc); }
+            if (delta) {
+              acc += delta;
+              if (!rafPending) { rafPending = true; requestAnimationFrame(flush); }
+            }
           } catch { buf = line + "\n" + buf; break; }
         }
       }
+      setStreamText(acc);
 
       const finalMsg: Msg = {
         role: "assistant",
