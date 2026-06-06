@@ -810,7 +810,7 @@ export default function PersonalAIPage() {
                   <div className="text-center space-y-2">
                     <h1 className="text-3xl font-semibold tracking-tight">{greeting}</h1>
                     <p className="text-sm text-muted-foreground">
-                      Compass writes in your voice. Rewrite an email, summarize a meeting, or draft something new.
+                      What are we working on?
                     </p>
                   </div>
                   {Composer}
