@@ -140,6 +140,8 @@ export default function PersonalAIPage() {
   const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
   const [imageMode, setImageMode] = useState(false);
   const [webSearch, setWebSearch] = useState(false);
+  const [deepResearch, setDeepResearch] = useState(false);
+  const [extendedThinking, setExtendedThinking] = useState(false);
   const [streaming, setStreaming] = useState(false);
   const [streamText, setStreamText] = useState("");
   const [streamImage, setStreamImage] = useState<string | null>(null);
@@ -264,15 +266,17 @@ export default function PersonalAIPage() {
   };
 
   // Run web search via firecrawl-search, return condensed context + sources
-  const runWebSearch = async (q: string): Promise<{ context: string; sources: { title: string; url: string }[] }> => {
+  const runWebSearch = async (q: string, deep = false): Promise<{ context: string; sources: { title: string; url: string }[] }> => {
+    const limit = deep ? 12 : 5;
+    const snippetLen = deep ? 3000 : 1500;
     const { data, error } = await supabase.functions.invoke("firecrawl-search", {
-      body: { query: q, options: { limit: 5 } },
+      body: { query: q, options: { limit } },
     });
     if (error || !data?.success) throw new Error(error?.message || data?.error || "Search failed");
-    const results = (data.data || []).slice(0, 5);
+    const results = (data.data || []).slice(0, limit);
     const sources = results.map((r: any) => ({ title: r.title || r.url, url: r.url }));
     const context = results.map((r: any, i: number) =>
-      `[${i + 1}] ${r.title}\n${r.url}\n${(r.markdown || r.description || "").slice(0, 1500)}`
+      `[${i + 1}] ${r.title}\n${r.url}\n${(r.markdown || r.description || "").slice(0, snippetLen)}`
     ).join("\n\n");
     return { context, sources };
   };
@@ -374,9 +378,9 @@ export default function PersonalAIPage() {
     try {
       let searchContext = "";
       let searchSources: { title: string; url: string }[] = [];
-      if (webSearch && text) {
+      if ((webSearch || deepResearch) && text) {
         try {
-          const r = await runWebSearch(text);
+          const r = await runWebSearch(text, deepResearch);
           searchContext = r.context;
           searchSources = r.sources;
         } catch (e: any) {
@@ -398,10 +402,12 @@ export default function PersonalAIPage() {
           message: text,
           history: active.messages.map(m => ({ role: m.role, content: m.content })),
           model: active.model,
-          systemPrompt: active.systemPrompt,
+          systemPrompt: active.systemPrompt + (deepResearch ? "\n\nDeep research mode: synthesize across the provided sources, cite [n] inline, surface conflicting evidence, and end with a short \"What I checked\" list." : ""),
           images,
           files,
           searchContext,
+          deepResearch,
+          extendedThinking,
         }),
       });
 
@@ -631,29 +637,32 @@ export default function PersonalAIPage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-52">
-              <DropdownMenuItem onClick={() => imageRef.current?.click()}>
-                <ImageIcon className="h-4 w-4 mr-2" /> Attach image
-              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => fileRef.current?.click()}>
-                <Paperclip className="h-4 w-4 mr-2" /> Attach file
-                <span className="ml-auto text-[10px] text-muted-foreground">Any type</span>
+                <Paperclip className="h-4 w-4 mr-2" /> Upload from computer
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-[10px] uppercase tracking-wide text-muted-foreground">Recipes</DropdownMenuLabel>
-              {RECIPES.map(r => (
-                <DropdownMenuItem key={r.id} onClick={() => { setInput(r.prompt + input); inputRef.current?.focus(); }}>
-                  <Sparkles className="h-4 w-4 mr-2 text-muted-foreground" /> {r.label}
-                </DropdownMenuItem>
-              ))}
+              <DropdownMenuItem onClick={() => imageRef.current?.click()}>
+                <ImageIcon className="h-4 w-4 mr-2" /> Add photos
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <input ref={imageRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => { handleFiles(e.target.files, true); e.target.value = ""; }} />
           <input ref={fileRef} type="file" multiple className="hidden" onChange={(e) => { handleFiles(e.target.files, false); e.target.value = ""; }} />
 
-          <Toggle pressed={webSearch} onPressedChange={setWebSearch} size="sm"
+          <Toggle pressed={webSearch && !deepResearch} onPressedChange={(v) => { setWebSearch(v); if (v) setDeepResearch(false); }} size="sm"
             className="h-8 px-2.5 gap-1.5 rounded-full text-xs text-muted-foreground hover:text-foreground data-[state=on]:bg-primary/10 data-[state=on]:text-primary data-[state=on]:border data-[state=on]:border-primary/20"
             aria-label="Web search">
             <Globe className="h-3.5 w-3.5" /> Search
+          </Toggle>
+          <Toggle pressed={deepResearch} onPressedChange={(v) => { setDeepResearch(v); if (v) setWebSearch(false); }} size="sm"
+            className="h-8 px-2.5 gap-1.5 rounded-full text-xs text-muted-foreground hover:text-foreground data-[state=on]:bg-primary/10 data-[state=on]:text-primary data-[state=on]:border data-[state=on]:border-primary/20"
+            aria-label="Deep research">
+            <Sparkles className="h-3.5 w-3.5" /> Research
+          </Toggle>
+          <Toggle pressed={extendedThinking} onPressedChange={setExtendedThinking} size="sm"
+            className="h-8 px-2.5 gap-1.5 rounded-full text-xs text-muted-foreground hover:text-foreground data-[state=on]:bg-primary/10 data-[state=on]:text-primary data-[state=on]:border data-[state=on]:border-primary/20"
+            aria-label="Extended thinking"
+            title="Extended thinking (Claude)">
+            <Brain className="h-3.5 w-3.5" /> Think
           </Toggle>
           <Toggle pressed={imageMode} onPressedChange={setImageMode} size="sm"
             className="h-8 px-2.5 gap-1.5 rounded-full text-xs text-muted-foreground hover:text-foreground data-[state=on]:bg-primary/10 data-[state=on]:text-primary data-[state=on]:border data-[state=on]:border-primary/20"
@@ -827,17 +836,6 @@ export default function PersonalAIPage() {
                     </p>
                   </div>
                   {Composer}
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {RECIPES.slice(0, 4).map(r => (
-                      <button
-                        key={r.id}
-                        onClick={() => { setInput(r.prompt); inputRef.current?.focus(); }}
-                        className="text-xs px-3 py-1.5 rounded-full border border-border/60 bg-card hover:bg-muted text-foreground/80 hover:text-foreground transition"
-                      >
-                        {r.label}
-                      </button>
-                    ))}
-                  </div>
                 </div>
               </div>
             ) : (
