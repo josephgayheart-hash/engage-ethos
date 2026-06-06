@@ -20,9 +20,9 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // ---- Personal memory + tenant brand injection ----
+    // ---- Personal memory injection (no tenant brand auto-inject) ----
     let memoryBlock = "";
-    let tenantBrand: { name?: string; logo_url?: string | null; primary_color?: string; accent_color?: string } | null = null;
+
     try {
       const authHeader = req.headers.get("Authorization") ?? "";
       if (authHeader) {
@@ -34,26 +34,11 @@ serve(async (req) => {
         const { data: userData } = await supabase.auth.getUser(token);
         const uid = userData?.user?.id;
         if (uid) {
-          const [{ data: prof }, { data: facts }, { data: profileRow }] = await Promise.all([
+          const [{ data: prof }, { data: facts }] = await Promise.all([
             supabase.from("personal_ai_profile").select("system_prompt,memory_enabled,use_cases,about_me,response_prefs,voice_profile").eq("user_id", uid).maybeSingle(),
             supabase.from("personal_ai_facts").select("fact,category").eq("user_id", uid).order("created_at", { ascending: false }).limit(80),
-            supabase.from("profiles").select("tenant_id").eq("id", uid).maybeSingle(),
           ]);
-          if (profileRow?.tenant_id) {
-            const { data: t } = await supabase
-              .from("tenants")
-              .select("institution_name,logo_url,primary_color,accent_color")
-              .eq("id", profileRow.tenant_id)
-              .maybeSingle();
-            if (t) {
-              tenantBrand = {
-                name: t.institution_name,
-                logo_url: t.logo_url,
-                primary_color: t.primary_color,
-                accent_color: t.accent_color,
-              };
-            }
-          }
+
           const parts: string[] = [];
           if (prof?.system_prompt?.trim()) parts.push(`# About the user (always apply)\n${prof.system_prompt.trim()}`);
           if (prof?.about_me?.trim()) parts.push(`# About the user\n${prof.about_me.trim()}`);
@@ -92,18 +77,17 @@ serve(async (req) => {
             const block = Object.entries(grouped).map(([k, v]) => `**${k}**\n${v.join("\n")}`).join("\n\n");
             parts.push(`# Things you remember about the user (learned across past chats)\n${block}\n\nUse these silently to personalize answers. Do not list them back unless asked.`);
           }
-          if (tenantBrand) {
-            parts.push(
-              `# Workspace brand (use for every generated artifact)\n` +
-              `- Organization: ${tenantBrand.name}\n` +
-              `- Primary color (use as accent): ${tenantBrand.primary_color}\n` +
-              `- Secondary color: ${tenantBrand.accent_color}\n` +
-              (tenantBrand.logo_url ? `- Logo URL (place on every slide/cover): ${tenantBrand.logo_url}\n` : "") +
-              `When you call generate_pptx, generate_pdf, generate_docx, or generate_html, you MUST pass theme.accent = "${tenantBrand.primary_color}", theme.secondary = "${tenantBrand.accent_color}"` +
-              (tenantBrand.logo_url ? `, and theme.logo_url = "${tenantBrand.logo_url}"` : "") +
-              `. Never produce an unbranded deliverable.`
-            );
-          }
+          parts.push(
+            `# Branding for generated artifacts\n` +
+            `Do NOT assume or inject any workspace/organization branding. ` +
+            `Only apply colors, fonts, or logos that the user explicitly provides in this conversation ` +
+            `(via instructions, an uploaded template, a brand reference, or attached files). ` +
+            `If the user has not specified branding, use a clean neutral default (dark text on white, a single neutral accent) ` +
+            `and ask once whether they want to supply a brand template, logo, or color palette. ` +
+            `When calling generate_pptx / generate_pdf / generate_docx / generate_html, only pass theme.accent, theme.secondary, ` +
+            `theme.logo_url, theme.fontHead, or theme.fontBody when the user has explicitly given those values.`
+          );
+
           if (parts.length) memoryBlock = parts.join("\n\n---\n\n");
         }
       }
@@ -181,11 +165,12 @@ serve(async (req) => {
           name: "generate_pptx",
 
           description:
-            "Generate a downloadable, fully-branded PowerPoint deck. Use whenever the user asks for slides, a deck, a pitch, or a presentation. " +
+            "Generate a downloadable PowerPoint deck. Use whenever the user asks for slides, a deck, a pitch, or a presentation. " +
             "Produce 8-15 slides. MIX LAYOUTS — never use the same layout twice in a row. " +
-            "Always pass theme.accent (workspace primary color), theme.secondary, and theme.logo_url if the workspace brand was provided in the system prompt. " +
+            "Only pass theme.accent / theme.secondary / theme.logo_url / theme.fontHead / theme.fontBody when the user has explicitly provided those (via instructions, template, or uploaded brand assets). Otherwise omit theme and a neutral default is used. " +
             "Each slide MUST pick a layout: 'title' (section divider), 'bullets' (3-5 short bullets), 'two_column' (left vs right), 'stat' (1-3 big numbers with labels), 'quote' (pull quote + attribution), or 'image' (hero image with caption). " +
             "For 'stat' slides, provide a `stats` array of {value, label, sublabel}. For 'two_column' provide `left` and `right` objects with optional heading + bullets. For 'image' provide image_url. For 'quote' provide quote + attribution.",
+
           input_schema: {
             type: "object",
             properties: {
