@@ -39,14 +39,15 @@ const STORAGE_KEY = "personal-ai-threads-v1";
 const ACTIVE_KEY = "personal-ai-active-v1";
 
 const MODELS = [
+  { id: "anthropic/claude-sonnet-4-5", label: "Claude Sonnet 4.5" },
+  { id: "anthropic/claude-opus-4-5", label: "Claude Opus 4.5" },
+  { id: "anthropic/claude-haiku-4-5", label: "Claude Haiku 4.5" },
   { id: "google/gemini-3-pro-preview", label: "Gemini 3 Pro (preview)" },
   { id: "google/gemini-3-flash-preview", label: "Gemini 3 Flash (preview)" },
   { id: "google/gemini-2.5-pro", label: "Gemini 2.5 Pro" },
   { id: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash" },
-  { id: "google/gemini-2.5-flash-lite", label: "Gemini 2.5 Flash Lite" },
   { id: "openai/gpt-5", label: "GPT-5" },
   { id: "openai/gpt-5-mini", label: "GPT-5 Mini" },
-  { id: "openai/gpt-5-nano", label: "GPT-5 Nano" },
 ];
 
 const DEFAULT_SYSTEM_PROMPT = `You are Tyler's personal communications copilot for his professional work at Valvoline Global Operations (VGO).
@@ -451,10 +452,14 @@ export default function PersonalAIPage() {
     if (ts) { setCopiedTs(ts); setTimeout(() => setCopiedTs(c => c === ts ? null : c), 1500); }
     else toast({ title: "Copied" });
   };
-  const downloadMd = (m: Msg) => {
-    const blob = new Blob([m.content], { type: "text/markdown" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = `response-${m.ts}.md`; a.click(); URL.revokeObjectURL(url);
+  const downloadAs = async (m: Msg, format: "md" | "docx" | "pptx" | "pdf") => {
+    try {
+      const { exportResponse } = await import("@/lib/exportResponse");
+      await exportResponse(format, m.content, active?.title);
+    } catch (e) {
+      console.error("export failed:", e);
+      toast({ title: "Export failed", description: e instanceof Error ? e.message : "Please try again.", variant: "destructive" });
+    }
   };
   const downloadImage = (url: string) => {
     const a = document.createElement("a"); a.href = url; a.download = `image-${Date.now()}.png`; a.click();
@@ -800,9 +805,21 @@ export default function PersonalAIPage() {
                                   <button onClick={() => copyMsg(m.content, m.ts)} className="h-7 w-7 inline-flex items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Copy">
                                     {copiedTs === m.ts ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
                                   </button>
-                                  <button onClick={() => downloadMd(m)} className="h-7 w-7 inline-flex items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Download markdown">
-                                    <Download className="h-3.5 w-3.5" />
-                                  </button>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <button className="h-7 w-7 inline-flex items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Download">
+                                        <Download className="h-3.5 w-3.5" />
+                                      </button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="start" className="w-44">
+                                      <DropdownMenuLabel className="text-xs">Download as</DropdownMenuLabel>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem onClick={() => downloadAs(m, "docx")}>Word (.docx)</DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => downloadAs(m, "pptx")}>PowerPoint (.pptx)</DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => downloadAs(m, "pdf")}>PDF</DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => downloadAs(m, "md")}>Markdown (.md)</DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
                                   {extractHtmlArtifact(m.content) && (
                                     <button onClick={() => openHtmlArtifact(m.content)} className="h-7 px-2 inline-flex items-center gap-1 rounded-md text-xs text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Open artifact">
                                       <Eye className="h-3.5 w-3.5" /> Artifact

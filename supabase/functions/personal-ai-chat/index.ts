@@ -114,6 +114,120 @@ serve(async (req) => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 120_000);
 
+    // ---- Anthropic (Claude) path: call Anthropic directly and translate SSE to OpenAI-style ----
+    const isAnthropic = typeof model === "string" && (model.startsWith("anthropic/") || model.startsWith("claude-"));
+    if (isAnthropic) {
+      const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+      if (!ANTHROPIC_API_KEY) {
+        clearTimeout(timeoutId);
+        return new Response(JSON.stringify({ error: "ANTHROPIC_API_KEY is not configured" }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const claudeModel = model.replace(/^anthropic\//, "");
+
+      // Convert messages: pull system out, normalize images.
+      const sys = finalSystem;
+      const aMsgs = [
+        ...history.slice(-30).map((m: any) => ({ role: m.role, content: m.content })),
+        { role: "user", content: userContent },
+      ].map((m: any) => {
+        if (typeof m.content === "string") return { role: m.role, content: m.content };
+        // multimodal: convert image_url -> image
+        const parts = (m.content as any[]).map((p) => {
+          if (p.type === "text") return { type: "text", text: p.text };
+          if (p.type === "image_url") {
+            const url = p.image_url?.url || "";
+            const match = /^data:(.+?);base64,(.+)$/.exec(url);
+            if (match) return { type: "image", source: { type: "base64", media_type: match[1], data: match[2] } };
+            return { type: "image", source: { type: "url", url } };
+          }
+          return p;
+        });
+        return { role: m.role, content: parts };
+      });
+
+      const aResp = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "x-api-key": ANTHROPIC_API_KEY,
+          "anthropic-version": "2023-06-01",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: claudeModel,
+          max_tokens: 4096,
+          system: sys,
+          messages: aMsgs,
+          stream: true,
+        }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      if (!aResp.ok || !aResp.body) {
+        const errText = await aResp.text();
+        console.error("Anthropic error:", aResp.status, errText);
+        const msg = aResp.status === 429 ? "Rate limit exceeded. Try again in a moment."
+          : aResp.status === 401 ? "Anthropic API key is invalid."
+          : aResp.status === 402 ? "Anthropic credits exhausted. Add a balance in console.anthropic.com."
+          : `Anthropic error: ${aResp.status}`;
+        return new Response(JSON.stringify({ error: msg }), {
+          status: aResp.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Translate Anthropic SSE -> OpenAI-style SSE the frontend already parses.
+      const encoder = new TextEncoder();
+      const decoder = new TextDecoder();
+      const id = `chatcmpl-${crypto.randomUUID()}`;
+      const created = Math.floor(Date.now() / 1000);
+      const stream = new ReadableStream({
+        async start(controller2) {
+          const reader = aResp.body!.getReader();
+          let buf = "";
+          const push = (delta: Record<string, unknown>) => {
+            const obj = { id, object: "chat.completion.chunk", created, model: claudeModel, choices: [{ index: 0, delta, finish_reason: null }] };
+            controller2.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`));
+          };
+          try {
+            while (true) {
+              const { value, done } = await reader.read();
+              if (done) break;
+              buf += decoder.decode(value, { stream: true });
+              const events = buf.split("\n\n");
+              buf = events.pop() ?? "";
+              for (const evt of events) {
+                const dataLine = evt.split("\n").find((l) => l.startsWith("data:"));
+                if (!dataLine) continue;
+                const payload = dataLine.slice(5).trim();
+                if (!payload || payload === "[DONE]") continue;
+                try {
+                  const json = JSON.parse(payload);
+                  if (json.type === "content_block_delta" && json.delta?.type === "text_delta") {
+                    push({ content: json.delta.text });
+                  } else if (json.type === "message_stop") {
+                    const finish = { id, object: "chat.completion.chunk", created, model: claudeModel, choices: [{ index: 0, delta: {}, finish_reason: "stop" }] };
+                    controller2.enqueue(encoder.encode(`data: ${JSON.stringify(finish)}\n\n`));
+                  } else if (json.type === "error") {
+                    push({ content: `\n\n[Anthropic error: ${json.error?.message || "unknown"}]` });
+                  }
+                } catch { /* ignore parse blips */ }
+              }
+            }
+            controller2.enqueue(encoder.encode("data: [DONE]\n\n"));
+            controller2.close();
+          } catch (e) {
+            console.error("anthropic stream error:", e);
+            controller2.error(e);
+          }
+        },
+      });
+
+      return new Response(stream, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
+    }
+
+    // ---- Lovable AI Gateway path (Gemini / GPT) ----
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
