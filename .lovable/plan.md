@@ -1,81 +1,104 @@
-## Goal
+## What we're building
 
-Give the super admin a dedicated **Platform Operations** dashboard at `/platform` focused on running CampusVoice as a SaaS — not user productivity shortcuts. When a super admin lands on `/`, auto-redirect them to `/platform`. Regular users see today's home unchanged.
+A new lightweight user type that only ever sees one feature: **Voice Studio** (the renamed Personal AI tool). They sign in, run a one-time setup wizard, and the rest of the app stays invisible to them.
 
-## What you'll see at `/platform`
+You (super admin) invite them from a new page in Platform Admin.
 
-**Header strip** — environment (Live/Preview), build status, last refresh, "Refresh all" button.
+---
 
-**KPI row** (top, dense)
-- Total tenants · Active tenants (7d)
-- Total users · Active users (7d / 30d)
-- Signups last 7d (sparkline)
-- Tool runs last 24h / 7d
-- Open access requests · New beta feedback (badged)
+## 1. Rename: Personal AI → Voice Studio
 
-**Platform Usage & Analytics** (primary panel for v1)
-- DAU / WAU / MAU line chart (from `tool_usage_events`, excluding `EXCLUDED_USER_IDS`)
-- Top 10 tools by runs (last 30d) — bar chart
-- Tenants by activity (table: tenant, users, runs 7d, last activity, plan/type)
-- New tenant & user signups over time (area chart, 30d)
+- Sidebar item label, page title, header, empty-state copy.
+- Route `/admin/personal-ai` stays for backward compat. New canonical route: `/voice-studio`. Tool-only users land here; the old admin route redirects super admins to the same page.
+- Memory dialog, system prompt fallback copy updated.
 
-**Access & Beta** (secondary cards, compact)
-- Pending `onboarding_requests` (latest 5, click → existing admin onboarding page)
-- Latest `beta_feedback` (5 newest with rating + status)
+## 2. Per-user `tool_only` flag
 
-**System Health** (compact strip)
-- Recent `security_events` (sev: warn/error count last 24h, link to existing SecurityEventsPage)
-- Edge function error count last 24h (via `supabase analytics_query` on `function_edge_logs` where status_code >= 500)
-- Auth failure count last 24h (via `auth_logs`)
-- Last 10 logins across platform (`profiles.last_login_at`)
+Add `tool_only boolean default false` to `public.profiles`.
+- New helper `public.is_tool_only(uuid)` (security definer) used by route guards.
+- No change to `user_roles` or super-admin behavior. You stay full-access.
 
-**Third-party analytics placeholder card** — empty state with "Connect analytics (Plausible / GA / PostHog)" CTA so you can drop in an embed/script later.
+## 3. Access lock-down for tool-only users
 
-**Quick links rail** — to existing admin pages: Users, Onboarding, Institutions, Security Events, NDA Links, AI Tech, QA Diagnostics, Seed Data, CRM.
+A new `<ToolOnlyGuard>` wrapper at the router level:
+- If `profile.tool_only === true`:
+  - All routes except `/voice-studio`, `/voice-studio/setup`, `/auth`, `/logout`, `/account` redirect → `/voice-studio` (or `/voice-studio/setup` if not finished).
+  - The app shell **hides the sidebar entirely** for them — full-bleed Voice Studio with a slim top bar (logo, profile menu, sign out).
+  - Dashboard, settings, admin, library, etc. are unreachable.
+- Super admins / normal users: unaffected.
 
-No "shortcuts to tools", no "resume work", no "drafts", no "library" — those stay on `/`.
+## 4. First-login onboarding wizard
 
-## Routing & access
+New page `/voice-studio/setup` (4 short steps, ~2 min):
 
-- New route `/platform` rendered inside `AppLayout` (so sidebar/topbar stay), guarded: only `isSuperAdmin` may view; others get redirect to `/`.
-- In `src/pages/Index.tsx`, on mount: if `isSuperAdmin && !isImpersonating`, `<Navigate to="/platform" replace />`. During impersonation the super admin still sees the impersonated user's normal home (matches existing impersonation pattern).
-- Add a "Platform Ops" entry to the super-admin section of `AppSidebar` so you can return to it.
+1. **How you'll use it** — multi-select: exec emails, meeting summaries, marketing copy, internal memos, general writing, other. Tunes the base prompt.
+2. **About you** — name, role/title, company, what you work on (1–3 lines). Persisted as durable context injected every turn.
+3. **Response preferences** — length (concise / balanced / detailed), format (bullets / prose / mixed), formality (casual → formal slider), banned words (free text), em-dash rule (on/off), markdown on/off.
+4. **Voice training** — paste 2–3 real writing samples (min 1, max 5). On submit, calls a new edge function `voice-studio-train` that uses Gemini to extract a concise voice profile (tone, sentence rhythm, vocabulary, structural habits, do/don't list) and saves it.
 
-## Data sources (read-only, RLS already permits super admin)
+Wizard saves to `personal_ai_profile` (existing table) — we extend it with the new columns rather than create a parallel one. After completion → redirect to `/voice-studio`.
 
-- `profiles` — counts, last_login_at, signup trend
-- `tenants` — tenant list, types, created_at
-- `tool_usage_events` — DAU/WAU/MAU, top tools, activity per tenant (filter out `EXCLUDED_USER_IDS`)
-- `onboarding_requests` — pending access requests
-- `beta_feedback` — latest feedback
-- `security_events` — health
-- `email_sends` (optional) — delivery health snapshot
-- Supabase analytics (`function_edge_logs`, `auth_logs`) via a small `platform-health` edge function (service role) returning aggregated counts only — keeps creds server-side.
+A "Retrain voice" / "Edit setup" button in the Voice Studio header re-opens the wizard at any time.
 
-## Files
+## 5. Chat behavior wired to the new profile
 
-New
-- `src/pages/admin/PlatformOpsPage.tsx` — page shell, layout, data orchestration
-- `src/components/platform/PlatformKPIs.tsx`
-- `src/components/platform/UsageAnalyticsPanel.tsx` (DAU/MAU + top tools + signups; recharts already in project)
-- `src/components/platform/TenantActivityTable.tsx`
-- `src/components/platform/AccessAndFeedbackPanel.tsx`
-- `src/components/platform/SystemHealthStrip.tsx`
-- `src/components/platform/AnalyticsEmbedCard.tsx` (placeholder)
-- `src/hooks/usePlatformMetrics.ts` — single hook fanning out queries with React Query
-- `supabase/functions/platform-health/index.ts` — aggregates edge/auth log counts (super-admin JWT check)
+`personal-ai-chat` edge function already merges profile + facts into the system prompt. We extend the assembled prompt with the new structured fields (use cases, about-me, response prefs, extracted voice profile) so tool-only users get a tailored copilot from message one.
 
-Edited
-- `src/App.tsx` — register `/platform` route under `AppLayout`, super-admin guard
-- `src/pages/Index.tsx` — redirect super admins to `/platform`
-- `src/components/app-shell/AppSidebar.tsx` — add "Platform Ops" link in super-admin group
+## 6. Super-admin invite UI
 
-## Visual style
+New page **Platform Admin → Tool-only users** (`/admin/voice-studio-users`):
+- Table of existing tool-only users (email, name, last active, "Reset setup").
+- **Invite** dialog: email, first name, last name → creates a `onboarding_requests` row (or reuses invite_tokens) marked as `tool_only`, calls an edge function `invite-tool-only-user` that:
+  - Creates the auth user (or sends magic-link signup),
+  - Inserts a profile with `tool_only = true`,
+  - Sends a Resend email with the sign-in link.
+- New sidebar item under your Platform Admin section: "Tool-only users".
 
-Follow existing dashboard tokens (cards, neutral surfaces, cyber-lime/purple accents, dense p-4/h-9), same chart patterns as `UniversityDashboardPage`. No new design system. Wave background reused.
+## 7. Edge functions
 
-## Out of scope (future)
+- `invite-tool-only-user` (admin only) — provisions account, sends email.
+- `voice-studio-train` — accepts samples, returns + saves extracted voice profile.
+- Update `personal-ai-chat` — read new profile columns, inject into system prompt. No breaking change for existing super-admin use.
 
-- Embedding a real third-party analytics tool (just the placeholder card for now — tell me which provider when ready)
-- Drill-down per tenant beyond linking to existing institution detail page
-- Writeable actions (approve requests, resolve feedback) — those stay on existing admin pages and we link to them
+---
+
+## Technical details
+
+**Schema changes (one migration):**
+```sql
+ALTER TABLE public.profiles ADD COLUMN tool_only boolean NOT NULL DEFAULT false;
+
+ALTER TABLE public.personal_ai_profile
+  ADD COLUMN use_cases text[] DEFAULT '{}',
+  ADD COLUMN about_me text,
+  ADD COLUMN response_prefs jsonb DEFAULT '{}'::jsonb,
+  ADD COLUMN voice_profile jsonb,                 -- extracted from samples
+  ADD COLUMN voice_samples text[],                -- raw pasted samples (for retraining)
+  ADD COLUMN setup_completed_at timestamptz;
+
+CREATE OR REPLACE FUNCTION public.is_tool_only(_user_id uuid)
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
+AS $$ SELECT COALESCE((SELECT tool_only FROM public.profiles WHERE id = _user_id), false) $$;
+```
+No new tables, so no new GRANTs needed. Existing RLS on `personal_ai_profile` (user owns own row) covers the new columns.
+
+**Frontend files (new):**
+- `src/pages/voice-studio/VoiceStudioSetup.tsx` — the 4-step wizard.
+- `src/pages/admin/ToolOnlyUsersPage.tsx` — invite + list.
+- `src/components/auth/ToolOnlyGuard.tsx` — route gating + shell stripping.
+- `src/hooks/useToolOnly.ts` — reads `tool_only` from profile.
+
+**Frontend files (edited):**
+- `src/pages/admin/PersonalAIPage.tsx` — rename UI strings, hide app sidebar when `tool_only`, add "Edit setup" button.
+- `src/components/app-shell/AppSidebar.tsx` — rename menu item to "Voice Studio", add "Tool-only users" entry.
+- `src/App.tsx` (or router root) — wrap routes with `<ToolOnlyGuard>` and add new routes.
+- `src/contexts/AuthContext.tsx` — expose `isToolOnly`.
+
+**Edge functions (new):**
+- `supabase/functions/invite-tool-only-user/index.ts`
+- `supabase/functions/voice-studio-train/index.ts`
+
+**Edge functions (edited):**
+- `supabase/functions/personal-ai-chat/index.ts` — include voice profile + use cases + about-me + prefs in system prompt.
+
+**Out of scope (ask before adding):** custom branding per tool-only user, file uploads in setup, voice cloning (audio), multi-tenant isolation for tool-only users (they're treated as standalone accounts in your tenant), self-serve signup.
