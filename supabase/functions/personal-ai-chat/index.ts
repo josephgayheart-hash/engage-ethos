@@ -182,6 +182,36 @@ serve(async (req) => {
             required: ["title", "slides"],
           },
         },
+        {
+          name: "generate_docx",
+          description:
+            "Generate a downloadable Microsoft Word (.docx) document. Use when the user asks for a doc, memo, brief, report, letter, essay, or written deliverable. Structure the document with headings, paragraphs, bullets, and numbered lists as appropriate. Prefer well-structured headings (heading1/2/3) over a wall of paragraphs.",
+          input_schema: {
+            type: "object",
+            properties: {
+              title: { type: "string", description: "Document title shown at the top." },
+              subtitle: { type: "string", description: "Optional subtitle / one-line description." },
+              author: { type: "string", description: "Optional author/byline." },
+              blocks: {
+                type: "array",
+                description: "Ordered content blocks that make up the document body.",
+                items: {
+                  type: "object",
+                  properties: {
+                    type: {
+                      type: "string",
+                      enum: ["heading1", "heading2", "heading3", "paragraph", "bullets", "numbered", "quote", "page_break"],
+                    },
+                    text: { type: "string", description: "Text content for heading/paragraph/quote blocks." },
+                    items: { type: "array", items: { type: "string" }, description: "List items for bullets/numbered blocks." },
+                  },
+                  required: ["type"],
+                },
+              },
+            },
+            required: ["title", "blocks"],
+          },
+        },
       ];
 
       const encoder = new TextEncoder();
