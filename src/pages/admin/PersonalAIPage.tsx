@@ -637,29 +637,32 @@ export default function PersonalAIPage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-52">
-              <DropdownMenuItem onClick={() => imageRef.current?.click()}>
-                <ImageIcon className="h-4 w-4 mr-2" /> Attach image
-              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => fileRef.current?.click()}>
-                <Paperclip className="h-4 w-4 mr-2" /> Attach file
-                <span className="ml-auto text-[10px] text-muted-foreground">Any type</span>
+                <Paperclip className="h-4 w-4 mr-2" /> Upload from computer
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-[10px] uppercase tracking-wide text-muted-foreground">Recipes</DropdownMenuLabel>
-              {RECIPES.map(r => (
-                <DropdownMenuItem key={r.id} onClick={() => { setInput(r.prompt + input); inputRef.current?.focus(); }}>
-                  <Sparkles className="h-4 w-4 mr-2 text-muted-foreground" /> {r.label}
-                </DropdownMenuItem>
-              ))}
+              <DropdownMenuItem onClick={() => imageRef.current?.click()}>
+                <ImageIcon className="h-4 w-4 mr-2" /> Add photos
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <input ref={imageRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => { handleFiles(e.target.files, true); e.target.value = ""; }} />
           <input ref={fileRef} type="file" multiple className="hidden" onChange={(e) => { handleFiles(e.target.files, false); e.target.value = ""; }} />
 
-          <Toggle pressed={webSearch} onPressedChange={setWebSearch} size="sm"
+          <Toggle pressed={webSearch && !deepResearch} onPressedChange={(v) => { setWebSearch(v); if (v) setDeepResearch(false); }} size="sm"
             className="h-8 px-2.5 gap-1.5 rounded-full text-xs text-muted-foreground hover:text-foreground data-[state=on]:bg-primary/10 data-[state=on]:text-primary data-[state=on]:border data-[state=on]:border-primary/20"
             aria-label="Web search">
             <Globe className="h-3.5 w-3.5" /> Search
+          </Toggle>
+          <Toggle pressed={deepResearch} onPressedChange={(v) => { setDeepResearch(v); if (v) setWebSearch(false); }} size="sm"
+            className="h-8 px-2.5 gap-1.5 rounded-full text-xs text-muted-foreground hover:text-foreground data-[state=on]:bg-primary/10 data-[state=on]:text-primary data-[state=on]:border data-[state=on]:border-primary/20"
+            aria-label="Deep research">
+            <Sparkles className="h-3.5 w-3.5" /> Research
+          </Toggle>
+          <Toggle pressed={extendedThinking} onPressedChange={setExtendedThinking} size="sm"
+            className="h-8 px-2.5 gap-1.5 rounded-full text-xs text-muted-foreground hover:text-foreground data-[state=on]:bg-primary/10 data-[state=on]:text-primary data-[state=on]:border data-[state=on]:border-primary/20"
+            aria-label="Extended thinking"
+            title="Extended thinking (Claude)">
+            <Brain className="h-3.5 w-3.5" /> Think
           </Toggle>
           <Toggle pressed={imageMode} onPressedChange={setImageMode} size="sm"
             className="h-8 px-2.5 gap-1.5 rounded-full text-xs text-muted-foreground hover:text-foreground data-[state=on]:bg-primary/10 data-[state=on]:text-primary data-[state=on]:border data-[state=on]:border-primary/20"
