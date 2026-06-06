@@ -213,6 +213,32 @@ export default function PersonalAIPage() {
   const [artifactTab, setArtifactTab] = useState<"preview" | "code">("preview");
   const [artifactHtml, setArtifactHtml] = useState<string>("");
   const [fileArtifact, setFileArtifact] = useState<FileArtifact | null>(null);
+  const [artifactBlobUrl, setArtifactBlobUrl] = useState<string>("");
+
+  // Fetch the artifact as a blob and create a same-origin object URL so the
+  // iframe preview and "Open" actions aren't blocked by Chrome's cross-origin
+  // download / sandboxing rules on Supabase storage signed URLs.
+  useEffect(() => {
+    let cancelled = false;
+    let createdUrl = "";
+    if (!fileArtifact) { setArtifactBlobUrl(""); return; }
+    (async () => {
+      try {
+        const res = await fetch(fileArtifact.url);
+        if (!res.ok) throw new Error(`status ${res.status}`);
+        const blob = await res.blob();
+        if (cancelled) return;
+        createdUrl = URL.createObjectURL(blob);
+        setArtifactBlobUrl(createdUrl);
+      } catch {
+        if (!cancelled) setArtifactBlobUrl("");
+      }
+    })();
+    return () => {
+      cancelled = true;
+      if (createdUrl) URL.revokeObjectURL(createdUrl);
+    };
+  }, [fileArtifact?.url]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
