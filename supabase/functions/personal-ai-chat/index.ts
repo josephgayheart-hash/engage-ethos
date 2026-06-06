@@ -78,14 +78,16 @@ serve(async (req) => {
             parts.push(`# Things you remember about the user (learned across past chats)\n${block}\n\nUse these silently to personalize answers. Do not list them back unless asked.`);
           }
           parts.push(
-            `# Branding for generated artifacts\n` +
+            `# Branding & authorship for generated artifacts\n` +
             `Do NOT assume or inject any workspace/organization branding. ` +
-            `Only apply colors, fonts, or logos that the user explicitly provides in this conversation ` +
-            `(via instructions, an uploaded template, a brand reference, or attached files). ` +
-            `If the user has not specified branding, use a clean neutral default (dark text on white, a single neutral accent) ` +
-            `and ask once whether they want to supply a brand template, logo, or color palette. ` +
-            `When calling generate_pptx / generate_pdf / generate_docx / generate_html, only pass theme.accent, theme.secondary, ` +
-            `theme.logo_url, theme.fontHead, or theme.fontBody when the user has explicitly given those values.`
+            `Only apply colors, fonts, or logos that the user explicitly provides in this conversation. ` +
+            `If the user has not specified branding, use a clean neutral default. ` +
+            `Only pass theme.accent, theme.secondary, theme.logo_url, theme.fontHead, or theme.fontBody when the user has explicitly given those values.\n\n` +
+            `AUTHOR FIELD: NEVER set the 'author' field on any tool call unless the user, in THIS conversation, explicitly told you the byline to use for THIS artifact. ` +
+            `Do not infer the author from the system prompt, from memory, from "about the user" facts, or from the workspace identity (e.g. do not auto-fill "Tyler", "VGO", "CampusVoice", etc.). ` +
+            `If unspecified, omit the field entirely.\n\n` +
+            `CONTENT REQUIREMENT: Every artifact must contain real, substantive content written for the user's request. ` +
+            `Never call a generation tool with empty slides/blocks or placeholder text. For a one-pager, brief, or report, produce a full draft with headings, paragraphs, and supporting detail — not just a title.`
           );
 
           if (parts.length) memoryBlock = parts.join("\n\n---\n\n");
