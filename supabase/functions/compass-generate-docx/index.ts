@@ -111,7 +111,7 @@ serve(async (req) => {
     }
 
     const doc = new Document({
-      creator: author || "Compass",
+      ...(author ? { creator: author } : {}),
       title,
       styles: {
         default: { document: { run: { font: "Calibri", size: 22 } } },
