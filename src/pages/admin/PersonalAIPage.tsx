@@ -212,6 +212,7 @@ export default function PersonalAIPage() {
   const [artifactOpen, setArtifactOpen] = useState(false);
   const [artifactTab, setArtifactTab] = useState<"preview" | "code">("preview");
   const [artifactHtml, setArtifactHtml] = useState<string>("");
+  const [fileArtifact, setFileArtifact] = useState<FileArtifact | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
