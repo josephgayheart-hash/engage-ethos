@@ -52,6 +52,7 @@ import ContentDNAPage from "./pages/admin/ContentDNAPage";
 import SecurityEventsPage from "./pages/admin/SecurityEventsPage";
 import PlatformOpsPage from "./pages/admin/PlatformOpsPage";
 import PersonalAIPage from "./pages/admin/PersonalAIPage";
+import CompassLockerPage from "./pages/admin/CompassLockerPage";
 import PersonalAIEditsPage from "./pages/admin/PersonalAIEditsPage";
 import VoiceStudioSetup from "./pages/voice-studio/VoiceStudioSetup";
 import { VoiceStudioGate } from "./pages/voice-studio/VoiceStudioGate";
