@@ -178,7 +178,7 @@ serve(async (req) => {
             properties: {
               title: { type: "string", description: "Deck title shown on the cover." },
               subtitle: { type: "string" },
-              author: { type: "string" },
+              author: { type: "string", description: "OMIT unless the user explicitly named a byline for this deck. Never default to the operator's name, workspace, or anyone from memory." },
               theme: {
                 type: "object",
                 properties: {
