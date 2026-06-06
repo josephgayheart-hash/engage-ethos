@@ -602,6 +602,13 @@ export default function PersonalAIPage() {
             if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
           }}
           onPaste={(e) => {
+            // Files (images, etc.) pasted from clipboard
+            const files = Array.from(e.clipboardData.files || []);
+            if (files.length) {
+              e.preventDefault();
+              handleFiles(files);
+              return;
+            }
             const pasted = e.clipboardData.getData("text");
             // Large paste → convert to a doc attachment so the composer stays usable
             if (pasted && pasted.length > 2000) {
