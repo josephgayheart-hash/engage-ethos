@@ -836,17 +836,6 @@ export default function PersonalAIPage() {
                     </p>
                   </div>
                   {Composer}
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {RECIPES.slice(0, 4).map(r => (
-                      <button
-                        key={r.id}
-                        onClick={() => { setInput(r.prompt); inputRef.current?.focus(); }}
-                        className="text-xs px-3 py-1.5 rounded-full border border-border/60 bg-card hover:bg-muted text-foreground/80 hover:text-foreground transition"
-                      >
-                        {r.label}
-                      </button>
-                    ))}
-                  </div>
                 </div>
               </div>
             ) : (
