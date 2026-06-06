@@ -19,8 +19,9 @@ import { cn } from "@/lib/utils";
 import {
   ArrowUp, Copy, Trash2, Plus, Square, Loader2, Paperclip, Image as ImageIcon,
   Globe, Wand2, FileText, X, Download, Code as CodeIcon, Eye, Sparkles,
-  MessageSquarePlus, Check, RefreshCw,
+  MessageSquarePlus, Check, RefreshCw, Brain,
 } from "lucide-react";
+import { MemoryDialog } from "@/components/personal-ai/MemoryDialog";
 
 type Role = "user" | "assistant";
 interface Attachment { name: string; kind: "image" | "doc"; dataUrl?: string; text?: string }
