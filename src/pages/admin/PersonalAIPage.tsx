@@ -170,7 +170,7 @@ export default function PersonalAIPage() {
 
   const active = useMemo(() => threads.find(t => t.id === activeId) ?? threads[0], [threads, activeId]);
 
-  useEffect(() => { document.title = "Personal AI"; }, []);
+  useEffect(() => { document.title = "Voice Studio"; }, []);
   useEffect(() => { saveThreads(threads); }, [threads]);
   useEffect(() => { localStorage.setItem(ACTIVE_KEY, activeId); }, [activeId]);
   useEffect(() => { inputRef.current?.focus(); }, [activeId]);
