@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useAuth } from "@/contexts/AuthContext";
@@ -122,7 +122,8 @@ function fileToDataUrl(file: File): Promise<string> {
 }
 
 export default function PersonalAIPage() {
-  const { isSuperAdmin } = useAuth();
+  const { isSuperAdmin, isToolOnly } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [threads, setThreads] = useState<Thread[]>(() => {
     const existing = loadThreads();
@@ -170,7 +171,7 @@ export default function PersonalAIPage() {
 
   const active = useMemo(() => threads.find(t => t.id === activeId) ?? threads[0], [threads, activeId]);
 
-  useEffect(() => { document.title = "Personal AI"; }, []);
+  useEffect(() => { document.title = "Voice Studio"; }, []);
   useEffect(() => { saveThreads(threads); }, [threads]);
   useEffect(() => { localStorage.setItem(ACTIVE_KEY, activeId); }, [activeId]);
   useEffect(() => { inputRef.current?.focus(); }, [activeId]);
@@ -188,7 +189,7 @@ export default function PersonalAIPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!isSuperAdmin) return <Navigate to="/dashboard" replace />;
+  if (!isSuperAdmin && !isToolOnly) return <Navigate to="/dashboard" replace />;
 
   const updateActive = (patch: Partial<Thread>) => {
     setThreads(prev => prev.map(t => t.id === activeId ? { ...t, ...patch, updatedAt: Date.now() } : t));
@@ -688,14 +689,24 @@ export default function PersonalAIPage() {
             </SelectContent>
           </Select>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setMemoryOpen(true)}
-            className="h-9 gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-          >
-            <Brain className="h-4 w-4" /> Memory
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/voice-studio/setup")}
+              className="h-9 gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <RefreshCw className="h-4 w-4" /> Setup
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setMemoryOpen(true)}
+              className="h-9 gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <Brain className="h-4 w-4" /> Memory
+            </Button>
+          </div>
         </header>
         <MemoryDialog
           open={memoryOpen}
@@ -713,7 +724,7 @@ export default function PersonalAIPage() {
                   <div className="text-center space-y-2">
                     <h1 className="text-3xl font-semibold tracking-tight">How can I help today?</h1>
                     <p className="text-sm text-muted-foreground">
-                      Rewrite an email, summarize a meeting, generate an image, or build an HTML mock.
+                      Voice Studio writes in your voice. Rewrite an email, summarize a meeting, or draft something new.
                     </p>
                   </div>
                   {Composer}

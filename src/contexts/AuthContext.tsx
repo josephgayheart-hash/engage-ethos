@@ -17,6 +17,7 @@ export interface UserProfile {
   department: string | null;
   title: string | null;
   password_reset_required: boolean;
+  tool_only: boolean;
   created_at: string;
   last_login_at: string | null;
 }
@@ -54,6 +55,7 @@ interface AuthContextType {
   isAgencyAdmin: boolean;
   isAgencyMember: boolean;
   isApprover: boolean;
+  isToolOnly: boolean;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   // Impersonation
@@ -357,22 +359,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const isAgencyMember = isAgencyAdmin || roles.includes('agency_user');
   const isAdmin = roles.includes('admin') || isAgencyAdmin || isSuperAdmin;
   const isApprover = roles.includes('approver') || roles.includes('admin') || isAgencyAdmin || isSuperAdmin;
+  const isToolOnly = profile?.tool_only === true;
   const role = roles.length > 0 ? roles[0] : null;
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      session, 
-      profile, 
-      tenant, 
+    <AuthContext.Provider value={{
+      user,
+      session,
+      profile,
+      tenant,
       role,
       roles,
-      isLoading, 
+      isLoading,
       isAdmin,
       isSuperAdmin,
       isAgencyAdmin,
       isAgencyMember,
       isApprover,
+      isToolOnly,
       logout,
       refreshProfile,
       isImpersonating: impersonation.isImpersonating,

@@ -1877,25 +1877,43 @@ export type Database = {
       }
       personal_ai_profile: {
         Row: {
+          about_me: string | null
           created_at: string
           memory_enabled: boolean
+          response_prefs: Json | null
+          setup_completed_at: string | null
           system_prompt: string
           updated_at: string
+          use_cases: string[] | null
           user_id: string
+          voice_profile: Json | null
+          voice_samples: string[] | null
         }
         Insert: {
+          about_me?: string | null
           created_at?: string
           memory_enabled?: boolean
+          response_prefs?: Json | null
+          setup_completed_at?: string | null
           system_prompt?: string
           updated_at?: string
+          use_cases?: string[] | null
           user_id: string
+          voice_profile?: Json | null
+          voice_samples?: string[] | null
         }
         Update: {
+          about_me?: string | null
           created_at?: string
           memory_enabled?: boolean
+          response_prefs?: Json | null
+          setup_completed_at?: string | null
           system_prompt?: string
           updated_at?: string
+          use_cases?: string[] | null
           user_id?: string
+          voice_profile?: Json | null
+          voice_samples?: string[] | null
         }
         Relationships: []
       }
@@ -2172,6 +2190,7 @@ export type Database = {
           status: Database["public"]["Enums"]["user_status"]
           tenant_id: string
           title: string | null
+          tool_only: boolean
           updated_at: string
         }
         Insert: {
@@ -2188,6 +2207,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["user_status"]
           tenant_id: string
           title?: string | null
+          tool_only?: boolean
           updated_at?: string
         }
         Update: {
@@ -2204,6 +2224,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["user_status"]
           tenant_id?: string
           title?: string | null
+          tool_only?: boolean
           updated_at?: string
         }
         Relationships: [
@@ -2903,6 +2924,7 @@ export type Database = {
       is_agency_admin: { Args: { _user_id: string }; Returns: boolean }
       is_agency_member: { Args: { _user_id: string }; Returns: boolean }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_tool_only: { Args: { _user_id: string }; Returns: boolean }
       is_user_active: { Args: { _user_id: string }; Returns: boolean }
       mark_nda_link_signed: { Args: { _link_id: string }; Returns: undefined }
       search_content_samples: {

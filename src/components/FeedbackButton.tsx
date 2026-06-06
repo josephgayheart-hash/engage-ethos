@@ -117,7 +117,8 @@ export function FeedbackButton() {
   };
 
   if (!user) return null;
-  if (location.pathname.startsWith("/admin/personal-ai")) return null;
+  if (profile?.tool_only) return null;
+  if (location.pathname.startsWith("/admin/personal-ai") || location.pathname.startsWith("/voice-studio")) return null;
 
   return (
     <>
