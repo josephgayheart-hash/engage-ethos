@@ -266,15 +266,17 @@ export default function PersonalAIPage() {
   };
 
   // Run web search via firecrawl-search, return condensed context + sources
-  const runWebSearch = async (q: string): Promise<{ context: string; sources: { title: string; url: string }[] }> => {
+  const runWebSearch = async (q: string, deep = false): Promise<{ context: string; sources: { title: string; url: string }[] }> => {
+    const limit = deep ? 12 : 5;
+    const snippetLen = deep ? 3000 : 1500;
     const { data, error } = await supabase.functions.invoke("firecrawl-search", {
-      body: { query: q, options: { limit: 5 } },
+      body: { query: q, options: { limit } },
     });
     if (error || !data?.success) throw new Error(error?.message || data?.error || "Search failed");
-    const results = (data.data || []).slice(0, 5);
+    const results = (data.data || []).slice(0, limit);
     const sources = results.map((r: any) => ({ title: r.title || r.url, url: r.url }));
     const context = results.map((r: any, i: number) =>
-      `[${i + 1}] ${r.title}\n${r.url}\n${(r.markdown || r.description || "").slice(0, 1500)}`
+      `[${i + 1}] ${r.title}\n${r.url}\n${(r.markdown || r.description || "").slice(0, snippetLen)}`
     ).join("\n\n");
     return { context, sources };
   };
