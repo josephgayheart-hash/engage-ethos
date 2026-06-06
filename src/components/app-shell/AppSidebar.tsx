@@ -76,6 +76,7 @@ const manageItems = [
 const superAdminItems = [
   { title: "Platform Ops", url: "/platform", icon: Activity },
   { title: "Super Admin Panel", url: "/admin/panel", icon: Shield },
+  { title: "Personal AI", url: "/admin/personal-ai", icon: Sparkles },
   { title: "CRM", url: "/admin/crm", icon: Contact },
   { title: "AI Technology", url: "/admin/ai-technology", icon: Cpu },
 ];
