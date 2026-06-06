@@ -213,6 +213,32 @@ export default function PersonalAIPage() {
   const [artifactTab, setArtifactTab] = useState<"preview" | "code">("preview");
   const [artifactHtml, setArtifactHtml] = useState<string>("");
   const [fileArtifact, setFileArtifact] = useState<FileArtifact | null>(null);
+  const [artifactBlobUrl, setArtifactBlobUrl] = useState<string>("");
+
+  // Fetch the artifact as a blob and create a same-origin object URL so the
+  // iframe preview and "Open" actions aren't blocked by Chrome's cross-origin
+  // download / sandboxing rules on Supabase storage signed URLs.
+  useEffect(() => {
+    let cancelled = false;
+    let createdUrl = "";
+    if (!fileArtifact) { setArtifactBlobUrl(""); return; }
+    (async () => {
+      try {
+        const res = await fetch(fileArtifact.url);
+        if (!res.ok) throw new Error(`status ${res.status}`);
+        const blob = await res.blob();
+        if (cancelled) return;
+        createdUrl = URL.createObjectURL(blob);
+        setArtifactBlobUrl(createdUrl);
+      } catch {
+        if (!cancelled) setArtifactBlobUrl("");
+      }
+    })();
+    return () => {
+      cancelled = true;
+      if (createdUrl) URL.revokeObjectURL(createdUrl);
+    };
+  }, [fileArtifact?.url]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -1048,7 +1074,7 @@ export default function PersonalAIPage() {
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" asChild>
-                        <a href={fileArtifact.url} target="_blank" rel="noopener noreferrer"><ExternalLink className="h-3 w-3" /> Open</a>
+                        <a href={artifactBlobUrl || fileArtifact.url} target="_blank" rel="noopener noreferrer"><ExternalLink className="h-3 w-3" /> Open</a>
                       </Button>
                       <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" asChild>
                         <a href={fileArtifact.downloadUrl}><Download className="h-3 w-3" /> Download</a>
@@ -1057,12 +1083,14 @@ export default function PersonalAIPage() {
                     </div>
                   </div>
                   <div className="flex-1 min-h-0 bg-white dark:bg-muted/20">
-                    {fileArtifact.kind === "image" || fileArtifact.kind === "svg" ? (
+                    {!artifactBlobUrl ? (
+                      <div className="h-full flex items-center justify-center text-xs text-muted-foreground">Loading preview…</div>
+                    ) : fileArtifact.kind === "image" || fileArtifact.kind === "svg" ? (
                       <div className="w-full h-full overflow-auto flex items-center justify-center p-4">
-                        <img src={fileArtifact.url} alt={fileArtifact.filename} className="max-w-full max-h-full object-contain" />
+                        <img src={artifactBlobUrl} alt={fileArtifact.filename} className="max-w-full max-h-full object-contain" />
                       </div>
                     ) : fileArtifact.kind === "pdf" || fileArtifact.kind === "html" ? (
-                      <iframe title={fileArtifact.filename} src={fileArtifact.url} className="w-full h-full bg-white" />
+                      <iframe title={fileArtifact.filename} src={artifactBlobUrl} className="w-full h-full bg-white" />
                     ) : (
                       <div className="h-full flex flex-col items-center justify-center gap-3 p-6 text-center">
                         <FileText className="h-12 w-12 text-muted-foreground/60" />
