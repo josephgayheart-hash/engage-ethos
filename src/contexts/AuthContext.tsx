@@ -55,6 +55,7 @@ interface AuthContextType {
   isAgencyAdmin: boolean;
   isAgencyMember: boolean;
   isApprover: boolean;
+  isToolOnly: boolean;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   // Impersonation
