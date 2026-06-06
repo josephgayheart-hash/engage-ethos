@@ -123,6 +123,37 @@ function extractHtmlArtifact(text: string): string | null {
   return m ? m[1].trim() : null;
 }
 
+// File artifacts emitted by Claude tools (pptx/docx/pdf/html/svg/image).
+// Marker format: <!--artifact:{"filename":..,"url":..,"downloadUrl":..}-->
+export type FileArtifact = { filename: string; url: string; downloadUrl: string; kind: "pdf" | "image" | "html" | "svg" | "docx" | "pptx" | "other" };
+function kindFromName(name: string): FileArtifact["kind"] {
+  const ext = name.toLowerCase().split(".").pop() || "";
+  if (ext === "pdf") return "pdf";
+  if (["png", "jpg", "jpeg", "webp", "gif"].includes(ext)) return "image";
+  if (ext === "html" || ext === "htm") return "html";
+  if (ext === "svg") return "svg";
+  if (ext === "docx") return "docx";
+  if (ext === "pptx") return "pptx";
+  return "other";
+}
+function extractFileArtifacts(text: string): FileArtifact[] {
+  const out: FileArtifact[] = [];
+  const re = /<!--artifact:(\{[\s\S]*?\})-->/g;
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    try {
+      const j = JSON.parse(m[1]);
+      if (j?.url && j?.filename) {
+        out.push({ filename: j.filename, url: j.url, downloadUrl: j.downloadUrl || j.url, kind: kindFromName(j.filename) });
+      }
+    } catch { /* ignore */ }
+  }
+  return out;
+}
+function stripArtifactMarkers(text: string): string {
+  return text.replace(/<!--artifact:\{[\s\S]*?\}-->\n?/g, "");
+}
+
 async function parsePdfToText(file: File): Promise<string> {
   const pdfjs: any = await import("pdfjs-dist");
   // @ts-ignore
@@ -181,6 +212,7 @@ export default function PersonalAIPage() {
   const [artifactOpen, setArtifactOpen] = useState(false);
   const [artifactTab, setArtifactTab] = useState<"preview" | "code">("preview");
   const [artifactHtml, setArtifactHtml] = useState<string>("");
+  const [fileArtifact, setFileArtifact] = useState<FileArtifact | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -516,6 +548,12 @@ export default function PersonalAIPage() {
       if (html) {
         setArtifactHtml(html);
         setArtifactTab("preview");
+        setArtifactOpen(true);
+      }
+      // Auto-open the most recent generated file artifact (PDF/image/HTML/SVG/etc.)
+      const artifactFiles = extractFileArtifacts(acc);
+      if (artifactFiles.length) {
+        setFileArtifact(artifactFiles[artifactFiles.length - 1]);
         setArtifactOpen(true);
       }
     } catch (err: any) {
@@ -907,7 +945,7 @@ export default function PersonalAIPage() {
                                 </div>
                               ) : (
                                 <div className="prose prose-sm dark:prose-invert max-w-none text-[15px] leading-relaxed prose-p:my-3 prose-headings:mt-5 prose-headings:mb-2 prose-pre:my-3 prose-pre:rounded-xl prose-pre:bg-muted prose-pre:text-foreground prose-code:text-foreground prose-code:before:content-none prose-code:after:content-none prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-[13px] prose-li:my-1 prose-ul:my-3 prose-ol:my-3">
-                                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.content}</ReactMarkdown>
+                                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ a: ({ node, ...props }) => <a {...props} target="_blank" rel="noopener noreferrer" /> }}>{stripArtifactMarkers(m.content)}</ReactMarkdown>
                                 </div>
                               )}
                               {m.searchSources?.length ? (
@@ -960,7 +998,7 @@ export default function PersonalAIPage() {
                         </div>
                         <div className="flex-1 min-w-0 pt-0.5">
                           <div className="prose prose-sm dark:prose-invert max-w-none text-[15px] leading-relaxed prose-p:my-3 prose-headings:mt-5 prose-headings:mb-2 prose-pre:my-3 prose-pre:rounded-xl prose-pre:bg-muted prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none prose-li:my-1">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{streamText + "▍"}</ReactMarkdown>
+                            <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ a: ({ node, ...props }) => <a {...props} target="_blank" rel="noopener noreferrer" /> }}>{stripArtifactMarkers(streamText) + "▍"}</ReactMarkdown>
                           </div>
                         </div>
                       </div>
@@ -1001,48 +1039,86 @@ export default function PersonalAIPage() {
           {/* Artifact panel */}
           {artifactOpen && (
             <aside className="w-[45%] min-w-[420px] border-l border-border/60 flex flex-col bg-muted/10">
-              <div className="h-14 border-b border-border/60 flex items-center justify-between px-3 shrink-0 bg-background/60">
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="gap-1 font-normal"><CodeIcon className="h-3 w-3" /> HTML artifact</Badge>
-                  <div className="flex rounded-lg border border-border/60 bg-background overflow-hidden">
-                    <button onClick={() => setArtifactTab("preview")} className={cn("px-2.5 py-1 text-xs inline-flex items-center gap-1", artifactTab === "preview" ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground")}>
-                      <Eye className="h-3 w-3" /> Preview
-                    </button>
-                    <button onClick={() => setArtifactTab("code")} className={cn("px-2.5 py-1 text-xs inline-flex items-center gap-1 border-l border-border/60", artifactTab === "code" ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground")}>
-                      <CodeIcon className="h-3 w-3" /> Code
-                    </button>
+              {fileArtifact ? (
+                <>
+                  <div className="h-14 border-b border-border/60 flex items-center justify-between px-3 shrink-0 bg-background/60">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Badge variant="outline" className="gap-1 font-normal shrink-0 uppercase text-[10px]">{fileArtifact.kind}</Badge>
+                      <span className="text-sm font-medium truncate" title={fileArtifact.filename}>{fileArtifact.filename}</span>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" asChild>
+                        <a href={fileArtifact.url} target="_blank" rel="noopener noreferrer"><ExternalLink className="h-3 w-3" /> Open</a>
+                      </Button>
+                      <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" asChild>
+                        <a href={fileArtifact.downloadUrl}><Download className="h-3 w-3" /> Download</a>
+                      </Button>
+                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => { setArtifactOpen(false); setFileArtifact(null); }} aria-label="Close artifact"><X className="h-4 w-4" /></Button>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" onClick={() => {
-                    const blob = new Blob([artifactHtml], { type: "text/html" });
-                    const url = URL.createObjectURL(blob);
-                    const w = window.open(url, "_blank", "noopener,noreferrer");
-                    if (!w) { toast({ title: "Popup blocked", description: "Allow popups to open the artifact in a new tab.", variant: "destructive" }); }
-                    setTimeout(() => URL.revokeObjectURL(url), 60_000);
-                  }}>
-                    <ExternalLink className="h-3 w-3" /> Open in browser
-                  </Button>
-                  <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" onClick={() => copyMsg(artifactHtml)}>
-                    <Copy className="h-3 w-3" /> Copy
-                  </Button>
-                  <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" onClick={() => {
-                    const blob = new Blob([artifactHtml], { type: "text/html" });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement("a"); a.href = url; a.download = `artifact-${Date.now()}.html`; a.click(); URL.revokeObjectURL(url);
-                  }}><Download className="h-3 w-3" /> .html</Button>
-                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => setArtifactOpen(false)} aria-label="Close artifact"><X className="h-4 w-4" /></Button>
-                </div>
-              </div>
-              <div className="flex-1 min-h-0">
-                {artifactTab === "preview" ? (
-                  <iframe title="Artifact preview" srcDoc={artifactHtml} sandbox="allow-scripts" className="w-full h-full bg-white" />
-                ) : (
-                  <ScrollArea className="h-full">
-                    <pre className="text-xs p-4 whitespace-pre-wrap font-mono leading-relaxed">{artifactHtml}</pre>
-                  </ScrollArea>
-                )}
-              </div>
+                  <div className="flex-1 min-h-0 bg-white dark:bg-muted/20">
+                    {fileArtifact.kind === "image" || fileArtifact.kind === "svg" ? (
+                      <div className="w-full h-full overflow-auto flex items-center justify-center p-4">
+                        <img src={fileArtifact.url} alt={fileArtifact.filename} className="max-w-full max-h-full object-contain" />
+                      </div>
+                    ) : fileArtifact.kind === "pdf" || fileArtifact.kind === "html" ? (
+                      <iframe title={fileArtifact.filename} src={fileArtifact.url} className="w-full h-full bg-white" />
+                    ) : (
+                      <div className="h-full flex flex-col items-center justify-center gap-3 p-6 text-center">
+                        <FileText className="h-12 w-12 text-muted-foreground/60" />
+                        <div className="text-sm font-medium">{fileArtifact.filename}</div>
+                        <div className="text-xs text-muted-foreground">Inline preview isn't available for this file type.</div>
+                        <Button size="sm" asChild><a href={fileArtifact.downloadUrl}><Download className="h-3 w-3 mr-1" /> Download to view</a></Button>
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="h-14 border-b border-border/60 flex items-center justify-between px-3 shrink-0 bg-background/60">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="gap-1 font-normal"><CodeIcon className="h-3 w-3" /> HTML artifact</Badge>
+                      <div className="flex rounded-lg border border-border/60 bg-background overflow-hidden">
+                        <button onClick={() => setArtifactTab("preview")} className={cn("px-2.5 py-1 text-xs inline-flex items-center gap-1", artifactTab === "preview" ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground")}>
+                          <Eye className="h-3 w-3" /> Preview
+                        </button>
+                        <button onClick={() => setArtifactTab("code")} className={cn("px-2.5 py-1 text-xs inline-flex items-center gap-1 border-l border-border/60", artifactTab === "code" ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground")}>
+                          <CodeIcon className="h-3 w-3" /> Code
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" onClick={() => {
+                        const blob = new Blob([artifactHtml], { type: "text/html" });
+                        const url = URL.createObjectURL(blob);
+                        const w = window.open(url, "_blank", "noopener,noreferrer");
+                        if (!w) { toast({ title: "Popup blocked", description: "Allow popups to open the artifact in a new tab.", variant: "destructive" }); }
+                        setTimeout(() => URL.revokeObjectURL(url), 60_000);
+                      }}>
+                        <ExternalLink className="h-3 w-3" /> Open in browser
+                      </Button>
+                      <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" onClick={() => copyMsg(artifactHtml)}>
+                        <Copy className="h-3 w-3" /> Copy
+                      </Button>
+                      <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" onClick={() => {
+                        const blob = new Blob([artifactHtml], { type: "text/html" });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a"); a.href = url; a.download = `artifact-${Date.now()}.html`; a.click(); URL.revokeObjectURL(url);
+                      }}><Download className="h-3 w-3" /> .html</Button>
+                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => setArtifactOpen(false)} aria-label="Close artifact"><X className="h-4 w-4" /></Button>
+                    </div>
+                  </div>
+                  <div className="flex-1 min-h-0">
+                    {artifactTab === "preview" ? (
+                      <iframe title="Artifact preview" srcDoc={artifactHtml} sandbox="allow-scripts" className="w-full h-full bg-white" />
+                    ) : (
+                      <ScrollArea className="h-full">
+                        <pre className="text-xs p-4 whitespace-pre-wrap font-mono leading-relaxed">{artifactHtml}</pre>
+                      </ScrollArea>
+                    )}
+                  </div>
+                </>
+              )}
             </aside>
           )}
         </div>

@@ -394,21 +394,30 @@ serve(async (req) => {
               // Execute tools, build tool_result content
               push({ content: `\n\n_Building your file…_\n` });
               const toolResults: any[] = [];
+
+              // Helper: build a download-forcing URL (adds Content-Disposition: attachment)
+              // and emit a marker line the frontend uses to auto-open the preview tray.
+              const withDownload = (url: string, filename: string) => {
+                const sep = url.includes("?") ? "&" : "?";
+                return `${url}${sep}download=${encodeURIComponent(filename)}`;
+              };
+              const emitArtifact = (icon: string, filename: string, url: string, blurb: string) => {
+                const dl = withDownload(url, filename);
+                // Marker (parsed + hidden by the client) lets the side tray preview the raw URL.
+                push({ content: `\n<!--artifact:${JSON.stringify({ filename, url, downloadUrl: dl })}-->\n${icon} **[Download ${filename}](${dl})** — ${blurb}\n\n` });
+              };
+
               for (const call of toolCalls) {
                 try {
                   if (call.name === "generate_pptx") {
                     const r = await fetch(`${SUPABASE_URL}/functions/v1/compass-generate-pptx`, {
                       method: "POST",
-                      headers: {
-                        "Content-Type": "application/json",
-                        Authorization: authForward,
-                      },
+                      headers: { "Content-Type": "application/json", Authorization: authForward },
                       body: JSON.stringify(call.input),
                     });
                     const json = await r.json();
                     if (!r.ok) throw new Error(json.error || `status ${r.status}`);
-                    // Surface a download link inline immediately
-                    push({ content: `\n📎 **[Download ${json.filename}](${json.url})** — ${json.slide_count} slides, link valid 7 days.\n\n` });
+                    emitArtifact("📎", json.filename, json.url, `${json.slide_count} slides, link valid 7 days.`);
                     toolResults.push({
                       type: "tool_result",
                       tool_use_id: call.id,
@@ -417,15 +426,12 @@ serve(async (req) => {
                   } else if (call.name === "generate_docx") {
                     const r = await fetch(`${SUPABASE_URL}/functions/v1/compass-generate-docx`, {
                       method: "POST",
-                      headers: {
-                        "Content-Type": "application/json",
-                        Authorization: authForward,
-                      },
+                      headers: { "Content-Type": "application/json", Authorization: authForward },
                       body: JSON.stringify(call.input),
                     });
                     const json = await r.json();
                     if (!r.ok) throw new Error(json.error || `status ${r.status}`);
-                    push({ content: `\n📄 **[Download ${json.filename}](${json.url})** — Word document, link valid 7 days.\n\n` });
+                    emitArtifact("📄", json.filename, json.url, `Word document, link valid 7 days.`);
                     toolResults.push({
                       type: "tool_result",
                       tool_use_id: call.id,
@@ -462,7 +468,7 @@ serve(async (req) => {
                     });
                     const json = await r.json();
                     if (!r.ok) throw new Error(json.error || `status ${r.status}`);
-                    push({ content: `\n${icon} **[Download ${json.filename}](${json.url})** — ${label}, link valid 7 days.\n\n` });
+                    emitArtifact(icon, json.filename, json.url, `${label}, link valid 7 days.`);
                     toolResults.push({
                       type: "tool_result",
                       tool_use_id: call.id,
