@@ -151,7 +151,24 @@ function extractFileArtifacts(text: string): FileArtifact[] {
   return out;
 }
 function stripArtifactMarkers(text: string): string {
-  return text.replace(/<!--artifact:\{[\s\S]*?\}-->\n?/g, "");
+  return text
+    .replace(/<!--artifact:\{[\s\S]*?\}-->\n?/g, "")
+    // Drop the transient "Building your file…" progress line once streaming has settled.
+    .replace(/\n?_Building your file…_\n?/g, "")
+    .trim();
+}
+
+// Icon + label helpers for the artifact pill rendered in the chat transcript.
+function artifactBadge(kind: FileArtifact["kind"]): { label: string; emoji: string } {
+  switch (kind) {
+    case "pdf": return { label: "PDF", emoji: "📕" };
+    case "image": return { label: "Image", emoji: "🖼️" };
+    case "html": return { label: "HTML", emoji: "🌐" };
+    case "svg": return { label: "SVG", emoji: "🎨" };
+    case "docx": return { label: "Word", emoji: "📄" };
+    case "pptx": return { label: "Slides", emoji: "📊" };
+    default: return { label: "File", emoji: "📎" };
+  }
 }
 
 async function parsePdfToText(file: File): Promise<string> {
@@ -970,9 +987,43 @@ export default function PersonalAIPage() {
                                   </button>
                                 </div>
                               ) : (
-                                <div className="prose prose-sm dark:prose-invert max-w-none text-[15px] leading-relaxed prose-p:my-3 prose-headings:mt-5 prose-headings:mb-2 prose-pre:my-3 prose-pre:rounded-xl prose-pre:bg-muted prose-pre:text-foreground prose-code:text-foreground prose-code:before:content-none prose-code:after:content-none prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-[13px] prose-li:my-1 prose-ul:my-3 prose-ol:my-3">
-                                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ a: ({ node, ...props }) => <a {...props} target="_blank" rel="noopener noreferrer" /> }}>{stripArtifactMarkers(m.content)}</ReactMarkdown>
-                                </div>
+                                <>
+                                  {stripArtifactMarkers(m.content) && (
+                                    <div className="prose prose-sm dark:prose-invert max-w-none text-[15px] leading-relaxed prose-p:my-3 prose-headings:mt-5 prose-headings:mb-2 prose-pre:my-3 prose-pre:rounded-xl prose-pre:bg-muted prose-pre:text-foreground prose-code:text-foreground prose-code:before:content-none prose-code:after:content-none prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-[13px] prose-li:my-1 prose-ul:my-3 prose-ol:my-3">
+                                      <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ a: ({ node, ...props }) => <a {...props} target="_blank" rel="noopener noreferrer" /> }}>{stripArtifactMarkers(m.content)}</ReactMarkdown>
+                                    </div>
+                                  )}
+                                  {(() => {
+                                    const files = extractFileArtifacts(m.content);
+                                    if (!files.length) return null;
+                                    return (
+                                      <div className="flex flex-wrap gap-2 pt-1">
+                                        {files.map((f, i) => {
+                                          const b = artifactBadge(f.kind);
+                                          const isActive = fileArtifact?.url === f.url && artifactOpen;
+                                          return (
+                                            <button
+                                              key={i}
+                                              onClick={() => { setFileArtifact(f); setArtifactOpen(true); }}
+                                              className={cn(
+                                                "group inline-flex items-center gap-2 max-w-full rounded-xl border bg-card hover:bg-accent/50 transition px-3 py-2 text-left",
+                                                isActive ? "border-primary/60 ring-1 ring-primary/30" : "border-border/60"
+                                              )}
+                                              title={`Open ${f.filename} in preview`}
+                                            >
+                                              <span className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center text-base shrink-0">{b.emoji}</span>
+                                              <span className="min-w-0 flex flex-col">
+                                                <span className="text-sm font-medium truncate max-w-[280px]">{f.filename}</span>
+                                                <span className="text-[11px] text-muted-foreground uppercase tracking-wide">{b.label} · Click to preview</span>
+                                              </span>
+                                              <Eye className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground ml-1 shrink-0" />
+                                            </button>
+                                          );
+                                        })}
+                                      </div>
+                                    );
+                                  })()}
+                                </>
                               )}
                               {m.searchSources?.length ? (
                                 <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t border-border/40">

@@ -401,10 +401,12 @@ serve(async (req) => {
                 const sep = url.includes("?") ? "&" : "?";
                 return `${url}${sep}download=${encodeURIComponent(filename)}`;
               };
-              const emitArtifact = (icon: string, filename: string, url: string, blurb: string) => {
+              const emitArtifact = (_icon: string, filename: string, url: string, _blurb: string) => {
                 const dl = withDownload(url, filename);
-                // Marker (parsed + hidden by the client) lets the side tray preview the raw URL.
-                push({ content: `\n<!--artifact:${JSON.stringify({ filename, url, downloadUrl: dl })}-->\n${icon} **[Download ${filename}](${dl})** — ${blurb}\n\n` });
+                // Emit ONLY the hidden marker. The chat UI renders these as a
+                // clickable pill that opens the file in the preview tray —
+                // no inline markdown download link.
+                push({ content: `\n<!--artifact:${JSON.stringify({ filename, url, downloadUrl: dl })}-->\n` });
               };
 
               for (const call of toolCalls) {
