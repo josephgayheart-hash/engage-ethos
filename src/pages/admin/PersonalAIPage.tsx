@@ -648,7 +648,21 @@ export default function PersonalAIPage() {
               {MODELS.map(m => (<SelectItem key={m.id} value={m.id}>{m.label}</SelectItem>))}
             </SelectContent>
           </Select>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setMemoryOpen(true)}
+            className="h-9 gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+          >
+            <Brain className="h-4 w-4" /> Memory
+          </Button>
         </header>
+        <MemoryDialog
+          open={memoryOpen}
+          onOpenChange={setMemoryOpen}
+          defaultPrompt={DEFAULT_SYSTEM_PROMPT}
+          onProfileSaved={(p) => setSavedProfilePrompt(p)}
+        />
 
         <div className="flex-1 flex min-h-0">
           {/* Chat column */}
