@@ -416,6 +416,11 @@ export default function PersonalAIPage() {
       ));
       setStreamText("");
 
+      // Fire-and-forget: extract durable facts from this turn
+      supabase.functions.invoke("personal-ai-extract-memory", {
+        body: { userMessage: text, assistantMessage: acc, threadId: activeId },
+      }).catch(() => {});
+
       // Auto-open artifact if HTML detected
       const html = extractHtmlArtifact(acc);
       if (html) {
