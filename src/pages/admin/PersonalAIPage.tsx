@@ -189,7 +189,8 @@ export default function PersonalAIPage() {
     setThreads(prev => prev.map(t => t.id === activeId ? { ...t, ...patch, updatedAt: Date.now() } : t));
   };
   const createThread = () => {
-    const t = newThread(active?.model, active?.systemPrompt);
+    const sys = savedProfilePrompt ?? active?.systemPrompt ?? DEFAULT_SYSTEM_PROMPT;
+    const t = newThread(active?.model, sys);
     setThreads(prev => [t, ...prev]);
     setActiveId(t.id);
   };
