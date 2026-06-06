@@ -306,6 +306,7 @@ const AppRoutes = () => (
         <Route path="/admin/personal-ai" element={<Navigate to="/compass" replace />} />
         <Route path="/admin/personal-ai/edits" element={<PersonalAIEditsPage />} />
         <Route path="/admin/compass-users" element={<ToolOnlyUsersPage />} />
+        <Route path="/admin/locker" element={<CompassLockerPage />} />
       </Route>
     </Route>
 
