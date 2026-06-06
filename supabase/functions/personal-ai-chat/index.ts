@@ -156,7 +156,30 @@ serve(async (req) => {
       }
       const claudeModel = model.replace(/^anthropic\//, "");
 
+      // Convert messages: pull system out, normalize images. Trim to last 10 turns to ease token pressure.
+      const sys = finalSystem;
+      const baseMsgs = [
+        ...history.slice(-10).map((m: any) => ({ role: m.role, content: m.content })),
+        { role: "user", content: userContent },
+      ].map((m: any) => {
+        if (typeof m.content === "string") return { role: m.role, content: m.content };
+        const parts = (m.content as any[]).map((p) => {
+          if (p.type === "text") return { type: "text", text: p.text };
+          if (p.type === "image_url") {
+            const url = p.image_url?.url || "";
+            const match = /^data:(.+?);base64,(.+)$/.exec(url);
+            if (match) return { type: "image", source: { type: "base64", media_type: match[1], data: match[2] } };
+            return { type: "image", source: { type: "url", url } };
+          }
+          return p;
+        });
+        return { role: m.role, content: parts };
+      });
+
+      const tools = [
+        {
           name: "generate_pptx",
+
           description:
             "Generate a downloadable, fully-branded PowerPoint deck. Use whenever the user asks for slides, a deck, a pitch, or a presentation. " +
             "Produce 8-15 slides. MIX LAYOUTS — never use the same layout twice in a row. " +
