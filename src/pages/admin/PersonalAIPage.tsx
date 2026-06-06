@@ -151,7 +151,24 @@ function extractFileArtifacts(text: string): FileArtifact[] {
   return out;
 }
 function stripArtifactMarkers(text: string): string {
-  return text.replace(/<!--artifact:\{[\s\S]*?\}-->\n?/g, "");
+  return text
+    .replace(/<!--artifact:\{[\s\S]*?\}-->\n?/g, "")
+    // Drop the transient "Building your file…" progress line once streaming has settled.
+    .replace(/\n?_Building your file…_\n?/g, "")
+    .trim();
+}
+
+// Icon + label helpers for the artifact pill rendered in the chat transcript.
+function artifactBadge(kind: FileArtifact["kind"]): { label: string; emoji: string } {
+  switch (kind) {
+    case "pdf": return { label: "PDF", emoji: "📕" };
+    case "image": return { label: "Image", emoji: "🖼️" };
+    case "html": return { label: "HTML", emoji: "🌐" };
+    case "svg": return { label: "SVG", emoji: "🎨" };
+    case "docx": return { label: "Word", emoji: "📄" };
+    case "pptx": return { label: "Slides", emoji: "📊" };
+    default: return { label: "File", emoji: "📎" };
+  }
 }
 
 async function parsePdfToText(file: File): Promise<string> {
