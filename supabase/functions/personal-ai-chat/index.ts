@@ -347,6 +347,23 @@ serve(async (req) => {
                       tool_use_id: call.id,
                       content: `File generated successfully. Filename: ${json.filename}. Download URL already shown to the user.`,
                     });
+                  } else if (call.name === "generate_docx") {
+                    const r = await fetch(`${SUPABASE_URL}/functions/v1/compass-generate-docx`, {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: authForward,
+                      },
+                      body: JSON.stringify(call.input),
+                    });
+                    const json = await r.json();
+                    if (!r.ok) throw new Error(json.error || `status ${r.status}`);
+                    push({ content: `\n📄 **[Download ${json.filename}](${json.url})** — Word document, link valid 7 days.\n\n` });
+                    toolResults.push({
+                      type: "tool_result",
+                      tool_use_id: call.id,
+                      content: `File generated successfully. Filename: ${json.filename}. Download URL already shown to the user.`,
+                    });
                   } else {
                     toolResults.push({
                       type: "tool_result",
