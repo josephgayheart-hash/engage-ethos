@@ -152,6 +152,11 @@ export default function PersonalAIPage() {
   const abortRef = useRef<AbortController | null>(null);
   const [copiedTs, setCopiedTs] = useState<number | null>(null);
   const [memoryOpen, setMemoryOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    const v = localStorage.getItem("personal-ai-sidebar-open");
+    return v === null ? true : v === "1";
+  });
+  useEffect(() => { localStorage.setItem("personal-ai-sidebar-open", sidebarOpen ? "1" : "0"); }, [sidebarOpen]);
   const [savedProfilePrompt, setSavedProfilePrompt] = useState<string | null>(null);
 
   // Load saved system-prompt profile once so new threads use it as default
