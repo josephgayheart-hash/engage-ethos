@@ -565,7 +565,35 @@ export default function PersonalAIPage() {
         </div>
       )}
 
-      <div className="relative rounded-3xl border border-border/60 bg-card shadow-[0_2px_24px_-12px_rgba(0,0,0,0.15)] focus-within:border-border focus-within:shadow-[0_2px_30px_-10px_rgba(0,0,0,0.2)] transition-shadow">
+      <div
+        className={cn(
+          "relative rounded-3xl border border-border/60 bg-card shadow-[0_2px_24px_-12px_rgba(0,0,0,0.15)] focus-within:border-border focus-within:shadow-[0_2px_30px_-10px_rgba(0,0,0,0.2)] transition-shadow",
+          dragOver && "border-primary ring-2 ring-primary/30 bg-primary/[0.03]"
+        )}
+        onDragEnter={(e) => {
+          if (!e.dataTransfer?.types?.includes("Files")) return;
+          e.preventDefault();
+          dragDepth.current += 1;
+          setDragOver(true);
+        }}
+        onDragOver={(e) => {
+          if (!e.dataTransfer?.types?.includes("Files")) return;
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "copy";
+        }}
+        onDragLeave={(e) => {
+          if (!e.dataTransfer?.types?.includes("Files")) return;
+          dragDepth.current = Math.max(0, dragDepth.current - 1);
+          if (dragDepth.current === 0) setDragOver(false);
+        }}
+        onDrop={(e) => {
+          if (!e.dataTransfer?.files?.length) return;
+          e.preventDefault();
+          dragDepth.current = 0;
+          setDragOver(false);
+          handleFiles(e.dataTransfer.files);
+        }}
+      >
         <Textarea
           ref={inputRef}
           value={input}
