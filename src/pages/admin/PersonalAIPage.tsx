@@ -945,7 +945,7 @@ export default function PersonalAIPage() {
                                 </div>
                               ) : (
                                 <div className="prose prose-sm dark:prose-invert max-w-none text-[15px] leading-relaxed prose-p:my-3 prose-headings:mt-5 prose-headings:mb-2 prose-pre:my-3 prose-pre:rounded-xl prose-pre:bg-muted prose-pre:text-foreground prose-code:text-foreground prose-code:before:content-none prose-code:after:content-none prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-[13px] prose-li:my-1 prose-ul:my-3 prose-ol:my-3">
-                                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.content}</ReactMarkdown>
+                                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ a: ({ node, ...props }) => <a {...props} target="_blank" rel="noopener noreferrer" /> }}>{stripArtifactMarkers(m.content)}</ReactMarkdown>
                                 </div>
                               )}
                               {m.searchSources?.length ? (
