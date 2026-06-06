@@ -883,7 +883,15 @@ export default function PersonalAIPage() {
                         )}
                         onClick={() => setActiveId(t.id)}
                       >
-                        <span className="flex-1 truncate">{t.title}</span>
+                        <span
+                          className="flex-1 min-w-0 overflow-hidden whitespace-nowrap text-ellipsis-fade"
+                          style={{
+                            WebkitMaskImage: "linear-gradient(to right, #000 calc(100% - 28px), transparent 100%)",
+                            maskImage: "linear-gradient(to right, #000 calc(100% - 28px), transparent 100%)",
+                          }}
+                        >
+                          {t.title}
+                        </span>
                         <button
                           type="button"
                           className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition p-0.5 rounded"
