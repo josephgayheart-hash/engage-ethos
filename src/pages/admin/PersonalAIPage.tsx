@@ -998,7 +998,7 @@ export default function PersonalAIPage() {
                         </div>
                         <div className="flex-1 min-w-0 pt-0.5">
                           <div className="prose prose-sm dark:prose-invert max-w-none text-[15px] leading-relaxed prose-p:my-3 prose-headings:mt-5 prose-headings:mb-2 prose-pre:my-3 prose-pre:rounded-xl prose-pre:bg-muted prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none prose-li:my-1">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{streamText + "▍"}</ReactMarkdown>
+                            <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ a: ({ node, ...props }) => <a {...props} target="_blank" rel="noopener noreferrer" /> }}>{stripArtifactMarkers(streamText) + "▍"}</ReactMarkdown>
                           </div>
                         </div>
                       </div>
