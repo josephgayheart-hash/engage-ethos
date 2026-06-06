@@ -212,6 +212,15 @@ export default function PersonalAIPage() {
   useEffect(() => { saveThreads(threads); }, [threads]);
   useEffect(() => { localStorage.setItem(ACTIVE_KEY, activeId); }, [activeId]);
   useEffect(() => { inputRef.current?.focus(); }, [activeId]);
+
+  // Auto-grow the composer textarea so long text doesn't overflow or scroll prematurely.
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    const max = 480; // generous max before internal scroll kicks in
+    el.style.height = Math.min(el.scrollHeight, max) + "px";
+  }, [input]);
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [active?.messages.length, streamText, streamImage]);
