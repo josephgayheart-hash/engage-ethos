@@ -237,6 +237,7 @@ export default function PersonalAIPage() {
   const [fileArtifact, setFileArtifact] = useState<FileArtifact | null>(null);
   const [artifactBlobUrl, setArtifactBlobUrl] = useState<string>("");
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
+  const [previewNonce, setPreviewNonce] = useState(0);
   const [artifactFullscreen, setArtifactFullscreen] = useState(false);
   const deviceWidthFor = (d: "desktop" | "tablet" | "mobile") =>
     d === "mobile" ? 414 : d === "tablet" ? 834 : 1280;
@@ -1306,6 +1307,16 @@ export default function PersonalAIPage() {
                     size="sm"
                     variant="ghost"
                     className="h-8 w-8 p-0"
+                    onClick={() => setPreviewNonce(n => n + 1)}
+                    title="Refresh preview"
+                    aria-label="Refresh preview"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 w-8 p-0"
                     onClick={() => setArtifactFullscreen(v => !v)}
                     title={artifactFullscreen ? "Exit fullscreen" : "Fullscreen"}
                     aria-label={artifactFullscreen ? "Exit fullscreen" : "Fullscreen"}
@@ -1317,7 +1328,7 @@ export default function PersonalAIPage() {
               </div>
 
               {/* Preview surface */}
-              <div className="flex-1 min-h-0 bg-[radial-gradient(circle_at_1px_1px,hsl(var(--border))_1px,transparent_0)] [background-size:20px_20px] bg-muted/20 p-4 overflow-auto">
+              <div key={previewNonce} className="flex-1 min-h-0 bg-[radial-gradient(circle_at_1px_1px,hsl(var(--border))_1px,transparent_0)] [background-size:20px_20px] bg-muted/20 p-4 overflow-auto">
                 {fileArtifact ? (
                   !artifactBlobUrl ? (
                     <div className="h-full flex items-center justify-center text-xs text-muted-foreground">Loading preview…</div>
