@@ -84,6 +84,7 @@ function expiryFromKey(key: ExpiryKey): string | null {
 export default function CompassLockerPage() {
   const { user, isLoading } = useAuth();
   const [items, setItems] = useState<LockerItem[]>([]);
+  const [uploaders, setUploaders] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "text" | "file">("all");
   const [text, setText] = useState("");
@@ -91,6 +92,7 @@ export default function CompassLockerPage() {
   const [expiry, setExpiry] = useState<ExpiryKey>("7d");
   const [posting, setPosting] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadItems = useCallback(async () => {
@@ -99,17 +101,34 @@ export default function CompassLockerPage() {
     const { data, error } = await supabase
       .from("compass_locker_items")
       .select("*")
-      .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(200);
     if (error) {
       toast.error("Failed to load locker");
+      setLoading(false);
+      return;
+    }
+    const now = Date.now();
+    const fresh = (data as LockerItem[]).filter(
+      (it) => !it.expires_at || new Date(it.expires_at).getTime() > now,
+    );
+    setItems(fresh);
+
+    // Fetch uploader names for non-self items
+    const otherIds = Array.from(new Set(fresh.map((i) => i.user_id).filter((id) => id !== user.id)));
+    if (otherIds.length) {
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, email")
+        .in("id", otherIds);
+      const map: Record<string, string> = {};
+      (profs || []).forEach((p: { id: string; first_name: string | null; last_name: string | null; email: string }) => {
+        const name = [p.first_name, p.last_name].filter(Boolean).join(" ").trim();
+        map[p.id] = name || p.email;
+      });
+      setUploaders(map);
     } else {
-      const now = Date.now();
-      const fresh = (data as LockerItem[]).filter(
-        (it) => !it.expires_at || new Date(it.expires_at).getTime() > now,
-      );
-      setItems(fresh);
+      setUploaders({});
     }
     setLoading(false);
   }, [user]);
