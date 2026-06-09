@@ -128,7 +128,7 @@ function extractHtmlArtifact(text: string): string | null {
 
 // File artifacts emitted by Claude tools (pptx/docx/pdf/html/svg/image).
 // Marker format: <!--artifact:{"filename":..,"url":..,"downloadUrl":..}-->
-export type FileArtifact = { filename: string; url: string; downloadUrl: string; kind: "pdf" | "image" | "html" | "svg" | "docx" | "pptx" | "other" };
+export type FileArtifact = { filename: string; url: string; downloadUrl: string; kind: "pdf" | "image" | "html" | "svg" | "docx" | "pptx" | "xlsx" | "other" };
 function kindFromName(name: string): FileArtifact["kind"] {
   const ext = name.toLowerCase().split(".").pop() || "";
   if (ext === "pdf") return "pdf";
@@ -137,6 +137,7 @@ function kindFromName(name: string): FileArtifact["kind"] {
   if (ext === "svg") return "svg";
   if (ext === "docx") return "docx";
   if (ext === "pptx") return "pptx";
+  if (ext === "xlsx" || ext === "xls" || ext === "csv") return "xlsx";
   return "other";
 }
 function extractFileArtifacts(text: string): FileArtifact[] {
