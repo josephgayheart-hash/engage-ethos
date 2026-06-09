@@ -435,6 +435,13 @@ export default function CompassLockerPage() {
                     <Badge variant="secondary" className="text-[10px]">
                       {item.kind}
                     </Badge>
+                    {item.user_id === user.id ? (
+                      <Badge variant="outline" className="text-[10px]">you</Badge>
+                    ) : (
+                      <span className="text-[11px] text-muted-foreground">
+                        by {uploaders[item.user_id] || "another user"}
+                      </span>
+                    )}
                     {item.expires_at ? (
                       <span className="text-[11px] text-muted-foreground">
                         expires {formatWhen(item.expires_at)}
