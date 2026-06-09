@@ -260,7 +260,7 @@ export default function CompassLockerPage() {
       </div>
     );
   }
-  if (!isSuperAdmin) return <Navigate to="/dashboard" replace />;
+  if (!user) return <Navigate to="/login" replace />;
 
   return (
     <div className="container mx-auto max-w-5xl space-y-6 p-6">
