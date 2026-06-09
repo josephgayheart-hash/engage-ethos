@@ -227,6 +227,18 @@ export default function CompassLockerPage() {
     }
     setItems((prev) => prev.filter((i) => i.id !== item.id));
   };
+  const handlePreview = async (item: LockerItem) => {
+    if (!item.storage_path) return;
+    const { data, error } = await supabase.storage
+      .from(BUCKET)
+      .createSignedUrl(item.storage_path, 60 * 10);
+    if (error || !data?.signedUrl) {
+      toast.error("Could not open preview");
+      return;
+    }
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  };
+
 
   const handleCopyText = async (item: LockerItem) => {
     if (!item.content) return;
