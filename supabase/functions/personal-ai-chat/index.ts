@@ -542,25 +542,29 @@ serve(async (req) => {
                     call.name === "generate_html" ||
                     call.name === "generate_svg" ||
                     call.name === "generate_pdf" ||
-                    call.name === "generate_image"
+                    call.name === "generate_image" ||
+                    call.name === "generate_xlsx"
                   ) {
                     const endpoint = {
                       generate_html: "compass-generate-html",
                       generate_svg: "compass-generate-svg",
                       generate_pdf: "compass-generate-pdf",
                       generate_image: "compass-generate-image",
+                      generate_xlsx: "compass-generate-xlsx",
                     }[call.name]!;
                     const icon = {
                       generate_html: "🌐",
                       generate_svg: "🎨",
                       generate_pdf: "📕",
                       generate_image: "🖼️",
+                      generate_xlsx: "📊",
                     }[call.name]!;
                     const label = {
                       generate_html: "HTML page",
                       generate_svg: "SVG graphic",
                       generate_pdf: "PDF",
                       generate_image: "image",
+                      generate_xlsx: "spreadsheet",
                     }[call.name]!;
                     const r = await fetch(`${SUPABASE_URL}/functions/v1/${endpoint}`, {
                       method: "POST",
