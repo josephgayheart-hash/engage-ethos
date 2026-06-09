@@ -282,11 +282,40 @@ export default function CompassLockerPage() {
   if (!user) return <Navigate to="/login" replace />;
 
   return (
-    <div className="container mx-auto max-w-5xl space-y-6 p-6">
+    <div
+      className={cn(
+        "container mx-auto max-w-5xl space-y-6 p-6 relative",
+        dragOver && "ring-2 ring-primary/60 rounded-xl",
+      )}
+      onDragOver={(e) => {
+        if (e.dataTransfer?.types?.includes("Files")) {
+          e.preventDefault();
+          setDragOver(true);
+        }
+      }}
+      onDragLeave={(e) => {
+        if (e.currentTarget === e.target) setDragOver(false);
+      }}
+      onDrop={(e) => {
+        if (e.dataTransfer?.files?.length) {
+          e.preventDefault();
+          setDragOver(false);
+          void handleUpload(e.dataTransfer.files);
+        }
+      }}
+    >
+      {dragOver && (
+        <div className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+          <div className="rounded-xl border-2 border-dashed border-primary px-8 py-6 text-center">
+            <Upload className="mx-auto mb-2 h-8 w-8 text-primary" />
+            <p className="text-sm font-medium">Drop to upload to the shared locker</p>
+          </div>
+        </div>
+      )}
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Compass Locker</h1>
         <p className="text-sm text-muted-foreground">
-          A private relay for your text and files between machines. Only you can see these items.
+          Shared relay for text and files across every active Compass user. Drag files anywhere on this page — uploads are visible to everyone immediately.
         </p>
       </header>
 
