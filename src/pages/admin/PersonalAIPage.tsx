@@ -1328,7 +1328,7 @@ export default function PersonalAIPage() {
               </div>
 
               {/* Preview surface */}
-              <div className="flex-1 min-h-0 bg-[radial-gradient(circle_at_1px_1px,hsl(var(--border))_1px,transparent_0)] [background-size:20px_20px] bg-muted/20 p-4 overflow-auto">
+              <div key={previewNonce} className="flex-1 min-h-0 bg-[radial-gradient(circle_at_1px_1px,hsl(var(--border))_1px,transparent_0)] [background-size:20px_20px] bg-muted/20 p-4 overflow-auto">
                 {fileArtifact ? (
                   !artifactBlobUrl ? (
                     <div className="h-full flex items-center justify-center text-xs text-muted-foreground">Loading preview…</div>
