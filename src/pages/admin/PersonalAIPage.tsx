@@ -171,6 +171,7 @@ function artifactBadge(kind: FileArtifact["kind"]): { label: string; emoji: stri
     case "svg": return { label: "SVG", emoji: "🎨" };
     case "docx": return { label: "Word", emoji: "📄" };
     case "pptx": return { label: "Slides", emoji: "📊" };
+    case "xlsx": return { label: "Sheet", emoji: "📈" };
     default: return { label: "File", emoji: "📎" };
   }
 }
