@@ -1307,6 +1307,16 @@ export default function PersonalAIPage() {
                     size="sm"
                     variant="ghost"
                     className="h-8 w-8 p-0"
+                    onClick={() => setPreviewNonce(n => n + 1)}
+                    title="Refresh preview"
+                    aria-label="Refresh preview"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 w-8 p-0"
                     onClick={() => setArtifactFullscreen(v => !v)}
                     title={artifactFullscreen ? "Exit fullscreen" : "Fullscreen"}
                     aria-label={artifactFullscreen ? "Exit fullscreen" : "Fullscreen"}
