@@ -128,7 +128,7 @@ function extractHtmlArtifact(text: string): string | null {
 
 // File artifacts emitted by Claude tools (pptx/docx/pdf/html/svg/image).
 // Marker format: <!--artifact:{"filename":..,"url":..,"downloadUrl":..}-->
-export type FileArtifact = { filename: string; url: string; downloadUrl: string; kind: "pdf" | "image" | "html" | "svg" | "docx" | "pptx" | "other" };
+export type FileArtifact = { filename: string; url: string; downloadUrl: string; kind: "pdf" | "image" | "html" | "svg" | "docx" | "pptx" | "xlsx" | "other" };
 function kindFromName(name: string): FileArtifact["kind"] {
   const ext = name.toLowerCase().split(".").pop() || "";
   if (ext === "pdf") return "pdf";
@@ -137,6 +137,7 @@ function kindFromName(name: string): FileArtifact["kind"] {
   if (ext === "svg") return "svg";
   if (ext === "docx") return "docx";
   if (ext === "pptx") return "pptx";
+  if (ext === "xlsx" || ext === "xls" || ext === "csv") return "xlsx";
   return "other";
 }
 function extractFileArtifacts(text: string): FileArtifact[] {
@@ -170,6 +171,7 @@ function artifactBadge(kind: FileArtifact["kind"]): { label: string; emoji: stri
     case "svg": return { label: "SVG", emoji: "🎨" };
     case "docx": return { label: "Word", emoji: "📄" };
     case "pptx": return { label: "Slides", emoji: "📊" };
+    case "xlsx": return { label: "Sheet", emoji: "📈" };
     default: return { label: "File", emoji: "📎" };
   }
 }
@@ -1339,7 +1341,7 @@ export default function PersonalAIPage() {
                         className="h-full"
                       />
                     </div>
-                  ) : (fileArtifact.kind === "pptx" || fileArtifact.kind === "docx") ? (
+                  ) : (fileArtifact.kind === "pptx" || fileArtifact.kind === "docx" || fileArtifact.kind === "xlsx") ? (
                     <div className="mx-auto h-full rounded-lg shadow-lg overflow-hidden bg-white ring-1 ring-border/60" style={{ maxWidth: 1100 }}>
                       <iframe
                         title={fileArtifact.filename}

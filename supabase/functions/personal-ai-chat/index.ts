@@ -345,6 +345,39 @@ serve(async (req) => {
             required: ["prompt", "title"],
           },
         },
+        {
+          name: "generate_xlsx",
+          description:
+            "Generate a downloadable Microsoft Excel workbook (.xlsx). Use whenever the user asks for a spreadsheet, table, tracker, roster, budget, schedule, CSV-style data export, or comparison grid. " +
+            "Provide one or more sheets, each with a `headers` row and `rows` (a 2D array of cell values — strings/numbers/booleans). " +
+            "Pick descriptive sheet names. Keep headers short and clear. Use numbers (not strings) for numeric values so totals and filters work.",
+          input_schema: {
+            type: "object",
+            properties: {
+              title: { type: "string", description: "Workbook title / filename base." },
+              author: { type: "string", description: "OMIT unless the user explicitly named a byline. Never default to operator name or workspace." },
+              sheets: {
+                type: "array",
+                description: "One or more worksheets. Prefer a single focused sheet unless the user asked for tabs.",
+                items: {
+                  type: "object",
+                  properties: {
+                    name: { type: "string", description: "Sheet/tab name (max 31 chars, no /\\?*[]:)." },
+                    headers: { type: "array", items: { type: "string" }, description: "Column header labels." },
+                    rows: {
+                      type: "array",
+                      description: "2D array of cells. Each inner array is one row aligned to headers.",
+                      items: { type: "array", items: {} },
+                    },
+                    column_widths: { type: "array", items: { type: "number" }, description: "Optional column widths in characters." },
+                  },
+                  required: ["name", "headers", "rows"],
+                },
+              },
+            },
+            required: ["title", "sheets"],
+          },
+        },
       ];
 
       const encoder = new TextEncoder();
@@ -509,25 +542,29 @@ serve(async (req) => {
                     call.name === "generate_html" ||
                     call.name === "generate_svg" ||
                     call.name === "generate_pdf" ||
-                    call.name === "generate_image"
+                    call.name === "generate_image" ||
+                    call.name === "generate_xlsx"
                   ) {
                     const endpoint = {
                       generate_html: "compass-generate-html",
                       generate_svg: "compass-generate-svg",
                       generate_pdf: "compass-generate-pdf",
                       generate_image: "compass-generate-image",
+                      generate_xlsx: "compass-generate-xlsx",
                     }[call.name]!;
                     const icon = {
                       generate_html: "🌐",
                       generate_svg: "🎨",
                       generate_pdf: "📕",
                       generate_image: "🖼️",
+                      generate_xlsx: "📊",
                     }[call.name]!;
                     const label = {
                       generate_html: "HTML page",
                       generate_svg: "SVG graphic",
                       generate_pdf: "PDF",
                       generate_image: "image",
+                      generate_xlsx: "spreadsheet",
                     }[call.name]!;
                     const r = await fetch(`${SUPABASE_URL}/functions/v1/${endpoint}`, {
                       method: "POST",
