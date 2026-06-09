@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
   Copy,
@@ -12,6 +12,7 @@ import {
   Link as LinkIcon,
   Clock,
   Eye,
+  ArrowLeft,
 } from "lucide-react";
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -342,7 +343,10 @@ export default function CompassLockerPage() {
           </div>
         </div>
       )}
-      <header className="space-y-1">
+      <header className="space-y-2">
+        <Button asChild variant="ghost" size="sm" className="h-8 -ml-2 gap-1 text-muted-foreground hover:text-foreground">
+          <Link to="/admin/personal-ai"><ArrowLeft className="h-4 w-4" /> Back to Compass</Link>
+        </Button>
         <h1 className="text-2xl font-semibold tracking-tight">Compass Locker</h1>
         <p className="text-sm text-muted-foreground">
           Shared relay for text and files across every active Compass user. Drag files anywhere on this page — uploads are visible to everyone immediately.
