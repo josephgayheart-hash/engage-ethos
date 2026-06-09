@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 type LockerItem = {
   id: string;
@@ -84,6 +85,7 @@ function expiryFromKey(key: ExpiryKey): string | null {
 export default function CompassLockerPage() {
   const { user, isLoading } = useAuth();
   const [items, setItems] = useState<LockerItem[]>([]);
+  const [uploaders, setUploaders] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "text" | "file">("all");
   const [text, setText] = useState("");
@@ -91,6 +93,7 @@ export default function CompassLockerPage() {
   const [expiry, setExpiry] = useState<ExpiryKey>("7d");
   const [posting, setPosting] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadItems = useCallback(async () => {
@@ -99,17 +102,34 @@ export default function CompassLockerPage() {
     const { data, error } = await supabase
       .from("compass_locker_items")
       .select("*")
-      .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(200);
     if (error) {
       toast.error("Failed to load locker");
+      setLoading(false);
+      return;
+    }
+    const now = Date.now();
+    const fresh = (data as LockerItem[]).filter(
+      (it) => !it.expires_at || new Date(it.expires_at).getTime() > now,
+    );
+    setItems(fresh);
+
+    // Fetch uploader names for non-self items
+    const otherIds = Array.from(new Set(fresh.map((i) => i.user_id).filter((id) => id !== user.id)));
+    if (otherIds.length) {
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, email")
+        .in("id", otherIds);
+      const map: Record<string, string> = {};
+      (profs || []).forEach((p: { id: string; first_name: string | null; last_name: string | null; email: string }) => {
+        const name = [p.first_name, p.last_name].filter(Boolean).join(" ").trim();
+        map[p.id] = name || p.email;
+      });
+      setUploaders(map);
     } else {
-      const now = Date.now();
-      const fresh = (data as LockerItem[]).filter(
-        (it) => !it.expires_at || new Date(it.expires_at).getTime() > now,
-      );
-      setItems(fresh);
+      setUploaders({});
     }
     setLoading(false);
   }, [user]);
@@ -263,11 +283,40 @@ export default function CompassLockerPage() {
   if (!user) return <Navigate to="/login" replace />;
 
   return (
-    <div className="container mx-auto max-w-5xl space-y-6 p-6">
+    <div
+      className={cn(
+        "container mx-auto max-w-5xl space-y-6 p-6 relative",
+        dragOver && "ring-2 ring-primary/60 rounded-xl",
+      )}
+      onDragOver={(e) => {
+        if (e.dataTransfer?.types?.includes("Files")) {
+          e.preventDefault();
+          setDragOver(true);
+        }
+      }}
+      onDragLeave={(e) => {
+        if (e.currentTarget === e.target) setDragOver(false);
+      }}
+      onDrop={(e) => {
+        if (e.dataTransfer?.files?.length) {
+          e.preventDefault();
+          setDragOver(false);
+          void handleUpload(e.dataTransfer.files);
+        }
+      }}
+    >
+      {dragOver && (
+        <div className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+          <div className="rounded-xl border-2 border-dashed border-primary px-8 py-6 text-center">
+            <Upload className="mx-auto mb-2 h-8 w-8 text-primary" />
+            <p className="text-sm font-medium">Drop to upload to the shared locker</p>
+          </div>
+        </div>
+      )}
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Compass Locker</h1>
         <p className="text-sm text-muted-foreground">
-          A private relay for your text and files between machines. Only you can see these items.
+          Shared relay for text and files across every active Compass user. Drag files anywhere on this page — uploads are visible to everyone immediately.
         </p>
       </header>
 
@@ -386,6 +435,13 @@ export default function CompassLockerPage() {
                     <Badge variant="secondary" className="text-[10px]">
                       {item.kind}
                     </Badge>
+                    {item.user_id === user.id ? (
+                      <Badge variant="outline" className="text-[10px]">you</Badge>
+                    ) : (
+                      <span className="text-[11px] text-muted-foreground">
+                        by {uploaders[item.user_id] || "another user"}
+                      </span>
+                    )}
                     {item.expires_at ? (
                       <span className="text-[11px] text-muted-foreground">
                         expires {formatWhen(item.expires_at)}
@@ -452,7 +508,7 @@ export default function CompassLockerPage() {
                       </Button>
                     </>
                   )}
-                  {item.expires_at && (
+                  {item.expires_at && item.user_id === user.id && (
                     <Button
                       variant="ghost"
                       size="icon"
@@ -463,15 +519,17 @@ export default function CompassLockerPage() {
                       <Clock className="h-4 w-4" />
                     </Button>
                   )}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-destructive hover:text-destructive"
-                    onClick={() => void handleDelete(item)}
-                    title="Delete"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  {item.user_id === user.id && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-destructive hover:text-destructive"
+                      onClick={() => void handleDelete(item)}
+                      title="Delete"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               </div>
             </Card>
