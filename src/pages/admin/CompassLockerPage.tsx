@@ -12,6 +12,7 @@ import {
   Link as LinkIcon,
   Clock,
   Eye,
+  ArrowLeft,
 } from "lucide-react";
 
 import { useAuth } from "@/contexts/AuthContext";
