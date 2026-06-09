@@ -273,6 +273,22 @@ export default function CompassLockerPage() {
     toast.success("Pinned — won't expire");
   };
 
+  const handleUnpin = async (item: LockerItem) => {
+    const newExpiry = expiryFromKey(expiry) ?? expiryFromKey("7d");
+    const { error } = await supabase
+      .from("compass_locker_items")
+      .update({ expires_at: newExpiry })
+      .eq("id", item.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setItems((prev) =>
+      prev.map((i) => (i.id === item.id ? { ...i, expires_at: newExpiry } : i)),
+    );
+    toast.success("Unpinned — will expire again");
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-12">
@@ -508,16 +524,28 @@ export default function CompassLockerPage() {
                       </Button>
                     </>
                   )}
-                  {item.expires_at && item.user_id === user.id && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => void handlePinForever(item)}
-                      title="Pin (never expire)"
-                    >
-                      <Clock className="h-4 w-4" />
-                    </Button>
+                  {item.user_id === user.id && (
+                    item.expires_at ? (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => void handlePinForever(item)}
+                        title="Pin (never expire)"
+                      >
+                        <Clock className="h-4 w-4" />
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-primary"
+                        onClick={() => void handleUnpin(item)}
+                        title="Unpin (restore expiry)"
+                      >
+                        <Clock className="h-4 w-4" />
+                      </Button>
+                    )
                   )}
                   {item.user_id === user.id && (
                     <Button
