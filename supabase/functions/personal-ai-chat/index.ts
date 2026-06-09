@@ -89,6 +89,14 @@ serve(async (req) => {
             `CONTENT REQUIREMENT: Every artifact must contain real, substantive content written for the user's request. ` +
             `Never call a generation tool with empty slides/blocks or placeholder text. For a one-pager, brief, or report, produce a full draft with headings, paragraphs, and supporting detail — not just a title.`
           );
+          parts.push(
+            `# Response style\n` +
+            `Write like ChatGPT or Claude in a normal chat: warm, direct, conversational prose. ` +
+            `Default to short plain-text replies (1–3 sentences). Use markdown headings, bold labels, or bullet lists ONLY when the user explicitly asks for a structured document or the content is genuinely a list.\n` +
+            `After generating a file with a tool, do NOT produce a recap, changelog, "what I changed / improved / included" section, summary of sections, or a bulleted breakdown of the artifact. ` +
+            `Just say one short natural sentence (e.g. "Here's your deck — let me know what to tweak.") and stop. The user can already see and open the file.\n` +
+            `Never narrate your own process ("I'll now…", "Let me…", "I've gone ahead and…"). No preamble, no sign-off, no emojis unless the user used them first.`
+          );
 
           if (parts.length) memoryBlock = parts.join("\n\n---\n\n");
         }
@@ -491,7 +499,7 @@ serve(async (req) => {
               }
 
               // Execute tools, build tool_result content
-              push({ content: `\n\n_Building your file…_\n` });
+
               const toolResults: any[] = [];
 
               // Helper: build a download-forcing URL (adds Content-Disposition: attachment)
