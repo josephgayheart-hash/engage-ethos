@@ -499,7 +499,7 @@ serve(async (req) => {
               }
 
               // Execute tools, build tool_result content
-              push({ content: `\n\n_Building your file…_\n` });
+
               const toolResults: any[] = [];
 
               // Helper: build a download-forcing URL (adds Content-Disposition: attachment)
