@@ -11,6 +11,7 @@ import {
   Upload,
   Link as LinkIcon,
   Clock,
+  Eye,
 } from "lucide-react";
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -226,6 +227,18 @@ export default function CompassLockerPage() {
     }
     setItems((prev) => prev.filter((i) => i.id !== item.id));
   };
+  const handlePreview = async (item: LockerItem) => {
+    if (!item.storage_path) return;
+    const { data, error } = await supabase.storage
+      .from(BUCKET)
+      .createSignedUrl(item.storage_path, 60 * 10);
+    if (error || !data?.signedUrl) {
+      toast.error("Could not open preview");
+      return;
+    }
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  };
+
 
   const handleCopyText = async (item: LockerItem) => {
     if (!item.content) return;
@@ -504,6 +517,15 @@ export default function CompassLockerPage() {
                     </Button>
                   ) : (
                     <>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => void handlePreview(item)}
+                        title="Preview / open in new tab"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"
