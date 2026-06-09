@@ -876,26 +876,36 @@ export default function PersonalAIPage() {
                       <div
                         key={t.id}
                         className={cn(
-                          "group flex items-center gap-2 rounded-lg px-3 py-2 cursor-pointer text-sm transition",
+                          "group relative flex items-center rounded-lg pl-3 pr-9 py-2 cursor-pointer text-sm transition",
                           t.id === activeId
                             ? "bg-accent text-accent-foreground"
                             : "text-foreground/80 hover:bg-muted hover:text-foreground"
                         )}
                         onClick={() => setActiveId(t.id)}
+                        title={t.title}
                       >
                         <span
-                          className="flex-1 min-w-0 overflow-hidden whitespace-nowrap text-ellipsis-fade"
+                          className="flex-1 min-w-0 overflow-hidden whitespace-nowrap"
                           style={{
-                            WebkitMaskImage: "linear-gradient(to right, #000 calc(100% - 28px), transparent 100%)",
-                            maskImage: "linear-gradient(to right, #000 calc(100% - 28px), transparent 100%)",
+                            WebkitMaskImage: "linear-gradient(to right, #000 calc(100% - 24px), transparent 100%)",
+                            maskImage: "linear-gradient(to right, #000 calc(100% - 24px), transparent 100%)",
                           }}
                         >
-                          {t.title}
+                          {t.title || "New chat"}
                         </span>
                         <button
                           type="button"
-                          className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition p-0.5 rounded"
-                          onClick={(e) => { e.stopPropagation(); deleteThread(t.id); }}
+                          className={cn(
+                            "absolute right-1.5 top-1/2 -translate-y-1/2 p-1 rounded text-muted-foreground hover:text-destructive hover:bg-background/80 transition",
+                            "opacity-0 group-hover:opacity-100 focus:opacity-100",
+                            t.id === activeId && "opacity-60"
+                          )}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm(`Delete "${t.title || "New chat"}"? This can't be undone.`)) {
+                              deleteThread(t.id);
+                            }
+                          }}
                           aria-label="Delete chat"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
