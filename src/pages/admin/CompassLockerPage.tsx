@@ -508,7 +508,7 @@ export default function CompassLockerPage() {
                       </Button>
                     </>
                   )}
-                  {item.expires_at && (
+                  {item.expires_at && item.user_id === user.id && (
                     <Button
                       variant="ghost"
                       size="icon"
@@ -519,15 +519,17 @@ export default function CompassLockerPage() {
                       <Clock className="h-4 w-4" />
                     </Button>
                   )}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-destructive hover:text-destructive"
-                    onClick={() => void handleDelete(item)}
-                    title="Delete"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  {item.user_id === user.id && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-destructive hover:text-destructive"
+                      onClick={() => void handleDelete(item)}
+                      title="Delete"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               </div>
             </Card>
