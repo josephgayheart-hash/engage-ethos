@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import {
   ArrowUp, Copy, Trash2, Plus, Square, Loader2, Paperclip, Image as ImageIcon,
   Globe, Wand2, FileText, X, Download, Code as CodeIcon, Eye, Sparkles,
-  MessageSquarePlus, Check, RefreshCw, Brain, PanelLeftClose, PanelLeftOpen, ExternalLink,
+  MessageSquarePlus, Check, RefreshCw, Brain, PanelLeftClose, PanelLeftOpen, ExternalLink, Inbox,
   Monitor, Tablet, Smartphone, Maximize2, Minimize2,
 } from "lucide-react";
 import { MemoryDialog } from "@/components/personal-ai/MemoryDialog";
@@ -946,6 +946,15 @@ export default function PersonalAIPage() {
           </Select>
           </div>
           <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/compass/locker")}
+              className="h-9 gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+              title="Compass Locker — pass text & files between devices"
+            >
+              <Inbox className="h-4 w-4" /> Locker
+            </Button>
             <Button
               variant="ghost"
               size="sm"

@@ -82,7 +82,7 @@ function expiryFromKey(key: ExpiryKey): string | null {
 }
 
 export default function CompassLockerPage() {
-  const { user, isSuperAdmin, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
   const [items, setItems] = useState<LockerItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "text" | "file">("all");
@@ -260,7 +260,7 @@ export default function CompassLockerPage() {
       </div>
     );
   }
-  if (!isSuperAdmin) return <Navigate to="/dashboard" replace />;
+  if (!user) return <Navigate to="/login" replace />;
 
   return (
     <div className="container mx-auto max-w-5xl space-y-6 p-6">

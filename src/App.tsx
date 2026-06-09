@@ -227,6 +227,14 @@ const AppRoutes = () => (
         </RequireAuth>
       }
     />
+    <Route
+      path="/compass/locker"
+      element={
+        <RequireAuth>
+          <CompassLockerPage />
+        </RequireAuth>
+      }
+    />
 
     {/* Authenticated routes — wrapped in AppLayout sidebar shell */}
     <Route element={<RequireAuth><RequireFullApp><AppLayout /></RequireFullApp></RequireAuth>}>
