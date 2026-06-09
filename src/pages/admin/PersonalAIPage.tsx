@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import {
   ArrowUp, Copy, Trash2, Plus, Square, Loader2, Paperclip, Image as ImageIcon,
   Globe, Wand2, FileText, X, Download, Code as CodeIcon, Eye, Sparkles,
-  MessageSquarePlus, Check, RefreshCw, Brain, PanelLeftClose, PanelLeftOpen, ExternalLink,
+  MessageSquarePlus, Check, RefreshCw, Brain, PanelLeftClose, PanelLeftOpen, ExternalLink, Inbox,
   Monitor, Tablet, Smartphone, Maximize2, Minimize2,
 } from "lucide-react";
 import { MemoryDialog } from "@/components/personal-ai/MemoryDialog";
