@@ -949,6 +949,15 @@ export default function PersonalAIPage() {
             <Button
               variant="ghost"
               size="sm"
+              onClick={() => navigate("/compass/locker")}
+              className="h-9 gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+              title="Compass Locker — pass text & files between devices"
+            >
+              <Inbox className="h-4 w-4" /> Locker
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => navigate("/compass/setup")}
               className="h-9 gap-1.5 text-sm text-muted-foreground hover:text-foreground"
             >
