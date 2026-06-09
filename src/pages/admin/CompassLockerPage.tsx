@@ -273,6 +273,22 @@ export default function CompassLockerPage() {
     toast.success("Pinned — won't expire");
   };
 
+  const handleUnpin = async (item: LockerItem) => {
+    const newExpiry = expiryFromKey(expiry) ?? expiryFromKey("7d");
+    const { error } = await supabase
+      .from("compass_locker_items")
+      .update({ expires_at: newExpiry })
+      .eq("id", item.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setItems((prev) =>
+      prev.map((i) => (i.id === item.id ? { ...i, expires_at: newExpiry } : i)),
+    );
+    toast.success("Unpinned — will expire again");
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-12">
