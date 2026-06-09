@@ -11,6 +11,7 @@ import {
   Upload,
   Link as LinkIcon,
   Clock,
+  Eye,
 } from "lucide-react";
 
 import { useAuth } from "@/contexts/AuthContext";
