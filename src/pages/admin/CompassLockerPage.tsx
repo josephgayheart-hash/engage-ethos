@@ -521,6 +521,15 @@ export default function CompassLockerPage() {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8"
+                        onClick={() => void handlePreview(item)}
+                        title="Preview / open in new tab"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
                         onClick={() => void handleCopyLink(item)}
                         title="Copy 1-hour signed link"
                       >
