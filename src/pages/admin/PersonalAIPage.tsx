@@ -1341,7 +1341,7 @@ export default function PersonalAIPage() {
                         className="h-full"
                       />
                     </div>
-                  ) : (fileArtifact.kind === "pptx" || fileArtifact.kind === "docx") ? (
+                  ) : (fileArtifact.kind === "pptx" || fileArtifact.kind === "docx" || fileArtifact.kind === "xlsx") ? (
                     <div className="mx-auto h-full rounded-lg shadow-lg overflow-hidden bg-white ring-1 ring-border/60" style={{ maxWidth: 1100 }}>
                       <iframe
                         title={fileArtifact.filename}
