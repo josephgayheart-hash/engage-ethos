@@ -70,7 +70,7 @@ const EXPIRY_OPTIONS: { value: ExpiryKey; label: string; seconds: number | null 
 const BUCKET = "compass-artifacts";
 // Standard supabase-js POST uploads cap at ~50MB; above that we use TUS resumable (up to 5GB).
 const STANDARD_UPLOAD_LIMIT = 50 * 1024 * 1024;
-const MAX_FILE_SIZE = 5 * 1024 * 1024 * 1024; // TUS storage hard cap
+const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024; // 2GB app cap
 const PART_UPLOAD_SIZE = 45 * 1024 * 1024;
 
 function parseMultipartMeta(item: LockerItem): MultipartMeta | null {
@@ -88,6 +88,10 @@ function parseMultipartMeta(item: LockerItem): MultipartMeta | null {
 
 function partPath(path: string, index: number) {
   return `${path}.part-${String(index).padStart(5, "0")}`;
+}
+
+function multipartPaths(path: string, partCount: number) {
+  return Array.from({ length: partCount }, (_, idx) => partPath(path, idx));
 }
 
 function getUploadErrorMessage(error: unknown) {
