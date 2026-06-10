@@ -233,6 +233,8 @@ export default function PersonalAIPage() {
   const [deepResearch, setDeepResearch] = useState(false);
   const [extendedThinking, setExtendedThinking] = useState(false);
   const [activePreset, setActivePreset] = useState<Preset | null>(null);
+  const [imageAspect, setImageAspect] = useState<string>("1:1");
+  const [imageStyle, setImageStyle] = useState<string>("auto");
   const [streaming, setStreaming] = useState(false);
   const [streamText, setStreamText] = useState("");
   const [streamImage, setStreamImage] = useState<string | null>(null);
