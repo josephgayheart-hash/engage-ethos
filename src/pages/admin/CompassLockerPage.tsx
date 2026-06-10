@@ -466,7 +466,7 @@ export default function CompassLockerPage() {
           </div>
         </div>
         <p className="text-xs text-muted-foreground">
-          Max 50MB per file. Items past their expiry are hidden automatically.
+          Max 2GB per file (large files use resumable upload). Items past their expiry are hidden automatically.
         </p>
       </Card>
 
