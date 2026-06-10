@@ -1008,14 +1008,12 @@ export default function PersonalAIPage() {
                           )}
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (window.confirm(`Delete "${t.title || "New chat"}"? This can't be undone.`)) {
-                              deleteThread(t.id);
-                            }
+                            setDeleteTarget(t);
                           }}
                           aria-label="Delete chat"
                           title="Delete chat"
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          <X className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     ))}
