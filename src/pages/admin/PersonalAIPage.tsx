@@ -656,7 +656,7 @@ export default function PersonalAIPage() {
     const text = input.trim();
     if ((!text && pendingAttachments.length === 0) || streaming || !active) return;
 
-    const intent = text ? detectIntent(text) : { image: false, research: false, search: false, think: false };
+    const intent = text ? detectIntent(text) : { image: false, research: false, search: false, think: false, preset: null as string | null };
     const useImage = imageMode || intent.image;
     const useResearch = deepResearch || intent.research;
     const useSearch = !useResearch && (webSearch || intent.search);
