@@ -658,9 +658,9 @@ export default function PersonalAIPage() {
     try {
       let searchContext = "";
       let searchSources: { title: string; url: string }[] = [];
-      if ((webSearch || deepResearch) && text) {
+      if ((useSearch || useResearch) && text) {
         try {
-          const r = await runWebSearch(text, deepResearch);
+          const r = await runWebSearch(text, useResearch);
           searchContext = r.context;
           searchSources = r.sources;
         } catch (e: any) {
@@ -685,12 +685,12 @@ export default function PersonalAIPage() {
           message: text,
           history: active.messages.map(m => ({ role: m.role, content: m.content })),
           model: active.model,
-          systemPrompt: active.systemPrompt + (deepResearch ? "\n\nDeep research mode: synthesize across the provided sources, cite [n] inline, surface conflicting evidence, and end with a short \"What I checked\" list." : ""),
+          systemPrompt: active.systemPrompt + (useResearch ? "\n\nDeep research mode: synthesize across the provided sources, cite [n] inline, surface conflicting evidence, and end with a short \"What I checked\" list." : ""),
           images,
           files,
           searchContext,
-          deepResearch,
-          extendedThinking,
+          deepResearch: useResearch,
+          extendedThinking: useThink,
         }),
       });
 
