@@ -686,7 +686,9 @@ export default function PersonalAIPage() {
           message: text,
           history: active.messages.map(m => ({ role: m.role, content: m.content })),
           model: active.model,
-          systemPrompt: active.systemPrompt + (useResearch ? "\n\nDeep research mode: synthesize across the provided sources, cite [n] inline, surface conflicting evidence, and end with a short \"What I checked\" list." : ""),
+          systemPrompt: active.systemPrompt
+            + (activePreset ? `\n\n# Build preset: ${activePreset.label}\n${activePreset.instruction}\n\nWhen you produce a diagram, ALWAYS emit it as a fenced \`\`\`mermaid block. When you produce a custom vector graphic (not a diagram), emit a fenced \`\`\`svg block containing valid <svg>...</svg> markup. These are rendered inline as interactive artifacts — never describe the diagram in prose instead of drawing it.` : "")
+            + (useResearch ? "\n\nDeep research mode: synthesize across the provided sources, cite [n] inline, surface conflicting evidence, and end with a short \"What I checked\" list." : ""),
           images,
           files,
           searchContext,
