@@ -25,6 +25,7 @@ import {
 import { MemoryDialog } from "@/components/personal-ai/MemoryDialog";
 import { ArtifactPreviewFrame } from "@/components/personal-ai/ArtifactPreviewFrame";
 import { RichMarkdown } from "@/components/personal-ai/RichMarkdown";
+import { PresetChips, type Preset } from "@/components/personal-ai/PresetChips";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
