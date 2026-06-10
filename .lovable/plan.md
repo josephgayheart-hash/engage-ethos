@@ -1,104 +1,134 @@
-## What we're building
 
-A new lightweight user type that only ever sees one feature: **Voice Studio** (the renamed Personal AI tool). They sign in, run a one-time setup wizard, and the rest of the app stays invisible to them.
+# Personal AI — Studio Upgrade
 
-You (super admin) invite them from a new page in Platform Admin.
+Turn the chat into a Claude-style **artifact workbench**: the AI renders diagrams, branded one-pagers, SVG infographics, and interactive previews into a side panel you can edit, version, export, and save. Plus folders for chats and drag-and-drop file/image uploads as context.
 
----
+## What you'll see
 
-## 1. Rename: Personal AI → Voice Studio
+```text
+┌───────────┬──────────────────────┬────────────────────────────┐
+│ Folders   │  Chat                │  Artifact Panel            │
+│  ▸ Ops    │  • User msg          │  ┌──────────────────────┐  │
+│  ▸ Brand  │  • AI msg + [chip]   │  │ Workflow v3   ⇆ Code │  │
+│  ▸ Q3     │  • [Mermaid pill]    │  │ ──────────────────── │  │
+│  + New    │  • [One-pager pill]  │  │   (rendered diagram) │  │
+│           │                      │  │                      │  │
+│ Chats     │  [+] [📎] [🎯Preset] │  │ v1 v2 v3  ⤓PNG ⤓SVG │  │
+│  • Today  │  ┌─prompt──────────┐ │  │ ⤓PDF  ↗Share  Iterate│  │
+└───────────┴──────────────────────┴────────────────────────────┘
+```
 
-- Sidebar item label, page title, header, empty-state copy.
-- Route `/admin/personal-ai` stays for backward compat. New canonical route: `/voice-studio`. Tool-only users land here; the old admin route redirects super admins to the same page.
-- Memory dialog, system prompt fallback copy updated.
+When the AI produces structured output, it streams into a **pill** in the message ("📊 Workflow Diagram — Open") and into the right panel. Click any past pill to re-open.
 
-## 2. Per-user `tool_only` flag
+## Scope (in order)
 
-Add `tool_only boolean default false` to `public.profiles`.
-- New helper `public.is_tool_only(uuid)` (security definer) used by route guards.
-- No change to `user_roles` or super-admin behavior. You stay full-access.
+### Phase 1 — Artifact engine + Mermaid + HTML one-pagers
+1. **Artifact data model** (new table `personal_ai_artifacts`): id, thread_id, message_id, kind (`mermaid`|`svg`|`html`|`react`|`markdown`|`image`), title, source, version, parent_artifact_id, created_at. RLS scoped to user.
+2. **Tool-call contract** for the chat model: add four "tools" the model emits as fenced blocks the renderer extracts:
+   - ` ```artifact:mermaid title="..." ` → Mermaid source
+   - ` ```artifact:svg title="..." ` → raw SVG
+   - ` ```artifact:html title="..." ` → branded HTML one-pager (sandboxed iframe)
+   - ` ```artifact:react title="..." ` → single TSX component (sandboxed preview)
+3. **Side panel** (`ArtifactPanel.tsx`): resizable split, tabs for Preview/Source, version dropdown, "Iterate on this" button (re-prompts with artifact as context), copy/download.
+4. **Renderers**:
+   - Mermaid via `mermaid` npm package, light/dark aware
+   - SVG: sanitized inline render
+   - HTML: sandboxed iframe with auto-injected brand CSS (tenant primary/secondary/logo)
+   - React/TSX: `sandpack-react` preview
+5. **Intent detection extension** — auto-route prompts like "diagram", "workflow", "one-pager", "org chart", "framework", "2x2" to add a system instruction biasing the appropriate artifact kind.
 
-## 3. Access lock-down for tool-only users
+### Phase 2 — Workflow & operating-model presets
+Quick-action chips above the composer (collapsible):
+- **Workflow Builder** → Mermaid flowchart + swim lanes + RACI markdown table
+- **Operating Model One-Pager** → branded HTML (Vision · Inputs · Process · Outputs · Metrics · Owners)
+- **Process Map (BPMN-ish)** → SVG
+- **Org / Capability Map** → Mermaid or SVG tree
+- **System Architecture** → Mermaid C4
+- **Framework Canvas** → 2x2 / pyramid / value chain (SVG)
 
-A new `<ToolOnlyGuard>` wrapper at the router level:
-- If `profile.tool_only === true`:
-  - All routes except `/voice-studio`, `/voice-studio/setup`, `/auth`, `/logout`, `/account` redirect → `/voice-studio` (or `/voice-studio/setup` if not finished).
-  - The app shell **hides the sidebar entirely** for them — full-bleed Voice Studio with a slim top bar (logo, profile menu, sign out).
-  - Dashboard, settings, admin, library, etc. are unreachable.
-- Super admins / normal users: unaffected.
+Each preset = curated system prompt + forced artifact kind + a starter template.
 
-## 4. First-login onboarding wizard
+### Phase 3 — Image upgrades
+- **Variations**: generate 3–4 in parallel, pick favorite
+- **Edit existing image**: use `imagegen--edit_image` flow ("make it darker", "add a label")
+- **Style presets**: Editorial · Whiteboard sketch · Flat illustration · Isometric · Corporate clean
+- **Brand-aware injection**: auto-append tenant primary/secondary hex + logo reference to the prompt
+- **Aspect ratio picker**: Square, 16:9 slide, 9:16 story, LinkedIn banner
+- **Annotate/overlay text** (reuses existing `generate-overlay-text` + smart-layer pipeline)
 
-New page `/voice-studio/setup` (4 short steps, ~2 min):
+### Phase 4 — Export & share
+- **Per-artifact**: download PNG/SVG/PDF; copy-as-image to clipboard
+- **Deck export**: select artifacts from a chat → bundle into `.pptx` via existing `compass-generate-pptx`
+- **Shareable link**: read-only public URL for a single artifact (token-based, optional)
 
-1. **How you'll use it** — multi-select: exec emails, meeting summaries, marketing copy, internal memos, general writing, other. Tunes the base prompt.
-2. **About you** — name, role/title, company, what you work on (1–3 lines). Persisted as durable context injected every turn.
-3. **Response preferences** — length (concise / balanced / detailed), format (bullets / prose / mixed), formality (casual → formal slider), banned words (free text), em-dash rule (on/off), markdown on/off.
-4. **Voice training** — paste 2–3 real writing samples (min 1, max 5). On submit, calls a new edge function `voice-studio-train` that uses Gemini to extract a concise voice profile (tone, sentence rhythm, vocabulary, structural habits, do/don't list) and saves it.
-
-Wizard saves to `personal_ai_profile` (existing table) — we extend it with the new columns rather than create a parallel one. After completion → redirect to `/voice-studio`.
-
-A "Retrain voice" / "Edit setup" button in the Voice Studio header re-opens the wizard at any time.
-
-## 5. Chat behavior wired to the new profile
-
-`personal-ai-chat` edge function already merges profile + facts into the system prompt. We extend the assembled prompt with the new structured fields (use cases, about-me, response prefs, extracted voice profile) so tool-only users get a tailored copilot from message one.
-
-## 6. Super-admin invite UI
-
-New page **Platform Admin → Tool-only users** (`/admin/voice-studio-users`):
-- Table of existing tool-only users (email, name, last active, "Reset setup").
-- **Invite** dialog: email, first name, last name → creates a `onboarding_requests` row (or reuses invite_tokens) marked as `tool_only`, calls an edge function `invite-tool-only-user` that:
-  - Creates the auth user (or sends magic-link signup),
-  - Inserts a profile with `tool_only = true`,
-  - Sends a Resend email with the sign-in link.
-- New sidebar item under your Platform Admin section: "Tool-only users".
-
-## 7. Edge functions
-
-- `invite-tool-only-user` (admin only) — provisions account, sends email.
-- `voice-studio-train` — accepts samples, returns + saves extracted voice profile.
-- Update `personal-ai-chat` — read new profile columns, inject into system prompt. No breaking change for existing super-admin use.
-
----
+### Phase 5 — Folders + uploads + QoL
+- **Folders/Projects** for chats: new table `personal_ai_folders` (id, user_id, name, color, sort_order). `personal_ai_threads` gains `folder_id` nullable FK. Sidebar shows collapsible folders, drag-to-move, rename, delete.
+- **Pin, rename, search** chats (search across thread titles + message text via Postgres FTS).
+- **File/image upload** in composer: drop PDF/DOCX/PNG/JPG → uploaded to `compass-artifacts` bucket → sent as multimodal `content` blocks to the chat model. PDFs parsed server-side to markdown (Gemini multimodal) before injection.
+- **System prompt per chat** (Settings drawer on the chat).
+- **Branch a conversation** from any AI message ("Continue from here in new chat").
 
 ## Technical details
 
-**Schema changes (one migration):**
+**New tables (migration):**
 ```sql
-ALTER TABLE public.profiles ADD COLUMN tool_only boolean NOT NULL DEFAULT false;
+CREATE TABLE public.personal_ai_artifacts (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  thread_id uuid NOT NULL REFERENCES public.personal_ai_threads(id) ON DELETE CASCADE,
+  message_id uuid,
+  kind text NOT NULL CHECK (kind IN ('mermaid','svg','html','react','markdown','image')),
+  title text,
+  source text NOT NULL,
+  preview_url text,
+  version int NOT NULL DEFAULT 1,
+  parent_artifact_id uuid REFERENCES public.personal_ai_artifacts(id) ON DELETE SET NULL,
+  metadata jsonb DEFAULT '{}',
+  created_at timestamptz DEFAULT now()
+);
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.personal_ai_artifacts TO authenticated;
+GRANT ALL ON public.personal_ai_artifacts TO service_role;
+ALTER TABLE public.personal_ai_artifacts ENABLE ROW LEVEL SECURITY;
+-- policy: user_id = auth.uid()
 
-ALTER TABLE public.personal_ai_profile
-  ADD COLUMN use_cases text[] DEFAULT '{}',
-  ADD COLUMN about_me text,
-  ADD COLUMN response_prefs jsonb DEFAULT '{}'::jsonb,
-  ADD COLUMN voice_profile jsonb,                 -- extracted from samples
-  ADD COLUMN voice_samples text[],                -- raw pasted samples (for retraining)
-  ADD COLUMN setup_completed_at timestamptz;
+CREATE TABLE public.personal_ai_folders (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  name text NOT NULL,
+  color text,
+  sort_order int DEFAULT 0,
+  created_at timestamptz DEFAULT now()
+);
+-- + grants + RLS
 
-CREATE OR REPLACE FUNCTION public.is_tool_only(_user_id uuid)
-RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
-AS $$ SELECT COALESCE((SELECT tool_only FROM public.profiles WHERE id = _user_id), false) $$;
+ALTER TABLE public.personal_ai_threads
+  ADD COLUMN folder_id uuid REFERENCES public.personal_ai_folders(id) ON DELETE SET NULL,
+  ADD COLUMN pinned boolean DEFAULT false,
+  ADD COLUMN system_prompt text;
 ```
-No new tables, so no new GRANTs needed. Existing RLS on `personal_ai_profile` (user owns own row) covers the new columns.
 
-**Frontend files (new):**
-- `src/pages/voice-studio/VoiceStudioSetup.tsx` — the 4-step wizard.
-- `src/pages/admin/ToolOnlyUsersPage.tsx` — invite + list.
-- `src/components/auth/ToolOnlyGuard.tsx` — route gating + shell stripping.
-- `src/hooks/useToolOnly.ts` — reads `tool_only` from profile.
+**Edge function changes:**
+- `personal-ai-chat`: extend system prompt with artifact contract; accept `mode` (preset) and `attachments[]`; pass file/image blocks per `ai-multimodal-input`.
+- New `personal-ai-parse-file` for PDF/DOCX → markdown (Gemini multimodal).
+- New `personal-ai-render-html-png` (optional, Phase 4) for PNG export of HTML one-pagers using a headless render of the iframe srcdoc into SVG, then `<img>` paint to canvas client-side instead — server function avoided if client-side works.
 
-**Frontend files (edited):**
-- `src/pages/admin/PersonalAIPage.tsx` — rename UI strings, hide app sidebar when `tool_only`, add "Edit setup" button.
-- `src/components/app-shell/AppSidebar.tsx` — rename menu item to "Voice Studio", add "Tool-only users" entry.
-- `src/App.tsx` (or router root) — wrap routes with `<ToolOnlyGuard>` and add new routes.
-- `src/contexts/AuthContext.tsx` — expose `isToolOnly`.
+**New deps:** `mermaid`, `dompurify`, `@codesandbox/sandpack-react` (Phase 1 React previews; can defer), `html2canvas` (client PNG export), `file-saver`.
 
-**Edge functions (new):**
-- `supabase/functions/invite-tool-only-user/index.ts`
-- `supabase/functions/voice-studio-train/index.ts`
+**Files touched/created (high-level):**
+- `src/pages/admin/PersonalAIPage.tsx` — split into chat column + `ArtifactPanel`
+- `src/components/personal-ai/ArtifactPanel.tsx` (new)
+- `src/components/personal-ai/renderers/{MermaidRenderer,SvgRenderer,HtmlRenderer,ReactRenderer}.tsx` (new)
+- `src/components/personal-ai/PresetChips.tsx` (new)
+- `src/components/personal-ai/FolderSidebar.tsx` (new)
+- `src/components/personal-ai/AttachmentDrop.tsx` (new)
+- `src/hooks/usePersonalAIArtifacts.ts`, `usePersonalAIFolders.ts` (new)
+- `supabase/functions/personal-ai-chat/index.ts` — artifact contract + attachments
+- `supabase/functions/personal-ai-parse-file/index.ts` (new)
+- migration for new tables/columns
 
-**Edge functions (edited):**
-- `supabase/functions/personal-ai-chat/index.ts` — include voice profile + use cases + about-me + prefs in system prompt.
+## Cut lines (so we ship)
+If we need to trim, drop in this order: React/TSX previews → BPMN preset → share links → branching. Mermaid, HTML one-pagers, presets, image variations, folders, and file uploads are the core promise.
 
-**Out of scope (ask before adding):** custom branding per tool-only user, file uploads in setup, voice cloning (audio), multi-tenant isolation for tool-only users (they're treated as standalone accounts in your tenant), self-serve signup.
+## What I'll do first
+Implement **Phase 1 + Phase 2** in one pass (artifact engine, Mermaid, HTML one-pagers, SVG, presets), then ship Phases 3–5 in follow-ups. Estimated as one substantial build cycle.
+

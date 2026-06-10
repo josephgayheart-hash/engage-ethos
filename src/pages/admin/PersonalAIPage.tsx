@@ -25,6 +25,7 @@ import {
 import { MemoryDialog } from "@/components/personal-ai/MemoryDialog";
 import { ArtifactPreviewFrame } from "@/components/personal-ai/ArtifactPreviewFrame";
 import { RichMarkdown } from "@/components/personal-ai/RichMarkdown";
+import { PresetChips, type Preset } from "@/components/personal-ai/PresetChips";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -231,6 +232,7 @@ export default function PersonalAIPage() {
   const [webSearch, setWebSearch] = useState(false);
   const [deepResearch, setDeepResearch] = useState(false);
   const [extendedThinking, setExtendedThinking] = useState(false);
+  const [activePreset, setActivePreset] = useState<Preset | null>(null);
   const [streaming, setStreaming] = useState(false);
   const [streamText, setStreamText] = useState("");
   const [streamImage, setStreamImage] = useState<string | null>(null);
@@ -649,6 +651,8 @@ export default function PersonalAIPage() {
     updateActive({ messages: newMessages, ...titleUpdate });
     setInput("");
     setPendingAttachments([]);
+    const usedPreset = activePreset;
+    setActivePreset(null);
     setStreaming(true);
     setStreamText("");
 
@@ -685,7 +689,9 @@ export default function PersonalAIPage() {
           message: text,
           history: active.messages.map(m => ({ role: m.role, content: m.content })),
           model: active.model,
-          systemPrompt: active.systemPrompt + (useResearch ? "\n\nDeep research mode: synthesize across the provided sources, cite [n] inline, surface conflicting evidence, and end with a short \"What I checked\" list." : ""),
+          systemPrompt: active.systemPrompt
+            + (usedPreset ? `\n\n# Build preset: ${usedPreset.label}\n${usedPreset.instruction}\n\nWhen you produce a diagram, ALWAYS emit it as a fenced \`\`\`mermaid block. When you produce a custom vector graphic (not a diagram), emit a fenced \`\`\`svg block containing valid <svg>...</svg> markup. These are rendered inline as interactive artifacts — never describe the diagram in prose instead of drawing it.` : "")
+            + (useResearch ? "\n\nDeep research mode: synthesize across the provided sources, cite [n] inline, surface conflicting evidence, and end with a short \"What I checked\" list." : ""),
           images,
           files,
           searchContext,
@@ -826,6 +832,21 @@ export default function PersonalAIPage() {
 
   const Composer = (
     <div className="space-y-2">
+      <div className="flex items-center gap-2 overflow-x-auto pb-0.5">
+        <PresetChips
+          active={activePreset?.id ?? null}
+          onSelect={(p) => setActivePreset(activePreset?.id === p.id ? null : p)}
+        />
+        {activePreset && (
+          <button
+            type="button"
+            onClick={() => setActivePreset(null)}
+            className="text-[11px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline whitespace-nowrap"
+          >
+            clear
+          </button>
+        )}
+      </div>
       {pendingAttachments.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {pendingAttachments.map((a, i) => (

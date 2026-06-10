@@ -90,6 +90,14 @@ serve(async (req) => {
             `Never call a generation tool with empty slides/blocks or placeholder text. For a one-pager, brief, or report, produce a full draft with headings, paragraphs, and supporting detail — not just a title.`
           );
           parts.push(
+            `# Inline artifacts (diagrams & graphics)\n` +
+            `The chat UI auto-renders certain fenced code blocks as interactive artifacts.\n` +
+            `- For ANY workflow, process, flowchart, swim-lane, org chart, sequence, ERD, or state diagram: emit a fenced \`\`\`mermaid block (valid Mermaid syntax). Do not describe the diagram in prose instead of drawing it.\n` +
+            `- For custom vector graphics that aren't workflow diagrams (2x2 matrices, frameworks, pyramids, funnels, value chains, simple infographics): emit a fenced \`\`\`svg block containing valid <svg viewBox="..."> ... </svg> markup. Use neutral colors unless the user gave brand colors.\n` +
+            `- For full one-pagers, briefs, or printable docs the user wants to download or share, call the \`generate_html\` or \`generate_pdf\` tool instead.\n` +
+            `Keep diagram node/edge labels short (1-4 words). Prefer LR (left-to-right) layouts for processes, TB (top-bottom) for hierarchies.`
+          );
+          parts.push(
             `# Response style (overrides any conflicting instructions above)\n` +
             `Write like Claude in a real conversation: warm, calm, direct, human. Flowing prose by default — not lists, not labels, not headings, not "Key improvements" sections, not "Recommended version / Optional version" scaffolding. ` +
             `Match length to the question: a one-line ask gets a one-to-three sentence answer. Only use bullets, headings, or numbered steps when the content is genuinely list-shaped (steps, comparisons, 4+ items) or the user explicitly asks for structure.\n` +
