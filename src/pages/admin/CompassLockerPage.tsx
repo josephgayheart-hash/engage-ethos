@@ -134,7 +134,26 @@ export default function CompassLockerPage() {
   const [posting, setPosting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [compassUsers, setCompassUsers] = useState<CompassUser[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    void (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, email, status")
+        .eq("status", "active")
+        .order("first_name", { ascending: true });
+      const list: CompassUser[] = (data || [])
+        .filter((p: any) => p.id !== user.id)
+        .map((p: any) => {
+          const name = [p.first_name, p.last_name].filter(Boolean).join(" ").trim();
+          return { id: p.id, name: name || p.email, email: p.email };
+        });
+      setCompassUsers(list);
+    })();
+  }, [user]);
 
   const loadItems = useCallback(async () => {
     if (!user) return;
