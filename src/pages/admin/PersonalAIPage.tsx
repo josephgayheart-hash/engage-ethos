@@ -268,6 +268,20 @@ export default function PersonalAIPage() {
     return () => window.removeEventListener("personal-ai:open-canvas", onOpen as EventListener);
   }, []);
 
+  // Esc closes the preview drawer (and exits fullscreen) so users always have an out.
+  useEffect(() => {
+    if (!artifactOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (artifactFullscreen) { setArtifactFullscreen(false); return; }
+      setArtifactOpen(false);
+      setFileArtifact(null);
+      setCanvasArtifact(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [artifactOpen, artifactFullscreen]);
+
 
 
   // Fetch the artifact as a blob and create a same-origin object URL so the
