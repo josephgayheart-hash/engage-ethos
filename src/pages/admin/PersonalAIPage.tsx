@@ -25,6 +25,8 @@ import {
 import { MemoryDialog } from "@/components/personal-ai/MemoryDialog";
 import { ArtifactPreviewFrame } from "@/components/personal-ai/ArtifactPreviewFrame";
 import { RichMarkdown } from "@/components/personal-ai/RichMarkdown";
+import { MermaidDiagram } from "@/components/personal-ai/MermaidDiagram";
+import { InlineSvg } from "@/components/personal-ai/InlineSvg";
 import { PRESETS, type Preset } from "@/components/personal-ai/PresetChips";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
