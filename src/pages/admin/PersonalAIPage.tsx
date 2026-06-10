@@ -208,7 +208,7 @@ function fileToDataUrl(file: File): Promise<string> {
 }
 
 export default function PersonalAIPage() {
-  const { isSuperAdmin, isToolOnly, profile } = useAuth();
+  const { isSuperAdmin, isToolOnly, profile, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [threads, setThreads] = useState<Thread[]>(() => {
@@ -300,6 +300,106 @@ export default function PersonalAIPage() {
   useEffect(() => { localStorage.setItem(ACTIVE_KEY, activeId); }, [activeId]);
   useEffect(() => { inputRef.current?.focus(); }, [activeId]);
 
+  // ─── Cloud sync: load threads from Supabase on mount, push changes back ───
+  const cloudHydratedRef = useRef(false);
+  const dirtyThreadsRef = useRef<Set<string>>(new Set());
+  const flushTimerRef = useRef<number | null>(null);
+
+  // Initial hydration from cloud (merges with local cache so nothing is lost)
+  useEffect(() => {
+    if (!user?.id || cloudHydratedRef.current) return;
+    cloudHydratedRef.current = true;
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from("personal_ai_threads")
+          .select("id,title,model,system_prompt,messages,updated_at")
+          .eq("user_id", user.id)
+          .order("updated_at", { ascending: false })
+          .limit(100);
+        if (error) throw error;
+
+        const cloudThreads: Thread[] = (data ?? []).map((r: any) => ({
+          id: r.id,
+          title: r.title || "New chat",
+          model: r.model || MODELS[0].id,
+          systemPrompt: r.system_prompt || DEFAULT_SYSTEM_PROMPT,
+          messages: Array.isArray(r.messages) ? r.messages : [],
+          updatedAt: r.updated_at ? new Date(r.updated_at).getTime() : Date.now(),
+        }));
+
+        if (cloudThreads.length === 0) {
+          // First time on cloud — push any meaningful local threads up
+          const localToPush = threads.filter(t => t.messages.length > 0);
+          if (localToPush.length) {
+            await supabase.from("personal_ai_threads").upsert(
+              localToPush.map(t => ({
+                id: t.id,
+                user_id: user.id,
+                title: t.title,
+                model: t.model,
+                system_prompt: t.systemPrompt,
+                messages: t.messages as any,
+                updated_at: new Date(t.updatedAt).toISOString(),
+              })),
+            );
+          }
+          return;
+        }
+
+        // Merge: cloud wins for overlapping ids; keep local-only unsaved drafts
+        const cloudIds = new Set(cloudThreads.map(t => t.id));
+        const localOnly = threads.filter(t => !cloudIds.has(t.id) && t.messages.length > 0);
+        const merged = [...cloudThreads, ...localOnly].sort((a, b) => b.updatedAt - a.updatedAt);
+        setThreads(merged.length ? merged : [newThread()]);
+
+        // Restore last-active if it exists in the merged set; otherwise pick newest
+        const storedActive = localStorage.getItem(ACTIVE_KEY);
+        if (storedActive && merged.some(t => t.id === storedActive)) {
+          setActiveId(storedActive);
+        } else {
+          setActiveId(merged[0]?.id ?? activeId);
+        }
+      } catch (e) {
+        console.warn("[compass] cloud thread hydration failed:", e);
+      }
+    })();
+  }, [user?.id]);
+
+  // Mark threads dirty whenever they change locally, then debounce-upsert to cloud
+  useEffect(() => {
+    if (!user?.id || !cloudHydratedRef.current) return;
+    for (const t of threads) dirtyThreadsRef.current.add(t.id);
+    if (flushTimerRef.current) window.clearTimeout(flushTimerRef.current);
+    flushTimerRef.current = window.setTimeout(async () => {
+      const ids = Array.from(dirtyThreadsRef.current);
+      dirtyThreadsRef.current.clear();
+      const rows = threads
+        .filter(t => ids.includes(t.id))
+        .map(t => ({
+          id: t.id,
+          user_id: user.id,
+          title: t.title || "New chat",
+          model: t.model,
+          system_prompt: t.systemPrompt,
+          messages: t.messages as any,
+          updated_at: new Date(t.updatedAt).toISOString(),
+        }));
+      if (!rows.length) return;
+      try {
+        const { error } = await supabase
+          .from("personal_ai_threads")
+          .upsert(rows, { onConflict: "id" });
+        if (error) throw error;
+      } catch (e) {
+        console.warn("[compass] cloud thread save failed:", e);
+      }
+    }, 800);
+    return () => {
+      if (flushTimerRef.current) window.clearTimeout(flushTimerRef.current);
+    };
+  }, [threads, user?.id]);
+
   // Auto-grow the composer textarea so long text doesn't overflow or scroll prematurely.
   useEffect(() => {
     const el = inputRef.current;
@@ -362,6 +462,12 @@ export default function PersonalAIPage() {
       if (id === activeId) setActiveId(next[0].id);
       return next;
     });
+    // Best-effort cloud delete (RLS ensures it's only the user's row)
+    if (user?.id) {
+      supabase.from("personal_ai_threads").delete().eq("id", id).then(({ error }) => {
+        if (error) console.warn("[compass] cloud thread delete failed:", error);
+      });
+    }
   };
 
   const TEXTY_EXT = /\.(txt|md|markdown|csv|tsv|json|jsonl|ya?ml|xml|html?|css|scss|less|js|jsx|ts|tsx|py|rb|go|rs|java|kt|swift|c|h|cpp|hpp|cs|php|sh|bash|zsh|sql|env|ini|toml|conf|log|srt|vtt)$/i;
