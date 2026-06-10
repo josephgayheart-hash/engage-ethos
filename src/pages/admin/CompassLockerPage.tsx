@@ -377,6 +377,24 @@ export default function CompassLockerPage() {
     toast.success("Unpinned — will expire again");
   };
 
+  const toggleShare = async (item: LockerItem, targetId: string) => {
+    const current = item.shared_with_user_ids || [];
+    const next = current.includes(targetId)
+      ? current.filter((id) => id !== targetId)
+      : [...current, targetId];
+    const { error } = await supabase
+      .from("compass_locker_items")
+      .update({ shared_with_user_ids: next })
+      .eq("id", item.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setItems((prev) =>
+      prev.map((i) => (i.id === item.id ? { ...i, shared_with_user_ids: next } : i)),
+    );
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-12">
