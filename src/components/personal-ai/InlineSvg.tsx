@@ -41,6 +41,24 @@ export function InlineSvg({ source, title, className }: Props) {
     URL.revokeObjectURL(url);
   };
 
+  // Auto-promote large/complex graphics to the canvas tray on first render.
+  const promotedRef = useRef(false);
+  useEffect(() => {
+    if (promotedRef.current) return;
+    const vbMatch = source.match(/viewBox="[^"]*?\s(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)"/);
+    const w = vbMatch ? parseFloat(vbMatch[1]) : 0;
+    const h = vbMatch ? parseFloat(vbMatch[2]) : 0;
+    const isComplex = source.length > 6000 || w >= 900 || h >= 700;
+    if (isComplex) {
+      promotedRef.current = true;
+      window.dispatchEvent(new CustomEvent("personal-ai:open-canvas", { detail: { kind: "svg", source, title } }));
+    }
+  }, [source, title]);
+
+  const openInCanvas = () => {
+    window.dispatchEvent(new CustomEvent("personal-ai:open-canvas", { detail: { kind: "svg", source, title } }));
+  };
+
   if (!cleaned) return null;
 
   return (
