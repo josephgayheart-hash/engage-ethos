@@ -50,6 +50,14 @@ type LockerItem = {
 
 type CompassUser = { id: string; name: string; email: string };
 
+type MultipartMeta = {
+  uploadStrategy: "parts";
+  partCount: number;
+  partSize: number;
+  contentType: string;
+  fileName: string;
+};
+
 type ExpiryKey = "1h" | "1d" | "7d" | "never";
 
 const EXPIRY_OPTIONS: { value: ExpiryKey; label: string; seconds: number | null }[] = [
@@ -63,6 +71,24 @@ const BUCKET = "compass-artifacts";
 // Standard supabase-js POST uploads cap at ~50MB; above that we use TUS resumable (up to 5GB).
 const STANDARD_UPLOAD_LIMIT = 50 * 1024 * 1024;
 const MAX_FILE_SIZE = 5 * 1024 * 1024 * 1024; // TUS storage hard cap
+const PART_UPLOAD_SIZE = 45 * 1024 * 1024;
+
+function parseMultipartMeta(item: LockerItem): MultipartMeta | null {
+  if (!item.content) return null;
+  try {
+    const parsed = JSON.parse(item.content) as Partial<MultipartMeta>;
+    if (parsed.uploadStrategy === "parts" && typeof parsed.partCount === "number") {
+      return parsed as MultipartMeta;
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+function partPath(path: string, index: number) {
+  return `${path}.part-${String(index).padStart(5, "0")}`;
+}
 
 function getUploadErrorMessage(error: unknown) {
   const err = error as {
