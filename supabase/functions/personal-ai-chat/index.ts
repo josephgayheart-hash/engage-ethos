@@ -90,12 +90,12 @@ serve(async (req) => {
             `Never call a generation tool with empty slides/blocks or placeholder text. For a one-pager, brief, or report, produce a full draft with headings, paragraphs, and supporting detail — not just a title.`
           );
           parts.push(
-            `# Response style\n` +
-            `Write like ChatGPT or Claude in a normal chat: warm, direct, conversational prose. ` +
-            `Default to short plain-text replies (1–3 sentences). Use markdown headings, bold labels, or bullet lists ONLY when the user explicitly asks for a structured document or the content is genuinely a list.\n` +
-            `After generating a file with a tool, do NOT produce a recap, changelog, "what I changed / improved / included" section, summary of sections, or a bulleted breakdown of the artifact. ` +
-            `Just say one short natural sentence (e.g. "Here's your deck — let me know what to tweak.") and stop. The user can already see and open the file.\n` +
-            `Never narrate your own process ("I'll now…", "Let me…", "I've gone ahead and…"). No preamble, no sign-off, no emojis unless the user used them first.`
+            `# Response style (overrides any conflicting instructions above)\n` +
+            `Write like Claude in a real conversation: warm, calm, direct, human. Flowing prose by default — not lists, not labels, not headings, not "Key improvements" sections, not "Recommended version / Optional version" scaffolding. ` +
+            `Match length to the question: a one-line ask gets a one-to-three sentence answer. Only use bullets, headings, or numbered steps when the content is genuinely list-shaped (steps, comparisons, 4+ items) or the user explicitly asks for structure.\n` +
+            `When the user asks you to rewrite or edit something, just return the rewrite. Do not append a bullet list of what you changed unless they ask "what did you change?". One short framing sentence before or after is fine; a changelog is not.\n` +
+            `After a tool generates a file, reply with ONE short natural sentence ("Here's your deck — tell me what to adjust.") and stop. Never summarize the artifact's sections, slide counts, or "what's included".\n` +
+            `Never narrate your own process ("I'll now…", "Let me…", "I've gone ahead and…", "Sure!", "Of course!", "Great question!"). No sign-offs, no emojis unless the user used them first. Do not use em dashes unless the user used one. Avoid corporate filler ("leverage", "synergy", "robust", "delve", "in the realm of", "it's worth noting").`
           );
 
           if (parts.length) memoryBlock = parts.join("\n\n---\n\n");
@@ -131,7 +131,7 @@ serve(async (req) => {
 
     const messages = [
       { role: "system", content: finalSystem },
-      ...history.slice(-30).map((m: any) => ({ role: m.role, content: m.content })),
+      ...history.slice(-20).map((m: any) => ({ role: m.role, content: m.content })),
       { role: "user", content: userContent },
     ];
 
@@ -140,6 +140,7 @@ serve(async (req) => {
 
     // ---- Anthropic (Claude) path: call Anthropic directly and translate SSE to OpenAI-style ----
     const isAnthropic = typeof model === "string" && (model.startsWith("anthropic/") || model.startsWith("claude-"));
+    console.log(`[personal-ai-chat] route=${isAnthropic ? "anthropic" : "lovable-gateway"} model=${model}`);
     if (isAnthropic) {
       const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
       if (!ANTHROPIC_API_KEY) {
@@ -416,7 +417,7 @@ serve(async (req) => {
                 },
                 body: JSON.stringify({
                   model: claudeModel,
-                  max_tokens: 4096,
+                  max_tokens: 8192,
                   system: sys,
                   messages: convo,
                   tools,
