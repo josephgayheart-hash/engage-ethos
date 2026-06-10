@@ -173,22 +173,26 @@ export default function CompassLockerPage() {
   const handleUpload = async (files: FileList | null) => {
     if (!user || !files || files.length === 0) return;
     setUploading(true);
+    let succeeded = 0;
     try {
       for (const file of Array.from(files)) {
         if (file.size > MAX_FILE_SIZE) {
-          toast.error(`${file.name} is larger than 50MB`);
+          toast.error(`${file.name} is ${(file.size / (1024 * 1024)).toFixed(1)}MB — over the 50MB limit`);
           continue;
         }
         const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, "_").slice(0, 80);
         const path = `${user.id}/locker/${Date.now()}-${safeName}`;
+        const isZip = /\.zip$/i.test(file.name);
+        const contentType = isZip ? "application/zip" : (file.type || "application/octet-stream");
         const { error: upErr } = await supabase.storage
           .from(BUCKET)
           .upload(path, file, {
-            contentType: file.type || "application/octet-stream",
+            contentType,
             upsert: false,
           });
         if (upErr) {
-          toast.error(`Upload failed: ${file.name}`);
+          console.error("Locker upload error:", upErr);
+          toast.error(`Upload failed: ${file.name} — ${upErr.message}`);
           continue;
         }
         const { error: insErr } = await supabase.from("compass_locker_items").insert({
@@ -196,22 +200,26 @@ export default function CompassLockerPage() {
           kind: "file",
           title: file.name,
           storage_path: path,
-          mime_type: file.type || "application/octet-stream",
+          mime_type: contentType,
           size_bytes: file.size,
           expires_at: expiryFromKey(expiry),
         });
         if (insErr) {
+          console.error("Locker insert error:", insErr);
           await supabase.storage.from(BUCKET).remove([path]);
-          toast.error(`Save failed: ${file.name}`);
+          toast.error(`Save failed: ${file.name} — ${insErr.message}`);
+          continue;
         }
+        succeeded++;
       }
-      toast.success("Uploaded");
+      if (succeeded > 0) toast.success(`Uploaded ${succeeded} file${succeeded === 1 ? "" : "s"}`);
       void loadItems();
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
+
 
   const handleDelete = async (item: LockerItem) => {
     if (!confirm("Delete this item?")) return;
