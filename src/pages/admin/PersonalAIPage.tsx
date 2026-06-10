@@ -958,13 +958,39 @@ export default function PersonalAIPage() {
                 <Plus className="h-[18px] w-[18px]" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-52">
+            <DropdownMenuContent align="start" className="w-64">
               <DropdownMenuItem onClick={() => fileRef.current?.click()}>
                 <Paperclip className="h-4 w-4 mr-2" /> Upload from computer
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => imageRef.current?.click()}>
                 <ImageIcon className="h-4 w-4 mr-2" /> Add photos
               </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/70 font-medium">
+                Build
+              </DropdownMenuLabel>
+              {PRESETS.map((p) => {
+                const Icon = p.icon;
+                const isActive = activePreset?.id === p.id;
+                return (
+                  <DropdownMenuItem
+                    key={p.id}
+                    onClick={() => setActivePreset(isActive ? null : p)}
+                    className={cn(isActive && "bg-primary/10 text-primary focus:bg-primary/15 focus:text-primary")}
+                  >
+                    <Icon className="h-4 w-4 mr-2" /> {p.label}
+                    {isActive && <Check className="h-3.5 w-3.5 ml-auto" />}
+                  </DropdownMenuItem>
+                );
+              })}
+              {activePreset && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setActivePreset(null)} className="text-muted-foreground">
+                    <X className="h-4 w-4 mr-2" /> Clear build preset
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
           <input ref={imageRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => { handleFiles(e.target.files, true); e.target.value = ""; }} />
