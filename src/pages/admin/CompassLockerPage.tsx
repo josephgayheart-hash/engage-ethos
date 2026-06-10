@@ -327,6 +327,7 @@ export default function CompassLockerPage() {
         const contentType = isZip ? "application/zip" : (file.type || "application/octet-stream");
         const useResumable = file.size > STANDARD_UPLOAD_LIMIT;
         const sizeLabel = `${(file.size / (1024 * 1024)).toFixed(1)}MB`;
+        let multipartMeta: MultipartMeta | null = null;
         if (useResumable) {
           toast.info(`Uploading ${file.name} (${sizeLabel})… 0%`, { id: `up-${path}` });
         }
@@ -344,14 +345,29 @@ export default function CompassLockerPage() {
           }
         } catch (e: any) {
           console.error("Locker upload error:", e);
-          toast.error(`Upload failed: ${file.name} — ${getUploadErrorMessage(e)}`, { id: `up-${path}` });
-          continue;
+          if (!useResumable) {
+            toast.error(`Upload failed: ${file.name} — ${getUploadErrorMessage(e)}`, { id: `up-${path}` });
+            continue;
+          }
+
+          toast.info(`Retrying ${file.name} in backend-safe parts…`, { id: `up-${path}` });
+          try {
+            multipartMeta = await uploadFileInParts(file, path, contentType, (bytesUploaded, bytesTotal) => {
+              const pct = Math.min(100, Math.round((bytesUploaded / bytesTotal) * 100));
+              toast.info(`Uploading ${file.name} (${sizeLabel})… ${pct}%`, { id: `up-${path}` });
+            });
+          } catch (partError: any) {
+            console.error("Locker chunked upload error:", partError);
+            toast.error(`Upload failed: ${file.name} — ${getUploadErrorMessage(partError)}`, { id: `up-${path}` });
+            continue;
+          }
         }
 
         const { error: insErr } = await supabase.from("compass_locker_items").insert({
           user_id: user.id,
           kind: "file",
           title: file.name,
+          content: multipartMeta ? JSON.stringify(multipartMeta) : null,
           storage_path: path,
           mime_type: contentType,
           size_bytes: file.size,
