@@ -985,7 +985,7 @@ export default function PersonalAIPage() {
                       <div
                         key={t.id}
                         className={cn(
-                          "group relative flex items-center rounded-lg pl-3 pr-10 py-2 cursor-pointer text-sm transition",
+                          "group grid grid-cols-[minmax(0,1fr)_2rem] items-center gap-1 rounded-lg pl-3 pr-1.5 py-1.5 cursor-pointer text-sm transition",
                           t.id === activeId
                             ? "bg-accent text-accent-foreground"
                             : "text-foreground/80 hover:bg-muted hover:text-foreground"
@@ -993,23 +993,17 @@ export default function PersonalAIPage() {
                         onClick={() => setActiveId(t.id)}
                         title={t.title}
                       >
-                        <span
-                          className="flex-1 min-w-0 overflow-hidden whitespace-nowrap"
-                          style={{
-                            WebkitMaskImage: "linear-gradient(to right, #000 calc(100% - 32px), transparent 100%)",
-                            maskImage: "linear-gradient(to right, #000 calc(100% - 32px), transparent 100%)",
-                          }}
-                        >
+                        <span className="min-w-0 truncate leading-6">
                           {t.title || "New chat"}
                         </span>
                         <button
                           type="button"
                           className={cn(
-                            "absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex items-center justify-center h-7 w-7 rounded-md transition",
-                            "text-muted-foreground hover:text-destructive",
+                            "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition",
+                            "text-muted-foreground/80 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                             t.id === activeId
-                              ? "bg-accent hover:bg-background/80 opacity-100"
-                              : "bg-transparent group-hover:bg-muted hover:!bg-background/90 opacity-0 group-hover:opacity-100 focus:opacity-100"
+                              ? "bg-background/40 hover:bg-background/80 opacity-100"
+                              : "bg-transparent opacity-70 hover:bg-background/80 hover:opacity-100 focus:opacity-100"
                           )}
                           onClick={(e) => {
                             e.stopPropagation();
@@ -1018,6 +1012,7 @@ export default function PersonalAIPage() {
                             }
                           }}
                           aria-label="Delete chat"
+                          title="Delete chat"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
