@@ -643,6 +643,62 @@ export default function CompassLockerPage() {
                     </>
                   )}
                   {item.user_id === user.id && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className={cn(
+                            "h-8 w-8 relative",
+                            (item.shared_with_user_ids?.length ?? 0) > 0 && "text-primary",
+                          )}
+                          title="Share with Compass users"
+                        >
+                          <Users className="h-4 w-4" />
+                          {(item.shared_with_user_ids?.length ?? 0) > 0 && (
+                            <span className="absolute -right-0.5 -top-0.5 rounded-full bg-primary px-1 text-[9px] leading-3 text-primary-foreground">
+                              {item.shared_with_user_ids.length}
+                            </span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent align="end" className="w-64 p-0">
+                        <div className="border-b px-3 py-2 text-xs font-medium text-muted-foreground">
+                          Share with
+                        </div>
+                        <div className="max-h-64 overflow-auto py-1">
+                          {compassUsers.length === 0 ? (
+                            <div className="px-3 py-2 text-xs text-muted-foreground">
+                              No other Compass users found.
+                            </div>
+                          ) : (
+                            compassUsers.map((u) => {
+                              const checked = (item.shared_with_user_ids || []).includes(u.id);
+                              return (
+                                <button
+                                  key={u.id}
+                                  type="button"
+                                  onClick={() => void toggleShare(item, u.id)}
+                                  className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm hover:bg-muted"
+                                >
+                                  <span className="flex h-4 w-4 items-center justify-center rounded border">
+                                    {checked && <Check className="h-3 w-3" />}
+                                  </span>
+                                  <span className="min-w-0 flex-1 truncate">
+                                    {u.name}
+                                    <span className="ml-1 text-[10px] text-muted-foreground">
+                                      {u.email}
+                                    </span>
+                                  </span>
+                                </button>
+                              );
+                            })
+                          )}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                  {item.user_id === user.id && (
                     item.expires_at ? (
                       <Button
                         variant="ghost"
