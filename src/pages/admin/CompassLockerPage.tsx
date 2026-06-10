@@ -209,24 +209,33 @@ export default function CompassLockerPage() {
     try {
       for (const file of Array.from(files)) {
         if (file.size > MAX_FILE_SIZE) {
-          toast.error(`${file.name} is ${(file.size / (1024 * 1024)).toFixed(1)}MB — over the 50MB limit`);
+          toast.error(`${file.name} is ${(file.size / (1024 * 1024 * 1024)).toFixed(2)}GB — over the 2GB limit`);
           continue;
         }
         const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, "_").slice(0, 80);
         const path = `${user.id}/locker/${Date.now()}-${safeName}`;
         const isZip = /\.zip$/i.test(file.name);
         const contentType = isZip ? "application/zip" : (file.type || "application/octet-stream");
-        const { error: upErr } = await supabase.storage
-          .from(BUCKET)
-          .upload(path, file, {
-            contentType,
-            upsert: false,
-          });
-        if (upErr) {
-          console.error("Locker upload error:", upErr);
-          toast.error(`Upload failed: ${file.name} — ${upErr.message}`);
+        const useResumable = file.size > STANDARD_UPLOAD_LIMIT;
+        const sizeLabel = `${(file.size / (1024 * 1024)).toFixed(1)}MB`;
+        if (useResumable) {
+          toast.info(`Uploading ${file.name} (${sizeLabel})…`, { id: `up-${path}` });
+        }
+        try {
+          if (useResumable) {
+            await resumableUpload(file, path, contentType);
+          } else {
+            const { error: upErr } = await supabase.storage
+              .from(BUCKET)
+              .upload(path, file, { contentType, upsert: false });
+            if (upErr) throw upErr;
+          }
+        } catch (e: any) {
+          console.error("Locker upload error:", e);
+          toast.error(`Upload failed: ${file.name} — ${e?.message || "unknown error"}`, { id: `up-${path}` });
           continue;
         }
+
         const { error: insErr } = await supabase.from("compass_locker_items").insert({
           user_id: user.id,
           kind: "file",
