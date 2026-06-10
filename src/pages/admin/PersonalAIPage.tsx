@@ -1259,9 +1259,24 @@ export default function PersonalAIPage() {
                               {m.imageUrl ? (
                                 <div className="space-y-2">
                                   <img src={m.imageUrl} alt="Generated" className="rounded-xl border max-w-full" />
-                                  <button onClick={() => downloadImage(m.imageUrl!)} className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
-                                    <Download className="h-3 w-3" /> Download
-                                  </button>
+                                  <div className="flex items-center gap-3">
+                                    <button onClick={() => downloadImage(m.imageUrl!)} className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+                                      <Download className="h-3 w-3" /> Download
+                                    </button>
+                                    {(() => {
+                                      const prevUser = active?.messages.slice(0, i).reverse().find(x => x.role === "user");
+                                      if (!prevUser?.content) return null;
+                                      return (
+                                        <button
+                                          disabled={streaming}
+                                          onClick={() => generateImage(prevUser.content, { variation: true, displayPrompt: "Variation of previous image" })}
+                                          className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 disabled:opacity-40"
+                                        >
+                                          <RefreshCw className="h-3 w-3" /> Variations
+                                        </button>
+                                      );
+                                    })()}
+                                  </div>
                                 </div>
                               ) : (
                                 <>
