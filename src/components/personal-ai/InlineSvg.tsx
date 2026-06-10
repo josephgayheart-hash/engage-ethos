@@ -1,7 +1,7 @@
 import DOMPurify from "dompurify";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Copy, Download, Code as CodeIcon, Eye, Check } from "lucide-react";
+import { Copy, Download, Code as CodeIcon, Eye, Check, Maximize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -41,6 +41,24 @@ export function InlineSvg({ source, title, className }: Props) {
     URL.revokeObjectURL(url);
   };
 
+  // Auto-promote large/complex graphics to the canvas tray on first render.
+  const promotedRef = useRef(false);
+  useEffect(() => {
+    if (promotedRef.current) return;
+    const vbMatch = source.match(/viewBox="[^"]*?\s(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)"/);
+    const w = vbMatch ? parseFloat(vbMatch[1]) : 0;
+    const h = vbMatch ? parseFloat(vbMatch[2]) : 0;
+    const isComplex = source.length > 6000 || w >= 900 || h >= 700;
+    if (isComplex) {
+      promotedRef.current = true;
+      window.dispatchEvent(new CustomEvent("personal-ai:open-canvas", { detail: { kind: "svg", source, title } }));
+    }
+  }, [source, title]);
+
+  const openInCanvas = () => {
+    window.dispatchEvent(new CustomEvent("personal-ai:open-canvas", { detail: { kind: "svg", source, title } }));
+  };
+
   if (!cleaned) return null;
 
   return (
@@ -64,6 +82,9 @@ export function InlineSvg({ source, title, className }: Props) {
           </Button>
           <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={download}>
             <Download className="h-3.5 w-3.5" />
+          </Button>
+          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={openInCanvas} title="Open in canvas">
+            <Maximize2 className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>

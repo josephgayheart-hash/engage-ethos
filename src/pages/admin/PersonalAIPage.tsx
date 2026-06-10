@@ -25,6 +25,8 @@ import {
 import { MemoryDialog } from "@/components/personal-ai/MemoryDialog";
 import { ArtifactPreviewFrame } from "@/components/personal-ai/ArtifactPreviewFrame";
 import { RichMarkdown } from "@/components/personal-ai/RichMarkdown";
+import { MermaidDiagram } from "@/components/personal-ai/MermaidDiagram";
+import { InlineSvg } from "@/components/personal-ai/InlineSvg";
 import { PRESETS, type Preset } from "@/components/personal-ai/PresetChips";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -248,8 +250,23 @@ export default function PersonalAIPage() {
   const [previewNonce, setPreviewNonce] = useState(0);
   const [deleteTarget, setDeleteTarget] = useState<Thread | null>(null);
   const [artifactFullscreen, setArtifactFullscreen] = useState(false);
+  const [canvasArtifact, setCanvasArtifact] = useState<{ kind: "mermaid" | "svg"; source: string; title?: string } | null>(null);
   const deviceWidthFor = (d: "desktop" | "tablet" | "mobile") =>
     d === "mobile" ? 414 : d === "tablet" ? 834 : 1280;
+
+  // Open Mermaid/SVG artifacts in the right canvas when triggered from inline cards
+  useEffect(() => {
+    const onOpen = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { kind: "mermaid" | "svg"; source: string; title?: string };
+      if (!detail?.source) return;
+      setCanvasArtifact(detail);
+      setFileArtifact(null);
+      setArtifactHtml("");
+      setArtifactOpen(true);
+    };
+    window.addEventListener("personal-ai:open-canvas", onOpen as EventListener);
+    return () => window.removeEventListener("personal-ai:open-canvas", onOpen as EventListener);
+  }, []);
 
 
 
@@ -1477,7 +1494,20 @@ export default function PersonalAIPage() {
               {/* Unified toolbar — works for both HTML artifacts and file artifacts */}
               <div className="h-14 border-b border-border/60 flex items-center justify-between px-3 shrink-0 bg-background/80 backdrop-blur gap-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  {fileArtifact ? (
+                  {canvasArtifact ? (
+                    <>
+                      <Badge variant="outline" className="gap-1 font-normal shrink-0 uppercase text-[10px]">{canvasArtifact.kind === "mermaid" ? "Diagram" : "Graphic"}</Badge>
+                      <span className="text-sm font-medium truncate">{canvasArtifact.title || (canvasArtifact.kind === "mermaid" ? "Diagram" : "Graphic")}</span>
+                      <div className="flex rounded-lg border border-border/60 bg-background overflow-hidden ml-1">
+                        <button onClick={() => setArtifactTab("preview")} className={cn("px-2.5 py-1 text-xs inline-flex items-center gap-1", artifactTab === "preview" ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground")}>
+                          <Eye className="h-3 w-3" /> Preview
+                        </button>
+                        <button onClick={() => setArtifactTab("code")} className={cn("px-2.5 py-1 text-xs inline-flex items-center gap-1 border-l border-border/60", artifactTab === "code" ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground")}>
+                          <CodeIcon className="h-3 w-3" /> Source
+                        </button>
+                      </div>
+                    </>
+                  ) : fileArtifact ? (
                     <>
                       <Badge variant="outline" className="gap-1 font-normal shrink-0 uppercase text-[10px]">{fileArtifact.kind}</Badge>
                       <span className="text-sm font-medium truncate" title={fileArtifact.filename}>{fileArtifact.filename}</span>
@@ -1572,13 +1602,27 @@ export default function PersonalAIPage() {
                   >
                     {artifactFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
                   </Button>
-                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => { setArtifactOpen(false); setFileArtifact(null); setArtifactFullscreen(false); }} aria-label="Close artifact"><X className="h-4 w-4" /></Button>
+                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => { setArtifactOpen(false); setFileArtifact(null); setCanvasArtifact(null); setArtifactFullscreen(false); }} aria-label="Close artifact"><X className="h-4 w-4" /></Button>
                 </div>
               </div>
 
               {/* Preview surface */}
               <div key={previewNonce} className="flex-1 min-h-0 bg-[radial-gradient(circle_at_1px_1px,hsl(var(--border))_1px,transparent_0)] [background-size:20px_20px] bg-muted/20 p-4 overflow-auto">
-                {fileArtifact ? (
+                {canvasArtifact ? (
+                  artifactTab === "code" ? (
+                    <ScrollArea className="h-full rounded-lg bg-background ring-1 ring-border/60">
+                      <pre className="text-xs p-4 whitespace-pre-wrap font-mono leading-relaxed">{canvasArtifact.source}</pre>
+                    </ScrollArea>
+                  ) : (
+                    <div className="mx-auto h-full w-full max-w-[1280px] rounded-lg shadow-lg overflow-auto bg-white ring-1 ring-border/60 p-8 flex items-center justify-center">
+                      {canvasArtifact.kind === "mermaid" ? (
+                        <MermaidDiagram source={canvasArtifact.source} title={canvasArtifact.title} className="border-0 my-0 w-full bg-transparent" />
+                      ) : (
+                        <InlineSvg source={canvasArtifact.source} title={canvasArtifact.title} className="border-0 my-0 w-full bg-transparent" />
+                      )}
+                    </div>
+                  )
+                ) : fileArtifact ? (
                   !artifactBlobUrl ? (
                     <div className="h-full flex items-center justify-center text-xs text-muted-foreground">Loading preview…</div>
                   ) : fileArtifact.kind === "image" || fileArtifact.kind === "svg" ? (

@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import mermaid from "mermaid";
 import { Button } from "@/components/ui/button";
-import { Copy, Download, Code as CodeIcon, Eye, Check } from "lucide-react";
+import { Copy, Download, Code as CodeIcon, Eye, Check, Maximize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 let initialized = false;
@@ -50,6 +50,26 @@ export function MermaidDiagram({ source, title, className }: Props) {
       cancelled = true;
     };
   }, [source, id]);
+
+  // Auto-promote large/complex diagrams to the right-side canvas on first render.
+  const promotedRef = useRef(false);
+  useEffect(() => {
+    if (promotedRef.current) return;
+    const lines = source.trim().split("\n").length;
+    const isComplex =
+      source.length > 1400 ||
+      lines > 28 ||
+      (source.match(/subgraph/gi)?.length ?? 0) >= 3 ||
+      (source.match(/participant\s/gi)?.length ?? 0) >= 5;
+    if (isComplex) {
+      promotedRef.current = true;
+      window.dispatchEvent(new CustomEvent("personal-ai:open-canvas", { detail: { kind: "mermaid", source, title } }));
+    }
+  }, [source, title]);
+
+  const openInCanvas = () => {
+    window.dispatchEvent(new CustomEvent("personal-ai:open-canvas", { detail: { kind: "mermaid", source, title } }));
+  };
 
   const copy = async () => {
     await navigator.clipboard.writeText(source);
@@ -121,6 +141,9 @@ export function MermaidDiagram({ source, title, className }: Props) {
           </Button>
           <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={downloadPng} title="Download PNG">
             <Download className="h-3.5 w-3.5" />
+          </Button>
+          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={openInCanvas} title="Open in canvas">
+            <Maximize2 className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>
