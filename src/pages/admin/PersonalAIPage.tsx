@@ -1564,11 +1564,22 @@ export default function PersonalAIPage() {
                   ) : (
                     <>
                       <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" onClick={() => {
-                        const blob = new Blob([artifactHtml], { type: "text/html" });
-                        const url = URL.createObjectURL(blob);
-                        const w = window.open(url, "_blank", "noopener,noreferrer");
-                        if (!w) { toast({ title: "Popup blocked", description: "Allow popups to open the artifact in a new tab.", variant: "destructive" }); }
-                        setTimeout(() => URL.revokeObjectURL(url), 60_000);
+                        // Use an <a target="_blank"> click instead of window.open — browsers treat
+                        // anchor-driven navigations as user-initiated and skip the popup blocker.
+                        try {
+                          const blob = new Blob([artifactHtml], { type: "text/html;charset=utf-8" });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement("a");
+                          a.href = url;
+                          a.target = "_blank";
+                          a.rel = "noopener noreferrer";
+                          document.body.appendChild(a);
+                          a.click();
+                          a.remove();
+                          setTimeout(() => URL.revokeObjectURL(url), 60_000);
+                        } catch (e: any) {
+                          toast({ title: "Couldn't open artifact", description: e?.message || "Try downloading instead.", variant: "destructive" });
+                        }
                       }}>
                         <ExternalLink className="h-3 w-3" /> Open
                       </Button>
