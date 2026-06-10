@@ -417,7 +417,7 @@ serve(async (req) => {
                 },
                 body: JSON.stringify({
                   model: claudeModel,
-                  max_tokens: 4096,
+                  max_tokens: 8192,
                   system: sys,
                   messages: convo,
                   tools,
