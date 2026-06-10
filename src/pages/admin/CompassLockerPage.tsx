@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 type LockerItem = {
@@ -44,7 +45,10 @@ type LockerItem = {
   size_bytes: number | null;
   expires_at: string | null;
   created_at: string;
+  shared_with_user_ids: string[];
 };
+
+type CompassUser = { id: string; name: string; email: string };
 
 type ExpiryKey = "1h" | "1d" | "7d" | "never";
 
