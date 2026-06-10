@@ -62,18 +62,38 @@ const EXPIRY_OPTIONS: { value: ExpiryKey; label: string; seconds: number | null 
 const BUCKET = "compass-artifacts";
 // Standard supabase-js POST uploads cap at ~50MB; above that we use TUS resumable (up to 5GB).
 const STANDARD_UPLOAD_LIMIT = 50 * 1024 * 1024;
-const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024; // 2GB hard cap
+const MAX_FILE_SIZE = 5 * 1024 * 1024 * 1024; // TUS storage hard cap
 
-async function resumableUpload(file: File, path: string, contentType: string): Promise<void> {
+function getUploadErrorMessage(error: unknown) {
+  const err = error as {
+    message?: string;
+    originalResponse?: { getStatus?: () => number; getBody?: () => string };
+  };
+  const status = err?.originalResponse?.getStatus?.();
+  const body = err?.originalResponse?.getBody?.();
+  const details = body || err?.message || "unknown error";
+  return status ? `${status}: ${details}` : details;
+}
+
+async function resumableUpload(
+  file: File,
+  path: string,
+  contentType: string,
+  onProgress?: (bytesUploaded: number, bytesTotal: number) => void,
+): Promise<void> {
   const tus = await import("tus-js-client");
   const { data: sess } = await supabase.auth.getSession();
   const token = sess.session?.access_token;
   if (!token) throw new Error("Not authenticated");
+  const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID as string | undefined;
   const projectUrl = import.meta.env.VITE_SUPABASE_URL as string;
+  const endpoint = projectId
+    ? `https://${projectId}.storage.supabase.co/storage/v1/upload/resumable`
+    : `${projectUrl}/storage/v1/upload/resumable`;
 
   await new Promise<void>((resolve, reject) => {
     const upload = new tus.Upload(file, {
-      endpoint: `${projectUrl}/storage/v1/upload/resumable`,
+      endpoint,
       retryDelays: [0, 3000, 5000, 10000, 20000],
       headers: {
         authorization: `Bearer ${token}`,
@@ -88,10 +108,14 @@ async function resumableUpload(file: File, path: string, contentType: string): P
         cacheControl: "3600",
       },
       chunkSize: 6 * 1024 * 1024,
+      onProgress,
       onError: (err) => reject(err),
       onSuccess: () => resolve(),
     });
-    upload.start();
+    upload.findPreviousUploads().then((previousUploads) => {
+      if (previousUploads.length) upload.resumeFromPreviousUpload(previousUploads[0]);
+      upload.start();
+    }).catch(reject);
   });
 }
 
