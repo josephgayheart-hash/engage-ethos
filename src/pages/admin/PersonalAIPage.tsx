@@ -1606,7 +1606,21 @@ export default function PersonalAIPage() {
 
               {/* Preview surface */}
               <div key={previewNonce} className="flex-1 min-h-0 bg-[radial-gradient(circle_at_1px_1px,hsl(var(--border))_1px,transparent_0)] [background-size:20px_20px] bg-muted/20 p-4 overflow-auto">
-                {fileArtifact ? (
+                {canvasArtifact ? (
+                  artifactTab === "code" ? (
+                    <ScrollArea className="h-full rounded-lg bg-background ring-1 ring-border/60">
+                      <pre className="text-xs p-4 whitespace-pre-wrap font-mono leading-relaxed">{canvasArtifact.source}</pre>
+                    </ScrollArea>
+                  ) : (
+                    <div className="mx-auto h-full w-full max-w-[1280px] rounded-lg shadow-lg overflow-auto bg-white ring-1 ring-border/60 p-8 flex items-center justify-center">
+                      {canvasArtifact.kind === "mermaid" ? (
+                        <MermaidDiagram source={canvasArtifact.source} title={canvasArtifact.title} className="border-0 my-0 w-full bg-transparent" />
+                      ) : (
+                        <InlineSvg source={canvasArtifact.source} title={canvasArtifact.title} className="border-0 my-0 w-full bg-transparent" />
+                      )}
+                    </div>
+                  )
+                ) : fileArtifact ? (
                   !artifactBlobUrl ? (
                     <div className="h-full flex items-center justify-center text-xs text-muted-foreground">Loading preview…</div>
                   ) : fileArtifact.kind === "image" || fileArtifact.kind === "svg" ? (
