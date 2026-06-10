@@ -650,6 +650,8 @@ export default function PersonalAIPage() {
     updateActive({ messages: newMessages, ...titleUpdate });
     setInput("");
     setPendingAttachments([]);
+    const usedPreset = activePreset;
+    setActivePreset(null);
     setStreaming(true);
     setStreamText("");
 
