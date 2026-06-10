@@ -248,8 +248,23 @@ export default function PersonalAIPage() {
   const [previewNonce, setPreviewNonce] = useState(0);
   const [deleteTarget, setDeleteTarget] = useState<Thread | null>(null);
   const [artifactFullscreen, setArtifactFullscreen] = useState(false);
+  const [canvasArtifact, setCanvasArtifact] = useState<{ kind: "mermaid" | "svg"; source: string; title?: string } | null>(null);
   const deviceWidthFor = (d: "desktop" | "tablet" | "mobile") =>
     d === "mobile" ? 414 : d === "tablet" ? 834 : 1280;
+
+  // Open Mermaid/SVG artifacts in the right canvas when triggered from inline cards
+  useEffect(() => {
+    const onOpen = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { kind: "mermaid" | "svg"; source: string; title?: string };
+      if (!detail?.source) return;
+      setCanvasArtifact(detail);
+      setFileArtifact(null);
+      setArtifactHtml("");
+      setArtifactOpen(true);
+    };
+    window.addEventListener("personal-ai:open-canvas", onOpen as EventListener);
+    return () => window.removeEventListener("personal-ai:open-canvas", onOpen as EventListener);
+  }, []);
 
 
 
