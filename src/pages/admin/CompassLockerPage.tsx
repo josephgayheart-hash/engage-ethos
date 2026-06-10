@@ -268,11 +268,14 @@ export default function CompassLockerPage() {
         const useResumable = file.size > STANDARD_UPLOAD_LIMIT;
         const sizeLabel = `${(file.size / (1024 * 1024)).toFixed(1)}MB`;
         if (useResumable) {
-          toast.info(`Uploading ${file.name} (${sizeLabel})…`, { id: `up-${path}` });
+          toast.info(`Uploading ${file.name} (${sizeLabel})… 0%`, { id: `up-${path}` });
         }
         try {
           if (useResumable) {
-            await resumableUpload(file, path, contentType);
+            await resumableUpload(file, path, contentType, (bytesUploaded, bytesTotal) => {
+              const pct = Math.min(100, Math.round((bytesUploaded / bytesTotal) * 100));
+              toast.info(`Uploading ${file.name} (${sizeLabel})… ${pct}%`, { id: `up-${path}` });
+            });
           } else {
             const { error: upErr } = await supabase.storage
               .from(BUCKET)
@@ -281,7 +284,7 @@ export default function CompassLockerPage() {
           }
         } catch (e: any) {
           console.error("Locker upload error:", e);
-          toast.error(`Upload failed: ${file.name} — ${e?.message || "unknown error"}`, { id: `up-${path}` });
+          toast.error(`Upload failed: ${file.name} — ${getUploadErrorMessage(e)}`, { id: `up-${path}` });
           continue;
         }
 
