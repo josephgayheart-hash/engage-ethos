@@ -145,6 +145,40 @@ async function resumableUpload(
   });
 }
 
+async function uploadFileInParts(
+  file: File,
+  path: string,
+  contentType: string,
+  onProgress?: (bytesUploaded: number, bytesTotal: number) => void,
+): Promise<MultipartMeta> {
+  const partCount = Math.ceil(file.size / PART_UPLOAD_SIZE);
+  let uploaded = 0;
+
+  for (let i = 0; i < partCount; i++) {
+    const start = i * PART_UPLOAD_SIZE;
+    const end = Math.min(start + PART_UPLOAD_SIZE, file.size);
+    const blob = file.slice(start, end, "application/octet-stream");
+    const { error } = await supabase.storage
+      .from(BUCKET)
+      .upload(partPath(path, i), blob, { contentType: "application/octet-stream", upsert: false });
+    if (error) {
+      const uploadedPaths = Array.from({ length: i }, (_, idx) => partPath(path, idx));
+      if (uploadedPaths.length) await supabase.storage.from(BUCKET).remove(uploadedPaths);
+      throw error;
+    }
+    uploaded += end - start;
+    onProgress?.(uploaded, file.size);
+  }
+
+  return {
+    uploadStrategy: "parts",
+    partCount,
+    partSize: PART_UPLOAD_SIZE,
+    contentType,
+    fileName: file.name,
+  };
+}
+
 function formatBytes(bytes: number | null | undefined) {
   if (!bytes && bytes !== 0) return "—";
   if (bytes < 1024) return `${bytes} B`;
