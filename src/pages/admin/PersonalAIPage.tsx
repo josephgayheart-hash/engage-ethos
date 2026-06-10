@@ -832,21 +832,47 @@ export default function PersonalAIPage() {
 
   const Composer = (
     <div className="space-y-2">
-      <div className="flex items-center gap-2 overflow-x-auto pb-0.5">
-        <PresetChips
-          active={activePreset?.id ?? null}
-          onSelect={(p) => setActivePreset(activePreset?.id === p.id ? null : p)}
-        />
-        {activePreset && (
-          <button
-            type="button"
-            onClick={() => setActivePreset(null)}
-            className="text-[11px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline whitespace-nowrap"
-          >
-            clear
-          </button>
-        )}
-      </div>
+      {activePreset && (
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className="gap-1.5 pl-2 pr-1 py-1 rounded-lg font-normal">
+            <activePreset.icon className="h-3 w-3" />
+            <span>Build: {activePreset.label}</span>
+            <button
+              onClick={() => setActivePreset(null)}
+              className="ml-0.5 p-0.5 hover:bg-background/60 rounded"
+              aria-label="Clear preset"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </Badge>
+        </div>
+      )}
+      {imageMode && (
+        <div className="flex flex-wrap items-center gap-2 text-[11px]">
+          <span className="text-muted-foreground/70 uppercase tracking-wider font-medium">Image</span>
+          <Select value={imageAspect} onValueChange={setImageAspect}>
+            <SelectTrigger className="h-7 w-auto gap-1 rounded-full px-2.5 text-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1:1">Square (1:1)</SelectItem>
+              <SelectItem value="3:2">Landscape (3:2)</SelectItem>
+              <SelectItem value="2:3">Portrait (2:3)</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={imageStyle} onValueChange={setImageStyle}>
+            <SelectTrigger className="h-7 w-auto gap-1 rounded-full px-2.5 text-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="auto">Auto style</SelectItem>
+              <SelectItem value="photo">Photorealistic</SelectItem>
+              <SelectItem value="illustration">Illustration</SelectItem>
+              <SelectItem value="3d">3D render</SelectItem>
+              <SelectItem value="line">Line art</SelectItem>
+              <SelectItem value="flat">Flat / vector</SelectItem>
+              <SelectItem value="watercolor">Watercolor</SelectItem>
+              <SelectItem value="cinematic">Cinematic</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
       {pendingAttachments.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {pendingAttachments.map((a, i) => (
