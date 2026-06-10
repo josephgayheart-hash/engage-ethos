@@ -51,6 +51,26 @@ export function MermaidDiagram({ source, title, className }: Props) {
     };
   }, [source, id]);
 
+  // Auto-promote large/complex diagrams to the right-side canvas on first render.
+  const promotedRef = useRef(false);
+  useEffect(() => {
+    if (promotedRef.current) return;
+    const lines = source.trim().split("\n").length;
+    const isComplex =
+      source.length > 1400 ||
+      lines > 28 ||
+      (source.match(/subgraph/gi)?.length ?? 0) >= 3 ||
+      (source.match(/participant\s/gi)?.length ?? 0) >= 5;
+    if (isComplex) {
+      promotedRef.current = true;
+      window.dispatchEvent(new CustomEvent("personal-ai:open-canvas", { detail: { kind: "mermaid", source, title } }));
+    }
+  }, [source, title]);
+
+  const openInCanvas = () => {
+    window.dispatchEvent(new CustomEvent("personal-ai:open-canvas", { detail: { kind: "mermaid", source, title } }));
+  };
+
   const copy = async () => {
     await navigator.clipboard.writeText(source);
     setCopied(true);
