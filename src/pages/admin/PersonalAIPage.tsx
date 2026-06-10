@@ -1492,7 +1492,20 @@ export default function PersonalAIPage() {
               {/* Unified toolbar — works for both HTML artifacts and file artifacts */}
               <div className="h-14 border-b border-border/60 flex items-center justify-between px-3 shrink-0 bg-background/80 backdrop-blur gap-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  {fileArtifact ? (
+                  {canvasArtifact ? (
+                    <>
+                      <Badge variant="outline" className="gap-1 font-normal shrink-0 uppercase text-[10px]">{canvasArtifact.kind === "mermaid" ? "Diagram" : "Graphic"}</Badge>
+                      <span className="text-sm font-medium truncate">{canvasArtifact.title || (canvasArtifact.kind === "mermaid" ? "Diagram" : "Graphic")}</span>
+                      <div className="flex rounded-lg border border-border/60 bg-background overflow-hidden ml-1">
+                        <button onClick={() => setArtifactTab("preview")} className={cn("px-2.5 py-1 text-xs inline-flex items-center gap-1", artifactTab === "preview" ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground")}>
+                          <Eye className="h-3 w-3" /> Preview
+                        </button>
+                        <button onClick={() => setArtifactTab("code")} className={cn("px-2.5 py-1 text-xs inline-flex items-center gap-1 border-l border-border/60", artifactTab === "code" ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground")}>
+                          <CodeIcon className="h-3 w-3" /> Source
+                        </button>
+                      </div>
+                    </>
+                  ) : fileArtifact ? (
                     <>
                       <Badge variant="outline" className="gap-1 font-normal shrink-0 uppercase text-[10px]">{fileArtifact.kind}</Badge>
                       <span className="text-sm font-medium truncate" title={fileArtifact.filename}>{fileArtifact.filename}</span>
