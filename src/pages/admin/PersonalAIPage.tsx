@@ -679,7 +679,7 @@ export default function PersonalAIPage() {
     updateActive({ messages: newMessages, ...titleUpdate });
     setInput("");
     setPendingAttachments([]);
-    const usedPreset = activePreset;
+    const usedPreset = activePreset ?? (intent.preset ? PRESETS.find(p => p.id === intent.preset) ?? null : null);
     setActivePreset(null);
     setStreaming(true);
     setStreamText("");
