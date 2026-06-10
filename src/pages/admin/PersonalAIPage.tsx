@@ -639,8 +639,18 @@ export default function PersonalAIPage() {
     const research = /\b(deep research|research (?:on|into|about)|do (?:some |a )?research|investigate|comprehensive (?:analysis|report)|in[- ]?depth (?:look|analysis|report)|literature review)\b/i.test(raw);
     const search = !research && /\b(search (?:the )?web|google|look(?: this)? up|find online|latest (?:news|info|update)|what'?s (?:new|happening)|current (?:news|events|price|status)|today'?s)\b/i.test(raw);
     const think = /\b(think (?:hard|deeply|carefully|step by step)|reason (?:through|carefully)|extended thinking|take your time|work this out)\b/i.test(raw);
-    return { image, research, search, think };
+    // Build preset auto-selection — first match wins, ordered most-specific → least-specific.
+    let preset: string | null = null;
+    if (/\b(sequence diagram|interaction diagram|api (?:call )?flow|request[/ ]response flow|message flow between)\b/.test(t)) preset = "sequence";
+    else if (/\b(2 ?x ?2|two by two|matrix|quadrant|pyramid|funnel|value chain|framework|eisenhower|bcg|swot)\b/.test(t)) preset = "framework";
+    else if (/\b(system architecture|architecture diagram|c4|component diagram|tech stack diagram|infra(?:structure)? diagram|data flow|service map)\b/.test(t)) preset = "architecture";
+    else if (/\b(org ?chart|organizational chart|capability map|reporting structure|team structure|hierarchy chart)\b/.test(t)) preset = "org";
+    else if (/\b(operating model|one[- ]pager|1[- ]pager|exec(?:utive)? summary|brief one[- ]page|one page (?:brief|summary|overview))\b/.test(t)) preset = "one-pager";
+    else if (/\b(process map|process flow|swim ?lane|raci|sop\b|standard operating procedure)\b/.test(t)) preset = "process";
+    else if (/\b(workflow|flowchart|decision tree|step[- ]by[- ]step (?:process|flow)|map (?:out )?(?:the |a )?process)\b/.test(t)) preset = "workflow";
+    return { image, research, search, think, preset };
   };
+
 
   const handleSend = async () => {
     const text = input.trim();
