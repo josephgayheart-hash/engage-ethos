@@ -232,7 +232,7 @@ export default function PersonalAIPage() {
   const [webSearch, setWebSearch] = useState(false);
   const [deepResearch, setDeepResearch] = useState(false);
   const [extendedThinking, setExtendedThinking] = useState(false);
-  const [activePreset, setActivePreset] = useState<import("@/components/personal-ai/PresetChips").Preset | null>(null);
+  const [activePreset, setActivePreset] = useState<Preset | null>(null);
   const [streaming, setStreaming] = useState(false);
   const [streamText, setStreamText] = useState("");
   const [streamImage, setStreamImage] = useState<string | null>(null);
