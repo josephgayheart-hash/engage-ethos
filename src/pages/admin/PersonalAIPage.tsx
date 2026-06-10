@@ -832,6 +832,21 @@ export default function PersonalAIPage() {
 
   const Composer = (
     <div className="space-y-2">
+      <div className="flex items-center gap-2 overflow-x-auto pb-0.5">
+        <PresetChips
+          active={activePreset?.id ?? null}
+          onSelect={(p) => setActivePreset(activePreset?.id === p.id ? null : p)}
+        />
+        {activePreset && (
+          <button
+            type="button"
+            onClick={() => setActivePreset(null)}
+            className="text-[11px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline whitespace-nowrap"
+          >
+            clear
+          </button>
+        )}
+      </div>
       {pendingAttachments.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {pendingAttachments.map((a, i) => (
