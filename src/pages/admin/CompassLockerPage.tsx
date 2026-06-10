@@ -397,7 +397,9 @@ export default function CompassLockerPage() {
   const handleDelete = async (item: LockerItem) => {
     if (!confirm("Delete this item?")) return;
     if (item.storage_path) {
-      await supabase.storage.from(BUCKET).remove([item.storage_path]);
+      const multipart = parseMultipartMeta(item);
+      const paths = multipart ? multipartPaths(item.storage_path, multipart.partCount) : [item.storage_path];
+      await supabase.storage.from(BUCKET).remove(paths);
     }
     const { error } = await supabase
       .from("compass_locker_items")
@@ -411,6 +413,11 @@ export default function CompassLockerPage() {
   };
   const handlePreview = async (item: LockerItem) => {
     if (!item.storage_path) return;
+    const multipart = parseMultipartMeta(item);
+    if (multipart) {
+      await handleDownload(item);
+      return;
+    }
     const { data, error } = await supabase.storage
       .from(BUCKET)
       .createSignedUrl(item.storage_path, 60 * 10);
@@ -430,6 +437,29 @@ export default function CompassLockerPage() {
 
   const handleDownload = async (item: LockerItem) => {
     if (!item.storage_path) return;
+    const multipart = parseMultipartMeta(item);
+    if (multipart) {
+      toast.info(`Preparing ${item.title || multipart.fileName}…`);
+      const chunks: Blob[] = [];
+      for (const path of multipartPaths(item.storage_path, multipart.partCount)) {
+        const { data, error } = await supabase.storage.from(BUCKET).download(path);
+        if (error || !data) {
+          toast.error(`Could not download ${item.title || multipart.fileName}`);
+          return;
+        }
+        chunks.push(data);
+      }
+      const blob = new Blob(chunks, { type: multipart.contentType || item.mime_type || "application/octet-stream" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = item.title || multipart.fileName || "download";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30_000);
+      return;
+    }
     const { data, error } = await supabase.storage
       .from(BUCKET)
       .createSignedUrl(item.storage_path, 60 * 5, { download: item.title || true });
@@ -442,6 +472,10 @@ export default function CompassLockerPage() {
 
   const handleCopyLink = async (item: LockerItem) => {
     if (!item.storage_path) return;
+    if (parseMultipartMeta(item)) {
+      toast.info("Large split files must be downloaded from Compass Locker.");
+      return;
+    }
     const { data, error } = await supabase.storage
       .from(BUCKET)
       .createSignedUrl(item.storage_path, 60 * 60);
