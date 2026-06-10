@@ -546,15 +546,30 @@ export default function PersonalAIPage() {
     return { context, sources };
   };
 
-  const generateImage = async (prompt: string) => {
+  const generateImage = async (prompt: string, opts?: { variation?: boolean; displayPrompt?: string }) => {
     setStreaming(true);
     setStreamImage(null);
     setStreamImageFinal(false);
-    const userMsg: Msg = { role: "user", content: prompt, ts: Date.now() };
+    const display = opts?.displayPrompt ?? prompt;
+    const userMsg: Msg = { role: "user", content: display, ts: Date.now() };
     const newMessages = [...(active?.messages ?? []), userMsg];
-    const titleUpdate = active?.messages.length === 0 ? { title: prompt.slice(0, 60) } : {};
+    const titleUpdate = active?.messages.length === 0 ? { title: display.slice(0, 60) } : {};
     updateActive({ messages: newMessages, ...titleUpdate });
     setInput("");
+
+    const styleHint: Record<string, string> = {
+      photo: "photorealistic, high detail, natural lighting",
+      illustration: "modern illustration, clean linework, balanced composition",
+      "3d": "3D rendered, soft studio lighting, subtle ambient occlusion",
+      line: "minimal line art, monochrome, generous whitespace",
+      flat: "flat vector style, bold shapes, limited palette",
+      watercolor: "watercolor painting, soft washes, textured paper feel",
+      cinematic: "cinematic lighting, shallow depth of field, filmic color",
+    };
+    const styleSuffix = imageStyle !== "auto" && styleHint[imageStyle] ? ` — ${styleHint[imageStyle]}` : "";
+    const aspectSuffix = imageAspect !== "1:1" ? ` (aspect ratio ${imageAspect})` : "";
+    const variationPrefix = opts?.variation ? "Create a fresh variation (different composition, same subject and intent) of: " : "";
+    const finalPrompt = `${variationPrefix}${prompt}${styleSuffix}${aspectSuffix}`;
 
     const controller = new AbortController();
     abortRef.current = controller;
@@ -565,7 +580,7 @@ export default function PersonalAIPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt: finalPrompt, aspect: imageAspect }),
         signal: controller.signal,
       });
       if (!resp.ok || !resp.body) {
