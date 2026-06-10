@@ -25,6 +25,10 @@ import {
 import { MemoryDialog } from "@/components/personal-ai/MemoryDialog";
 import { ArtifactPreviewFrame } from "@/components/personal-ai/ArtifactPreviewFrame";
 import { RichMarkdown } from "@/components/personal-ai/RichMarkdown";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type Role = "user" | "assistant";
 interface Attachment { name: string; kind: "image" | "doc"; dataUrl?: string; text?: string }
