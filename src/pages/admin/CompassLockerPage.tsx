@@ -54,8 +54,40 @@ const EXPIRY_OPTIONS: { value: ExpiryKey; label: string; seconds: number | null 
 ];
 
 const BUCKET = "compass-artifacts";
-// Direct supabase-js uploads cap at 50MB by default.
-const MAX_FILE_SIZE = 50 * 1024 * 1024;
+// Standard supabase-js POST uploads cap at ~50MB; above that we use TUS resumable (up to 5GB).
+const STANDARD_UPLOAD_LIMIT = 50 * 1024 * 1024;
+const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024; // 2GB hard cap
+
+async function resumableUpload(file: File, path: string, contentType: string): Promise<void> {
+  const tus = await import("tus-js-client");
+  const { data: sess } = await supabase.auth.getSession();
+  const token = sess.session?.access_token;
+  if (!token) throw new Error("Not authenticated");
+  const projectUrl = import.meta.env.VITE_SUPABASE_URL as string;
+
+  await new Promise<void>((resolve, reject) => {
+    const upload = new tus.Upload(file, {
+      endpoint: `${projectUrl}/storage/v1/upload/resumable`,
+      retryDelays: [0, 3000, 5000, 10000, 20000],
+      headers: {
+        authorization: `Bearer ${token}`,
+        "x-upsert": "false",
+      },
+      uploadDataDuringCreation: true,
+      removeFingerprintOnSuccess: true,
+      metadata: {
+        bucketName: BUCKET,
+        objectName: path,
+        contentType,
+        cacheControl: "3600",
+      },
+      chunkSize: 6 * 1024 * 1024,
+      onError: (err) => reject(err),
+      onSuccess: () => resolve(),
+    });
+    upload.start();
+  });
+}
 
 function formatBytes(bytes: number | null | undefined) {
   if (!bytes && bytes !== 0) return "—";
@@ -177,24 +209,33 @@ export default function CompassLockerPage() {
     try {
       for (const file of Array.from(files)) {
         if (file.size > MAX_FILE_SIZE) {
-          toast.error(`${file.name} is ${(file.size / (1024 * 1024)).toFixed(1)}MB — over the 50MB limit`);
+          toast.error(`${file.name} is ${(file.size / (1024 * 1024 * 1024)).toFixed(2)}GB — over the 2GB limit`);
           continue;
         }
         const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, "_").slice(0, 80);
         const path = `${user.id}/locker/${Date.now()}-${safeName}`;
         const isZip = /\.zip$/i.test(file.name);
         const contentType = isZip ? "application/zip" : (file.type || "application/octet-stream");
-        const { error: upErr } = await supabase.storage
-          .from(BUCKET)
-          .upload(path, file, {
-            contentType,
-            upsert: false,
-          });
-        if (upErr) {
-          console.error("Locker upload error:", upErr);
-          toast.error(`Upload failed: ${file.name} — ${upErr.message}`);
+        const useResumable = file.size > STANDARD_UPLOAD_LIMIT;
+        const sizeLabel = `${(file.size / (1024 * 1024)).toFixed(1)}MB`;
+        if (useResumable) {
+          toast.info(`Uploading ${file.name} (${sizeLabel})…`, { id: `up-${path}` });
+        }
+        try {
+          if (useResumable) {
+            await resumableUpload(file, path, contentType);
+          } else {
+            const { error: upErr } = await supabase.storage
+              .from(BUCKET)
+              .upload(path, file, { contentType, upsert: false });
+            if (upErr) throw upErr;
+          }
+        } catch (e: any) {
+          console.error("Locker upload error:", e);
+          toast.error(`Upload failed: ${file.name} — ${e?.message || "unknown error"}`, { id: `up-${path}` });
           continue;
         }
+
         const { error: insErr } = await supabase.from("compass_locker_items").insert({
           user_id: user.id,
           kind: "file",
@@ -425,7 +466,7 @@ export default function CompassLockerPage() {
           </div>
         </div>
         <p className="text-xs text-muted-foreground">
-          Max 50MB per file. Items past their expiry are hidden automatically.
+          Max 2GB per file (large files use resumable upload). Items past their expiry are hidden automatically.
         </p>
       </Card>
 
