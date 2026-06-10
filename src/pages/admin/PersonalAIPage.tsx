@@ -25,6 +25,10 @@ import {
 import { MemoryDialog } from "@/components/personal-ai/MemoryDialog";
 import { ArtifactPreviewFrame } from "@/components/personal-ai/ArtifactPreviewFrame";
 import { RichMarkdown } from "@/components/personal-ai/RichMarkdown";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type Role = "user" | "assistant";
 interface Attachment { name: string; kind: "image" | "doc"; dataUrl?: string; text?: string }
@@ -238,6 +242,7 @@ export default function PersonalAIPage() {
   const [artifactBlobUrl, setArtifactBlobUrl] = useState<string>("");
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [previewNonce, setPreviewNonce] = useState(0);
+  const [deleteTarget, setDeleteTarget] = useState<Thread | null>(null);
   const [artifactFullscreen, setArtifactFullscreen] = useState(false);
   const deviceWidthFor = (d: "desktop" | "tablet" | "mobile") =>
     d === "mobile" ? 414 : d === "tablet" ? 834 : 1280;
@@ -1007,14 +1012,12 @@ export default function PersonalAIPage() {
                           )}
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (window.confirm(`Delete "${t.title || "New chat"}"? This can't be undone.`)) {
-                              deleteThread(t.id);
-                            }
+                            setDeleteTarget(t);
                           }}
                           aria-label="Delete chat"
                           title="Delete chat"
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          <X className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     ))}
@@ -1503,6 +1506,29 @@ export default function PersonalAIPage() {
           )}
         </div>
       </main>
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this chat?</AlertDialogTitle>
+            <AlertDialogDescription>
+              "{deleteTarget?.title || "New chat"}" will be permanently removed from all your devices. This can't be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteTarget) deleteThread(deleteTarget.id);
+                setDeleteTarget(null);
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
+
