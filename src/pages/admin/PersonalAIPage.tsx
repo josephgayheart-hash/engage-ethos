@@ -238,6 +238,7 @@ export default function PersonalAIPage() {
   const [artifactBlobUrl, setArtifactBlobUrl] = useState<string>("");
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [previewNonce, setPreviewNonce] = useState(0);
+  const [deleteTarget, setDeleteTarget] = useState<Thread | null>(null);
   const [artifactFullscreen, setArtifactFullscreen] = useState(false);
   const deviceWidthFor = (d: "desktop" | "tablet" | "mobile") =>
     d === "mobile" ? 414 : d === "tablet" ? 834 : 1280;
