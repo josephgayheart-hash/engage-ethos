@@ -142,6 +142,9 @@ export function MermaidDiagram({ source, title, className }: Props) {
           <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={downloadPng} title="Download PNG">
             <Download className="h-3.5 w-3.5" />
           </Button>
+          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={openInCanvas} title="Open in canvas">
+            <Maximize2 className="h-3.5 w-3.5" />
+          </Button>
         </div>
       </div>
       <div className="p-3">
