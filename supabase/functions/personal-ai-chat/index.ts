@@ -131,7 +131,7 @@ serve(async (req) => {
 
     const messages = [
       { role: "system", content: finalSystem },
-      ...history.slice(-30).map((m: any) => ({ role: m.role, content: m.content })),
+      ...history.slice(-20).map((m: any) => ({ role: m.role, content: m.content })),
       { role: "user", content: userContent },
     ];
 
@@ -140,6 +140,7 @@ serve(async (req) => {
 
     // ---- Anthropic (Claude) path: call Anthropic directly and translate SSE to OpenAI-style ----
     const isAnthropic = typeof model === "string" && (model.startsWith("anthropic/") || model.startsWith("claude-"));
+    console.log(`[personal-ai-chat] route=${isAnthropic ? "anthropic" : "lovable-gateway"} model=${model}`);
     if (isAnthropic) {
       const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
       if (!ANTHROPIC_API_KEY) {
