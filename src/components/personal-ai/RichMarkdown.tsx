@@ -103,6 +103,22 @@ export function RichMarkdown({ children, className }: Props) {
             </div>
           ),
           thead: ({ node, ...props }: any) => <thead {...props} className="bg-muted/60" />,
+          code: ({ node, inline, className: codeClassName, children, ...props }: any) => {
+            const match = /language-(\w+)/.exec(codeClassName || "");
+            const lang = match?.[1]?.toLowerCase();
+            const raw = String(children ?? "").replace(/\n$/, "");
+            if (!inline && lang === "mermaid") {
+              return <MermaidDiagram source={raw} title="Diagram" />;
+            }
+            if (!inline && (lang === "svg" || (lang === undefined && raw.trim().startsWith("<svg")))) {
+              return <InlineSvg source={raw} title="Graphic" />;
+            }
+            return (
+              <code className={codeClassName} {...props}>
+                {children}
+              </code>
+            );
+          },
         }}
       >
         {children}
