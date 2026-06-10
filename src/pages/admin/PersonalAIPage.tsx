@@ -985,7 +985,7 @@ export default function PersonalAIPage() {
                       <div
                         key={t.id}
                         className={cn(
-                          "group relative flex items-center rounded-lg pl-3 pr-9 py-2 cursor-pointer text-sm transition",
+                          "group relative flex items-center rounded-lg pl-3 pr-10 py-2 cursor-pointer text-sm transition",
                           t.id === activeId
                             ? "bg-accent text-accent-foreground"
                             : "text-foreground/80 hover:bg-muted hover:text-foreground"
@@ -996,8 +996,8 @@ export default function PersonalAIPage() {
                         <span
                           className="flex-1 min-w-0 overflow-hidden whitespace-nowrap"
                           style={{
-                            WebkitMaskImage: "linear-gradient(to right, #000 calc(100% - 24px), transparent 100%)",
-                            maskImage: "linear-gradient(to right, #000 calc(100% - 24px), transparent 100%)",
+                            WebkitMaskImage: "linear-gradient(to right, #000 calc(100% - 32px), transparent 100%)",
+                            maskImage: "linear-gradient(to right, #000 calc(100% - 32px), transparent 100%)",
                           }}
                         >
                           {t.title || "New chat"}
@@ -1005,9 +1005,11 @@ export default function PersonalAIPage() {
                         <button
                           type="button"
                           className={cn(
-                            "absolute right-1.5 top-1/2 -translate-y-1/2 p-1 rounded text-muted-foreground hover:text-destructive hover:bg-background/80 transition",
-                            "opacity-0 group-hover:opacity-100 focus:opacity-100",
-                            t.id === activeId && "opacity-60"
+                            "absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex items-center justify-center h-7 w-7 rounded-md transition",
+                            "text-muted-foreground hover:text-destructive",
+                            t.id === activeId
+                              ? "bg-accent hover:bg-background/80 opacity-100"
+                              : "bg-transparent group-hover:bg-muted hover:!bg-background/90 opacity-0 group-hover:opacity-100 focus:opacity-100"
                           )}
                           onClick={(e) => {
                             e.stopPropagation();
