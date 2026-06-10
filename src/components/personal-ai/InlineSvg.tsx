@@ -1,7 +1,7 @@
 import DOMPurify from "dompurify";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Copy, Download, Code as CodeIcon, Eye, Check } from "lucide-react";
+import { Copy, Download, Code as CodeIcon, Eye, Check, Maximize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Props {
