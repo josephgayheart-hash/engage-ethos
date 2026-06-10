@@ -13,6 +13,8 @@ import {
   Clock,
   Eye,
   ArrowLeft,
+  Users,
+  Check,
 } from "lucide-react";
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -29,6 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 type LockerItem = {
@@ -42,7 +45,10 @@ type LockerItem = {
   size_bytes: number | null;
   expires_at: string | null;
   created_at: string;
+  shared_with_user_ids: string[];
 };
+
+type CompassUser = { id: string; name: string; email: string };
 
 type ExpiryKey = "1h" | "1d" | "7d" | "never";
 
@@ -128,7 +134,26 @@ export default function CompassLockerPage() {
   const [posting, setPosting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [compassUsers, setCompassUsers] = useState<CompassUser[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    void (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, email, status")
+        .eq("status", "active")
+        .order("first_name", { ascending: true });
+      const list: CompassUser[] = (data || [])
+        .filter((p: any) => p.id !== user.id)
+        .map((p: any) => {
+          const name = [p.first_name, p.last_name].filter(Boolean).join(" ").trim();
+          return { id: p.id, name: name || p.email, email: p.email };
+        });
+      setCompassUsers(list);
+    })();
+  }, [user]);
 
   const loadItems = useCallback(async () => {
     if (!user) return;
@@ -350,6 +375,24 @@ export default function CompassLockerPage() {
       prev.map((i) => (i.id === item.id ? { ...i, expires_at: newExpiry } : i)),
     );
     toast.success("Unpinned — will expire again");
+  };
+
+  const toggleShare = async (item: LockerItem, targetId: string) => {
+    const current = item.shared_with_user_ids || [];
+    const next = current.includes(targetId)
+      ? current.filter((id) => id !== targetId)
+      : [...current, targetId];
+    const { error } = await supabase
+      .from("compass_locker_items")
+      .update({ shared_with_user_ids: next })
+      .eq("id", item.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setItems((prev) =>
+      prev.map((i) => (i.id === item.id ? { ...i, shared_with_user_ids: next } : i)),
+    );
   };
 
   if (isLoading) {
@@ -598,6 +641,62 @@ export default function CompassLockerPage() {
                         <Download className="h-4 w-4" />
                       </Button>
                     </>
+                  )}
+                  {item.user_id === user.id && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className={cn(
+                            "h-8 w-8 relative",
+                            (item.shared_with_user_ids?.length ?? 0) > 0 && "text-primary",
+                          )}
+                          title="Share with Compass users"
+                        >
+                          <Users className="h-4 w-4" />
+                          {(item.shared_with_user_ids?.length ?? 0) > 0 && (
+                            <span className="absolute -right-0.5 -top-0.5 rounded-full bg-primary px-1 text-[9px] leading-3 text-primary-foreground">
+                              {item.shared_with_user_ids.length}
+                            </span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent align="end" className="w-64 p-0">
+                        <div className="border-b px-3 py-2 text-xs font-medium text-muted-foreground">
+                          Share with
+                        </div>
+                        <div className="max-h-64 overflow-auto py-1">
+                          {compassUsers.length === 0 ? (
+                            <div className="px-3 py-2 text-xs text-muted-foreground">
+                              No other Compass users found.
+                            </div>
+                          ) : (
+                            compassUsers.map((u) => {
+                              const checked = (item.shared_with_user_ids || []).includes(u.id);
+                              return (
+                                <button
+                                  key={u.id}
+                                  type="button"
+                                  onClick={() => void toggleShare(item, u.id)}
+                                  className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm hover:bg-muted"
+                                >
+                                  <span className="flex h-4 w-4 items-center justify-center rounded border">
+                                    {checked && <Check className="h-3 w-3" />}
+                                  </span>
+                                  <span className="min-w-0 flex-1 truncate">
+                                    {u.name}
+                                    <span className="ml-1 text-[10px] text-muted-foreground">
+                                      {u.email}
+                                    </span>
+                                  </span>
+                                </button>
+                              );
+                            })
+                          )}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
                   )}
                   {item.user_id === user.id && (
                     item.expires_at ? (
