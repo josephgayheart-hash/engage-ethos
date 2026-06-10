@@ -611,15 +611,34 @@ export default function PersonalAIPage() {
     }
   };
 
+  // Detect intent from natural language so users don't have to click toggles.
+  // Returns per-turn overrides; explicit toggles still win.
+  const detectIntent = (raw: string) => {
+    const t = raw.toLowerCase().trim();
+    const image = /^(?:please\s+)?(?:can you |could you |pls |plz )?(?:generate|create|make|draw|render|design|paint|illustrate|produce|give me|show me)\s+(?:an?\s+|me\s+an?\s+)?(?:image|picture|photo|illustration|logo|icon|graphic|artwork|painting|drawing|render|mockup|wallpaper|poster|banner|sketch)\b/i.test(raw)
+      || /\b(image of|picture of|photo of|illustration of|drawing of|render of)\b/i.test(raw);
+    const research = /\b(deep research|research (?:on|into|about)|do (?:some |a )?research|investigate|comprehensive (?:analysis|report)|in[- ]?depth (?:look|analysis|report)|literature review)\b/i.test(raw);
+    const search = !research && /\b(search (?:the )?web|google|look(?: this)? up|find online|latest (?:news|info|update)|what'?s (?:new|happening)|current (?:news|events|price|status)|today'?s)\b/i.test(raw);
+    const think = /\b(think (?:hard|deeply|carefully|step by step)|reason (?:through|carefully)|extended thinking|take your time|work this out)\b/i.test(raw);
+    return { image, research, search, think };
+  };
+
   const handleSend = async () => {
     const text = input.trim();
     if ((!text && pendingAttachments.length === 0) || streaming || !active) return;
 
-    if (imageMode) {
+    const intent = text ? detectIntent(text) : { image: false, research: false, search: false, think: false };
+    const useImage = imageMode || intent.image;
+    const useResearch = deepResearch || intent.research;
+    const useSearch = !useResearch && (webSearch || intent.search);
+    const useThink = extendedThinking || intent.think;
+
+    if (useImage) {
       if (!text) { toast({ title: "Enter an image prompt" }); return; }
       await generateImage(text);
       return;
     }
+
 
     const attachments = pendingAttachments;
     const userMsg: Msg = { role: "user", content: text, ts: Date.now(), attachments: attachments.length ? attachments : undefined };
@@ -639,9 +658,9 @@ export default function PersonalAIPage() {
     try {
       let searchContext = "";
       let searchSources: { title: string; url: string }[] = [];
-      if ((webSearch || deepResearch) && text) {
+      if ((useSearch || useResearch) && text) {
         try {
-          const r = await runWebSearch(text, deepResearch);
+          const r = await runWebSearch(text, useResearch);
           searchContext = r.context;
           searchSources = r.sources;
         } catch (e: any) {
@@ -666,12 +685,12 @@ export default function PersonalAIPage() {
           message: text,
           history: active.messages.map(m => ({ role: m.role, content: m.content })),
           model: active.model,
-          systemPrompt: active.systemPrompt + (deepResearch ? "\n\nDeep research mode: synthesize across the provided sources, cite [n] inline, surface conflicting evidence, and end with a short \"What I checked\" list." : ""),
+          systemPrompt: active.systemPrompt + (useResearch ? "\n\nDeep research mode: synthesize across the provided sources, cite [n] inline, surface conflicting evidence, and end with a short \"What I checked\" list." : ""),
           images,
           files,
           searchContext,
-          deepResearch,
-          extendedThinking,
+          deepResearch: useResearch,
+          extendedThinking: useThink,
         }),
       });
 
