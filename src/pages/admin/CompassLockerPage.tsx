@@ -379,7 +379,8 @@ export default function CompassLockerPage() {
         });
         if (insErr) {
           console.error("Locker insert error:", insErr);
-          await supabase.storage.from(BUCKET).remove([path]);
+          const cleanupPaths = multipartMeta ? multipartPaths(path, multipartMeta.partCount) : [path];
+          await supabase.storage.from(BUCKET).remove(cleanupPaths);
           toast.error(`Save failed: ${file.name} — ${insErr.message}`);
           continue;
         }
