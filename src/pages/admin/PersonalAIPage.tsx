@@ -1587,7 +1587,7 @@ export default function PersonalAIPage() {
                   >
                     {artifactFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
                   </Button>
-                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => { setArtifactOpen(false); setFileArtifact(null); setArtifactFullscreen(false); }} aria-label="Close artifact"><X className="h-4 w-4" /></Button>
+                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => { setArtifactOpen(false); setFileArtifact(null); setCanvasArtifact(null); setArtifactFullscreen(false); }} aria-label="Close artifact"><X className="h-4 w-4" /></Button>
                 </div>
               </div>
 
