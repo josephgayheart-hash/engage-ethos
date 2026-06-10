@@ -1004,11 +1004,11 @@ export default function PersonalAIPage() {
                         <button
                           type="button"
                           className={cn(
-                            "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition",
-                            "text-muted-foreground/80 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                            "inline-flex h-5 w-5 shrink-0 items-center justify-center rounded transition",
+                            "text-muted-foreground/60 hover:text-destructive hover:bg-background/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                             t.id === activeId
-                              ? "bg-background/40 hover:bg-background/80 opacity-100"
-                              : "bg-transparent opacity-70 hover:bg-background/80 hover:opacity-100 focus:opacity-100"
+                              ? "opacity-80 hover:opacity-100"
+                              : "opacity-0 group-hover:opacity-60 hover:!opacity-100 focus:opacity-100"
                           )}
                           onClick={(e) => {
                             e.stopPropagation();
@@ -1017,7 +1017,7 @@ export default function PersonalAIPage() {
                           aria-label="Delete chat"
                           title="Delete chat"
                         >
-                          <X className="h-3.5 w-3.5" />
+                          <X className="h-3 w-3" strokeWidth={2.25} />
                         </button>
                       </div>
                     ))}
