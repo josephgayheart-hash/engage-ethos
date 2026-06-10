@@ -462,6 +462,12 @@ export default function PersonalAIPage() {
       if (id === activeId) setActiveId(next[0].id);
       return next;
     });
+    // Best-effort cloud delete (RLS ensures it's only the user's row)
+    if (user?.id) {
+      supabase.from("personal_ai_threads").delete().eq("id", id).then(({ error }) => {
+        if (error) console.warn("[compass] cloud thread delete failed:", error);
+      });
+    }
   };
 
   const TEXTY_EXT = /\.(txt|md|markdown|csv|tsv|json|jsonl|ya?ml|xml|html?|css|scss|less|js|jsx|ts|tsx|py|rb|go|rs|java|kt|swift|c|h|cpp|hpp|cs|php|sh|bash|zsh|sql|env|ini|toml|conf|log|srt|vtt)$/i;
