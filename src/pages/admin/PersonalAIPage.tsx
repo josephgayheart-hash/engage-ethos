@@ -1485,12 +1485,24 @@ export default function PersonalAIPage() {
           {artifactOpen && (
             <aside
               className={cn(
-                "border-l border-border/60 flex flex-col bg-muted/10 transition-all duration-200",
+                "relative border-l border-border/60 flex flex-col bg-muted/10 transition-all duration-200",
                 artifactFullscreen
                   ? "fixed inset-0 z-50 w-full border-l-0 bg-background"
                   : "w-[52%] min-w-[480px] max-w-[920px]"
               )}
             >
+              {/* Always-visible floating close — guarantees the drawer can be dismissed
+                  even when the toolbar overflows on narrow viewports. */}
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => { setArtifactOpen(false); setFileArtifact(null); setCanvasArtifact(null); setArtifactFullscreen(false); }}
+                aria-label="Close preview"
+                title="Close preview (Esc)"
+                className="absolute top-2 right-2 z-30 h-8 w-8 p-0 rounded-full shadow-md border border-border/60"
+              >
+                <X className="h-4 w-4" />
+              </Button>
               {/* Unified toolbar — works for both HTML artifacts and file artifacts */}
               <div className="h-14 border-b border-border/60 flex items-center justify-between px-3 shrink-0 bg-background/80 backdrop-blur gap-2">
                 <div className="flex items-center gap-2 min-w-0">
