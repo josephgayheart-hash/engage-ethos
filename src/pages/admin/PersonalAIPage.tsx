@@ -644,6 +644,7 @@ export default function PersonalAIPage() {
     }
 
 
+
     const attachments = pendingAttachments;
     const userMsg: Msg = { role: "user", content: text, ts: Date.now(), attachments: attachments.length ? attachments : undefined };
     const newMessages = [...active.messages, userMsg];
