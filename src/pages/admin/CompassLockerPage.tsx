@@ -50,6 +50,14 @@ type LockerItem = {
 
 type CompassUser = { id: string; name: string; email: string };
 
+type MultipartMeta = {
+  uploadStrategy: "parts";
+  partCount: number;
+  partSize: number;
+  contentType: string;
+  fileName: string;
+};
+
 type ExpiryKey = "1h" | "1d" | "7d" | "never";
 
 const EXPIRY_OPTIONS: { value: ExpiryKey; label: string; seconds: number | null }[] = [
@@ -62,18 +70,60 @@ const EXPIRY_OPTIONS: { value: ExpiryKey; label: string; seconds: number | null 
 const BUCKET = "compass-artifacts";
 // Standard supabase-js POST uploads cap at ~50MB; above that we use TUS resumable (up to 5GB).
 const STANDARD_UPLOAD_LIMIT = 50 * 1024 * 1024;
-const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024; // 2GB hard cap
+const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024; // 2GB app cap
+const PART_UPLOAD_SIZE = 45 * 1024 * 1024;
 
-async function resumableUpload(file: File, path: string, contentType: string): Promise<void> {
+function parseMultipartMeta(item: LockerItem): MultipartMeta | null {
+  if (!item.content) return null;
+  try {
+    const parsed = JSON.parse(item.content) as Partial<MultipartMeta>;
+    if (parsed.uploadStrategy === "parts" && typeof parsed.partCount === "number") {
+      return parsed as MultipartMeta;
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+function partPath(path: string, index: number) {
+  return `${path}.part-${String(index).padStart(5, "0")}`;
+}
+
+function multipartPaths(path: string, partCount: number) {
+  return Array.from({ length: partCount }, (_, idx) => partPath(path, idx));
+}
+
+function getUploadErrorMessage(error: unknown) {
+  const err = error as {
+    message?: string;
+    originalResponse?: { getStatus?: () => number; getBody?: () => string };
+  };
+  const status = err?.originalResponse?.getStatus?.();
+  const body = err?.originalResponse?.getBody?.();
+  const details = body || err?.message || "unknown error";
+  return status ? `${status}: ${details}` : details;
+}
+
+async function resumableUpload(
+  file: File,
+  path: string,
+  contentType: string,
+  onProgress?: (bytesUploaded: number, bytesTotal: number) => void,
+): Promise<void> {
   const tus = await import("tus-js-client");
   const { data: sess } = await supabase.auth.getSession();
   const token = sess.session?.access_token;
   if (!token) throw new Error("Not authenticated");
+  const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID as string | undefined;
   const projectUrl = import.meta.env.VITE_SUPABASE_URL as string;
+  const endpoint = projectId
+    ? `https://${projectId}.storage.supabase.co/storage/v1/upload/resumable`
+    : `${projectUrl}/storage/v1/upload/resumable`;
 
   await new Promise<void>((resolve, reject) => {
     const upload = new tus.Upload(file, {
-      endpoint: `${projectUrl}/storage/v1/upload/resumable`,
+      endpoint,
       retryDelays: [0, 3000, 5000, 10000, 20000],
       headers: {
         authorization: `Bearer ${token}`,
@@ -88,11 +138,49 @@ async function resumableUpload(file: File, path: string, contentType: string): P
         cacheControl: "3600",
       },
       chunkSize: 6 * 1024 * 1024,
+      onProgress,
       onError: (err) => reject(err),
       onSuccess: () => resolve(),
     });
-    upload.start();
+    upload.findPreviousUploads().then((previousUploads) => {
+      if (previousUploads.length) upload.resumeFromPreviousUpload(previousUploads[0]);
+      upload.start();
+    }).catch(reject);
   });
+}
+
+async function uploadFileInParts(
+  file: File,
+  path: string,
+  contentType: string,
+  onProgress?: (bytesUploaded: number, bytesTotal: number) => void,
+): Promise<MultipartMeta> {
+  const partCount = Math.ceil(file.size / PART_UPLOAD_SIZE);
+  let uploaded = 0;
+
+  for (let i = 0; i < partCount; i++) {
+    const start = i * PART_UPLOAD_SIZE;
+    const end = Math.min(start + PART_UPLOAD_SIZE, file.size);
+    const blob = file.slice(start, end, "application/octet-stream");
+    const { error } = await supabase.storage
+      .from(BUCKET)
+      .upload(partPath(path, i), blob, { contentType: "application/octet-stream", upsert: false });
+    if (error) {
+      const uploadedPaths = Array.from({ length: i }, (_, idx) => partPath(path, idx));
+      if (uploadedPaths.length) await supabase.storage.from(BUCKET).remove(uploadedPaths);
+      throw error;
+    }
+    uploaded += end - start;
+    onProgress?.(uploaded, file.size);
+  }
+
+  return {
+    uploadStrategy: "parts",
+    partCount,
+    partSize: PART_UPLOAD_SIZE,
+    contentType,
+    fileName: file.name,
+  };
 }
 
 function formatBytes(bytes: number | null | undefined) {
@@ -241,14 +329,24 @@ export default function CompassLockerPage() {
         const path = `${user.id}/locker/${Date.now()}-${safeName}`;
         const isZip = /\.zip$/i.test(file.name);
         const contentType = isZip ? "application/zip" : (file.type || "application/octet-stream");
-        const useResumable = file.size > STANDARD_UPLOAD_LIMIT;
+        const useChunkedParts = isZip && file.size > STANDARD_UPLOAD_LIMIT;
+        const useResumable = file.size > STANDARD_UPLOAD_LIMIT && !useChunkedParts;
         const sizeLabel = `${(file.size / (1024 * 1024)).toFixed(1)}MB`;
-        if (useResumable) {
-          toast.info(`Uploading ${file.name} (${sizeLabel})…`, { id: `up-${path}` });
+        let multipartMeta: MultipartMeta | null = null;
+        if (useResumable || useChunkedParts) {
+          toast.info(`Uploading ${file.name} (${sizeLabel})… 0%`, { id: `up-${path}` });
         }
         try {
-          if (useResumable) {
-            await resumableUpload(file, path, contentType);
+          if (useChunkedParts) {
+            multipartMeta = await uploadFileInParts(file, path, contentType, (bytesUploaded, bytesTotal) => {
+              const pct = Math.min(100, Math.round((bytesUploaded / bytesTotal) * 100));
+              toast.info(`Uploading ${file.name} (${sizeLabel})… ${pct}%`, { id: `up-${path}` });
+            });
+          } else if (useResumable) {
+            await resumableUpload(file, path, contentType, (bytesUploaded, bytesTotal) => {
+              const pct = Math.min(100, Math.round((bytesUploaded / bytesTotal) * 100));
+              toast.info(`Uploading ${file.name} (${sizeLabel})… ${pct}%`, { id: `up-${path}` });
+            });
           } else {
             const { error: upErr } = await supabase.storage
               .from(BUCKET)
@@ -257,14 +355,29 @@ export default function CompassLockerPage() {
           }
         } catch (e: any) {
           console.error("Locker upload error:", e);
-          toast.error(`Upload failed: ${file.name} — ${e?.message || "unknown error"}`, { id: `up-${path}` });
-          continue;
+          if (!useResumable) {
+            toast.error(`Upload failed: ${file.name} — ${getUploadErrorMessage(e)}`, { id: `up-${path}` });
+            continue;
+          }
+
+          toast.info(`Retrying ${file.name} in backend-safe parts…`, { id: `up-${path}` });
+          try {
+            multipartMeta = await uploadFileInParts(file, path, contentType, (bytesUploaded, bytesTotal) => {
+              const pct = Math.min(100, Math.round((bytesUploaded / bytesTotal) * 100));
+              toast.info(`Uploading ${file.name} (${sizeLabel})… ${pct}%`, { id: `up-${path}` });
+            });
+          } catch (partError: any) {
+            console.error("Locker chunked upload error:", partError);
+            toast.error(`Upload failed: ${file.name} — ${getUploadErrorMessage(partError)}`, { id: `up-${path}` });
+            continue;
+          }
         }
 
         const { error: insErr } = await supabase.from("compass_locker_items").insert({
           user_id: user.id,
           kind: "file",
           title: file.name,
+          content: multipartMeta ? JSON.stringify(multipartMeta) : null,
           storage_path: path,
           mime_type: contentType,
           size_bytes: file.size,
@@ -272,7 +385,8 @@ export default function CompassLockerPage() {
         });
         if (insErr) {
           console.error("Locker insert error:", insErr);
-          await supabase.storage.from(BUCKET).remove([path]);
+          const cleanupPaths = multipartMeta ? multipartPaths(path, multipartMeta.partCount) : [path];
+          await supabase.storage.from(BUCKET).remove(cleanupPaths);
           toast.error(`Save failed: ${file.name} — ${insErr.message}`);
           continue;
         }
@@ -290,7 +404,9 @@ export default function CompassLockerPage() {
   const handleDelete = async (item: LockerItem) => {
     if (!confirm("Delete this item?")) return;
     if (item.storage_path) {
-      await supabase.storage.from(BUCKET).remove([item.storage_path]);
+      const multipart = parseMultipartMeta(item);
+      const paths = multipart ? multipartPaths(item.storage_path, multipart.partCount) : [item.storage_path];
+      await supabase.storage.from(BUCKET).remove(paths);
     }
     const { error } = await supabase
       .from("compass_locker_items")
@@ -304,6 +420,11 @@ export default function CompassLockerPage() {
   };
   const handlePreview = async (item: LockerItem) => {
     if (!item.storage_path) return;
+    const multipart = parseMultipartMeta(item);
+    if (multipart) {
+      await handleDownload(item);
+      return;
+    }
     const { data, error } = await supabase.storage
       .from(BUCKET)
       .createSignedUrl(item.storage_path, 60 * 10);
@@ -323,6 +444,29 @@ export default function CompassLockerPage() {
 
   const handleDownload = async (item: LockerItem) => {
     if (!item.storage_path) return;
+    const multipart = parseMultipartMeta(item);
+    if (multipart) {
+      toast.info(`Preparing ${item.title || multipart.fileName}…`);
+      const chunks: Blob[] = [];
+      for (const path of multipartPaths(item.storage_path, multipart.partCount)) {
+        const { data, error } = await supabase.storage.from(BUCKET).download(path);
+        if (error || !data) {
+          toast.error(`Could not download ${item.title || multipart.fileName}`);
+          return;
+        }
+        chunks.push(data);
+      }
+      const blob = new Blob(chunks, { type: multipart.contentType || item.mime_type || "application/octet-stream" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = item.title || multipart.fileName || "download";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30_000);
+      return;
+    }
     const { data, error } = await supabase.storage
       .from(BUCKET)
       .createSignedUrl(item.storage_path, 60 * 5, { download: item.title || true });
@@ -335,6 +479,10 @@ export default function CompassLockerPage() {
 
   const handleCopyLink = async (item: LockerItem) => {
     if (!item.storage_path) return;
+    if (parseMultipartMeta(item)) {
+      toast.info("Large split files must be downloaded from Compass Locker.");
+      return;
+    }
     const { data, error } = await supabase.storage
       .from(BUCKET)
       .createSignedUrl(item.storage_path, 60 * 60);
