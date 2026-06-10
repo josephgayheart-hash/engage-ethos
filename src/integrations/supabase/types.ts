@@ -1833,6 +1833,69 @@ export type Database = {
           },
         ]
       }
+      personal_ai_artifacts: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          message_id: string | null
+          metadata: Json
+          parent_artifact_id: string | null
+          preview_url: string | null
+          source: string
+          thread_id: string
+          title: string | null
+          updated_at: string
+          user_id: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          message_id?: string | null
+          metadata?: Json
+          parent_artifact_id?: string | null
+          preview_url?: string | null
+          source: string
+          thread_id: string
+          title?: string | null
+          updated_at?: string
+          user_id: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          message_id?: string | null
+          metadata?: Json
+          parent_artifact_id?: string | null
+          preview_url?: string | null
+          source?: string
+          thread_id?: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personal_ai_artifacts_parent_artifact_id_fkey"
+            columns: ["parent_artifact_id"]
+            isOneToOne: false
+            referencedRelation: "personal_ai_artifacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "personal_ai_artifacts_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "personal_ai_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       personal_ai_edits: {
         Row: {
           created_at: string
@@ -1914,6 +1977,36 @@ export type Database = {
         }
         Relationships: []
       }
+      personal_ai_folders: {
+        Row: {
+          color: string | null
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       personal_ai_profile: {
         Row: {
           about_me: string | null
@@ -1959,9 +2052,11 @@ export type Database = {
       personal_ai_threads: {
         Row: {
           created_at: string
+          folder_id: string | null
           id: string
           messages: Json
           model: string
+          pinned: boolean
           system_prompt: string
           title: string
           updated_at: string
@@ -1969,9 +2064,11 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          folder_id?: string | null
           id: string
           messages?: Json
           model?: string
+          pinned?: boolean
           system_prompt?: string
           title?: string
           updated_at?: string
@@ -1979,15 +2076,25 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          folder_id?: string | null
           id?: string
           messages?: Json
           model?: string
+          pinned?: boolean
           system_prompt?: string
           title?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "personal_ai_threads_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "personal_ai_folders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       personal_messages: {
         Row: {
