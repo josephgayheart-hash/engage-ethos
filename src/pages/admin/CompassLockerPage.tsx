@@ -329,14 +329,20 @@ export default function CompassLockerPage() {
         const path = `${user.id}/locker/${Date.now()}-${safeName}`;
         const isZip = /\.zip$/i.test(file.name);
         const contentType = isZip ? "application/zip" : (file.type || "application/octet-stream");
-        const useResumable = file.size > STANDARD_UPLOAD_LIMIT;
+        const useChunkedParts = isZip && file.size > STANDARD_UPLOAD_LIMIT;
+        const useResumable = file.size > STANDARD_UPLOAD_LIMIT && !useChunkedParts;
         const sizeLabel = `${(file.size / (1024 * 1024)).toFixed(1)}MB`;
         let multipartMeta: MultipartMeta | null = null;
-        if (useResumable) {
+        if (useResumable || useChunkedParts) {
           toast.info(`Uploading ${file.name} (${sizeLabel})… 0%`, { id: `up-${path}` });
         }
         try {
-          if (useResumable) {
+          if (useChunkedParts) {
+            multipartMeta = await uploadFileInParts(file, path, contentType, (bytesUploaded, bytesTotal) => {
+              const pct = Math.min(100, Math.round((bytesUploaded / bytesTotal) * 100));
+              toast.info(`Uploading ${file.name} (${sizeLabel})… ${pct}%`, { id: `up-${path}` });
+            });
+          } else if (useResumable) {
             await resumableUpload(file, path, contentType, (bytesUploaded, bytesTotal) => {
               const pct = Math.min(100, Math.round((bytesUploaded / bytesTotal) * 100));
               toast.info(`Uploading ${file.name} (${sizeLabel})… ${pct}%`, { id: `up-${path}` });
