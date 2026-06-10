@@ -1193,13 +1193,21 @@ export default function PersonalAIPage() {
                     )}
 
                     {streaming && !streamText && !streamImage && (
-                      <div className="flex gap-3 items-center">
+                      <div className="flex gap-3 items-center animate-fade-in">
                         <div className="shrink-0 h-7 w-7 rounded-full bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center text-primary-foreground shadow-sm">
                           <Sparkles className="h-3.5 w-3.5" />
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          {imageMode ? "Generating image…" : webSearch ? "Searching the web…" : "Thinking…"}
+                        <div className="flex items-center gap-2.5">
+                          <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-muted/70 border border-border/40">
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary/70 animate-bounce" style={{ animationDelay: "0ms", animationDuration: "1s" }} />
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary/70 animate-bounce" style={{ animationDelay: "150ms", animationDuration: "1s" }} />
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary/70 animate-bounce" style={{ animationDelay: "300ms", animationDuration: "1s" }} />
+                          </div>
+                          <span
+                            className="text-xs font-medium bg-gradient-to-r from-muted-foreground via-foreground to-muted-foreground bg-[length:200%_100%] bg-clip-text text-transparent animate-[shimmer_2.4s_linear_infinite]"
+                          >
+                            {imageMode ? "Rendering image" : webSearch ? "Searching the web" : `${currentModelLabel} is thinking`}
+                          </span>
                         </div>
                       </div>
                     )}
