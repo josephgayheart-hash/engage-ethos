@@ -25,7 +25,7 @@ import {
 import { MemoryDialog } from "@/components/personal-ai/MemoryDialog";
 import { ArtifactPreviewFrame } from "@/components/personal-ai/ArtifactPreviewFrame";
 import { RichMarkdown } from "@/components/personal-ai/RichMarkdown";
-import { PresetChips, type Preset } from "@/components/personal-ai/PresetChips";
+import { PRESETS, type Preset } from "@/components/personal-ai/PresetChips";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -233,6 +233,8 @@ export default function PersonalAIPage() {
   const [deepResearch, setDeepResearch] = useState(false);
   const [extendedThinking, setExtendedThinking] = useState(false);
   const [activePreset, setActivePreset] = useState<Preset | null>(null);
+  const [imageAspect, setImageAspect] = useState<string>("1:1");
+  const [imageStyle, setImageStyle] = useState<string>("auto");
   const [streaming, setStreaming] = useState(false);
   const [streamText, setStreamText] = useState("");
   const [streamImage, setStreamImage] = useState<string | null>(null);
@@ -544,15 +546,30 @@ export default function PersonalAIPage() {
     return { context, sources };
   };
 
-  const generateImage = async (prompt: string) => {
+  const generateImage = async (prompt: string, opts?: { variation?: boolean; displayPrompt?: string }) => {
     setStreaming(true);
     setStreamImage(null);
     setStreamImageFinal(false);
-    const userMsg: Msg = { role: "user", content: prompt, ts: Date.now() };
+    const display = opts?.displayPrompt ?? prompt;
+    const userMsg: Msg = { role: "user", content: display, ts: Date.now() };
     const newMessages = [...(active?.messages ?? []), userMsg];
-    const titleUpdate = active?.messages.length === 0 ? { title: prompt.slice(0, 60) } : {};
+    const titleUpdate = active?.messages.length === 0 ? { title: display.slice(0, 60) } : {};
     updateActive({ messages: newMessages, ...titleUpdate });
     setInput("");
+
+    const styleHint: Record<string, string> = {
+      photo: "photorealistic, high detail, natural lighting",
+      illustration: "modern illustration, clean linework, balanced composition",
+      "3d": "3D rendered, soft studio lighting, subtle ambient occlusion",
+      line: "minimal line art, monochrome, generous whitespace",
+      flat: "flat vector style, bold shapes, limited palette",
+      watercolor: "watercolor painting, soft washes, textured paper feel",
+      cinematic: "cinematic lighting, shallow depth of field, filmic color",
+    };
+    const styleSuffix = imageStyle !== "auto" && styleHint[imageStyle] ? ` — ${styleHint[imageStyle]}` : "";
+    const aspectSuffix = imageAspect !== "1:1" ? ` (aspect ratio ${imageAspect})` : "";
+    const variationPrefix = opts?.variation ? "Create a fresh variation (different composition, same subject and intent) of: " : "";
+    const finalPrompt = `${variationPrefix}${prompt}${styleSuffix}${aspectSuffix}`;
 
     const controller = new AbortController();
     abortRef.current = controller;
@@ -563,7 +580,7 @@ export default function PersonalAIPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt: finalPrompt, aspect: imageAspect }),
         signal: controller.signal,
       });
       if (!resp.ok || !resp.body) {
@@ -640,6 +657,7 @@ export default function PersonalAIPage() {
       await generateImage(text);
       return;
     }
+
 
 
     const attachments = pendingAttachments;
@@ -832,21 +850,47 @@ export default function PersonalAIPage() {
 
   const Composer = (
     <div className="space-y-2">
-      <div className="flex items-center gap-2 overflow-x-auto pb-0.5">
-        <PresetChips
-          active={activePreset?.id ?? null}
-          onSelect={(p) => setActivePreset(activePreset?.id === p.id ? null : p)}
-        />
-        {activePreset && (
-          <button
-            type="button"
-            onClick={() => setActivePreset(null)}
-            className="text-[11px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline whitespace-nowrap"
-          >
-            clear
-          </button>
-        )}
-      </div>
+      {activePreset && (
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className="gap-1.5 pl-2 pr-1 py-1 rounded-lg font-normal">
+            <activePreset.icon className="h-3 w-3" />
+            <span>Build: {activePreset.label}</span>
+            <button
+              onClick={() => setActivePreset(null)}
+              className="ml-0.5 p-0.5 hover:bg-background/60 rounded"
+              aria-label="Clear preset"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </Badge>
+        </div>
+      )}
+      {imageMode && (
+        <div className="flex flex-wrap items-center gap-2 text-[11px]">
+          <span className="text-muted-foreground/70 uppercase tracking-wider font-medium">Image</span>
+          <Select value={imageAspect} onValueChange={setImageAspect}>
+            <SelectTrigger className="h-7 w-auto gap-1 rounded-full px-2.5 text-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1:1">Square (1:1)</SelectItem>
+              <SelectItem value="3:2">Landscape (3:2)</SelectItem>
+              <SelectItem value="2:3">Portrait (2:3)</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={imageStyle} onValueChange={setImageStyle}>
+            <SelectTrigger className="h-7 w-auto gap-1 rounded-full px-2.5 text-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="auto">Auto style</SelectItem>
+              <SelectItem value="photo">Photorealistic</SelectItem>
+              <SelectItem value="illustration">Illustration</SelectItem>
+              <SelectItem value="3d">3D render</SelectItem>
+              <SelectItem value="line">Line art</SelectItem>
+              <SelectItem value="flat">Flat / vector</SelectItem>
+              <SelectItem value="watercolor">Watercolor</SelectItem>
+              <SelectItem value="cinematic">Cinematic</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
       {pendingAttachments.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {pendingAttachments.map((a, i) => (
@@ -930,13 +974,39 @@ export default function PersonalAIPage() {
                 <Plus className="h-[18px] w-[18px]" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-52">
+            <DropdownMenuContent align="start" className="w-64">
               <DropdownMenuItem onClick={() => fileRef.current?.click()}>
                 <Paperclip className="h-4 w-4 mr-2" /> Upload from computer
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => imageRef.current?.click()}>
                 <ImageIcon className="h-4 w-4 mr-2" /> Add photos
               </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/70 font-medium">
+                Build
+              </DropdownMenuLabel>
+              {PRESETS.map((p) => {
+                const Icon = p.icon;
+                const isActive = activePreset?.id === p.id;
+                return (
+                  <DropdownMenuItem
+                    key={p.id}
+                    onClick={() => setActivePreset(isActive ? null : p)}
+                    className={cn(isActive && "bg-primary/10 text-primary focus:bg-primary/15 focus:text-primary")}
+                  >
+                    <Icon className="h-4 w-4 mr-2" /> {p.label}
+                    {isActive && <Check className="h-3.5 w-3.5 ml-auto" />}
+                  </DropdownMenuItem>
+                );
+              })}
+              {activePreset && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setActivePreset(null)} className="text-muted-foreground">
+                    <X className="h-4 w-4 mr-2" /> Clear build preset
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
           <input ref={imageRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => { handleFiles(e.target.files, true); e.target.value = ""; }} />
@@ -1189,9 +1259,24 @@ export default function PersonalAIPage() {
                               {m.imageUrl ? (
                                 <div className="space-y-2">
                                   <img src={m.imageUrl} alt="Generated" className="rounded-xl border max-w-full" />
-                                  <button onClick={() => downloadImage(m.imageUrl!)} className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
-                                    <Download className="h-3 w-3" /> Download
-                                  </button>
+                                  <div className="flex items-center gap-3">
+                                    <button onClick={() => downloadImage(m.imageUrl!)} className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+                                      <Download className="h-3 w-3" /> Download
+                                    </button>
+                                    {(() => {
+                                      const prevUser = active?.messages.slice(0, i).reverse().find(x => x.role === "user");
+                                      if (!prevUser?.content) return null;
+                                      return (
+                                        <button
+                                          disabled={streaming}
+                                          onClick={() => generateImage(prevUser.content, { variation: true, displayPrompt: "Variation of previous image" })}
+                                          className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 disabled:opacity-40"
+                                        >
+                                          <RefreshCw className="h-3 w-3" /> Variations
+                                        </button>
+                                      );
+                                    })()}
+                                  </div>
                                 </div>
                               ) : (
                                 <>
