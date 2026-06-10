@@ -539,6 +539,10 @@ export default function PersonalAIPage() {
         } else if (lower.endsWith(".docx")) {
           const text = await parseDocxToText(f);
           next.push({ name: f.name, kind: "doc", text });
+        } else if (lower.endsWith(".zip") || f.type === "application/zip" || f.type === "application/x-zip-compressed") {
+          const text = await parseZipToText(f);
+          next.push({ name: f.name, kind: "doc", text });
+          toast({ title: `${f.name} unpacked`, description: "Listed entries and extracted readable text from inside the archive." });
         } else if (TEXTY_EXT.test(lower) || f.type.startsWith("text/") || f.type.includes("json") || f.type.includes("xml")) {
           const text = await f.text();
           next.push({ name: f.name, kind: "doc", text });
@@ -554,6 +558,7 @@ export default function PersonalAIPage() {
             toast({ title: `${f.name} attached as reference`, description: "Binary file — I can see the name and type, not the contents." });
           }
         }
+
       } catch (e: any) {
         toast({ title: `Couldn't read ${f.name}`, description: e.message, variant: "destructive" });
       }
