@@ -205,6 +205,34 @@ async function parseDocxToText(file: File): Promise<string> {
   const result = await mammoth.extractRawText({ arrayBuffer: buf });
   return result.value || "";
 }
+async function parseZipToText(file: File): Promise<string> {
+  const JSZip: any = (await import("jszip")).default;
+  const zip = await JSZip.loadAsync(await file.arrayBuffer());
+  const TEXTY = /\.(txt|md|markdown|csv|tsv|json|jsonl|ya?ml|xml|html?|css|scss|less|js|jsx|ts|tsx|py|rb|go|rs|java|kt|swift|c|h|cpp|hpp|cs|php|sh|bash|zsh|sql|env|ini|toml|conf|log|srt|vtt|rtf)$/i;
+  const entries: { path: string; size: number; dir: boolean }[] = [];
+  zip.forEach((path: string, entry: any) => {
+    entries.push({ path, size: entry._data?.uncompressedSize ?? 0, dir: entry.dir });
+  });
+  const fileEntries = entries.filter(e => !e.dir);
+  const header = `[ZIP archive: ${file.name} · ${fileEntries.length} files]\n\nContents:\n${entries.map(e => `- ${e.path}${e.dir ? "/" : ` (${Math.max(1, Math.round(e.size / 1024))} KB)`}`).join("\n")}`;
+  const MAX_FILES = 30;
+  const MAX_BYTES_PER = 200_000;
+  const MAX_TOTAL = 1_000_000;
+  let total = 0;
+  const parts: string[] = [];
+  for (const e of fileEntries) {
+    if (parts.length >= MAX_FILES || total >= MAX_TOTAL) break;
+    if (!TEXTY.test(e.path)) continue;
+    try {
+      let text: string = await zip.file(e.path).async("string");
+      if (text.length > MAX_BYTES_PER) text = text.slice(0, MAX_BYTES_PER) + "\n…[truncated]";
+      total += text.length;
+      parts.push(`\n\n--- ${e.path} ---\n${text}`);
+    } catch { /* skip */ }
+  }
+  return header + (parts.length ? `\n\nReadable text extracted:${parts.join("")}` : "\n\n(No readable text files found — only binaries inside.)");
+}
+
 function fileToDataUrl(file: File): Promise<string> {
   return new Promise((res, rej) => {
     const r = new FileReader();
