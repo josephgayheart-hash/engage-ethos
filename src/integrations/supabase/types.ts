@@ -421,6 +421,7 @@ export type Database = {
           id: string
           kind: string
           mime_type: string | null
+          shared_with_user_ids: string[]
           size_bytes: number | null
           storage_path: string | null
           title: string | null
@@ -433,6 +434,7 @@ export type Database = {
           id?: string
           kind: string
           mime_type?: string | null
+          shared_with_user_ids?: string[]
           size_bytes?: number | null
           storage_path?: string | null
           title?: string | null
@@ -445,6 +447,7 @@ export type Database = {
           id?: string
           kind?: string
           mime_type?: string | null
+          shared_with_user_ids?: string[]
           size_bytes?: number | null
           storage_path?: string | null
           title?: string | null
