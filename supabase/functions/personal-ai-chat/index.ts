@@ -616,6 +616,20 @@ serve(async (req) => {
                 }
               }
 
+              // File-generation tools already render an artifact pill in the
+              // chat. Asking Claude to wrap up after they run frequently
+              // produces a second message that restates the original answer,
+              // which the user perceives as a duplicated reply. Skip the
+              // wrap-up turn when every tool call was a file-generation tool.
+              const FILE_TOOLS = new Set([
+                "generate_pptx", "generate_docx", "generate_html",
+                "generate_svg", "generate_pdf", "generate_image", "generate_xlsx",
+              ]);
+              const allFileTools = toolCalls.every((c) => FILE_TOOLS.has(c.name));
+              if (allFileTools) {
+                break;
+              }
+
               convo = [
                 ...convo,
                 { role: "assistant", content: assistantContent },
