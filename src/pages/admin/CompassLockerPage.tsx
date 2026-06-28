@@ -791,6 +791,19 @@ export default function CompassLockerPage() {
                         : item.content}
                     </pre>
                   )}
+                  {item.kind === "file" &&
+                    item.storage_path &&
+                    !parseMultipartMeta(item) &&
+                    isImageMime(item.mime_type) && (
+                      <button
+                        type="button"
+                        onClick={() => void handlePreview(item)}
+                        className="block"
+                        title="Click to preview"
+                      >
+                        <LockerThumbnail path={item.storage_path} alt={item.title || "image"} />
+                      </button>
+                    )}
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   {item.kind === "text" ? (
