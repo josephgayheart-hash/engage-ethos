@@ -943,6 +943,59 @@ export default function CompassLockerPage() {
           ))}
         </ul>
       )}
+
+      <Dialog
+        open={!!previewItem}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPreviewItem(null);
+            setPreviewUrl(null);
+          }
+        }}
+      >
+        <DialogContent className="max-w-5xl p-0 overflow-hidden">
+          <DialogHeader className="border-b px-4 py-3">
+            <DialogTitle className="flex items-center justify-between gap-3">
+              <span className="truncate text-sm">
+                {previewItem?.title || "Preview"}
+              </span>
+              {previewUrl && (
+                <a
+                  href={previewUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-muted-foreground underline"
+                >
+                  Open in new tab
+                </a>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="bg-muted/30">
+            {previewItem && previewUrl && (
+              <>
+                {isImageMime(previewItem.mime_type) && (
+                  <div className="flex max-h-[80vh] items-center justify-center overflow-auto p-2">
+                    <img
+                      src={previewUrl}
+                      alt={previewItem.title || "preview"}
+                      className="max-h-[78vh] w-auto object-contain"
+                    />
+                  </div>
+                )}
+                {(isPdfMime(previewItem.mime_type) ||
+                  isTextLikeMime(previewItem.mime_type)) && (
+                  <iframe
+                    src={previewUrl}
+                    title={previewItem.title || "preview"}
+                    className="h-[80vh] w-full border-0 bg-white"
+                  />
+                )}
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
