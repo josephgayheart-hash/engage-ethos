@@ -32,7 +32,44 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+
+function isImageMime(mime: string | null | undefined) {
+  return !!mime && mime.startsWith("image/");
+}
+function isPdfMime(mime: string | null | undefined) {
+  return mime === "application/pdf";
+}
+function isTextLikeMime(mime: string | null | undefined) {
+  if (!mime) return false;
+  return mime.startsWith("text/") || mime === "application/json" || mime === "application/xml";
+}
+function isPreviewableInBrowser(mime: string | null | undefined) {
+  return isImageMime(mime) || isPdfMime(mime) || isTextLikeMime(mime);
+}
+
+function LockerThumbnail({ path, alt }: { path: string; alt: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    void supabase.storage.from(BUCKET).createSignedUrl(path, 60 * 10).then(({ data }) => {
+      if (!cancelled && data?.signedUrl) setUrl(data.signedUrl);
+    });
+    return () => { cancelled = true; };
+  }, [path]);
+  if (!url) {
+    return <div className="mt-2 h-20 w-20 animate-pulse rounded-md bg-muted" />;
+  }
+  return (
+    <img
+      src={url}
+      alt={alt}
+      loading="lazy"
+      className="mt-2 h-20 w-20 cursor-zoom-in rounded-md border object-cover"
+    />
+  );
+}
 
 type LockerItem = {
   id: string;
@@ -223,6 +260,8 @@ export default function CompassLockerPage() {
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [compassUsers, setCompassUsers] = useState<CompassUser[]>([]);
+  const [previewItem, setPreviewItem] = useState<LockerItem | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -432,7 +471,12 @@ export default function CompassLockerPage() {
       toast.error("Could not open preview");
       return;
     }
-    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+    if (isPreviewableInBrowser(item.mime_type)) {
+      setPreviewItem(item);
+      setPreviewUrl(data.signedUrl);
+    } else {
+      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+    }
   };
 
 
@@ -747,6 +791,19 @@ export default function CompassLockerPage() {
                         : item.content}
                     </pre>
                   )}
+                  {item.kind === "file" &&
+                    item.storage_path &&
+                    !parseMultipartMeta(item) &&
+                    isImageMime(item.mime_type) && (
+                      <button
+                        type="button"
+                        onClick={() => void handlePreview(item)}
+                        className="block"
+                        title="Click to preview"
+                      >
+                        <LockerThumbnail path={item.storage_path} alt={item.title || "image"} />
+                      </button>
+                    )}
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   {item.kind === "text" ? (
@@ -886,6 +943,59 @@ export default function CompassLockerPage() {
           ))}
         </ul>
       )}
+
+      <Dialog
+        open={!!previewItem}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPreviewItem(null);
+            setPreviewUrl(null);
+          }
+        }}
+      >
+        <DialogContent className="max-w-5xl p-0 overflow-hidden">
+          <DialogHeader className="border-b px-4 py-3">
+            <DialogTitle className="flex items-center justify-between gap-3">
+              <span className="truncate text-sm">
+                {previewItem?.title || "Preview"}
+              </span>
+              {previewUrl && (
+                <a
+                  href={previewUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-muted-foreground underline"
+                >
+                  Open in new tab
+                </a>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="bg-muted/30">
+            {previewItem && previewUrl && (
+              <>
+                {isImageMime(previewItem.mime_type) && (
+                  <div className="flex max-h-[80vh] items-center justify-center overflow-auto p-2">
+                    <img
+                      src={previewUrl}
+                      alt={previewItem.title || "preview"}
+                      className="max-h-[78vh] w-auto object-contain"
+                    />
+                  </div>
+                )}
+                {(isPdfMime(previewItem.mime_type) ||
+                  isTextLikeMime(previewItem.mime_type)) && (
+                  <iframe
+                    src={previewUrl}
+                    title={previewItem.title || "preview"}
+                    className="h-[80vh] w-full border-0 bg-white"
+                  />
+                )}
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
