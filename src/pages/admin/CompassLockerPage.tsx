@@ -471,7 +471,12 @@ export default function CompassLockerPage() {
       toast.error("Could not open preview");
       return;
     }
-    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+    if (isPreviewableInBrowser(item.mime_type)) {
+      setPreviewItem(item);
+      setPreviewUrl(data.signedUrl);
+    } else {
+      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+    }
   };
 
 
