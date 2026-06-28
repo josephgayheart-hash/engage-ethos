@@ -260,6 +260,8 @@ export default function CompassLockerPage() {
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [compassUsers, setCompassUsers] = useState<CompassUser[]>([]);
+  const [previewItem, setPreviewItem] = useState<LockerItem | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
