@@ -32,7 +32,44 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+
+function isImageMime(mime: string | null | undefined) {
+  return !!mime && mime.startsWith("image/");
+}
+function isPdfMime(mime: string | null | undefined) {
+  return mime === "application/pdf";
+}
+function isTextLikeMime(mime: string | null | undefined) {
+  if (!mime) return false;
+  return mime.startsWith("text/") || mime === "application/json" || mime === "application/xml";
+}
+function isPreviewableInBrowser(mime: string | null | undefined) {
+  return isImageMime(mime) || isPdfMime(mime) || isTextLikeMime(mime);
+}
+
+function LockerThumbnail({ path, alt }: { path: string; alt: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    void supabase.storage.from(BUCKET).createSignedUrl(path, 60 * 10).then(({ data }) => {
+      if (!cancelled && data?.signedUrl) setUrl(data.signedUrl);
+    });
+    return () => { cancelled = true; };
+  }, [path]);
+  if (!url) {
+    return <div className="mt-2 h-20 w-20 animate-pulse rounded-md bg-muted" />;
+  }
+  return (
+    <img
+      src={url}
+      alt={alt}
+      loading="lazy"
+      className="mt-2 h-20 w-20 cursor-zoom-in rounded-md border object-cover"
+    />
+  );
+}
 
 type LockerItem = {
   id: string;
