@@ -166,6 +166,8 @@ function stripArtifactMarkers(text: string): string {
     .replace(/<!--artifact:\{[\s\S]*?\}-->\n?/g, "")
     // Drop the transient "Building your file…" progress line once streaming has settled.
     .replace(/\n?_Building your file…_\n?/g, "")
+    // Remove any leftover streaming caret characters saved into history.
+    .replace(/[▍▌█]+\s*$/g, "")
     .trim();
 }
 
