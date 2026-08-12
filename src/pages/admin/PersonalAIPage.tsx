@@ -1483,7 +1483,8 @@ export default function PersonalAIPage() {
                           <Sparkles className="h-3.5 w-3.5" />
                         </div>
                         <div className="flex-1 min-w-0 pt-0.5">
-                          <RichMarkdown>{stripArtifactMarkers(streamText) + "▍"}</RichMarkdown>
+                          <RichMarkdown>{stripArtifactMarkers(streamText)}</RichMarkdown>
+                          <span className="inline-block w-[2px] h-4 align-middle bg-primary/70 animate-pulse rounded-sm" aria-hidden />
                         </div>
                       </div>
                     )}
