@@ -166,6 +166,8 @@ function stripArtifactMarkers(text: string): string {
     .replace(/<!--artifact:\{[\s\S]*?\}-->\n?/g, "")
     // Drop the transient "Building your file…" progress line once streaming has settled.
     .replace(/\n?_Building your file…_\n?/g, "")
+    // Remove any leftover streaming caret characters saved into history.
+    .replace(/[▍▌█]+\s*$/g, "")
     .trim();
 }
 
@@ -1445,7 +1447,7 @@ export default function PersonalAIPage() {
                                 </div>
                               ) : null}
                               {m.content && (
-                                <div className="flex items-center gap-1 -ml-1.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition">
+                                <div className="flex items-center gap-1 -ml-1.5 opacity-60 group-hover:opacity-100 focus-within:opacity-100 transition">
                                   <button onClick={() => copyMsg(m.content, m.ts)} className="h-7 w-7 inline-flex items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Copy">
                                     {copiedTs === m.ts ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
                                   </button>
@@ -1483,7 +1485,8 @@ export default function PersonalAIPage() {
                           <Sparkles className="h-3.5 w-3.5" />
                         </div>
                         <div className="flex-1 min-w-0 pt-0.5">
-                          <RichMarkdown>{stripArtifactMarkers(streamText) + "▍"}</RichMarkdown>
+                          <RichMarkdown>{stripArtifactMarkers(streamText)}</RichMarkdown>
+                          <span className="inline-block w-[2px] h-4 align-middle bg-primary/70 animate-pulse rounded-sm" aria-hidden />
                         </div>
                       </div>
                     )}
