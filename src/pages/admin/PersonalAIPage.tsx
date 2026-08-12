@@ -1445,7 +1445,7 @@ export default function PersonalAIPage() {
                                 </div>
                               ) : null}
                               {m.content && (
-                                <div className="flex items-center gap-1 -ml-1.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition">
+                                <div className="flex items-center gap-1 -ml-1.5 opacity-60 group-hover:opacity-100 focus-within:opacity-100 transition">
                                   <button onClick={() => copyMsg(m.content, m.ts)} className="h-7 w-7 inline-flex items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Copy">
                                     {copiedTs === m.ts ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
                                   </button>
