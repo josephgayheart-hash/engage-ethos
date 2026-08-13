@@ -899,13 +899,40 @@ export default function CompassLockerPage() {
                 ? "Permanently delete all of your locker items?"
                 : "Permanently delete the items in this view?"}
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              This removes {bulkTarget === "all" ? ownedCount : ownedInViewCount} item
-              {(bulkTarget === "all" ? ownedCount : ownedInViewCount) === 1 ? "" : "s"} you own — the
-              stored files are erased from the server and the records are deleted from the database.
-              Anyone you shared them with loses access immediately. This cannot be undone, and items
-              owned by other people are never touched.
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <p>
+                  This affects {bulkTarget === "all" ? ownedCount : ownedInViewCount} item
+                  {(bulkTarget === "all" ? ownedCount : ownedInViewCount) === 1 ? "" : "s"} you own.
+                  Here is exactly what happens:
+                </p>
+                <ul className="list-disc space-y-1 pl-5">
+                  <li>
+                    Every stored object is erased from file storage, including all parts of chunked
+                    large uploads and any generated thumbnails.
+                  </li>
+                  <li>
+                    The database row is deleted outright — not flagged or archived — so no filename,
+                    text content, note, or share list remains in the table.
+                  </li>
+                  <li>
+                    All existing share links and signed URLs stop working immediately, and anyone you
+                    shared with loses access at once.
+                  </li>
+                  <li>
+                    Only a tamper-evident audit entry (who deleted what, and when) is retained for
+                    compliance. It records the event, never the file contents.
+                  </li>
+                  <li>
+                    There is no recycle bin, no soft-delete window, and no restore. Encrypted
+                    infrastructure backups age out on their own rolling schedule and are not
+                    user-accessible.
+                  </li>
+                </ul>
+                <p>Items owned by other people are never touched.</p>
+              </div>
             </AlertDialogDescription>
+
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
