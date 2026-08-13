@@ -56,8 +56,11 @@ const MODELS = [
   { id: "google/gemini-3-flash-preview", label: "Gemini 3 Flash (preview)" },
   { id: "google/gemini-2.5-pro", label: "Gemini 2.5 Pro" },
   { id: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash" },
-  { id: "openai/gpt-5", label: "GPT-5" },
-  { id: "openai/gpt-5-mini", label: "GPT-5 Mini" },
+  { id: "google/gemini-3.6-flash", label: "Gemini 3.6 Flash" },
+  { id: "google/gemini-3.1-pro-preview", label: "Gemini 3.1 Pro (preview)" },
+  { id: "openai/gpt-5.5", label: "GPT-5.5" },
+  { id: "openai/gpt-5.4", label: "GPT-5.4" },
+  { id: "openai/gpt-5.4-mini", label: "GPT-5.4 Mini" },
 ];
 
 const DEFAULT_SYSTEM_PROMPT = `You are Tyler's personal communications copilot for his professional work at Valvoline Global Operations (VGO).
@@ -721,6 +724,19 @@ export default function PersonalAIPage() {
   const handleSend = async () => {
     const text = input.trim();
     if ((!text && pendingAttachments.length === 0) || streaming || !active) return;
+    // Synchronous re-entry guard: `streaming` state updates asynchronously, so a
+    // fast double Enter/click could otherwise fire two identical requests and
+    // render two answers to the same question.
+    if (sendingRef.current) return;
+    sendingRef.current = true;
+    try {
+      await runSend(text);
+    } finally {
+      sendingRef.current = false;
+    }
+  };
+
+  const runSend = async (text: string) => {
 
     const intent = text ? detectIntent(text) : { image: false, research: false, search: false, think: false, preset: null as string | null };
     const useImage = imageMode || intent.image;
