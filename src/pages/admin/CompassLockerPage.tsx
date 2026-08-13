@@ -320,9 +320,36 @@ export default function CompassLockerPage() {
     setLoading(false);
   }, [user]);
 
+  // Record an access event for the audit trail. Never blocks the UI.
+  const logAccess = useCallback(
+    (action: string, item: LockerItem, detail?: string) => {
+      if (!user) return;
+      void supabase
+        .from("compass_locker_audit")
+        .insert({
+          item_id: item.id,
+          owner_id: item.user_id,
+          actor_id: user.id,
+          action,
+          file_name: item.title,
+          detail: detail ?? null,
+        })
+        .then(() => undefined, () => undefined);
+    },
+    [user],
+  );
+
   useEffect(() => {
-    void loadItems();
-  }, [loadItems]);
+    if (!user) return;
+    // Hard-delete anything past its retention window (storage objects + rows)
+    // before rendering, so expired files never linger on the server.
+    void supabase.functions
+      .invoke("compass-locker-purge")
+      .catch(() => undefined)
+      .finally(() => {
+        void loadItems();
+      });
+  }, [loadItems, user]);
 
   const filtered = useMemo(
     () => (filter === "all" ? items : items.filter((i) => i.kind === filter)),
