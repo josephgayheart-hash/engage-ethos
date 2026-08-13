@@ -669,7 +669,10 @@ export default function CompassLockerPage() {
         </Button>
         <h1 className="text-2xl font-semibold tracking-tight">Compass Locker</h1>
         <p className="text-sm text-muted-foreground">
-          Shared relay for text and files across every active Compass user. Drag files anywhere on this page — uploads are visible to everyone immediately.
+          Your private relay for text and files. Drag files anywhere on this page. Items are visible only to you unless you explicitly share them with another Compass user.
+        </p>
+        <p className="text-xs text-muted-foreground/80">
+          Security: files are stored encrypted at rest, served only through short-lived signed links, and every view, download, link, share, and delete is logged. When an item reaches its expiry it is permanently deleted from storage and the database — no recovery, no archive copy.
         </p>
       </header>
 
