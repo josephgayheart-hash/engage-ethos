@@ -346,6 +346,7 @@ export default function PersonalAIPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const imageRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const sendingRef = useRef(false);
   const [copiedTs, setCopiedTs] = useState<number | null>(null);
   const [memoryOpen, setMemoryOpen] = useState(false);
   const [dragOver, setDragOver] = useState(false);
