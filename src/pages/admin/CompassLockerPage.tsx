@@ -15,6 +15,9 @@ import {
   ArrowLeft,
   Users,
   Check,
+  MoreHorizontal,
+  ShieldAlert,
+  Timer,
 } from "lucide-react";
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -33,6 +36,24 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 
 function isImageMime(mime: string | null | undefined) {
@@ -259,6 +280,8 @@ export default function CompassLockerPage() {
   const [posting, setPosting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [bulkTarget, setBulkTarget] = useState<"view" | "all" | null>(null);
+  const [purging, setPurging] = useState(false);
   const [compassUsers, setCompassUsers] = useState<CompassUser[]>([]);
   const [previewItem, setPreviewItem] = useState<LockerItem | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -354,6 +377,14 @@ export default function CompassLockerPage() {
   const filtered = useMemo(
     () => (filter === "all" ? items : items.filter((i) => i.kind === filter)),
     [items, filter],
+  );
+  const ownedCount = useMemo(
+    () => items.filter((i) => i.user_id === user?.id).length,
+    [items, user],
+  );
+  const ownedInViewCount = useMemo(
+    () => filtered.filter((i) => i.user_id === user?.id).length,
+    [filtered, user],
   );
 
   const handlePostText = async () => {
@@ -466,6 +497,66 @@ export default function CompassLockerPage() {
     }
   };
 
+
+  /** Permanently remove a set of items I own: storage objects first, then rows. */
+  const purgeItems = async (targets: LockerItem[], label: string) => {
+    if (!user) return;
+    const mine = targets.filter((i) => i.user_id === user.id);
+    if (mine.length === 0) {
+      toast.info("Nothing to clear — you can only permanently delete files you own.");
+      return;
+    }
+    setPurging(true);
+    try {
+      const paths = mine.flatMap((item) => {
+        if (!item.storage_path) return [];
+        const multipart = parseMultipartMeta(item);
+        return multipart
+          ? multipartPaths(item.storage_path, multipart.partCount)
+          : [item.storage_path];
+      });
+      for (let i = 0; i < paths.length; i += 100) {
+        const { error } = await supabase.storage.from(BUCKET).remove(paths.slice(i, i + 100));
+        if (error) console.error("bulk purge storage error:", error.message);
+      }
+      const ids = mine.map((i) => i.id);
+      const { error } = await supabase
+        .from("compass_locker_items")
+        .delete()
+        .in("id", ids)
+        .eq("user_id", user.id);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      mine.forEach((item) => logAccess("bulk_delete", item, `Permanently cleared (${label})`));
+      setItems((prev) => prev.filter((i) => !ids.includes(i.id)));
+      toast.success(`Permanently deleted ${mine.length} item${mine.length === 1 ? "" : "s"}`);
+    } finally {
+      setPurging(false);
+      setBulkTarget(null);
+    }
+  };
+
+  const handlePurgeExpiredNow = async () => {
+    setPurging(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("compass-locker-purge");
+      if (error) {
+        toast.error("Purge failed");
+        return;
+      }
+      const purged = (data as { purged?: number } | null)?.purged ?? 0;
+      toast.success(
+        purged > 0
+          ? `Purged ${purged} expired item${purged === 1 ? "" : "s"} from storage and the database`
+          : "No expired items to purge",
+      );
+      await loadItems();
+    } finally {
+      setPurging(false);
+    }
+  };
 
   const handleDelete = async (item: LockerItem) => {
     if (!confirm("Delete this item permanently? The file is removed from storage and cannot be recovered.")) return;
@@ -758,10 +849,82 @@ export default function CompassLockerPage() {
             </Button>
           ))}
         </div>
-        <span className="text-xs text-muted-foreground">
-          {filtered.length} item{filtered.length === 1 ? "" : "s"}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">
+            {filtered.length} item{filtered.length === 1 ? "" : "s"}
+          </span>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8" disabled={purging}>
+                {purging ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <MoreHorizontal className="h-4 w-4" />
+                )}
+                <span className="sr-only">Locker actions</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuLabel>Retention</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => void handlePurgeExpiredNow()}>
+                <Timer className="mr-2 h-4 w-4" />
+                Purge expired items now
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Permanent deletion</DropdownMenuLabel>
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onClick={() => setBulkTarget("view")}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Clear items in this view
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onClick={() => setBulkTarget("all")}
+              >
+                <ShieldAlert className="mr-2 h-4 w-4" />
+                Clear everything I own
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
+
+      <AlertDialog open={bulkTarget !== null} onOpenChange={(open) => !open && setBulkTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {bulkTarget === "all"
+                ? "Permanently delete all of your locker items?"
+                : "Permanently delete the items in this view?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This removes {bulkTarget === "all" ? ownedCount : ownedInViewCount} item
+              {(bulkTarget === "all" ? ownedCount : ownedInViewCount) === 1 ? "" : "s"} you own — the
+              stored files are erased from the server and the records are deleted from the database.
+              Anyone you shared them with loses access immediately. This cannot be undone, and items
+              owned by other people are never touched.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={(e) => {
+                e.preventDefault();
+                void purgeItems(
+                  bulkTarget === "all" ? items : filtered,
+                  bulkTarget === "all" ? "all owned items" : `filter: ${filter}`,
+                );
+              }}
+            >
+              {purging ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Delete permanently
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {loading ? (
         <div className="flex items-center justify-center p-12">
