@@ -833,6 +833,34 @@ export default function CompassLockerPage() {
         <p className="text-xs text-muted-foreground">
           Max 2GB per file (large files use resumable upload). Items past their expiry are hidden automatically.
         </p>
+        <details className="group rounded-md border border-border/60 bg-muted/30 p-3">
+          <summary className="cursor-pointer text-xs font-medium text-foreground">
+            How deletion and retention actually work
+          </summary>
+          <div className="mt-2 space-y-2 text-xs leading-relaxed text-muted-foreground">
+            <p>
+              <span className="font-medium text-foreground">On expiry.</span> Once an item passes its
+              retention date it is hidden from every view at the database level, so it can no longer be
+              previewed, downloaded, or shared — even by you. A purge job then hard-deletes it: the
+              storage objects are erased and the database row is removed permanently.
+            </p>
+            <p>
+              <span className="font-medium text-foreground">On manual delete.</span> Deleting is
+              immediate and permanent. All stored objects (including every part of a chunked large
+              upload) are erased from storage, and the database record is deleted outright rather than
+              flagged — no filename, text body, note, or share list is left behind. Existing share
+              links and signed URLs stop resolving right away.
+            </p>
+            <p>
+              <span className="font-medium text-foreground">What is kept.</span> Only an audit entry
+              recording the action, the actor, and the timestamp, retained for compliance. It never
+              stores file contents. There is no recycle bin, soft-delete window, or self-serve
+              restore; encrypted platform-level infrastructure backups roll off on their own schedule
+              and are not accessible from the app.
+            </p>
+          </div>
+        </details>
+
       </Card>
 
       <div className="flex items-center justify-between">
@@ -899,13 +927,40 @@ export default function CompassLockerPage() {
                 ? "Permanently delete all of your locker items?"
                 : "Permanently delete the items in this view?"}
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              This removes {bulkTarget === "all" ? ownedCount : ownedInViewCount} item
-              {(bulkTarget === "all" ? ownedCount : ownedInViewCount) === 1 ? "" : "s"} you own — the
-              stored files are erased from the server and the records are deleted from the database.
-              Anyone you shared them with loses access immediately. This cannot be undone, and items
-              owned by other people are never touched.
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <p>
+                  This affects {bulkTarget === "all" ? ownedCount : ownedInViewCount} item
+                  {(bulkTarget === "all" ? ownedCount : ownedInViewCount) === 1 ? "" : "s"} you own.
+                  Here is exactly what happens:
+                </p>
+                <ul className="list-disc space-y-1 pl-5">
+                  <li>
+                    Every stored object is erased from file storage, including all parts of chunked
+                    large uploads and any generated thumbnails.
+                  </li>
+                  <li>
+                    The database row is deleted outright — not flagged or archived — so no filename,
+                    text content, note, or share list remains in the table.
+                  </li>
+                  <li>
+                    All existing share links and signed URLs stop working immediately, and anyone you
+                    shared with loses access at once.
+                  </li>
+                  <li>
+                    Only a tamper-evident audit entry (who deleted what, and when) is retained for
+                    compliance. It records the event, never the file contents.
+                  </li>
+                  <li>
+                    There is no recycle bin, no soft-delete window, and no restore. Encrypted
+                    infrastructure backups age out on their own rolling schedule and are not
+                    user-accessible.
+                  </li>
+                </ul>
+                <p>Items owned by other people are never touched.</p>
+              </div>
             </AlertDialogDescription>
+
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
