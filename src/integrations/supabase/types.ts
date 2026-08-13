@@ -413,6 +413,39 @@ export type Database = {
           },
         ]
       }
+      compass_locker_audit: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          detail: string | null
+          file_name: string | null
+          id: string
+          item_id: string | null
+          owner_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          detail?: string | null
+          file_name?: string | null
+          id?: string
+          item_id?: string | null
+          owner_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          detail?: string | null
+          file_name?: string | null
+          id?: string
+          item_id?: string | null
+          owner_id?: string | null
+        }
+        Relationships: []
+      }
       compass_locker_items: {
         Row: {
           content: string | null
