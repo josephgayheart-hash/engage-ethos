@@ -53,7 +53,7 @@ function LockerThumbnail({ path, alt }: { path: string; alt: string }) {
   const [url, setUrl] = useState<string | null>(null);
   useEffect(() => {
     let cancelled = false;
-    void supabase.storage.from(BUCKET).createSignedUrl(path, 60 * 10).then(({ data }) => {
+    void supabase.storage.from(BUCKET).createSignedUrl(path, 60 * 5).then(({ data }) => {
       if (!cancelled && data?.signedUrl) setUrl(data.signedUrl);
     });
     return () => { cancelled = true; };
@@ -468,7 +468,7 @@ export default function CompassLockerPage() {
 
 
   const handleDelete = async (item: LockerItem) => {
-    if (!confirm("Delete this item?")) return;
+    if (!confirm("Delete this item permanently? The file is removed from storage and cannot be recovered.")) return;
     if (item.storage_path) {
       const multipart = parseMultipartMeta(item);
       const paths = multipart ? multipartPaths(item.storage_path, multipart.partCount) : [item.storage_path];
@@ -482,6 +482,7 @@ export default function CompassLockerPage() {
       toast.error(error.message);
       return;
     }
+    logAccess("delete", item, "Item and stored file permanently deleted");
     setItems((prev) => prev.filter((i) => i.id !== item.id));
   };
   const handlePreview = async (item: LockerItem) => {
@@ -493,11 +494,12 @@ export default function CompassLockerPage() {
     }
     const { data, error } = await supabase.storage
       .from(BUCKET)
-      .createSignedUrl(item.storage_path, 60 * 10);
+      .createSignedUrl(item.storage_path, 120);
     if (error || !data?.signedUrl) {
       toast.error("Could not open preview");
       return;
     }
+    logAccess("preview", item);
     if (isPreviewableInBrowser(item.mime_type)) {
       setPreviewItem(item);
       setPreviewUrl(data.signedUrl);
@@ -515,6 +517,7 @@ export default function CompassLockerPage() {
 
   const handleDownload = async (item: LockerItem) => {
     if (!item.storage_path) return;
+    logAccess("download", item);
     const multipart = parseMultipartMeta(item);
     if (multipart) {
       toast.info(`Preparing ${item.title || multipart.fileName}…`);
@@ -540,7 +543,7 @@ export default function CompassLockerPage() {
     }
     const { data, error } = await supabase.storage
       .from(BUCKET)
-      .createSignedUrl(item.storage_path, 60 * 5, { download: item.title || true });
+      .createSignedUrl(item.storage_path, 120, { download: item.title || true });
     if (error || !data?.signedUrl) {
       toast.error("Could not create download link");
       return;
@@ -550,19 +553,20 @@ export default function CompassLockerPage() {
 
   const handleCopyLink = async (item: LockerItem) => {
     if (!item.storage_path) return;
+    logAccess("copy_link", item, "Short-lived signed link created (15 minutes)");
     if (parseMultipartMeta(item)) {
       toast.info("Large split files must be downloaded from Compass Locker.");
       return;
     }
     const { data, error } = await supabase.storage
       .from(BUCKET)
-      .createSignedUrl(item.storage_path, 60 * 60);
+      .createSignedUrl(item.storage_path, 60 * 15);
     if (error || !data?.signedUrl) {
       toast.error("Could not create link");
       return;
     }
     await navigator.clipboard.writeText(data.signedUrl);
-    toast.success("Signed link copied (valid 1 hour)");
+    toast.success("Signed link copied (expires in 15 minutes)");
   };
 
   const handlePinForever = async (item: LockerItem) => {
@@ -609,6 +613,11 @@ export default function CompassLockerPage() {
       toast.error(error.message);
       return;
     }
+    logAccess(
+      next.includes(targetId) ? "share_granted" : "share_revoked",
+      item,
+      `Recipient: ${targetId}`,
+    );
     setItems((prev) =>
       prev.map((i) => (i.id === item.id ? { ...i, shared_with_user_ids: next } : i)),
     );
