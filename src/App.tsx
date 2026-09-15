@@ -38,6 +38,7 @@ import TranslationTool from "./pages/TranslationTool";
 import UniversitySettingsPage from "./pages/UniversitySettingsPage";
 import NotFound from "./pages/NotFound";
 import LoginPage from "./pages/LoginPage";
+import OAuthConsentPage from "./pages/OAuthConsentPage";
 import RequestAccessPage from "./pages/RequestAccessPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
 import ProfilePage from "./pages/ProfilePage";
