@@ -61,7 +61,7 @@ export default function LoginPage() {
     setIsGoogleLoading(true);
     setError(null);
     const { error } = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+      redirect_uri: nextPath ? `${window.location.origin}${nextPath}` : window.location.origin,
     });
     if (error) {
       setError("Google sign-in failed. Please try again.");
