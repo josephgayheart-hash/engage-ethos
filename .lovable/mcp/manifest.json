@@ -1,0 +1,203 @@
+{
+  "version": 1,
+  "sdk_version": "2.0.4",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://yeuwpuzbccqnqdlnjhfm.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "campusvoice-ai",
+      "version": "0.1.0",
+      "title": "CampusVoice.ai"
+    },
+    "tools": [
+      {
+        "name": "list_profiles",
+        "title": "List profiles",
+        "description": "List the organization/institution profiles the signed-in user can access, with their type and status.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25,
+              "description": "Maximum profiles to return."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_messages",
+        "title": "List saved messages",
+        "description": "List the signed-in user's saved messages, newest first. Optionally filter by profile, channel, or a text search on the title.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "profile_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Only messages tied to this profile."
+            },
+            "channel": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Only messages for this channel, e.g. email."
+            },
+            "search": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Case-insensitive title search."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "description": "Maximum messages to return."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_message",
+        "title": "Get a saved message",
+        "description": "Fetch the full content and metadata of one saved message by its ID.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The message ID."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_message",
+        "title": "Save a message",
+        "description": "Save a new message for the signed-in user so it appears in their personal library in the app.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "description": "Short title for the message."
+            },
+            "content": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The message body."
+            },
+            "channel": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Channel, e.g. email, social, letter."
+            },
+            "audience": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Intended audience."
+            },
+            "tone": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Tone of voice."
+            },
+            "profile_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Profile this message belongs to."
+            }
+          },
+          "required": [
+            "title",
+            "content"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "search_stories",
+        "title": "Search story bank",
+        "description": "Search the story bank the signed-in user can access by title or narrative text, returning matching stories.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "minLength": 2,
+              "description": "Text to look for in story titles and narratives."
+            },
+            "profile_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Only stories tied to this profile."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 25,
+              "default": 10,
+              "description": "Maximum stories to return."
+            }
+          },
+          "required": [
+            "query"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}

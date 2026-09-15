@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import { useToast } from '@/hooks/use-toast';
@@ -28,6 +28,11 @@ const WELCOME_PHRASES = [
 export default function LoginPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+
+  // Same-origin relative path to return to after sign-in (used by the OAuth consent flow).
+  const rawNext = searchParams.get('next');
+  const nextPath = rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : null;
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -56,7 +61,7 @@ export default function LoginPage() {
     setIsGoogleLoading(true);
     setError(null);
     const { error } = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+      redirect_uri: nextPath ? `${window.location.origin}${nextPath}` : window.location.origin,
     });
     if (error) {
       setError("Google sign-in failed. Please try again.");
@@ -146,7 +151,7 @@ export default function LoginPage() {
             .eq('user_id', data.user.id)
             .eq('role', 'super_admin')
             .maybeSingle();
-          navigate(roleRow ? '/platform' : '/dashboard');
+          navigate(nextPath ?? (roleRow ? '/platform' : '/dashboard'));
         }
       }
     } catch {
