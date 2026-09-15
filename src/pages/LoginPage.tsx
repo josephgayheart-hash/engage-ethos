@@ -28,6 +28,11 @@ const WELCOME_PHRASES = [
 export default function LoginPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+
+  // Same-origin relative path to return to after sign-in (used by the OAuth consent flow).
+  const rawNext = searchParams.get('next');
+  const nextPath = rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : null;
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
