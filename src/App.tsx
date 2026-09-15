@@ -184,6 +184,7 @@ const AppRoutes = () => (
     <Route path="/" element={<LandingPage />} />
     <Route path="/og-preview" element={<OGPreviewPage />} />
     <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+    <Route path="/.lovable/oauth/consent" element={<OAuthConsentPage />} />
     <Route path="/request-access" element={<RequestAccessPage />} />
     <Route path="/change-password" element={<ChangePasswordPage />} />
     <Route path="/setup" element={<InitialSetupPage />} />
