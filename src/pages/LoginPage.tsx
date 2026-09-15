@@ -151,7 +151,7 @@ export default function LoginPage() {
             .eq('user_id', data.user.id)
             .eq('role', 'super_admin')
             .maybeSingle();
-          navigate(roleRow ? '/platform' : '/dashboard');
+          navigate(nextPath ?? (roleRow ? '/platform' : '/dashboard'));
         }
       }
     } catch {
