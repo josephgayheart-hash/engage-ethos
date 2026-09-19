@@ -413,14 +413,14 @@ export default function RequestAccessPage() {
                 {mode === 'signup' && step === 1 && (
                   <>
                     <div className="space-y-1">
-                      <Label htmlFor="email" className="text-xs font-medium text-foreground">Work Email *</Label>
+                      <Label htmlFor="email" className="text-xs font-medium text-foreground">Email *</Label>
                       <Input
                         id="email"
                         name="email"
                         type="email"
                         value={formData.email}
                         onChange={handleChange}
-                        placeholder="you@institution.edu"
+                        placeholder="you@example.com"
                         className="h-10 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
                         required
                         autoFocus
@@ -455,7 +455,7 @@ export default function RequestAccessPage() {
                     </Button>
 
                     <p className="text-[11px] text-center text-muted-foreground">
-                      Any work email works — not just .edu. Two fields now, then you're in.
+                      Any email address works. Two fields now, then you're in.
                     </p>
                   </>
                 )}
@@ -614,14 +614,14 @@ export default function RequestAccessPage() {
                 {mode === 'inquiry' && (
                   <>
                     <div className="space-y-1">
-                      <Label htmlFor="inq-email" className="text-xs font-medium text-foreground">Work Email *</Label>
+                      <Label htmlFor="inq-email" className="text-xs font-medium text-foreground">Email *</Label>
                       <Input
                         id="inq-email"
                         name="email"
                         type="email"
                         value={formData.email}
                         onChange={handleChange}
-                        placeholder="you@institution.edu"
+                        placeholder="you@example.com"
                         className="h-10 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
                         required
                         autoFocus
