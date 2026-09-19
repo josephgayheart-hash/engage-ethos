@@ -327,35 +327,47 @@ export default function RequestAccessPage() {
               </div>
               <div className="space-y-2">
                 <h2 className="text-2xl sm:text-3xl font-serif font-bold tracking-tight text-foreground">
-                  You're In the Queue
+                  {outcome === 'inquiry' ? 'Message Sent' : "We'll Be In Touch"}
                 </h2>
                 <p className="text-muted-foreground">
-                  We'll review your request and send login credentials to <strong className="text-foreground">{formData.email}</strong> within 24–48 hours.
+                  {outcome === 'inquiry'
+                    ? <>Thanks — we'll reply to <strong className="text-foreground">{formData.email}</strong>, usually the same day.</>
+                    : <>We just need to check a detail on <strong className="text-foreground">{formData.email}</strong>. You'll hear from us shortly — a work email address gets you in instantly.</>
+                  }
                 </p>
               </div>
-              <Link to="/login">
-                <Button variant="outline" className="mt-4 border-border/60 hover:bg-muted/50">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Login
-                </Button>
-              </Link>
+              <div className="space-y-2">
+                <Link to="/try-copywriter" className="block">
+                  <Button className="w-full h-10 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90">
+                    Try the copywriter while you wait
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+                <Link to="/platform" className="block">
+                  <Button variant="outline" className="w-full border-border/60 hover:bg-muted/50">
+                    See what the platform does
+                  </Button>
+                </Link>
+              </div>
             </div>
           ) : (
             <>
               {/* Header */}
               <div className="space-y-1">
                 <h2 className="text-xl sm:text-2xl font-serif font-bold tracking-tight text-foreground">
-                  {isColleagueReferral
-                    ? isSameInstitution
-                      ? `Join ${institutionFromUrl || 'Your Team'}`
-                      : 'Welcome Aboard'
-                    : 'Start Your Journey'
+                  {mode === 'inquiry'
+                    ? 'Ask Us Anything'
+                    : isColleagueReferral
+                      ? isSameInstitution
+                        ? `Join ${institutionFromUrl || 'Your Team'}`
+                        : 'Welcome Aboard'
+                      : 'Create Your Account'
                   }
                 </h2>
                 <p className="text-muted-foreground text-sm">
-                  {isColleagueReferral
-                    ? 'A colleague invited you — fill in the details below.'
-                    : 'Tell us about yourself and we\'ll get you set up.'
+                  {mode === 'inquiry'
+                    ? 'Send us a question or ask for a walkthrough — no account needed.'
+                    : 'Set a password and you\'re in — no waiting for approval. Free during the beta.'
                   }
                 </p>
               </div>
