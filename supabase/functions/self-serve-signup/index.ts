@@ -133,11 +133,18 @@ Deno.serve(async (req) => {
     });
 
     if (userError || !created?.user) {
-      const msg = (userError?.message ?? '').toLowerCase();
+      const raw = userError?.message ?? '';
+      const msg = raw.toLowerCase();
+      if (!joinedExisting && tenantId) {
+        await admin.from('tenants').delete().eq('id', tenantId);
+      }
       if (msg.includes('already') || msg.includes('registered') || msg.includes('exists')) {
         return json({ error: 'An account with this email already exists. Try signing in instead.' }, 409);
       }
-      console.error('createUser failed:', userError?.message);
+      if (msg.includes('weak') || msg.includes('password')) {
+        return json({ error: 'That password is too easy to guess. Please pick a stronger one.' }, 400);
+      }
+      console.error('createUser failed:', raw);
       return json({ error: 'We could not create your account. Please try again.' }, 500);
     }
 
