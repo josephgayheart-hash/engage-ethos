@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
       title: body.title || null,
       referral_source: body.referralSource || null,
       request_status: isWorkEmail ? 'approved' : 'submitted',
-      request_type: 'institution',
+      request_type: 'university',
     });
     if (requestError) console.error('onboarding_requests insert failed:', requestError.message);
 
