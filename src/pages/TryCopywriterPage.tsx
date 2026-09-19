@@ -95,9 +95,7 @@ export default function TryCopywriterPage() {
         description="Try our brand-aware AI Copywriter live. Drafts emails, social posts, and campaigns in a real institution's voice. No signup required."
         keywords={["AI copywriter demo", "brand voice AI", "free AI writing tool"]}
       />
-      <LandingNav />
-
-      {/* Header strip */}
+      {/* Header strip (nav lives inside so the white-on-dark nav is legible) */}
       <section
         className="relative overflow-hidden border-b border-border/40"
         style={{ background: "linear-gradient(145deg, hsl(222 47% 16%) 0%, hsl(222 40% 22%) 100%)" }}
@@ -105,7 +103,20 @@ export default function TryCopywriterPage() {
         <div className="hidden sm:block absolute w-72 h-72 rounded-full blur-[80px]" style={{ background: "hsl(82 85% 55% / 0.15)", top: "-10%", right: "5%" }} />
         <div className="hidden sm:block absolute w-56 h-56 rounded-full blur-[70px]" style={{ background: "hsl(270 70% 60% / 0.18)", bottom: "-20%", left: "10%" }} />
 
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+        <div className="relative">
+          <LandingNav />
+        </div>
+
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 pb-10 sm:pb-14 pt-2">
+          {/* Breadcrumbs */}
+          <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-1.5 text-xs text-white/50">
+            <Link to="/" className="inline-flex items-center gap-1 hover:text-white transition-colors">
+              <ChevronLeft className="w-3 h-3" />
+              Home
+            </Link>
+            <span className="text-white/25">/</span>
+            <span className="text-white/80">Try the AI Copywriter</span>
+          </nav>
           <Badge
             variant="secondary"
             className="bg-[hsl(82_85%_55%_/_0.15)] text-[hsl(82_85%_70%)] border-[hsl(82_85%_55%_/_0.3)] mb-3"
