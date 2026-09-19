@@ -528,6 +528,21 @@ export default function RequestAccessPage() {
                     </div>
 
                     <div className="space-y-1">
+                      <Label htmlFor="password" className="text-xs font-medium text-foreground">Create a Password *</Label>
+                      <Input
+                        id="password"
+                        name="password"
+                        type="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        placeholder="At least 8 characters"
+                        minLength={8}
+                        className="h-9 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-1">
                       <Label htmlFor="referralSource" className="text-xs font-medium text-foreground">How did you hear about us?</Label>
                       <Select
                         value={formData.referralSource}
