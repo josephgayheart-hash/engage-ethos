@@ -1,0 +1,2 @@
+ALTER TABLE public.sales_prospects DROP CONSTRAINT IF EXISTS sales_prospects_status_check;
+ALTER TABLE public.sales_prospects ADD CONSTRAINT sales_prospects_status_check CHECK (status = ANY (ARRAY['inbound'::text, 'new'::text, 'contacted'::text, 'qualified'::text, 'closed'::text, 'not_interested'::text]));
