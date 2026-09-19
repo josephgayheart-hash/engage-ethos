@@ -1,0 +1,2 @@
+ALTER TABLE public.onboarding_requests DROP CONSTRAINT IF EXISTS onboarding_requests_request_type_check;
+ALTER TABLE public.onboarding_requests ADD CONSTRAINT onboarding_requests_request_type_check CHECK (request_type = ANY (ARRAY['university'::text, 'agency'::text, 'inquiry'::text]));
