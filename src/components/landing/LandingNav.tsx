@@ -59,7 +59,7 @@ export function LandingNav() {
               size="sm"
               className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] font-bold rounded-full px-5"
             >
-              Get Early Access
+              Start Free
               <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
             </Button>
           </Link>
