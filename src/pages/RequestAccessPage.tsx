@@ -455,13 +455,13 @@ export default function RequestAccessPage() {
                     </Button>
 
                     <p className="text-[11px] text-center text-muted-foreground">
-                      Just two quick fields to start. We'll ask for your name on the next step.
+                      Any work email works — not just .edu. Two fields now, then you're in.
                     </p>
                   </>
                 )}
 
                 {/* STEP 2 — Name + optional details + consent */}
-                {step === 2 && (
+                {mode === 'signup' && step === 2 && (
                   <>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1">
