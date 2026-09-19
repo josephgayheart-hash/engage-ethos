@@ -98,7 +98,7 @@ export default function RequestAccessPage() {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
@@ -107,42 +107,99 @@ export default function RequestAccessPage() {
       const { error: insertError } = await supabase
         .from('onboarding_requests')
         .insert({
-          first_name: formData.firstName,
-          last_name: formData.lastName,
+          first_name: formData.firstName || 'Unknown',
+          last_name: formData.lastName || '-',
           email: formData.email,
-          phone: formData.phone || null,
           institution_name_input: formData.institutionName,
-          department: formData.department || null,
           title: formData.title || null,
           referral_source: formData.referralSource || null,
           request_status: 'submitted',
+          request_type: 'inquiry',
+          notes: formData.message || null,
           tenant_id: isSameInstitution ? tenantId : null,
         });
 
       if (insertError) {
-        if (insertError.message.includes('duplicate')) {
-          setError('An access request with this email already exists. Please contact your administrator.');
-        } else {
-          setError('Failed to submit request. Please try again.');
-        }
+        setError('We could not send your message. Please try again.');
         return;
       }
 
-      supabase.functions.invoke('send-request-confirmation', {
+      setOutcome('inquiry');
+      setIsSubmitted(true);
+    } catch (err) {
+      console.error('Inquiry error:', err);
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('self-serve-signup', {
         body: {
-          email: formData.email,
+          email: formData.email.trim(),
+          password: formData.password,
           firstName: formData.firstName,
           lastName: formData.lastName,
           institutionName: formData.institutionName,
+          title: formData.title || null,
+          department: formData.department || null,
+          phone: formData.phone || null,
+          referralSource: formData.referralSource || null,
         },
-      }).catch((emailErr) => {
-        console.error('Failed to send confirmation email:', emailErr);
       });
 
-      setIsSubmitted(true);
+      if (fnError) {
+        let detail = '';
+        try {
+          const ctx = (fnError as { context?: { text?: () => Promise<string> } }).context;
+          if (ctx?.text) detail = await ctx.text();
+        } catch { /* ignore */ }
+        console.error('self-serve-signup failed:', detail || fnError.message);
+        let message = 'We could not create your account. Please try again.';
+        try {
+          const parsed = JSON.parse(detail);
+          if (parsed?.error) message = parsed.error;
+        } catch { /* ignore */ }
+        setError(message);
+        return;
+      }
+
+      if (data?.status === 'pending_review') {
+        supabase.functions.invoke('send-request-confirmation', {
+          body: {
+            email: formData.email,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            institutionName: formData.institutionName,
+          },
+        }).catch((emailErr) => console.error('Failed to send confirmation email:', emailErr));
+
+        setOutcome('pending_review');
+        setIsSubmitted(true);
+        return;
+      }
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: formData.email.trim(),
+        password: formData.password,
+      });
+
+      if (signInError) {
+        setError('Your account is ready — please sign in to continue.');
+        setTimeout(() => navigate('/login'), 1500);
+        return;
+      }
+
+      navigate('/dashboard');
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
-      console.error('Request access error:', err);
+      console.error('Signup error:', err);
     } finally {
       setIsSubmitting(false);
     }
