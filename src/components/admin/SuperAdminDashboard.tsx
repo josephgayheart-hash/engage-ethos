@@ -26,9 +26,9 @@ import {
   FeatureAdoptionCard,
   TenantHealthTable,
   AlertsInsightsCard,
-  ToolUsageBreakdownCard
+  ToolUsageBreakdownCard,
+  NewLeadsAndAccountsCard
 } from './analytics';
-import { FieldmarkDemoSwitcher } from './FieldmarkDemoSwitcher';
 
 interface SuperAdminDashboardProps {
   pendingRequestsCount: number;
@@ -161,22 +161,16 @@ export function SuperAdminDashboard({
 
         {/* Command Center Tab - Overview Dashboard */}
         <TabsContent value="command-center" className="space-y-6 mt-4">
-          {/* Fieldmark demo shortcut */}
-          <FieldmarkDemoSwitcher />
-
           {/* KPI Cards */}
           <AnalyticsKPICards data={analytics!} isLoading={isLoading} />
 
+          {/* New leads & new accounts */}
+          <NewLeadsAndAccountsCard />
+
           {/* Main Grid */}
           <div className="grid lg:grid-cols-3 gap-6">
-            {/* Left Column - Trends */}
             <div className="lg:col-span-2 space-y-6">
               <UsageTrendChart data={analytics?.dailyUsage || []} isLoading={isLoading} />
-              
-              <div className="grid md:grid-cols-2 gap-4">
-                <FeatureAdoptionCard data={analytics?.featureAdoption || []} isLoading={isLoading} />
-                <ToolUsageBreakdownCard data={analytics?.toolUsage || []} isLoading={isLoading} />
-              </div>
             </div>
 
             {/* Right Column - Health & Alerts */}
@@ -188,7 +182,6 @@ export function SuperAdminDashboard({
                 totalUsers={analytics?.totalUsers || 0}
                 isLoading={isLoading}
               />
-              <EngagementFunnelCard data={analytics?.engagementFunnel!} isLoading={isLoading} />
             </div>
           </div>
         </TabsContent>
