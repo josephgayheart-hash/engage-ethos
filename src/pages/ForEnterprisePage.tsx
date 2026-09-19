@@ -453,7 +453,7 @@ export default function ForEnterprisePage() {
                   size="lg"
                   className="border border-[hsl(var(--cyber-lime)_/_0.4)] bg-transparent text-[hsl(var(--cyber-lime))] hover:bg-[hsl(var(--cyber-lime)_/_0.1)] rounded-full px-8 text-base"
                 >
-                  Get Early Access
+                  Start Free — Instant Access
                 </Button>
               </Link>
             </div>

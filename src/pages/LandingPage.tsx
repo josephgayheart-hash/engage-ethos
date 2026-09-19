@@ -578,7 +578,7 @@ export default function LandingPage() {
               className="bg-[hsl(82_85%_55%)] text-primary hover:bg-[hsl(82_85%_50%)] shadow-xl hover:shadow-2xl hover:scale-105 px-8 font-bold transition-all duration-300 rounded-full"
             >
               <Link to="/request-access">
-                Get Early Access
+                Start Free — Instant Access
               </Link>
             </Button>
             <RequestDemoDialog

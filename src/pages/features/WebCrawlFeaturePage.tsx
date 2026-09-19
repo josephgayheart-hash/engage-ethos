@@ -115,7 +115,7 @@ export default function WebCrawlFeaturePage() {
           <div className="flex items-center gap-3">
             <Link to="/" className="hidden md:inline-flex"><Button variant="ghost" size="sm"><ArrowLeft className="w-4 h-4 mr-2" />Back</Button></Link>
             <Link to="/login" className="hidden md:inline-flex"><Button variant="outline" size="sm">Sign In</Button></Link>
-            <Link to="/request-access" className="hidden md:inline-flex"><Button size="sm">Get Early Access</Button></Link>
+            <Link to="/request-access" className="hidden md:inline-flex"><Button size="sm">Start Free</Button></Link>
             <MobileNav />
           </div>
         </div>
@@ -143,7 +143,7 @@ export default function WebCrawlFeaturePage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: "0.3s" }}>
               <Link to="/request-access">
                 <Button size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
-                  Get Early Access <ArrowRight className="w-4 h-4" />
+                  Start Free — Instant Access <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
             </div>
@@ -296,7 +296,7 @@ export default function WebCrawlFeaturePage() {
           <p className="text-white/80 text-lg mb-8 max-w-2xl mx-auto">Your website already speaks in your voice. Let AI turn that into actionable Content DNA.</p>
           <Link to="/request-access">
             <Button size="lg" className="bg-white text-blue-600 hover:bg-white/90 font-bold px-8">
-              Get Early Access <ArrowRight className="w-4 h-4 ml-2" />
+              Start Free — Instant Access <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </Link>
         </div>
