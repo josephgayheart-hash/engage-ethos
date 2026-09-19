@@ -380,15 +380,21 @@ export default function RequestAccessPage() {
               )}
 
               {/* Step indicator */}
-              <div className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground -mt-1">
-                <span className={step === 1 ? 'text-foreground font-semibold' : ''}>1. Email</span>
-                <span className="opacity-40">›</span>
-                <span className={step === 2 ? 'text-foreground font-semibold' : ''}>2. Your details</span>
-              </div>
+              {mode === 'signup' && (
+                <div className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground -mt-1">
+                  <span className={step === 1 ? 'text-foreground font-semibold' : ''}>1. Email</span>
+                  <span className="opacity-40">›</span>
+                  <span className={step === 2 ? 'text-foreground font-semibold' : ''}>2. Your details</span>
+                </div>
+              )}
 
               {/* Form */}
               <form
                 onSubmit={(e) => {
+                  if (mode === 'inquiry') {
+                    handleInquiry(e);
+                    return;
+                  }
                   if (step === 1) {
                     e.preventDefault();
                     if (!formData.email || !formData.institutionName) {
@@ -404,7 +410,7 @@ export default function RequestAccessPage() {
                 className="space-y-3"
               >
                 {/* STEP 1 — Email + Institution only */}
-                {step === 1 && (
+                {mode === 'signup' && step === 1 && (
                   <>
                     <div className="space-y-1">
                       <Label htmlFor="email" className="text-xs font-medium text-foreground">Work Email *</Label>
