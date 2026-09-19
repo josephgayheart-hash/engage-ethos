@@ -41,12 +41,12 @@ Yes — this is the single biggest lever, and it is worth doing. Today a person 
 ### 4. Give visitors something to do that is not an application
 Make the free copywriter demo the primary action on the home page and the enterprise page, with "Request access" as the secondary. It already exists at `/try-copywriter` and needs no login, which is the strongest asset you have and it is currently the smaller button.
 
-### 4. Replace the "apply for permission" framing
+### 5. Replace the "apply for permission" framing
 - CTA wording moves from "Get Early Access" to an outcome ("See it write for your institution").
 - On the request page, say plainly what happens and when, that any work email is fine, and that there is no cost during the beta.
 - Add a third option on that page: a short "Have a question / want a walkthrough" path that only asks email, institution, and one message box, saved as an inquiry and pushed to the CRM the same way.
 
-### 5. Confirmation screen stops being a dead end
+### 6. Confirmation screen stops being a dead end
 After submitting, offer the demo and the enterprise overview instead of only "Back to Login," so a person who just raised their hand keeps engaging.
 
 ## What this will not fix
@@ -57,5 +57,6 @@ At 55 visitors a month no amount of page tuning produces a pipeline. The changes
 
 - New migration: trigger function on `onboarding_requests` insert writing to `sales_prospects` (status `inbound`, dedupe on `contact_email`, domain inferred from email as the existing profile trigger does).
 - New edge function for the internal alert, or extend `send-request-confirmation` with a second send; recipient address stored as a secret so it is not hard-coded.
-- `RequestAccessPage.tsx`: copy changes, reassurance line, inquiry mode, new success state.
+- `RequestAccessPage.tsx`: becomes self-serve sign-up (password field, `supabase.auth.signUp`), plus copy changes, inquiry mode, new success state. Free-email and agency submissions keep the existing `onboarding_requests` path.
+- Enable email/password sign-in on the backend; add a signup trigger that creates the tenant and profile for a new self-serve account (domain-matched join when a workspace already exists).
 - `LandingPage.tsx` and `ForEnterprisePage.tsx`: CTA hierarchy and wording only.
