@@ -332,7 +332,7 @@ export default function RequestAccessPage() {
                 <p className="text-muted-foreground">
                   {outcome === 'inquiry'
                     ? <>Thanks — we'll reply to <strong className="text-foreground">{formData.email}</strong>, usually the same day.</>
-                    : <>We just need to check a detail on <strong className="text-foreground">{formData.email}</strong>. You'll hear from us shortly — a work email address gets you in instantly.</>
+                    : <>We just need to check a detail on <strong className="text-foreground">{formData.email}</strong>. You'll hear from us shortly.</>
                   }
                 </p>
               </div>
