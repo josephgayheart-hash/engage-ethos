@@ -48,7 +48,7 @@ export function HeroProductProof() {
               </span>
             </div>
             <p className="text-sm font-semibold text-foreground mb-1">
-              Welcome to the class of 2030, future Wildcat.
+              Welcome to the class of 2030, future Sentinel.
             </p>
             <p className="text-sm text-foreground/75 leading-relaxed flex-1">
               You worked for this. We saw it in your essays, your transcripts, your story. Now we'd like to show you what comes next — campus tours, scholarship next steps, and a few first-year traditions worth knowing about…
