@@ -162,11 +162,23 @@ var create_message_default = defineTool4({
       return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     }
     const supabase = supabaseForUser(ctx);
+    const userId = ctx.getUserId();
+    const { data: profile, error: profileError } = await supabase.from("profiles").select("tenant_id").eq("id", userId).maybeSingle();
+    if (profileError) {
+      return { content: [{ type: "text", text: profileError.message }], isError: true };
+    }
+    if (!profile?.tenant_id) {
+      return {
+        content: [{ type: "text", text: "No workspace found for this account, so the message cannot be saved." }],
+        isError: true
+      };
+    }
     const { data, error } = await supabase.from("personal_messages").insert({
-      user_id: ctx.getUserId(),
+      user_id: userId,
+      tenant_id: profile.tenant_id,
       title,
       content,
-      channel: channel ?? null,
+      channel: channel ?? "email",
       audience: audience ?? null,
       tone: tone ?? null,
       institutional_profile_id: profile_id ?? null,
