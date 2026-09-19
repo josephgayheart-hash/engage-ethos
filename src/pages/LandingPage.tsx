@@ -249,16 +249,21 @@ export default function LandingPage() {
               className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center sm:items-start pt-2 animate-fade-in"
               style={{ animationDelay: '0.35s' }}
             >
-              <Button
-                asChild
-                size="lg"
-                className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] shadow-[0_0_30px_hsl(82_85%_55%_/_0.3)] hover:shadow-[0_0_40px_hsl(82_85%_55%_/_0.5)] transition-all duration-300 text-base px-8 py-6 font-bold border-0"
-              >
-                <Link to="/request-access">
-                  Get Early Access
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
+              <div className="flex flex-col items-center">
+                <Button
+                  asChild
+                  size="lg"
+                  className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] shadow-[0_0_30px_hsl(82_85%_55%_/_0.3)] hover:shadow-[0_0_40px_hsl(82_85%_55%_/_0.5)] transition-all duration-300 text-base px-8 py-6 font-bold border-0"
+                >
+                  <Link to="/try-copywriter">
+                    See It Write for Your Institution
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+                <span className="text-[hsl(82_85%_65%)] text-[10px] mt-1 font-medium">
+                  Free · No signup
+                </span>
+              </div>
               <div className="flex flex-col items-center">
                 <Button
                   asChild
@@ -266,12 +271,12 @@ export default function LandingPage() {
                   size="lg"
                   className="border-2 border-[hsl(82_85%_55%_/_0.4)] text-white bg-white/5 hover:bg-[hsl(82_85%_55%_/_0.15)] hover:border-[hsl(82_85%_55%_/_0.6)] text-base px-8 py-6 backdrop-blur-sm"
                 >
-                  <Link to="/try-copywriter">
-                    Try the AI Copywriter
+                  <Link to="/request-access">
+                    Create Your Account
                   </Link>
                 </Button>
-                <span className="text-[hsl(82_85%_65%)] text-[10px] mt-1 font-medium">
-                  Free · No signup
+                <span className="text-white/45 text-[10px] mt-1 font-medium">
+                  Instant access · Free beta
                 </span>
               </div>
             </div>
@@ -573,7 +578,7 @@ export default function LandingPage() {
               className="bg-[hsl(82_85%_55%)] text-primary hover:bg-[hsl(82_85%_50%)] shadow-xl hover:shadow-2xl hover:scale-105 px-8 font-bold transition-all duration-300 rounded-full"
             >
               <Link to="/request-access">
-                Get Early Access
+                Start Free — Instant Access
               </Link>
             </Button>
             <RequestDemoDialog

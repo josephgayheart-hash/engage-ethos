@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,19 +48,25 @@ export default function RequestAccessPage() {
   const isColleagueReferral = refSource === 'colleague';
   const isSameInstitution = isColleagueReferral && !!tenantId;
 
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
+    password: '',
     phone: '',
     institutionName: institutionFromUrl || '',
     department: '',
     title: '',
     referralSource: isColleagueReferral ? 'colleague' : '',
+    message: '',
   });
+  const [mode, setMode] = useState<'signup' | 'inquiry'>('signup');
   const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [outcome, setOutcome] = useState<'pending_review' | 'inquiry'>('pending_review');
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<1 | 2>(1);
   const [phraseIndex, setPhraseIndex] = useState(0);
@@ -91,7 +98,7 @@ export default function RequestAccessPage() {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
@@ -100,42 +107,99 @@ export default function RequestAccessPage() {
       const { error: insertError } = await supabase
         .from('onboarding_requests')
         .insert({
-          first_name: formData.firstName,
-          last_name: formData.lastName,
+          first_name: formData.firstName || 'Unknown',
+          last_name: formData.lastName || '-',
           email: formData.email,
-          phone: formData.phone || null,
           institution_name_input: formData.institutionName,
-          department: formData.department || null,
           title: formData.title || null,
           referral_source: formData.referralSource || null,
           request_status: 'submitted',
+          request_type: 'inquiry',
+          notes: formData.message || null,
           tenant_id: isSameInstitution ? tenantId : null,
         });
 
       if (insertError) {
-        if (insertError.message.includes('duplicate')) {
-          setError('An access request with this email already exists. Please contact your administrator.');
-        } else {
-          setError('Failed to submit request. Please try again.');
-        }
+        setError('We could not send your message. Please try again.');
         return;
       }
 
-      supabase.functions.invoke('send-request-confirmation', {
+      setOutcome('inquiry');
+      setIsSubmitted(true);
+    } catch (err) {
+      console.error('Inquiry error:', err);
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('self-serve-signup', {
         body: {
-          email: formData.email,
+          email: formData.email.trim(),
+          password: formData.password,
           firstName: formData.firstName,
           lastName: formData.lastName,
           institutionName: formData.institutionName,
+          title: formData.title || null,
+          department: formData.department || null,
+          phone: formData.phone || null,
+          referralSource: formData.referralSource || null,
         },
-      }).catch((emailErr) => {
-        console.error('Failed to send confirmation email:', emailErr);
       });
 
-      setIsSubmitted(true);
+      if (fnError) {
+        let detail = '';
+        try {
+          const ctx = (fnError as { context?: { text?: () => Promise<string> } }).context;
+          if (ctx?.text) detail = await ctx.text();
+        } catch { /* ignore */ }
+        console.error('self-serve-signup failed:', detail || fnError.message);
+        let message = 'We could not create your account. Please try again.';
+        try {
+          const parsed = JSON.parse(detail);
+          if (parsed?.error) message = parsed.error;
+        } catch { /* ignore */ }
+        setError(message);
+        return;
+      }
+
+      if (data?.status === 'pending_review') {
+        supabase.functions.invoke('send-request-confirmation', {
+          body: {
+            email: formData.email,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            institutionName: formData.institutionName,
+          },
+        }).catch((emailErr) => console.error('Failed to send confirmation email:', emailErr));
+
+        setOutcome('pending_review');
+        setIsSubmitted(true);
+        return;
+      }
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: formData.email.trim(),
+        password: formData.password,
+      });
+
+      if (signInError) {
+        setError('Your account is ready — please sign in to continue.');
+        setTimeout(() => navigate('/login'), 1500);
+        return;
+      }
+
+      navigate('/dashboard');
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
-      console.error('Request access error:', err);
+      console.error('Signup error:', err);
     } finally {
       setIsSubmitting(false);
     }
@@ -263,35 +327,47 @@ export default function RequestAccessPage() {
               </div>
               <div className="space-y-2">
                 <h2 className="text-2xl sm:text-3xl font-serif font-bold tracking-tight text-foreground">
-                  You're In the Queue
+                  {outcome === 'inquiry' ? 'Message Sent' : "We'll Be In Touch"}
                 </h2>
                 <p className="text-muted-foreground">
-                  We'll review your request and send login credentials to <strong className="text-foreground">{formData.email}</strong> within 24–48 hours.
+                  {outcome === 'inquiry'
+                    ? <>Thanks — we'll reply to <strong className="text-foreground">{formData.email}</strong>, usually the same day.</>
+                    : <>We just need to check a detail on <strong className="text-foreground">{formData.email}</strong>. You'll hear from us shortly — a work email address gets you in instantly.</>
+                  }
                 </p>
               </div>
-              <Link to="/login">
-                <Button variant="outline" className="mt-4 border-border/60 hover:bg-muted/50">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Login
-                </Button>
-              </Link>
+              <div className="space-y-2">
+                <Link to="/try-copywriter" className="block">
+                  <Button className="w-full h-10 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90">
+                    Try the copywriter while you wait
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+                <Link to="/platform" className="block">
+                  <Button variant="outline" className="w-full border-border/60 hover:bg-muted/50">
+                    See what the platform does
+                  </Button>
+                </Link>
+              </div>
             </div>
           ) : (
             <>
               {/* Header */}
               <div className="space-y-1">
                 <h2 className="text-xl sm:text-2xl font-serif font-bold tracking-tight text-foreground">
-                  {isColleagueReferral
-                    ? isSameInstitution
-                      ? `Join ${institutionFromUrl || 'Your Team'}`
-                      : 'Welcome Aboard'
-                    : 'Start Your Journey'
+                  {mode === 'inquiry'
+                    ? 'Ask Us Anything'
+                    : isColleagueReferral
+                      ? isSameInstitution
+                        ? `Join ${institutionFromUrl || 'Your Team'}`
+                        : 'Welcome Aboard'
+                      : 'Create Your Account'
                   }
                 </h2>
                 <p className="text-muted-foreground text-sm">
-                  {isColleagueReferral
-                    ? 'A colleague invited you — fill in the details below.'
-                    : 'Tell us about yourself and we\'ll get you set up.'
+                  {mode === 'inquiry'
+                    ? 'Send us a question or ask for a walkthrough — no account needed.'
+                    : 'Set a password and you\'re in — no waiting for approval. Free during the beta.'
                   }
                 </p>
               </div>
@@ -304,15 +380,21 @@ export default function RequestAccessPage() {
               )}
 
               {/* Step indicator */}
-              <div className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground -mt-1">
-                <span className={step === 1 ? 'text-foreground font-semibold' : ''}>1. Email</span>
-                <span className="opacity-40">›</span>
-                <span className={step === 2 ? 'text-foreground font-semibold' : ''}>2. Your details</span>
-              </div>
+              {mode === 'signup' && (
+                <div className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground -mt-1">
+                  <span className={step === 1 ? 'text-foreground font-semibold' : ''}>1. Email</span>
+                  <span className="opacity-40">›</span>
+                  <span className={step === 2 ? 'text-foreground font-semibold' : ''}>2. Your details</span>
+                </div>
+              )}
 
               {/* Form */}
               <form
                 onSubmit={(e) => {
+                  if (mode === 'inquiry') {
+                    handleInquiry(e);
+                    return;
+                  }
                   if (step === 1) {
                     e.preventDefault();
                     if (!formData.email || !formData.institutionName) {
@@ -328,7 +410,7 @@ export default function RequestAccessPage() {
                 className="space-y-3"
               >
                 {/* STEP 1 — Email + Institution only */}
-                {step === 1 && (
+                {mode === 'signup' && step === 1 && (
                   <>
                     <div className="space-y-1">
                       <Label htmlFor="email" className="text-xs font-medium text-foreground">Work Email *</Label>
@@ -373,13 +455,13 @@ export default function RequestAccessPage() {
                     </Button>
 
                     <p className="text-[11px] text-center text-muted-foreground">
-                      Just two quick fields to start. We'll ask for your name on the next step.
+                      Any work email works — not just .edu. Two fields now, then you're in.
                     </p>
                   </>
                 )}
 
                 {/* STEP 2 — Name + optional details + consent */}
-                {step === 2 && (
+                {mode === 'signup' && step === 2 && (
                   <>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1">
@@ -446,6 +528,21 @@ export default function RequestAccessPage() {
                     </div>
 
                     <div className="space-y-1">
+                      <Label htmlFor="password" className="text-xs font-medium text-foreground">Create a Password *</Label>
+                      <Input
+                        id="password"
+                        name="password"
+                        type="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        placeholder="At least 8 characters"
+                        minLength={8}
+                        className="h-9 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-1">
                       <Label htmlFor="referralSource" className="text-xs font-medium text-foreground">How did you hear about us?</Label>
                       <Select
                         value={formData.referralSource}
@@ -496,26 +593,109 @@ export default function RequestAccessPage() {
                         {isSubmitting ? (
                           <>
                             <Loader2 className="w-4 h-4 animate-spin" />
-                            Submitting...
+                            Creating your account...
                           </>
                         ) : (
                           <>
-                            Request Access
+                            Create Account &amp; Start
                             <ArrowRight className="w-4 h-4" />
                           </>
                         )}
                       </Button>
                     </div>
+
+                    <p className="text-[11px] text-center text-muted-foreground">
+                      You'll be signed in right away. Free during the beta, no card required.
+                    </p>
+                  </>
+                )}
+
+                {/* INQUIRY MODE — question or walkthrough request */}
+                {mode === 'inquiry' && (
+                  <>
+                    <div className="space-y-1">
+                      <Label htmlFor="inq-email" className="text-xs font-medium text-foreground">Work Email *</Label>
+                      <Input
+                        id="inq-email"
+                        name="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="you@institution.edu"
+                        className="h-10 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                        required
+                        autoFocus
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label htmlFor="inq-institution" className="text-xs font-medium text-foreground">Institution / Company *</Label>
+                      <Input
+                        id="inq-institution"
+                        name="institutionName"
+                        value={formData.institutionName}
+                        onChange={handleChange}
+                        placeholder="University Name"
+                        className="h-10 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label htmlFor="inq-message" className="text-xs font-medium text-foreground">What would you like to know?</Label>
+                      <Textarea
+                        id="inq-message"
+                        value={formData.message}
+                        onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
+                        placeholder="A question, or ask for a 20-minute walkthrough."
+                        rows={4}
+                        className="text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                      />
+                    </div>
+
+                    <Button
+                      type="submit"
+                      className="w-full h-10 text-sm font-semibold rounded-xl gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          Send Message
+                          <ArrowRight className="w-4 h-4" />
+                        </>
+                      )}
+                    </Button>
                   </>
                 )}
               </form>
 
-              <p className="text-center text-sm text-muted-foreground">
-                Already have an account?{' '}
-                <Link to="/login" className="font-medium text-accent hover:underline underline-offset-4">
-                  Sign In
-                </Link>
-              </p>
+              <div className="space-y-1 text-center text-sm text-muted-foreground">
+                <p>
+                  {mode === 'signup' ? 'Rather talk to a person first? ' : 'Ready to jump in? '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode(mode === 'signup' ? 'inquiry' : 'signup');
+                      setStep(1);
+                      setError(null);
+                    }}
+                    className="font-medium text-accent hover:underline underline-offset-4"
+                  >
+                    {mode === 'signup' ? 'Ask a question instead' : 'Create an account'}
+                  </button>
+                </p>
+                <p>
+                  Already have an account?{' '}
+                  <Link to="/login" className="font-medium text-accent hover:underline underline-offset-4">
+                    Sign In
+                  </Link>
+                </p>
+              </div>
             </>
           )}
         </div>

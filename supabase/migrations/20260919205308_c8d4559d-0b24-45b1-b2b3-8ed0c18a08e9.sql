@@ -1,0 +1,2 @@
+REVOKE EXECUTE ON FUNCTION public.auto_create_prospect_from_request() FROM anon, authenticated, public;
+REVOKE EXECUTE ON FUNCTION public.auto_create_prospect_from_profile() FROM anon, authenticated, public;
