@@ -28,7 +28,17 @@ Add a database trigger so a submitted access request immediately creates or upda
 ### 2. You get notified instantly
 Send an internal alert email to your address on every submission, with the person's details and a direct link to the admin review screen. The applicant's confirmation email stays as it is.
 
-### 3. Give visitors something to do that is not an application
+### 3. Instant access instead of a 24-48 hour approval queue
+
+Yes — this is the single biggest lever, and it is worth doing. Today a person fills in a form, then waits for you to approve them and email credentials. Most people never come back. Change it to: they set their own password, are signed in immediately, and land in a workspace created for them automatically from their email domain.
+
+- Sign-up is self-serve on the request page: email, institution, name, password, done.
+- Their workspace is created on the spot; if someone from the same email domain already has a workspace, they join it in a pending state so you keep control of team access.
+- Email confirmation is turned on by default so a real address is required, and the confirmation link drops them straight into the app. If you would rather they be signed in the instant they submit, we can skip confirmation — say the word and I will set that instead.
+- New accounts start as a trial workspace so you can still gate advanced features; you review afterward rather than blocking the door.
+- The approval queue stays for the cases that need it: agency requests, and anyone using a free email address (gmail, outlook, etc.), who still routes to you for manual review.
+
+### 4. Give visitors something to do that is not an application
 Make the free copywriter demo the primary action on the home page and the enterprise page, with "Request access" as the secondary. It already exists at `/try-copywriter` and needs no login, which is the strongest asset you have and it is currently the smaller button.
 
 ### 4. Replace the "apply for permission" framing
