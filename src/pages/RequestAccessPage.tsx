@@ -48,19 +48,25 @@ export default function RequestAccessPage() {
   const isColleagueReferral = refSource === 'colleague';
   const isSameInstitution = isColleagueReferral && !!tenantId;
 
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
+    password: '',
     phone: '',
     institutionName: institutionFromUrl || '',
     department: '',
     title: '',
     referralSource: isColleagueReferral ? 'colleague' : '',
+    message: '',
   });
+  const [mode, setMode] = useState<'signup' | 'inquiry'>('signup');
   const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [outcome, setOutcome] = useState<'pending_review' | 'inquiry'>('pending_review');
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<1 | 2>(1);
   const [phraseIndex, setPhraseIndex] = useState(0);
