@@ -50,7 +50,7 @@ function useNewLeads() {
         .order('discovered_at', { ascending: false })
         .limit(8);
       if (error) throw error;
-      return (data ?? []) as Lead[];
+      return (data ?? []) as unknown as Lead[];
     },
   });
 }

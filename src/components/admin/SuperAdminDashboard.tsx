@@ -26,9 +26,9 @@ import {
   FeatureAdoptionCard,
   TenantHealthTable,
   AlertsInsightsCard,
-  ToolUsageBreakdownCard
+  ToolUsageBreakdownCard,
+  NewLeadsAndAccountsCard
 } from './analytics';
-import { FieldmarkDemoSwitcher } from './FieldmarkDemoSwitcher';
 
 interface SuperAdminDashboardProps {
   pendingRequestsCount: number;

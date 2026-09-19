@@ -5,3 +5,4 @@ export { FeatureAdoptionCard } from './FeatureAdoptionCard';
 export { TenantHealthTable } from './TenantHealthTable';
 export { AlertsInsightsCard } from './AlertsInsightsCard';
 export { ToolUsageBreakdownCard } from './ToolUsageBreakdownCard';
+export { NewLeadsAndAccountsCard } from './NewLeadsAndAccountsCard';
