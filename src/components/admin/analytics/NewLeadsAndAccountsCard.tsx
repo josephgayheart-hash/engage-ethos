@@ -14,7 +14,7 @@ interface Lead {
   contact_email: string | null;
   contact_title: string | null;
   status: string | null;
-  created_at: string;
+  discovered_at: string;
 }
 
 interface Account {
@@ -46,8 +46,8 @@ function useNewLeads() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('sales_prospects')
-        .select('id, university_name, contact_name, contact_email, contact_title, status, created_at')
-        .order('created_at', { ascending: false })
+        .select('id, university_name, contact_name, contact_email, contact_title, status, discovered_at')
+        .order('discovered_at', { ascending: false })
         .limit(8);
       if (error) throw error;
       return (data ?? []) as Lead[];
@@ -124,7 +124,7 @@ export function NewLeadsAndAccountsCard() {
                   {lead.status === 'inbound' && (
                     <Badge variant="outline" className="text-[10px] capitalize">inbound</Badge>
                   )}
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">{timeAgo(lead.created_at)}</span>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">{timeAgo(lead.discovered_at)}</span>
                 </div>
               </div>
             ))
