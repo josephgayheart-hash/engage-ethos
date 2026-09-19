@@ -28,15 +28,25 @@ Add a database trigger so a submitted access request immediately creates or upda
 ### 2. You get notified instantly
 Send an internal alert email to your address on every submission, with the person's details and a direct link to the admin review screen. The applicant's confirmation email stays as it is.
 
-### 3. Give visitors something to do that is not an application
+### 3. Instant access instead of a 24-48 hour approval queue
+
+Yes — this is the single biggest lever, and it is worth doing. Today a person fills in a form, then waits for you to approve them and email credentials. Most people never come back. Change it to: they set their own password, are signed in immediately, and land in a workspace created for them automatically from their email domain.
+
+- Sign-up is self-serve on the request page: email, institution, name, password, done.
+- Their workspace is created on the spot; if someone from the same email domain already has a workspace, they join it in a pending state so you keep control of team access.
+- Email confirmation is turned on by default so a real address is required, and the confirmation link drops them straight into the app. If you would rather they be signed in the instant they submit, we can skip confirmation — say the word and I will set that instead.
+- New accounts start as a trial workspace so you can still gate advanced features; you review afterward rather than blocking the door.
+- The approval queue stays for the cases that need it: agency requests, and anyone using a free email address (gmail, outlook, etc.), who still routes to you for manual review.
+
+### 4. Give visitors something to do that is not an application
 Make the free copywriter demo the primary action on the home page and the enterprise page, with "Request access" as the secondary. It already exists at `/try-copywriter` and needs no login, which is the strongest asset you have and it is currently the smaller button.
 
-### 4. Replace the "apply for permission" framing
+### 5. Replace the "apply for permission" framing
 - CTA wording moves from "Get Early Access" to an outcome ("See it write for your institution").
 - On the request page, say plainly what happens and when, that any work email is fine, and that there is no cost during the beta.
 - Add a third option on that page: a short "Have a question / want a walkthrough" path that only asks email, institution, and one message box, saved as an inquiry and pushed to the CRM the same way.
 
-### 5. Confirmation screen stops being a dead end
+### 6. Confirmation screen stops being a dead end
 After submitting, offer the demo and the enterprise overview instead of only "Back to Login," so a person who just raised their hand keeps engaging.
 
 ## What this will not fix
@@ -47,5 +57,6 @@ At 55 visitors a month no amount of page tuning produces a pipeline. The changes
 
 - New migration: trigger function on `onboarding_requests` insert writing to `sales_prospects` (status `inbound`, dedupe on `contact_email`, domain inferred from email as the existing profile trigger does).
 - New edge function for the internal alert, or extend `send-request-confirmation` with a second send; recipient address stored as a secret so it is not hard-coded.
-- `RequestAccessPage.tsx`: copy changes, reassurance line, inquiry mode, new success state.
+- `RequestAccessPage.tsx`: becomes self-serve sign-up (password field, `supabase.auth.signUp`), plus copy changes, inquiry mode, new success state. Free-email and agency submissions keep the existing `onboarding_requests` path.
+- Enable email/password sign-in on the backend; add a signup trigger that creates the tenant and profile for a new self-serve account (domain-matched join when a workspace already exists).
 - `LandingPage.tsx` and `ForEnterprisePage.tsx`: CTA hierarchy and wording only.
