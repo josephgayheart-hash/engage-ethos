@@ -437,14 +437,23 @@ export default function ForEnterprisePage() {
               complete control — no matter how distributed your organization.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link to="/try-copywriter">
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-[hsl(var(--cyber-lime))] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] font-bold rounded-full px-8 text-base"
+                >
+                  See It Write for Your Brand
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
               <RequestDemoDialog
                 trigger={
                   <Button
                     size="lg"
-                    className="bg-gradient-to-r from-[hsl(var(--cyber-lime))] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] font-bold rounded-full px-8 text-base"
+                    variant="ghost"
+                    className="text-white hover:bg-white/10 rounded-full px-8 text-base"
                   >
                     Request a Demo
-                    <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 }
               />
