@@ -593,26 +593,109 @@ export default function RequestAccessPage() {
                         {isSubmitting ? (
                           <>
                             <Loader2 className="w-4 h-4 animate-spin" />
-                            Submitting...
+                            Creating your account...
                           </>
                         ) : (
                           <>
-                            Request Access
+                            Create Account &amp; Start
                             <ArrowRight className="w-4 h-4" />
                           </>
                         )}
                       </Button>
                     </div>
+
+                    <p className="text-[11px] text-center text-muted-foreground">
+                      You'll be signed in right away. Free during the beta, no card required.
+                    </p>
+                  </>
+                )}
+
+                {/* INQUIRY MODE — question or walkthrough request */}
+                {mode === 'inquiry' && (
+                  <>
+                    <div className="space-y-1">
+                      <Label htmlFor="inq-email" className="text-xs font-medium text-foreground">Work Email *</Label>
+                      <Input
+                        id="inq-email"
+                        name="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="you@institution.edu"
+                        className="h-10 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                        required
+                        autoFocus
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label htmlFor="inq-institution" className="text-xs font-medium text-foreground">Institution / Company *</Label>
+                      <Input
+                        id="inq-institution"
+                        name="institutionName"
+                        value={formData.institutionName}
+                        onChange={handleChange}
+                        placeholder="University Name"
+                        className="h-10 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label htmlFor="inq-message" className="text-xs font-medium text-foreground">What would you like to know?</Label>
+                      <Textarea
+                        id="inq-message"
+                        value={formData.message}
+                        onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
+                        placeholder="A question, or ask for a 20-minute walkthrough."
+                        rows={4}
+                        className="text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                      />
+                    </div>
+
+                    <Button
+                      type="submit"
+                      className="w-full h-10 text-sm font-semibold rounded-xl gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          Send Message
+                          <ArrowRight className="w-4 h-4" />
+                        </>
+                      )}
+                    </Button>
                   </>
                 )}
               </form>
 
-              <p className="text-center text-sm text-muted-foreground">
-                Already have an account?{' '}
-                <Link to="/login" className="font-medium text-accent hover:underline underline-offset-4">
-                  Sign In
-                </Link>
-              </p>
+              <div className="space-y-1 text-center text-sm text-muted-foreground">
+                <p>
+                  {mode === 'signup' ? 'Rather talk to a person first? ' : 'Ready to jump in? '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode(mode === 'signup' ? 'inquiry' : 'signup');
+                      setStep(1);
+                      setError(null);
+                    }}
+                    className="font-medium text-accent hover:underline underline-offset-4"
+                  >
+                    {mode === 'signup' ? 'Ask a question instead' : 'Create an account'}
+                  </button>
+                </p>
+                <p>
+                  Already have an account?{' '}
+                  <Link to="/login" className="font-medium text-accent hover:underline underline-offset-4">
+                    Sign In
+                  </Link>
+                </p>
+              </div>
             </>
           )}
         </div>
