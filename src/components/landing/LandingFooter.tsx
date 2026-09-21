@@ -18,7 +18,7 @@ const footerColumns = [
       { label: 'For Universities', to: '/' },
       { label: 'For Enterprise', to: '/for-enterprise' },
       { label: 'For Agencies', to: '/for-agencies' },
-      { label: 'Create Account', to: '/request-access' },
+      { label: 'Create Account', to: '/login?signup=1' },
     ],
   },
   {

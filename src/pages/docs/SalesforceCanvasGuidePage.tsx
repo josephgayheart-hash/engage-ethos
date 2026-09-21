@@ -146,7 +146,7 @@ export default function SalesforceCanvasGuidePage() {
           </p>
           <div className="flex flex-wrap gap-2 pt-1">
             <Button asChild>
-              <Link to="/request-access">Get early access</Link>
+              <Link to="/login?signup=1">Get early access</Link>
             </Button>
             <Button variant="outline" asChild>
               <a href="https://help.salesforce.com/s/articleView?id=sf.canvas_app_overview.htm" target="_blank" rel="noopener noreferrer">

@@ -120,7 +120,7 @@ export default function BrandStudioFeaturePage() {
           <div className="flex items-center gap-3">
             <Link to="/" className="hidden md:inline-flex"><Button variant="ghost" size="sm"><ArrowLeft className="w-4 h-4 mr-2" />Back</Button></Link>
             <Link to="/login" className="hidden md:inline-flex"><Button variant="outline" size="sm">Sign In</Button></Link>
-            <Link to="/request-access" className="hidden md:inline-flex"><Button size="sm">Create Account</Button></Link>
+            <Link to="/login?signup=1" className="hidden md:inline-flex"><Button size="sm">Create Account</Button></Link>
             <MobileNav />
           </div>
         </div>
@@ -146,7 +146,7 @@ export default function BrandStudioFeaturePage() {
               Layer your logo, brand patterns, AI-generated headlines, and CTAs onto any image with Smart Layer masking that keeps subjects looking natural.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: "0.3s" }}>
-              <Link to="/request-access">
+              <Link to="/login?signup=1">
                 <Button size="lg" className="gap-2 bg-purple-600 hover:bg-purple-700">
                   Create Your Account <ArrowRight className="w-4 h-4" />
                 </Button>
@@ -265,7 +265,7 @@ export default function BrandStudioFeaturePage() {
         <div className="container mx-auto px-4 relative z-10 text-center">
           <h2 className="font-serif text-3xl md:text-4xl font-bold text-white mb-4">Ready to brand every image in seconds?</h2>
           <p className="text-white/80 text-lg mb-8 max-w-2xl mx-auto">From raw photo to fully branded asset — with AI-powered patterns, headlines, and CTAs.</p>
-          <Link to="/request-access">
+          <Link to="/login?signup=1">
             <Button size="lg" className="bg-white text-purple-600 hover:bg-white/90 font-bold px-8">
               Create Your Account <ArrowRight className="w-4 h-4 ml-2" />
             </Button>

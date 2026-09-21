@@ -108,7 +108,7 @@ export function MessageBuilderShowcase() {
               </div>
             ))}
           </div>
-          <Link to="/request-access" className="inline-flex items-center gap-1.5 text-sm font-semibold mt-6 transition-colors" style={{ color: 'hsl(173 58% 39%)' }}>
+          <Link to="/login?signup=1" className="inline-flex items-center gap-1.5 text-sm font-semibold mt-6 transition-colors" style={{ color: 'hsl(173 58% 39%)' }}>
             Try the Message Builder <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -468,7 +468,7 @@ export function JourneyBuilderShowcase() {
               </div>
             ))}
           </div>
-          <Link to="/request-access" className="inline-flex items-center gap-1.5 text-sm font-semibold mt-6 transition-colors" style={{ color: 'hsl(45 93% 42%)' }}>
+          <Link to="/login?signup=1" className="inline-flex items-center gap-1.5 text-sm font-semibold mt-6 transition-colors" style={{ color: 'hsl(45 93% 42%)' }}>
             Plan your first journey <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -543,7 +543,7 @@ export function ImageStudioShowcase() {
               </div>
             ))}
           </div>
-          <Link to="/request-access" className="inline-flex items-center gap-1.5 text-sm font-semibold mt-6 transition-colors" style={{ color: 'hsl(82 85% 45%)' }}>
+          <Link to="/login?signup=1" className="inline-flex items-center gap-1.5 text-sm font-semibold mt-6 transition-colors" style={{ color: 'hsl(82 85% 45%)' }}>
             Generate your first image <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -894,7 +894,7 @@ export function BrandStudioShowcase() {
             ))}
           </div>
           </div>
-          <Link to="/request-access" className="inline-flex items-center gap-1.5 text-sm font-semibold mt-6 transition-colors" style={{ color: 'hsl(270 70% 55%)' }}>
+          <Link to="/login?signup=1" className="inline-flex items-center gap-1.5 text-sm font-semibold mt-6 transition-colors" style={{ color: 'hsl(270 70% 55%)' }}>
             Brand your visuals <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -949,7 +949,7 @@ export function AICopywriterShowcase() {
               </div>
             ))}
           </div>
-          <Link to="/request-access" className="inline-flex items-center gap-1.5 text-sm font-semibold mt-6 transition-colors" style={{ color: 'hsl(200 100% 45%)' }}>
+          <Link to="/login?signup=1" className="inline-flex items-center gap-1.5 text-sm font-semibold mt-6 transition-colors" style={{ color: 'hsl(200 100% 45%)' }}>
             Chat with your brand <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>

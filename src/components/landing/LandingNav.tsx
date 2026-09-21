@@ -45,7 +45,7 @@ export function LandingNav() {
               Sign In
             </Button>
           </Link>
-          <Link to="/request-access" className="hidden sm:block">
+          <Link to="/login?signup=1" className="hidden sm:block">
             <Button
               variant="ghost"
               size="sm"

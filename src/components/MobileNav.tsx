@@ -28,7 +28,7 @@ const defaultLinks: MobileNavLink[] = [
   { label: 'Library', href: '/features/library' },
   { label: 'Sign In', href: '/login', variant: 'outline' },
   { label: 'Try It Free', href: '/try-copywriter', variant: 'primary' },
-  { label: 'Create Account', href: '/request-access', variant: 'outline' },
+  { label: 'Create Account', href: '/login?signup=1', variant: 'outline' },
 ];
 
 export function MobileNav({ links = defaultLinks }: MobileNavProps) {

@@ -83,13 +83,13 @@ const handler = async (req: Request): Promise<Response> => {
     // Build tracking URLs
     let emailHtml: string;
     if (data.referralType === "same_institution") {
-      const destinationUrl = `https://www.campusvoice.ai/request-access?ref=colleague&tenant=${data.tenantId}&institution=${encodeURIComponent(data.institutionName)}`;
+      const destinationUrl = `https://www.campusvoice.ai/login?signup=1&ref=colleague&tenant=${data.tenantId}&institution=${encodeURIComponent(data.institutionName)}`;
       const trackingUrl = nudgeId 
         ? getTrackingUrl(nudgeId, destinationUrl, "complete_profile_button")
         : destinationUrl;
       emailHtml = getSameInstitutionHtml(data.refereeName, data.referrerName, data.institutionName, trackingUrl, data.personalMessage);
     } else {
-      const destinationUrl = `https://www.campusvoice.ai/request-access?ref=colleague&institution=${encodeURIComponent(data.institutionName)}`;
+      const destinationUrl = `https://www.campusvoice.ai/login?signup=1&ref=colleague&institution=${encodeURIComponent(data.institutionName)}`;
       const trackingUrl = nudgeId 
         ? getTrackingUrl(nudgeId, destinationUrl, "request_access_button")
         : destinationUrl;
