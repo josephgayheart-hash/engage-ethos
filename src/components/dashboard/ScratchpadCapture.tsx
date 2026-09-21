@@ -107,12 +107,12 @@ export function ScratchpadCapture() {
     setIsClassifying(true);
     try {
       const resp = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/organize-scratchpad`,
+        `${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/organize-scratchpad`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: `Bearer ${import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY']}`,
           },
           body: JSON.stringify({ stage: "classify", rawText: text }),
         }
@@ -170,12 +170,12 @@ export function ScratchpadCapture() {
 
     try {
       const resp = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/organize-scratchpad`,
+        `${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/organize-scratchpad`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: `Bearer ${import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY']}`,
           },
           body: JSON.stringify({
             stage: "organize",

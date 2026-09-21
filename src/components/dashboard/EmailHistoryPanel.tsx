@@ -81,7 +81,7 @@ export function EmailHistoryPanel() {
         <div className="space-y-1.5">
           {emails.map((email) => {
             const effectiveStatus = email.delivery_status || email.status || "sent";
-            const config = statusConfig[effectiveStatus] || statusConfig.sent;
+            const config = statusConfig[effectiveStatus] || statusConfig['sent'];
             const StatusIcon = config.icon;
 
             return (

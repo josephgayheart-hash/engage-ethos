@@ -225,8 +225,8 @@ export function useInstitutionalProfiles() {
   const updateProfile = useCallback(async (id: string, updates: Partial<Pick<InstitutionalProfile, 'name' | 'config'>>) => {
     try {
       const updateData: Record<string, unknown> = {};
-      if (updates.name !== undefined) updateData.name = updates.name;
-      if (updates.config !== undefined) updateData.config = JSON.parse(JSON.stringify(updates.config));
+      if (updates.name !== undefined) updateData['name'] = updates.name;
+      if (updates.config !== undefined) updateData['config'] = JSON.parse(JSON.stringify(updates.config));
 
       const { error } = await supabase
         .from('institutional_profiles')

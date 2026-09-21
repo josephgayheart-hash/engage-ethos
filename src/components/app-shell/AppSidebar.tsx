@@ -48,22 +48,22 @@ import { brandConfig } from "@/config/brandConfig";
 type NavItems = Record<string, string>;
 
 const createItemsDef = (nav: NavItems) => [
-  { title: nav.messageBuilder, url: "/build", icon: PenTool },
+  { title: nav['messageBuilder'], url: "/build", icon: PenTool },
   { title: "Journey Designer", url: "/strategy", icon: Route },
   { title: "Giving Day Planner", url: "/giving-day-planner", icon: Gift },
   { title: "Stewardship Report", url: "/stewardship-report", icon: Heart },
-  { title: nav.playground, url: "/playground", icon: Sparkles },
+  { title: nav['playground'], url: "/playground", icon: Sparkles },
   { title: "Image Studio", url: "/image-generator", icon: ImageIcon },
   { title: "Brand Studio", url: "/brand-studio", icon: Palette },
   { title: "Evaluator", url: "/evaluate", icon: ClipboardCheck },
 ];
 
 const fieldOpsItemsDef = (nav: NavItems) => [
-  { title: nav.campaignBrief, url: "/campaign-brief", icon: ClipboardList },
+  { title: nav['campaignBrief'], url: "/campaign-brief", icon: ClipboardList },
   { title: "Competitive Analyzer", url: "/competitive-analyzer", icon: Swords },
-  { title: nav.regionAdapter, url: "/region-adapter", icon: Globe2 },
-  { title: nav.regionalPlaybook, url: "/regional-playbook", icon: MapPin },
-  { title: nav.socialPosts ?? "Social Posts", url: "/social-posts", icon: Share2 },
+  { title: nav['regionAdapter'], url: "/region-adapter", icon: Globe2 },
+  { title: nav['regionalPlaybook'], url: "/regional-playbook", icon: MapPin },
+  { title: nav['socialPosts'] ?? "Social Posts", url: "/social-posts", icon: Share2 },
 ];
 
 const manageItems = [

@@ -151,11 +151,11 @@ const CopywriterPopoutPage = () => {
     onDelta: (chunk: string) => void,
     onDone: () => void
   ) => {
-    const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/playground-chat`, {
+    const resp = await fetch(`${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/playground-chat`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: `Bearer ${import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY']}`,
       },
       body: JSON.stringify({
         message: messageContent,

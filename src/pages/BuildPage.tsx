@@ -535,11 +535,11 @@ const BuildPage = () => {
       const draft = await loadDraftById(resumeDraftId);
       if (draft) {
         const draftData = draft.draft_data as Record<string, unknown>;
-        if (draftData.context) setContext(draftData.context as MessageContext);
-        if (draftData.selectedChannels) setSelectedChannels(draftData.selectedChannels as Channel[]);
-        if (draftData.selectedProfileId) setSelectedProfileId(draftData.selectedProfileId as string);
-        if (draftData.selectedProfileName) setSelectedProfileName(draftData.selectedProfileName as string);
-        if (draftData.builderResult) setBuilderResult(draftData.builderResult as BuilderResult);
+        if (draftData['context']) setContext(draftData['context'] as MessageContext);
+        if (draftData['selectedChannels']) setSelectedChannels(draftData['selectedChannels'] as Channel[]);
+        if (draftData['selectedProfileId']) setSelectedProfileId(draftData['selectedProfileId'] as string);
+        if (draftData['selectedProfileName']) setSelectedProfileName(draftData['selectedProfileName'] as string);
+        if (draftData['builderResult']) setBuilderResult(draftData['builderResult'] as BuilderResult);
         toast({
           title: "Draft Resumed",
           description: `Continuing "${draft.title || 'your message draft'}"`,

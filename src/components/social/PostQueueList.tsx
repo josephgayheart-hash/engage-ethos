@@ -44,7 +44,7 @@ export function PostQueueList({ posts, selectedId, onSelect, onDelete, onPublish
     <ScrollArea className="h-[calc(100vh-14rem)]">
       <div className="space-y-2 pr-2">
         {posts.map((post) => {
-          const sc = statusConfig[post.status] ?? statusConfig.draft;
+          const sc = statusConfig[post.status] ?? statusConfig['draft'];
           const Icon = sc.icon;
           const isSelected = post.id === selectedId;
           return (

@@ -77,8 +77,8 @@ export function ContentDNAStatusCard() {
       if (mostRecent?.voice_analysis) {
         const va = mostRecent.voice_analysis as Record<string, unknown>;
         overallTone =
-          (va.overallTone as string) ||
-          (va.overall_tone as string) ||
+          (va['overallTone'] as string) ||
+          (va['overall_tone'] as string) ||
           null;
       }
 
@@ -86,7 +86,7 @@ export function ContentDNAStatusCard() {
       let pillarCount = 0;
       if (mostRecent?.brand_platform) {
         const bp = mostRecent.brand_platform as Record<string, unknown>;
-        const pillars = (bp.pillars as unknown[]) || (bp.brandPillars as unknown[]);
+        const pillars = (bp['pillars'] as unknown[]) || (bp['brandPillars'] as unknown[]);
         if (Array.isArray(pillars)) pillarCount = pillars.length;
       }
 

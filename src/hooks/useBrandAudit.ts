@@ -134,13 +134,13 @@ export function useBrandAudit(profileId?: string | null) {
       const dbUpdates: Record<string, unknown> = {
         updated_at: new Date().toISOString(),
       };
-      if (updates.content_sample !== undefined) dbUpdates.content_sample = updates.content_sample;
-      if (updates.status !== undefined) dbUpdates.status = updates.status;
-      if (updates.remediation_notes !== undefined) dbUpdates.remediation_notes = updates.remediation_notes;
-      if (updates.brand_score !== undefined) dbUpdates.brand_score = updates.brand_score;
-      if (updates.voice_score !== undefined) dbUpdates.voice_score = updates.voice_score;
-      if (updates.analysis_result !== undefined) dbUpdates.analysis_result = updates.analysis_result as unknown;
-      if (updates.terminology_issues !== undefined) dbUpdates.terminology_issues = updates.terminology_issues as unknown;
+      if (updates.content_sample !== undefined) dbUpdates['content_sample'] = updates.content_sample;
+      if (updates.status !== undefined) dbUpdates['status'] = updates.status;
+      if (updates.remediation_notes !== undefined) dbUpdates['remediation_notes'] = updates.remediation_notes;
+      if (updates.brand_score !== undefined) dbUpdates['brand_score'] = updates.brand_score;
+      if (updates.voice_score !== undefined) dbUpdates['voice_score'] = updates.voice_score;
+      if (updates.analysis_result !== undefined) dbUpdates['analysis_result'] = updates.analysis_result as unknown;
+      if (updates.terminology_issues !== undefined) dbUpdates['terminology_issues'] = updates.terminology_issues as unknown;
 
       const { error } = await supabase
         .from('brand_audit_touchpoints')

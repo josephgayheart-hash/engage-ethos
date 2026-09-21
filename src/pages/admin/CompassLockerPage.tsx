@@ -173,8 +173,8 @@ async function resumableUpload(
   const { data: sess } = await supabase.auth.getSession();
   const token = sess.session?.access_token;
   if (!token) throw new Error("Not authenticated");
-  const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID as string | undefined;
-  const projectUrl = import.meta.env.VITE_SUPABASE_URL as string;
+  const projectId = import.meta.env['VITE_SUPABASE_PROJECT_ID'] as string | undefined;
+  const projectUrl = import.meta.env['VITE_SUPABASE_URL'] as string;
   const endpoint = projectId
     ? `https://${projectId}.storage.supabase.co/storage/v1/upload/resumable`
     : `${projectUrl}/storage/v1/upload/resumable`;

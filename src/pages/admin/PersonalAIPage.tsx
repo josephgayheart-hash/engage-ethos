@@ -644,11 +644,11 @@ export default function PersonalAIPage() {
     const controller = new AbortController();
     abortRef.current = controller;
     try {
-      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/personal-ai-image`, {
+      const resp = await fetch(`${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/personal-ai-image`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY']}`,
         },
         body: JSON.stringify({ prompt: finalPrompt, aspect: imageAspect }),
         signal: controller.signal,
@@ -787,13 +787,13 @@ export default function PersonalAIPage() {
       const files = attachments.filter(a => a.kind === "doc").map(a => ({ name: a.name, text: a.text! }));
 
       const { data: { session: currentSession } } = await supabase.auth.getSession();
-      const accessToken = currentSession?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/personal-ai-chat`, {
+      const accessToken = currentSession?.access_token ?? import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'];
+      const resp = await fetch(`${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/personal-ai-chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
-          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          apikey: import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'],
         },
         signal: controller.signal,
         body: JSON.stringify({

@@ -168,44 +168,44 @@ const BrandStudioPage = () => {
   }, [selectedProfileId, applyProfile]);
 
   // Overlay state
-  const [overlayPattern, setOverlayPattern] = useState<OverlayPatternId | string>(restore?.overlayPattern || "solid");
-  const [overlayColor, setOverlayColor] = useState(restore?.overlayColor || primary);
-  const [overlayOpacity, setOverlayOpacity] = useState(restore?.overlayOpacity ?? 0.55);
+  const [overlayPattern, setOverlayPattern] = useState<OverlayPatternId | string>(restore?.['overlayPattern'] || "solid");
+  const [overlayColor, setOverlayColor] = useState(restore?.['overlayColor'] || primary);
+  const [overlayOpacity, setOverlayOpacity] = useState(restore?.['overlayOpacity'] ?? 0.55);
   const [customOverlayUrl, setCustomOverlayUrl] = useState<string | null>(null);
   const { overlays: customOverlays } = useCustomOverlays(undefined);
 
   // Canvas background state (no-image graphic design mode)
-  const [canvasBackgroundType, setCanvasBackgroundType] = useState<CanvasBackgroundType>(restore?.canvasBackgroundType || "gradient-diagonal");
-  const [canvasBackgroundColor, setCanvasBackgroundColor] = useState(restore?.canvasBackgroundColor || primary);
-  const [canvasBackgroundSecondaryColor, setCanvasBackgroundSecondaryColor] = useState(restore?.canvasBackgroundSecondaryColor || secondary);
+  const [canvasBackgroundType, setCanvasBackgroundType] = useState<CanvasBackgroundType>(restore?.['canvasBackgroundType'] || "gradient-diagonal");
+  const [canvasBackgroundColor, setCanvasBackgroundColor] = useState(restore?.['canvasBackgroundColor'] || primary);
+  const [canvasBackgroundSecondaryColor, setCanvasBackgroundSecondaryColor] = useState(restore?.['canvasBackgroundSecondaryColor'] || secondary);
 
   // Logo state
-  const [showLogo, setShowLogo] = useState(restore?.showLogo ?? !!logoUrl);
-  const [logoPosition, setLogoPosition] = useState<LogoPosition>(restore?.logoPosition || "top-left");
-  const [logoScale, setLogoScale] = useState(restore?.logoScale ?? 60);
-  const [activeLogoIndex, setActiveLogoIndex] = useState(restore?.activeLogoIndex ?? 0);
+  const [showLogo, setShowLogo] = useState(restore?.['showLogo'] ?? !!logoUrl);
+  const [logoPosition, setLogoPosition] = useState<LogoPosition>(restore?.['logoPosition'] || "top-left");
+  const [logoScale, setLogoScale] = useState(restore?.['logoScale'] ?? 60);
+  const [activeLogoIndex, setActiveLogoIndex] = useState(restore?.['activeLogoIndex'] ?? 0);
 
   // Headline state
-  const [headlineText, setHeadlineText] = useState(restore?.headlineText || "");
-  const [headlineFontSize, setHeadlineFontSize] = useState(restore?.headlineFontSize ?? 28);
-  const [headlineX, setHeadlineX] = useState(restore?.headlineX ?? 50);
-  const [headlineY, setHeadlineY] = useState(restore?.headlineY ?? 50);
-  const [headlineColor, setHeadlineColor] = useState(restore?.headlineColor || "#ffffff");
-  const [headlineAlign, setHeadlineAlign] = useState<HeadlineAlign>(restore?.headlineAlign || "center");
-  const [headlineFont, setHeadlineFont] = useState(restore?.headlineFont || "Inter");
-  const [headlineBold, setHeadlineBold] = useState(restore?.headlineBold ?? false);
-  const [headlineItalic, setHeadlineItalic] = useState(restore?.headlineItalic ?? false);
-  const [headlineUnderline, setHeadlineUnderline] = useState(restore?.headlineUnderline ?? false);
-  const [headlineWidth, setHeadlineWidth] = useState(restore?.headlineWidth ?? 90);
+  const [headlineText, setHeadlineText] = useState(restore?.['headlineText'] || "");
+  const [headlineFontSize, setHeadlineFontSize] = useState(restore?.['headlineFontSize'] ?? 28);
+  const [headlineX, setHeadlineX] = useState(restore?.['headlineX'] ?? 50);
+  const [headlineY, setHeadlineY] = useState(restore?.['headlineY'] ?? 50);
+  const [headlineColor, setHeadlineColor] = useState(restore?.['headlineColor'] || "#ffffff");
+  const [headlineAlign, setHeadlineAlign] = useState<HeadlineAlign>(restore?.['headlineAlign'] || "center");
+  const [headlineFont, setHeadlineFont] = useState(restore?.['headlineFont'] || "Inter");
+  const [headlineBold, setHeadlineBold] = useState(restore?.['headlineBold'] ?? false);
+  const [headlineItalic, setHeadlineItalic] = useState(restore?.['headlineItalic'] ?? false);
+  const [headlineUnderline, setHeadlineUnderline] = useState(restore?.['headlineUnderline'] ?? false);
+  const [headlineWidth, setHeadlineWidth] = useState(restore?.['headlineWidth'] ?? 90);
 
   // Drag state
   const [isDragging, setIsDragging] = useState(false);
   const dragOffset = useRef({ x: 0, y: 0 });
 
   // Bottom bar state
-  const [showBottomBar, setShowBottomBar] = useState(restore?.showBottomBar ?? false);
-  const [bottomBarText, setBottomBarText] = useState(restore?.bottomBarText || "");
-  const [bottomBarColor, setBottomBarColor] = useState(restore?.bottomBarColor || primary);
+  const [showBottomBar, setShowBottomBar] = useState(restore?.['showBottomBar'] ?? false);
+  const [bottomBarText, setBottomBarText] = useState(restore?.['bottomBarText'] || "");
+  const [bottomBarColor, setBottomBarColor] = useState(restore?.['bottomBarColor'] || primary);
 
 
   useGoogleFont(headlineFont);

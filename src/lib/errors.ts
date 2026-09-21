@@ -30,9 +30,9 @@ export function getErrorMessage(error: unknown): string {
   if (typeof error === "string") return error;
   if (error && typeof error === "object") {
     const e = error as Record<string, unknown>;
-    if (typeof e.message === "string") return e.message;
-    if (typeof e.error_description === "string") return e.error_description;
-    if (typeof e.msg === "string") return e.msg;
+    if (typeof e['message'] === "string") return e['message'];
+    if (typeof e['error_description'] === "string") return e['error_description'];
+    if (typeof e['msg'] === "string") return e['msg'];
   }
   return "An unexpected error occurred.";
 }

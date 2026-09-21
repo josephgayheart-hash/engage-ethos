@@ -596,7 +596,7 @@ const GivingDayPlannerPage = () => {
                   const draftedCount = campaign.touchpoints.filter((t: any) => t.status !== 'planned').length;
                   const isPast = daysUntil < 0;
                   const campProfile = profiles.find(p => p.id === campaign.profile_id);
-                  const profileMeta = campProfile ? PROFILE_TYPE_LABELS[campProfile.profileType] || PROFILE_TYPE_LABELS.university : null;
+                  const profileMeta = campProfile ? PROFILE_TYPE_LABELS[campProfile.profileType] || PROFILE_TYPE_LABELS['university'] : null;
                   const ProfileIcon = profileMeta?.icon || Building2;
 
                   return (
@@ -666,7 +666,7 @@ const GivingDayPlannerPage = () => {
                     {selectedCampaign?.name}
                   </h1>
                   {selectedProfile && (() => {
-                    const meta = PROFILE_TYPE_LABELS[selectedProfile.profileType] || PROFILE_TYPE_LABELS.university;
+                    const meta = PROFILE_TYPE_LABELS[selectedProfile.profileType] || PROFILE_TYPE_LABELS['university'];
                     const Icon = meta.icon;
                     return (
                       <Badge variant="outline" className="gap-1 text-[11px] border-primary/30 text-primary">
