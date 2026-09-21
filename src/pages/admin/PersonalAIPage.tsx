@@ -1208,7 +1208,7 @@ export default function PersonalAIPage() {
                           type="button"
                           className={cn(
                             "inline-flex h-5 w-5 shrink-0 items-center justify-center rounded transition",
-                            "text-muted-foreground/60 hover:text-destructive hover:bg-background/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                            "text-muted-foreground/60 hover:text-destructive hover:bg-background/60 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring",
                             t.id === activeId
                               ? "opacity-80 hover:opacity-100"
                               : "opacity-0 group-hover:opacity-60 hover:!opacity-100 focus:opacity-100"

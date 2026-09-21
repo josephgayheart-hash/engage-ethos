@@ -301,7 +301,7 @@ export const BrandOverlayCanvas = forwardRef<HTMLDivElement, BrandOverlayCanvasP
               contentEditable={isEditing}
               suppressContentEditableWarning
               className={cn(
-                "px-6 drop-shadow-lg select-none outline-none w-full",
+                "px-6 drop-shadow-lg select-none outline-hidden w-full",
                 HEADLINE_ALIGN_CLASSES[headlineAlign],
                 isEditing && "ring-2 ring-white/50 rounded cursor-text select-auto bg-black/20"
               )}
