@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useActiveWorkspaceId } from '@/contexts/WorkspaceContext';
 import { useUserDrafts } from '@/hooks/useUserDrafts';
 import { useInstitutionalProfiles } from '@/hooks/useInstitutionalProfiles';
-import { isExcludedUser, EXCLUDED_USER_IDS } from '@/lib/analyticsExclusions';
+import { isExcludedUser } from '@/lib/analyticsExclusions';
 
 export type DashboardMode = 'onboarding' | 'configured' | 'active' | 'power-user';
 
