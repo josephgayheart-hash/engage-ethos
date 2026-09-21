@@ -1,19 +1,15 @@
 import { Link } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
-import { ChevronDown, MessageSquare, BarChart3, Target, PenTool, BookOpen, Image, Palette, Bot, Globe, BarChart } from 'lucide-react';
+import { ChevronDown, MessageSquare, BarChart3, Target, BookOpen, Bot, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const featureLinks = [
   { icon: MessageSquare, label: 'Message Builder', to: '/features/message-builder' },
   { icon: BarChart3, label: 'Content DNA Studio', to: '/features/content-dna' },
-  { icon: Image, label: 'AI Image Studio', to: '/features/image-studio' },
-  { icon: Palette, label: 'Brand It Studio', to: '/features/brand-studio' },
   { icon: Bot, label: 'AI Copywriter', to: '/features/ai-copywriter' },
   { icon: Target, label: 'Journey Designer', to: '/features/journey-designer' },
-  { icon: PenTool, label: 'Evaluator', to: '/features/evaluate' },
-  { icon: Globe, label: 'WebCrawl', to: '/features/webcrawl' },
   { icon: BookOpen, label: 'Library', to: '/features/library' },
-  { icon: BarChart, label: 'Brand Audit', to: '/features/brand-audit' },
+  { icon: Layers, label: 'More Capabilities', to: '/features' },
 ];
 
 export function FeaturesDropdown() {

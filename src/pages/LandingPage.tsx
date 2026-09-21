@@ -87,18 +87,6 @@ const features = [
     link: '/features/content-dna',
   },
   {
-    icon: Image,
-    title: 'AI Image Studio',
-    description: 'Generate on-brand photography and graphics across 19 formats.',
-    link: '/features/image-studio',
-  },
-  {
-    icon: Palette,
-    title: 'Brand It Studio',
-    description: 'Layer logos, headlines, and brand patterns onto any image with AI copy.',
-    link: '/features/brand-studio',
-  },
-  {
     icon: Bot,
     title: 'AI Copywriter',
     description: 'A brand-aware assistant that knows your voice, facts, and stories.',
@@ -111,28 +99,16 @@ const features = [
     link: '/features/journey-designer',
   },
   {
-    icon: PenTool,
-    title: 'Message Evaluator',
-    description: 'Score content against your brand platform and voice profile.',
-    link: '/features/evaluate',
-  },
-  {
-    icon: Globe,
-    title: 'WebCrawl Intelligence',
-    description: 'Extract brand voice from your website automatically.',
-    link: '/features/webcrawl',
-  },
-  {
     icon: BookOpen,
     title: 'Content Library',
     description: 'Governed content with approval workflows and shared collections.',
     link: '/features/library',
   },
   {
-    icon: BarChart,
-    title: 'Brand Audit & Scoring',
-    description: 'Audit touchpoints and track brand consistency over time.',
-    link: '/features/brand-audit',
+    icon: Layers,
+    title: 'More Capabilities',
+    description: 'Image Studio, Brand Studio, Evaluator, WebCrawl and Brand Audit.',
+    link: '/features',
   },
 ];
 
