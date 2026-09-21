@@ -28,7 +28,7 @@ const featureIcons: Record<string, React.ReactNode> = {
 
 const featureColors: Record<string, string> = {
   'Message Builder': 'bg-blue-100 text-blue-600',
-  'Journey Designer': 'bg-purple-100 text-purple-600',
+  'Journey Designer': 'bg-blue-100 text-blue-600',
   'Evaluator': 'bg-green-100 text-green-600',
   'Content DNA Studio': 'bg-orange-100 text-orange-600',
   'Web Analyzer': 'bg-cyan-100 text-cyan-600',

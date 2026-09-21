@@ -31,7 +31,7 @@ const channelIcons: Record<string, typeof Mail> = {
 const channelColors: Record<string, string> = {
   'email': 'bg-blue-500',
   'sms': 'bg-green-500',
-  'portal': 'bg-purple-500',
+  'portal': 'bg-blue-600',
   'landing-page': 'bg-orange-500',
   'social-media': 'bg-pink-500',
   'phone': 'bg-yellow-500',

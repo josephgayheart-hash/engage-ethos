@@ -95,13 +95,13 @@ export function ContentDNAExplainer({
           </div>
 
           {/* Custom Instructions */}
-          <div className="flex items-start gap-3 p-3 rounded-lg bg-purple-50/80 border border-purple-200/60">
-            <div className="p-2 rounded-lg bg-purple-100 shrink-0">
-              <Quote className="w-4 h-4 text-purple-600" />
+          <div className="flex items-start gap-3 p-3 rounded-lg bg-blue-50/80 border border-blue-200/60">
+            <div className="p-2 rounded-lg bg-blue-100 shrink-0">
+              <Quote className="w-4 h-4 text-blue-600" />
             </div>
             <div>
-              <h4 className="text-sm font-medium text-purple-800">Custom Instructions</h4>
-              <p className="text-xs text-purple-700/80 mt-1 leading-relaxed">
+              <h4 className="text-sm font-medium text-blue-800">Custom Instructions</h4>
+              <p className="text-xs text-blue-700/80 mt-1 leading-relaxed">
                 Add specific guidelines—terminology preferences, phrases to avoid, formatting rules—layered on top of your DNA analysis.
               </p>
             </div>

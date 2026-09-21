@@ -90,13 +90,13 @@ const formatChannelName = (channel: string): string => {
 const phaseColors: Record<StrategyPhase, string> = {
   'short-term': 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200',
   'mid-term': 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200',
-  'long-term': 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-200',
+  'long-term': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200',
 };
 
 const phaseBorderColors: Record<StrategyPhase, string> = {
   'short-term': 'border-l-emerald-500',
   'mid-term': 'border-l-amber-500',
-  'long-term': 'border-l-violet-500',
+  'long-term': 'border-l-blue-600',
 };
 
 export function JourneyViewer({ 
@@ -398,7 +398,7 @@ export function JourneyViewer({
                     <div className={`absolute -left-4 w-4 h-4 rounded-full border-2 border-background flex items-center justify-center text-[10px] font-bold ${
                       touchpoint.phase === 'short-term' ? 'bg-emerald-500 text-white' :
                       touchpoint.phase === 'mid-term' ? 'bg-amber-500 text-white' :
-                      'bg-violet-500 text-white'
+                      'bg-blue-600 text-white'
                     }`}>
                       {touchpoint.week}
                     </div>

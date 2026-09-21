@@ -270,8 +270,8 @@ export default function AgencyAnalyticsPage() {
                 <Card>
                   <CardContent className="p-4">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-purple-500/10">
-                        <Library className="w-5 h-5 text-purple-600" />
+                      <div className="p-2 rounded-lg bg-blue-600/10">
+                        <Library className="w-5 h-5 text-blue-600" />
                       </div>
                       <div>
                         <p className="text-2xl font-bold">{overallStats?.totalTemplates || 0}</p>

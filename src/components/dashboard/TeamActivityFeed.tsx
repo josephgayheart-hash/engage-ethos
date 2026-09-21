@@ -85,7 +85,7 @@ export function TeamActivityFeed() {
     <Card className="border-border/50">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-semibold flex items-center gap-2">
-          <Activity className="w-4 h-4 text-[hsl(200_100%_50%)]" />
+          <Activity className="w-4 h-4 text-[hsl(216_100%_45%)]" />
           Team Activity
         </CardTitle>
       </CardHeader>

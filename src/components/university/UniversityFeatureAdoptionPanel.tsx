@@ -96,7 +96,7 @@ export function UniversityFeatureAdoptionPanel({
 
   const features = [
     {
-      icon: <MessageSquare className="w-4 h-4 text-purple-600" />,
+      icon: <MessageSquare className="w-4 h-4 text-blue-600" />,
       name: 'Message Builder',
       description: 'AI-powered content generation',
       count: messagesGenerated,
@@ -104,7 +104,7 @@ export function UniversityFeatureAdoptionPanel({
       link: '/build'
     },
     {
-      icon: <Route className="w-4 h-4 text-indigo-600" />,
+      icon: <Route className="w-4 h-4 text-blue-600" />,
       name: 'Journey Designer',
       description: 'Communication flow creation',
       count: journeysCreated,

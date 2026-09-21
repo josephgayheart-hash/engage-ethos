@@ -38,8 +38,8 @@ const steps: Step[] = [
     title: "Content DNA",
     description: "Your institution's unique voice patterns, vocabulary, and communication style.",
     example: "Warm, accessible tone • Gateway metaphors • Student-first language",
-    color: "text-purple-600",
-    bgColor: "bg-purple-500/10",
+    color: "text-blue-600",
+    bgColor: "bg-blue-600/10",
   },
   {
     number: 3,
@@ -148,7 +148,7 @@ export function BuilderStepsShowcase() {
       </div>
       
       {/* Result Preview */}
-      <div className="bg-gradient-to-r from-primary/5 via-accent/5 to-purple-500/5 rounded-2xl border border-border p-6 md:p-8">
+      <div className="bg-gradient-to-r from-primary/5 via-accent/5 to-blue-600/5 rounded-2xl border border-border p-6 md:p-8">
         <div className="flex flex-col md:flex-row items-center gap-6">
           <div className="flex-shrink-0">
             <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">

@@ -558,7 +558,7 @@ const AdminPanel = () => {
                 </Badge>
               )}
               {dnaAnalysis?.brand_platform && (
-                <Badge className="text-[10px] bg-purple-100 text-purple-700 border-purple-200">
+                <Badge className="text-[10px] bg-blue-100 text-blue-700 border-blue-200">
                   <Target className="w-3 h-3 mr-1" />
                   Brand
                 </Badge>
@@ -690,8 +690,8 @@ const AdminPanel = () => {
             <Card>
               <CardContent className="p-3">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded bg-purple-500/10">
-                    <Briefcase className="w-4 h-4 text-purple-600" />
+                  <div className="p-1.5 rounded bg-blue-600/10">
+                    <Briefcase className="w-4 h-4 text-blue-600" />
                   </div>
                   <div>
                     <p className="text-xl font-bold">{isLoading ? '...' : agencyCount}</p>
@@ -729,8 +729,8 @@ const AdminPanel = () => {
             <Card>
               <CardContent className="p-3">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded bg-indigo-500/10">
-                    <FolderTree className="w-4 h-4 text-indigo-600" />
+                  <div className="p-1.5 rounded bg-blue-600/10">
+                    <FolderTree className="w-4 h-4 text-blue-600" />
                   </div>
                   <div>
                     <p className="text-xl font-bold">{institutionalProfiles.length}</p>
@@ -755,8 +755,8 @@ const AdminPanel = () => {
             <Card>
               <CardContent className="p-3">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded bg-purple-500/10">
-                    <Target className="w-4 h-4 text-purple-600" />
+                  <div className="p-1.5 rounded bg-blue-600/10">
+                    <Target className="w-4 h-4 text-blue-600" />
                   </div>
                   <div>
                     <p className="text-xl font-bold">{totalAnalyses}</p>
@@ -1172,7 +1172,7 @@ const AdminPanel = () => {
                                       {analysis.sample_count} samples
                                     </Badge>
                                     {hasBrand && (
-                                      <Badge className="text-[10px] bg-purple-100 text-purple-700">
+                                      <Badge className="text-[10px] bg-blue-100 text-blue-700">
                                         Brand Layer
                                       </Badge>
                                     )}
@@ -1307,7 +1307,7 @@ const AdminPanel = () => {
                                           {analysis.profile_name || 'Institution Level'}
                                         </p>
                                         <div className="flex gap-1">
-                                          {brand && <Badge className="text-[10px] bg-purple-100 text-purple-700">Brand Platform</Badge>}
+                                          {brand && <Badge className="text-[10px] bg-blue-100 text-blue-700">Brand Platform</Badge>}
                                           {voice && <Badge className="text-[10px] bg-orange-100 text-orange-700">Voice DNA</Badge>}
                                         </div>
                                       </div>
@@ -1437,20 +1437,20 @@ const AdminPanel = () => {
                         <p className="text-[10px] text-muted-foreground">{delivered} of {totalSent}</p>
                       </CardContent>
                     </Card>
-                    <Card className="border-l-4 border-l-purple-500">
+                    <Card className="border-l-4 border-l-blue-600">
                       <CardContent className="pt-4 pb-3">
                         <div className="flex items-center gap-2 mb-1">
-                          <Eye className="w-4 h-4 text-purple-500" />
+                          <Eye className="w-4 h-4 text-blue-600" />
                           <p className="text-xs text-muted-foreground">Open Rate</p>
                         </div>
                         <p className="text-2xl font-bold">{openRate}%</p>
                         <p className="text-[10px] text-muted-foreground">{opened} of {delivered} delivered</p>
                       </CardContent>
                     </Card>
-                    <Card className="border-l-4 border-l-indigo-500">
+                    <Card className="border-l-4 border-l-blue-600">
                       <CardContent className="pt-4 pb-3">
                         <div className="flex items-center gap-2 mb-1">
-                          <ExternalLink className="w-4 h-4 text-indigo-500" />
+                          <ExternalLink className="w-4 h-4 text-blue-600" />
                           <p className="text-xs text-muted-foreground">Click Rate</p>
                         </div>
                         <p className="text-2xl font-bold">{clickRate}%</p>
@@ -1558,14 +1558,14 @@ const AdminPanel = () => {
                                   )}
                                   {/* Opened */}
                                   {nudge.opened_at && (
-                                    <Badge className="bg-purple-100 text-purple-700 text-[10px] px-1.5 py-0.5" title={`Opened: ${new Date(nudge.opened_at).toLocaleString()}`}>
+                                    <Badge className="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0.5" title={`Opened: ${new Date(nudge.opened_at).toLocaleString()}`}>
                                       <Eye className="w-2.5 h-2.5 mr-0.5" />
                                       Opened
                                     </Badge>
                                   )}
                                   {/* Clicked */}
                                   {nudge.clicked_at && (
-                                    <Badge className="bg-indigo-100 text-indigo-700 text-[10px] px-1.5 py-0.5" title={`Clicked: ${new Date(nudge.clicked_at).toLocaleString()}`}>
+                                    <Badge className="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0.5" title={`Clicked: ${new Date(nudge.clicked_at).toLocaleString()}`}>
                                       <ExternalLink className="w-2.5 h-2.5 mr-0.5" />
                                       Clicked
                                     </Badge>

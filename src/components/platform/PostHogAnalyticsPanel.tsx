@@ -292,14 +292,14 @@ export function PostHogAnalyticsPanel() {
                     value={fmt(Number(overview.totals['visitors'] || 0))}
                     delta={pctDelta(Number(overview.totals['visitors'] || 0), Number(overview.prevTotals['visitors'] || 0))}
                     sparkValues={overview.daily.map((d: any) => Number(d.visitors || 0))}
-                    accent="hsl(270 70% 55%)"
+                    accent="hsl(216 100% 50%)"
                   />
                   <HeroStat
                     label={`Pageviews (${days}d)`}
                     value={fmt(Number(overview.totals['pageviews'] || 0))}
                     delta={pctDelta(Number(overview.totals['pageviews'] || 0), Number(overview.prevTotals['pageviews'] || 0))}
                     sparkValues={overview.daily.map((d: any) => Number(d.pageviews || 0))}
-                    accent="hsl(200 100% 50%)"
+                    accent="hsl(216 100% 45%)"
                   />
                 </div>
 
@@ -320,7 +320,7 @@ export function PostHogAnalyticsPanel() {
                         <div className="flex items-center gap-3 mt-2">
                           <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden flex">
                             <div className="h-full bg-primary" style={{ width: `${newPct}%` }} />
-                            <div className="h-full bg-purple-500/70" style={{ width: `${100 - newPct}%` }} />
+                            <div className="h-full bg-blue-600/70" style={{ width: `${100 - newPct}%` }} />
                           </div>
                           <span className="text-xs tabular-nums whitespace-nowrap">{newPct.toFixed(0)}% new</span>
                         </div>

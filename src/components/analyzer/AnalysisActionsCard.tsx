@@ -87,7 +87,7 @@ export function AnalysisActionsCard({
           
           {/* Rewrite Button with Loading State */}
           <Button
-            className="w-full justify-start bg-[hsl(270_70%_55%)] hover:bg-[hsl(270_70%_50%)] transition-all"
+            className="w-full justify-start bg-[hsl(216_100%_50%)] hover:bg-[hsl(216_100%_50%)] transition-all"
             onClick={onRewrite}
             disabled={showRewrite || isDisabled || isRewriting}
           >
@@ -112,12 +112,12 @@ export function AnalysisActionsCard({
 
           {/* Rewriting Progress Indicator */}
           {isRewriting && (
-            <div className="p-3 rounded-lg bg-[hsl(270_70%_55%)]/10 border border-[hsl(270_70%_55%)]/20 space-y-2">
+            <div className="p-3 rounded-lg bg-[hsl(216_100%_50%)]/10 border border-[hsl(216_100%_50%)]/20 space-y-2">
               <div className="flex items-center gap-2">
                 <div className="relative">
-                  <div className="w-2 h-2 rounded-full bg-[hsl(270_70%_55%)] animate-pulse" />
+                  <div className="w-2 h-2 rounded-full bg-[hsl(216_100%_50%)] animate-pulse" />
                 </div>
-                <span className="text-xs font-medium text-[hsl(270_70%_45%)]">
+                <span className="text-xs font-medium text-[hsl(216_100%_45%)]">
                   AI is transforming your content...
                 </span>
               </div>

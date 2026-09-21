@@ -41,7 +41,7 @@ import { MobileNav } from "@/components/MobileNav";
 const workflowSteps = [
   { step: 1, icon: FileText, title: "Save to Personal", description: "Save generated messages or evaluations to your private library", color: "bg-blue-500" },
   { step: 2, icon: Send, title: "Submit for Review", description: "Submit your best work to the University Library", color: "bg-amber-500" },
-  { step: 3, icon: Eye, title: "Admin Review", description: "Approvers review content, guardrails, and brand alignment", color: "bg-purple-500" },
+  { step: 3, icon: Eye, title: "Admin Review", description: "Approvers review content, guardrails, and brand alignment", color: "bg-blue-600" },
   { step: 4, icon: BookOpen, title: "Publish Institution-Wide", description: "Approved content available to all team members", color: "bg-emerald-500" },
 ];
 
@@ -141,9 +141,9 @@ export default function LibraryFeaturePage() {
         {/* Lens flares */}
         <div className="absolute top-20 right-[12%] w-32 h-32 bg-[hsl(140_60%_50%_/_0.18)] rounded-full blur-2xl" />
         <div className="absolute bottom-36 left-[8%] w-40 h-40 bg-[hsl(160_60%_55%_/_0.15)] rounded-full blur-3xl" />
-        <div className="absolute top-44 left-[22%] w-24 h-24 bg-[hsl(270_70%_60%_/_0.1)] rounded-full blur-2xl" />
-        <div className="absolute bottom-48 right-[25%] w-20 h-20 bg-[hsl(82_85%_55%_/_0.1)] rounded-full blur-2xl" />
-        <div className="absolute top-32 right-[35%] w-16 h-16 bg-[hsl(200_100%_50%_/_0.12)] rounded-full blur-xl" />
+        <div className="absolute top-44 left-[22%] w-24 h-24 bg-[hsl(216_100%_50%_/_0.1)] rounded-full blur-2xl" />
+        <div className="absolute bottom-48 right-[25%] w-20 h-20 bg-[hsl(216_100%_50%_/_0.1)] rounded-full blur-2xl" />
+        <div className="absolute top-32 right-[35%] w-16 h-16 bg-[hsl(216_100%_45%_/_0.12)] rounded-full blur-xl" />
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
@@ -180,9 +180,9 @@ export default function LibraryFeaturePage() {
       {/* Two Library System */}
       <section className="py-20 bg-[hsl(140_50%_94%)] relative overflow-hidden">
         {/* Lens flares */}
-        <div className="absolute top-12 right-[10%] w-28 h-28 bg-[hsl(270_70%_60%_/_0.12)] rounded-full blur-2xl" />
-        <div className="absolute bottom-28 left-[6%] w-36 h-36 bg-[hsl(82_85%_55%_/_0.12)] rounded-full blur-3xl" />
-        <div className="absolute top-1/3 left-[40%] w-20 h-20 bg-[hsl(200_100%_50%_/_0.1)] rounded-full blur-2xl" />
+        <div className="absolute top-12 right-[10%] w-28 h-28 bg-[hsl(216_100%_50%_/_0.12)] rounded-full blur-2xl" />
+        <div className="absolute bottom-28 left-[6%] w-36 h-36 bg-[hsl(216_100%_50%_/_0.12)] rounded-full blur-3xl" />
+        <div className="absolute top-1/3 left-[40%] w-20 h-20 bg-[hsl(216_100%_45%_/_0.1)] rounded-full blur-2xl" />
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-16">
@@ -430,7 +430,7 @@ export default function LibraryFeaturePage() {
       <section className="py-20 bg-[hsl(160_45%_93%)] relative overflow-hidden">
         {/* Lens flares */}
         <div className="absolute top-12 right-[10%] w-28 h-28 bg-[hsl(140_60%_50%_/_0.12)] rounded-full blur-2xl" />
-        <div className="absolute bottom-28 left-[6%] w-36 h-36 bg-[hsl(82_85%_55%_/_0.1)] rounded-full blur-3xl" />
+        <div className="absolute bottom-28 left-[6%] w-36 h-36 bg-[hsl(216_100%_50%_/_0.1)] rounded-full blur-3xl" />
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-5xl mx-auto">
@@ -585,7 +585,7 @@ export default function LibraryFeaturePage() {
       <section className="py-20 bg-[hsl(82_50%_94%)] relative overflow-hidden">
         {/* Lens flares */}
         <div className="absolute top-12 right-[10%] w-28 h-28 bg-[hsl(140_60%_50%_/_0.1)] rounded-full blur-2xl" />
-        <div className="absolute bottom-16 left-[8%] w-32 h-32 bg-[hsl(270_70%_60%_/_0.08)] rounded-full blur-3xl" />
+        <div className="absolute bottom-16 left-[8%] w-32 h-32 bg-[hsl(216_100%_50%_/_0.08)] rounded-full blur-3xl" />
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto">

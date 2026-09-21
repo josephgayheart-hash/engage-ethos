@@ -39,8 +39,8 @@ const capabilities = [
     icon: Palette,
     title: 'AI Brand Studio',
     tagline: 'Layer your identity onto any image, precisely.',
-    accent: 'text-violet-600',
-    accentBg: 'bg-violet-500/10',
+    accent: 'text-blue-600',
+    accentBg: 'bg-blue-600/10',
     points: [
       'Drop logos, headlines, calls to action and brand patterns onto any photo.',
       'Smart Layer masking keeps type legible over busy imagery.',
@@ -148,10 +148,10 @@ export default function MoreCapabilitiesPage() {
 
       {/* Hero */}
       <section className="relative overflow-hidden py-16 md:py-24 border-b border-border/50">
-        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(82_85%_55%_/_0.07)] via-background to-[hsl(262_60%_55%_/_0.06)]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(216_100%_50%_/_0.07)] via-background to-[hsl(262_60%_55%_/_0.06)]" />
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl">
-            <Badge className="mb-6 bg-[hsl(82_85%_55%_/_0.12)] text-[hsl(82_60%_28%)] border-[hsl(82_85%_45%_/_0.3)]">
+            <Badge className="mb-6 bg-[hsl(216_100%_50%_/_0.12)] text-[hsl(82_60%_28%)] border-[hsl(82_85%_45%_/_0.3)]">
               <Layers className="w-3 h-3 mr-1" />
               More Capabilities
             </Badge>
@@ -245,7 +245,7 @@ export default function MoreCapabilitiesPage() {
           <Link to="/try-copywriter">
             <Button
               size="lg"
-              className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] font-bold px-8 rounded-full"
+              className="bg-gradient-to-r from-[hsl(216_100%_50%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] font-bold px-8 rounded-full"
             >
               Try It Free <ArrowRight className="w-4 h-4 ml-2" />
             </Button>

@@ -95,7 +95,7 @@ export function DNAAlignmentPanel({
       icon: Mic2, 
       score: dnaAlignment.voiceScore, 
       feedback: dnaAlignment.voiceFeedback,
-      color: 'text-purple-500'
+      color: 'text-blue-600'
     },
     { 
       key: 'brand', 

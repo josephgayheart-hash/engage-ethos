@@ -214,8 +214,8 @@ export function MultiLevelProfileShowcase() {
         </div>
         
         <div className="bg-card rounded-xl border border-border p-5 text-center">
-          <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mx-auto mb-4">
-            <Sparkles className="w-6 h-6 text-purple-600" />
+          <div className="w-12 h-12 rounded-xl bg-blue-600/10 flex items-center justify-center mx-auto mb-4">
+            <Sparkles className="w-6 h-6 text-blue-600" />
           </div>
           <h3 className="font-semibold mb-2">Centralized Governance</h3>
           <p className="text-sm text-muted-foreground">

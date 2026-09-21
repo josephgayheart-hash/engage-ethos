@@ -134,13 +134,13 @@ export function UniversityKPICards({ analytics, tenantHealth, isLoading }: Unive
         status={dnaStatus}
       />
       <KPICard
-        icon={<MessageSquare className="w-4 h-4 text-purple-600" />}
+        icon={<MessageSquare className="w-4 h-4 text-blue-600" />}
         label="Messages"
         value={messagesGenerated}
         subValue="Generated content"
       />
       <KPICard
-        icon={<Route className="w-4 h-4 text-indigo-600" />}
+        icon={<Route className="w-4 h-4 text-blue-600" />}
         label="Journeys"
         value={journeysCreated}
         subValue="Communication flows"

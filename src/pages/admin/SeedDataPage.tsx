@@ -443,7 +443,7 @@ export default function SeedDataPage() {
                       University Alpha (Eagle mascot)
                     </li>
                     <li className="flex items-center gap-2">
-                      <Badge variant="outline" className="bg-purple-50">Beta</Badge>
+                      <Badge variant="outline" className="bg-blue-50">Beta</Badge>
                       University Beta (Bear mascot)
                     </li>
                   </ul>

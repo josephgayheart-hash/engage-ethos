@@ -26,7 +26,7 @@ const sourceConfig: Record<LibrarySource, { label: string; icon: typeof PenTool;
   journey: { 
     label: "Journey", 
     icon: Route, 
-    className: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/30 dark:text-purple-400 dark:border-purple-800" 
+    className: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800" 
   },
   copywriter: { 
     label: "Copywriter", 
@@ -56,7 +56,7 @@ const sourceConfig: Record<LibrarySource, { label: string; icon: typeof PenTool;
   'image-studio': {
     label: "Image Studio",
     icon: ImageIcon,
-    className: "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/30 dark:text-indigo-400 dark:border-indigo-800"
+    className: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800"
   },
   'brand-studio': {
     label: "Brand Studio",

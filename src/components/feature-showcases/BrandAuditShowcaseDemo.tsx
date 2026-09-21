@@ -51,9 +51,9 @@ function BrowserChrome({ title, children }: { title: string; children: React.Rea
 
 const dimensions = [
   { label: 'Voice Consistency', score: 87, color: 'hsl(142 76% 45%)' },
-  { label: 'Brand Platform', score: 72, color: 'hsl(200 100% 50%)' },
+  { label: 'Brand Platform', score: 72, color: 'hsl(216 100% 45%)' },
   { label: 'Terminology', score: 64, color: 'hsl(45 93% 47%)' },
-  { label: 'Audience Fit', score: 91, color: 'hsl(270 70% 60%)' },
+  { label: 'Audience Fit', score: 91, color: 'hsl(216 100% 50%)' },
 ];
 
 const touchpoints = [
