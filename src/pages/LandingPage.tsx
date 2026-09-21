@@ -165,20 +165,20 @@ export default function LandingPage() {
         jsonLd={landingPageSchemas}
       />
 
-      {/* Hero Section — Graphite band, arctic signal */}
+      {/* Hero Section — Warm stone ground, arctic signal */}
       <header
-        className="relative overflow-hidden border-b border-white/10"
-        style={{ background: 'linear-gradient(160deg, hsl(60 4% 9%) 0%, hsl(60 4% 13%) 55%, hsl(60 4% 10%) 100%)' }}
+        className="relative overflow-hidden border-b border-border"
+        style={{ background: 'linear-gradient(170deg, hsl(50 32% 97%) 0%, hsl(51 22% 94%) 60%, hsl(50 30% 96%) 100%)' }}
       >
         {/* Navigation */}
-        <LandingNav />
+        <LandingNav tone="light" />
 
         {/* Precision grid */}
         <div
-          className="absolute inset-0 opacity-[0.07] pointer-events-none"
+          className="absolute inset-0 opacity-[0.5] pointer-events-none"
           style={{
             backgroundImage:
-              'linear-gradient(to right, rgba(255,255,255,0.35) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.35) 1px, transparent 1px)',
+              'linear-gradient(to right, hsl(60 4% 10% / 0.06) 1px, transparent 1px), linear-gradient(to bottom, hsl(60 4% 10% / 0.06) 1px, transparent 1px)',
             backgroundSize: '72px 72px',
             maskImage: 'radial-gradient(ellipse 80% 60% at 50% 0%, black, transparent 75%)',
           }}
@@ -186,7 +186,7 @@ export default function LandingPage() {
         {/* Single cold signal wash */}
         <div
           className="hidden sm:block absolute -top-24 right-[6%] w-[28rem] h-[28rem] rounded-full blur-[110px] pointer-events-none"
-          style={{ background: 'hsl(216 100% 50% / 0.16)' }}
+          style={{ background: 'hsl(216 100% 50% / 0.09)' }}
         />
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
@@ -194,8 +194,8 @@ export default function LandingPage() {
             {/* Left: copy */}
             <div className="space-y-6">
               <div className="animate-fade-in">
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70 backdrop-blur-sm">
-                  <Sparkles className="w-3 h-3 text-[hsl(216_100%_62%)]" />
+                <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                  <Sparkles className="w-3 h-3 text-[hsl(216_100%_45%)]" />
                   Strategic Messaging Intelligence
                 </span>
               </div>
@@ -204,16 +204,16 @@ export default function LandingPage() {
                 className="font-display text-4xl sm:text-5xl lg:text-[3.5rem] tracking-[-0.03em] leading-[1.05] animate-fade-in"
                 style={{ animationDelay: '0.1s' }}
               >
-                <span className="text-white">AI copywriting that stays</span>{' '}
-                <span className="text-[hsl(216_100%_66%)]">on your brand.</span>
+                <span className="text-foreground">AI copywriting that stays</span>{' '}
+                <span className="text-[hsl(216_100%_45%)]">on your brand.</span>
               </h1>
 
               <p
-                className="text-base sm:text-lg text-white/65 max-w-xl leading-relaxed animate-fade-in"
+                className="text-base sm:text-lg text-muted-foreground max-w-xl leading-relaxed animate-fade-in"
                 style={{ animationDelay: '0.2s' }}
               >
                 Upload your brand voice once. Generate emails, social posts, journeys, and campaigns that sound like{' '}
-                <span className="text-white font-semibold">you</span> — across every channel.
+                <span className="text-foreground font-semibold">you</span> — across every channel.
               </p>
 
               <div
@@ -224,35 +224,35 @@ export default function LandingPage() {
                   <Button
                     asChild
                     size="lg"
-                    className="h-12 px-7 rounded-lg bg-[hsl(216_100%_50%)] text-white font-semibold border-0 shadow-[0_10px_30px_-10px_hsl(216_100%_50%_/_0.65)] hover:bg-[hsl(216_100%_45%)] transition-colors"
+                    className="h-12 px-7 rounded-lg bg-[hsl(216_100%_50%)] text-white font-semibold border-0 shadow-[0_10px_30px_-12px_hsl(216_100%_50%_/_0.5)] hover:bg-[hsl(216_100%_45%)] transition-colors"
                   >
                     <Link to="/try-copywriter">
                       Try It Free
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
-                  <span className="text-white/40 text-[10px] mt-1.5 font-medium tracking-wide">Free · No signup</span>
+                  <span className="text-muted-foreground text-[10px] mt-1.5 font-medium tracking-wide">Free · No signup</span>
                 </div>
                 <div className="flex flex-col">
                   <Button
                     asChild
                     variant="ghost"
                     size="lg"
-                    className="h-12 px-7 rounded-lg border border-white/15 bg-white/[0.04] text-white hover:bg-white/[0.09] hover:text-white backdrop-blur-sm"
+                    className="h-12 px-7 rounded-lg border border-border bg-card text-foreground hover:bg-muted hover:text-foreground"
                   >
                     <Link to="/login?signup=1">Create Your Account</Link>
                   </Button>
-                  <span className="text-white/35 text-[10px] mt-1.5 font-medium tracking-wide">
+                  <span className="text-muted-foreground text-[10px] mt-1.5 font-medium tracking-wide">
                     Instant access · Free beta
                   </span>
                 </div>
               </div>
 
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-2 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-                <p className="text-white/45 text-sm">
+                <p className="text-muted-foreground text-sm">
                   For higher-ed, enterprise, nonprofit, and healthcare brand teams.
                 </p>
-                <Link to="/login" className="text-white/40 text-xs hover:text-white/75 transition-colors underline decoration-white/20 underline-offset-4">
+                <Link to="/login" className="text-muted-foreground text-xs hover:text-foreground transition-colors underline decoration-border underline-offset-4">
                   Already have an account? Sign in
                 </Link>
               </div>
@@ -260,18 +260,18 @@ export default function LandingPage() {
 
             {/* Right: layered signal panel */}
             <div className="relative animate-fade-in" style={{ animationDelay: '0.25s' }}>
-              <div className="absolute inset-x-4 -bottom-3 h-full rounded-xl border border-white/[0.07] bg-white/[0.02]" />
-              <div className="relative rounded-xl border border-white/[0.12] bg-[hsl(60_4%_12%)]/80 backdrop-blur-sm overflow-hidden">
-                <div className="flex items-center justify-between border-b border-white/[0.08] px-4 py-3">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/45">
+              <div className="absolute inset-x-4 -bottom-3 h-full rounded-xl border border-border bg-muted/60" />
+              <div className="relative rounded-xl border border-border bg-card shadow-[var(--shadow-lg)] overflow-hidden">
+                <div className="flex items-center justify-between border-b border-border px-4 py-3">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                     Brand alignment
                   </span>
-                  <span className="flex items-center gap-1.5 text-[11px] font-medium text-white/55">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[hsl(216_100%_60%)]" />
+                  <span className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[hsl(216_100%_50%)]" />
                     Live
                   </span>
                 </div>
-                <div className="divide-y divide-white/[0.06]">
+                <div className="divide-y divide-border">
                   {[
                     { label: 'Voice match', value: 'On brand' },
                     { label: 'Reading level', value: 'Grade 9' },
@@ -279,13 +279,13 @@ export default function LandingPage() {
                     { label: 'Governance', value: 'PII blocked' },
                   ].map((row) => (
                     <div key={row.label} className="flex items-center justify-between px-4 py-3.5">
-                      <span className="text-sm text-white/55">{row.label}</span>
-                      <span className="text-sm font-semibold text-white/90">{row.value}</span>
+                      <span className="text-sm text-muted-foreground">{row.label}</span>
+                      <span className="text-sm font-semibold text-foreground">{row.value}</span>
                     </div>
                   ))}
                 </div>
-                <div className="border-t border-white/[0.08] bg-white/[0.02] px-4 py-3">
-                  <p className="text-xs leading-relaxed text-white/45">
+                <div className="border-t border-border bg-muted/50 px-4 py-3">
+                  <p className="text-xs leading-relaxed text-muted-foreground">
                     Every draft is checked against your brand voice, audience, and compliance rules before it ships.
                   </p>
                 </div>
