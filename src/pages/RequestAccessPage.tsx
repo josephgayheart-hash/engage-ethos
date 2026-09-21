@@ -575,7 +575,7 @@ export default function RequestAccessPage() {
                       <Button
                         type="submit"
                         className="flex-1 h-10 text-sm font-semibold rounded-xl gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
-                        disabled={isSubmitting || !agreedToPrivacy}
+                        disabled={isSubmitting}
                       >
                         {isSubmitting ? (
                           <>
@@ -592,8 +592,14 @@ export default function RequestAccessPage() {
                     </div>
 
                     <p className="text-[11px] text-center text-muted-foreground">
-                      You'll be signed in right away. Free during the beta, no card required.
+                      You'll be signed in right away. Free during the beta, no card required. By
+                      continuing you agree to our{' '}
+                      <Link to="/privacy" target="_blank" className="underline underline-offset-2 hover:text-foreground">
+                        Privacy Policy
+                      </Link>
+                      .
                     </p>
+
                   </>
                 )}
 
