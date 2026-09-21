@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import { CheckCircle2, Loader2, ArrowLeft, ArrowRight, Zap, BarChart3, Palette, MessageSquareText } from 'lucide-react';
 import campusvoiceLogo from '@/assets/campusvoice-logo.png';
 import { SEOHead } from '@/components/SEOHead';
@@ -63,7 +62,6 @@ export default function RequestAccessPage() {
     message: '',
   });
   const [mode, setMode] = useState<'signup' | 'inquiry'>('signup');
-  const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [outcome, setOutcome] = useState<'pending_review' | 'inquiry'>('pending_review');
@@ -561,19 +559,6 @@ export default function RequestAccessPage() {
                       </Select>
                     </div>
 
-                    <div className="flex items-start space-x-2">
-                      <Checkbox
-                        id="privacy-consent"
-                        checked={agreedToPrivacy}
-                        onCheckedChange={(checked) => setAgreedToPrivacy(checked === true)}
-                      />
-                      <label htmlFor="privacy-consent" className="text-xs text-muted-foreground leading-tight cursor-pointer">
-                        I agree to the{' '}
-                        <Link to="/privacy" target="_blank" className="text-accent underline underline-offset-2 hover:text-accent/80">
-                          Privacy Policy
-                        </Link>
-                      </label>
-                    </div>
 
                     <div className="flex gap-2">
                       <Button
@@ -588,7 +573,7 @@ export default function RequestAccessPage() {
                       <Button
                         type="submit"
                         className="flex-1 h-10 text-sm font-semibold rounded-xl gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
-                        disabled={isSubmitting || !agreedToPrivacy}
+                        disabled={isSubmitting}
                       >
                         {isSubmitting ? (
                           <>
@@ -605,8 +590,14 @@ export default function RequestAccessPage() {
                     </div>
 
                     <p className="text-[11px] text-center text-muted-foreground">
-                      You'll be signed in right away. Free during the beta, no card required.
+                      You'll be signed in right away. Free during the beta, no card required. By
+                      continuing you agree to our{' '}
+                      <Link to="/privacy" target="_blank" className="underline underline-offset-2 hover:text-foreground">
+                        Privacy Policy
+                      </Link>
+                      .
                     </p>
+
                   </>
                 )}
 
