@@ -1712,80 +1712,6 @@ export type Database = {
           },
         ]
       }
-      onboarding_requests: {
-        Row: {
-          agency_name: string | null
-          agency_website: string | null
-          department: string | null
-          email: string
-          estimated_client_count: number | null
-          first_name: string
-          id: string
-          institution_name_input: string | null
-          last_name: string
-          notes: string | null
-          phone: string | null
-          referral_source: string | null
-          request_status: Database["public"]["Enums"]["onboarding_status"]
-          request_type: string
-          reviewed_at: string | null
-          reviewed_by_admin_user_id: string | null
-          submitted_at: string
-          tenant_id: string | null
-          title: string | null
-        }
-        Insert: {
-          agency_name?: string | null
-          agency_website?: string | null
-          department?: string | null
-          email: string
-          estimated_client_count?: number | null
-          first_name: string
-          id?: string
-          institution_name_input?: string | null
-          last_name: string
-          notes?: string | null
-          phone?: string | null
-          referral_source?: string | null
-          request_status?: Database["public"]["Enums"]["onboarding_status"]
-          request_type?: string
-          reviewed_at?: string | null
-          reviewed_by_admin_user_id?: string | null
-          submitted_at?: string
-          tenant_id?: string | null
-          title?: string | null
-        }
-        Update: {
-          agency_name?: string | null
-          agency_website?: string | null
-          department?: string | null
-          email?: string
-          estimated_client_count?: number | null
-          first_name?: string
-          id?: string
-          institution_name_input?: string | null
-          last_name?: string
-          notes?: string | null
-          phone?: string | null
-          referral_source?: string | null
-          request_status?: Database["public"]["Enums"]["onboarding_status"]
-          request_type?: string
-          reviewed_at?: string | null
-          reviewed_by_admin_user_id?: string | null
-          submitted_at?: string
-          tenant_id?: string | null
-          title?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "onboarding_requests_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       outreach_history: {
         Row: {
           body: string
@@ -3105,6 +3031,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      capture_site_lead: {
+        Args: {
+          p_email: string
+          p_institution?: string
+          p_message?: string
+          p_name?: string
+          p_source?: string
+        }
+        Returns: undefined
+      }
       check_rate_limit: {
         Args: {
           p_endpoint: string
