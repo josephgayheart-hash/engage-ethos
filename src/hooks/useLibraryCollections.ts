@@ -122,7 +122,7 @@ export function useLibraryCollections() {
 
     const { error } = await supabase
       .from('library_collections')
-      .update(payload)
+      .update(payload as never)
       .eq('id', id);
 
     if (error) {

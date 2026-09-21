@@ -192,7 +192,7 @@ export function useInstitutionalProfiles() {
         config: data.config as InstitutionalConfig,
         createdAt: data.created_at,
         updatedAt: data.updated_at,
-        createdByUserId: data.created_by_user_id,
+        createdByUserId: data.created_by_user_id ?? undefined,
         parentProfileId: data.parent_profile_id,
         profileType: (data.profile_type || 'university') as ProfileType,
       };
@@ -290,7 +290,7 @@ export function useInstitutionalProfiles() {
         config: data.config as InstitutionalConfig,
         createdAt: data.created_at,
         updatedAt: data.updated_at,
-        createdByUserId: data.created_by_user_id,
+        createdByUserId: data.created_by_user_id ?? undefined,
         parentProfileId: data.parent_profile_id,
         profileType: (data.profile_type || 'university') as ProfileType,
       };

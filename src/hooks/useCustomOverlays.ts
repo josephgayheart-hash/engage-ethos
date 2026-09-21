@@ -121,7 +121,7 @@ export function useCustomOverlays(profileId?: string | null) {
         fileName: data.file_name,
         fileType: data.file_type,
         isActive: data.is_active,
-        sortOrder: data.sort_order,
+        sortOrder: data.sort_order ?? 0,
         source: data.source as 'self_service' | 'concierge',
         profileId: data.profile_id,
         createdAt: data.created_at,

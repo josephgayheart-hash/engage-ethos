@@ -188,6 +188,7 @@ export function PostHogAnalyticsPanel() {
       const t = setInterval(() => load("overview"), 30_000);
       return () => clearInterval(t);
     }
+    return undefined;
     // eslint-disable-next-line
   }, [tab]);
 

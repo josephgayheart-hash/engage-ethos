@@ -211,7 +211,7 @@ export function useMessageLibrary() {
 
     const { error } = await supabase
       .from('personal_messages')
-      .update(updatePayload)
+      .update(updatePayload as never)
       .eq('id', id);
 
     if (error) {

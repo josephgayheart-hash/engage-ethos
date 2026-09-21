@@ -36,7 +36,7 @@ export function useBrandAudit(profileId?: string | null) {
 
       if (error) throw error;
 
-      const transformedData: BrandAuditTouchpoint[] = (data || []).map(tp => ({
+      const transformedData: BrandAuditTouchpoint[] = ((data || []) as any[]).map(tp => ({
         ...tp,
         touchpoint_type: tp.touchpoint_type as TouchpointType,
         terminology_issues: (tp.terminology_issues as unknown as TerminologyIssue[]) || [],
@@ -144,7 +144,7 @@ export function useBrandAudit(profileId?: string | null) {
 
       const { error } = await supabase
         .from('brand_audit_touchpoints')
-        .update(dbUpdates)
+        .update(dbUpdates as never)
         .eq('id', touchpointId);
 
       if (error) throw error;

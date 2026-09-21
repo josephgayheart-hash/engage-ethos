@@ -45,7 +45,7 @@ export function usePlaybookKits(institutionType?: string) {
         }
 
         // Transform data to proper types
-        const transformedKits: PlaybookKit[] = filteredData.map(kit => ({
+        const transformedKits: PlaybookKit[] = (filteredData as any[]).map(kit => ({
           ...kit,
           journey_template: (kit.journey_template as unknown as JourneyTemplate) || { phases: [] },
           message_templates: (kit.message_templates as unknown as MessageTemplate[]) || [],

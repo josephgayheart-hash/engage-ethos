@@ -618,9 +618,9 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
     try {
       const { data, error } = await supabase.rpc('search_content_samples', {
         p_tenant_id: workspaceId,
-        p_profile_id: profileId || null,
-        p_search_query: query || null,
-        p_themes: themes || null,
+        p_profile_id: profileId || undefined,
+        p_search_query: query || undefined,
+        p_themes: themes || undefined,
         p_limit: limit,
       });
 
@@ -729,7 +729,7 @@ export function useContentDNA(options: UseContentDNAOptions = {}) {
         .from('content_dna_samples')
         .update(updates)
         .eq('id', sampleId)
-        .eq('tenant_id', tenant.id);
+        .eq('tenant_id', workspaceId);
 
       if (error) throw error;
 
