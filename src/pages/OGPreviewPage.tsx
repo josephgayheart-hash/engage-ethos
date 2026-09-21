@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { toPng } from 'html-to-image';
+// html-to-image is browser-only: loaded on demand so server rendering never evaluates it
+const loadToPng = async () => (await import('html-to-image')).toPng;
 import { Button } from '@/components/ui/button';
 import { OGImagePreview } from '@/components/OGImagePreview';
 import { Download, Check, Loader2 } from 'lucide-react';
@@ -19,7 +20,7 @@ export default function OGPreviewPage() {
 
     setIsExporting(true);
     try {
-      const dataUrl = await toPng(element, {
+      const dataUrl = await (await loadToPng())(element, {
         width: 1200,
         height: 630,
         pixelRatio: 1,

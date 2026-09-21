@@ -3,17 +3,18 @@
  * Designed to handle large PDFs without sending the full file to backend functions.
  */
 
-import * as PDFJS from "pdfjs-dist";
-// Vite will turn this into a URL at build time
-import workerSrc from "pdfjs-dist/legacy/build/pdf.worker.min?url";
-
+// pdfjs-dist is browser-only: loaded on demand so server rendering never evaluates it
 let workerConfigured = false;
 
-function ensurePdfWorkerConfigured() {
-  if (workerConfigured) return;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (PDFJS as any).GlobalWorkerOptions.workerSrc = workerSrc;
-  workerConfigured = true;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function loadPdfJs(): Promise<any> {
+  const PDFJS: any = await import("pdfjs-dist");
+  if (!workerConfigured) {
+    const workerSrc = (await import("pdfjs-dist/legacy/build/pdf.worker.min?url")).default;
+    PDFJS.GlobalWorkerOptions.workerSrc = workerSrc;
+    workerConfigured = true;
+  }
+  return PDFJS;
 }
 
 export async function extractTextFromPdfWithPdfJs(file: File): Promise<{
@@ -22,12 +23,12 @@ export async function extractTextFromPdfWithPdfJs(file: File): Promise<{
   message?: string;
 }> {
   try {
-    ensurePdfWorkerConfigured();
+    const PDFJS = await loadPdfJs();
 
     const arrayBuffer = await file.arrayBuffer();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const loadingTask = (PDFJS as any).getDocument({ data: arrayBuffer });
+    const loadingTask = PDFJS.getDocument({ data: arrayBuffer });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const pdf = await (loadingTask as any).promise;
