@@ -15,7 +15,10 @@ const footerColumns = [
     title: 'Company',
     links: [
       { label: 'About', to: '/about' },
-      { label: 'For Universities', to: '/' },
+      {
+        label: 'Marketing Strategies Guide',
+        to: '/higher-education-marketing-strategies',
+      },
       { label: 'For Enterprise', to: '/for-enterprise' },
       { label: 'For Agencies', to: '/for-agencies' },
       { label: 'Create Account', to: '/login?signup=1' },

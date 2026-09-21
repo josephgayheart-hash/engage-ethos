@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { OGImagePreview } from '@/components/OGImagePreview';
 import { Download, Check, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { SEOHead } from '@/components/SEOHead';
 
 export default function OGPreviewPage() {
   const [isExporting, setIsExporting] = useState(false);
@@ -46,6 +47,7 @@ export default function OGPreviewPage() {
 
   return (
     <div className="min-h-screen bg-background p-8">
+      <SEOHead title="OG Image Preview" noIndex />
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">
