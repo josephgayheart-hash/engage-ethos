@@ -175,13 +175,16 @@ export function useUserDashboardContext(): UserDashboardContext {
     if (!workspaceId || !isAdmin) return;
 
     try {
-      // Get users in tenant
-      const { data: tenantUsers, count: totalUsers } = await supabase
+      // Get users in tenant (internal/super-admin accounts excluded from metrics)
+      const { data: allTenantUsers } = await supabase
         .from('profiles')
-        .select('id, last_login_at', { count: 'exact' })
+        .select('id, last_login_at')
         .eq('tenant_id', workspaceId);
 
-      if (!tenantUsers) return;
+      if (!allTenantUsers) return;
+
+      const tenantUsers = allTenantUsers.filter(u => !isExcludedUser(u.id));
+      const totalUsers = tenantUsers.length;
 
       // Calculate active users (last 30 days)
       const thirtyDaysAgo = new Date();
