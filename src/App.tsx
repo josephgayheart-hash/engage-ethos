@@ -102,6 +102,7 @@ import RegionalPlaybookPage from "./pages/RegionalPlaybookPage";
 import SocialPostsPage from "./pages/SocialPostsPage";
 import CopywriterPopoutPage from "./pages/CopywriterPopoutPage";
 import SalesforceCanvasGuidePage from "./pages/docs/SalesforceCanvasGuidePage";
+import HigherEdMarketingStrategiesPage from "./pages/guides/HigherEdMarketingStrategiesPage";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
 import { IndustryProvider } from "@/contexts/IndustryContext";
 import { BrandModeProvider } from "@/contexts/BrandModeContext";
@@ -205,6 +206,7 @@ const AppRoutes = () => (
     <Route path="/about" element={<AboutPage />} />
     <Route path="/try-copywriter" element={<TryCopywriterPage />} />
     <Route path="/docs/salesforce-canvas" element={<SalesforceCanvasGuidePage />} />
+    <Route path="/higher-education-marketing-strategies" element={<HigherEdMarketingStrategiesPage />} />
     <Route path="/integrations/salesforce-canvas" element={<Navigate to="/docs/salesforce-canvas" replace />} />
 
     {/* Compass — full-bleed, no app sidebar. Available to super admins and tool-only users. */}
