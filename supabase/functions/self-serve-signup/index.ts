@@ -74,40 +74,19 @@ Deno.serve(async (req) => {
     const domain = email.split('@')[1] ?? '';
     const isWorkEmail = domain.length > 0 && !FREE_EMAIL_DOMAINS.has(domain);
 
-    // Always record the inbound request (this also pushes it into the CRM via trigger).
-    const { error: requestError } = await admin.from('onboarding_requests').insert({
-      first_name: body.firstName,
-      last_name: body.lastName,
-      email,
-      phone: body.phone || null,
-      institution_name_input: body.institutionName,
-      department: body.department || null,
-      title: body.title || null,
-      referral_source: body.referralSource || null,
-      request_status: isWorkEmail ? 'approved' : 'submitted',
-      request_type: 'university',
-    });
-    if (requestError) console.error('onboarding_requests insert failed:', requestError.message);
-
-    if (!isWorkEmail) {
-      await notifyAdmins(admin, 'New access request (manual review needed)', [
-        `<strong>${body.firstName} ${body.lastName}</strong> — ${email}`,
-        `${body.institutionName}${body.title ? ` · ${body.title}` : ''}`,
-        'Personal email address, so no account was created automatically.',
-      ]);
-      return json({ status: 'pending_review' });
-    }
-
     // Find an existing workspace for this email domain, otherwise create one.
+    // Only work-email domains can auto-join an existing workspace.
     let tenantId: string | null = null;
     let joinedExisting = false;
 
-    const { data: domainMatch } = await admin
-      .from('profiles')
-      .select('tenant_id')
-      .ilike('email', `%@${domain}`)
-      .limit(1)
-      .maybeSingle();
+    const { data: domainMatch } = isWorkEmail
+      ? await admin
+          .from('profiles')
+          .select('tenant_id')
+          .ilike('email', `%@${domain}`)
+          .limit(1)
+          .maybeSingle()
+      : { data: null };
 
     if (domainMatch?.tenant_id) {
       tenantId = domainMatch.tenant_id as string;
