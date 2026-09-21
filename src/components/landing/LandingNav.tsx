@@ -18,15 +18,6 @@ export function LandingNav() {
 
         <div className="flex items-center gap-1 sm:gap-3">
           <FeaturesDropdown />
-          <Link to="/" className="hidden sm:block">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white/70 hover:text-white hover:bg-white/10"
-            >
-              For Universities
-            </Button>
-          </Link>
           <Link to="/for-enterprise" className="hidden sm:block">
             <Button
               variant="ghost"
