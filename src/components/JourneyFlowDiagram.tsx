@@ -528,12 +528,13 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate, brand
   }, [journey]);
 
   // Export as clean SVG for Lucidchart import
-  const exportToLucidchartSVG = useCallback(() => {
+  const exportToLucidchartSVG = useCallback(async () => {
     const flowElement = flowRef.current?.querySelector('.react-flow') as HTMLElement;
     if (!flowElement) return;
 
     const timestamp = new Date().toISOString().split('T')[0];
-    
+
+    const { toSvg } = await loadImageExporters();
     toSvg(flowElement, {
       backgroundColor: '#ffffff',
       quality: 1,
