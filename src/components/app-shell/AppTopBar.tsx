@@ -5,7 +5,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAgencyMode } from "@/hooks/useAgencyMode";
 import { useIndustry } from "@/contexts/IndustryContext";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
-import { BetaBanner } from "@/components/BetaBanner";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -116,7 +115,6 @@ export function AppTopBar() {
           </kbd>
         </Button>
 
-        <BetaBanner variant="badge" />
       </header>
 
       {/* Command Palette */}

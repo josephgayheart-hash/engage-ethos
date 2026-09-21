@@ -13,7 +13,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { BetaBanner } from "@/components/BetaBanner";
 import { ReferColleagueDialog } from "@/components/ReferColleagueDialog";
 import campusvoiceLogo from "@/assets/campusvoice-logo-new.png";
 import { cn } from "@/lib/utils";
@@ -59,7 +58,6 @@ export function Header() {
         <div className="flex items-center gap-4">
           <Link to="/dashboard" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
             <img src={campusvoiceLogo} alt="CampusVoice.AI" className="h-8 sm:h-10 w-auto max-w-[180px] sm:max-w-[220px] object-contain" />
-            <BetaBanner variant="badge" />
           </Link>
         {tenant && (
             <>
