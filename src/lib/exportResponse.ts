@@ -209,7 +209,7 @@ async function exportPptx(content: string, baseName: string) {
 }
 
 // ---------- PDF ----------
-function exportPdf(content: string, baseName: string) {
+async function exportPdf(content: string, baseName: string) {
   const tokens = marked.lexer(content);
   const doc = new (await loadJsPDF())({ unit: "pt", format: "letter" });
   const pageW = doc.internal.pageSize.getWidth();
@@ -285,5 +285,5 @@ export async function exportResponse(format: Format, content: string, titleHint?
   if (format === "md") return exportMarkdown(content, base);
   if (format === "docx") return exportDocx(content, base);
   if (format === "pptx") return exportPptx(content, base);
-  if (format === "pdf") return exportPdf(content, base);
+  if (format === "pdf") return await exportPdf(content, base);
 }
