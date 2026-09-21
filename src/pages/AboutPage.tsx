@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router-compat';
 import { ArrowLeft, GraduationCap, BookOpen, Brain, BarChart3, Linkedin, ExternalLink, Heart, Target, Shield, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SEOHead } from '@/components/SEOHead';

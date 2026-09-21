@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { TenantHealthScore } from '@/hooks/useAdminAnalytics';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router-compat';
 
 interface AlertsInsightsCardProps {
   atRiskTenants: TenantHealthScore[];

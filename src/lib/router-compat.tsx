@@ -1,5 +1,5 @@
 /**
- * Router-compat shim — bridges react-router-dom v6 call sites to
+ * Router-compat shim — bridges @/lib/router-compat v6 call sites to
  * @tanstack/react-router without hand-rewriting every component.
  * This is the same load-bearing pattern used in Klar's dev-copy migration.
  */
@@ -83,7 +83,7 @@ export function useParams<
   return tsParams({ strict: false } as never) as T;
 }
 
-// ---------- useSearchParams (react-router-dom compat) ----------
+// ---------- useSearchParams (@/lib/router-compat compat) ----------
 
 export function useSearchParams(): [
   URLSearchParams,

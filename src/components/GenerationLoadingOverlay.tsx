@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, forwardRef } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import {
   Loader2, Building2, Dna, Users, Target, BookMarked, Mail, Sparkles, Map,
   Check, Shield, Palette, MessageSquare, FileText, Brain, Zap, BarChart3,

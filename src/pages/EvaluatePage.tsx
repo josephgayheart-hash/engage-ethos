@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { format } from "date-fns";
 import { ContextSelector } from "@/components/ContextSelector";
 import { type AIModel } from "@/components/playground/ModelSelector";

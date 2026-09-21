@@ -1,6 +1,6 @@
 // Strategy Page - Journey Designer with PDF Export
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import { format, differenceInWeeks, addWeeks } from "date-fns";
 import { jsPDF } from "jspdf";

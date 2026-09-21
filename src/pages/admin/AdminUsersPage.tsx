@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from '@/lib/router-compat';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth, UserProfile, UserStatus } from '@/contexts/AuthContext';
 import { useIndustry } from '@/contexts/IndustryContext';

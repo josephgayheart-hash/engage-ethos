@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "@/lib/router-compat";
 import { Library, FolderOpen, Settings, Home, LogOut, User, CheckCircle, UserPlus, Building2, PenTool, Route, ChevronDown, Sparkles, FileEdit, Briefcase, BarChart3, Users, Layers, Wrench } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAgencyMode } from "@/hooks/useAgencyMode";

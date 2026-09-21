@@ -8,13 +8,13 @@ import {
   PenTool, FileText, MessageCircle, Globe, Dna, Building2,
   Users, Target, Radio, Clock, Palette, Image, Paintbrush,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { cn } from "@/lib/utils";
 import { useContentDNA } from "@/hooks/useContentDNA";
 import { useUserDrafts } from "@/hooks/useUserDrafts";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import ReactMarkdown from "react-markdown";
 
 const STORAGE_KEY = "campusvoice_scratchpad_draft";
