@@ -35,7 +35,7 @@ async function captureElement(el: HTMLElement): Promise<HTMLCanvasElement> {
   });
 }
 
-export function downloadCanvas(canvas: HTMLCanvasElement, filename: string, format: DownloadFormat) {
+export async function downloadCanvas(canvas: HTMLCanvasElement, filename: string, format: DownloadFormat) {
   if (format === "pdf") {
     const imgData = canvas.toDataURL("image/png");
     const w = canvas.width;
