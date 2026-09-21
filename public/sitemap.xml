@@ -46,9 +46,9 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.campusvoice.ai/features/evaluate</loc>
+    <loc>https://www.campusvoice.ai/features</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.campusvoice.ai/features/library</loc>
@@ -56,27 +56,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.campusvoice.ai/features/image-studio</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.campusvoice.ai/features/brand-studio</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://www.campusvoice.ai/features/ai-copywriter</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.campusvoice.ai/features/brand-audit</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.campusvoice.ai/features/webcrawl</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
