@@ -37,7 +37,7 @@ function usePlatformMetrics() {
         tenantsCount, tenantsList,
         profilesCount, profilesRecent, profilesActive7, profilesActive30,
         eventsRecent, eventsTotal24h,
-        onboardingPending, betaNew,
+        inboundLeads, betaNew,
         recentLogins, securityEvents24h,
       ] = await Promise.all([
         supabase.from("tenants").select("id", { count: "exact", head: true }),
@@ -57,8 +57,8 @@ function usePlatformMetrics() {
         supabase.from("tool_usage_events").select("id", { count: "exact", head: true })
           .gte("created_at", since1).neq("tool_name", "page_view")
           .not("user_id", "in", EXCLUDED),
-        supabase.from("onboarding_requests").select("id, first_name, last_name, email, institution_name_input, submitted_at, request_type", { count: "exact" })
-          .eq("request_status", "submitted").order("submitted_at", { ascending: false }).limit(5),
+        supabase.from("sales_prospects").select("id, university_name, contact_name, contact_email, discovered_at, notes", { count: "exact" })
+          .eq("status", "inbound").order("discovered_at", { ascending: false }).limit(5),
         supabase.from("beta_feedback").select("id, feature_area, rating, feedback_text, created_at, status", { count: "exact" })
           .eq("status", "new").order("created_at", { ascending: false }).limit(5),
         supabase.from("profiles").select("id, first_name, last_name, email, last_login_at, tenant_id")
@@ -77,7 +77,7 @@ function usePlatformMetrics() {
           active30: profilesActive30.count ?? 0,
         },
         events: { recent: eventsRecent.data ?? [], last24h: eventsTotal24h.count ?? 0 },
-        onboardingPending: { rows: onboardingPending.data ?? [], count: onboardingPending.count ?? 0 },
+        inboundLeads: { rows: inboundLeads.data ?? [], count: inboundLeads.count ?? 0 },
         betaNew: { rows: betaNew.data ?? [], count: betaNew.count ?? 0 },
         recentLogins: recentLogins.data ?? [],
         securityCount24h: securityEvents24h.count ?? 0,
@@ -175,7 +175,7 @@ function buildTenantActivity(
 
 const QUICK_LINKS = [
   { label: "Users", icon: Users, href: "/admin/users" },
-  { label: "Onboarding Requests", icon: Inbox, href: "/admin/onboarding" },
+  { label: "CRM & Leads", icon: Inbox, href: "/admin/crm" },
   { label: "Beta Feedback", icon: MessageSquare, href: "/feedback" },
   { label: "Security Events", icon: Shield, href: "/admin/security-events" },
   { label: "NDA Links", icon: FileSignature, href: "/admin/nda-links" },
@@ -264,7 +264,7 @@ export default function PlatformOpsPage() {
               <StatCard icon={TrendingUp} label="Active 30d" value={data.users.active30} sublabel="logged in" />
               <StatCard icon={Activity} label="Tool Runs 24h" value={data.events.last24h} sublabel="excl. internal" />
               <StatCard icon={Inbox} label="New Signups 7d" value={data.users.new30d.filter(u => Date.now() - new Date(u.created_at).getTime() < 7*86400000).length} sublabel="last 7 days" />
-              <StatCard icon={Mail} label="Pending Access" value={data.onboardingPending.count} sublabel="onboarding requests" accent="accent" />
+              <StatCard icon={Mail} label="Inbound Leads" value={data.inboundLeads.count} sublabel="form fills to follow up" accent="accent" />
               <StatCard icon={AlertTriangle} label="Security Events 24h" value={data.securityCount24h} sublabel="warn / error" />
             </>
           )}
@@ -383,21 +383,21 @@ export default function PlatformOpsPage() {
           </Card>
         </div>
 
-        {/* Access requests + Beta feedback + Recent logins */}
+        {/* Inbound leads + Beta feedback + Recent logins */}
         <div className="grid lg:grid-cols-3 gap-6 mb-6">
           <Card>
             <CardHeader className="pb-2 flex-row justify-between items-center">
-              <CardTitle className="text-base flex items-center gap-2"><Inbox className="w-4 h-4" /> Pending Access</CardTitle>
-              <Button variant="ghost" size="sm" asChild className="h-7 text-xs"><Link to="/admin/onboarding">All <ExternalLink className="w-3 h-3 ml-1" /></Link></Button>
+              <CardTitle className="text-base flex items-center gap-2"><Inbox className="w-4 h-4" /> Inbound Leads</CardTitle>
+              <Button variant="ghost" size="sm" asChild className="h-7 text-xs"><Link to="/admin/crm">All <ExternalLink className="w-3 h-3 ml-1" /></Link></Button>
             </CardHeader>
             <CardContent className="space-y-2">
-              {isLoading ? <Skeleton className="h-32" /> : data?.onboardingPending.rows.length === 0 ? (
-                <p className="text-xs text-muted-foreground">No pending requests.</p>
-              ) : data?.onboardingPending.rows.map((r) => (
+              {isLoading ? <Skeleton className="h-32" /> : data?.inboundLeads.rows.length === 0 ? (
+                <p className="text-xs text-muted-foreground">No inbound leads yet.</p>
+              ) : data?.inboundLeads.rows.map((r) => (
                 <div key={r.id} className="text-sm border-b last:border-0 pb-2 last:pb-0">
-                  <p className="font-medium truncate">{r.first_name} {r.last_name}</p>
-                  <p className="text-xs text-muted-foreground truncate">{r.institution_name_input || r.email}</p>
-                  <p className="text-[10px] text-muted-foreground">{format(new Date(r.submitted_at), "MMM d, h:mma")} · {r.request_type}</p>
+                  <p className="font-medium truncate">{r.contact_name || r.contact_email}</p>
+                  <p className="text-xs text-muted-foreground truncate">{r.university_name || r.contact_email}</p>
+                  <p className="text-[10px] text-muted-foreground">{r.discovered_at ? format(new Date(r.discovered_at), "MMM d, h:mma") : ""}</p>
                 </div>
               ))}
             </CardContent>
