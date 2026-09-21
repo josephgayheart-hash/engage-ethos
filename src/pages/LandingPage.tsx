@@ -532,16 +532,16 @@ export default function LandingPage() {
 
 
       {/* Secondary CTA Section - Vibrant Purple */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-[hsl(60_4%_10%)]">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-[hsl(51_22%_93%)] border-y border-border">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-8 right-[12%] w-72 h-72 bg-[hsl(216_100%_50%_/_0.14)] rounded-full blur-[100px]" />
+          <div className="absolute top-8 right-[12%] w-72 h-72 bg-[hsl(216_100%_50%_/_0.08)] rounded-full blur-[100px]" />
         </div>
         
         <div className="max-w-3xl mx-auto text-center relative z-10">
-          <h2 className="font-display tracking-[-0.02em] text-2xl sm:text-3xl text-white mb-4">
-            Ready to become your institution's <span className="text-[hsl(216_100%_66%)]">digital brand enforcer</span>?
+          <h2 className="font-display tracking-[-0.02em] text-2xl sm:text-3xl text-foreground mb-4">
+            Ready to become your institution's <span className="text-[hsl(216_100%_45%)]">digital brand enforcer</span>?
           </h2>
-          <p className="text-white/80 mb-8 text-lg">
+          <p className="text-muted-foreground mb-8 text-lg">
             Small teams. Big brand protection. AI that keeps everyone on-brand.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -558,7 +558,7 @@ export default function LandingPage() {
               asChild
               variant="ghost"
               size="lg"
-              className="h-12 px-8 text-white hover:text-white hover:bg-white/10 rounded-lg border border-white/20"
+              className="h-12 px-8 text-foreground hover:text-foreground hover:bg-muted rounded-lg border border-border bg-card"
             >
               <Link to="/try-copywriter">
                 Try It Free
