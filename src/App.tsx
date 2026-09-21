@@ -39,12 +39,10 @@ import UniversitySettingsPage from "./pages/UniversitySettingsPage";
 import NotFound from "./pages/NotFound";
 import LoginPage from "./pages/LoginPage";
 import OAuthConsentPage from "./pages/OAuthConsentPage";
-import RequestAccessPage from "./pages/RequestAccessPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
 import ProfilePage from "./pages/ProfilePage";
 import AdminConsolePage from "./pages/admin/AdminConsolePage";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
-import AdminOnboardingPage from "./pages/admin/AdminOnboardingPage";
 import QADiagnosticsPage from "./pages/admin/QADiagnosticsPage";
 import SeedDataPage from "./pages/admin/SeedDataPage";
 import InstitutionDetailPage from "./pages/admin/InstitutionDetailPage";
@@ -78,7 +76,6 @@ import OGPreviewPage from "./pages/OGPreviewPage";
 import WebContentAnalyzerPage from "./pages/WebContentAnalyzerPage";
 import BrandAuditPage from "./pages/BrandAuditPage";
 import ForAgenciesPage from "./pages/agency/ForAgenciesPage";
-import AgencyRequestAccessPage from "./pages/agency/AgencyRequestAccessPage";
 import AgencyOnboardingPage from "./pages/agency/AgencyOnboardingPage";
 import AgencyDashboardPage from "./pages/agency/AgencyDashboardPage";
 import AgencyClientsPage from "./pages/agency/AgencyClientsPage";
@@ -185,13 +182,13 @@ const AppRoutes = () => (
     <Route path="/og-preview" element={<OGPreviewPage />} />
     <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
     <Route path="/.lovable/oauth/consent" element={<OAuthConsentPage />} />
-    <Route path="/login?signup=1" element={<RequestAccessPage />} />
+    <Route path="/request-access" element={<Navigate to="/login?signup=1" replace />} />
     <Route path="/change-password" element={<ChangePasswordPage />} />
     <Route path="/setup" element={<InitialSetupPage />} />
     <Route path="/for-agencies" element={<ForAgenciesPage />} />
     <Route path="/for-enterprise" element={<ForEnterprisePage />} />
     <Route path="/enterprise" element={<Navigate to="/for-enterprise" replace />} />
-    <Route path="/login?signup=1" element={<AgencyRequestAccessPage />} />
+    <Route path="/agency/request-access" element={<Navigate to="/login?signup=1" replace />} />
     <Route path="/features/content-dna" element={<ContentDNAFeaturePage />} />
     <Route path="/features/message-builder" element={<MessageBuilderFeaturePage />} />
     <Route path="/features/journey-designer" element={<JourneyDesignerFeaturePage />} />
@@ -303,7 +300,6 @@ const AppRoutes = () => (
       <Route element={<RequireSuperAdmin><Outlet /></RequireSuperAdmin>}>
         <Route path="/platform" element={<PlatformOpsPage />} />
         <Route path="/admin/panel" element={<AdminPanel />} />
-        <Route path="/admin/onboarding" element={<AdminOnboardingPage />} />
         <Route path="/admin/qa" element={<QADiagnosticsPage />} />
         <Route path="/admin/seed" element={<SeedDataPage />} />
         <Route path="/admin/security-events" element={<SecurityEventsPage />} />
