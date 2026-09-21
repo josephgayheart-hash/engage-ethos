@@ -19,7 +19,7 @@ import {
   Palette,
   Bot,
   PenTool,
-  BarChart
+  BarChart,
   Layers,
 } from 'lucide-react';
 import campusvoiceLogo from '@/assets/campusvoice-logo-new.png';
