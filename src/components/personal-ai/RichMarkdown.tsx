@@ -50,12 +50,15 @@ function injectHex(node: React.ReactNode): React.ReactNode {
 }
 
 const Wrap =
-  (Tag: keyof JSX.IntrinsicElements, className?: string) =>
-  ({ node, children, ...props }: any) => (
-    <Tag {...props} className={cn(className, props.className)}>
-      {injectHex(children)}
-    </Tag>
-  );
+  (tag: keyof React.JSX.IntrinsicElements, className?: string) =>
+  ({ node, children, ...props }: any) => {
+    const Tag = tag as any;
+    return (
+      <Tag {...props} className={cn(className, props.className)}>
+        {injectHex(children)}
+      </Tag>
+    );
+  };
 
 interface Props {
   children: string;

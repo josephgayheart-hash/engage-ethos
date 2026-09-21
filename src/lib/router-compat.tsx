@@ -128,10 +128,15 @@ export function useSearchParams(): [
 
 // ---------- Link ----------
 
-type LinkProps = Omit<ComponentProps<typeof TSLink>, "to"> & {
+export type LinkProps = Omit<
+  ComponentProps<typeof TSLink>,
+  "to" | "state" | "search" | "hash" | "replace" | "className" | "style"
+> & {
   to: string;
   replace?: boolean;
   state?: unknown;
+  className?: string;
+  style?: React.CSSProperties;
   children?: ReactNode;
 };
 
@@ -182,6 +187,34 @@ export function Navigate({
 
 export const Outlet = TSOutlet;
 
-// ---------- NavLink (minimal) ----------
+// ---------- NavLink ----------
 
-export const NavLink = Link;
+type NavLinkRenderState = { isActive: boolean; isPending: boolean };
+
+export type NavLinkProps = Omit<LinkProps, "className" | "style"> & {
+  className?: string | ((state: NavLinkRenderState) => string);
+  style?: React.CSSProperties | ((state: NavLinkRenderState) => React.CSSProperties);
+  end?: boolean;
+};
+
+export const NavLink = forwardRef<HTMLAnchorElement, NavLinkProps>(function NavLink(
+  { className, style, end, to, ...rest },
+  ref,
+) {
+  const loc = tsLocation();
+  const { pathname } = parseTo(to);
+  const isActive = end
+    ? loc.pathname === pathname
+    : loc.pathname === pathname || loc.pathname.startsWith(`${pathname}/`);
+  const state: NavLinkRenderState = { isActive, isPending: false };
+  return (
+    <Link
+      ref={ref}
+      to={to}
+      className={typeof className === "function" ? className(state) : className}
+      style={typeof style === "function" ? style(state) : style}
+      data-status={isActive ? "active" : undefined}
+      {...(rest as Record<string, unknown>)}
+    />
+  );
+});
