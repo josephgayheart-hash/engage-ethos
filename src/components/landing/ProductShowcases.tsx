@@ -87,7 +87,7 @@ export function MessageBuilderShowcase() {
     <div ref={ref} className={`transition-all duration-1000 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
       <div className="grid lg:grid-cols-2 gap-12 items-center">
         <div>
-          <div className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full mb-4" style={{ background: 'hsl(173 58% 39% / 0.15)', color: 'hsl(173 58% 39%)' }}>
+          <div className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full mb-4" style={{ background: 'hsl(216 100% 50% / 0.15)', color: 'hsl(216 100% 50%)' }}>
             <PenTool className="w-3.5 h-3.5" /> Message Builder
           </div>
           <h3 className="text-2xl md:text-3xl font-serif font-bold text-foreground tracking-tight mb-4">
@@ -103,12 +103,12 @@ export function MessageBuilderShowcase() {
               { icon: Sparkles, text: 'AI generates multi-channel drafts in seconds' },
             ].map((f, i) => (
               <div key={i} className="flex items-center gap-3 text-sm text-muted-foreground">
-                <f.icon className="w-4 h-4 flex-shrink-0" style={{ color: 'hsl(173 58% 39%)' }} />
+                <f.icon className="w-4 h-4 flex-shrink-0" style={{ color: 'hsl(216 100% 50%)' }} />
                 <span>{f.text}</span>
               </div>
             ))}
           </div>
-          <Link to="/login?signup=1" className="inline-flex items-center gap-1.5 text-sm font-semibold mt-6 transition-colors" style={{ color: 'hsl(173 58% 39%)' }}>
+          <Link to="/login?signup=1" className="inline-flex items-center gap-1.5 text-sm font-semibold mt-6 transition-colors" style={{ color: 'hsl(216 100% 50%)' }}>
             Try the Message Builder <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -125,9 +125,9 @@ export function MessageBuilderShowcase() {
                     }`}
                     style={
                       step > i + 1
-                        ? { background: 'hsl(173 58% 39%)' }
+                        ? { background: 'hsl(216 100% 50%)' }
                         : step === i + 1
-                        ? { background: 'hsl(173 58% 39% / 0.7)' }
+                        ? { background: 'hsl(216 100% 50% / 0.7)' }
                         : {}
                     }
                   >
@@ -148,10 +148,10 @@ export function MessageBuilderShowcase() {
                     key={a}
                     className={`text-[10px] font-medium px-2.5 py-1 rounded-full border transition-all duration-300 ${
                       step >= 1 && i === 1
-                        ? 'border-[hsl(173_58%_39%)] text-[hsl(173_58%_39%)]'
+                        ? 'border-[hsl(216_100%_50%)] text-[hsl(216_100%_50%)]'
                         : 'border-border/60 text-muted-foreground'
                     }`}
-                    style={step >= 1 && i === 1 ? { background: 'hsl(173 58% 39% / 0.1)' } : {}}
+                    style={step >= 1 && i === 1 ? { background: 'hsl(216 100% 50% / 0.1)' } : {}}
                   >
                     {a}
                   </span>
@@ -168,10 +168,10 @@ export function MessageBuilderShowcase() {
                     key={ch.label}
                     className={`flex items-center gap-1.5 text-[10px] font-medium px-2.5 py-1.5 rounded-lg border transition-all duration-300 ${
                       step >= 2 && (i === 0 || i === 1)
-                        ? 'border-[hsl(173_58%_39%)] text-[hsl(173_58%_39%)]'
+                        ? 'border-[hsl(216_100%_50%)] text-[hsl(216_100%_50%)]'
                         : 'border-border/60 text-muted-foreground'
                     }`}
-                    style={step >= 2 && (i === 0 || i === 1) ? { background: 'hsl(173 58% 39% / 0.1)' } : {}}
+                    style={step >= 2 && (i === 0 || i === 1) ? { background: 'hsl(216 100% 50% / 0.1)' } : {}}
                   >
                     <ch.icon className="w-3 h-3" />
                     {ch.label}
@@ -196,17 +196,17 @@ export function MessageBuilderShowcase() {
 
             {/* Generation result */}
             {step >= 4 && (
-              <div className="rounded-xl border border-border/60 p-3 transition-all duration-500" style={{ opacity: step >= 4 ? 1 : 0, background: 'hsl(173 58% 39% / 0.03)' }}>
+              <div className="rounded-xl border border-border/60 p-3 transition-all duration-500" style={{ opacity: step >= 4 ? 1 : 0, background: 'hsl(216 100% 50% / 0.03)' }}>
                 {step === 4 ? (
                   <div className="flex items-center justify-center gap-2 py-6">
-                    <div className="w-5 h-5 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: 'hsl(173 58% 39%)', borderTopColor: 'transparent' }} />
+                    <div className="w-5 h-5 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: 'hsl(216 100% 50%)', borderTopColor: 'transparent' }} />
                     <span className="text-xs text-muted-foreground">Generating with Content DNA…</span>
                   </div>
                 ) : (
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-bold text-foreground">📧 Email Draft</span>
-                      <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'hsl(82 85% 55% / 0.15)', color: 'hsl(82 85% 45%)' }}>Brand Score: 91</span>
+                      <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'hsl(216 100% 50% / 0.15)', color: 'hsl(216 100% 42%)' }}>Brand Score: 91</span>
                     </div>
                     <p className="text-[10px] text-muted-foreground leading-relaxed">
                       <span className="font-semibold text-foreground">Subject:</span> Your Next Chapter Begins — Welcome to [University]
@@ -264,14 +264,14 @@ export function JourneyBuilderShowcase() {
   // ReactFlow-style touchpoint nodes for the diagram
   const flowNodes = [
     { week: 1, channel: 'Email', title: 'Welcome & Intro', color: 'hsl(200 100% 50%)' },
-    { week: 2, channel: 'SMS', title: 'Campus Visit Nudge', color: 'hsl(82 85% 55%)' },
+    { week: 2, channel: 'SMS', title: 'Campus Visit Nudge', color: 'hsl(216 100% 50%)' },
     { week: 3, channel: 'Email', title: 'Program Deep-Dive', color: 'hsl(200 100% 50%)' },
-    { week: 4, channel: 'Direct Mail', title: 'Viewbook + Letter', color: 'hsl(270 70% 60%)' },
+    { week: 4, channel: 'Direct Mail', title: 'Viewbook + Letter', color: 'hsl(60 4% 26%)' },
     { week: 5, channel: 'Email', title: 'Financial Aid Guide', color: 'hsl(200 100% 50%)' },
-    { week: 6, channel: 'SMS', title: 'Deadline Reminder', color: 'hsl(82 85% 55%)' },
+    { week: 6, channel: 'SMS', title: 'Deadline Reminder', color: 'hsl(216 100% 50%)' },
     { week: 8, channel: 'Email', title: 'Student Story', color: 'hsl(200 100% 50%)' },
     { week: 10, channel: 'Email', title: 'Decision Day CTA', color: 'hsl(200 100% 50%)' },
-    { week: 12, channel: 'SMS', title: 'Final Deposit Nudge', color: 'hsl(82 85% 55%)' },
+    { week: 12, channel: 'SMS', title: 'Final Deposit Nudge', color: 'hsl(216 100% 50%)' },
   ];
 
   return (
@@ -289,10 +289,10 @@ export function JourneyBuilderShowcase() {
                       key={a}
                       className={`text-[9px] font-medium px-2 py-0.5 rounded-full border transition-all duration-400 ${
                         step >= 1 && i === 1
-                          ? 'border-[hsl(45_93%_47%)] text-[hsl(45_93%_42%)]'
+                          ? 'border-[hsl(216_100%_50%)] text-[hsl(216_100%_40%)]'
                           : 'border-border/50 text-muted-foreground/60'
                       }`}
-                      style={step >= 1 && i === 1 ? { background: 'hsl(45 93% 47% / 0.1)' } : {}}
+                      style={step >= 1 && i === 1 ? { background: 'hsl(216 100% 50% / 0.1)' } : {}}
                     >
                       {a}
                     </span>
@@ -302,8 +302,8 @@ export function JourneyBuilderShowcase() {
               <div>
                 <p className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground mb-1.5">Moment</p>
                 <div className={`text-[10px] font-medium px-2.5 py-1 rounded-lg border transition-all duration-400 ${
-                  step >= 1 ? 'border-[hsl(45_93%_47%)] text-[hsl(45_93%_42%)]' : 'border-border/50 text-muted-foreground/60'
-                }`} style={step >= 1 ? { background: 'hsl(45 93% 47% / 0.08)' } : {}}>
+                  step >= 1 ? 'border-[hsl(216_100%_50%)] text-[hsl(216_100%_40%)]' : 'border-border/50 text-muted-foreground/60'
+                }`} style={step >= 1 ? { background: 'hsl(216 100% 50% / 0.08)' } : {}}>
                   {step >= 1 ? 'Post-Admit Yield' : 'Select moment…'}
                 </div>
               </div>
@@ -319,10 +319,10 @@ export function JourneyBuilderShowcase() {
                       key={ch.label}
                       className={`flex items-center gap-1 text-[9px] font-medium px-2 py-1 rounded-lg border transition-all ${
                         ch.selected
-                          ? 'border-[hsl(45_93%_47%)] text-[hsl(45_93%_42%)]'
+                          ? 'border-[hsl(216_100%_50%)] text-[hsl(216_100%_40%)]'
                           : 'border-border/40 text-muted-foreground/50'
                       }`}
-                      style={ch.selected ? { background: 'hsl(45 93% 47% / 0.08)' } : {}}
+                      style={ch.selected ? { background: 'hsl(216 100% 50% / 0.08)' } : {}}
                     >
                       <ch.icon className="w-2.5 h-2.5" />
                       {ch.label}
@@ -343,33 +343,33 @@ export function JourneyBuilderShowcase() {
                   <p className="text-[8px] uppercase tracking-wider font-bold text-muted-foreground">Cadence</p>
                   <p className="text-[10px] font-semibold text-foreground">2× / week</p>
                 </div>
-                <div className="flex-1 rounded-lg border px-2.5 py-1.5" style={{ borderColor: 'hsl(82 85% 55% / 0.4)', background: 'hsl(82 85% 55% / 0.05)' }}>
-                  <p className="text-[8px] uppercase tracking-wider font-bold" style={{ color: 'hsl(82 85% 45%)' }}>Content DNA</p>
-                  <p className="text-[10px] font-semibold" style={{ color: 'hsl(82 85% 40%)' }}>✓ Active</p>
+                <div className="flex-1 rounded-lg border px-2.5 py-1.5" style={{ borderColor: 'hsl(216 100% 50% / 0.4)', background: 'hsl(216 100% 50% / 0.05)' }}>
+                  <p className="text-[8px] uppercase tracking-wider font-bold" style={{ color: 'hsl(216 100% 42%)' }}>Content DNA</p>
+                  <p className="text-[10px] font-semibold" style={{ color: 'hsl(216 100% 40%)' }}>✓ Active</p>
                 </div>
               </div>
             )}
 
             {/* Step 4: Generating overlay */}
             {step === 4 && (
-              <div className="flex items-center justify-center gap-2 py-4 rounded-xl border border-border/50" style={{ background: 'hsl(45 93% 47% / 0.03)' }}>
-                <div className="w-5 h-5 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: 'hsl(45 93% 47%)', borderTopColor: 'transparent' }} />
+              <div className="flex items-center justify-center gap-2 py-4 rounded-xl border border-border/50" style={{ background: 'hsl(216 100% 50% / 0.03)' }}>
+                <div className="w-5 h-5 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: 'hsl(216 100% 50%)', borderTopColor: 'transparent' }} />
                 <span className="text-xs text-muted-foreground">Mapping journey with Brand DNA…</span>
               </div>
             )}
 
             {/* Step 5-6: ReactFlow-style diagram */}
             {step >= 5 && (
-              <div className="rounded-xl border border-border/60 overflow-hidden transition-all duration-600" style={{ opacity: step >= 5 ? 1 : 0, background: 'hsl(222 47% 11% / 0.02)' }}>
+              <div className="rounded-xl border border-border/60 overflow-hidden transition-all duration-600" style={{ opacity: step >= 5 ? 1 : 0, background: 'hsl(60 4% 10% / 0.02)' }}>
                 {/* Diagram toolbar */}
-                <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/40" style={{ background: 'hsl(222 47% 14% / 0.04)' }}>
+                <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/40" style={{ background: 'hsl(60 4% 10% / 0.04)' }}>
                   <div className="flex items-center gap-2">
                     <GitBranch className="w-3 h-3 text-muted-foreground" />
                     <span className="text-[9px] font-bold text-foreground">Flow Diagram</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[8px] px-1.5 py-0.5 rounded" style={{ background: 'hsl(82 85% 55% / 0.15)', color: 'hsl(82 85% 45%)' }}>9 touchpoints</span>
-                    <span className="text-[8px] px-1.5 py-0.5 rounded" style={{ background: 'hsl(270 70% 60% / 0.15)', color: 'hsl(270 70% 55%)' }}>3 phases</span>
+                    <span className="text-[8px] px-1.5 py-0.5 rounded" style={{ background: 'hsl(216 100% 50% / 0.15)', color: 'hsl(216 100% 42%)' }}>9 touchpoints</span>
+                    <span className="text-[8px] px-1.5 py-0.5 rounded" style={{ background: 'hsl(60 4% 26% / 0.15)', color: 'hsl(60 4% 22%)' }}>3 phases</span>
                   </div>
                 </div>
 
@@ -377,8 +377,8 @@ export function JourneyBuilderShowcase() {
                 <div className="px-3 pt-2 pb-1 flex gap-2">
                   {[
                     { name: 'Phase 1 — Engage', color: 'hsl(200 100% 50%)', weeks: 'Wk 1–4' },
-                    { name: 'Phase 2 — Deepen', color: 'hsl(270 70% 60%)', weeks: 'Wk 5–8' },
-                    { name: 'Phase 3 — Convert', color: 'hsl(82 85% 55%)', weeks: 'Wk 9–12' },
+                    { name: 'Phase 2 — Deepen', color: 'hsl(60 4% 26%)', weeks: 'Wk 5–8' },
+                    { name: 'Phase 3 — Convert', color: 'hsl(216 100% 50%)', weeks: 'Wk 9–12' },
                   ].map((phase, i) => (
                     <div
                       key={phase.name}
@@ -431,12 +431,12 @@ export function JourneyBuilderShowcase() {
 
                 {/* Brand DNA footer */}
                 {step >= 6 && (
-                  <div className="px-3 py-1.5 border-t border-border/30 flex items-center justify-between" style={{ background: 'hsl(82 85% 55% / 0.03)' }}>
+                  <div className="px-3 py-1.5 border-t border-border/30 flex items-center justify-between" style={{ background: 'hsl(216 100% 50% / 0.03)' }}>
                     <div className="flex items-center gap-1">
-                      <Sparkles className="w-2.5 h-2.5" style={{ color: 'hsl(82 85% 45%)' }} />
-                      <span className="text-[8px] text-muted-foreground">Generated from <span className="font-semibold" style={{ color: 'hsl(82 85% 40%)' }}>Content DNA</span></span>
+                      <Sparkles className="w-2.5 h-2.5" style={{ color: 'hsl(216 100% 42%)' }} />
+                      <span className="text-[8px] text-muted-foreground">Generated from <span className="font-semibold" style={{ color: 'hsl(216 100% 40%)' }}>Content DNA</span></span>
                     </div>
-                    <span className="text-[8px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: 'hsl(82 85% 55% / 0.15)', color: 'hsl(82 85% 45%)' }}>
+                    <span className="text-[8px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: 'hsl(216 100% 50% / 0.15)', color: 'hsl(216 100% 42%)' }}>
                       Brand Score: 93
                     </span>
                   </div>
@@ -447,7 +447,7 @@ export function JourneyBuilderShowcase() {
         </BrowserChrome>
 
         <div>
-          <div className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full mb-4" style={{ background: 'hsl(45 93% 47% / 0.15)', color: 'hsl(45 93% 42%)' }}>
+          <div className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full mb-4" style={{ background: 'hsl(216 100% 50% / 0.15)', color: 'hsl(216 100% 40%)' }}>
             <Map className="w-3.5 h-3.5" /> Journey Builder
           </div>
           <h3 className="text-2xl md:text-3xl font-serif font-bold text-foreground tracking-tight mb-4">
@@ -463,12 +463,12 @@ export function JourneyBuilderShowcase() {
               { icon: BarChart3, text: 'Cadence, escalation & duration controls for precise timing' },
             ].map((f, i) => (
               <div key={i} className="flex items-center gap-3 text-sm text-muted-foreground">
-                <f.icon className="w-4 h-4 flex-shrink-0" style={{ color: 'hsl(45 93% 42%)' }} />
+                <f.icon className="w-4 h-4 flex-shrink-0" style={{ color: 'hsl(216 100% 40%)' }} />
                 <span>{f.text}</span>
               </div>
             ))}
           </div>
-          <Link to="/login?signup=1" className="inline-flex items-center gap-1.5 text-sm font-semibold mt-6 transition-colors" style={{ color: 'hsl(45 93% 42%)' }}>
+          <Link to="/login?signup=1" className="inline-flex items-center gap-1.5 text-sm font-semibold mt-6 transition-colors" style={{ color: 'hsl(216 100% 40%)' }}>
             Plan your first journey <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -520,7 +520,7 @@ export function ImageStudioShowcase() {
     <div ref={ref} className={`transition-all duration-1000 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
       <div className="grid lg:grid-cols-2 gap-12 items-center">
         <div>
-          <div className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full mb-4" style={{ background: 'hsl(82 85% 55% / 0.15)', color: 'hsl(82 85% 45%)' }}>
+          <div className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full mb-4" style={{ background: 'hsl(216 100% 50% / 0.15)', color: 'hsl(216 100% 42%)' }}>
             <Image className="w-3.5 h-3.5" /> AI Image Studio
           </div>
           <h3 className="text-2xl md:text-3xl font-serif font-bold text-foreground tracking-tight mb-4">
@@ -538,12 +538,12 @@ export function ImageStudioShowcase() {
               { icon: Image, text: 'In-context mockups: phones, browsers, postcards & more' },
             ].map((f, i) => (
               <div key={i} className="flex items-center gap-3 text-sm text-muted-foreground">
-                <f.icon className="w-4 h-4 flex-shrink-0" style={{ color: 'hsl(82 85% 45%)' }} />
+                <f.icon className="w-4 h-4 flex-shrink-0" style={{ color: 'hsl(216 100% 42%)' }} />
                 <span>{f.text}</span>
               </div>
             ))}
           </div>
-          <Link to="/login?signup=1" className="inline-flex items-center gap-1.5 text-sm font-semibold mt-6 transition-colors" style={{ color: 'hsl(82 85% 45%)' }}>
+          <Link to="/login?signup=1" className="inline-flex items-center gap-1.5 text-sm font-semibold mt-6 transition-colors" style={{ color: 'hsl(216 100% 42%)' }}>
             Generate your first image <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -563,9 +563,9 @@ export function ImageStudioShowcase() {
               </div>
               <div
                 className={`flex items-center gap-1.5 text-[10px] font-medium px-2.5 py-1 rounded-lg border transition-all duration-300 ${
-                  step >= 1 ? 'border-[hsl(270_70%_60%)] text-[hsl(270_70%_55%)]' : 'border-border/40 text-muted-foreground/50'
+                  step >= 1 ? 'border-[hsl(60_4%_26%)] text-[hsl(60_4%_22%)]' : 'border-border/40 text-muted-foreground/50'
                 }`}
-                style={step >= 1 ? { background: 'hsl(270 70% 60% / 0.1)' } : {}}
+                style={step >= 1 ? { background: 'hsl(60 4% 26% / 0.1)' } : {}}
               >
                 <Crown className="w-3 h-3" />
                 Premium
@@ -581,10 +581,10 @@ export function ImageStudioShowcase() {
                     key={s.label}
                     className={`flex items-center gap-1 text-[9px] font-medium px-2 py-1 rounded-lg border transition-all duration-300 ${
                       step >= 1 && s.active
-                        ? 'border-[hsl(82_85%_55%)] text-[hsl(82_85%_45%)]'
+                        ? 'border-[hsl(216_100%_50%)] text-[hsl(216_100%_42%)]'
                         : 'border-border/40 text-muted-foreground/60'
                     }`}
-                    style={step >= 1 && s.active ? { background: 'hsl(82 85% 55% / 0.1)' } : {}}
+                    style={step >= 1 && s.active ? { background: 'hsl(216 100% 50% / 0.1)' } : {}}
                   >
                     <span>{s.emoji}</span>
                     {s.label}
@@ -602,10 +602,10 @@ export function ImageStudioShowcase() {
                     key={ch}
                     className={`text-[9px] font-medium px-2 py-1 rounded-full border whitespace-nowrap transition-all duration-300 ${
                       step >= 2 && i === 0
-                        ? 'border-[hsl(82_85%_55%)] text-[hsl(82_85%_45%)]'
+                        ? 'border-[hsl(216_100%_50%)] text-[hsl(216_100%_42%)]'
                         : 'border-border/50 text-muted-foreground/60'
                     }`}
-                    style={step >= 2 && i === 0 ? { background: 'hsl(82 85% 55% / 0.1)' } : {}}
+                    style={step >= 2 && i === 0 ? { background: 'hsl(216 100% 50% / 0.1)' } : {}}
                   >
                     {ch}
                   </span>
@@ -617,11 +617,11 @@ export function ImageStudioShowcase() {
             <div className="rounded-xl border border-border/60 overflow-hidden relative" style={{ aspectRatio: '1/1', maxHeight: '260px' }}>
               {/* State 0-1: Empty placeholder */}
               {step < 3 && (
-                <div className="w-full h-full flex flex-col items-center justify-center gap-3" style={{ background: 'hsl(222 47% 14% / 0.03)' }}>
+                <div className="w-full h-full flex flex-col items-center justify-center gap-3" style={{ background: 'hsl(60 4% 10% / 0.03)' }}>
                   {step >= 2 ? (
                     <button
                       className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-lg transition-all"
-                      style={{ background: 'hsl(82 85% 55% / 0.15)', color: 'hsl(82 85% 45%)', border: '1px solid hsl(82 85% 55% / 0.3)' }}
+                      style={{ background: 'hsl(216 100% 50% / 0.15)', color: 'hsl(216 100% 42%)', border: '1px solid hsl(216 100% 50% / 0.3)' }}
                     >
                       <Sparkles className="w-3.5 h-3.5" />
                       Generate with Content DNA
@@ -638,7 +638,7 @@ export function ImageStudioShowcase() {
               {/* State 3: Processing screen */}
               {step === 3 && (
                 <div className="w-full h-full flex flex-col items-center justify-center p-5" style={{ background: 'linear-gradient(135deg, hsl(222 47% 13%), hsl(222 47% 16%))' }}>
-                  <div className="w-7 h-7 rounded-full border-2 border-t-transparent animate-spin mb-3" style={{ borderColor: 'hsl(82 85% 55%)', borderTopColor: 'transparent' }} />
+                  <div className="w-7 h-7 rounded-full border-2 border-t-transparent animate-spin mb-3" style={{ borderColor: 'hsl(216 100% 50%)', borderTopColor: 'transparent' }} />
                   <p className="text-[10px] font-semibold text-white/80 mb-3">Generating with Premium Engine…</p>
                   <div className="w-full max-w-[200px] space-y-1.5">
                     {processingSteps.map((ps, i) => {
@@ -655,9 +655,9 @@ export function ImageStudioShowcase() {
                           }}
                         >
                           {i < 4 ? (
-                            <CheckCircle2 className="w-3 h-3 shrink-0" style={{ color: 'hsl(82 85% 55%)' }} />
+                            <CheckCircle2 className="w-3 h-3 shrink-0" style={{ color: 'hsl(216 100% 50%)' }} />
                           ) : (
-                            <Loader2 className="w-3 h-3 shrink-0 animate-spin" style={{ color: 'hsl(82 85% 55% / 0.6)' }} />
+                            <Loader2 className="w-3 h-3 shrink-0 animate-spin" style={{ color: 'hsl(216 100% 50% / 0.6)' }} />
                           )}
                           <span className={`text-[8px] ${i < 4 ? 'text-white/60' : 'text-white/40'}`}>{ps.label}</span>
                         </div>
@@ -667,7 +667,7 @@ export function ImageStudioShowcase() {
                   {/* Brand DNA readback */}
                   <div className="mt-3 flex gap-1.5 flex-wrap justify-center">
                     {['Tone: Warm', 'Formality: 7/10', 'Slogan: "Where leaders begin"'].map((tag, i) => (
-                      <span key={i} className="text-[7px] px-1.5 py-0.5 rounded-full border" style={{ borderColor: 'hsl(270 70% 60% / 0.3)', color: 'hsl(270 70% 65%)', background: 'hsl(270 70% 60% / 0.08)' }}>
+                      <span key={i} className="text-[7px] px-1.5 py-0.5 rounded-full border" style={{ borderColor: 'hsl(60 4% 26% / 0.3)', color: 'hsl(216 100% 66%)', background: 'hsl(60 4% 26% / 0.08)' }}>
                         {tag}
                       </span>
                     ))}
@@ -685,20 +685,20 @@ export function ImageStudioShowcase() {
                     style={{ opacity: step >= 4 ? 1 : 0 }}
                   />
                   {/* Aspect ratio label */}
-                  <div className="absolute top-2 right-2 text-[8px] font-medium px-1.5 py-0.5 rounded-full text-white/80" style={{ background: 'hsl(222 47% 14% / 0.7)', backdropFilter: 'blur(4px)' }}>
+                  <div className="absolute top-2 right-2 text-[8px] font-medium px-1.5 py-0.5 rounded-full text-white/80" style={{ background: 'hsl(60 4% 10% / 0.7)', backdropFilter: 'blur(4px)' }}>
                     1:1 — 1080×1080
                   </div>
                   {/* Style badge */}
-                  <div className="absolute top-2 left-2 text-[8px] font-medium px-1.5 py-0.5 rounded-full text-white/80 flex items-center gap-1" style={{ background: 'hsl(222 47% 14% / 0.7)', backdropFilter: 'blur(4px)' }}>
+                  <div className="absolute top-2 left-2 text-[8px] font-medium px-1.5 py-0.5 rounded-full text-white/80 flex items-center gap-1" style={{ background: 'hsl(60 4% 10% / 0.7)', backdropFilter: 'blur(4px)' }}>
                     📷 Photorealistic · Premium
                   </div>
                   {/* Brand score + ready badge */}
                   {step >= 5 && (
                     <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-                      <div className="flex items-center gap-1 text-[9px] font-semibold px-2 py-1 rounded-full" style={{ background: 'hsl(82 85% 55% / 0.2)', color: 'hsl(82 85% 55%)', backdropFilter: 'blur(4px)' }}>
+                      <div className="flex items-center gap-1 text-[9px] font-semibold px-2 py-1 rounded-full" style={{ background: 'hsl(216 100% 50% / 0.2)', color: 'hsl(216 100% 50%)', backdropFilter: 'blur(4px)' }}>
                         <CheckCircle2 className="w-3 h-3" /> Ready for AI Brand Studio
                       </div>
-                      <div className="text-[9px] font-bold px-2 py-1 rounded-full" style={{ background: 'hsl(82 85% 55% / 0.2)', color: 'hsl(82 85% 55%)', backdropFilter: 'blur(4px)' }}>
+                      <div className="text-[9px] font-bold px-2 py-1 rounded-full" style={{ background: 'hsl(216 100% 50% / 0.2)', color: 'hsl(216 100% 50%)', backdropFilter: 'blur(4px)' }}>
                         Brand Score: 94
                       </div>
                     </div>
@@ -710,7 +710,7 @@ export function ImageStudioShowcase() {
             {/* Mode toggle + In Context */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-[9px] font-semibold px-2.5 py-1 rounded-full" style={{ background: 'hsl(270 70% 60% / 0.15)', color: 'hsl(270 70% 55%)' }}>📷 Photo</span>
+                <span className="text-[9px] font-semibold px-2.5 py-1 rounded-full" style={{ background: 'hsl(60 4% 26% / 0.15)', color: 'hsl(60 4% 22%)' }}>📷 Photo</span>
                 <span className="text-[9px] font-semibold px-2.5 py-1 rounded-full border border-border/50 text-muted-foreground">🎨 Graphic Design</span>
                 <span className="text-[9px] font-semibold px-2.5 py-1 rounded-full border border-border/50 text-muted-foreground">📐 Blank Canvas</span>
               </div>
@@ -764,10 +764,10 @@ export function BrandStudioShowcase() {
                     key={v}
                     className={`text-[10px] font-medium px-2 py-1.5 rounded-lg border transition-all duration-300 cursor-default ${
                       step >= 1 && i === 0
-                        ? 'border-[hsl(270_70%_60%)] text-[hsl(270_70%_55%)]'
+                        ? 'border-[hsl(60_4%_26%)] text-[hsl(60_4%_22%)]'
                         : 'border-border/40 text-muted-foreground'
                     }`}
-                    style={step >= 1 && i === 0 ? { background: 'hsl(270 70% 60% / 0.1)' } : {}}
+                    style={step >= 1 && i === 0 ? { background: 'hsl(60 4% 26% / 0.1)' } : {}}
                   >
                     {v}
                   </div>
@@ -791,7 +791,7 @@ export function BrandStudioShowcase() {
 
               <p className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground pt-2">Brand Colors</p>
               <div className="flex gap-1.5">
-                {['hsl(222 47% 14%)', 'hsl(45 93% 47%)', 'hsl(173 58% 39%)', 'hsl(0 0% 100%)'].map((c, i) => (
+                {['hsl(60 4% 10%)', 'hsl(216 100% 50%)', 'hsl(216 100% 50%)', 'hsl(0 0% 100%)'].map((c, i) => (
                   <div
                     key={i}
                     className={`w-6 h-6 rounded-full border-2 transition-all ${step >= 2 ? 'border-border' : 'border-border/40'}`}
@@ -820,7 +820,7 @@ export function BrandStudioShowcase() {
                 <div 
                   className="absolute inset-0 transition-opacity duration-700"
                   style={{ 
-                    background: 'linear-gradient(to top, hsl(222 47% 14% / 0.85) 10%, hsl(222 47% 14% / 0.4) 45%, transparent 70%)',
+                    background: 'linear-gradient(to top, hsl(60 4% 10% / 0.85) 10%, hsl(60 4% 10% / 0.4) 45%, transparent 70%)',
                     opacity: step >= 2 ? 1 : 0,
                   }} 
                 />
@@ -832,7 +832,7 @@ export function BrandStudioShowcase() {
                   className="absolute inset-0 transition-opacity duration-500"
                   style={{ 
                     opacity: 0.08,
-                    backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 8px, hsl(82 85% 55%) 8px, hsl(82 85% 55%) 9px)',
+                    backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 8px, hsl(216 100% 50%) 8px, hsl(216 100% 50%) 9px)',
                   }} 
                 />
               )}
@@ -841,7 +841,7 @@ export function BrandStudioShowcase() {
               {step >= 1 && (
                 <div className="absolute top-3 left-3 transition-all duration-500" style={{ opacity: step >= 1 ? 1 : 0, transform: step >= 1 ? 'scale(1)' : 'scale(0.8)' }}>
                   <div className="w-12 h-12 rounded-lg bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg">
-                    <span className="text-[7px] text-[hsl(222_47%_14%)] font-bold leading-tight text-center">MIDWEST<br/>STATE</span>
+                    <span className="text-[7px] text-[hsl(60_4%_10%)] font-bold leading-tight text-center">MIDWEST<br/>STATE</span>
                   </div>
                 </div>
               )}
@@ -853,7 +853,7 @@ export function BrandStudioShowcase() {
                     Your Future in<br />Computer Science
                   </p>
                   <p className="text-white/60 text-[9px] mt-1">100% Online · ABET Accredited</p>
-                  <div className="mt-2 text-[9px] font-bold px-3 py-1 rounded w-fit" style={{ background: 'hsl(82 85% 55%)', color: 'hsl(222 47% 14%)' }}>
+                  <div className="mt-2 text-[9px] font-bold px-3 py-1 rounded w-fit" style={{ background: 'hsl(216 100% 50%)', color: 'hsl(60 4% 10%)' }}>
                     Apply Now →
                   </div>
                 </div>
@@ -863,7 +863,7 @@ export function BrandStudioShowcase() {
               {step >= 3 && (
                 <div className="absolute top-3 right-3 transition-all duration-500" style={{ opacity: step >= 3 ? 1 : 0 }}>
                   <div className="bg-white/90 backdrop-blur-sm rounded-lg px-2 py-1 shadow-lg">
-                    <p className="text-[8px] font-bold text-[hsl(82_70%_35%)]">✓ On Brand</p>
+                    <p className="text-[8px] font-bold text-[hsl(216_100%_36%)]">✓ On Brand</p>
                   </div>
                 </div>
               )}
@@ -872,7 +872,7 @@ export function BrandStudioShowcase() {
         </BrowserChrome>
 
         <div>
-          <div className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full mb-4" style={{ background: 'hsl(270 70% 60% / 0.15)', color: 'hsl(270 70% 55%)' }}>
+          <div className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full mb-4" style={{ background: 'hsl(60 4% 26% / 0.15)', color: 'hsl(60 4% 22%)' }}>
             <Palette className="w-3.5 h-3.5" /> AI Brand Studio
           </div>
           <h3 className="text-2xl md:text-3xl font-serif font-bold text-foreground tracking-tight mb-4">
@@ -888,13 +888,13 @@ export function BrandStudioShowcase() {
               { icon: Layers, text: '24 overlay patterns: gradients, geometric, patterns' },
             ].map((f, i) => (
               <div key={i} className="flex items-center gap-3 text-sm text-muted-foreground">
-                <f.icon className="w-4 h-4 flex-shrink-0" style={{ color: 'hsl(270 70% 55%)' }} />
+                <f.icon className="w-4 h-4 flex-shrink-0" style={{ color: 'hsl(60 4% 22%)' }} />
                 <span>{f.text}</span>
               </div>
             ))}
           </div>
           </div>
-          <Link to="/login?signup=1" className="inline-flex items-center gap-1.5 text-sm font-semibold mt-6 transition-colors" style={{ color: 'hsl(270 70% 55%)' }}>
+          <Link to="/login?signup=1" className="inline-flex items-center gap-1.5 text-sm font-semibold mt-6 transition-colors" style={{ color: 'hsl(60 4% 22%)' }}>
             Brand your visuals <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -961,7 +961,7 @@ export function AICopywriterShowcase() {
               {/* User message */}
               {step >= 1 && (
                 <div className="flex justify-end transition-all duration-500" style={{ opacity: step >= 1 ? 1 : 0, transform: step >= 1 ? 'translateY(0)' : 'translateY(8px)' }}>
-                  <div className="rounded-2xl rounded-br-md px-4 py-2.5 max-w-[75%] text-xs text-white" style={{ background: 'hsl(222 47% 18%)' }}>
+                  <div className="rounded-2xl rounded-br-md px-4 py-2.5 max-w-[75%] text-xs text-white" style={{ background: 'hsl(60 4% 13%)' }}>
                     Write a welcome email for admitted students that highlights our research opportunities
                   </div>
                 </div>
@@ -993,10 +993,10 @@ export function AICopywriterShowcase() {
                     <p className="text-muted-foreground">Congratulations on your admission! As you begin this next chapter, we want you to know that <span className="text-foreground font-medium">undergraduate research isn't just an opportunity here — it's a tradition.</span> From day one, you'll have access to…</p>
                     {step >= 4 && (
                       <div className="mt-3 flex items-center gap-2">
-                        <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'hsl(82 85% 55% / 0.15)', color: 'hsl(82 85% 45%)' }}>
+                        <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'hsl(216 100% 50% / 0.15)', color: 'hsl(216 100% 42%)' }}>
                           ✓ On-brand
                         </span>
-                        <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'hsl(270 70% 60% / 0.15)', color: 'hsl(270 70% 55%)' }}>
+                        <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'hsl(60 4% 26% / 0.15)', color: 'hsl(60 4% 22%)' }}>
                           Brand Score: 94
                         </span>
                       </div>
@@ -1007,7 +1007,7 @@ export function AICopywriterShowcase() {
             </div>
 
             {/* Input bar */}
-            <div className="mt-4 flex items-center gap-2 rounded-xl border border-border/60 px-3 py-2" style={{ background: 'hsl(222 47% 14% / 0.03)' }}>
+            <div className="mt-4 flex items-center gap-2 rounded-xl border border-border/60 px-3 py-2" style={{ background: 'hsl(60 4% 10% / 0.03)' }}>
               <span className="flex-1 text-[11px] text-muted-foreground/50">Ask CampusVoice anything…</span>
               <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'hsl(200 100% 50% / 0.15)' }}>
                 <Send className="w-3.5 h-3.5" style={{ color: 'hsl(200 100% 45%)' }} />

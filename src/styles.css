@@ -60,9 +60,10 @@
   --color-cyber-purple: hsl(var(--cyber-purple));
   --color-cyber-blue: hsl(var(--cyber-blue));
 
-  --font-serif: "Libre Baskerville", Georgia, serif;
-  --font-sans: "Source Sans 3", system-ui, sans-serif;
-  --font-chat: Inter, system-ui, sans-serif;
+  --font-serif: Sora, system-ui, sans-serif;
+  --font-sans: Manrope, system-ui, sans-serif;
+  --font-display: Sora, system-ui, sans-serif;
+  --font-chat: Manrope, system-ui, sans-serif;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -70,7 +71,7 @@
 
   --shadow-elevated: 0 4px 6px -1px hsl(222 47% 11% / 0.08), 0 2px 4px -2px hsl(222 47% 11% / 0.05);
   --shadow-elevated-lg: 0 10px 15px -3px hsl(222 47% 11% / 0.08), 0 4px 6px -4px hsl(222 47% 11% / 0.05);
-  --shadow-glow: 0 0 20px hsl(45 93% 47% / 0.15);
+  --shadow-glow: 0 0 24px hsl(216 100% 50% / 0.16);
 
   --animate-fade-in: fade-in 0.5s ease-out forwards;
   --animate-slide-up: slide-up 0.5s ease-out forwards;
@@ -95,116 +96,117 @@
 
 :root {
   /* CampusVoice Design System - Academic & Professional */
-  --background: 210 20% 98%;
-  --foreground: 222 47% 11%;
+  --background: 50 30% 96%;
+  --foreground: 60 4% 10%;
 
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
+  --card-foreground: 60 4% 10%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
+  --popover-foreground: 60 4% 10%;
 
   /* Deep Navy - Authority & Trust */
-  --primary: 222 47% 14%;
-  --primary-foreground: 45 100% 96%;
+  --primary: 60 4% 10%;
+  --primary-foreground: 50 30% 96%;
 
   /* Warm Amber - Engagement & Optimism */
-  --secondary: 45 93% 47%;
-  --secondary-foreground: 222 47% 11%;
+  --secondary: 51 20% 92%;
+  --secondary-foreground: 60 4% 10%;
 
-  --muted: 210 20% 94%;
-  --muted-foreground: 220 14% 46%;
+  --muted: 51 20% 92%;
+  --muted-foreground: 60 4% 36%;
 
   /* Teal Accent - Growth & Progress */
-  --accent: 173 58% 39%;
+  --accent: 216 100% 50%;
   --accent-foreground: 0 0% 100%;
 
   /* Cyberpunk Accents */
-  --cyber-lime: 82 85% 55%;
-  --cyber-purple: 270 70% 60%;
-  --cyber-blue: 200 100% 50%;
+  --cyber-lime: 216 100% 50%;
+  --cyber-purple: 60 4% 26%;
+  --cyber-blue: 216 100% 50%;
 
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 220 13% 88%;
-  --input: 220 13% 88%;
-  --ring: 222 47% 14%;
+  --border: 51 12% 88%;
+  --input: 51 12% 88%;
+  --ring: 216 100% 50%;
 
-  --radius: 0.5rem;
+  --radius: 0.625rem;
 
   /* Status Colors */
   --status-strong: 158 64% 42%;
   --status-strong-foreground: 0 0% 100%;
-  --status-moderate: 45 93% 47%;
-  --status-moderate-foreground: 222 47% 11%;
+  --status-moderate: 38 92% 50%;
+  --status-moderate-foreground: 60 4% 10%;
   --status-attention: 0 72% 51%;
   --status-attention-foreground: 0 0% 100%;
 
   /* Pillar Colors */
-  --pillar-authority: 222 47% 14%;
-  --pillar-susceptibility: 262 52% 47%;
-  --pillar-cognitive: 173 58% 39%;
-  --pillar-consensus: 45 93% 47%;
-  --pillar-ethics: 340 75% 55%;
+  --pillar-authority: 60 4% 10%;
+  --pillar-susceptibility: 216 100% 50%;
+  --pillar-cognitive: 195 70% 40%;
+  --pillar-consensus: 60 4% 40%;
+  --pillar-ethics: 216 60% 35%;
 
   /* Typography */
-  --font-serif: "Libre Baskerville", Georgia, serif;
-  --font-sans: "Source Sans 3", system-ui, sans-serif;
+  --font-serif: Sora, system-ui, sans-serif;
+  --font-sans: Manrope, system-ui, sans-serif;
+  --font-display: Sora, system-ui, sans-serif;
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px 0 hsl(222 47% 11% / 0.05);
-  --shadow-md: 0 4px 6px -1px hsl(222 47% 11% / 0.08), 0 2px 4px -2px hsl(222 47% 11% / 0.05);
-  --shadow-lg: 0 10px 15px -3px hsl(222 47% 11% / 0.08), 0 4px 6px -4px hsl(222 47% 11% / 0.05);
-  --shadow-glow: 0 0 20px hsl(45 93% 47% / 0.15);
+  --shadow-sm: 0 1px 2px 0 hsl(60 4% 10% / 0.05);
+  --shadow-md: 0 4px 6px -1px hsl(60 4% 10% / 0.07), 0 2px 4px -2px hsl(60 4% 10% / 0.05);
+  --shadow-lg: 0 14px 30px -12px hsl(60 4% 10% / 0.14), 0 4px 8px -4px hsl(60 4% 10% / 0.06);
+  --shadow-glow: 0 0 24px hsl(216 100% 50% / 0.16);
 
-  --sidebar-background: 0 0% 98%;
-  --sidebar-foreground: 240 5.3% 26.1%;
-  --sidebar-primary: 240 5.9% 10%;
-  --sidebar-primary-foreground: 0 0% 98%;
-  --sidebar-accent: 240 4.8% 95.9%;
-  --sidebar-accent-foreground: 240 5.9% 10%;
-  --sidebar-border: 220 13% 91%;
-  --sidebar-ring: 217.2 91.2% 59.8%;
+  --sidebar-background: 51 20% 95%;
+  --sidebar-foreground: 60 4% 26%;
+  --sidebar-primary: 60 4% 10%;
+  --sidebar-primary-foreground: 50 30% 96%;
+  --sidebar-accent: 51 20% 90%;
+  --sidebar-accent-foreground: 60 4% 10%;
+  --sidebar-border: 51 12% 88%;
+  --sidebar-ring: 216 100% 50%;
 }
 
 .dark {
-  --background: 222 47% 8%;
-  --foreground: 210 40% 96%;
+  --background: 60 4% 7%;
+  --foreground: 50 20% 95%;
 
-  --card: 222 47% 11%;
-  --card-foreground: 210 40% 96%;
+  --card: 60 4% 11%;
+  --card-foreground: 50 20% 95%;
 
-  --popover: 222 47% 11%;
-  --popover-foreground: 210 40% 96%;
+  --popover: 60 4% 11%;
+  --popover-foreground: 50 20% 95%;
 
-  --primary: 45 93% 55%;
-  --primary-foreground: 222 47% 11%;
+  --primary: 50 20% 95%;
+  --primary-foreground: 60 4% 10%;
 
-  --secondary: 222 30% 22%;
-  --secondary-foreground: 210 40% 96%;
+  --secondary: 60 4% 18%;
+  --secondary-foreground: 50 20% 95%;
 
-  --muted: 222 30% 18%;
-  --muted-foreground: 215 20% 65%;
+  --muted: 60 4% 16%;
+  --muted-foreground: 60 4% 64%;
 
-  --accent: 173 58% 45%;
-  --accent-foreground: 222 47% 11%;
+  --accent: 216 100% 58%;
+  --accent-foreground: 0 0% 100%;
 
   --destructive: 0 62% 50%;
   --destructive-foreground: 210 40% 98%;
 
-  --border: 222 30% 22%;
-  --input: 222 30% 22%;
-  --ring: 45 93% 55%;
+  --border: 60 4% 20%;
+  --input: 60 4% 20%;
+  --ring: 216 100% 58%;
 
-  --sidebar-background: 222 47% 8%;
-  --sidebar-foreground: 240 4.8% 95.9%;
-  --sidebar-primary: 45 93% 55%;
-  --sidebar-primary-foreground: 222 47% 11%;
-  --sidebar-accent: 222 30% 15%;
-  --sidebar-accent-foreground: 240 4.8% 95.9%;
-  --sidebar-border: 222 30% 18%;
-  --sidebar-ring: 45 93% 55%;
+  --sidebar-background: 60 4% 8%;
+  --sidebar-foreground: 50 20% 95%;
+  --sidebar-primary: 50 20% 95%;
+  --sidebar-primary-foreground: 60 4% 10%;
+  --sidebar-accent: 60 4% 14%;
+  --sidebar-accent-foreground: 50 20% 95%;
+  --sidebar-border: 60 4% 18%;
+  --sidebar-ring: 216 100% 58%;
 }
 
 @layer base {
@@ -225,8 +227,9 @@
   h4,
   h5,
   h6 {
-    font-family: var(--font-serif);
-    letter-spacing: -0.025em;
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.028em;
   }
 }
 
@@ -281,28 +284,28 @@
   .gradient-hero {
     background: linear-gradient(
       135deg,
-      hsl(222 47% 11%) 0%,
-      hsl(222 47% 16%) 50%,
-      hsl(222 47% 11%) 100%
+      hsl(60 4% 10%) 0%,
+      hsl(60 4% 16%) 50%,
+      hsl(60 4% 10%) 100%
     );
   }
 
   .gradient-hero-landing {
     background: linear-gradient(
       145deg,
-      hsl(220 25% 96%) 0%,
-      hsl(210 30% 94%) 30%,
-      hsl(200 35% 95%) 60%,
-      hsl(180 20% 96%) 100%
+      hsl(50 30% 97%) 0%,
+      hsl(51 22% 94%) 35%,
+      hsl(51 18% 95%) 70%,
+      hsl(50 30% 97%) 100%
     );
   }
 
   .gradient-ai-accent {
     background: linear-gradient(
       135deg,
-      hsl(200 80% 50%) 0%,
-      hsl(220 70% 55%) 50%,
-      hsl(250 60% 55%) 100%
+      hsl(216 100% 50%) 0%,
+      hsl(216 90% 44%) 55%,
+      hsl(60 4% 16%) 100%
     );
   }
 
@@ -314,22 +317,22 @@
   .bg-zone-hero {
     background: linear-gradient(
       145deg,
-      hsl(220 25% 97%) 0%,
-      hsl(210 30% 95%) 50%,
-      hsl(200 25% 96%) 100%
+      hsl(50 30% 97%) 0%,
+      hsl(51 20% 94%) 50%,
+      hsl(50 28% 96%) 100%
     );
   }
 
   .bg-zone-section {
-    background: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(210 20% 96%) 100%);
+    background: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(51 20% 93%) 100%);
   }
 
   .bg-zone-mint {
-    background: hsl(173 40% 96%);
+    background: hsl(200 30% 96%);
   }
 
   .bg-zone-warm {
-    background: hsl(48 60% 97%);
+    background: hsl(50 34% 96%);
   }
 
   /* Enhanced Card Styles - Matching Landing Page */

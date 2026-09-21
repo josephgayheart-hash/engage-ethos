@@ -11,7 +11,7 @@ const glowColors = {
   lime: 'hsl(var(--cyber-lime))',
   purple: 'hsl(var(--cyber-purple))',
   blue: 'hsl(var(--cyber-blue))',
-  pink: 'hsl(340 75% 55%)',
+  pink: 'hsl(216 100% 50%)',
 };
 
 export default function AnimatedBorderCard({ 

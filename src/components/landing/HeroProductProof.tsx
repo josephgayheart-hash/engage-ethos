@@ -32,18 +32,18 @@ export function HeroProductProof() {
           </div>
 
           {/* Arrow */}
-          <div className="hidden md:flex items-center justify-center text-[hsl(82_85%_45%)]">
+          <div className="hidden md:flex items-center justify-center text-[hsl(216_100%_42%)]">
             <ArrowRight className="w-6 h-6" />
           </div>
-          <div className="flex md:hidden items-center justify-center text-[hsl(82_85%_45%)]">
+          <div className="flex md:hidden items-center justify-center text-[hsl(216_100%_42%)]">
             <ArrowRight className="w-5 h-5 rotate-90" />
           </div>
 
           {/* Output card */}
-          <div className="rounded-2xl border-2 border-[hsl(82_85%_55%_/_0.3)] bg-gradient-to-br from-background to-[hsl(82_85%_55%_/_0.04)] p-5 shadow-[0_0_24px_hsl(82_85%_55%_/_0.08)] flex flex-col">
+          <div className="rounded-2xl border-2 border-[hsl(216_100%_50%_/_0.3)] bg-gradient-to-br from-background to-[hsl(216_100%_50%_/_0.04)] p-5 shadow-[0_0_24px_hsl(216_100%_50%_/_0.08)] flex flex-col">
             <div className="flex items-center gap-1.5 mb-2">
-              <Sparkles className="w-3 h-3 text-[hsl(82_85%_45%)]" />
-              <span className="text-[10px] uppercase tracking-wider text-[hsl(82_85%_35%)] font-bold">
+              <Sparkles className="w-3 h-3 text-[hsl(216_100%_42%)]" />
+              <span className="text-[10px] uppercase tracking-wider text-[hsl(216_100%_36%)] font-bold">
                 Your brand voice
               </span>
             </div>
@@ -55,7 +55,7 @@ export function HeroProductProof() {
             </p>
             <div className="mt-3 flex items-center gap-2 text-[10px] text-muted-foreground">
               <span className="inline-flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-[hsl(82_85%_55%)]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[hsl(216_100%_50%)]" />
                 Voice match: 96%
               </span>
               <span>·</span>
