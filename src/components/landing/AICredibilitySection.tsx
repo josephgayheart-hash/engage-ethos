@@ -14,13 +14,13 @@ const pillars = [
     icon: null,
     title: 'Content DNA Engine',
     description: "Your brand voice isn't a prompt. It's a living profile built from your actual content, continuously refined.",
-    accent: 'hsl(60 4% 26%)',
+    accent: 'hsl(60 4% 30%)',
   },
   {
     icon: null,
     title: 'Evaluation Loop',
     description: 'Every output is scored against your brand platform before you see it. Not vibes — metrics.',
-    accent: 'hsl(200 100% 50%)',
+    accent: 'hsl(216 100% 50%)',
   },
 ];
 
@@ -34,46 +34,46 @@ export default function AICredibilitySection() {
   return (
     <section
       className="relative py-20 sm:py-28 px-4 sm:px-6 lg:px-8 overflow-hidden"
-      style={{ background: 'linear-gradient(160deg, hsl(60 4% 10%) 0%, hsl(222 40% 20%) 50%, hsl(60 4% 10%) 100%)' }}
+      style={{ background: 'linear-gradient(160deg, hsl(200 26% 96%) 0%, hsl(210 24% 93%) 50%, hsl(200 26% 96%) 100%)' }}
     >
       {/* Dot grid */}
       <div
-        className="absolute inset-0 opacity-[0.04]"
+        className="absolute inset-0 opacity-[0.07]"
         style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.5) 1px, transparent 0)',
+          backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(60 4% 10% / 0.5) 1px, transparent 0)',
           backgroundSize: '40px 40px',
         }}
       />
 
       {/* Glow orbs */}
-      <div className="absolute w-64 h-64 rounded-full blur-[100px] opacity-20" style={{ background: 'hsl(216 100% 50%)', top: '10%', right: '15%' }} />
-      <div className="absolute w-48 h-48 rounded-full blur-[80px] opacity-15" style={{ background: 'hsl(60 4% 26%)', bottom: '15%', left: '10%' }} />
+      <div className="absolute w-64 h-64 rounded-full blur-[100px] opacity-[0.12]" style={{ background: 'hsl(216 100% 50%)', top: '10%', right: '15%' }} />
+      <div className="absolute w-48 h-48 rounded-full blur-[80px] opacity-[0.08]" style={{ background: 'hsl(60 4% 26%)', bottom: '15%', left: '10%' }} />
 
       <div className="relative z-10 max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-14">
-          <Badge className="mb-4 bg-white/10 text-white/70 border-white/20 backdrop-blur-sm">
+          <Badge className="mb-4 rounded-full bg-card text-muted-foreground border-border uppercase tracking-[0.12em] text-[11px] font-semibold">
             <Brain className="w-3 h-3 mr-1.5" />
             The AI Under the Hood
           </Badge>
-          <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-white mb-5 tracking-tight">
-            Not just AI. <span className="italic text-[hsl(216_100%_66%)]">Your</span> AI.
+          <h2 className="font-display tracking-[-0.02em] text-2xl sm:text-3xl lg:text-4xl text-foreground mb-5 tracking-tight">
+            Not just AI. <span className="italic text-[hsl(216_100%_45%)]">Your</span> AI.
           </h2>
 
           {/* Provider logos + text */}
           <div className="flex items-center justify-center gap-6 mb-3">
             <div className="flex items-center gap-2.5">
               <img src={geminiLogo} alt="Google Gemini" className="w-6 h-6" />
-              <span className="text-white/70 font-medium text-sm sm:text-base">Google Gemini</span>
+              <span className="text-foreground/75 font-medium text-sm sm:text-base">Google Gemini</span>
             </div>
-            <span className="text-white/20 text-lg">×</span>
+            <span className="text-muted-foreground text-lg">×</span>
             <div className="flex items-center gap-2.5">
-              <img src={openaiLogo} alt="OpenAI" className="w-5 h-5 brightness-0 invert opacity-70" />
-              <span className="text-white/70 font-medium text-sm sm:text-base">OpenAI</span>
+              <img src={openaiLogo} alt="OpenAI" className="w-5 h-5 opacity-80" />
+              <span className="text-foreground/75 font-medium text-sm sm:text-base">OpenAI</span>
             </div>
           </div>
 
-          <p className="text-white/40 max-w-lg mx-auto text-sm leading-relaxed">
+          <p className="text-muted-foreground max-w-lg mx-auto text-sm leading-relaxed">
             Multiple models orchestrated for the right task, every time.
           </p>
         </div>
@@ -89,7 +89,7 @@ export default function AICredibilitySection() {
             return (
               <div
                 key={p.title}
-                className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm p-6 hover:border-white/20 transition-colors"
+                className="rounded-xl border border-border bg-card p-6 hover:shadow-[var(--shadow-lg)] hover:-translate-y-0.5 transition-all duration-300"
               >
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
@@ -97,8 +97,8 @@ export default function AICredibilitySection() {
                 >
                   {icons[i]}
                 </div>
-                <h3 className="text-white font-semibold text-sm mb-2">{p.title}</h3>
-                <p className="text-white/40 text-sm leading-relaxed">{p.description}</p>
+                <h3 className="text-foreground font-semibold text-sm mb-2">{p.title}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">{p.description}</p>
               </div>
             );
           })}
@@ -109,10 +109,10 @@ export default function AICredibilitySection() {
           {stats.map((s) => (
             <div
               key={s.label}
-              className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/[0.03]"
+              className="flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card"
             >
-              <span className="text-white font-bold text-sm">{s.value}</span>
-              <span className="text-white/40 text-xs">{s.label}</span>
+              <span className="text-foreground font-bold text-sm">{s.value}</span>
+              <span className="text-muted-foreground text-xs">{s.label}</span>
             </div>
           ))}
         </div>

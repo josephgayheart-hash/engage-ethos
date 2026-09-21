@@ -3,8 +3,19 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import campusvoiceLogo from '@/assets/campusvoice-logo-new.png';
 import { FeaturesDropdown } from './FeaturesDropdown';
+import { cn } from '@/lib/utils';
 
-export function LandingNav() {
+interface LandingNavProps {
+  /** "dark" = nav sits on a dark band (default). "light" = nav sits on a light band. */
+  tone?: 'dark' | 'light';
+}
+
+export function LandingNav({ tone = 'dark' }: LandingNavProps) {
+  const isLight = tone === 'light';
+  const linkClass = isLight
+    ? 'text-foreground/70 hover:text-foreground hover:bg-foreground/5'
+    : 'text-white/70 hover:text-white hover:bg-white/10';
+
   return (
     <nav className="relative z-20 py-4 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
@@ -12,45 +23,29 @@ export function LandingNav() {
           <img
             src={campusvoiceLogo}
             alt="CampusVoice.AI"
-            className="h-8 w-auto max-w-[160px] brightness-0 invert"
+            className={cn('h-8 w-auto max-w-[160px]', isLight ? '' : 'brightness-0 invert')}
           />
         </Link>
 
         <div className="flex items-center gap-1 sm:gap-3">
-          <FeaturesDropdown />
+          <FeaturesDropdown tone={tone} />
           <Link to="/for-enterprise" className="hidden sm:block">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white/70 hover:text-white hover:bg-white/10"
-            >
+            <Button variant="ghost" size="sm" className={linkClass}>
               For Enterprise
             </Button>
           </Link>
           <Link to="/for-agencies" className="hidden sm:block">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white/70 hover:text-white hover:bg-white/10"
-            >
+            <Button variant="ghost" size="sm" className={linkClass}>
               For Agencies
             </Button>
           </Link>
           <Link to="/login">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white/70 hover:text-white hover:bg-white/10"
-            >
+            <Button variant="ghost" size="sm" className={linkClass}>
               Sign In
             </Button>
           </Link>
           <Link to="/login?signup=1" className="hidden sm:block">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white/70 hover:text-white hover:bg-white/10"
-            >
+            <Button variant="ghost" size="sm" className={linkClass}>
               Create Account
             </Button>
           </Link>

@@ -147,7 +147,7 @@ function PhaseCard({
           >
             <phase.icon className="w-4.5 h-4.5" style={{ color: phase.accent }} />
           </div>
-          <h3 className="text-white font-semibold text-sm leading-tight">
+          <h3 className="text-foreground font-semibold text-sm leading-tight">
             {phase.title}
           </h3>
         </div>
@@ -248,13 +248,13 @@ function MobilePhaseCard({
       >
         <div className="flex items-center gap-2 mb-3">
           <phase.icon className="w-4 h-4" style={{ color: phase.accent }} />
-          <h3 className="text-white font-semibold text-sm">{phase.title}</h3>
+          <h3 className="text-foreground font-semibold text-sm">{phase.title}</h3>
         </div>
 
         {phase.bullets ? (
           <ul className="space-y-1.5">
             {phase.bullets.map((b, i) => (
-              <li key={i} className="flex items-start gap-2 text-xs text-white/50">
+              <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
                 <Check className="w-3 h-3 mt-0.5 shrink-0" style={{ color: phase.accent }} />
                 {b}
               </li>
@@ -265,7 +265,7 @@ function MobilePhaseCard({
             {phase.tools.map((tool, i) => (
               <div
                 key={i}
-                className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs text-white/60"
+                className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs text-muted-foreground"
                 style={{ background: phase.accentMuted }}
               >
                 <tool.icon className="w-3 h-3" style={{ color: phase.accent }} />
@@ -297,21 +297,21 @@ export default function HowItWorksSection() {
   return (
     <section
       id="how-it-works"
-      className="py-24 px-4 sm:px-6 lg:px-8 bg-[hsl(60_4%_10%)] relative overflow-hidden"
+      className="py-24 px-4 sm:px-6 lg:px-8 bg-[hsl(50_30%_96%)] border-y border-border relative overflow-hidden"
     >
       {/* Background */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(216_100%_30%_/_0.12),_transparent_70%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(216_100%_50%_/_0.06),_transparent_70%)]" />
 
       <div className="max-w-6xl mx-auto relative z-10">
         {/* Header */}
         <div className="text-center mb-6">
-          <h2 className="font-serif text-4xl sm:text-5xl mb-4">
-            <span className="text-white">How It </span>
-            <span className="bg-gradient-to-r from-[hsl(216_100%_60%)] to-[hsl(216_100%_66%)] bg-clip-text text-transparent">
+          <h2 className="font-display tracking-[-0.02em] text-4xl sm:text-5xl mb-4">
+            <span className="text-foreground">How It </span>
+            <span className="bg-gradient-to-r from-[hsl(216_100%_50%)] to-[hsl(216_100%_40%)] bg-clip-text text-transparent">
               Works
             </span>
           </h2>
-          <p className="text-white/55 text-lg max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             From institutional setup to on-brand content at scale—four steps to
             transform how your campus communicates.
           </p>
@@ -368,9 +368,9 @@ export default function HowItWorksSection() {
 
         {/* Bottom tagline */}
         <div className="mt-10 flex justify-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.04] border border-white/[0.06]">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border">
             <Dna className="w-3.5 h-3.5 text-[hsl(60_4%_26%)]" />
-            <span className="text-white/40 text-xs">
+            <span className="text-muted-foreground text-xs">
               Every output is grounded in your Content DNA — voice, brand platform & institutional facts
             </span>
           </div>
