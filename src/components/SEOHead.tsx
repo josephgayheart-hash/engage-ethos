@@ -117,7 +117,8 @@ export function SEOHead({
   const location = useLocation();
   
   // Auto-generate canonical URL from current route if not provided
-  const effectiveCanonicalUrl = canonicalUrl || `${window.location.origin}${location.pathname}`;
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.campusvoice.ai';
+  const effectiveCanonicalUrl = canonicalUrl || `${origin}${location.pathname}`;
 
   useEffect(() => {
     // Update document title
