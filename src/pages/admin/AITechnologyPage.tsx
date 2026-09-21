@@ -440,7 +440,7 @@ export default function AITechnologyPage() {
           {/* Google Gemini */}
           <div className="card-interactive rounded-xl p-5 mb-4">
             <div className="flex items-start gap-4 mb-4">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-[hsl(220_70%_96%)] to-[hsl(270_50%_96%)] border border-border/40">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-[hsl(220_70%_96%)] to-[hsl(216_100%_96%)] border border-border/40">
                 <GeminiLogo className="h-8 w-8" />
               </div>
               <div className="flex-1">

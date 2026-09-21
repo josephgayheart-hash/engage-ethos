@@ -336,7 +336,7 @@ export default function PlatformOpsPage() {
                     <XAxis type="number" tick={{ fontSize: 10 }} />
                     <YAxis type="category" dataKey="tool" tick={{ fontSize: 10 }} width={120} />
                     <Tooltip contentStyle={{ fontSize: 12, background: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }} />
-                    <Bar dataKey="runs" fill="hsl(200 100% 50%)" radius={[0, 3, 3, 0]} />
+                    <Bar dataKey="runs" fill="hsl(216 100% 45%)" radius={[0, 3, 3, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               )}

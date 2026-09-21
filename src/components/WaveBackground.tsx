@@ -16,10 +16,10 @@ export function WaveBackground({ variant = 'teal' }: { variant?: 'teal' | 'amber
       
       {/* Blurred sprite accents - varied colors */}
       <div className="absolute top-8 right-[15%] w-32 h-32 bg-[hsl(216_100%_50%_/_0.15)] rounded-full blur-2xl" />
-      <div className="absolute top-4 left-[10%] w-40 h-40 bg-[hsl(82_85%_55%_/_0.12)] rounded-full blur-3xl" />
-      <div className="absolute top-12 left-[45%] w-24 h-24 bg-[hsl(200_100%_50%_/_0.12)] rounded-full blur-2xl" />
+      <div className="absolute top-4 left-[10%] w-40 h-40 bg-[hsl(216_100%_50%_/_0.12)] rounded-full blur-3xl" />
+      <div className="absolute top-12 left-[45%] w-24 h-24 bg-[hsl(216_100%_45%_/_0.12)] rounded-full blur-2xl" />
       <div className="absolute bottom-20 right-[30%] w-20 h-20 bg-[hsl(340_75%_55%_/_0.1)] rounded-full blur-xl" />
-      <div className="absolute top-6 right-[40%] w-16 h-16 bg-[hsl(82_85%_55%_/_0.18)] rounded-full blur-xl" />
+      <div className="absolute top-6 right-[40%] w-16 h-16 bg-[hsl(216_100%_50%_/_0.18)] rounded-full blur-xl" />
       
       {/* Wave divider at bottom - extends past container */}
       <div className="absolute -bottom-px left-0 right-0">

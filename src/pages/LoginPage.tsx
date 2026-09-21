@@ -14,15 +14,15 @@ import campusvoiceLogo from '@/assets/campusvoice-logo.png';
 const INVITE_EXPIRATION_HOURS = 72;
 
 const WELCOME_PHRASES = [
-  { text: "Firms", color: "hsl(82 85% 55%)" },
+  { text: "Firms", color: "hsl(216 100% 50%)" },
   { text: "Brands", color: "hsl(216 100% 50%)" },
-  { text: "Planners", color: "hsl(200 100% 50%)" },
-  { text: "Writers", color: "hsl(82 85% 55%)" },
+  { text: "Planners", color: "hsl(216 100% 45%)" },
+  { text: "Writers", color: "hsl(216 100% 50%)" },
   { text: "Marketers", color: "hsl(216 100% 50%)" },
-  { text: "Storytellers", color: "hsl(200 100% 50%)" },
-  { text: "Designers", color: "hsl(82 85% 55%)" },
+  { text: "Storytellers", color: "hsl(216 100% 45%)" },
+  { text: "Designers", color: "hsl(216 100% 50%)" },
   { text: "Higher Education", color: "hsl(216 100% 50%)" },
-  { text: "Strategists", color: "hsl(82 85% 55%)" },
+  { text: "Strategists", color: "hsl(216 100% 50%)" },
 ];
 
 export default function LoginPage() {
@@ -243,9 +243,9 @@ export default function LoginPage() {
         />
 
         {/* Animated floating orbs — CampusVoice color burst */}
-        <div className="absolute w-72 h-72 rounded-full blur-[80px] animate-float-slow" style={{ background: 'hsl(82 85% 55% / 0.25)', top: '8%', right: '10%' }} />
+        <div className="absolute w-72 h-72 rounded-full blur-[80px] animate-float-slow" style={{ background: 'hsl(216 100% 50% / 0.25)', top: '8%', right: '10%' }} />
         <div className="absolute w-56 h-56 rounded-full blur-[70px] animate-float-medium" style={{ background: 'hsl(216 100% 50% / 0.3)', bottom: '15%', left: '5%', animationDelay: '1s' }} />
-        <div className="absolute w-40 h-40 rounded-full blur-[60px] animate-float-fast" style={{ background: 'hsl(200 100% 50% / 0.3)', top: '45%', left: '30%', animationDelay: '0.5s' }} />
+        <div className="absolute w-40 h-40 rounded-full blur-[60px] animate-float-fast" style={{ background: 'hsl(216 100% 45% / 0.3)', top: '45%', left: '30%', animationDelay: '0.5s' }} />
         <div className="absolute w-32 h-32 rounded-full blur-[50px] animate-float-medium" style={{ background: 'hsl(340 75% 55% / 0.2)', bottom: '30%', right: '20%', animationDelay: '2s' }} />
         <div className="absolute w-24 h-24 rounded-full blur-[40px] animate-float-slow" style={{ background: 'hsl(45 93% 55% / 0.2)', top: '25%', left: '15%', animationDelay: '1.5s' }} />
         <div className="absolute w-48 h-48 rounded-full blur-[60px] animate-float-fast" style={{ background: 'hsl(173 58% 45% / 0.2)', bottom: '5%', right: '5%', animationDelay: '3s' }} />
@@ -283,7 +283,7 @@ export default function LoginPage() {
           </p>
           <div className="flex gap-3">
             {['Plan', 'Strategize', 'Execute'].map((word, i) => {
-              const colors = ['hsl(82 85% 55%)', 'hsl(216 100% 50%)', 'hsl(200 100% 50%)'];
+              const colors = ['hsl(216 100% 50%)', 'hsl(216 100% 50%)', 'hsl(216 100% 45%)'];
               return (
                 <span
                   key={word}
@@ -305,7 +305,7 @@ export default function LoginPage() {
       {/* Right form panel */}
       <div className="flex-1 flex items-center justify-center p-6 sm:p-12 bg-background relative overflow-hidden">
         {/* Subtle orb accents on right panel too */}
-        <div className="absolute w-64 h-64 rounded-full blur-[100px] opacity-[0.04]" style={{ background: 'hsl(82 85% 55%)', top: '-5%', right: '-5%' }} />
+        <div className="absolute w-64 h-64 rounded-full blur-[100px] opacity-[0.04]" style={{ background: 'hsl(216 100% 50%)', top: '-5%', right: '-5%' }} />
         <div className="absolute w-48 h-48 rounded-full blur-[80px] opacity-[0.04]" style={{ background: 'hsl(216 100% 50%)', bottom: '-5%', left: '-5%' }} />
 
         <div className="w-full max-w-md space-y-8 relative z-10">

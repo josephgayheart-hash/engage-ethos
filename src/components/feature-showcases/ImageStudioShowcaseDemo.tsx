@@ -226,7 +226,7 @@ export default function ImageStudioShowcaseDemo() {
               </span>
             </div>
             {step >= 5 && (
-              <span className="text-[8px] font-medium px-2 py-0.5 rounded-full" style={{ background: 'hsl(200 100% 50% / 0.12)', color: 'hsl(200 100% 45%)' }}>
+              <span className="text-[8px] font-medium px-2 py-0.5 rounded-full" style={{ background: 'hsl(216 100% 45% / 0.12)', color: 'hsl(200 100% 45%)' }}>
                 In Context ▸
               </span>
             )}

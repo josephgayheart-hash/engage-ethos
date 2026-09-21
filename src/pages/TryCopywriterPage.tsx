@@ -100,7 +100,7 @@ export default function TryCopywriterPage() {
         className="relative overflow-hidden border-b border-border/40"
         style={{ background: "linear-gradient(145deg, hsl(222 47% 16%) 0%, hsl(222 40% 22%) 100%)" }}
       >
-        <div className="hidden sm:block absolute w-72 h-72 rounded-full blur-[80px]" style={{ background: "hsl(82 85% 55% / 0.15)", top: "-10%", right: "5%" }} />
+        <div className="hidden sm:block absolute w-72 h-72 rounded-full blur-[80px]" style={{ background: "hsl(216 100% 50% / 0.15)", top: "-10%", right: "5%" }} />
         <div className="hidden sm:block absolute w-56 h-56 rounded-full blur-[70px]" style={{ background: "hsl(216 100% 50% / 0.18)", bottom: "-20%", left: "10%" }} />
 
         <div className="relative">
@@ -119,7 +119,7 @@ export default function TryCopywriterPage() {
           </nav>
           <Badge
             variant="secondary"
-            className="bg-[hsl(82_85%_55%_/_0.15)] text-[hsl(82_85%_70%)] border-[hsl(82_85%_55%_/_0.3)] mb-3"
+            className="bg-[hsl(216 100% 50%_/_0.15)] text-[hsl(82_85%_70%)] border-[hsl(216 100% 50%_/_0.3)] mb-3"
           >
             <Sparkles className="w-3 h-3 mr-1.5" />
             Free demo · No signup
@@ -145,7 +145,7 @@ export default function TryCopywriterPage() {
               <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 max-h-[60vh]">
                 {messages.length === 0 && (
                   <div className="text-center py-10 space-y-5">
-                    <div className="w-12 h-12 rounded-2xl mx-auto bg-[hsl(82_85%_55%_/_0.15)] flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-2xl mx-auto bg-[hsl(216 100% 50%_/_0.15)] flex items-center justify-center">
                       <Wand2 className="w-6 h-6 text-[hsl(82_85%_45%)]" />
                     </div>
                     <div>
@@ -161,7 +161,7 @@ export default function TryCopywriterPage() {
                         <button
                           key={p}
                           onClick={() => send(p)}
-                          className="text-left text-sm px-3 py-2.5 rounded-lg border border-border/60 bg-muted/30 hover:bg-muted/60 hover:border-[hsl(82_85%_55%_/_0.4)] transition-colors text-foreground"
+                          className="text-left text-sm px-3 py-2.5 rounded-lg border border-border/60 bg-muted/30 hover:bg-muted/60 hover:border-[hsl(216 100% 50%_/_0.4)] transition-colors text-foreground"
                         >
                           {p}
                         </button>
@@ -233,7 +233,7 @@ export default function TryCopywriterPage() {
                     onClick={() => send()}
                     aria-label="Send message"
                     disabled={loading || !input.trim()}
-                    className="h-10 px-4 bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] font-bold"
+                    className="h-10 px-4 bg-gradient-to-r from-[hsl(216 100% 50%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] font-bold"
                   >
                     {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                   </Button>
@@ -276,7 +276,7 @@ export default function TryCopywriterPage() {
               </p>
             </Card>
 
-            <Card className="p-4 border-[hsl(82_85%_55%_/_0.4)] bg-gradient-to-br from-background to-[hsl(82_85%_55%_/_0.04)]">
+            <Card className="p-4 border-[hsl(216 100% 50%_/_0.4)] bg-gradient-to-br from-background to-[hsl(216 100% 50%_/_0.04)]">
               <div className="flex items-center gap-2 mb-2">
                 <Lock className="w-4 h-4 text-[hsl(82_85%_45%)]" />
                 <div className="font-semibold text-sm text-foreground">Use your own voice</div>
@@ -288,7 +288,7 @@ export default function TryCopywriterPage() {
               <Button
                 asChild
                 size="sm"
-                className="w-full bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] font-bold"
+                className="w-full bg-gradient-to-r from-[hsl(216 100% 50%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] font-bold"
               >
                 <Link to="/login?signup=1">
                   Create Your Account

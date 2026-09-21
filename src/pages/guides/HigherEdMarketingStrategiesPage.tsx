@@ -214,10 +214,10 @@ export default function HigherEdMarketingStrategiesPage() {
 
       {/* Hero */}
       <section className="relative overflow-hidden py-16 md:py-24 border-b border-border/50">
-        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(82_85%_55%_/_0.07)] via-background to-[hsl(262_60%_55%_/_0.06)]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(216_100%_50%_/_0.07)] via-background to-[hsl(262_60%_55%_/_0.06)]" />
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl">
-            <Badge className="mb-6 bg-[hsl(82_85%_55%_/_0.12)] text-[hsl(82_60%_28%)] border-[hsl(82_85%_45%_/_0.3)]">
+            <Badge className="mb-6 bg-[hsl(216_100%_50%_/_0.12)] text-[hsl(82_60%_28%)] border-[hsl(82_85%_45%_/_0.3)]">
               <BookOpen className="w-3 h-3 mr-1" />
               Guide
             </Badge>
@@ -332,7 +332,7 @@ export default function HigherEdMarketingStrategiesPage() {
                     key={p.title}
                     className="p-6 rounded-xl border border-border bg-card hover:shadow-md transition-shadow"
                   >
-                    <div className="p-2.5 rounded-lg bg-[hsl(82_85%_55%_/_0.12)] w-fit mb-4">
+                    <div className="p-2.5 rounded-lg bg-[hsl(216_100%_50%_/_0.12)] w-fit mb-4">
                       <p.icon className="w-5 h-5 text-[hsl(82_60%_32%)]" />
                     </div>
                     <h3 className="font-semibold text-foreground mb-2">{p.title}</h3>
@@ -522,7 +522,7 @@ export default function HigherEdMarketingStrategiesPage() {
               <ol className="space-y-3">
                 {checklist.map((item, i) => (
                   <li key={item} className="flex gap-4 p-4 rounded-lg border border-border bg-card">
-                    <span className="shrink-0 w-6 h-6 rounded-full bg-[hsl(82_85%_55%_/_0.15)] text-[hsl(82_60%_28%)] text-xs font-bold flex items-center justify-center">
+                    <span className="shrink-0 w-6 h-6 rounded-full bg-[hsl(216_100%_50%_/_0.15)] text-[hsl(82_60%_28%)] text-xs font-bold flex items-center justify-center">
                       {i + 1}
                     </span>
                     <span className="text-sm text-muted-foreground leading-relaxed pt-0.5">
@@ -591,7 +591,7 @@ export default function HigherEdMarketingStrategiesPage() {
           <Link to="/try-copywriter">
             <Button
               size="lg"
-              className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] font-bold px-8 rounded-full"
+              className="bg-gradient-to-r from-[hsl(216_100%_50%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] font-bold px-8 rounded-full"
             >
               Try It Free <ArrowRight className="w-4 h-4 ml-2" />
             </Button>

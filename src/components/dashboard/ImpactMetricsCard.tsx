@@ -16,7 +16,7 @@ export function ImpactMetricsCard() {
       icon: Zap,
       value: personalStats.messagesCreated,
       label: 'Messages Created',
-      color: 'hsl(82 85% 55%)',
+      color: 'hsl(216 100% 50%)',
     },
     {
       icon: Clock,
@@ -28,7 +28,7 @@ export function ImpactMetricsCard() {
       icon: TrendingUp,
       value: personalStats.buildsCount,
       label: 'Builds Generated',
-      color: 'hsl(200 100% 50%)',
+      color: 'hsl(216 100% 45%)',
     },
     {
       icon: Target,
@@ -48,7 +48,7 @@ export function ImpactMetricsCard() {
     <Card className="border-border/50">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-semibold flex items-center gap-2">
-          <TrendingUp className="w-4 h-4 text-[hsl(82_85%_55%)]" />
+          <TrendingUp className="w-4 h-4 text-[hsl(216 100% 50%)]" />
           Your Impact
         </CardTitle>
       </CardHeader>

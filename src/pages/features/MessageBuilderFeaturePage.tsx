@@ -140,13 +140,13 @@ export default function MessageBuilderFeaturePage() {
         {/* Gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-background to-blue-600/5" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(220_70%_90%_/_0.3),_transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_hsl(270_60%_85%_/_0.25),_transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_hsl(216_100%_85%_/_0.25),_transparent_50%)]" />
         
         {/* Lens flares */}
         <div className="absolute top-20 right-[12%] w-32 h-32 bg-[hsl(220_70%_60%_/_0.18)] rounded-full blur-2xl" />
         <div className="absolute bottom-36 left-[8%] w-40 h-40 bg-[hsl(216_100%_50%_/_0.15)] rounded-full blur-3xl" />
-        <div className="absolute top-44 left-[22%] w-24 h-24 bg-[hsl(200_100%_50%_/_0.12)] rounded-full blur-2xl" />
-        <div className="absolute bottom-48 right-[25%] w-20 h-20 bg-[hsl(82_85%_55%_/_0.1)] rounded-full blur-2xl" />
+        <div className="absolute top-44 left-[22%] w-24 h-24 bg-[hsl(216_100%_45%_/_0.12)] rounded-full blur-2xl" />
+        <div className="absolute bottom-48 right-[25%] w-20 h-20 bg-[hsl(216_100%_50%_/_0.1)] rounded-full blur-2xl" />
         <div className="absolute top-32 right-[35%] w-16 h-16 bg-[hsl(340_75%_55%_/_0.12)] rounded-full blur-xl" />
         
         <div className="container mx-auto px-4 relative z-10">
@@ -185,8 +185,8 @@ export default function MessageBuilderFeaturePage() {
       <section className="py-16 bg-[hsl(220_70%_95%)] relative overflow-hidden">
         {/* Lens flares */}
         <div className="absolute top-12 right-[10%] w-28 h-28 bg-[hsl(216_100%_50%_/_0.15)] rounded-full blur-2xl" />
-        <div className="absolute bottom-28 left-[6%] w-36 h-36 bg-[hsl(82_85%_55%_/_0.12)] rounded-full blur-3xl" />
-        <div className="absolute top-1/3 left-[40%] w-20 h-20 bg-[hsl(200_100%_50%_/_0.1)] rounded-full blur-2xl" />
+        <div className="absolute bottom-28 left-[6%] w-36 h-36 bg-[hsl(216_100%_50%_/_0.12)] rounded-full blur-3xl" />
+        <div className="absolute top-1/3 left-[40%] w-20 h-20 bg-[hsl(216_100%_45%_/_0.1)] rounded-full blur-2xl" />
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-12">
@@ -223,7 +223,7 @@ export default function MessageBuilderFeaturePage() {
       <section className="py-20 relative overflow-hidden">
         {/* Lens flares */}
         <div className="absolute top-20 left-[15%] w-40 h-40 bg-[hsl(220_70%_60%_/_0.08)] rounded-full blur-3xl" />
-        <div className="absolute bottom-24 right-[10%] w-32 h-32 bg-[hsl(82_85%_55%_/_0.1)] rounded-full blur-2xl" />
+        <div className="absolute bottom-24 right-[10%] w-32 h-32 bg-[hsl(216_100%_50%_/_0.1)] rounded-full blur-2xl" />
         
         <div className="container mx-auto px-4 relative z-10">
           <BuilderStepsShowcase />
@@ -231,7 +231,7 @@ export default function MessageBuilderFeaturePage() {
       </section>
       <section className="py-20 relative overflow-hidden">
         {/* Lens flares */}
-        <div className="absolute top-16 left-[18%] w-32 h-32 bg-[hsl(200_100%_50%_/_0.08)] rounded-full blur-2xl" />
+        <div className="absolute top-16 left-[18%] w-32 h-32 bg-[hsl(216_100%_45%_/_0.08)] rounded-full blur-2xl" />
         <div className="absolute bottom-20 right-[15%] w-44 h-44 bg-[hsl(216_100%_50%_/_0.08)] rounded-full blur-3xl" />
 
         <div className="container mx-auto px-4 relative z-10">
@@ -377,8 +377,8 @@ export default function MessageBuilderFeaturePage() {
       {/* Audience Types */}
       <section className="py-20 relative overflow-hidden">
         {/* Lens flares */}
-        <div className="absolute top-1/4 right-[8%] w-36 h-36 bg-[hsl(82_85%_55%_/_0.08)] rounded-full blur-3xl" />
-        <div className="absolute bottom-1/3 left-[12%] w-28 h-28 bg-[hsl(200_100%_50%_/_0.08)] rounded-full blur-2xl" />
+        <div className="absolute top-1/4 right-[8%] w-36 h-36 bg-[hsl(216_100%_50%_/_0.08)] rounded-full blur-3xl" />
+        <div className="absolute bottom-1/3 left-[12%] w-28 h-28 bg-[hsl(216_100%_45%_/_0.08)] rounded-full blur-2xl" />
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">

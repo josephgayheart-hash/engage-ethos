@@ -103,7 +103,7 @@ export default function AICopywriterFeaturePage() {
       <section className="relative overflow-hidden py-20 md:py-32">
         <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 via-background to-blue-500/5" />
         <div className="absolute top-20 right-[12%] w-32 h-32 bg-[hsl(173_58%_45%_/_0.15)] rounded-full blur-2xl" />
-        <div className="absolute bottom-36 left-[8%] w-40 h-40 bg-[hsl(200_100%_50%_/_0.12)] rounded-full blur-3xl" />
+        <div className="absolute bottom-36 left-[8%] w-40 h-40 bg-[hsl(216_100%_45%_/_0.12)] rounded-full blur-3xl" />
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">

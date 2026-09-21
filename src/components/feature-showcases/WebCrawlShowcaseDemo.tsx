@@ -95,12 +95,12 @@ export default function WebCrawlShowcaseDemo() {
           <div>
             <label className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground block mb-1.5">Institution Website</label>
             <div className="flex gap-2">
-              <div className={`flex-1 rounded-lg px-3 py-2 text-[11px] border transition-all duration-300 ${step >= 1 ? 'border-blue-400 text-foreground' : 'border-border/60 text-muted-foreground'}`} style={step >= 1 ? { background: 'hsl(200 100% 50% / 0.05)' } : {}}>
+              <div className={`flex-1 rounded-lg px-3 py-2 text-[11px] border transition-all duration-300 ${step >= 1 ? 'border-blue-400 text-foreground' : 'border-border/60 text-muted-foreground'}`} style={step >= 1 ? { background: 'hsl(216 100% 45% / 0.05)' } : {}}>
                 {step >= 1 ? 'https://www.lakewoodstate.edu' : 'Enter your institution URL…'}
               </div>
               <button
                 className={`flex items-center gap-1.5 text-[10px] font-semibold px-3 py-2 rounded-lg transition-all duration-300 ${step >= 1 ? 'text-white' : 'text-muted-foreground border border-border/60'}`}
-                style={step >= 1 ? { background: 'hsl(200 100% 50%)' } : {}}
+                style={step >= 1 ? { background: 'hsl(216 100% 45%)' } : {}}
               >
                 <Search className="w-3 h-3" /> Crawl
               </button>
@@ -161,7 +161,7 @@ export default function WebCrawlShowcaseDemo() {
                       transitionDelay: `${i * 120}ms`,
                       opacity: step >= 4 ? 1 : 0,
                       transform: step >= 4 ? 'translateY(0)' : 'translateY(6px)',
-                      background: 'hsl(200 100% 50% / 0.03)',
+                      background: 'hsl(216 100% 45% / 0.03)',
                     }}
                   >
                     <result.icon className={`w-3.5 h-3.5 ${result.color} shrink-0 mt-0.5`} />

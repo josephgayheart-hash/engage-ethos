@@ -67,7 +67,7 @@ const industries = [
     title: "Financial Services",
     pain: "Branch offices and advisors going rogue on messaging, risking compliance.",
     example: "Banks, insurance, wealth management",
-    color: "from-[hsl(var(--cyber-purple))] to-[hsl(270_70%_45%)]",
+    color: "from-[hsl(var(--cyber-purple))] to-[hsl(216_100%_45%)]",
   },
 ];
 

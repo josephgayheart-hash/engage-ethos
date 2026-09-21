@@ -299,7 +299,7 @@ export function PostHogAnalyticsPanel() {
                     value={fmt(Number(overview.totals['pageviews'] || 0))}
                     delta={pctDelta(Number(overview.totals['pageviews'] || 0), Number(overview.prevTotals['pageviews'] || 0))}
                     sparkValues={overview.daily.map((d: any) => Number(d.pageviews || 0))}
-                    accent="hsl(200 100% 50%)"
+                    accent="hsl(216 100% 45%)"
                   />
                 </div>
 

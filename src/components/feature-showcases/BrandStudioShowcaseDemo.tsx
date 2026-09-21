@@ -102,7 +102,7 @@ export default function BrandStudioShowcaseDemo() {
                   className={`text-[9px] text-center py-1 rounded border transition-all ${
                     step >= 2 && p.active ? 'border-blue-400 text-blue-500' : 'border-border/40 text-muted-foreground'
                   }`}
-                  style={step >= 2 && p.active ? { background: 'hsl(200 100% 50% / 0.1)' } : {}}
+                  style={step >= 2 && p.active ? { background: 'hsl(216 100% 45% / 0.1)' } : {}}
                 >
                   {p.label}
                 </div>
@@ -111,7 +111,7 @@ export default function BrandStudioShowcaseDemo() {
 
             <p className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground pt-2">Brand Colors</p>
             <div className="flex gap-1.5">
-              {['hsl(270 70% 45%)', 'hsl(200 100% 50%)', 'hsl(82 85% 55%)', 'hsl(0 0% 100%)'].map((c, i) => (
+              {['hsl(216 100% 45%)', 'hsl(216 100% 45%)', 'hsl(216 100% 50%)', 'hsl(0 0% 100%)'].map((c, i) => (
                 <div key={i} className={`w-5 h-5 rounded-full border-2 transition-all ${step >= 2 ? 'border-border' : 'border-border/40'}`} style={{ background: c }} />
               ))}
             </div>
@@ -136,7 +136,7 @@ export default function BrandStudioShowcaseDemo() {
                 <div
                   className="absolute inset-0 transition-opacity duration-700"
                   style={{
-                    background: 'linear-gradient(to top, hsl(270 70% 20% / 0.85) 10%, hsl(270 70% 20% / 0.4) 45%, transparent 70%)',
+                    background: 'linear-gradient(to top, hsl(216 100% 20% / 0.85) 10%, hsl(216 100% 20% / 0.4) 45%, transparent 70%)',
                     opacity: step >= 2 ? 1 : 0,
                   }}
                 />
@@ -166,7 +166,7 @@ export default function BrandStudioShowcaseDemo() {
                   Your Future in<br />Computer Science
                 </p>
                 <p className="text-white/60 text-[9px] mt-1">100% Online · ABET Accredited</p>
-                <div className="mt-2 text-[9px] font-bold px-3 py-1 rounded w-fit" style={{ background: 'hsl(82 85% 55%)', color: 'hsl(270 70% 20%)' }}>
+                <div className="mt-2 text-[9px] font-bold px-3 py-1 rounded w-fit" style={{ background: 'hsl(216 100% 50%)', color: 'hsl(216 100% 20%)' }}>
                   Apply Now →
                 </div>
               </div>
@@ -188,8 +188,8 @@ export default function BrandStudioShowcaseDemo() {
         <div className="px-5 pb-4 flex items-center gap-3">
           {[
             { label: 'Image', color: 'hsl(340 75% 55%)', active: true },
-            { label: 'Pattern', color: 'hsl(200 100% 50%)', active: step >= 2 },
-            { label: 'Logo & Headlines', color: 'hsl(82 85% 55%)', active: step >= 3 },
+            { label: 'Pattern', color: 'hsl(216 100% 45%)', active: step >= 2 },
+            { label: 'Logo & Headlines', color: 'hsl(216 100% 50%)', active: step >= 3 },
             { label: 'CTA Bar', color: 'hsl(216 100% 50%)', active: step >= 3 },
           ].map((layer, i) => (
             <div key={layer.label} className="flex items-center gap-1.5 transition-all duration-300" style={{ opacity: layer.active ? 1 : 0.3 }}>

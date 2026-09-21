@@ -117,7 +117,7 @@ export function AnalysisActionsCard({
                 <div className="relative">
                   <div className="w-2 h-2 rounded-full bg-[hsl(216_100%_50%)] animate-pulse" />
                 </div>
-                <span className="text-xs font-medium text-[hsl(270_70%_45%)]">
+                <span className="text-xs font-medium text-[hsl(216_100%_45%)]">
                   AI is transforming your content...
                 </span>
               </div>
