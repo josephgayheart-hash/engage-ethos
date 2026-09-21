@@ -8,6 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserDashboardContext } from "@/hooks/useUserDashboardContext";
+import { EXCLUDED_USER_IDS } from "@/lib/analyticsExclusions";
 import { Users, ChevronDown, ChevronUp, ArrowRight, Activity, Sparkles, UserCheck } from "lucide-react";
 
 interface TeamUser {
