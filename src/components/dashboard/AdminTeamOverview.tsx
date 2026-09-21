@@ -37,6 +37,7 @@ export function AdminTeamOverview() {
         .from("profiles")
         .select("id, first_name, last_name, email, last_login_at, status")
         .eq("tenant_id", tenant.id)
+        .not("id", "in", `(${EXCLUDED_USER_IDS.join(",")})`)
         .order("last_login_at", { ascending: false, nullsFirst: false })
         .limit(5);
 
