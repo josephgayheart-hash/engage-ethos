@@ -113,9 +113,9 @@ export function SuperAdminDashboard({
             </Link>
           </Button>
           <Button variant="outline" asChild className="relative">
-            <Link to="/admin/onboarding">
+            <Link to="/admin/crm">
               <UserPlus className="w-4 h-4 mr-2" />
-              Requests
+              Leads
               {pendingRequestsCount > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-xs font-bold px-1.5">
                   {pendingRequestsCount > 99 ? '99+' : pendingRequestsCount}
