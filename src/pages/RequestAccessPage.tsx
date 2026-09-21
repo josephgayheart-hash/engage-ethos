@@ -561,19 +561,6 @@ export default function RequestAccessPage() {
                       </Select>
                     </div>
 
-                    <div className="flex items-start space-x-2">
-                      <Checkbox
-                        id="privacy-consent"
-                        checked={agreedToPrivacy}
-                        onCheckedChange={(checked) => setAgreedToPrivacy(checked === true)}
-                      />
-                      <label htmlFor="privacy-consent" className="text-xs text-muted-foreground leading-tight cursor-pointer">
-                        I agree to the{' '}
-                        <Link to="/privacy" target="_blank" className="text-accent underline underline-offset-2 hover:text-accent/80">
-                          Privacy Policy
-                        </Link>
-                      </label>
-                    </div>
 
                     <div className="flex gap-2">
                       <Button
