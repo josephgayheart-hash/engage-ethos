@@ -422,7 +422,7 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate, brand
   }, [journey, context, startDate, endDate, branding]);
 
   // Export functions with options
-  const exportToImage = useCallback((format: 'png' | 'svg') => {
+  const exportToImage = useCallback(async (format: 'png' | 'svg') => {
     const flowElement = flowRef.current?.querySelector('.react-flow') as HTMLElement;
     if (!flowElement) return;
 
@@ -440,8 +440,9 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate, brand
       return 'hsl(var(--background))';
     };
 
+    const { toPng, toSvg } = await loadImageExporters();
     const exportFn = format === 'png' ? toPng : toSvg;
-    
+
     exportFn(flowElement, {
       backgroundColor: getBgColor(),
       quality: 1,
