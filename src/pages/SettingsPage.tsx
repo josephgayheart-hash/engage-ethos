@@ -51,7 +51,7 @@ import {
   PenTool,
   ArrowRight
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "@/lib/router-compat";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import type { InstitutionalConfig as InstitutionalConfigType, ProfileType as ConfigProfileType } from "@/types/campusvoice";

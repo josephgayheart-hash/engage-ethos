@@ -1,4 +1,5 @@
-import jsPDF from "jspdf";
+// jspdf is browser-only: loaded on demand so server rendering never evaluates it
+const loadJsPDF = async () => (await import("jspdf")).jsPDF;
 import type { TalkingPointsDraft, CaseForCareDraft } from "@/types/campusvoice";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -87,7 +88,7 @@ export async function exportTalkingPointsToPDF(
   institutionName?: string,
   branding?: BrandingOptions
 ): Promise<void> {
-  const doc = new jsPDF({
+  const doc = new (await loadJsPDF())({
     orientation: 'portrait',
     unit: 'mm',
     format: 'a4',
@@ -525,7 +526,7 @@ export async function exportCaseForSupportToPDF(
   branding?: BrandingOptions,
   profileId?: string
 ): Promise<void> {
-  const doc = new jsPDF();
+  const doc = new (await loadJsPDF())();
   try {
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();

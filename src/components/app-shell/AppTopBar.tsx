@@ -1,5 +1,5 @@
 import { useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { Users, Dna, Search } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAgencyMode } from "@/hooks/useAgencyMode";

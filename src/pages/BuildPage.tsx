@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Link, useLocation, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ContextSelector } from "@/components/ContextSelector";
@@ -1171,7 +1171,7 @@ const BuildPage = () => {
                   value={context.additionalContext || ''}
                   onChange={(e) => setContext({ ...context, additionalContext: e.target.value })}
                   placeholder="Add campaign context or refinement notes..."
-                  className="w-full min-h-[80px] px-3 py-2 text-sm rounded-md border border-input bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-y"
+                  className="w-full min-h-[80px] px-3 py-2 text-sm rounded-md border border-input bg-background placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring resize-y"
                 />
               </BuilderStepSection>
 

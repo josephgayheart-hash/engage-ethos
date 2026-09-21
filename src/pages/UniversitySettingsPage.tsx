@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "@/lib/router-compat";
 import { InstitutionalConfig } from "@/components/InstitutionalConfig";
 import { ProfileSetupWizard } from "@/components/ProfileSetupWizard";
 import { EnterpriseProfileWizard } from "@/components/EnterpriseProfileWizard";

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { Lightbulb, Settings, Dna, ArrowRight } from "lucide-react";
 import { useContentDNAForGeneration } from "@/hooks/useContentDNAForGeneration";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";

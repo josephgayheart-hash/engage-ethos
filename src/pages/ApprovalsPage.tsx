@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { AdminApprovalPanel } from "@/components/library/AdminApprovalPanel";
 import { useSharedLibrary } from "@/hooks/useSharedLibrary";
 import { useAuth } from "@/contexts/AuthContext";

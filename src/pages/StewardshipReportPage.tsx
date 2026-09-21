@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { useLastUsedProfile } from "@/hooks/useLastUsedProfile";
 import { useInstitutionalProfiles } from "@/hooks/useInstitutionalProfiles";
 import { useUserDrafts } from "@/hooks/useUserDrafts";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "@/lib/router-compat";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

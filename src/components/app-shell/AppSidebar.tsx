@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import {
   Home, PenTool, Route, ClipboardCheck, Wrench, FolderOpen, Library, FileEdit,
   Sparkles, ImageIcon, Palette, CheckCircle, Settings, Building2, Layers, BarChart3,
@@ -319,7 +319,7 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-52"
+                className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-52"
                 side="top"
                 align="start"
                 sideOffset={4}

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router-compat';
 import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, MessageSquare, BarChart3, Target, BookOpen, Bot, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';

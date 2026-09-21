@@ -110,7 +110,7 @@ export function MultiSelectDropdown({
           </div>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-popover" align="start">
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 bg-popover" align="start">
         <div className="max-h-60 overflow-auto p-1">
           {options.map((option) => {
             const isSelected = value.includes(option.value);
@@ -120,7 +120,7 @@ export function MultiSelectDropdown({
                 type="button"
                 onClick={() => handleSelect(option.value)}
                 className={cn(
-                  "relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
+                  "relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-hidden hover:bg-accent hover:text-accent-foreground",
                   isSelected && "bg-accent/50"
                 )}
               >

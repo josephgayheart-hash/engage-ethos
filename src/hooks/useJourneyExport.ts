@@ -1,6 +1,8 @@
 import { useCallback, useState, RefObject } from "react";
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
+// jspdf is browser-only: loaded on demand so server rendering never evaluates it
+const loadJsPDF = async () => (await import("jspdf")).jsPDF;
+// html2canvas is browser-only: loaded on demand so server rendering never evaluates it
+const loadHtml2Canvas = async () => (await import("html2canvas")).default;
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
@@ -89,7 +91,7 @@ export const useJourneyExport = ({ title = "Journey", containerRef }: UseJourney
 
       const canvases: HTMLCanvasElement[] = [];
       for (const target of exportTargets) {
-        const canvas = await html2canvas(target, {
+        const canvas = await (await loadHtml2Canvas())(target, {
           ...commonCanvasOpts,
           windowWidth: target.scrollWidth,
           windowHeight: target.scrollHeight,
@@ -97,7 +99,7 @@ export const useJourneyExport = ({ title = "Journey", containerRef }: UseJourney
         canvases.push(canvas);
       }
 
-      const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
+      const pdf = new (await loadJsPDF())({ orientation: "portrait", unit: "pt", format: "a4" });
 
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();

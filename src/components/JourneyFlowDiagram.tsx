@@ -12,8 +12,9 @@ import ReactFlow, {
   SelectionMode,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { toPng, toSvg } from 'html-to-image';
-import { jsPDF } from 'jspdf';
+// html-to-image and jspdf are browser-only: loaded on demand so server rendering never evaluates them
+const loadImageExporters = async () => await import('html-to-image');
+const loadJsPDF = async () => (await import('jspdf')).jsPDF;
 import { Mail, MessageSquare, Globe, Phone, Share2, FileText, Download, Image, FileCode, Users, Target, Calendar, Megaphone, Search, FileSpreadsheet, Building2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -239,6 +240,7 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate, brand
 
     try {
       // Capture the diagram as PNG
+      const { toPng } = await loadImageExporters();
       const diagramDataUrl = await toPng(flowElement, {
         backgroundColor: '#ffffff',
         quality: 1,
@@ -246,7 +248,7 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate, brand
       });
 
       // Create PDF (landscape letter size for better fit)
-      const pdf = new jsPDF({
+      const pdf = new (await loadJsPDF())({
         orientation: 'landscape',
         unit: 'pt',
         format: 'letter',
@@ -420,7 +422,7 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate, brand
   }, [journey, context, startDate, endDate, branding]);
 
   // Export functions with options
-  const exportToImage = useCallback((format: 'png' | 'svg') => {
+  const exportToImage = useCallback(async (format: 'png' | 'svg') => {
     const flowElement = flowRef.current?.querySelector('.react-flow') as HTMLElement;
     if (!flowElement) return;
 
@@ -438,8 +440,9 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate, brand
       return 'hsl(var(--background))';
     };
 
+    const { toPng, toSvg } = await loadImageExporters();
     const exportFn = format === 'png' ? toPng : toSvg;
-    
+
     exportFn(flowElement, {
       backgroundColor: getBgColor(),
       quality: 1,
@@ -525,12 +528,13 @@ export const JourneyFlowDiagram = ({ journey, context, startDate, endDate, brand
   }, [journey]);
 
   // Export as clean SVG for Lucidchart import
-  const exportToLucidchartSVG = useCallback(() => {
+  const exportToLucidchartSVG = useCallback(async () => {
     const flowElement = flowRef.current?.querySelector('.react-flow') as HTMLElement;
     if (!flowElement) return;
 
     const timestamp = new Date().toISOString().split('T')[0];
-    
+
+    const { toSvg } = await loadImageExporters();
     toSvg(flowElement, {
       backgroundColor: '#ffffff',
       quality: 1,

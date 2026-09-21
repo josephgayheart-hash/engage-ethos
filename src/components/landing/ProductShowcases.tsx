@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router-compat';
 import { Image, Palette, Type, Wand2, Layers, Sparkles, CheckCircle2, MessageSquare, Send, Bot, PenTool, Users, Mail, Smartphone, Share2, Target, Map, Clock, ArrowRight, GitBranch, BarChart3, Zap, Crown, Camera, Paintbrush, Dna, Building2, BookOpen, Loader2 } from 'lucide-react';
 import showcaseCampusImage from '@/assets/showcase-student-image.png';
 

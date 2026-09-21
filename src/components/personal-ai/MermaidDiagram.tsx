@@ -1,12 +1,19 @@
 import { useEffect, useId, useRef, useState } from "react";
-import mermaid from "mermaid";
+// mermaid is browser-only: loaded on demand so server rendering never evaluates it
+type MermaidApi = typeof import("mermaid")["default"];
+let mermaidApi: MermaidApi | null = null;
+async function loadMermaid(): Promise<MermaidApi> {
+  if (!mermaidApi) mermaidApi = (await import("mermaid")).default;
+  return mermaidApi;
+}
 import { Button } from "@/components/ui/button";
 import { Copy, Download, Code as CodeIcon, Eye, Check, Maximize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 let initialized = false;
-function ensureInit() {
-  if (initialized) return;
+async function ensureInit() {
+  const mermaid = await loadMermaid();
+  if (initialized) return mermaid;
   initialized = true;
   const isDark = document.documentElement.classList.contains("dark");
   mermaid.initialize({
@@ -16,6 +23,7 @@ function ensureInit() {
     fontFamily: "inherit",
     flowchart: { curve: "basis", htmlLabels: true },
   });
+  return mermaid;
 }
 
 interface Props {
@@ -36,7 +44,7 @@ export function MermaidDiagram({ source, title, className }: Props) {
     let cancelled = false;
     (async () => {
       try {
-        ensureInit();
+        const mermaid = await ensureInit();
         const { svg } = await mermaid.render(`m-${id}`, source.trim());
         if (!cancelled) {
           setSvg(svg);

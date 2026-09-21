@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import { ChannelMockup } from "@/components/image-generator/ChannelMockup";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { useMemo, useCallback, useState, lazy, Suspense } from "react";
 import ReactFlow, {
   Node,

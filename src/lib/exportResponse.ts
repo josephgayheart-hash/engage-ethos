@@ -5,7 +5,8 @@ import { marked, type Token, type Tokens } from "marked";
 import {
   Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType,
 } from "docx";
-import jsPDF from "jspdf";
+// jspdf is browser-only: loaded on demand so server rendering never evaluates it
+const loadJsPDF = async () => (await import("jspdf")).jsPDF;
 
 type Format = "md" | "docx" | "pptx" | "pdf";
 
@@ -208,9 +209,9 @@ async function exportPptx(content: string, baseName: string) {
 }
 
 // ---------- PDF ----------
-function exportPdf(content: string, baseName: string) {
+async function exportPdf(content: string, baseName: string) {
   const tokens = marked.lexer(content);
-  const doc = new jsPDF({ unit: "pt", format: "letter" });
+  const doc = new (await loadJsPDF())({ unit: "pt", format: "letter" });
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const margin = 54;
@@ -284,5 +285,5 @@ export async function exportResponse(format: Format, content: string, titleHint?
   if (format === "md") return exportMarkdown(content, base);
   if (format === "docx") return exportDocx(content, base);
   if (format === "pptx") return exportPptx(content, base);
-  if (format === "pdf") return exportPdf(content, base);
+  if (format === "pdf") return await exportPdf(content, base);
 }

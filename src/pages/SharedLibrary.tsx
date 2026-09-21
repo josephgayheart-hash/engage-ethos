@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "@/lib/router-compat";
 import { WaveBackground } from "@/components/WaveBackground";
 import { Button } from "@/components/ui/button";
 import { useLibraryCollections } from "@/hooks/useLibraryCollections";

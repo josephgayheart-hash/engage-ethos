@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router-compat';
 import { WaveBackground } from '@/components/WaveBackground';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminAnalytics } from '@/hooks/useAdminAnalytics';

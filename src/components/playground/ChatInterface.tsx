@@ -237,7 +237,7 @@ export function ChatInterface({
               onKeyDown={handleKeyDown}
               placeholder={profileName ? `Message Copywriter about ${profileName}...` : "Message Copywriter..."}
               className="flex-1 bg-transparent border-0 resize-none px-4 py-3 text-sm 
-                         placeholder:text-muted-foreground/60 focus:outline-none focus:ring-0
+                         placeholder:text-muted-foreground/60 focus:outline-hidden focus:ring-0
                          min-h-[44px] max-h-[200px]"
               disabled={isLoading}
               rows={1}

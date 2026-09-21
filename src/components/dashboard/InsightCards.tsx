@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router-compat';
 import { Dna, Building2, BarChart3, Users } from 'lucide-react';
 import { UserDashboardContext } from '@/hooks/useUserDashboardContext';
 import { useAuth } from '@/contexts/AuthContext';

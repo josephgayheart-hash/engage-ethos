@@ -16,7 +16,7 @@ import { ImageIcon, Download, RefreshCw, Loader2, Sparkles, Palette, Camera, Use
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "@/lib/router-compat";
 import { ChannelMockup } from "@/components/image-generator/ChannelMockup";
 import { BrandOverlayEditor } from "@/components/image-generator/BrandOverlayEditor";
 import { useCampusPhotoCount } from "@/hooks/useCampusPhotoCount";

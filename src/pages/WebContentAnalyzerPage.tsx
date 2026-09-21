@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from '@/lib/router-compat';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AnalyzerInput } from '@/components/analyzer/AnalyzerInput';
@@ -32,7 +32,7 @@ import {
   Building2,
   Save
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router-compat';
 import { cn } from '@/lib/utils';
 import type { AnalysisResult, SavedAnalysisData, IssueRemediation } from '@/types/analyzer';
 

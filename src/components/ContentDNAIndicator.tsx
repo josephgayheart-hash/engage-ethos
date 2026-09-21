@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router-compat';
 import { useContentDNAForGeneration } from '@/hooks/useContentDNAForGeneration';
 import { useInstitutionalProfiles } from '@/hooks/useInstitutionalProfiles';
 import { useAuth } from '@/contexts/AuthContext';
