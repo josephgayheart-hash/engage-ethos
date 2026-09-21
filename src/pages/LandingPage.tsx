@@ -313,17 +313,16 @@ export default function LandingPage() {
 
       {/* Product Showcases Section — Top 2 inline + 3 tabbed */}
       <section className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-background relative overflow-hidden">
-        <div className="absolute top-20 right-[8%] w-48 h-48 bg-[hsl(82_85%_55%_/_0.06)] rounded-full blur-3xl" />
-        <div className="absolute bottom-32 left-[5%] w-40 h-40 bg-[hsl(270_70%_60%_/_0.06)] rounded-full blur-3xl" />
+        <div className="absolute top-24 right-[8%] w-64 h-64 bg-[hsl(216_100%_50%_/_0.05)] rounded-full blur-[90px]" />
 
         <div className="max-w-6xl mx-auto relative z-10 space-y-24 sm:space-y-32">
           <ScrollRevealSection>
             <div className="text-center">
-              <Badge className="mb-4 bg-[hsl(270_70%_60%_/_0.15)] text-[hsl(270_70%_55%)] border-[hsl(270_70%_60%_/_0.3)]">
+              <Badge className="mb-4 rounded-full bg-[hsl(216_100%_50%_/_0.08)] text-[hsl(216_100%_38%)] border-[hsl(216_100%_50%_/_0.25)] uppercase tracking-[0.12em] text-[11px] font-semibold">
                 <Sparkles className="w-3 h-3 mr-1" />
                 Product Tour
               </Badge>
-              <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-3">
+              <h2 className="font-display tracking-[-0.02em] text-2xl sm:text-3xl text-foreground mb-3">
                 See it in action.
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -344,9 +343,8 @@ export default function LandingPage() {
       </section>
 
       {/* Value Proposition Section - Fun Yellow Background */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(48_100%_90%)] relative overflow-hidden">
-        <div className="absolute top-12 right-[10%] w-28 h-28 bg-[hsl(270_70%_60%_/_0.2)] rounded-full blur-2xl" />
-        <div className="absolute bottom-28 left-[6%] w-36 h-36 bg-[hsl(82_85%_55%_/_0.18)] rounded-full blur-3xl" />
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(51_22%_93%)] relative overflow-hidden border-y border-border/70">
+        <div className="absolute top-12 right-[10%] w-40 h-40 bg-[hsl(216_100%_50%_/_0.07)] rounded-full blur-[70px]" />
         
         {/* Wave transition at bottom */}
         <div className="absolute -bottom-px left-0 right-0">
@@ -359,7 +357,7 @@ export default function LandingPage() {
           >
             <path 
               d="M0 80L48 70C96 60 192 40 288 35C384 30 480 40 576 45C672 50 768 50 864 45C960 40 1056 30 1152 30C1248 30 1344 40 1392 45L1440 50V80H1392C1344 80 1248 80 1152 80C1056 80 960 80 864 80C768 80 672 80 576 80C480 80 384 80 288 80C192 80 96 80 48 80H0Z" 
-              fill="hsl(173 40% 92%)"
+              fill="hsl(200 24% 95%)"
             />
           </svg>
         </div>
@@ -367,8 +365,8 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto relative z-10">
           <ScrollRevealSection>
             <div className="text-center mb-12">
-              <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-3">
-                <span className="text-[hsl(270_70%_55%)]">Stop Reacting.</span> Start Planning.
+              <h2 className="font-display tracking-[-0.02em] text-2xl sm:text-3xl text-foreground mb-3">
+                <span className="text-[hsl(216_100%_40%)]">Stop Reacting.</span> Start Planning.
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
                 Most comms are written on instinct. CampusVoice gives you the playbook to plan and execute with confidence.
@@ -379,15 +377,15 @@ export default function LandingPage() {
           <ul className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8" aria-label="Core value propositions">
             {valueProps.map((prop, index) => {
               const colors = [
-                { bg: 'bg-[hsl(82_85%_55%_/_0.2)]', icon: 'text-[hsl(82_70%_40%)]' },
-                { bg: 'bg-[hsl(270_70%_60%_/_0.2)]', icon: 'text-[hsl(270_70%_55%)]' },
-                { bg: 'bg-[hsl(200_100%_50%_/_0.2)]', icon: 'text-[hsl(200_100%_45%)]' },
-                { bg: 'bg-[hsl(340_75%_55%_/_0.2)]', icon: 'text-[hsl(340_75%_50%)]' },
+                { bg: 'bg-[hsl(216_100%_50%_/_0.1)]', icon: 'text-[hsl(216_100%_40%)]' },
+                { bg: 'bg-[hsl(60_4%_10%_/_0.08)]', icon: 'text-[hsl(60_4%_20%)]' },
+                { bg: 'bg-[hsl(216_100%_50%_/_0.1)]', icon: 'text-[hsl(216_100%_40%)]' },
+                { bg: 'bg-[hsl(60_4%_10%_/_0.08)]', icon: 'text-[hsl(60_4%_20%)]' },
               ];
               const color = colors[index % 4];
               return (
                 <li key={prop.title} className="text-center list-none opacity-0 animate-reveal-up" style={{ animationDelay: `${index * 100}ms` }}>
-                  <div className={`w-12 h-12 rounded-2xl ${color.bg} flex items-center justify-center mx-auto mb-4 rotate-3 hover:rotate-0 transition-transform`}>
+                  <div className={`w-12 h-12 rounded-xl ${color.bg} flex items-center justify-center mx-auto mb-4 transition-transform group-hover:scale-105`}>
                     <CheckCircle2 className={`w-6 h-6 ${color.icon}`} />
                   </div>
                   <h3 className="font-semibold text-foreground mb-2">{prop.title}</h3>
@@ -400,19 +398,18 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section - Fresh Mint Background */}
-      <section className="pt-16 sm:pt-20 pb-32 sm:pb-36 px-4 sm:px-6 lg:px-8 bg-[hsl(173_40%_92%)] relative overflow-hidden">
-        <div className="absolute top-16 left-[18%] w-32 h-32 bg-[hsl(200_100%_50%_/_0.18)] rounded-full blur-2xl" />
-        <div className="absolute bottom-20 right-[15%] w-44 h-44 bg-[hsl(270_70%_60%_/_0.12)] rounded-full blur-3xl" />
+      <section className="pt-16 sm:pt-20 pb-32 sm:pb-36 px-4 sm:px-6 lg:px-8 bg-[hsl(200_24%_95%)] relative overflow-hidden border-t border-border/70">
+        <div className="absolute top-16 left-[18%] w-48 h-48 bg-[hsl(216_100%_50%_/_0.07)] rounded-full blur-[80px]" />
         
         <div className="max-w-6xl mx-auto relative z-10">
           <ScrollRevealSection>
             <div className="text-center mb-12">
-              <Badge className="mb-4 bg-[hsl(82_85%_55%_/_0.2)] text-[hsl(82_70%_35%)] border-[hsl(82_85%_55%_/_0.4)]">
+              <Badge className="mb-4 rounded-full bg-[hsl(60_4%_10%_/_0.06)] text-[hsl(60_4%_20%)] border-[hsl(60_4%_10%_/_0.15)] uppercase tracking-[0.12em] text-[11px] font-semibold">
                 <Zap className="w-3 h-3 mr-1" />
                 Core Capabilities
               </Badge>
-              <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-3">
-                Powered by <span className="text-[hsl(200_100%_45%)]">Communication Science</span>
+              <h2 className="font-display tracking-[-0.02em] text-2xl sm:text-3xl text-foreground mb-3">
+                Powered by <span className="text-[hsl(216_100%_40%)]">Communication Science</span>
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
                 Every feature is designed around how people actually make decisions.
@@ -423,20 +420,18 @@ export default function LandingPage() {
           <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5" aria-label="CampusVoice feature list">
             {features.map((feature, index) => {
               const cardColors = [
-                { bg: 'bg-white', border: 'border-[hsl(82_85%_55%_/_0.4)]', iconBg: 'bg-[hsl(82_85%_55%_/_0.2)]', iconColor: 'text-[hsl(82_70%_35%)]', hoverBorder: 'hover:border-[hsl(82_85%_55%)]' },
-                { bg: 'bg-white', border: 'border-[hsl(270_70%_60%_/_0.4)]', iconBg: 'bg-[hsl(270_70%_60%_/_0.2)]', iconColor: 'text-[hsl(270_70%_50%)]', hoverBorder: 'hover:border-[hsl(270_70%_60%)]' },
-                { bg: 'bg-white', border: 'border-[hsl(200_100%_50%_/_0.4)]', iconBg: 'bg-[hsl(200_100%_50%_/_0.2)]', iconColor: 'text-[hsl(200_100%_40%)]', hoverBorder: 'hover:border-[hsl(200_100%_50%)]' },
-                { bg: 'bg-white', border: 'border-[hsl(340_75%_55%_/_0.4)]', iconBg: 'bg-[hsl(340_75%_55%_/_0.2)]', iconColor: 'text-[hsl(340_75%_45%)]', hoverBorder: 'hover:border-[hsl(340_75%_55%)]' },
+                { bg: 'bg-card', border: 'border-border', iconBg: 'bg-[hsl(216_100%_50%_/_0.1)]', iconColor: 'text-[hsl(216_100%_40%)]', hoverBorder: 'hover:border-[hsl(216_100%_50%_/_0.5)]' },
+                { bg: 'bg-card', border: 'border-border', iconBg: 'bg-[hsl(60_4%_10%_/_0.07)]', iconColor: 'text-[hsl(60_4%_20%)]', hoverBorder: 'hover:border-[hsl(60_4%_10%_/_0.3)]' },
               ];
-              const colors = cardColors[index % 4];
+              const colors = cardColors[index % 2];
               return (
                 <li key={feature.title} className="list-none opacity-0 animate-reveal-up" style={{ animationDelay: `${index * 80}ms` }}>
                   <Link 
                     to={feature.link}
-                    className={`group ${colors.bg} ${colors.border} border-2 rounded-2xl p-6 ${colors.hoverBorder} hover:shadow-2xl hover:-translate-y-3 hover:scale-[1.02] transition-all duration-500 ease-out cursor-pointer block h-full`}
+                    className={`group ${colors.bg} ${colors.border} border rounded-xl p-6 ${colors.hoverBorder} hover:shadow-[var(--shadow-lg)] hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer block h-full`}
                     style={{ transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }}
                   >
-                    <div className={`p-3 rounded-xl ${colors.iconBg} w-fit mb-4 group-hover:scale-110 transition-transform`}>
+                    <div className={`p-2.5 rounded-lg ${colors.iconBg} w-fit mb-4 group-hover:scale-105 transition-transform`}>
                       <feature.icon className={`w-6 h-6 ${colors.iconColor}`} />
                     </div>
                     <h3 className="font-semibold text-foreground mb-2">{feature.title}</h3>
@@ -494,7 +489,7 @@ export default function LandingPage() {
             Built for Enterprise. Ready for the Field.
           </p>
 
-          <h2 className="font-serif text-3xl sm:text-4xl text-white mb-4 leading-tight">
+          <h2 className="font-display tracking-[-0.02em] text-3xl sm:text-4xl text-white mb-4 leading-tight">
             Introducing <span style={{ color: '#0082cb' }}>Fieldmark</span>
           </h2>
 
@@ -537,15 +532,14 @@ export default function LandingPage() {
 
 
       {/* Secondary CTA Section - Vibrant Purple */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[hsl(270_60%_50%)] relative overflow-hidden">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-[hsl(60_4%_10%)]">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-12 right-[12%] w-40 h-40 bg-[hsl(82_85%_55%_/_0.2)] rounded-full blur-3xl" />
-          <div className="absolute bottom-20 left-[8%] w-48 h-48 bg-[hsl(200_100%_50%_/_0.15)] rounded-full blur-3xl" />
+          <div className="absolute top-8 right-[12%] w-72 h-72 bg-[hsl(216_100%_50%_/_0.14)] rounded-full blur-[100px]" />
         </div>
         
         <div className="max-w-3xl mx-auto text-center relative z-10">
-          <h2 className="font-serif text-2xl sm:text-3xl text-white mb-4">
-            Ready to become your institution's <span className="text-[hsl(82_85%_65%)]">digital brand enforcer</span>?
+          <h2 className="font-display tracking-[-0.02em] text-2xl sm:text-3xl text-white mb-4">
+            Ready to become your institution's <span className="text-[hsl(216_100%_66%)]">digital brand enforcer</span>?
           </h2>
           <p className="text-white/80 mb-8 text-lg">
             Small teams. Big brand protection. AI that keeps everyone on-brand.
@@ -554,7 +548,7 @@ export default function LandingPage() {
             <Button 
               asChild
               size="lg"
-              className="bg-[hsl(82_85%_55%)] text-primary hover:bg-[hsl(82_85%_50%)] shadow-xl hover:shadow-2xl hover:scale-105 px-8 font-bold transition-all duration-300 rounded-full"
+              className="h-12 rounded-lg bg-[hsl(216_100%_50%)] text-white hover:bg-[hsl(216_100%_45%)] shadow-[0_10px_30px_-10px_hsl(216_100%_50%_/_0.65)] px-8 font-semibold transition-colors border-0"
             >
               <Link to="/login?signup=1">
                 Create Your Account
@@ -564,7 +558,7 @@ export default function LandingPage() {
               asChild
               variant="ghost"
               size="lg"
-              className="text-white hover:text-white hover:bg-white/20 rounded-full border-2 border-white/30"
+              className="h-12 px-8 text-white hover:text-white hover:bg-white/10 rounded-lg border border-white/20"
             >
               <Link to="/try-copywriter">
                 Try It Free
