@@ -77,7 +77,7 @@ export function DownloadFormatPicker({
     try {
       const canvas = await captureElement(el as HTMLElement);
       const filename = `${filenameBase}-${Date.now()}`;
-      downloadCanvas(canvas, filename, format);
+      await downloadCanvas(canvas, filename, format);
       toast.success(`Downloaded as ${format.toUpperCase()}!`);
     } catch (err) {
       console.error("Download failed:", err);
