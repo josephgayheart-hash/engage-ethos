@@ -15,5 +15,13 @@ export default defineConfig({
   },
   vite: {
     plugins: [mcpPlugin()],
+    resolve: {
+      alias: [
+        // jspdf only exposes its entry under the "node"/"browser" conditions, which the
+        // server bundle does not use. It is dynamically imported from browser-only code
+        // paths, so point at the browser build to keep bundling resolvable.
+        { find: /^jspdf$/, replacement: "jspdf/dist/jspdf.es.min.js" },
+      ],
+    },
   },
 });
