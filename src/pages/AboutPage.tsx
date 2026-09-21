@@ -207,7 +207,7 @@ export default function AboutPage() {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <Link to="/request-access">
-              <Button size="sm" className="rounded-full px-6">Request Early Access</Button>
+              <Button size="sm" className="rounded-full px-6">Create Your Account</Button>
             </Link>
             <a href="mailto:sales@campusvoice.ai">
               <Button variant="outline" size="sm" className="rounded-full px-6">Contact Tyler</Button>

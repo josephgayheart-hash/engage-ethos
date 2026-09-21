@@ -78,7 +78,7 @@ export default function BrandAuditFeaturePage() {
         description="Audit every touchpoint across your institution. Score brand consistency, detect terminology violations, and track remediation progress over time."
         keywords={["brand audit", "brand consistency scoring", "institutional governance", "higher education branding"]}
         jsonLd={[
-          getWebPageSchema("Brand Audit & Scoring", "Institutional brand governance for higher education", "https://engage-ethos.lovable.app/features/brand-audit"),
+          getWebPageSchema("Brand Audit & Scoring", "Institutional brand governance for higher education", "https://www.campusvoice.ai/features/brand-audit"),
           getSoftwareApplicationSchema("Brand Audit & Scoring", "Audit touchpoints, score brand consistency, and track remediation across your institution.", ["Touchpoint Inventory", "Brand Scoring", "Issue Detection", "Progress Tracking"]),
         ]}
       />
@@ -93,7 +93,7 @@ export default function BrandAuditFeaturePage() {
           <div className="flex items-center gap-3">
             <Link to="/" className="hidden md:inline-flex"><Button variant="ghost" size="sm"><ArrowLeft className="w-4 h-4 mr-2" />Back</Button></Link>
             <Link to="/login" className="hidden md:inline-flex"><Button variant="outline" size="sm">Sign In</Button></Link>
-            <Link to="/request-access" className="hidden md:inline-flex"><Button size="sm">Start Free</Button></Link>
+            <Link to="/request-access" className="hidden md:inline-flex"><Button size="sm">Create Account</Button></Link>
             <MobileNav />
           </div>
         </div>
@@ -121,7 +121,7 @@ export default function BrandAuditFeaturePage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: "0.3s" }}>
               <Link to="/request-access">
                 <Button size="lg" className="gap-2 bg-amber-600 hover:bg-amber-700">
-                  Start Free — Instant Access <ArrowRight className="w-4 h-4" />
+                  Create Your Account <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
             </div>
@@ -261,7 +261,7 @@ export default function BrandAuditFeaturePage() {
           <p className="text-white/80 text-lg mb-8 max-w-2xl mx-auto">Start auditing touchpoints today. Protect your brand across every department.</p>
           <Link to="/request-access">
             <Button size="lg" className="bg-white text-amber-600 hover:bg-white/90 font-bold px-8">
-              Start Free — Instant Access <ArrowRight className="w-4 h-4 ml-2" />
+              Create Your Account <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </Link>
         </div>

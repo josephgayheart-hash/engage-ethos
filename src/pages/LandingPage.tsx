@@ -54,11 +54,11 @@ const landingPageSchemas = [
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'CampusVoice.AI',
-    url: 'https://engage-ethos.lovable.app',
+    url: 'https://www.campusvoice.ai',
     description: 'Strategic Messaging Intelligence for Brand Teams',
     potentialAction: {
       '@type': 'SearchAction',
-      target: 'https://engage-ethos.lovable.app/search?q={search_term_string}',
+      target: 'https://www.campusvoice.ai/search?q={search_term_string}',
       'query-input': 'required name=search_term_string'
     }
   },
@@ -578,7 +578,7 @@ export default function LandingPage() {
               className="bg-[hsl(82_85%_55%)] text-primary hover:bg-[hsl(82_85%_50%)] shadow-xl hover:shadow-2xl hover:scale-105 px-8 font-bold transition-all duration-300 rounded-full"
             >
               <Link to="/request-access">
-                Start Free — Instant Access
+                Create Your Account
               </Link>
             </Button>
             <RequestDemoDialog

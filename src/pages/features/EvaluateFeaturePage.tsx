@@ -102,7 +102,7 @@ export default function EvaluateFeaturePage() {
           getWebPageSchema(
             'Message Evaluator',
             'Five-pillar persuasion analysis for higher education communications',
-            'https://engage-ethos.lovable.app/features/evaluate'
+            'https://www.campusvoice.ai/features/evaluate'
           ),
           getSoftwareApplicationSchema(
             'Message Evaluator',
@@ -143,7 +143,7 @@ export default function EvaluateFeaturePage() {
             </Link>
             <Link to="/request-access" className="hidden md:inline-flex">
               <Button size="sm" className="bg-primary hover:bg-primary/90">
-                Join Beta
+                Create Your Account
               </Button>
             </Link>
             <MobileNav />

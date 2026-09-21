@@ -78,7 +78,7 @@ export default function AICopywriterFeaturePage() {
         description="Chat your way to on-brand copy. AI Copywriter knows your voice, facts, and stories — generating institutional messaging through natural conversation."
         keywords={["AI copywriter", "brand messaging assistant", "higher education content", "AI writing tool"]}
         jsonLd={[
-          getWebPageSchema("AI Copywriter", "Brand-aware messaging assistant for higher education", "https://engage-ethos.lovable.app/features/ai-copywriter"),
+          getWebPageSchema("AI Copywriter", "Brand-aware messaging assistant for higher education", "https://www.campusvoice.ai/features/ai-copywriter"),
           getSoftwareApplicationSchema("AI Copywriter", "A brand-aware messaging assistant that generates institutional content through natural conversation.", ["Conversational AI", "Content DNA Integration", "Multi-Channel Output", "Conversation History"]),
         ]}
       />
@@ -93,7 +93,7 @@ export default function AICopywriterFeaturePage() {
           <div className="flex items-center gap-3">
             <Link to="/" className="hidden md:inline-flex"><Button variant="ghost" size="sm"><ArrowLeft className="w-4 h-4 mr-2" />Back</Button></Link>
             <Link to="/login" className="hidden md:inline-flex"><Button variant="outline" size="sm">Sign In</Button></Link>
-            <Link to="/request-access" className="hidden md:inline-flex"><Button size="sm">Start Free</Button></Link>
+            <Link to="/request-access" className="hidden md:inline-flex"><Button size="sm">Create Account</Button></Link>
             <MobileNav />
           </div>
         </div>
@@ -121,7 +121,7 @@ export default function AICopywriterFeaturePage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: "0.3s" }}>
               <Link to="/request-access">
                 <Button size="lg" className="gap-2 bg-teal-600 hover:bg-teal-700">
-                  Start Free — Instant Access <ArrowRight className="w-4 h-4" />
+                  Create Your Account <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
             </div>
@@ -279,7 +279,7 @@ export default function AICopywriterFeaturePage() {
           <p className="text-white/80 text-lg mb-8 max-w-2xl mx-auto">Stop prompting generic AI tools with brand guidelines. Start with an AI that already knows you.</p>
           <Link to="/request-access">
             <Button size="lg" className="bg-white text-teal-600 hover:bg-white/90 font-bold px-8">
-              Start Free — Instant Access <ArrowRight className="w-4 h-4 ml-2" />
+              Create Your Account <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </Link>
         </div>

@@ -290,7 +290,7 @@ export default function TryCopywriterPage() {
                 className="w-full bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] font-bold"
               >
                 <Link to="/request-access">
-                  Get Early Access
+                  Create Your Account
                   <ArrowRight className="w-3.5 h-3.5 ml-1" />
                 </Link>
               </Button>

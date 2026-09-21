@@ -25,8 +25,8 @@ const getOrganizationSchema = () => ({
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'CampusVoice.AI',
-  url: 'https://engage-ethos.lovable.app',
-  logo: 'https://engage-ethos.lovable.app/campusvoice-logo.png',
+  url: 'https://www.campusvoice.ai',
+  logo: 'https://www.campusvoice.ai/campusvoice-logo.png',
   description: 'Strategic Messaging Intelligence for Higher Education',
   sameAs: [
     'https://twitter.com/CampusVoiceAI'
@@ -87,7 +87,7 @@ export const getWebPageSchema = (
   isPartOf: {
     '@type': 'WebSite',
     name: 'CampusVoice.AI',
-    url: 'https://engage-ethos.lovable.app'
+    url: 'https://www.campusvoice.ai'
   },
   provider: getOrganizationSchema()
 });

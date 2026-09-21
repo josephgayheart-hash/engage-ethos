@@ -109,7 +109,7 @@ export default function ForAgenciesPage() {
                 <Button size="sm" className="gap-2 whitespace-nowrap">
                   <Briefcase className="h-4 w-4 hidden sm:block" />
                   <span className="sm:hidden">Apply</span>
-                  <span className="hidden sm:inline">Get Early Access</span>
+                  <span className="hidden sm:inline">Create Your Account</span>
                 </Button>
               </Link>
             </div>
@@ -150,7 +150,7 @@ export default function ForAgenciesPage() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link to="/agency/request-access">
                   <Button size="lg" className="gap-2 text-base px-8 shadow-lg hover:shadow-xl transition-shadow">
-                    Get Early Access
+                    Create Your Account
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
@@ -444,7 +444,7 @@ export default function ForAgenciesPage() {
                   variant="secondary"
                   className="gap-2 text-base px-10 py-6 text-lg shadow-lg hover:shadow-xl transition-all"
                 >
-                  Get Early Access
+                  Create Your Account
                   <ArrowRight className="h-5 w-5" />
                 </Button>
               </Link>
