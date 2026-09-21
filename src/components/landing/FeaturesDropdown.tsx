@@ -12,7 +12,15 @@ const featureLinks = [
   { icon: Layers, label: 'More Capabilities', to: '/features' },
 ];
 
-export function FeaturesDropdown() {
+interface FeaturesDropdownProps {
+  tone?: 'dark' | 'light';
+}
+
+export function FeaturesDropdown({ tone = 'dark' }: FeaturesDropdownProps) {
+  const isLight = tone === 'light';
+  const triggerClass = isLight
+    ? 'text-foreground/70 hover:text-foreground hover:bg-foreground/5'
+    : 'text-white/70 hover:text-white hover:bg-white/10';
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -29,7 +37,7 @@ export function FeaturesDropdown() {
       <Button
         variant="ghost"
         size="sm"
-        className="text-white/70 hover:text-white hover:bg-white/10"
+        className={triggerClass}
         onClick={() => setOpen(!open)}
       >
         Features
@@ -37,13 +45,13 @@ export function FeaturesDropdown() {
       </Button>
 
       {open && (
-        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 rounded-xl border border-white/10 bg-[hsl(222_47%_15%)] backdrop-blur-xl shadow-2xl p-2 z-50 animate-fade-in">
+        <div className={`absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 rounded-xl border shadow-2xl p-2 z-50 animate-fade-in backdrop-blur-xl ${isLight ? 'border-border bg-card' : 'border-white/10 bg-[hsl(60_4%_13%)]'}`}>
           {featureLinks.map((f) => (
             <Link
               key={f.to}
               to={f.to}
               onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${isLight ? 'text-foreground/75 hover:text-foreground hover:bg-muted' : 'text-white/70 hover:text-white hover:bg-white/10'}`}
             >
               <f.icon className="w-4 h-4 text-[hsl(216_100%_50%)]" />
               {f.label}
