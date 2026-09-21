@@ -1870,9 +1870,9 @@ const AdminPanel = () => {
                       </Link>
                     </Button>
                     <Button variant="outline" className="w-full justify-start" size="sm" asChild>
-                      <Link to="/admin/onboarding">
+                      <Link to="/admin/crm">
                         <Activity className="w-4 h-4 mr-2" />
-                        Access Requests
+                        Leads &amp; CRM
                         <ChevronRight className="w-4 h-4 ml-auto" />
                       </Link>
                     </Button>
