@@ -471,7 +471,7 @@ const StrategyPage = () => {
 
       const result = await mapMessages(
         contextWithChannels, 
-        configForGeneration, 
+        configForGeneration as any, 
         journeyWeeks,
         startDate?.toISOString(),
         endDate?.toISOString(),
@@ -700,8 +700,8 @@ const StrategyPage = () => {
       status: (isAdmin || isApprover) ? 'published' as const : 'submitted' as const,
       version: '1.0',
       requiredFields: {
-        audience: [context.audience],
-        moment: [context.moment],
+        audience: [context.audience ?? ''],
+        moment: [context.moment ?? ''],
         channel: selectedChannels,
       },
       useCases: {

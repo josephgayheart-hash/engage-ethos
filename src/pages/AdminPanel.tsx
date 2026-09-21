@@ -329,7 +329,7 @@ const AdminPanel = () => {
       setInstitutionalProfiles(profilesWithInstitution);
 
       // Map Content DNA samples with names
-      const samplesWithNames: ContentDNASample[] = (dnaSamplesData || []).map(s => {
+      const samplesWithNames: ContentDNASample[] = ((dnaSamplesData || []) as any[]).map(s => {
         const sTenant = tenantsData?.find(t => t.id === s.tenant_id);
         const sProfile = profilesWithInstitution.find(p => p.id === s.profile_id);
         return {
@@ -341,7 +341,7 @@ const AdminPanel = () => {
       setContentDNASamples(samplesWithNames);
 
       // Map Content DNA analyses with names
-      const analysesWithNames: ContentDNAAnalysis[] = (dnaAnalysesData || []).map(a => {
+      const analysesWithNames: ContentDNAAnalysis[] = ((dnaAnalysesData || []) as any[]).map(a => {
         const aTenant = tenantsData?.find(t => t.id === a.tenant_id);
         const aProfile = profilesWithInstitution.find(p => p.id === a.profile_id);
         return {
@@ -355,7 +355,7 @@ const AdminPanel = () => {
       setContentDNAAnalyses(analysesWithNames);
 
       // Map email nudges with user info
-      const nudgesWithNames: EmailNudge[] = (nudgesData || []).map(n => {
+      const nudgesWithNames: EmailNudge[] = ((nudgesData || []) as any[]).map(n => {
         const nUser = usersWithInstitution.find(u => u.id === n.user_id);
         const nTenant = tenantsData?.find(t => t.id === n.tenant_id);
         return {
