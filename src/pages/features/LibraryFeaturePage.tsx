@@ -77,7 +77,7 @@ export default function LibraryFeaturePage() {
             '@type': 'WebPage',
             name: 'University Library',
             description: 'Content governance and approval workflows for higher education',
-            url: 'https://engage-ethos.lovable.app/features/library'
+            url: 'https://www.campusvoice.ai/features/library'
           },
           {
             '@context': 'https://schema.org',
@@ -122,7 +122,7 @@ export default function LibraryFeaturePage() {
             </Link>
             <Link to="/request-access" className="hidden md:inline-flex">
               <Button size="sm" className="bg-primary hover:bg-primary/90">
-                Join Beta
+                Create Your Account
               </Button>
             </Link>
             <MobileNav />

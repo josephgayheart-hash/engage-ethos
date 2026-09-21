@@ -86,7 +86,7 @@ export default function ContentDNAFeaturePage() {
           getWebPageSchema(
             'Content DNA Studio',
             'AI-powered voice analysis for higher education institutions',
-            'https://engage-ethos.lovable.app/features/content-dna'
+            'https://www.campusvoice.ai/features/content-dna'
           ),
           getSoftwareApplicationSchema(
             'Content DNA Studio',
@@ -127,7 +127,7 @@ export default function ContentDNAFeaturePage() {
             </Link>
             <Link to="/request-access" className="hidden md:inline-flex">
               <Button size="sm" className="bg-primary hover:bg-primary/90">
-                Join Beta
+                Create Your Account
               </Button>
             </Link>
             <MobileNav />

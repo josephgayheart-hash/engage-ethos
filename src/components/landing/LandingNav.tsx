@@ -18,15 +18,6 @@ export function LandingNav() {
 
         <div className="flex items-center gap-1 sm:gap-3">
           <FeaturesDropdown />
-          <Link to="/" className="hidden sm:block">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white/70 hover:text-white hover:bg-white/10"
-            >
-              For Universities
-            </Button>
-          </Link>
           <Link to="/for-enterprise" className="hidden sm:block">
             <Button
               variant="ghost"
@@ -54,12 +45,21 @@ export function LandingNav() {
               Sign In
             </Button>
           </Link>
-          <Link to="/request-access">
+          <Link to="/request-access" className="hidden sm:block">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white/70 hover:text-white hover:bg-white/10"
+            >
+              Create Account
+            </Button>
+          </Link>
+          <Link to="/try-copywriter">
             <Button
               size="sm"
               className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] font-bold rounded-full px-5"
             >
-              Start Free
+              Try It Free
               <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
             </Button>
           </Link>

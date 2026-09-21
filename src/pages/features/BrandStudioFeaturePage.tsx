@@ -105,7 +105,7 @@ export default function BrandStudioFeaturePage() {
         description="Layer logos, headlines, CTAs, and brand patterns onto any image with AI-powered Smart Layer masking. On-brand visual branding for higher education."
         keywords={["brand overlay editor", "smart layer masking", "institutional branding", "AI brand studio"]}
         jsonLd={[
-          getWebPageSchema("AI Brand Studio", "Smart overlay editor for institutional branding", "https://engage-ethos.lovable.app/features/brand-studio"),
+          getWebPageSchema("AI Brand Studio", "Smart overlay editor for institutional branding", "https://www.campusvoice.ai/features/brand-studio"),
           getSoftwareApplicationSchema("AI Brand Studio", "Layer logos, headlines, CTAs, and brand patterns onto any image with AI-powered Smart Layer masking.", ["Smart Layer", "AI Headlines", "Pattern Overlays", "Multi-Format Export"]),
         ]}
       />
@@ -120,7 +120,7 @@ export default function BrandStudioFeaturePage() {
           <div className="flex items-center gap-3">
             <Link to="/" className="hidden md:inline-flex"><Button variant="ghost" size="sm"><ArrowLeft className="w-4 h-4 mr-2" />Back</Button></Link>
             <Link to="/login" className="hidden md:inline-flex"><Button variant="outline" size="sm">Sign In</Button></Link>
-            <Link to="/request-access" className="hidden md:inline-flex"><Button size="sm">Start Free</Button></Link>
+            <Link to="/request-access" className="hidden md:inline-flex"><Button size="sm">Create Account</Button></Link>
             <MobileNav />
           </div>
         </div>
@@ -148,7 +148,7 @@ export default function BrandStudioFeaturePage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: "0.3s" }}>
               <Link to="/request-access">
                 <Button size="lg" className="gap-2 bg-purple-600 hover:bg-purple-700">
-                  Start Free — Instant Access <ArrowRight className="w-4 h-4" />
+                  Create Your Account <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
             </div>
@@ -267,7 +267,7 @@ export default function BrandStudioFeaturePage() {
           <p className="text-white/80 text-lg mb-8 max-w-2xl mx-auto">From raw photo to fully branded asset — with AI-powered patterns, headlines, and CTAs.</p>
           <Link to="/request-access">
             <Button size="lg" className="bg-white text-purple-600 hover:bg-white/90 font-bold px-8">
-              Start Free — Instant Access <ArrowRight className="w-4 h-4 ml-2" />
+              Create Your Account <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </Link>
         </div>

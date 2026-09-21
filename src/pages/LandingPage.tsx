@@ -15,7 +15,6 @@ import {
   CheckCircle2,
   GraduationCap,
   Globe,
-  Calendar,
   Image,
   Palette,
   Bot,
@@ -31,7 +30,6 @@ import AICredibilitySection from '@/components/landing/AICredibilitySection';
 import { LandingNav } from '@/components/landing/LandingNav';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { SEOHead, getOrganizationSchema, getSoftwareApplicationSchema } from '@/components/SEOHead';
-import { RequestDemoDialog } from '@/components/landing/RequestDemoDialog';
 import { StickyCtaBar } from '@/components/landing/StickyCtaBar';
 import { SocialProofStrip } from '@/components/landing/SocialProofStrip';
 import { HeroProductProof } from '@/components/landing/HeroProductProof';
@@ -54,11 +52,11 @@ const landingPageSchemas = [
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'CampusVoice.AI',
-    url: 'https://engage-ethos.lovable.app',
+    url: 'https://www.campusvoice.ai',
     description: 'Strategic Messaging Intelligence for Brand Teams',
     potentialAction: {
       '@type': 'SearchAction',
-      target: 'https://engage-ethos.lovable.app/search?q={search_term_string}',
+      target: 'https://www.campusvoice.ai/search?q={search_term_string}',
       'query-input': 'required name=search_term_string'
     }
   },
@@ -256,7 +254,7 @@ export default function LandingPage() {
                   className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] shadow-[0_0_30px_hsl(82_85%_55%_/_0.3)] hover:shadow-[0_0_40px_hsl(82_85%_55%_/_0.5)] transition-all duration-300 text-base px-8 py-6 font-bold border-0"
                 >
                   <Link to="/try-copywriter">
-                    See It Write for Your Institution
+                    Try It Free
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
@@ -578,21 +576,19 @@ export default function LandingPage() {
               className="bg-[hsl(82_85%_55%)] text-primary hover:bg-[hsl(82_85%_50%)] shadow-xl hover:shadow-2xl hover:scale-105 px-8 font-bold transition-all duration-300 rounded-full"
             >
               <Link to="/request-access">
-                Start Free — Instant Access
+                Create Your Account
               </Link>
             </Button>
-            <RequestDemoDialog
-              trigger={
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  className="text-white hover:text-white hover:bg-white/20 rounded-full border-2 border-white/30"
-                >
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Learn More
-                </Button>
-              }
-            />
+            <Button
+              asChild
+              variant="ghost"
+              size="lg"
+              className="text-white hover:text-white hover:bg-white/20 rounded-full border-2 border-white/30"
+            >
+              <Link to="/try-copywriter">
+                Try It Free
+              </Link>
+            </Button>
           </div>
         </div>
       </section>

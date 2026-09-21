@@ -86,7 +86,7 @@ export default function MessageBuilderFeaturePage() {
           getWebPageSchema(
             'AI Message Builder',
             'Multi-channel content generation for higher education',
-            'https://engage-ethos.lovable.app/features/message-builder'
+            'https://www.campusvoice.ai/features/message-builder'
           ),
           getSoftwareApplicationSchema(
             'AI Message Builder',
@@ -127,7 +127,7 @@ export default function MessageBuilderFeaturePage() {
             </Link>
             <Link to="/request-access" className="hidden md:inline-flex">
               <Button size="sm" className="bg-primary hover:bg-primary/90">
-                Join Beta
+                Create Your Account
               </Button>
             </Link>
             <MobileNav />

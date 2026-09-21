@@ -181,7 +181,7 @@ export default function JourneyDesignerFeaturePage() {
             '@type': 'WebPage',
             name: 'Journey Flow Builder',
             description: 'Visual journey planning for higher education enrollment',
-            url: 'https://engage-ethos.lovable.app/features/journey-designer'
+            url: 'https://www.campusvoice.ai/features/journey-designer'
           },
           {
             '@context': 'https://schema.org',
@@ -226,7 +226,7 @@ export default function JourneyDesignerFeaturePage() {
             </Link>
             <Link to="/request-access" className="hidden md:inline-flex">
               <Button size="sm" className="bg-primary hover:bg-primary/90">
-                Join Beta
+                Create Your Account
               </Button>
             </Link>
             <MobileNav />

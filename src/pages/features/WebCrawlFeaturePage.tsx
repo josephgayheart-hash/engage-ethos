@@ -100,7 +100,7 @@ export default function WebCrawlFeaturePage() {
         description="Automatically extract your institution's brand voice from your website. AI crawls your pages to understand tone, terminology, and brand signals."
         keywords={["web crawl AI", "brand voice extraction", "website analysis", "content intelligence"]}
         jsonLd={[
-          getWebPageSchema("WebCrawl Intelligence", "AI-powered brand voice extraction from your website", "https://engage-ethos.lovable.app/features/webcrawl"),
+          getWebPageSchema("WebCrawl Intelligence", "AI-powered brand voice extraction from your website", "https://www.campusvoice.ai/features/webcrawl"),
           getSoftwareApplicationSchema("WebCrawl Intelligence", "Automatically extract brand voice, terminology, and tone from your institutional website.", ["Site Mapping", "Voice Extraction", "Terminology Analysis", "Screenshot Capture"]),
         ]}
       />
@@ -115,7 +115,7 @@ export default function WebCrawlFeaturePage() {
           <div className="flex items-center gap-3">
             <Link to="/" className="hidden md:inline-flex"><Button variant="ghost" size="sm"><ArrowLeft className="w-4 h-4 mr-2" />Back</Button></Link>
             <Link to="/login" className="hidden md:inline-flex"><Button variant="outline" size="sm">Sign In</Button></Link>
-            <Link to="/request-access" className="hidden md:inline-flex"><Button size="sm">Start Free</Button></Link>
+            <Link to="/request-access" className="hidden md:inline-flex"><Button size="sm">Create Account</Button></Link>
             <MobileNav />
           </div>
         </div>
@@ -143,7 +143,7 @@ export default function WebCrawlFeaturePage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: "0.3s" }}>
               <Link to="/request-access">
                 <Button size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
-                  Start Free — Instant Access <ArrowRight className="w-4 h-4" />
+                  Create Your Account <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
             </div>
@@ -296,7 +296,7 @@ export default function WebCrawlFeaturePage() {
           <p className="text-white/80 text-lg mb-8 max-w-2xl mx-auto">Your website already speaks in your voice. Let AI turn that into actionable Content DNA.</p>
           <Link to="/request-access">
             <Button size="lg" className="bg-white text-blue-600 hover:bg-white/90 font-bold px-8">
-              Start Free — Instant Access <ArrowRight className="w-4 h-4 ml-2" />
+              Create Your Account <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </Link>
         </div>
