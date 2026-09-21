@@ -57,7 +57,7 @@ export default function AICredibilitySection() {
             The AI Under the Hood
           </Badge>
           <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-white mb-5 tracking-tight">
-            Not just AI. <span className="italic text-[hsl(82_85%_60%)]">Your</span> AI.
+            Not just AI. <span className="italic text-[hsl(216_100%_66%)]">Your</span> AI.
           </h2>
 
           {/* Provider logos + text */}

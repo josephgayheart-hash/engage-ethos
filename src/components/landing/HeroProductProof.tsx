@@ -43,7 +43,7 @@ export function HeroProductProof() {
           <div className="rounded-2xl border-2 border-[hsl(216_100%_50%_/_0.3)] bg-gradient-to-br from-background to-[hsl(216_100%_50%_/_0.04)] p-5 shadow-[0_0_24px_hsl(216_100%_50%_/_0.08)] flex flex-col">
             <div className="flex items-center gap-1.5 mb-2">
               <Sparkles className="w-3 h-3 text-[hsl(216_100%_42%)]" />
-              <span className="text-[10px] uppercase tracking-wider text-[hsl(82_85%_35%)] font-bold">
+              <span className="text-[10px] uppercase tracking-wider text-[hsl(216_100%_36%)] font-bold">
                 Your brand voice
               </span>
             </div>
