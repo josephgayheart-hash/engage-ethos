@@ -46,7 +46,7 @@ function NDAPageWrapper({ children }: { children: React.ReactNode }) {
       <SEOHead
         title="Confidentiality Agreement — CampusVoice.AI"
         description="Review and sign a confidentiality agreement for your CampusVoice.AI demo session."
-        ogImage="/nda-og-image.png"
+        ogImage="https://www.campusvoice.ai/nda-og-image.png"
         noIndex={true}
       />
       <div className="max-w-2xl mx-auto px-4 py-8 md:py-16">

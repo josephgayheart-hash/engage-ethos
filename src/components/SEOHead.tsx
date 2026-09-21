@@ -106,7 +106,7 @@ export const getWebPageSchema = (
 export function SEOHead({
   title = 'CampusVoice.AI - Strategic Messaging Intelligence for Higher Education',
   description = 'Plan, strategize, and execute brand-aligned communications at scale. Research-driven messaging intelligence built for higher education.',
-  ogImage = '/og-image.png',
+  ogImage = 'https://www.campusvoice.ai/og-image.png',
   ogType = 'website',
   canonicalUrl,
   keywords = ['higher education', 'communications', 'brand messaging', 'AI', 'enrollment marketing'],

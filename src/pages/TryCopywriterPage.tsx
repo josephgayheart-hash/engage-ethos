@@ -231,6 +231,7 @@ export default function TryCopywriterPage() {
                   />
                   <Button
                     onClick={() => send()}
+                    aria-label="Send message"
                     disabled={loading || !input.trim()}
                     className="h-10 px-4 bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] font-bold"
                   >
