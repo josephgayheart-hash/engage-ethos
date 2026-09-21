@@ -57,7 +57,7 @@ export function LandingNav() {
           <Link to="/try-copywriter">
             <Button
               size="sm"
-              className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] font-bold rounded-full px-5"
+              className="bg-[hsl(216_100%_50%)] text-white hover:bg-[hsl(216_100%_45%)] font-semibold rounded-lg px-6 shadow-[0_8px_24px_-10px_hsl(216_100%_50%_/_0.6)] border-0"
             >
               Try It Free
               <ArrowRight className="ml-1.5 h-3.5 w-3.5" />

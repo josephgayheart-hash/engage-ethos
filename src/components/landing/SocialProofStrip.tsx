@@ -9,7 +9,7 @@ const stats = [
 
 export function SocialProofStrip() {
   return (
-    <section className="py-10 px-4 sm:px-6 lg:px-8" style={{ background: 'hsl(222 47% 11%)' }}>
+    <section className="py-10 px-4 sm:px-6 lg:px-8" style={{ background: 'hsl(60 4% 10%)' }}>
       <div className="max-w-5xl mx-auto">
         <h2 className="text-center text-xs uppercase tracking-[0.2em] text-white/30 mb-8 font-medium">
           What powers the platform
@@ -17,10 +17,10 @@ export function SocialProofStrip() {
         <ul className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8" aria-label="Platform capabilities">
           {stats.map((stat, i) => {
             const colors = [
-              'hsl(82 85% 55%)',
-              'hsl(270 70% 60%)',
+              'hsl(216 100% 50%)',
+              'hsl(60 4% 26%)',
               'hsl(200 100% 50%)',
-              'hsl(82 85% 55%)',
+              'hsl(216 100% 50%)',
             ];
             return (
               <li key={stat.label} className="text-center group list-none">

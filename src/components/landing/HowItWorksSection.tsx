@@ -35,8 +35,8 @@ const phases = [
   {
     number: "02",
     title: "Build Your Content DNA",
-    accent: "hsl(270 70% 60%)",       // purple
-    accentMuted: "hsl(270 70% 60% / 0.15)",
+    accent: "hsl(60 4% 26%)",       // purple
+    accentMuted: "hsl(60 4% 26% / 0.15)",
     icon: Dna,
     bullets: [
       "Upload brand guidelines & samples",
@@ -47,8 +47,8 @@ const phases = [
   {
     number: "03",
     title: "Create On-Brand Content",
-    accent: "hsl(82 85% 55%)",        // green
-    accentMuted: "hsl(82 85% 55% / 0.15)",
+    accent: "hsl(216 100% 50%)",        // green
+    accentMuted: "hsl(216 100% 50% / 0.15)",
     icon: Sparkles,
     tools: [
       { icon: Mail, label: "Messages" },
@@ -132,7 +132,7 @@ function PhaseCard({
         className="absolute -top-3 left-5 text-xs font-bold px-2.5 py-0.5 rounded-full"
         style={{
           background: phase.accent,
-          color: "hsl(222 47% 11%)",
+          color: "hsl(60 4% 10%)",
         }}
       >
         {phase.number}
@@ -226,7 +226,7 @@ function MobilePhaseCard({
       <div className="flex flex-col items-center">
         <div
           className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-          style={{ background: phase.accent, color: "hsl(222 47% 11%)" }}
+          style={{ background: phase.accent, color: "hsl(60 4% 10%)" }}
         >
           {phase.number}
         </div>
@@ -297,7 +297,7 @@ export default function HowItWorksSection() {
   return (
     <section
       id="how-it-works"
-      className="py-24 px-4 sm:px-6 lg:px-8 bg-[hsl(222_47%_11%)] relative overflow-hidden"
+      className="py-24 px-4 sm:px-6 lg:px-8 bg-[hsl(60_4%_10%)] relative overflow-hidden"
     >
       {/* Background */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(270_50%_20%_/_0.12),_transparent_70%)]" />
@@ -369,7 +369,7 @@ export default function HowItWorksSection() {
         {/* Bottom tagline */}
         <div className="mt-10 flex justify-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.04] border border-white/[0.06]">
-            <Dna className="w-3.5 h-3.5 text-[hsl(270_70%_60%)]" />
+            <Dna className="w-3.5 h-3.5 text-[hsl(60_4%_26%)]" />
             <span className="text-white/40 text-xs">
               Every output is grounded in your Content DNA — voice, brand platform & institutional facts
             </span>

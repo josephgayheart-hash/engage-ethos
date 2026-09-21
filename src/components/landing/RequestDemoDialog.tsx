@@ -102,8 +102,8 @@ export function RequestDemoDialog({ trigger }: RequestDemoDialogProps) {
       <DialogContent className="sm:max-w-md">
         {isSubmitted ? (
           <div className="py-8 text-center space-y-4">
-            <div className="w-16 h-16 rounded-full bg-[hsl(82_85%_55%_/_0.2)] flex items-center justify-center mx-auto">
-              <CheckCircle2 className="w-8 h-8 text-[hsl(82_70%_40%)]" />
+            <div className="w-16 h-16 rounded-full bg-[hsl(216_100%_50%_/_0.2)] flex items-center justify-center mx-auto">
+              <CheckCircle2 className="w-8 h-8 text-[hsl(216_100%_38%)]" />
             </div>
             <DialogHeader className="space-y-2">
               <DialogTitle className="text-center">Request Received!</DialogTitle>
@@ -119,7 +119,7 @@ export function RequestDemoDialog({ trigger }: RequestDemoDialogProps) {
           <>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-[hsl(270_70%_55%)]" />
+                <Calendar className="w-5 h-5 text-[hsl(60_4%_22%)]" />
                 Request a Demo
               </DialogTitle>
               <DialogDescription>
@@ -183,7 +183,7 @@ export function RequestDemoDialog({ trigger }: RequestDemoDialogProps) {
               </div>
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-[hsl(270_70%_55%)] to-[hsl(270_70%_45%)] hover:from-[hsl(270_70%_50%)] hover:to-[hsl(270_70%_40%)]"
+                className="w-full bg-gradient-to-r from-[hsl(60_4%_22%)] to-[hsl(270_70%_45%)] hover:from-[hsl(60_4%_20%)] hover:to-[hsl(270_70%_40%)]"
                 disabled={isSubmitting || !agreedToPrivacy}
               >
                 {isSubmitting ? (

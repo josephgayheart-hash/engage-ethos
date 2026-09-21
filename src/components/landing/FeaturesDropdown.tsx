@@ -45,7 +45,7 @@ export function FeaturesDropdown() {
               onClick={() => setOpen(false)}
               className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 transition-colors"
             >
-              <f.icon className="w-4 h-4 text-[hsl(82_85%_55%)]" />
+              <f.icon className="w-4 h-4 text-[hsl(216_100%_50%)]" />
               {f.label}
             </Link>
           ))}

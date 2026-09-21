@@ -42,7 +42,7 @@ export default function GlowOrbs({ variant = 'hero' }: GlowOrbsProps) {
         <div 
           className="absolute w-24 h-24 rounded-full blur-2xl animate-float-medium"
           style={{
-            background: 'hsl(340 75% 55% / 0.15)',
+            background: 'hsl(216 100% 50% / 0.15)',
             bottom: '30%',
             right: '25%',
             animationDelay: '1.5s',

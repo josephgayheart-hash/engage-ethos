@@ -8,13 +8,13 @@ const pillars = [
     icon: null,
     title: 'Multi-Model Orchestration',
     description: '8 specialized AI models selected per task — text generation, image creation, content analysis, voice extraction.',
-    accent: 'hsl(82 85% 55%)',
+    accent: 'hsl(216 100% 50%)',
   },
   {
     icon: null,
     title: 'Content DNA Engine',
     description: "Your brand voice isn't a prompt. It's a living profile built from your actual content, continuously refined.",
-    accent: 'hsl(270 70% 60%)',
+    accent: 'hsl(60 4% 26%)',
   },
   {
     icon: null,
@@ -34,7 +34,7 @@ export default function AICredibilitySection() {
   return (
     <section
       className="relative py-20 sm:py-28 px-4 sm:px-6 lg:px-8 overflow-hidden"
-      style={{ background: 'linear-gradient(160deg, hsl(222 47% 14%) 0%, hsl(222 40% 20%) 50%, hsl(222 47% 14%) 100%)' }}
+      style={{ background: 'linear-gradient(160deg, hsl(60 4% 10%) 0%, hsl(222 40% 20%) 50%, hsl(60 4% 10%) 100%)' }}
     >
       {/* Dot grid */}
       <div
@@ -46,8 +46,8 @@ export default function AICredibilitySection() {
       />
 
       {/* Glow orbs */}
-      <div className="absolute w-64 h-64 rounded-full blur-[100px] opacity-20" style={{ background: 'hsl(82 85% 55%)', top: '10%', right: '15%' }} />
-      <div className="absolute w-48 h-48 rounded-full blur-[80px] opacity-15" style={{ background: 'hsl(270 70% 60%)', bottom: '15%', left: '10%' }} />
+      <div className="absolute w-64 h-64 rounded-full blur-[100px] opacity-20" style={{ background: 'hsl(216 100% 50%)', top: '10%', right: '15%' }} />
+      <div className="absolute w-48 h-48 rounded-full blur-[80px] opacity-15" style={{ background: 'hsl(60 4% 26%)', bottom: '15%', left: '10%' }} />
 
       <div className="relative z-10 max-w-5xl mx-auto">
         {/* Header */}
