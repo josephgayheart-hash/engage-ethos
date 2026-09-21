@@ -345,7 +345,7 @@ export function JourneyBuilderShowcase() {
                 </div>
                 <div className="flex-1 rounded-lg border px-2.5 py-1.5" style={{ borderColor: 'hsl(216 100% 50% / 0.4)', background: 'hsl(216 100% 50% / 0.05)' }}>
                   <p className="text-[8px] uppercase tracking-wider font-bold" style={{ color: 'hsl(216 100% 42%)' }}>Content DNA</p>
-                  <p className="text-[10px] font-semibold" style={{ color: 'hsl(82 85% 40%)' }}>✓ Active</p>
+                  <p className="text-[10px] font-semibold" style={{ color: 'hsl(216 100% 40%)' }}>✓ Active</p>
                 </div>
               </div>
             )}
@@ -434,7 +434,7 @@ export function JourneyBuilderShowcase() {
                   <div className="px-3 py-1.5 border-t border-border/30 flex items-center justify-between" style={{ background: 'hsl(216 100% 50% / 0.03)' }}>
                     <div className="flex items-center gap-1">
                       <Sparkles className="w-2.5 h-2.5" style={{ color: 'hsl(216 100% 42%)' }} />
-                      <span className="text-[8px] text-muted-foreground">Generated from <span className="font-semibold" style={{ color: 'hsl(82 85% 40%)' }}>Content DNA</span></span>
+                      <span className="text-[8px] text-muted-foreground">Generated from <span className="font-semibold" style={{ color: 'hsl(216 100% 40%)' }}>Content DNA</span></span>
                     </div>
                     <span className="text-[8px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: 'hsl(216 100% 50% / 0.15)', color: 'hsl(216 100% 42%)' }}>
                       Brand Score: 93
@@ -667,7 +667,7 @@ export function ImageStudioShowcase() {
                   {/* Brand DNA readback */}
                   <div className="mt-3 flex gap-1.5 flex-wrap justify-center">
                     {['Tone: Warm', 'Formality: 7/10', 'Slogan: "Where leaders begin"'].map((tag, i) => (
-                      <span key={i} className="text-[7px] px-1.5 py-0.5 rounded-full border" style={{ borderColor: 'hsl(60 4% 26% / 0.3)', color: 'hsl(270 70% 65%)', background: 'hsl(60 4% 26% / 0.08)' }}>
+                      <span key={i} className="text-[7px] px-1.5 py-0.5 rounded-full border" style={{ borderColor: 'hsl(60 4% 26% / 0.3)', color: 'hsl(216 100% 66%)', background: 'hsl(60 4% 26% / 0.08)' }}>
                         {tag}
                       </span>
                     ))}

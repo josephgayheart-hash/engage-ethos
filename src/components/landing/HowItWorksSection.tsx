@@ -300,14 +300,14 @@ export default function HowItWorksSection() {
       className="py-24 px-4 sm:px-6 lg:px-8 bg-[hsl(60_4%_10%)] relative overflow-hidden"
     >
       {/* Background */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(270_50%_20%_/_0.12),_transparent_70%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(216_100%_30%_/_0.12),_transparent_70%)]" />
 
       <div className="max-w-6xl mx-auto relative z-10">
         {/* Header */}
         <div className="text-center mb-6">
           <h2 className="font-serif text-4xl sm:text-5xl mb-4">
             <span className="text-white">How It </span>
-            <span className="bg-gradient-to-r from-[hsl(200_100%_60%)] to-[hsl(270_70%_65%)] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[hsl(216_100%_60%)] to-[hsl(216_100%_66%)] bg-clip-text text-transparent">
               Works
             </span>
           </h2>

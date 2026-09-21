@@ -183,7 +183,7 @@ export function RequestDemoDialog({ trigger }: RequestDemoDialogProps) {
               </div>
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-[hsl(60_4%_22%)] to-[hsl(270_70%_45%)] hover:from-[hsl(60_4%_20%)] hover:to-[hsl(270_70%_40%)]"
+                className="w-full bg-gradient-to-r from-[hsl(60_4%_22%)] to-[hsl(216_100%_44%)] hover:from-[hsl(60_4%_20%)] hover:to-[hsl(216_100%_40%)]"
                 disabled={isSubmitting || !agreedToPrivacy}
               >
                 {isSubmitting ? (
