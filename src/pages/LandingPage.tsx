@@ -581,18 +581,16 @@ export default function LandingPage() {
                 Create Your Account
               </Link>
             </Button>
-            <RequestDemoDialog
-              trigger={
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  className="text-white hover:text-white hover:bg-white/20 rounded-full border-2 border-white/30"
-                >
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Learn More
-                </Button>
-              }
-            />
+            <Button
+              asChild
+              variant="ghost"
+              size="lg"
+              className="text-white hover:text-white hover:bg-white/20 rounded-full border-2 border-white/30"
+            >
+              <Link to="/try-copywriter">
+                Try It Free
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
