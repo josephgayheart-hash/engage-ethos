@@ -65,13 +65,8 @@ import BetaFeedbackPage from "./pages/BetaFeedbackPage";
 import ContentDNAFeaturePage from "./pages/features/ContentDNAFeaturePage";
 import MessageBuilderFeaturePage from "./pages/features/MessageBuilderFeaturePage";
 import JourneyDesignerFeaturePage from "./pages/features/JourneyDesignerFeaturePage";
-import EvaluateFeaturePage from "./pages/features/EvaluateFeaturePage";
 import LibraryFeaturePage from "./pages/features/LibraryFeaturePage";
-import ImageStudioFeaturePage from "./pages/features/ImageStudioFeaturePage";
-import BrandStudioFeaturePage from "./pages/features/BrandStudioFeaturePage";
 import AICopywriterFeaturePage from "./pages/features/AICopywriterFeaturePage";
-import BrandAuditFeaturePage from "./pages/features/BrandAuditFeaturePage";
-import WebCrawlFeaturePage from "./pages/features/WebCrawlFeaturePage";
 import OGPreviewPage from "./pages/OGPreviewPage";
 import WebContentAnalyzerPage from "./pages/WebContentAnalyzerPage";
 import BrandAuditPage from "./pages/BrandAuditPage";
@@ -103,6 +98,7 @@ import SocialPostsPage from "./pages/SocialPostsPage";
 import CopywriterPopoutPage from "./pages/CopywriterPopoutPage";
 import SalesforceCanvasGuidePage from "./pages/docs/SalesforceCanvasGuidePage";
 import HigherEdMarketingStrategiesPage from "./pages/guides/HigherEdMarketingStrategiesPage";
+import MoreCapabilitiesPage from "./pages/features/MoreCapabilitiesPage";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
 import { IndustryProvider } from "@/contexts/IndustryContext";
 import { BrandModeProvider } from "@/contexts/BrandModeContext";
@@ -193,13 +189,14 @@ const AppRoutes = () => (
     <Route path="/features/content-dna" element={<ContentDNAFeaturePage />} />
     <Route path="/features/message-builder" element={<MessageBuilderFeaturePage />} />
     <Route path="/features/journey-designer" element={<JourneyDesignerFeaturePage />} />
-    <Route path="/features/evaluate" element={<EvaluateFeaturePage />} />
+    <Route path="/features" element={<MoreCapabilitiesPage />} />
+    <Route path="/features/evaluate" element={<Navigate to="/features#evaluate" replace />} />
     <Route path="/features/library" element={<LibraryFeaturePage />} />
-    <Route path="/features/image-studio" element={<ImageStudioFeaturePage />} />
-    <Route path="/features/brand-studio" element={<BrandStudioFeaturePage />} />
+    <Route path="/features/image-studio" element={<Navigate to="/features#image-studio" replace />} />
+    <Route path="/features/brand-studio" element={<Navigate to="/features#brand-studio" replace />} />
     <Route path="/features/ai-copywriter" element={<AICopywriterFeaturePage />} />
-    <Route path="/features/brand-audit" element={<BrandAuditFeaturePage />} />
-    <Route path="/features/webcrawl" element={<WebCrawlFeaturePage />} />
+    <Route path="/features/brand-audit" element={<Navigate to="/features#brand-audit" replace />} />
+    <Route path="/features/webcrawl" element={<Navigate to="/features#webcrawl" replace />} />
     <Route path="/nda/sign/:slug" element={<NDASignPage />} />
     <Route path="/privacy" element={<PrivacyPolicyPage />} />
     <Route path="/terms" element={<TermsOfServicePage />} />
