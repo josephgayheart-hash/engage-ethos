@@ -32,26 +32,26 @@ export function StickyCtaBar() {
       >
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
           <p className="text-white/80 text-sm hidden sm:block">
-            <span className="font-semibold text-white">Ready to transform your messaging?</span>{' '}
-            Join institutions already using CampusVoice.
+            <span className="font-semibold text-white">See it write in your voice.</span>{' '}
+            No signup, no cost.
           </p>
           <p className="text-white/80 text-sm sm:hidden font-semibold">
-            Get started with CampusVoice
+            See it write in your voice
           </p>
           <div className="flex items-center gap-2 flex-shrink-0">
             <Link
-              to="/try-copywriter"
+              to="/request-access"
               className="hidden sm:inline-flex text-white/80 hover:text-white text-xs font-medium underline-offset-4 hover:underline"
             >
-              Try free
+              Create your account
             </Link>
             <Button
               asChild
               size="sm"
               className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] shadow-[0_0_20px_hsl(82_85%_55%_/_0.3)] font-bold rounded-full px-5"
             >
-              <Link to="/request-access">
-                Create Your Account
+              <Link to="/try-copywriter">
+                Try It Free
                 <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
               </Link>
             </Button>
