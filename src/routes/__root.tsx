@@ -14,7 +14,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { FeedbackButton } from "@/components/FeedbackButton";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { PostHogIdentifier } from "@/components/PostHogIdentifier";
 import { usePageTracking } from "@/hooks/usePageTracking";
@@ -118,7 +117,6 @@ function RootComponent() {
           <Toaster />
           <Sonner />
           <Outlet />
-          <FeedbackButton />
         </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
