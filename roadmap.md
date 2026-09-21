@@ -7,3 +7,5 @@
 - [ ] Implement chosen direction (tokens copied verbatim into src/styles.css)
 - [ ] Constraint: purple is a rare accent only, not the dominant color
 - [ ] Constraint: no large empty white expanses - denser, warmer, more layered surfaces
+- [ ] Constraint: avoid navy + orange pairing entirely (reads as Auburn University)
+- [ ] Each direction must carry a distinctly different palette, not one palette recomposed
