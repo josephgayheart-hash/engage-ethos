@@ -40,7 +40,8 @@ import {
 import { campaignToText } from "@/lib/campaignExport";
 import { openInGoogleDocs } from "@/lib/googleDocsExport";
 
-import { jsPDF } from "jspdf";
+// jspdf is browser-only: loaded on demand so server rendering never evaluates it
+const loadJsPDF = async () => (await import("jspdf")).jsPDF;
 
 const PROFILE_TYPE_LABELS: Record<string, { label: string; icon: typeof Building2 }> = {
   university: { label: "University", icon: Building2 },
@@ -307,7 +308,7 @@ const GivingDayPlannerPage = () => {
     setIsExporting(true);
     try {
       const text = getCampaignText();
-      const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
+      const pdf = new (await loadJsPDF())({ orientation: "portrait", unit: "pt", format: "a4" });
       const pageW = pdf.internal.pageSize.getWidth();
       const pageH = pdf.internal.pageSize.getHeight();
       const margin = 50;

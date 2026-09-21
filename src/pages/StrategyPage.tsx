@@ -3,8 +3,10 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { Link, useLocation } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import { format, differenceInWeeks, addWeeks } from "date-fns";
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
+// jspdf is browser-only: loaded on demand so server rendering never evaluates it
+const loadJsPDF = async () => (await import("jspdf")).jsPDF;
+// html2canvas is browser-only: loaded on demand so server rendering never evaluates it
+const loadHtml2Canvas = async () => (await import("html2canvas")).default;
 import { PlaybookKitSelector } from "@/components/PlaybookKitSelector";
 import { PlaybookKitGuidance } from "@/components/PlaybookKitGuidance";
 import { usePlaybookKits } from "@/hooks/usePlaybookKits";
@@ -791,7 +793,7 @@ const StrategyPage = () => {
 
       const canvases: HTMLCanvasElement[] = [];
       for (const target of exportTargets) {
-        const canvas = await html2canvas(target, {
+        const canvas = await (await loadHtml2Canvas())(target, {
           ...commonCanvasOpts,
           windowWidth: target.scrollWidth,
           windowHeight: target.scrollHeight,
@@ -800,7 +802,7 @@ const StrategyPage = () => {
       }
 
       // Standard A4 multi-page export with section-aware page breaks
-      const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
+      const pdf = new (await loadJsPDF())({ orientation: "portrait", unit: "pt", format: "a4" });
 
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();

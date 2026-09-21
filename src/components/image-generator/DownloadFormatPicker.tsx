@@ -8,8 +8,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Download, ChevronDown, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
+// html2canvas is browser-only: loaded on demand so server rendering never evaluates it
+const loadHtml2Canvas = async () => (await import("html2canvas")).default;
+// jspdf is browser-only: loaded on demand so server rendering never evaluates it
+const loadJsPDF = async () => (await import("jspdf")).jsPDF;
 
 export type DownloadFormat = "png" | "jpg" | "pdf";
 
@@ -24,7 +26,7 @@ interface DownloadFormatPickerProps {
 }
 
 async function captureElement(el: HTMLElement): Promise<HTMLCanvasElement> {
-  return html2canvas(el, {
+  return (await loadHtml2Canvas())(el, {
     scale: 2,
     useCORS: true,
     allowTaint: false,
@@ -39,7 +41,7 @@ export function downloadCanvas(canvas: HTMLCanvasElement, filename: string, form
     const w = canvas.width;
     const h = canvas.height;
     const orientation = w > h ? "l" : "p";
-    const pdf = new jsPDF(orientation as any, "px", [w, h]);
+    const pdf = new (await loadJsPDF())(orientation as any, "px", [w, h]);
     pdf.addImage(imgData, "PNG", 0, 0, w, h);
     pdf.save(`${filename}.pdf`);
   } else {

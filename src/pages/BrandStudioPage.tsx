@@ -1,11 +1,12 @@
 import { useRef, useCallback, useState, useEffect } from "react";
 import { useIndustry } from "@/contexts/IndustryContext";
 import { useLocation, useNavigate } from "@/lib/router-compat";
-import html2canvas from "html2canvas";
+// html2canvas is browser-only: loaded on demand so server rendering never evaluates it
+const loadHtml2Canvas = async () => (await import("html2canvas")).default;
 import { DownloadFormatPicker } from "@/components/image-generator/DownloadFormatPicker";
 
 async function captureToDataUrl(el: HTMLElement, scale = 1.5): Promise<string> {
-  const canvas = await html2canvas(el, { scale, useCORS: true, allowTaint: false, logging: false, backgroundColor: null });
+  const canvas = await (await loadHtml2Canvas())(el, { scale, useCORS: true, allowTaint: false, logging: false, backgroundColor: null });
   return canvas.toDataURL("image/png");
 }
 import { toast } from "sonner";
