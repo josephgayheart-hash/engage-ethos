@@ -125,7 +125,7 @@ export default function MessageBuilderFeaturePage() {
             <Link to="/login" className="hidden md:inline-flex">
               <Button variant="outline" size="sm">Sign In</Button>
             </Link>
-            <Link to="/request-access" className="hidden md:inline-flex">
+            <Link to="/login?signup=1" className="hidden md:inline-flex">
               <Button size="sm" className="bg-primary hover:bg-primary/90">
                 Create Your Account
               </Button>
@@ -163,7 +163,7 @@ export default function MessageBuilderFeaturePage() {
               Select your audience, moment, and goals—then generate brand-aligned content for email, SMS, ads, call scripts, and more simultaneously.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
-              <Link to="/request-access">
+              <Link to="/login?signup=1">
                 <Button size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
                   Request Beta Access
                   <ArrowRight className="w-4 h-4" />
@@ -408,7 +408,7 @@ export default function MessageBuilderFeaturePage() {
           <p className="text-lg opacity-90 mb-8 max-w-xl mx-auto">
             Join the beta to start generating multi-channel content in seconds.
           </p>
-          <Link to="/request-access">
+          <Link to="/login?signup=1">
             <Button size="lg" variant="secondary" className="gap-2">
               Request Beta Access
               <ArrowRight className="w-4 h-4" />

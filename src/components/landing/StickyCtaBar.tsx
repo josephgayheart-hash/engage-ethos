@@ -40,7 +40,7 @@ export function StickyCtaBar() {
           </p>
           <div className="flex items-center gap-2 flex-shrink-0">
             <Link
-              to="/request-access"
+              to="/login?signup=1"
               className="hidden sm:inline-flex text-white/80 hover:text-white text-xs font-medium underline-offset-4 hover:underline"
             >
               Create your account

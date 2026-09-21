@@ -118,7 +118,7 @@ export default function ImageStudioFeaturePage() {
           <div className="flex items-center gap-3">
             <Link to="/" className="hidden md:inline-flex"><Button variant="ghost" size="sm"><ArrowLeft className="w-4 h-4 mr-2" />Back</Button></Link>
             <Link to="/login" className="hidden md:inline-flex"><Button variant="outline" size="sm">Sign In</Button></Link>
-            <Link to="/request-access" className="hidden md:inline-flex"><Button size="sm">Create Account</Button></Link>
+            <Link to="/login?signup=1" className="hidden md:inline-flex"><Button size="sm">Create Account</Button></Link>
             <MobileNav />
           </div>
         </div>
@@ -145,7 +145,7 @@ export default function ImageStudioFeaturePage() {
               Generate photorealistic campus photography and bold graphic designs across 19 formats — all grounded in your institution's Content DNA and visual identity.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: "0.3s" }}>
-              <Link to="/request-access">
+              <Link to="/login?signup=1">
                 <Button size="lg" className="gap-2 bg-pink-600 hover:bg-pink-700">
                   Create Your Account <ArrowRight className="w-4 h-4" />
                 </Button>
@@ -333,7 +333,7 @@ export default function ImageStudioFeaturePage() {
         <div className="container mx-auto px-4 relative z-10 text-center">
           <h2 className="font-serif text-3xl md:text-4xl font-bold text-white mb-4">Ready to create on-brand visuals at scale?</h2>
           <p className="text-white/80 text-lg mb-8 max-w-2xl mx-auto">Stop searching stock photo libraries. Generate exactly what you need, grounded in your brand.</p>
-          <Link to="/request-access">
+          <Link to="/login?signup=1">
             <Button size="lg" className="bg-white text-pink-600 hover:bg-white/90 font-bold px-8">
               Create Your Account <ArrowRight className="w-4 h-4 ml-2" />
             </Button>

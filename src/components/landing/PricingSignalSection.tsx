@@ -38,7 +38,7 @@ export default function PricingSignalSection() {
             size="lg"
             className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] shadow-[0_0_30px_hsl(82_85%_55%_/_0.2)] font-bold rounded-full px-8"
           >
-            <Link to="/request-access">
+            <Link to="/login?signup=1">
               Create Your Account
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>

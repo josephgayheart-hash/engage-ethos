@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import { useToast } from '@/hooks/use-toast';
@@ -34,6 +34,10 @@ export default function LoginPage() {
   const rawNext = searchParams.get('next');
   const nextPath = rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : null;
 
+  const [mode, setMode] = useState<'signin' | 'signup'>(searchParams.get('signup') === '1' ? 'signup' : 'signin');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [institutionName, setInstitutionName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -161,6 +165,45 @@ export default function LoginPage() {
     }
   };
 
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('self-serve-signup', {
+        body: {
+          email,
+          password,
+          firstName,
+          lastName,
+          institutionName: institutionName || undefined,
+        },
+      });
+
+      if (fnError) {
+        setError('We could not create your account. Please try again or contact support.');
+        return;
+      }
+      if (data?.error) {
+        setError(String(data.error));
+        return;
+      }
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) {
+        setMode('signin');
+        toast({ title: 'Account created', description: 'Please sign in with your new password.' });
+        return;
+      }
+      navigate('/dashboard');
+    } catch {
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleForgotPassword = async () => {
     if (!email) {
       setError('Enter your email, then click "Forgot password?".');
@@ -275,10 +318,12 @@ export default function LoginPage() {
           {/* Header */}
           <div className="space-y-2">
             <h2 className="text-2xl sm:text-3xl font-serif font-bold tracking-tight text-foreground">
-              Welcome Back
+              {mode === 'signup' ? 'Create Your Account' : 'Welcome Back'}
             </h2>
             <p className="text-muted-foreground">
-              Sign in to your CampusVoice account
+              {mode === 'signup'
+                ? 'Set a password and start using CampusVoice right away'
+                : 'Sign in to your CampusVoice account'}
             </p>
           </div>
 
@@ -324,12 +369,49 @@ export default function LoginPage() {
               <span className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-3 text-muted-foreground">or sign in with email</span>
+              <span className="bg-background px-3 text-muted-foreground">{mode === 'signup' ? 'or sign up with email' : 'or sign in with email'}</span>
             </div>
           </div>
 
           {/* Email/Password Form */}
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form onSubmit={mode === 'signup' ? handleSignup : handleLogin} className="space-y-5">
+            {mode === 'signup' && (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName" className="text-sm font-medium text-foreground">First name</Label>
+                    <Input
+                      id="firstName"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      className="h-12 bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName" className="text-sm font-medium text-foreground">Last name</Label>
+                    <Input
+                      id="lastName"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      className="h-12 bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="institutionName" className="text-sm font-medium text-foreground">Organization</Label>
+                  <Input
+                    id="institutionName"
+                    value={institutionName}
+                    onChange={(e) => setInstitutionName(e.target.value)}
+                    placeholder="Where you work"
+                    className="h-12 bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                  />
+                </div>
+              </>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium text-foreground">Email</Label>
               <div className="relative">
@@ -339,7 +421,7 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@institution.edu"
+                  placeholder="you@example.com"
                   className="pl-10 h-12 bg-muted/30 border-border/60 focus:bg-background transition-colors"
                   required
                 />
@@ -360,7 +442,10 @@ export default function LoginPage() {
                   required
                 />
               </div>
-              <div className="flex justify-end">
+              {mode === 'signup' && (
+                <p className="text-xs text-muted-foreground">At least 8 characters.</p>
+              )}
+              <div className={mode === 'signup' ? 'hidden' : 'flex justify-end'}>
                 <button
                   type="button"
                   onClick={handleForgotPassword}
@@ -380,11 +465,11 @@ export default function LoginPage() {
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Signing in...
+                  {mode === 'signup' ? 'Creating your account...' : 'Signing in...'}
                 </>
               ) : (
                 <>
-                  Sign In
+                  {mode === 'signup' ? 'Create Account' : 'Sign In'}
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -392,10 +477,29 @@ export default function LoginPage() {
           </form>
 
           <p className="text-center text-sm text-muted-foreground">
-            Don't have an account?{' '}
-            <Link to="/request-access" className="font-medium text-accent hover:underline underline-offset-4">
-              Create Account
-            </Link>
+            {mode === 'signup' ? (
+              <>
+                Already have an account?{' '}
+                <button
+                  type="button"
+                  onClick={() => { setMode('signin'); setError(null); }}
+                  className="font-medium text-accent hover:underline underline-offset-4"
+                >
+                  Sign in
+                </button>
+              </>
+            ) : (
+              <>
+                Don't have an account?{' '}
+                <button
+                  type="button"
+                  onClick={() => { setMode('signup'); setError(null); }}
+                  className="font-medium text-accent hover:underline underline-offset-4"
+                >
+                  Create Account
+                </button>
+              </>
+            )}
           </p>
         </div>
       </div>

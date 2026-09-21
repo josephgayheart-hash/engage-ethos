@@ -297,14 +297,14 @@ const AdminPanel = () => {
         .from('shared_templates')
         .select('id, tenant_id');
 
-      // Fetch pending onboarding requests count
-      const { data: pendingRequestsData, error: pendingError } = await supabase
-        .from('onboarding_requests')
-        .select('id')
-        .eq('request_status', 'submitted');
-      
-      if (!pendingError) {
-        setPendingRequestsCount(pendingRequestsData?.length || 0);
+      // Fetch new inbound lead count
+      const { count: inboundCount, error: inboundError } = await supabase
+        .from('sales_prospects')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'inbound');
+
+      if (!inboundError) {
+        setPendingRequestsCount(inboundCount || 0);
       }
 
       // Map users with institution names
@@ -659,9 +659,9 @@ const AdminPanel = () => {
                 </Link>
               </Button>
               <Button variant="outline" asChild className="relative">
-                <Link to="/admin/onboarding">
+                <Link to="/admin/crm">
                   <UserPlus className="w-4 h-4 mr-2" />
-                  Requests
+                  Leads
                   {pendingRequestsCount > 0 && (
                     <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-xs font-bold px-1.5">
                       {pendingRequestsCount > 99 ? '99+' : pendingRequestsCount}
@@ -1870,9 +1870,9 @@ const AdminPanel = () => {
                       </Link>
                     </Button>
                     <Button variant="outline" className="w-full justify-start" size="sm" asChild>
-                      <Link to="/admin/onboarding">
+                      <Link to="/admin/crm">
                         <Activity className="w-4 h-4 mr-2" />
-                        Access Requests
+                        Leads &amp; CRM
                         <ChevronRight className="w-4 h-4 ml-auto" />
                       </Link>
                     </Button>

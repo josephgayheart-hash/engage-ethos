@@ -105,7 +105,7 @@ export default function ForAgenciesPage() {
                   Sign In
                 </Button>
               </Link>
-              <Link to="/agency/request-access">
+              <Link to="/login?signup=1">
                 <Button size="sm" className="gap-2 whitespace-nowrap">
                   <Briefcase className="h-4 w-4 hidden sm:block" />
                   <span className="sm:hidden">Apply</span>
@@ -148,7 +148,7 @@ export default function ForAgenciesPage() {
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link to="/agency/request-access">
+                <Link to="/login?signup=1">
                   <Button size="lg" className="gap-2 text-base px-8 shadow-lg hover:shadow-xl transition-shadow">
                     Create Your Account
                     <ArrowRight className="h-4 w-4" />
@@ -438,7 +438,7 @@ export default function ForAgenciesPage() {
               clients without sacrificing quality or burning out your team.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link to="/agency/request-access">
+              <Link to="/login?signup=1">
                 <Button
                   size="lg"
                   variant="secondary"

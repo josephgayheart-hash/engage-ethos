@@ -64,12 +64,6 @@ interface UserStats {
   recentLogins: number;
 }
 
-interface OnboardingStats {
-  pending: number;
-  approved: number;
-  rejected: number;
-}
-
 interface ContentStats {
   institutionalProfiles: number;
   contentDNASamples: number;
@@ -119,7 +113,7 @@ export default function AdminConsolePage() {
   const entityTerm = isPlatformOwner ? 'platform' : isEffectiveAgency ? 'agency' : 'institution';
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [userStats, setUserStats] = useState<UserStats>({ total: 0, active: 0, pending: 0, recentLogins: 0 });
-  const [onboardingStats, setOnboardingStats] = useState<OnboardingStats>({ pending: 0, approved: 0, rejected: 0 });
+  const [inboundLeadCount, setInboundLeadCount] = useState(0);
   const [contentStats, setContentStats] = useState<ContentStats>({ institutionalProfiles: 0, contentDNASamples: 0, personalMessages: 0, sharedTemplates: 0 });
   const [recentUsers, setRecentUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -540,19 +534,13 @@ export default function AdminConsolePage() {
           setRecentUsers(users.slice(0, 5));
         }
 
-        // Fetch onboarding requests (only for super admins)
+        // Fetch inbound leads (only for super admins)
         if (isSuperAdmin) {
-          const { data: requests } = await supabase
-            .from('onboarding_requests')
-            .select('request_status');
-
-          if (requests) {
-            setOnboardingStats({
-              pending: requests.filter(r => r.request_status === 'submitted').length,
-              approved: requests.filter(r => r.request_status === 'approved').length,
-              rejected: requests.filter(r => r.request_status === 'rejected').length
-            });
-          }
+          const { count } = await supabase
+            .from('sales_prospects')
+            .select('id', { count: 'exact', head: true })
+            .eq('status', 'inbound');
+          setInboundLeadCount(count ?? 0);
         }
 
         // Fetch content stats for the tenant
@@ -606,12 +594,12 @@ export default function AdminConsolePage() {
     },
     // Only show platform-level admin items when viewing own (platform) workspace
     ...(isSuperAdmin && isOwnTenant ? [{
-      title: 'Onboarding Requests',
-      description: 'Review and approve access requests',
+      title: 'Leads & CRM',
+      description: 'Follow up on new signups and inbound interest',
       icon: UserPlus,
-      href: '/admin/onboarding',
+      href: '/admin/crm',
       color: 'bg-[hsl(173,58%,39%)]',
-      stat: onboardingStats.pending > 0 ? `${onboardingStats.pending} pending` : 'No pending'
+      stat: inboundLeadCount > 0 ? `${inboundLeadCount} new leads` : 'No new leads'
     },
     {
       title: 'NDA Links',

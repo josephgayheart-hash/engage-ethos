@@ -59,21 +59,16 @@ export function ExitIntentDialog({ enabled = true }: ExitIntentDialogProps) {
 
     setIsSubmitting(true);
     try {
-      // Store the email interest
-      const { error } = await supabase
-        .from('onboarding_requests')
-        .insert({
-          email,
-          first_name: 'Newsletter',
-          last_name: 'Subscriber',
-          institution_name_input: 'Unknown',
-          referral_source: 'exit_intent',
-          request_status: 'submitted',
-        });
+      // Drop the interest straight into the contact list
+      const { error } = await supabase.rpc('capture_site_lead', {
+        p_email: email,
+        p_source: 'exit_intent',
+      });
 
-      if (error && !error.message.includes('duplicate')) {
+      if (error) {
         throw error;
       }
+
 
       toast({
         title: "Thanks for your interest!",
