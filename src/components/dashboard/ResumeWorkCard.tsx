@@ -85,7 +85,7 @@ export function ResumeWorkCard() {
   if (actionAge > 24 * 60 * 60 * 1000) return null;
 
   const Icon = config.icon;
-  const audience = lastAction.metadata?.audience || lastAction.metadata?.profileName;
+  const audience = lastAction.metadata?.['audience'] || lastAction.metadata?.['profileName'];
   const contextLabel = audience ? ` for ${audience}` : "";
 
   return (

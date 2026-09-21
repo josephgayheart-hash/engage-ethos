@@ -26,7 +26,7 @@ function extractText(node: React.ReactNode): string {
   if (typeof node === 'number' || typeof node === 'boolean') return String(node);
   if (Array.isArray(node)) return node.map(extractText).join('');
   if (typeof node === 'object' && 'props' in node) {
-    return extractText((node as React.ReactElement).props.children);
+    return extractText((node as React.ReactElement<{ children?: React.ReactNode }>).props.children);
   }
   return '';
 }
@@ -107,12 +107,12 @@ export function ScratchpadCapture() {
     setIsClassifying(true);
     try {
       const resp = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/organize-scratchpad`,
+        `${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/organize-scratchpad`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: `Bearer ${import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY']}`,
           },
           body: JSON.stringify({ stage: "classify", rawText: text }),
         }
@@ -170,12 +170,12 @@ export function ScratchpadCapture() {
 
     try {
       const resp = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/organize-scratchpad`,
+        `${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/organize-scratchpad`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: `Bearer ${import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY']}`,
           },
           body: JSON.stringify({
             stage: "organize",

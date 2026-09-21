@@ -5,7 +5,7 @@ import getMessageTool from "./tools/get-message";
 import createMessageTool from "./tools/create-message";
 import searchStoriesTool from "./tools/search-stories";
 
-const projectRef = import.meta.env.VITE_SUPABASE_PROJECT_ID ?? "project-ref-unset";
+const projectRef = import.meta.env['VITE_SUPABASE_PROJECT_ID'] ?? "project-ref-unset";
 
 export default defineMcp({
   name: "campusvoice-ai",

@@ -356,7 +356,7 @@ export default function ProspectOutreachPage() {
         };
 
         // Only include prospect_id if it's a real prospect
-        if (prospectId) payload.prospect_id = prospectId;
+        if (prospectId) payload['prospect_id'] = prospectId;
 
         const { data, error } = await supabase.functions.invoke("send-prospect-email", { body: payload });
 

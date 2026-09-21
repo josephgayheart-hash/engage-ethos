@@ -474,7 +474,7 @@ const BuildPage = () => {
           }
         : undefined;
 
-      const result = await buildMessage(contextWithChannels, configForGeneration, selectedModel, industryLabels.industryContext, industryLabels.contentStyle);
+      const result = await buildMessage(contextWithChannels, configForGeneration as any, selectedModel, industryLabels.industryContext, industryLabels.contentStyle);
       setBuilderResult(result);
       setJustGenerated(true); // Mark as freshly generated to trigger scroll
 
@@ -535,11 +535,11 @@ const BuildPage = () => {
       const draft = await loadDraftById(resumeDraftId);
       if (draft) {
         const draftData = draft.draft_data as Record<string, unknown>;
-        if (draftData.context) setContext(draftData.context as MessageContext);
-        if (draftData.selectedChannels) setSelectedChannels(draftData.selectedChannels as Channel[]);
-        if (draftData.selectedProfileId) setSelectedProfileId(draftData.selectedProfileId as string);
-        if (draftData.selectedProfileName) setSelectedProfileName(draftData.selectedProfileName as string);
-        if (draftData.builderResult) setBuilderResult(draftData.builderResult as BuilderResult);
+        if (draftData['context']) setContext(draftData['context'] as MessageContext);
+        if (draftData['selectedChannels']) setSelectedChannels(draftData['selectedChannels'] as Channel[]);
+        if (draftData['selectedProfileId']) setSelectedProfileId(draftData['selectedProfileId'] as string);
+        if (draftData['selectedProfileName']) setSelectedProfileName(draftData['selectedProfileName'] as string);
+        if (draftData['builderResult']) setBuilderResult(draftData['builderResult'] as BuilderResult);
         toast({
           title: "Draft Resumed",
           description: `Continuing "${draft.title || 'your message draft'}"`,
@@ -654,7 +654,7 @@ const BuildPage = () => {
     
     // Serialize channel drafts to content for backwards compatibility
     const contentSummary = selectedChannels.map(ch => {
-      const content = builderResult.channelDrafts[ch];
+      const content = (builderResult.channelDrafts as any)[ch];
       if (typeof content === 'string') return `[${ch.toUpperCase()}]\n${content}`;
       if (content && typeof content === 'object') {
         if ('subject' in content) return `[EMAIL]\nSubject: ${content.subject}\n${content.body}`;
@@ -728,7 +728,7 @@ const BuildPage = () => {
     // For multi-channel kits, store the first channel's content as JSON for proper rendering
     // and include metadata about all channels
     const primaryChannel = selectedChannels[0];
-    const primaryContent = builderResult.channelDrafts[primaryChannel];
+    const primaryContent = (builderResult.channelDrafts as any)[primaryChannel];
     
     // Store structured content as JSON string for proper parsing later
     let contentToStore: string;
@@ -739,7 +739,7 @@ const BuildPage = () => {
     } else {
       // Fallback to text summary for multiple channels
       contentToStore = selectedChannels.map(ch => {
-        const content = builderResult.channelDrafts[ch];
+        const content = (builderResult.channelDrafts as any)[ch];
         if (typeof content === 'string') return `[${ch.toUpperCase()}]\n${content}`;
         if (content && typeof content === 'object') {
           if ('subject' in content) return `[EMAIL]\nSubject: ${content.subject}\n${content.body}`;
@@ -802,7 +802,7 @@ const BuildPage = () => {
   const handleSaveIndividualChannelConfirm = async (name: string): Promise<string | undefined> => {
     if (!saveToLibraryChannel || !builderResult?.channelDrafts) return undefined;
     
-    const content = builderResult.channelDrafts[saveToLibraryChannel];
+    const content = (builderResult.channelDrafts as any)[saveToLibraryChannel];
     let contentText = '';
     if (typeof content === 'string') {
       contentText = content;
@@ -1488,7 +1488,7 @@ const BuildPage = () => {
                 selectedChannels.length === 1 ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2"
               )}>
                 {selectedChannels.map(channel => {
-                  const content = builderResult.channelDrafts[channel];
+                  const content = (builderResult.channelDrafts as any)[channel];
                   if (!content) return null;
                   return (
                     <ChannelPreview

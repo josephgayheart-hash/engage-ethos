@@ -62,11 +62,11 @@ export function EmbedProvider({ children }: { children: ReactNode }) {
         setCtx({
           isEmbed: true,
           isLoading: false,
-          orgId: payload.context?.organization?.organizationId,
-          sfUserId: payload.context?.user?.userId,
-          sfUserEmail: payload.context?.user?.email,
-          instanceUrl: payload.client?.instanceUrl,
-          clientId: payload.client?.oauthClientId,
+          orgId: payload['context']?.organization?.organizationId,
+          sfUserId: payload['context']?.user?.userId,
+          sfUserEmail: payload['context']?.user?.email,
+          instanceUrl: payload['client']?.instanceUrl,
+          clientId: payload['client']?.oauthClientId,
           rawContext: payload,
         });
         return;
@@ -81,11 +81,11 @@ export function EmbedProvider({ children }: { children: ReactNode }) {
           setCtx({
             isEmbed: true,
             isLoading: false,
-            orgId: payload.context?.organization?.organizationId,
-            sfUserId: payload.context?.user?.userId,
-            sfUserEmail: payload.context?.user?.email,
-            instanceUrl: payload.client?.instanceUrl,
-            clientId: payload.client?.oauthClientId,
+            orgId: payload['context']?.organization?.organizationId,
+            sfUserId: payload['context']?.user?.userId,
+            sfUserEmail: payload['context']?.user?.email,
+            instanceUrl: payload['client']?.instanceUrl,
+            clientId: payload['client']?.oauthClientId,
             rawContext: payload,
           });
         }

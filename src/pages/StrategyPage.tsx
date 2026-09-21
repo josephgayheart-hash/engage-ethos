@@ -229,16 +229,16 @@ const StrategyPage = () => {
         const draft = await loadDraftById(state.resumeDraftId!);
         if (draft) {
           const draftData = draft.draft_data as Record<string, unknown>;
-          if (draftData.context) setContext(draftData.context as MessageContext);
-          if (draftData.selectedChannels) setSelectedChannels(draftData.selectedChannels as Channel[]);
-          if (draftData.selectedProfileId) setSelectedProfileId(draftData.selectedProfileId as string);
-          if (draftData.selectedProfileName) setSelectedProfileName(draftData.selectedProfileName as string);
-          if (draftData.mapperResult) setMapperResult(draftData.mapperResult as MapperResult);
-          if (draftData.journeyWeeks) setJourneyWeeks(draftData.journeyWeeks as number);
-          if (draftData.startDate) setStartDate(new Date(draftData.startDate as string));
-          if (draftData.endDate) setEndDate(new Date(draftData.endDate as string));
-          if (draftData.cadence) setCadence(draftData.cadence as CadenceFrequency);
-          if (draftData.escalation) setEscalation(draftData.escalation as EscalationPattern);
+          if (draftData['context']) setContext(draftData['context'] as MessageContext);
+          if (draftData['selectedChannels']) setSelectedChannels(draftData['selectedChannels'] as Channel[]);
+          if (draftData['selectedProfileId']) setSelectedProfileId(draftData['selectedProfileId'] as string);
+          if (draftData['selectedProfileName']) setSelectedProfileName(draftData['selectedProfileName'] as string);
+          if (draftData['mapperResult']) setMapperResult(draftData['mapperResult'] as MapperResult);
+          if (draftData['journeyWeeks']) setJourneyWeeks(draftData['journeyWeeks'] as number);
+          if (draftData['startDate']) setStartDate(new Date(draftData['startDate'] as string));
+          if (draftData['endDate']) setEndDate(new Date(draftData['endDate'] as string));
+          if (draftData['cadence']) setCadence(draftData['cadence'] as CadenceFrequency);
+          if (draftData['escalation']) setEscalation(draftData['escalation'] as EscalationPattern);
           toast({
             title: "Draft Resumed",
             description: `Continuing "${draft.title || 'your journey draft'}"`,
@@ -471,7 +471,7 @@ const StrategyPage = () => {
 
       const result = await mapMessages(
         contextWithChannels, 
-        configForGeneration, 
+        configForGeneration as any, 
         journeyWeeks,
         startDate?.toISOString(),
         endDate?.toISOString(),
@@ -700,8 +700,8 @@ const StrategyPage = () => {
       status: (isAdmin || isApprover) ? 'published' as const : 'submitted' as const,
       version: '1.0',
       requiredFields: {
-        audience: [context.audience],
-        moment: [context.moment],
+        audience: [context.audience ?? ''],
+        moment: [context.moment ?? ''],
         channel: selectedChannels,
       },
       useCases: {
@@ -998,7 +998,7 @@ const StrategyPage = () => {
                     description: `Using "${kit.name}" as your starting template. Scroll down to customize timeline and channels.`,
                   });
                 }}
-                selectedKitKey={selectedPlaybookKit?.kit_key}
+                selectedKitKey={undefined}
                 institutionType={institutionalConfig?.institutionType}
                 showAllKits={showAllPlaybookKits}
                 onToggleShowAll={setShowAllPlaybookKits}

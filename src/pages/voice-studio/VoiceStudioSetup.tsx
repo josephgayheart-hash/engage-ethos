@@ -75,12 +75,12 @@ export default function VoiceStudioSetup() {
         setUseCases((prof.use_cases as string[]) ?? []);
         setAbout(prof.about_me ?? "");
         const prefs = (prof.response_prefs as Record<string, unknown>) ?? {};
-        if (typeof prefs.length === "string") setLength(prefs.length);
-        if (typeof prefs.format === "string") setFormat(prefs.format);
-        if (typeof prefs.formality === "number") setFormality([prefs.formality]);
-        if (typeof prefs.banned_words === "string") setBannedWords(prefs.banned_words);
-        if (typeof prefs.no_em_dash === "boolean") setNoEmDash(prefs.no_em_dash);
-        if (typeof prefs.use_markdown === "boolean") setUseMarkdown(prefs.use_markdown);
+        if (typeof prefs['length'] === "string") setLength(prefs['length']);
+        if (typeof prefs['format'] === "string") setFormat(prefs['format']);
+        if (typeof prefs['formality'] === "number") setFormality([prefs['formality']]);
+        if (typeof prefs['banned_words'] === "string") setBannedWords(prefs['banned_words']);
+        if (typeof prefs['no_em_dash'] === "boolean") setNoEmDash(prefs['no_em_dash']);
+        if (typeof prefs['use_markdown'] === "boolean") setUseMarkdown(prefs['use_markdown']);
         const samples = (prof.voice_samples as string[]) ?? [];
         if (samples[0]) setS1(samples[0]);
         if (samples[1]) setS2(samples[1]);

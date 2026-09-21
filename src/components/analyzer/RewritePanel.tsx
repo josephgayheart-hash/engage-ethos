@@ -114,6 +114,7 @@ export function RewritePanel({
       setProgress(prev => {
         // Progress based on phase
         const targetProgress = {
+          idle: 0,
           preparing: 15,
           analyzing: 35,
           rewriting: 75,

@@ -329,7 +329,7 @@ const AdminPanel = () => {
       setInstitutionalProfiles(profilesWithInstitution);
 
       // Map Content DNA samples with names
-      const samplesWithNames: ContentDNASample[] = (dnaSamplesData || []).map(s => {
+      const samplesWithNames: ContentDNASample[] = ((dnaSamplesData || []) as any[]).map(s => {
         const sTenant = tenantsData?.find(t => t.id === s.tenant_id);
         const sProfile = profilesWithInstitution.find(p => p.id === s.profile_id);
         return {
@@ -341,7 +341,7 @@ const AdminPanel = () => {
       setContentDNASamples(samplesWithNames);
 
       // Map Content DNA analyses with names
-      const analysesWithNames: ContentDNAAnalysis[] = (dnaAnalysesData || []).map(a => {
+      const analysesWithNames: ContentDNAAnalysis[] = ((dnaAnalysesData || []) as any[]).map(a => {
         const aTenant = tenantsData?.find(t => t.id === a.tenant_id);
         const aProfile = profilesWithInstitution.find(p => p.id === a.profile_id);
         return {
@@ -355,7 +355,7 @@ const AdminPanel = () => {
       setContentDNAAnalyses(analysesWithNames);
 
       // Map email nudges with user info
-      const nudgesWithNames: EmailNudge[] = (nudgesData || []).map(n => {
+      const nudgesWithNames: EmailNudge[] = ((nudgesData || []) as any[]).map(n => {
         const nUser = usersWithInstitution.find(u => u.id === n.user_id);
         const nTenant = tenantsData?.find(t => t.id === n.tenant_id);
         return {
@@ -1178,16 +1178,16 @@ const AdminPanel = () => {
                                     )}
                                   </div>
                                 </div>
-                                {voice.voiceAttributes && Array.isArray(voice.voiceAttributes) && (
+                                {voice['voiceAttributes'] && Array.isArray(voice['voiceAttributes']) && (
                                   <div className="flex flex-wrap gap-1 mt-2">
-                                    {voice.voiceAttributes.slice(0, 4).map((attr: any, i: number) => (
+                                    {voice['voiceAttributes'].slice(0, 4).map((attr: any, i: number) => (
                                       <Badge key={i} variant="secondary" className="text-[10px]">
                                         {typeof attr === 'string' ? attr : attr?.name || 'Attribute'}
                                       </Badge>
                                     ))}
-                                    {voice.voiceAttributes.length > 4 && (
+                                    {voice['voiceAttributes'].length > 4 && (
                                       <Badge variant="outline" className="text-[10px]">
-                                        +{voice.voiceAttributes.length - 4} more
+                                        +{voice['voiceAttributes'].length - 4} more
                                       </Badge>
                                     )}
                                   </div>
@@ -1321,8 +1321,8 @@ const AdminPanel = () => {
                                               <p className="text-xs font-medium text-muted-foreground">Brand Promise</p>
                                             </div>
                                             <p className="text-sm">
-                                              {typeof brand.promise === 'string' ? brand.promise : 
-                                               typeof brand.brandPromise === 'string' ? brand.brandPromise : 
+                                              {typeof brand['promise'] === 'string' ? brand['promise'] : 
+                                               typeof brand['brandPromise'] === 'string' ? brand['brandPromise'] : 
                                                'Not defined'}
                                             </p>
                                           </div>
@@ -1333,9 +1333,9 @@ const AdminPanel = () => {
                                               <Layers className="w-4 h-4 text-blue-600" />
                                               <p className="text-xs font-medium text-muted-foreground">Brand Pillars</p>
                                             </div>
-                                            {brand.pillars || brand.brandPillars ? (
+                                            {brand['pillars'] || brand['brandPillars'] ? (
                                               <div className="flex flex-wrap gap-1">
-                                                {(brand.pillars || brand.brandPillars || []).map((pillar: any, i: number) => (
+                                                {(brand['pillars'] || brand['brandPillars'] || []).map((pillar: any, i: number) => (
                                                   <Badge key={i} variant="secondary" className="text-[10px]">
                                                     {typeof pillar === 'string' ? pillar : pillar?.name || 'Pillar'}
                                                   </Badge>
@@ -1352,9 +1352,9 @@ const AdminPanel = () => {
                                               <BookOpen className="w-4 h-4 text-green-600" />
                                               <p className="text-xs font-medium text-muted-foreground">Proof Points</p>
                                             </div>
-                                            {brand.proofPoints || brand.foundations ? (
+                                            {brand['proofPoints'] || brand['foundations'] ? (
                                               <div className="flex flex-wrap gap-1">
-                                                {(brand.proofPoints || brand.foundations || []).slice(0, 3).map((point: any, i: number) => (
+                                                {(brand['proofPoints'] || brand['foundations'] || []).slice(0, 3).map((point: any, i: number) => (
                                                   <Badge key={i} variant="outline" className="text-[10px]">
                                                     {typeof point === 'string' ? point : point?.name || 'Point'}
                                                   </Badge>
@@ -1367,11 +1367,11 @@ const AdminPanel = () => {
                                         </div>
                                       )}
                                       
-                                      {voice?.voiceAttributes && Array.isArray(voice.voiceAttributes) && (
+                                      {voice?.['voiceAttributes'] && Array.isArray(voice['voiceAttributes']) && (
                                         <div>
                                           <p className="text-xs font-medium text-muted-foreground mb-2">Voice Attributes</p>
                                           <div className="flex flex-wrap gap-1">
-                                            {voice.voiceAttributes.map((attr: any, i: number) => (
+                                            {voice['voiceAttributes'].map((attr: any, i: number) => (
                                               <Badge key={i} variant="secondary" className="text-[10px]">
                                                 {typeof attr === 'string' ? attr : attr?.name || 'Attribute'}
                                               </Badge>

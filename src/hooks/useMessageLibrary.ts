@@ -181,19 +181,19 @@ export function useMessageLibrary() {
   const updateMessage = useCallback(async (id: string, updates: Partial<SavedMessage>, addVersion = false) => {
     const updatePayload: Record<string, any> = {};
 
-    if (updates.title !== undefined) updatePayload.title = updates.title;
-    if (updates.content !== undefined) updatePayload.content = updates.content;
-    if (updates.channel !== undefined) updatePayload.channel = updates.channel;
-    if (updates.audience !== undefined) updatePayload.audience = updates.audience;
-    if (updates.domain !== undefined) updatePayload.domain = updates.domain;
-    if (updates.moment !== undefined) updatePayload.moment = updates.moment;
-    if (updates.goal !== undefined) updatePayload.goal = updates.goal;
-    if (updates.tone !== undefined) updatePayload.tone = updates.tone;
-    if (updates.notes !== undefined) updatePayload.notes = updates.notes;
-    if (updates.approved !== undefined) updatePayload.approved = updates.approved;
-    if (updates.tags !== undefined) updatePayload.tags = updates.tags;
-    if (updates.submittedToLibrary !== undefined) updatePayload.submitted_to_library = updates.submittedToLibrary;
-    if (updates.submittedAt !== undefined) updatePayload.submitted_at = updates.submittedAt;
+    if (updates.title !== undefined) updatePayload['title'] = updates.title;
+    if (updates.content !== undefined) updatePayload['content'] = updates.content;
+    if (updates.channel !== undefined) updatePayload['channel'] = updates.channel;
+    if (updates.audience !== undefined) updatePayload['audience'] = updates.audience;
+    if (updates.domain !== undefined) updatePayload['domain'] = updates.domain;
+    if (updates.moment !== undefined) updatePayload['moment'] = updates.moment;
+    if (updates.goal !== undefined) updatePayload['goal'] = updates.goal;
+    if (updates.tone !== undefined) updatePayload['tone'] = updates.tone;
+    if (updates.notes !== undefined) updatePayload['notes'] = updates.notes;
+    if (updates.approved !== undefined) updatePayload['approved'] = updates.approved;
+    if (updates.tags !== undefined) updatePayload['tags'] = updates.tags;
+    if (updates.submittedToLibrary !== undefined) updatePayload['submitted_to_library'] = updates.submittedToLibrary;
+    if (updates.submittedAt !== undefined) updatePayload['submitted_at'] = updates.submittedAt;
 
     // Handle version addition
     if (addVersion && updates.content) {
@@ -205,13 +205,13 @@ export function useMessageLibrary() {
           createdAt: new Date().toISOString(),
           changeNotes: updates.notes,
         };
-        updatePayload.versions = [newVersion, ...existing.versions] as any;
+        updatePayload['versions'] = [newVersion, ...existing.versions] as any;
       }
     }
 
     const { error } = await supabase
       .from('personal_messages')
-      .update(updatePayload)
+      .update(updatePayload as never)
       .eq('id', id);
 
     if (error) {

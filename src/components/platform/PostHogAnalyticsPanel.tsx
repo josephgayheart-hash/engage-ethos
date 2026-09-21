@@ -188,13 +188,14 @@ export function PostHogAnalyticsPanel() {
       const t = setInterval(() => load("overview"), 30_000);
       return () => clearInterval(t);
     }
+    return undefined;
     // eslint-disable-next-line
   }, [tab]);
 
   const overview = useMemo(() => {
     if (!data) return null;
     return {
-      live: Number(rowsFromQuery(data.live)[0]?.live || 0),
+      live: Number(rowsFromQuery(data.live)[0]?.['live'] || 0),
       today: rowsFromQuery(data.today)[0] || {},
       yesterday: rowsFromQuery(data.yesterday)[0] || {},
       totals: rowsFromQuery(data.totals)[0] || {},
@@ -207,7 +208,7 @@ export function PostHogAnalyticsPanel() {
       browsers: rowsFromQuery(data.browsers),
       topEvents: rowsFromQuery(data.topEvents),
       newVsReturning: rowsFromQuery(data.newVsReturning)[0] || {},
-      hourly: rowsFromQuery(data.hourly).map((r) => ({ dow: Number(r.dow), hour: Number(r.hour), c: Number(r.c) })),
+      hourly: rowsFromQuery(data.hourly).map((r) => ({ dow: Number(r['dow']), hour: Number(r['hour']), c: Number(r['c']) })),
       exits: rowsFromQuery(data.exits),
       exceptions: rowsFromQuery(data.exceptions),
     };
@@ -282,21 +283,21 @@ export function PostHogAnalyticsPanel() {
                   />
                   <HeroStat
                     label="Pageviews Today"
-                    value={fmt(Number(overview.today.pageviews || 0))}
-                    delta={pctDelta(Number(overview.today.pageviews || 0), Number(overview.yesterday.pageviews || 0))}
+                    value={fmt(Number(overview.today['pageviews'] || 0))}
+                    delta={pctDelta(Number(overview.today['pageviews'] || 0), Number(overview.yesterday['pageviews'] || 0))}
                     accent="hsl(82 85% 45%)"
                   />
                   <HeroStat
                     label={`Visitors (${days}d)`}
-                    value={fmt(Number(overview.totals.visitors || 0))}
-                    delta={pctDelta(Number(overview.totals.visitors || 0), Number(overview.prevTotals.visitors || 0))}
+                    value={fmt(Number(overview.totals['visitors'] || 0))}
+                    delta={pctDelta(Number(overview.totals['visitors'] || 0), Number(overview.prevTotals['visitors'] || 0))}
                     sparkValues={overview.daily.map((d: any) => Number(d.visitors || 0))}
                     accent="hsl(270 70% 55%)"
                   />
                   <HeroStat
                     label={`Pageviews (${days}d)`}
-                    value={fmt(Number(overview.totals.pageviews || 0))}
-                    delta={pctDelta(Number(overview.totals.pageviews || 0), Number(overview.prevTotals.pageviews || 0))}
+                    value={fmt(Number(overview.totals['pageviews'] || 0))}
+                    delta={pctDelta(Number(overview.totals['pageviews'] || 0), Number(overview.prevTotals['pageviews'] || 0))}
                     sparkValues={overview.daily.map((d: any) => Number(d.pageviews || 0))}
                     accent="hsl(200 100% 50%)"
                   />
@@ -306,11 +307,11 @@ export function PostHogAnalyticsPanel() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <div className="rounded-lg border p-3">
                     <div className="text-[11px] uppercase tracking-wider text-muted-foreground flex items-center gap-1"><TrendingUp className="w-3 h-3" /> Sessions</div>
-                    <div className="text-xl font-semibold mt-1 tabular-nums">{fmt(Number(overview.totals.sessions || 0))}</div>
+                    <div className="text-xl font-semibold mt-1 tabular-nums">{fmt(Number(overview.totals['sessions'] || 0))}</div>
                   </div>
                   {(() => {
-                    const n = Number(overview.newVsReturning.new_visitors || 0);
-                    const r = Number(overview.newVsReturning.returning_visitors || 0);
+                    const n = Number(overview.newVsReturning['new_visitors'] || 0);
+                    const r = Number(overview.newVsReturning['returning_visitors'] || 0);
                     const total = n + r;
                     const newPct = total ? (n / total) * 100 : 0;
                     return (

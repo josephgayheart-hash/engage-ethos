@@ -117,17 +117,17 @@ export function useUserDrafts(draftType?: DraftType) {
 
         // Fire-and-forget: generate cover image for new drafts
         if (draft.id && title) {
-          const contextData = data?.context as Record<string, unknown> | undefined;
+          const contextData = data?.['context'] as Record<string, unknown> | undefined;
           supabase.functions.invoke('generate-cover-image', {
             body: {
               draftId: draft.id,
               title: title,
-              audience: contextData?.audience,
-              moment: contextData?.moment,
-              channels: data?.selectedChannels,
+              audience: contextData?.['audience'],
+              moment: contextData?.['moment'],
+              channels: data?.['selectedChannels'],
               mode: type === 'journey' ? 'journey' : 'builder',
               tenantId: tenantId,
-              profileId: data?.selectedProfileId,
+              profileId: data?.['selectedProfileId'],
             },
           }).then(() => {
             if (!silent) fetchDrafts();

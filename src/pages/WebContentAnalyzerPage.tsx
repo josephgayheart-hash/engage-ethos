@@ -212,8 +212,8 @@ export default function WebContentAnalyzerPage() {
           setSelectedProfileId(draftData.profileId || null);
           setResolvedIssues(draftData.remediation?.resolvedIssues || []);
           setCurrentDraftId(draft.id);
-          if (draftData.analysisResult?.sections?.length > 0) {
-            setSelectedSectionId(draftData.analysisResult.sections[0].id);
+          if ((draftData.analysisResult?.sections?.length ?? 0) > 0) {
+            setSelectedSectionId(draftData.analysisResult!.sections![0].id);
           }
           
           // Show appropriate toast based on status

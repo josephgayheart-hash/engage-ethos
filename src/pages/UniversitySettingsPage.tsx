@@ -497,23 +497,23 @@ export default function UniversitySettingsPage() {
       // Apply name change
       if (headerDirty) {
         if (editingProfile.profileType === 'university' || editingProfile.profileType === 'headquarters') {
-          updates.name = draftName.trim();
+          updates['name'] = draftName.trim();
         }
         // Always store unitName in config
         newConfig.unitName = draftName.trim();
       }
 
       // Save config
-      updates.config = JSON.parse(JSON.stringify(newConfig));
+      updates['config'] = JSON.parse(JSON.stringify(newConfig));
 
       // Save type if changed
       if (draftType !== editingProfile.profileType) {
-        updates.profile_type = draftType;
+        updates['profile_type'] = draftType;
       }
 
       // Save parent if changed
       if (draftParentId !== (editingProfile.parentProfileId || null)) {
-        updates.parent_profile_id = draftParentId;
+        updates['parent_profile_id'] = draftParentId;
       }
 
       const { error } = await supabase

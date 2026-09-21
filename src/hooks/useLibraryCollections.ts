@@ -113,16 +113,16 @@ export function useLibraryCollections() {
 
   const updateCollection = useCallback(async (id: string, updates: Partial<Pick<LibraryCollection, 'name' | 'description' | 'collectionType' | 'coverImageUrl' | 'tags' | 'status'>>) => {
     const payload: Record<string, any> = {};
-    if (updates.name !== undefined) payload.name = updates.name;
-    if (updates.description !== undefined) payload.description = updates.description;
-    if (updates.collectionType !== undefined) payload.collection_type = updates.collectionType;
-    if (updates.coverImageUrl !== undefined) payload.cover_image_url = updates.coverImageUrl;
-    if (updates.tags !== undefined) payload.tags = updates.tags;
-    if (updates.status !== undefined) payload.status = updates.status;
+    if (updates.name !== undefined) payload['name'] = updates.name;
+    if (updates.description !== undefined) payload['description'] = updates.description;
+    if (updates.collectionType !== undefined) payload['collection_type'] = updates.collectionType;
+    if (updates.coverImageUrl !== undefined) payload['cover_image_url'] = updates.coverImageUrl;
+    if (updates.tags !== undefined) payload['tags'] = updates.tags;
+    if (updates.status !== undefined) payload['status'] = updates.status;
 
     const { error } = await supabase
       .from('library_collections')
-      .update(payload)
+      .update(payload as never)
       .eq('id', id);
 
     if (error) {

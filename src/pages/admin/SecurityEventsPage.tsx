@@ -322,10 +322,10 @@ export default function SecurityEventsPage() {
                           {event.endpoint && (
                             <p className="text-muted-foreground">
                               <span className="font-medium">Endpoint:</span>{' '}
-                              <code className="text-xs bg-muted px-1 py-0.5 rounded">{event.endpoint}</code>
+                              <code className="text-xs bg-muted px-1 py-0.5 rounded">{String(event.endpoint)}</code>
                             </p>
                           )}
-                          {event.metadata && typeof event.metadata === 'object' && Object.keys(event.metadata as Record<string, unknown>).length > 0 && (
+                          {Boolean(event.metadata) && typeof event.metadata === 'object' && Object.keys(event.metadata as Record<string, unknown>).length > 0 && (
                             <details className="mt-2">
                               <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground">
                                 View metadata

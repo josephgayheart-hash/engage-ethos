@@ -485,7 +485,7 @@ export function StoryBankTab({ profileId }: StoryBankTabProps) {
               {!parsedStory ? (
                 <>
                   {/* Import Mode Tabs */}
-                  <Tabs value={importMode} onValueChange={(v: 'text' | 'url') => setImportMode(v)}>
+                  <Tabs value={importMode} onValueChange={(v: string) => setImportMode(v as 'text' | 'url')}>
                     <TabsList className="grid w-full grid-cols-2">
                       <TabsTrigger value="url" className="gap-2">
                         <Link className="w-4 h-4" />

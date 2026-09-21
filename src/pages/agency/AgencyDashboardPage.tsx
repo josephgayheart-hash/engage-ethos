@@ -67,7 +67,7 @@ export default function AgencyDashboardPage() {
       const { data: profilesData, error: profilesError } = await supabase
         .from("institutional_profiles")
         .select("*")
-        .eq("tenant_id", tenant?.id)
+        .eq("tenant_id", tenant?.id ?? "")
         .order("created_at", { ascending: false });
 
       if (profilesError) throw profilesError;
@@ -76,13 +76,13 @@ export default function AgencyDashboardPage() {
       const { data: messagesData } = await supabase
         .from("personal_messages")
         .select("institutional_profile_id")
-        .eq("tenant_id", tenant?.id);
+        .eq("tenant_id", tenant?.id ?? "");
 
       // Fetch DNA configurations
       const { data: dnaData } = await supabase
         .from("content_dna_analysis")
         .select("profile_id")
-        .eq("tenant_id", tenant?.id);
+        .eq("tenant_id", tenant?.id ?? "");
 
       // Calculate counts per client
       const messageCounts: Record<string, number> = {};

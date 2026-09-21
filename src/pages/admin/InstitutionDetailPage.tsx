@@ -731,7 +731,7 @@ export default function InstitutionDetailPage() {
                             if (typeof value === 'object' && value !== null) return Object.keys(value).length > 0;
                             return value && value.toString().trim() !== '';
                           }).length;
-                          const hasDNA = config.voiceAnalysis || (config.brandVoiceSamples && config.brandVoiceSamples.length > 0);
+                          const hasDNA = config['voiceAnalysis'] || (config['brandVoiceSamples'] && config['brandVoiceSamples'].length > 0);
                           
                           return (
                             <Card key={profile.id} className="border">
@@ -760,28 +760,28 @@ export default function InstitutionDetailPage() {
                                 </div>
                                 <Progress value={completionPct} className="h-1.5 mb-3" />
                                 <div className="flex flex-wrap gap-1 mb-3">
-                                  {config.institutionName && <Badge variant="secondary" className="text-[10px]">Name</Badge>}
-                                  {config.mascot && <Badge variant="secondary" className="text-[10px]">Mascot</Badge>}
-                                  {config.primaryCTAs?.length > 0 && <Badge variant="secondary" className="text-[10px]">CTAs</Badge>}
-                                  {config.leaderNames?.length > 0 && <Badge variant="secondary" className="text-[10px]">Leaders</Badge>}
-                                  {config.portalName && <Badge variant="secondary" className="text-[10px]">Portal</Badge>}
-                                  {config.lmsName && <Badge variant="secondary" className="text-[10px]">LMS</Badge>}
-                                  {config.toneRules?.length > 0 && <Badge variant="secondary" className="text-[10px]">Tone</Badge>}
-                                  {config.supportCenters?.length > 0 && <Badge variant="secondary" className="text-[10px]">Centers</Badge>}
-                                  {config.primaryContactEmail && <Badge variant="secondary" className="text-[10px]">Contact</Badge>}
+                                  {config['institutionName'] && <Badge variant="secondary" className="text-[10px]">Name</Badge>}
+                                  {config['mascot'] && <Badge variant="secondary" className="text-[10px]">Mascot</Badge>}
+                                  {config['primaryCTAs']?.length > 0 && <Badge variant="secondary" className="text-[10px]">CTAs</Badge>}
+                                  {config['leaderNames']?.length > 0 && <Badge variant="secondary" className="text-[10px]">Leaders</Badge>}
+                                  {config['portalName'] && <Badge variant="secondary" className="text-[10px]">Portal</Badge>}
+                                  {config['lmsName'] && <Badge variant="secondary" className="text-[10px]">LMS</Badge>}
+                                  {config['toneRules']?.length > 0 && <Badge variant="secondary" className="text-[10px]">Tone</Badge>}
+                                  {config['supportCenters']?.length > 0 && <Badge variant="secondary" className="text-[10px]">Centers</Badge>}
+                                  {config['primaryContactEmail'] && <Badge variant="secondary" className="text-[10px]">Contact</Badge>}
                                 </div>
                                 <div className="grid grid-cols-2 gap-2 text-xs">
-                                  {config.institutionName && (
-                                    <div><span className="text-muted-foreground">Name:</span> {config.institutionName}</div>
+                                  {config['institutionName'] && (
+                                    <div><span className="text-muted-foreground">Name:</span> {config['institutionName']}</div>
                                   )}
-                                  {config.mascot && (
-                                    <div><span className="text-muted-foreground">Mascot:</span> {config.mascot}</div>
+                                  {config['mascot'] && (
+                                    <div><span className="text-muted-foreground">Mascot:</span> {config['mascot']}</div>
                                   )}
-                                  {config.leaderNames?.length > 0 && (
-                                    <div><span className="text-muted-foreground">Leader:</span> {config.leaderNames[0]}</div>
+                                  {config['leaderNames']?.length > 0 && (
+                                    <div><span className="text-muted-foreground">Leader:</span> {config['leaderNames'][0]}</div>
                                   )}
-                                  {config.portalName && (
-                                    <div><span className="text-muted-foreground">Portal:</span> {config.portalName}</div>
+                                  {config['portalName'] && (
+                                    <div><span className="text-muted-foreground">Portal:</span> {config['portalName']}</div>
                                   )}
                                 </div>
                               </CardContent>

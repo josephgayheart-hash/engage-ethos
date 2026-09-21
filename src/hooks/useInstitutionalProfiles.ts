@@ -192,7 +192,7 @@ export function useInstitutionalProfiles() {
         config: data.config as InstitutionalConfig,
         createdAt: data.created_at,
         updatedAt: data.updated_at,
-        createdByUserId: data.created_by_user_id,
+        createdByUserId: data.created_by_user_id ?? undefined,
         parentProfileId: data.parent_profile_id,
         profileType: (data.profile_type || 'university') as ProfileType,
       };
@@ -225,8 +225,8 @@ export function useInstitutionalProfiles() {
   const updateProfile = useCallback(async (id: string, updates: Partial<Pick<InstitutionalProfile, 'name' | 'config'>>) => {
     try {
       const updateData: Record<string, unknown> = {};
-      if (updates.name !== undefined) updateData.name = updates.name;
-      if (updates.config !== undefined) updateData.config = JSON.parse(JSON.stringify(updates.config));
+      if (updates.name !== undefined) updateData['name'] = updates.name;
+      if (updates.config !== undefined) updateData['config'] = JSON.parse(JSON.stringify(updates.config));
 
       const { error } = await supabase
         .from('institutional_profiles')
@@ -290,7 +290,7 @@ export function useInstitutionalProfiles() {
         config: data.config as InstitutionalConfig,
         createdAt: data.created_at,
         updatedAt: data.updated_at,
-        createdByUserId: data.created_by_user_id,
+        createdByUserId: data.created_by_user_id ?? undefined,
         parentProfileId: data.parent_profile_id,
         profileType: (data.profile_type || 'university') as ProfileType,
       };

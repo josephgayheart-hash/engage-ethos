@@ -603,7 +603,7 @@ const TemplateDetailPage = () => {
                     return (
                       <ChannelPreview
                         channel={templateChannel}
-                        content={parsedContent}
+                        content={parsedContent ?? undefined}
                         onCopy={handleCopy}
                         onSaveToLibrary={() => handlePull()}
                         institutionName={(() => {

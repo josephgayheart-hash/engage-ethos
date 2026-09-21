@@ -128,7 +128,7 @@ export function EmailTemplatesTab({ tenants = [], users = [], onEmailSent }: Ema
       setTemplates((data || []).map(t => ({
         ...t,
         trigger_config: t.trigger_config as Record<string, any> | null
-      })));
+      })) as unknown as EmailTemplate[]);
     } catch (error: any) {
       console.error("Error fetching templates:", error);
       toast({
@@ -161,8 +161,8 @@ export function EmailTemplatesTab({ tenants = [], users = [], onEmailSent }: Ema
     setSelectedTemplate(template);
     setConfigTriggerType(template.trigger_type as "manual" | "auto");
     const config = template.trigger_config || {};
-    setConfigDelayHours(config.delay_hours || 24);
-    setConfigDelayDays(config.delay_days || 0);
+    setConfigDelayHours(config['delay_hours'] || 24);
+    setConfigDelayDays(config['delay_days'] || 0);
     setIsConfiguring(true);
   };
 
@@ -461,7 +461,7 @@ export function EmailTemplatesTab({ tenants = [], users = [], onEmailSent }: Ema
   const formatTriggerTiming = (template: EmailTemplate) => {
     if (template.trigger_type !== "auto" || !template.trigger_config) return null;
     const config = template.trigger_config;
-    const totalHours = config.total_delay_hours || config.delay_hours || 0;
+    const totalHours = config['total_delay_hours'] || config['delay_hours'] || 0;
     if (totalHours >= 24) {
       const days = Math.floor(totalHours / 24);
       const hours = totalHours % 24;

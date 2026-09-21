@@ -674,7 +674,7 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
             ) : (
               <>
                 {/* Mode Toggle */}
-                <Tabs value={addMode} onValueChange={(v: 'manual' | 'generate' | 'select') => setAddMode(v)} className="w-full">
+                <Tabs value={addMode} onValueChange={(v: string) => setAddMode(v as 'manual' | 'generate' | 'select')} className="w-full">
                   <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="manual" className="gap-2">
                       <FileText className="w-4 h-4" />
@@ -1199,8 +1199,8 @@ export function FactBookTab({ profileId }: FactBookTabProps) {
                       category: editingFact.category,
                       label: editingFact.label,
                       value: editingFact.value,
-                      context: editingFact.context,
-                      year: editingFact.year,
+                      context: editingFact.context ?? undefined,
+                      year: editingFact.year ?? undefined,
                       display_format: editingFact.display_format,
                     });
                     setEditingFact(null);

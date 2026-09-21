@@ -381,7 +381,7 @@ export default function AdminUsersPage() {
       const { data: currentProfile } = await supabase
         .from('profiles')
         .select('first_name, last_name')
-        .eq('id', currentUser?.id)
+        .eq('id', currentUser?.id ?? '')
         .single();
 
       const inviterName = currentProfile 

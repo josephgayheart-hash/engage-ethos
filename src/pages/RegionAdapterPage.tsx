@@ -230,11 +230,11 @@ Use this exact format for each region:
             <AIBadge />
           </Button>
 
-          {adaptations._full && (
+          {adaptations['_full'] && (
             <Card className="print:shadow-none print:border-none">
               <CardContent className="pt-6 print:px-0">
                 <PlaybookRenderer
-                  content={displayContent || adaptations._full}
+                  content={displayContent || adaptations['_full']}
                   title="Regional Adaptations"
                   outputLanguage={outputLanguage}
                   outputLanguageLabel={outputLanguages.find(l => l.value === outputLanguage)?.label}
@@ -247,7 +247,7 @@ Use this exact format for each region:
                   translationToggle={
                     outputLanguage !== 'en' ? (
                       <TranslationToggle
-                        originalContent={adaptations._full}
+                        originalContent={adaptations['_full']}
                         outputLanguage={outputLanguage}
                         inline={false}
                         onToggle={(content) => setDisplayContent(content)}
