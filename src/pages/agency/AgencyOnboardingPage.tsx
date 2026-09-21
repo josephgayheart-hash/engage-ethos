@@ -49,7 +49,7 @@ export default function AgencyOnboardingPage() {
     setIsSubmitting(true);
     try {
       const { error } = await supabase.from("institutional_profiles").insert({
-        tenant_id: tenant?.id,
+        tenant_id: tenant?.id ?? "",
         created_by_user_id: profile?.id,
         name: clientData.name,
         profile_type: "university",

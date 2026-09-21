@@ -208,7 +208,7 @@ export default function UserDetailPage() {
       
       // Get profile names for DNA entries
       if (dnaData && dnaData.length > 0) {
-        const profileIds = dnaData.filter(d => d.profile_id).map(d => d.profile_id);
+        const profileIds = dnaData.filter(d => d.profile_id).map(d => d.profile_id as string);
         const { data: dnaProfiles } = await supabase
           .from('institutional_profiles')
           .select('id, name')

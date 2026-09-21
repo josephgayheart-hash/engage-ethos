@@ -998,7 +998,7 @@ const StrategyPage = () => {
                     description: `Using "${kit.name}" as your starting template. Scroll down to customize timeline and channels.`,
                   });
                 }}
-                selectedKitKey={selectedPlaybookKit?.kit_key}
+                selectedKitKey={undefined}
                 institutionType={institutionalConfig?.institutionType}
                 showAllKits={showAllPlaybookKits}
                 onToggleShowAll={setShowAllPlaybookKits}
