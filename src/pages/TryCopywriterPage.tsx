@@ -101,7 +101,7 @@ export default function TryCopywriterPage() {
         style={{ background: "linear-gradient(145deg, hsl(222 47% 16%) 0%, hsl(222 40% 22%) 100%)" }}
       >
         <div className="hidden sm:block absolute w-72 h-72 rounded-full blur-[80px]" style={{ background: "hsl(82 85% 55% / 0.15)", top: "-10%", right: "5%" }} />
-        <div className="hidden sm:block absolute w-56 h-56 rounded-full blur-[70px]" style={{ background: "hsl(270 70% 60% / 0.18)", bottom: "-20%", left: "10%" }} />
+        <div className="hidden sm:block absolute w-56 h-56 rounded-full blur-[70px]" style={{ background: "hsl(216 100% 50% / 0.18)", bottom: "-20%", left: "10%" }} />
 
         <div className="relative">
           <LandingNav />
@@ -258,8 +258,8 @@ export default function TryCopywriterPage() {
           <aside className="space-y-4">
             <Card className="p-4 border-border/60">
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-[hsl(270_70%_60%_/_0.15)] flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-[hsl(270_70%_55%)]" />
+                <div className="w-8 h-8 rounded-lg bg-[hsl(216_100%_50%_/_0.15)] flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-[hsl(216_100%_50%)]" />
                 </div>
                 <div>
                   <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">

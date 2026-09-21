@@ -101,7 +101,7 @@ const DemoTouchpointNode = ({ data }: { data: { channel: string; week: number; t
     switch (channel) {
       case 'email': return 'bg-blue-500';
       case 'sms': return 'bg-green-500';
-      case 'phone': return 'bg-purple-500';
+      case 'phone': return 'bg-blue-600';
       default: return 'bg-teal-500';
     }
   };
@@ -245,7 +245,7 @@ export default function JourneyDesignerFeaturePage() {
         <div className="absolute top-20 right-[12%] w-32 h-32 bg-[hsl(173_58%_50%_/_0.18)] rounded-full blur-2xl" />
         <div className="absolute bottom-36 left-[8%] w-40 h-40 bg-[hsl(160_60%_55%_/_0.15)] rounded-full blur-3xl" />
         <div className="absolute top-44 left-[22%] w-24 h-24 bg-[hsl(200_100%_50%_/_0.12)] rounded-full blur-2xl" />
-        <div className="absolute bottom-48 right-[25%] w-20 h-20 bg-[hsl(270_70%_60%_/_0.1)] rounded-full blur-2xl" />
+        <div className="absolute bottom-48 right-[25%] w-20 h-20 bg-[hsl(216_100%_50%_/_0.1)] rounded-full blur-2xl" />
         <div className="absolute top-32 right-[35%] w-16 h-16 bg-[hsl(82_85%_55%_/_0.15)] rounded-full blur-xl" />
         
         <div className="container mx-auto px-4 relative z-10">
@@ -283,7 +283,7 @@ export default function JourneyDesignerFeaturePage() {
       {/* Journey Timeline Demo */}
       <section className="py-16 bg-[hsl(173_40%_92%)] relative overflow-hidden">
         {/* Lens flares */}
-        <div className="absolute top-12 right-[10%] w-28 h-28 bg-[hsl(270_70%_60%_/_0.15)] rounded-full blur-2xl" />
+        <div className="absolute top-12 right-[10%] w-28 h-28 bg-[hsl(216_100%_50%_/_0.15)] rounded-full blur-2xl" />
         <div className="absolute bottom-28 left-[6%] w-36 h-36 bg-[hsl(82_85%_55%_/_0.12)] rounded-full blur-3xl" />
         <div className="absolute top-1/3 left-[40%] w-20 h-20 bg-[hsl(200_100%_50%_/_0.1)] rounded-full blur-2xl" />
         <div className="container mx-auto px-4">
@@ -360,7 +360,7 @@ export default function JourneyDesignerFeaturePage() {
       <section className="py-20 relative overflow-hidden">
         {/* Lens flares */}
         <div className="absolute top-16 left-[18%] w-32 h-32 bg-[hsl(200_100%_50%_/_0.1)] rounded-full blur-2xl" />
-        <div className="absolute bottom-20 right-[15%] w-44 h-44 bg-[hsl(270_70%_60%_/_0.08)] rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-[15%] w-44 h-44 bg-[hsl(216_100%_50%_/_0.08)] rounded-full blur-3xl" />
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
@@ -419,7 +419,7 @@ export default function JourneyDesignerFeaturePage() {
       <section className="py-16 bg-[hsl(48_100%_92%)] relative overflow-hidden">
         {/* Lens flares */}
         <div className="absolute top-12 right-[10%] w-28 h-28 bg-[hsl(173_58%_50%_/_0.15)] rounded-full blur-2xl" />
-        <div className="absolute bottom-16 left-[8%] w-32 h-32 bg-[hsl(270_70%_60%_/_0.12)] rounded-full blur-3xl" />
+        <div className="absolute bottom-16 left-[8%] w-32 h-32 bg-[hsl(216_100%_50%_/_0.12)] rounded-full blur-3xl" />
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
@@ -486,7 +486,7 @@ export default function JourneyDesignerFeaturePage() {
                   <span className="text-xs">SMS</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <div className="w-4 h-4 rounded-full bg-purple-500 flex items-center justify-center">
+                  <div className="w-4 h-4 rounded-full bg-blue-600 flex items-center justify-center">
                     <Phone className="w-2.5 h-2.5 text-white" />
                   </div>
                   <span className="text-xs">Phone</span>

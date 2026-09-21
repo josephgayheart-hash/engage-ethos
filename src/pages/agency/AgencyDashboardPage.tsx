@@ -236,8 +236,8 @@ export default function AgencyDashboardPage() {
                         {stats.dnaConfigurations}
                       </p>
                     </div>
-                    <div className="p-3 bg-purple-500/10 rounded-lg">
-                      <Sparkles className="h-6 w-6 text-purple-600" />
+                    <div className="p-3 bg-blue-600/10 rounded-lg">
+                      <Sparkles className="h-6 w-6 text-blue-600" />
                     </div>
                   </div>
                 </CardContent>
@@ -371,8 +371,8 @@ export default function AgencyDashboardPage() {
               <Link to="/library/personal">
                 <Card className="hover:border-primary/30 transition-colors cursor-pointer">
                   <CardContent className="pt-6 flex items-center gap-4">
-                    <div className="p-3 bg-purple-500/10 rounded-lg">
-                      <Clock className="h-6 w-6 text-purple-600" />
+                    <div className="p-3 bg-blue-600/10 rounded-lg">
+                      <Clock className="h-6 w-6 text-blue-600" />
                     </div>
                     <div>
                       <h3 className="font-medium">Recent Messages</h3>

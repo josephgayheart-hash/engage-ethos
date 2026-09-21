@@ -101,11 +101,11 @@ const TouchpointNode = ({ data }: { data: { touchpoint: JourneyTouchpoint; index
     switch (channel?.toLowerCase()) {
       case 'email': return 'bg-blue-500';
       case 'sms': return 'bg-green-500';
-      case 'phone': case 'phone-call': return 'bg-purple-500';
+      case 'phone': case 'phone-call': return 'bg-blue-600';
       case 'social-media': return 'bg-pink-500';
       case 'portal': return 'bg-orange-500';
       case 'digital-ad-search': return 'bg-yellow-500';
-      case 'digital-ad-social': return 'bg-indigo-500';
+      case 'digital-ad-social': return 'bg-blue-600';
       default: return 'bg-gray-500';
     }
   };

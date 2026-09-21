@@ -105,8 +105,8 @@ const DNATuningDiagram = () => {
       <div className="hidden md:flex items-center justify-between gap-4">
         {/* Base DNA */}
         <div className="flex-1 max-w-[200px]">
-          <div className="bg-gradient-to-br from-[hsl(270_70%_60%_/_0.15)] to-[hsl(270_70%_60%_/_0.05)] border border-[hsl(270_70%_60%_/_0.3)] rounded-xl p-4 text-center transition-all duration-300 hover:shadow-lg hover:border-[hsl(270_70%_60%_/_0.5)]">
-            <div className="w-12 h-12 bg-gradient-to-br from-[hsl(270_70%_60%)] to-[hsl(270_70%_50%)] rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
+          <div className="bg-gradient-to-br from-[hsl(216_100%_50%_/_0.15)] to-[hsl(216_100%_50%_/_0.05)] border border-[hsl(216_100%_50%_/_0.3)] rounded-xl p-4 text-center transition-all duration-300 hover:shadow-lg hover:border-[hsl(216_100%_50%_/_0.5)]">
+            <div className="w-12 h-12 bg-gradient-to-br from-[hsl(216_100%_50%)] to-[hsl(216_100%_50%)] rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
               <Dna className="h-6 w-6 text-white" />
             </div>
             <h4 className="font-semibold text-sm mb-1">Base Content DNA</h4>
@@ -171,8 +171,8 @@ const DNATuningDiagram = () => {
       <div className="flex md:hidden flex-col items-center gap-3">
         {/* Base DNA */}
         <div className="w-full max-w-[280px]">
-          <div className="bg-gradient-to-br from-[hsl(270_70%_60%_/_0.15)] to-[hsl(270_70%_60%_/_0.05)] border border-[hsl(270_70%_60%_/_0.3)] rounded-xl p-4 text-center">
-            <div className="w-10 h-10 bg-gradient-to-br from-[hsl(270_70%_60%)] to-[hsl(270_70%_50%)] rounded-full flex items-center justify-center mx-auto mb-2 shadow-lg">
+          <div className="bg-gradient-to-br from-[hsl(216_100%_50%_/_0.15)] to-[hsl(216_100%_50%_/_0.05)] border border-[hsl(216_100%_50%_/_0.3)] rounded-xl p-4 text-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-[hsl(216_100%_50%)] to-[hsl(216_100%_50%)] rounded-full flex items-center justify-center mx-auto mb-2 shadow-lg">
               <Dna className="h-5 w-5 text-white" />
             </div>
             <h4 className="font-semibold text-sm mb-1">Base Content DNA</h4>

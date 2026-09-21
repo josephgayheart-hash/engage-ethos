@@ -107,7 +107,7 @@ export default function SecurityEventsPage() {
       'rate_limit_exceeded': 'bg-red-100 text-red-800 border-red-300',
       'suspicious_activity': 'bg-orange-100 text-orange-800 border-orange-300',
       'auth_failure': 'bg-yellow-100 text-yellow-800 border-yellow-300',
-      'access_denied': 'bg-purple-100 text-purple-800 border-purple-300',
+      'access_denied': 'bg-blue-100 text-blue-800 border-blue-300',
     };
     return (
       <Badge className={colors[eventType] || 'bg-gray-100 text-gray-800 border-gray-300'}>

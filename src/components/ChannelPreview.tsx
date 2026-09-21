@@ -1222,8 +1222,8 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
         </div>
       )}
       
-      <div className="bg-purple-50 dark:bg-purple-950/30 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
-        <p className="text-xs font-semibold text-purple-700 dark:text-purple-400 mb-1">CLOSING</p>
+      <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+        <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-1">CLOSING</p>
         <p className="text-sm">{script.closing}</p>
       </div>
       

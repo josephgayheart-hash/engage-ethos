@@ -104,10 +104,10 @@ export function TenantHealthTable({ data, isLoading, showAll, maxItems = 10 }: T
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className={`p-2 rounded-lg ${
-                      tenant.tenant_type === 'agency' ? 'bg-purple-100' : 'bg-primary/10'
+                      tenant.tenant_type === 'agency' ? 'bg-blue-100' : 'bg-primary/10'
                     }`}>
                       {tenant.tenant_type === 'agency' 
-                        ? <Briefcase className="w-4 h-4 text-purple-600" />
+                        ? <Briefcase className="w-4 h-4 text-blue-600" />
                         : <Building2 className="w-4 h-4 text-primary" />
                       }
                     </div>

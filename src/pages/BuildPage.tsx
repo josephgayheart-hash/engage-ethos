@@ -1440,7 +1440,7 @@ const BuildPage = () => {
                           </SelectItem>
                           <SelectItem value="cinematic">
                             <span className="flex items-center gap-1.5">
-                              <Film className="w-3.5 h-3.5 text-violet-500" />
+                              <Film className="w-3.5 h-3.5 text-blue-600" />
                               Cinematic
                             </span>
                           </SelectItem>

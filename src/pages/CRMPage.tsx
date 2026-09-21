@@ -165,8 +165,8 @@ interface ToolUsageItem {
 const STATUS_OPTIONS = ["new", "contacted", "qualified", "demo_scheduled", "closed"];
 const OPPORTUNITY_STAGES = [
   { value: "discovery", label: "Discovery", color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300" },
-  { value: "qualification", label: "Qualification", color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300" },
-  { value: "demo", label: "Demo", color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300" },
+  { value: "qualification", label: "Qualification", color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300" },
+  { value: "demo", label: "Demo", color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300" },
   { value: "proposal", label: "Proposal", color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300" },
   { value: "negotiation", label: "Negotiation", color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300" },
   { value: "closed_won", label: "Closed Won", color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300" },
@@ -189,7 +189,7 @@ const FROM_EMAILS = [
 const STATUS_COLORS: Record<string, string> = {
   new: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
   contacted: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
-  qualified: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+  qualified: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
   demo_scheduled: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300",
   closed: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300",
 };

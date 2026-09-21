@@ -219,7 +219,7 @@ export function MyDraftsCard() {
                 </Badge>
               )}
               {imageDrafts.length > 0 && (
-                <Badge variant="secondary" className="text-xs bg-violet-500/10 text-violet-600">
+                <Badge variant="secondary" className="text-xs bg-blue-600/10 text-blue-600">
                   <ImageIcon className="w-3 h-3 mr-1" />
                   {imageDrafts.length}
                 </Badge>
@@ -320,7 +320,7 @@ export function MyDraftsCard() {
                       : draft.draft_type === 'journey'
                       ? 'bg-pillar-consensus/10'
                       : draft.draft_type === 'image'
-                      ? 'bg-violet-500/10'
+                      ? 'bg-blue-600/10'
                       : draft.draft_type === 'campaign'
                       ? 'bg-amber-500/10'
                       : draft.draft_type === 'stewardship'
@@ -333,7 +333,7 @@ export function MyDraftsCard() {
                         : draft.draft_type === 'journey'
                         ? 'text-pillar-consensus'
                         : draft.draft_type === 'image'
-                        ? 'text-violet-600'
+                        ? 'text-blue-600'
                         : draft.draft_type === 'campaign'
                         ? 'text-amber-600'
                         : draft.draft_type === 'stewardship'
@@ -451,7 +451,7 @@ export function MyDraftsCard() {
                         )}
                         <div className="flex items-center gap-1.5 flex-wrap">
                           {(draftData?.['channel'] as string) && (
-                            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5 bg-violet-500/10 text-violet-600">
+                            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5 bg-blue-600/10 text-blue-600">
                               {channelLabels[draftData['channel'] as string] || draftData['channel'] as string}
                             </Badge>
                           )}

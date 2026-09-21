@@ -39,8 +39,8 @@ const capabilities = [
     icon: Palette,
     title: 'AI Brand Studio',
     tagline: 'Layer your identity onto any image, precisely.',
-    accent: 'text-violet-600',
-    accentBg: 'bg-violet-500/10',
+    accent: 'text-blue-600',
+    accentBg: 'bg-blue-600/10',
     points: [
       'Drop logos, headlines, calls to action and brand patterns onto any photo.',
       'Smart Layer masking keeps type legible over busy imagery.',

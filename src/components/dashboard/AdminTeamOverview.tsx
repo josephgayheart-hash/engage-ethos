@@ -97,7 +97,7 @@ export function AdminTeamOverview() {
                   <p className="text-[10px] text-muted-foreground">Adoption</p>
                 </div>
                 <div className="text-center p-3 rounded-lg bg-muted/50">
-                  <Sparkles className="w-4 h-4 mx-auto mb-1 text-[hsl(270_70%_55%)]" />
+                  <Sparkles className="w-4 h-4 mx-auto mb-1 text-[hsl(216_100%_50%)]" />
                   <p className="text-xl font-bold font-serif">{stats.dnaCompleteness}%</p>
                   <p className="text-[10px] text-muted-foreground">DNA Complete</p>
                 </div>

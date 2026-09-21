@@ -61,7 +61,7 @@ const crawlPages = [
 const extractionResults = [
   { icon: Target, label: 'Voice Patterns', value: 'Warm, authoritative, student-centric', color: 'text-blue-500' },
   { icon: FileText, label: 'Terminology', value: '34 preferred terms identified', color: 'text-green-500' },
-  { icon: Shield, label: 'Brand Signals', value: 'Innovation, community, discovery', color: 'text-purple-500' },
+  { icon: Shield, label: 'Brand Signals', value: 'Innovation, community, discovery', color: 'text-blue-600' },
   { icon: MessageCircle, label: 'Tone Markers', value: 'Conversational (admissions), formal (academic)', color: 'text-teal-500' },
   { icon: LayoutGrid, label: 'Page Structure', value: '6 content archetypes found', color: 'text-orange-500' },
   { icon: Lightbulb, label: 'Key Themes', value: 'Research excellence, career outcomes', color: 'text-amber-500' },

@@ -365,7 +365,7 @@ export default function InstitutionDetailPage() {
                           onClick={() => { setEditingTenantType(tenant.tenant_type || 'university'); setIsEditingType(true); }}
                           className="group flex items-center gap-1 cursor-pointer"
                         >
-                          <Badge variant="outline" className={tenant.tenant_type === 'agency' ? 'bg-purple-50 text-purple-700 border-purple-200' : ''}>
+                          <Badge variant="outline" className={tenant.tenant_type === 'agency' ? 'bg-blue-50 text-blue-700 border-blue-200' : ''}>
                             {(tenant.tenant_type || 'university').charAt(0).toUpperCase() + (tenant.tenant_type || 'university').slice(1)}
                           </Badge>
                           <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -421,8 +421,8 @@ export default function InstitutionDetailPage() {
                 <Card>
                   <CardContent className="p-3">
                     <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded bg-purple-500/10">
-                        <Library className="w-4 h-4 text-purple-600" />
+                      <div className="p-1.5 rounded bg-blue-600/10">
+                        <Library className="w-4 h-4 text-blue-600" />
                       </div>
                       <div>
                         <p className="text-xl font-bold">{sharedTemplates.length}</p>
@@ -447,8 +447,8 @@ export default function InstitutionDetailPage() {
                 <Card>
                   <CardContent className="p-3">
                     <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded bg-indigo-500/10">
-                        <Settings className="w-4 h-4 text-indigo-600" />
+                      <div className="p-1.5 rounded bg-blue-600/10">
+                        <Settings className="w-4 h-4 text-blue-600" />
                       </div>
                       <div>
                         <p className="text-xl font-bold">{institutionalProfiles.length}</p>

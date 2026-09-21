@@ -81,13 +81,13 @@ const channelIcons: Record<Channel, React.ReactNode> = {
 const phaseColors: Record<StrategyPhase, string> = {
   'short-term': 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200 border-emerald-300',
   'mid-term': 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200 border-amber-300',
-  'long-term': 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-200 border-violet-300',
+  'long-term': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200 border-blue-300',
 };
 
 const phaseBgColors: Record<StrategyPhase, string> = {
   'short-term': 'border-l-emerald-500',
   'mid-term': 'border-l-amber-500',
-  'long-term': 'border-l-violet-500',
+  'long-term': 'border-l-blue-600',
 };
 
 // Channel colors - matches diagram node colors
@@ -98,9 +98,9 @@ const channelColors: Record<Channel, string> = {
   'landing-page': 'bg-gray-500 text-white',
   'social-media': 'bg-pink-500 text-white',
   'direct-mail': 'bg-gray-500 text-white',
-  'phone-call': 'bg-purple-500 text-white',
+  'phone-call': 'bg-blue-600 text-white',
   'digital-ad-search': 'bg-yellow-500 text-black',
-  'digital-ad-social': 'bg-indigo-500 text-white',
+  'digital-ad-social': 'bg-blue-600 text-white',
   'talking-points': 'bg-teal-500 text-white',
   'news-article': 'bg-slate-600 text-white',
   'case-for-care': 'bg-rose-500 text-white',
@@ -108,7 +108,7 @@ const channelColors: Record<Channel, string> = {
   'internal-memo': 'bg-cyan-500 text-white',
   'event-invite': 'bg-amber-500 text-white',
   'proposal': 'bg-emerald-600 text-white',
-  'investor-update': 'bg-violet-500 text-white',
+  'investor-update': 'bg-blue-600 text-white',
 };
 
 const channelBorderColors: Record<Channel, string> = {
@@ -118,9 +118,9 @@ const channelBorderColors: Record<Channel, string> = {
   'landing-page': 'border-l-gray-500',
   'social-media': 'border-l-pink-500',
   'direct-mail': 'border-l-gray-500',
-  'phone-call': 'border-l-purple-500',
+  'phone-call': 'border-l-blue-600',
   'digital-ad-search': 'border-l-yellow-500',
-  'digital-ad-social': 'border-l-indigo-500',
+  'digital-ad-social': 'border-l-blue-600',
   'talking-points': 'border-l-teal-500',
   'news-article': 'border-l-slate-600',
   'case-for-care': 'border-l-rose-500',
@@ -128,7 +128,7 @@ const channelBorderColors: Record<Channel, string> = {
   'internal-memo': 'border-l-cyan-500',
   'event-invite': 'border-l-amber-500',
   'proposal': 'border-l-emerald-600',
-  'investor-update': 'border-l-violet-500',
+  'investor-update': 'border-l-blue-600',
 };
 
 const channelDotColors: Record<Channel, string> = {
@@ -138,9 +138,9 @@ const channelDotColors: Record<Channel, string> = {
   'landing-page': 'bg-gray-500',
   'social-media': 'bg-pink-500',
   'direct-mail': 'bg-gray-500',
-  'phone-call': 'bg-purple-500',
+  'phone-call': 'bg-blue-600',
   'digital-ad-search': 'bg-yellow-500',
-  'digital-ad-social': 'bg-indigo-500',
+  'digital-ad-social': 'bg-blue-600',
   'talking-points': 'bg-teal-500',
   'news-article': 'bg-slate-600',
   'case-for-care': 'bg-rose-500',
@@ -148,7 +148,7 @@ const channelDotColors: Record<Channel, string> = {
   'internal-memo': 'bg-cyan-500',
   'event-invite': 'bg-amber-500',
   'proposal': 'bg-emerald-600',
-  'investor-update': 'bg-violet-500',
+  'investor-update': 'bg-blue-600',
 };
 
 const allChannels: Channel[] = ['email', 'sms', 'portal', 'social-media', 'landing-page', 'direct-mail', 'phone-call', 'digital-ad-search', 'digital-ad-social', 'talking-points', 'news-article', 'case-for-care', 'press-release', 'internal-memo', 'event-invite', 'proposal', 'investor-update'];

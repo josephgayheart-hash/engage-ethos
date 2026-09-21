@@ -171,7 +171,7 @@ export default function AICopywriterShowcaseDemo() {
                     <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-teal-500/15 text-teal-600 flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3" /> On-brand
                     </span>
-                    <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-500">
+                    <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-blue-600/15 text-blue-600">
                       Brand Score: 96
                     </span>
                     <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-500 flex items-center gap-1">

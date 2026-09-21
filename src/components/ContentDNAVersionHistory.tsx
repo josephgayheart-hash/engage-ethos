@@ -47,13 +47,13 @@ interface ContentDNAVersionHistoryProps {
 const SECTION_CONFIG: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
   samples: { label: 'Content Samples', icon: <FileText className="w-3 h-3" />, color: 'text-blue-600 bg-blue-50 border-blue-200' },
   analysis: { label: 'DNA Analysis', icon: <Dna className="w-3 h-3" />, color: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
-  stories: { label: 'Story Bank', icon: <BookOpen className="w-3 h-3" />, color: 'text-purple-600 bg-purple-50 border-purple-200' },
+  stories: { label: 'Story Bank', icon: <BookOpen className="w-3 h-3" />, color: 'text-blue-600 bg-blue-50 border-blue-200' },
   facts: { label: 'Fact Book', icon: <BarChart3 className="w-3 h-3" />, color: 'text-amber-600 bg-amber-50 border-amber-200' },
   photos: { label: 'Campus Photos', icon: <Camera className="w-3 h-3" />, color: 'text-pink-600 bg-pink-50 border-pink-200' },
   design_refs: { label: 'Design References', icon: <Palette className="w-3 h-3" />, color: 'text-sky-600 bg-sky-50 border-sky-200' },
   web_crawl: { label: 'Web Crawl', icon: <Globe className="w-3 h-3" />, color: 'text-teal-600 bg-teal-50 border-teal-200' },
   tuning: { label: 'DNA Tuning', icon: <Sliders className="w-3 h-3" />, color: 'text-orange-600 bg-orange-50 border-orange-200' },
-  custom_instructions: { label: 'Custom Instructions', icon: <Settings className="w-3 h-3" />, color: 'text-violet-600 bg-violet-50 border-violet-200' },
+  custom_instructions: { label: 'Custom Instructions', icon: <Settings className="w-3 h-3" />, color: 'text-blue-600 bg-blue-50 border-blue-200' },
 };
 
 const ACTION_ICONS: Record<string, React.ReactNode> = {

@@ -150,7 +150,7 @@ export function AnalyticsKPICards({ data, isLoading, compact }: AnalyticsKPICard
         subValue={`${data.activeTenants30d} active (30d)`}
       />
       <KPICard
-        icon={<TrendingUp className="w-4 h-4 text-indigo-600" />}
+        icon={<TrendingUp className="w-4 h-4 text-blue-600" />}
         label="Avg Health Score"
         value={`${avgHealth}%`}
         subValue="across all tenants"

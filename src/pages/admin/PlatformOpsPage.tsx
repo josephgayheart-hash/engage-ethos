@@ -227,7 +227,7 @@ export default function PlatformOpsPage() {
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-6">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <Badge variant="outline" className="text-[10px] bg-[hsl(270_70%_55%_/_0.1)] text-[hsl(270_70%_55%)] border-[hsl(270_70%_55%_/_0.3)]">
+              <Badge variant="outline" className="text-[10px] bg-[hsl(216_100%_50%_/_0.1)] text-[hsl(216_100%_50%)] border-[hsl(216_100%_50%_/_0.3)]">
                 <Shield className="w-3 h-3 mr-1" /> Super Admin
               </Badge>
               <Badge variant="outline" className="text-[10px]">
@@ -290,8 +290,8 @@ export default function PlatformOpsPage() {
                           <stop offset="100%" stopColor="hsl(82 85% 45%)" stopOpacity={0} />
                         </linearGradient>
                         <linearGradient id="dauGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="hsl(270 70% 55%)" stopOpacity={0.4} />
-                          <stop offset="100%" stopColor="hsl(270 70% 55%)" stopOpacity={0} />
+                          <stop offset="0%" stopColor="hsl(216_100%_50%)" stopOpacity={0.4} />
+                          <stop offset="100%" stopColor="hsl(216_100%_50%)" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -299,7 +299,7 @@ export default function PlatformOpsPage() {
                       <YAxis tick={{ fontSize: 10 }} />
                       <Tooltip contentStyle={{ fontSize: 12, background: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }} />
                       <Area type="monotone" dataKey="runs" stroke="hsl(82 85% 45%)" fill="url(#runsGrad)" name="Tool runs" />
-                      <Area type="monotone" dataKey="dau" stroke="hsl(270 70% 55%)" fill="url(#dauGrad)" name="DAU" />
+                      <Area type="monotone" dataKey="dau" stroke="hsl(216_100%_50%)" fill="url(#dauGrad)" name="DAU" />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>

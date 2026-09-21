@@ -27,9 +27,9 @@ const allFeatures = [
     title: "Content DNA Studio",
     description: "Upload samples or scrape from your website, tune voice dimensions, and build your AI voice foundation.",
     link: "/features/content-dna",
-    color: "text-purple-600",
-    bgColor: "bg-purple-500/10",
-    borderColor: "border-purple-300",
+    color: "text-blue-600",
+    bgColor: "bg-blue-600/10",
+    borderColor: "border-blue-300",
   },
   {
     id: "ai-copywriter",

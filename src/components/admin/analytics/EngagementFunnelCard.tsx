@@ -91,18 +91,18 @@ export function EngagementFunnelCard({ data, isLoading }: EngagementFunnelCardPr
       color: "bg-orange-100"
     },
     {
-      icon: <MessageSquare className="w-4 h-4 text-purple-600" />,
+      icon: <MessageSquare className="w-4 h-4 text-blue-600" />,
       label: "Created First Message",
       value: data.first_message,
       percentage: Math.round((data.first_message / total) * 100),
-      color: "bg-purple-100"
+      color: "bg-blue-100"
     },
     {
-      icon: <Repeat className="w-4 h-4 text-indigo-600" />,
+      icon: <Repeat className="w-4 h-4 text-blue-600" />,
       label: "Repeat Users (7d+)",
       value: data.repeat_users,
       percentage: Math.round((data.repeat_users / total) * 100),
-      color: "bg-indigo-100"
+      color: "bg-blue-100"
     },
     {
       icon: <Zap className="w-4 h-4 text-amber-600" />,

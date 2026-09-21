@@ -1372,8 +1372,8 @@ export default function ContentDNAPage() {
                 <Card className="border-border">
                   <CardContent className="pt-6">
                     <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg ${analysis?.brand_platform ? 'bg-purple-100' : 'bg-gray-100'}`}>
-                        <Target className={`w-5 h-5 ${analysis?.brand_platform ? 'text-purple-600' : 'text-gray-400'}`} />
+                      <div className={`p-2 rounded-lg ${analysis?.brand_platform ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                        <Target className={`w-5 h-5 ${analysis?.brand_platform ? 'text-blue-600' : 'text-gray-400'}`} />
                       </div>
                       <div>
                         <p className="text-2xl font-bold">
@@ -1495,7 +1495,7 @@ export default function ContentDNAPage() {
                         <span className="text-sm font-medium">Brand Platform</span>
                       </div>
                       {analysis?.brand_platform ? (
-                        <Badge variant="default" className="bg-purple-100 text-purple-800 hover:bg-purple-100">
+                        <Badge variant="default" className="bg-blue-100 text-blue-800 hover:bg-blue-100">
                           {analysis.brand_platform.brandPillars?.length || 0} pillars
                         </Badge>
                       ) : (

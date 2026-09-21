@@ -143,7 +143,7 @@ export function ContentDNAStatusCard() {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Sparkles className="w-5 h-5 text-[hsl(270_70%_55%)]" />
+            <Sparkles className="w-5 h-5 text-[hsl(216_100%_50%)]" />
             Content DNA
           </CardTitle>
         </CardHeader>
@@ -161,7 +161,7 @@ export function ContentDNAStatusCard() {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Sparkles className="w-5 h-5 text-[hsl(270_70%_55%)]" />
+            <Sparkles className="w-5 h-5 text-[hsl(216_100%_50%)]" />
             Content DNA
           </CardTitle>
           <div className="flex items-center gap-1.5">

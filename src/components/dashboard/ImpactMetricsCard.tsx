@@ -22,7 +22,7 @@ export function ImpactMetricsCard() {
       icon: Clock,
       value: `${estimatedHoursSaved}h`,
       label: 'Est. Time Saved',
-      color: 'hsl(270 70% 60%)',
+      color: 'hsl(216 100% 50%)',
     },
     {
       icon: TrendingUp,

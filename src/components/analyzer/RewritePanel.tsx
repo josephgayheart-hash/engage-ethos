@@ -264,12 +264,12 @@ export function RewritePanel({
   };
 
   return (
-    <Card className="border-[hsl(270_70%_55%)]/30 bg-gradient-to-br from-[hsl(270_70%_55%)]/5 to-transparent">
+    <Card className="border-[hsl(216_100%_50%)]/30 bg-gradient-to-br from-[hsl(216_100%_50%)]/5 to-transparent">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="flex items-center gap-2 text-xl">
-              <Wand2 className="w-5 h-5 text-[hsl(270_70%_55%)]" />
+              <Wand2 className="w-5 h-5 text-[hsl(216_100%_50%)]" />
               AI Brand Rewrite
             </CardTitle>
             <CardDescription className="text-sm mt-1">
@@ -285,11 +285,11 @@ export function RewritePanel({
       <CardContent className="space-y-5">
         {/* Processing State - Shows during rewrite */}
         {isRewriting && (
-          <div className="p-5 rounded-xl border-2 bg-[hsl(270_70%_55%)]/5 border-[hsl(270_70%_55%)]/20 space-y-4">
+          <div className="p-5 rounded-xl border-2 bg-[hsl(216_100%_50%)]/5 border-[hsl(216_100%_50%)]/20 space-y-4">
             <div className="flex items-center gap-4">
               <div className="relative">
-                <div className="w-10 h-10 rounded-full bg-[hsl(270_70%_55%)]/20 flex items-center justify-center">
-                  <Loader2 className="w-5 h-5 animate-spin text-[hsl(270_70%_55%)]" />
+                <div className="w-10 h-10 rounded-full bg-[hsl(216_100%_50%)]/20 flex items-center justify-center">
+                  <Loader2 className="w-5 h-5 animate-spin text-[hsl(216_100%_50%)]" />
                 </div>
               </div>
               <div className="flex-1">
@@ -314,8 +314,8 @@ export function RewritePanel({
         {/* Initial State - Before rewrite */}
         {!isRewriting && rewrittenSections.length === 0 && (
           <div className="text-center py-8">
-            <div className="w-16 h-16 rounded-full bg-[hsl(270_70%_55%)]/10 flex items-center justify-center mx-auto mb-4">
-              <Sparkles className="w-8 h-8 text-[hsl(270_70%_55%)]" />
+            <div className="w-16 h-16 rounded-full bg-[hsl(216_100%_50%)]/10 flex items-center justify-center mx-auto mb-4">
+              <Sparkles className="w-8 h-8 text-[hsl(216_100%_50%)]" />
             </div>
             <h3 className="text-lg font-semibold mb-2">Ready to Rewrite</h3>
             <p className="text-sm text-muted-foreground mb-5 max-w-md mx-auto">
@@ -325,7 +325,7 @@ export function RewritePanel({
               onClick={handleRewriteAll}
               disabled={isRewriting}
               size="lg"
-              className="bg-[hsl(270_70%_55%)] hover:bg-[hsl(270_70%_50%)]"
+              className="bg-[hsl(216_100%_50%)] hover:bg-[hsl(216_100%_50%)]"
             >
               <Sparkles className="w-4 h-4 mr-2" />
               Rewrite All Sections

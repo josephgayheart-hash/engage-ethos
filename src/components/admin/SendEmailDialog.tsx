@@ -609,9 +609,9 @@ export function SendEmailDialog({
               <strong>Subject:</strong> 🎉 Thank You for Joining {brandName} Beta!
             </p>
             <div className="border-t pt-3 space-y-2 text-muted-foreground">
-              <div className="bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 p-3 rounded-lg text-center">
-                <p className="font-semibold text-indigo-700 dark:text-indigo-300">🎉 Thank You!</p>
-                <p className="text-xs text-indigo-600 dark:text-indigo-400">We're thrilled to have you as part of our beta community</p>
+              <div className="bg-gradient-to-r from-blue-100 to-blue-100 dark:from-blue-900/30 dark:to-blue-900/30 p-3 rounded-lg text-center">
+                <p className="font-semibold text-blue-700 dark:text-blue-300">🎉 Thank You!</p>
+                <p className="text-xs text-blue-600 dark:text-blue-400">We're thrilled to have you as part of our beta community</p>
               </div>
               <p>
                 Hi <strong>{firstName}</strong>,
