@@ -15,7 +15,6 @@ import {
   CheckCircle2,
   GraduationCap,
   Globe,
-  Calendar,
   Image,
   Palette,
   Bot,
@@ -31,7 +30,6 @@ import AICredibilitySection from '@/components/landing/AICredibilitySection';
 import { LandingNav } from '@/components/landing/LandingNav';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { SEOHead, getOrganizationSchema, getSoftwareApplicationSchema } from '@/components/SEOHead';
-import { RequestDemoDialog } from '@/components/landing/RequestDemoDialog';
 import { StickyCtaBar } from '@/components/landing/StickyCtaBar';
 import { SocialProofStrip } from '@/components/landing/SocialProofStrip';
 import { HeroProductProof } from '@/components/landing/HeroProductProof';
