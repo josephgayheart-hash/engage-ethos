@@ -12,7 +12,7 @@ import {
   Navigate as TSNavigate,
   Outlet as TSOutlet,
 } from "@tanstack/react-router";
-import { useMemo, useCallback, forwardRef, type ComponentProps, type ReactNode } from "react";
+import { useMemo, useCallback, forwardRef, type ComponentProps, type CSSProperties, type ReactNode } from "react";
 
 // ---------- shared URL parsing ----------
 
@@ -136,7 +136,7 @@ export type LinkProps = Omit<
   replace?: boolean;
   state?: unknown;
   className?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
   children?: ReactNode;
 };
 
@@ -193,7 +193,7 @@ type NavLinkRenderState = { isActive: boolean; isPending: boolean };
 
 export type NavLinkProps = Omit<LinkProps, "className" | "style"> & {
   className?: string | ((state: NavLinkRenderState) => string);
-  style?: React.CSSProperties | ((state: NavLinkRenderState) => React.CSSProperties);
+  style?: CSSProperties | ((state: NavLinkRenderState) => CSSProperties);
   end?: boolean;
 };
 
