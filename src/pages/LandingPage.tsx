@@ -256,7 +256,7 @@ export default function LandingPage() {
                   className="bg-gradient-to-r from-[hsl(82_85%_55%)] to-[hsl(82_85%_45%)] text-primary hover:from-[hsl(82_85%_50%)] hover:to-[hsl(82_85%_40%)] shadow-[0_0_30px_hsl(82_85%_55%_/_0.3)] hover:shadow-[0_0_40px_hsl(82_85%_55%_/_0.5)] transition-all duration-300 text-base px-8 py-6 font-bold border-0"
                 >
                   <Link to="/try-copywriter">
-                    See It Write for Your Institution
+                    Try It Free
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
