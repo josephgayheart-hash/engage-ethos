@@ -1597,7 +1597,7 @@ export function ChannelPreview({ channel, content, onCopy, onContentChange, onSa
         // If it's an object but doesn't match structure, try to display as JSON
         if (typeof displayContent === 'object' && displayContent !== null) {
           console.warn('[ChannelPreview] case-for-care content is object but missing expected fields:', Object.keys(displayContent));
-          return renderCaseForCarePreview(displayContent as CaseForCareDraft);
+          return renderCaseForCarePreview(displayContent as unknown as CaseForCareDraft);
         }
         return <p className="text-sm whitespace-pre-wrap">{String(displayContent)}</p>;
       default:

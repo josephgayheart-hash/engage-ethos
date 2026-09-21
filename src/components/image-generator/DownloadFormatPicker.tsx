@@ -16,7 +16,7 @@ const loadJsPDF = async () => (await import("jspdf")).jsPDF;
 export type DownloadFormat = "png" | "jpg" | "pdf";
 
 interface DownloadFormatPickerProps {
-  targetRef?: React.RefObject<HTMLElement>;
+  targetRef?: React.RefObject<HTMLElement | null>;
   targetId?: string;
   filenameBase?: string;
   className?: string;

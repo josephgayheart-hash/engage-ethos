@@ -128,7 +128,7 @@ export function EmailTemplatesTab({ tenants = [], users = [], onEmailSent }: Ema
       setTemplates((data || []).map(t => ({
         ...t,
         trigger_config: t.trigger_config as Record<string, any> | null
-      })));
+      })) as unknown as EmailTemplate[]);
     } catch (error: any) {
       console.error("Error fetching templates:", error);
       toast({

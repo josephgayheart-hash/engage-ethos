@@ -94,7 +94,7 @@ export function ContextSelector({
         if (error) throw error;
         const options: ContentDNAOption[] = (data || []).map(d => {
           const profile = profiles.find(p => p.id === d.profile_id);
-          const hasAnalysis = d.voice_analysis && Object.keys(d.voice_analysis).length > 0;
+          const hasAnalysis = Boolean(d.voice_analysis && Object.keys(d.voice_analysis).length > 0);
           return {
             id: d.id, profile_id: d.profile_id, profile_name: profile?.name || null,
             sample_count: d.sample_count, has_analysis: hasAnalysis
